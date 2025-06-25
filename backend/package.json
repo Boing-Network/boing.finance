@@ -1,0 +1,55 @@
+{
+  "name": "dex-backend",
+  "version": "1.0.0",
+  "description": "Backend API for DEX with Drizzle ORM and D1 database",
+  "main": "src/worker.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js",
+    "worker:dev": "wrangler dev",
+    "worker:deploy": "wrangler deploy",
+    "worker:deploy:staging": "wrangler deploy --env staging",
+    "worker:deploy:prod": "wrangler deploy --env production",
+    "setup": "node setup-db.js",
+    "setup:simple": "node setup-db-simple.js",
+    "db:generate": "drizzle-kit generate:sqlite",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "db:push": "drizzle-kit push:sqlite --driver=better-sqlite --schema=./src/database/schema.js --url=./data/dex.db",
+    "db:drop": "drizzle-kit drop",
+    "d1:generate": "node migrate-to-d1.js",
+    "d1:setup": "npm run d1:generate && echo 'Now run: wrangler d1 create dex-database && wrangler d1 execute dex-database --file=./d1-schema.sql'",
+    "test": "echo 'Add your test command here'",
+    "lint": "echo 'Add your lint command here'"
+  },
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "@hono/node-server": "^1.8.2",
+    "better-sqlite3": "^9.2.2",
+    "drizzle-orm": "^0.29.3",
+    "hono": "^4.0.0"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.20.9",
+    "wrangler": "^4.21.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "dex",
+    "defi",
+    "blockchain",
+    "ethereum",
+    "trading",
+    "liquidity",
+    "amm",
+    "cloudflare",
+    "workers",
+    "d1",
+    "hono"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
