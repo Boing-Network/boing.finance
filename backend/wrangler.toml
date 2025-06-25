@@ -1,0 +1,64 @@
+name = "mochi-api"
+main = "src/worker.js"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Environment variables
+[vars]
+NODE_ENV = "development"
+FRONTEND_URL = "http://localhost:3000"
+
+[env.production]
+name = "mochi-api-prod"
+
+[env.production.vars]
+NODE_ENV = "production"
+FRONTEND_URL = "https://your-frontend-domain.com"
+
+[env.staging]
+name = "mochi-api-staging"
+
+[env.staging.vars]
+NODE_ENV = "staging"
+FRONTEND_URL = "https://staging.your-frontend-domain.com"
+
+# D1 Database - You need to create these in Cloudflare dashboard
+# Run: wrangler d1 create mochi-database
+[[d1_databases]]
+binding = "DB"
+database_name = "mochi-database"
+database_id = "b8b903d8-6fbe-441f-802c-beaf8089ae48"
+
+# Environment-specific D1 databases
+[env.production.d1_databases]
+binding = "DB"
+database_name = "mochi-database-prod"
+database_id = "" # Add your production D1 database ID here
+
+[env.staging.d1_databases]
+binding = "DB"
+database_name = "mochi-database-staging"
+database_id = "" # Add your staging D1 database ID here
+
+# KV Namespace for caching (optional)
+# Run: wrangler kv:namespace create "MOCHI_CACHE"
+# [[kv_namespaces]]
+# binding = "CACHE"
+# id = "" # Add your KV namespace ID here
+# preview_id = "" # Add your KV preview namespace ID here
+
+# Secrets (set via wrangler secret put)
+# ETHEREUM_RPC_URL
+# POLYGON_RPC_URL
+# BSC_RPC_URL
+# SEPOLIA_RPC_URL
+# ETHERSCAN_API_KEY
+# JWT_SECRET
+
+# Cron triggers for background jobs (optional)
+# [triggers]
+# crons = ["0 */6 * * *"] # Run every 6 hours
+
+# Limits
+[limits]
+cpu_ms = 50 
