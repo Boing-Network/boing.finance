@@ -1,113 +1,49 @@
 import React, { useState, useEffect } from 'react';
+import { ethers } from 'ethers';
+import { useWallet } from '../contexts/WalletContext';
+import { NETWORKS } from '../config/networks';
+import TokenScanner from '../services/tokenScanner';
+import { useQuery } from 'react-query';
 import axios from 'axios';
 import config from '../config';
+import TokenManagementModal from '../components/TokenManagementModal';
+import NetworkSelector from '../components/NetworkSelector';
+import GasFeeEstimator from '../components/GasFeeEstimator';
+import { InfoTooltip, WarningTooltip, HelpTooltip } from '../components/Tooltip';
+import { Helmet } from 'react-helmet-async';
 
-// Helper function to get API URL
-const getApiUrl = () => {
-  return config.apiUrl || 'http://localhost:8787';
+// Initialize token scanner
+const tokenScanner = new TokenScanner();
+
+// Helper function to get provider for a specific chain
+const getProvider = (chainId) => {
+  const network = NETWORKS[chainId];
+  if (!network) return null;
+  return new ethers.JsonRpcProvider(network.rpcUrl);
 };
 
 function AnimatedBackground() {
-  return (
-    <div className="pointer-events-none absolute inset-0 z-0">
-      <svg width="100%" height="100%" viewBox="0 0 1440 800" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute inset-0 w-full h-full">
-        {/* Floating orbs */}
-        <circle cx="200" cy="200" r="60" fill="#00E0FF" opacity="0.12">
-          <animate attributeName="cy" values="200;220;200" dur="6s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="1200" cy="300" r="40" fill="#7B61FF" opacity="0.10">
-          <animate attributeName="cy" values="300;320;300" dur="7s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="700" cy="600" r="80" fill="#00FFB2" opacity="0.08">
-          <animate attributeName="cy" values="600;620;600" dur="8s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="400" cy="700" r="30" fill="#fff" opacity="0.07">
-          <animate attributeName="cy" values="700;720;700" dur="5s" repeatCount="indefinite" />
-        </circle>
-        
-        {/* Additional floating elements */}
-        <circle cx="1000" cy="150" r="25" fill="#FF6B6B" opacity="0.09">
-          <animate attributeName="cx" values="1000;1020;1000" dur="9s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="300" cy="500" r="35" fill="#4ECDC4" opacity="0.11">
-          <animate attributeName="cy" values="500;480;500" dur="10s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="1100" cy="650" r="20" fill="#45B7D1" opacity="0.08">
-          <animate attributeName="cx" values="1100;1080;1100" dur="11s" repeatCount="indefinite" />
-        </circle>
-        
-        {/* Rotating geometric shapes */}
-        <rect x="150" y="100" width="40" height="40" fill="#FFD93D" opacity="0.06" rx="8">
-          <animateTransform attributeName="transform" type="rotate" values="0 170 120;360 170 120" dur="15s" repeatCount="indefinite" />
-        </rect>
-        <polygon points="1300,200 1320,180 1340,200 1320,220" fill="#FF8A80" opacity="0.07">
-          <animateTransform attributeName="transform" type="rotate" values="0 1320 200;360 1320 200" dur="12s" repeatCount="indefinite" />
-        </polygon>
-        <ellipse cx="600" cy="300" rx="30" ry="15" fill="#81C784" opacity="0.08">
-          <animateTransform attributeName="transform" type="rotate" values="0 600 300;360 600 300" dur="18s" repeatCount="indefinite" />
-        </ellipse>
-        
-        {/* Twinkling stars */}
-        <circle cx="300" cy="100" r="2" fill="#fff">
-          <animate attributeName="opacity" values="0.2;1;0.2" dur="2.5s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="900" cy="200" r="1.5" fill="#00E0FF">
-          <animate attributeName="opacity" values="0.3;1;0.3" dur="3s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="1300" cy="500" r="2" fill="#7B61FF">
-          <animate attributeName="opacity" values="0.2;1;0.2" dur="2.2s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="500" cy="150" r="1.8" fill="#FF6B6B">
-          <animate attributeName="opacity" values="0.1;0.8;0.1" dur="3.5s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="800" cy="400" r="1.2" fill="#4ECDC4">
-          <animate attributeName="opacity" values="0.2;1;0.2" dur="2.8s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="1200" cy="100" r="1.6" fill="#FFD93D">
-          <animate attributeName="opacity" values="0.3;0.9;0.3" dur="4s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="200" cy="600" r="1.4" fill="#FF8A80">
-          <animate attributeName="opacity" values="0.1;0.7;0.1" dur="3.2s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="1000" cy="700" r="1.7" fill="#81C784">
-          <animate attributeName="opacity" values="0.2;0.8;0.2" dur="2.9s" repeatCount="indefinite" />
-        </circle>
-        
-        {/* Floating particles */}
-        <circle cx="400" cy="300" r="3" fill="#00E0FF" opacity="0.4">
-          <animate attributeName="cy" values="300;280;300" dur="4s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="0.4;0.1;0.4" dur="4s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="800" cy="500" r="2" fill="#7B61FF" opacity="0.3">
-          <animate attributeName="cx" values="800;820;800" dur="5s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="0.3;0.05;0.3" dur="5s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="600" cy="700" r="2.5" fill="#00FFB2" opacity="0.35">
-          <animate attributeName="cy" values="700;680;700" dur="6s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="0.35;0.08;0.35" dur="6s" repeatCount="indefinite" />
-        </circle>
-        
-        {/* Pulsing elements */}
-        <circle cx="1000" cy="400" r="15" fill="#FF6B6B" opacity="0.05">
-          <animate attributeName="r" values="15;25;15" dur="8s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="0.05;0.15;0.05" dur="8s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="200" cy="400" r="12" fill="#4ECDC4" opacity="0.06">
-          <animate attributeName="r" values="12;20;12" dur="10s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="0.06;0.12;0.06" dur="10s" repeatCount="indefinite" />
-        </circle>
-      </svg>
-    </div>
-  );
+  return null; // Removed since it's now applied centrally
 }
 
-function MochiAstronaut({ position }) {
-  let className = "animate-float z-20";
-  if (position === "bottom-right") className += " absolute bottom-8 right-8";
-  else className += " absolute right-0 top-0 mt-[-30px] mr-[-30px]";
+function MochiAstronaut({ position = "bottom-right" }) {
+  const getPositionClasses = () => {
+    switch (position) {
+      case "top-right":
+        return "absolute right-0 top-0 mt-4 mr-4 z-20";
+      case "bottom-right":
+        return "absolute right-0 bottom-0 mb-4 mr-4 z-20";
+      case "top-left":
+        return "absolute left-0 top-0 mt-4 ml-4 z-20";
+      case "bottom-left":
+        return "absolute left-0 bottom-0 mb-4 ml-4 z-20";
+      default:
+        return "absolute right-0 bottom-0 mb-4 mr-4 z-20";
+    }
+  };
 
   return (
-    <svg width="60" height="60" viewBox="0 0 200 200" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="60" height="60" viewBox="0 0 200 200" className={`animate-float ${getPositionClasses()}`} fill="none" xmlns="http://www.w3.org/2000/svg">
       <g>
         <ellipse cx="100" cy="175" rx="28" ry="8" fill="#1e293b" opacity="0.13" />
         <ellipse cx="100" cy="85" rx="48" ry="44" fill="#fff" stroke="#bfc9d9" strokeWidth="3" />
@@ -135,360 +71,456 @@ function MochiAstronaut({ position }) {
 }
 
 const Tokens = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedChain, setSelectedChain] = useState('all');
-  const [sortBy, setSortBy] = useState('volume');
-  const [sortOrder, setSortOrder] = useState('desc');
+  const { chainId, switchNetwork } = useWallet();
+  const [selectedChain, setSelectedChain] = useState(chainId || 11155111); // Default to Sepolia
   const [tokens, setTokens] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [lastScanTime, setLastScanTime] = useState(null);
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanProgress, setScanProgress] = useState({ current: 0, total: 0, message: '' });
+  const [searchAddress, setSearchAddress] = useState('');
+  const [searching, setSearching] = useState(false);
+  const [searchedToken, setSearchedToken] = useState(null);
 
-  // Load tokens from API
+  // Sync selectedChain with wallet chainId
   useEffect(() => {
-    const loadTokens = async () => {
-      try {
-        const apiUrl = getApiUrl();
-        const response = await axios.get(`${apiUrl}/tokens`);
-        if (response.data.success && response.data.data.length > 0) {
-          setTokens(response.data.data);
-        } else {
-          setTokens([]);
-        }
-      } catch (error) {
-        console.error('Failed to load tokens:', error.message);
+    if (chainId) {
+      setSelectedChain(chainId);
+    }
+  }, [chainId]);
+
+  const handleNetworkChange = async (newChainId) => {
+    try {
+      setSelectedChain(newChainId);
+      setTokens([]);
+      setError(null);
+      setLastScanTime(null);
+      setScanProgress({ current: 0, total: 0, message: '' });
+      setSearchedToken(null);
+      
+      // Switch network in wallet if different
+      if (newChainId !== chainId) {
+        await switchNetwork(newChainId);
+      }
+    } catch (error) {
+      console.error('Error switching network:', error);
+      setError('Failed to switch network');
+    }
+  };
+
+  const scanTokens = async () => {
+    if (isScanning) return;
+    
+    try {
+      setIsScanning(true);
+      setLoading(true);
+      setError(null);
+      setScanProgress({ current: 0, total: 0, message: 'Initializing scan...' });
+      setSearchedToken(null);
+      
+      console.log(`Starting token scan for chain ${selectedChain}`);
+      const network = NETWORKS[selectedChain];
+      
+      if (!network) {
+        setError('Network not supported');
+        return;
+      }
+
+      setScanProgress({ current: 0, total: 0, message: 'Scanning recent blocks (this may take 5-10 seconds)...' });
+      const scannedTokens = await tokenScanner.scanRecentBlocks(selectedChain, 5); // Reduced to 5 blocks
+      
+      if (scannedTokens && scannedTokens.length > 0) {
+        setTokens(scannedTokens);
+        setLastScanTime(new Date());
+        setScanProgress({ current: scannedTokens.length, total: scannedTokens.length, message: 'Scan complete!' });
+        console.log(`Found ${scannedTokens.length} tokens`);
+      } else {
         setTokens([]);
+        setLastScanTime(new Date());
+        setScanProgress({ current: 0, total: 0, message: 'No tokens found' });
+        console.log('No tokens found in recent blocks');
       }
-    };
+    } catch (error) {
+      console.error('Error scanning tokens:', error);
+      setError('Failed to scan tokens. Please try again later.');
+      setScanProgress({ current: 0, total: 0, message: 'Scan failed' });
+    } finally {
+      setLoading(false);
+      setIsScanning(false);
+    }
+  };
 
-    loadTokens();
-  }, []);
-
-  // Filter and sort tokens
-  const filteredAndSortedTokens = tokens
-    .filter(token => {
-      const matchesSearch = token.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           token.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesChain = selectedChain === 'all' || token.chainId === selectedChain;
-      return matchesSearch && matchesChain;
-    })
-    .sort((a, b) => {
-      let aValue, bValue;
+  const searchToken = async () => {
+    if (!searchAddress.trim() || searching) return;
+    
+    try {
+      setSearching(true);
+      setError(null);
+      setSearchedToken(null);
       
-      switch (sortBy) {
-        case 'marketCap':
-          aValue = parseFloat(a.marketCap || 0);
-          bValue = parseFloat(b.marketCap || 0);
-          break;
-        case 'price':
-          aValue = parseFloat(a.priceUsd || 0);
-          bValue = parseFloat(b.priceUsd || 0);
-          break;
-        case 'volume24h':
-          aValue = parseFloat(a.volume24h || 0);
-          bValue = parseFloat(b.volume24h || 0);
-          break;
-        case 'change24h':
-          aValue = parseFloat(a.change24h || 0);
-          bValue = parseFloat(b.change24h || 0);
-          break;
-        default:
-          aValue = parseFloat(a.marketCap || 0);
-          bValue = parseFloat(b.marketCap || 0);
+      console.log(`Searching for token: ${searchAddress}`);
+      const token = await tokenScanner.searchToken(searchAddress.trim(), selectedChain);
+      
+      if (token) {
+        setSearchedToken(token);
+        console.log('Token found:', token.name);
+      } else {
+        setError('Token not found or invalid address');
       }
-      
-      return sortOrder === 'desc' ? bValue - aValue : aValue - bValue;
-    });
+    } catch (error) {
+      console.error('Error searching token:', error);
+      setError(error.message || 'Failed to search token');
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const handleSearchKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      searchToken();
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchAddress('');
+    setSearchedToken(null);
+    setError(null);
+  };
+
+  const syncWithWallet = () => {
+    if (chainId && chainId !== selectedChain) {
+      setSelectedChain(chainId);
+      setTokens([]);
+      setError(null);
+      setLastScanTime(null);
+    }
+  };
+
+  const formatAddress = (address) => {
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  const formatNumber = (num) => {
+    if (num === 0) return '0';
+    if (num < 0.01) return '< 0.01';
+    return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
+  };
+
+  const getNetworkName = (chainId) => {
+    return NETWORKS[chainId]?.name || `Chain ${chainId}`;
+  };
 
   return (
-    <div className="relative max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 overflow-x-hidden">
-      <AnimatedBackground />
-      
-      <div className="relative z-10">
-        {/* MochiAstronaut positioned relative to content */}
-        <MochiAstronaut position="top-right" />
-        
-        {/* Educational Banner */}
-        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-6 mb-8 border border-purple-500/20">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <h2 className="text-xl font-bold text-white mb-2">
-                🪙 Discover & Create Any Token!
-              </h2>
-              <p className="text-purple-100 mb-4">
-                Browse thousands of tokens or create your own! mochi supports any ERC-20 token. 
-                Deploy your token and instantly create trading pairs - no permission required.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg font-medium transition-colors border border-white/30"
-                >
-                  🚀 Deploy New Token
-                </button>
-                <a
-                  href="/liquidity"
-                  className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg font-medium transition-colors border border-white/30"
-                >
-                  💧 Add Liquidity
-                </a>
-                <a
-                  href="/docs"
-                  className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg font-medium transition-colors border border-white/30"
-                >
-                  📖 Learn How
-                </a>
-              </div>
-            </div>
-            <div className="hidden md:block ml-6">
-              <div className="text-right">
-                <div className="text-3xl text-white font-bold">∞</div>
-                <div className="text-purple-100 text-sm">Unlimited Tokens</div>
-              </div>
-            </div>
-            {/* Mobile version of Unlimited Tokens */}
-            <div className="block md:hidden ml-4">
-              <div className="text-xl text-white font-bold">∞</div>
-              <div className="text-purple-100 text-xs">Unlimited</div>
-            </div>
-          </div>
+    <>
+      <Helmet>
+        <title>Token Directory - boing.finance</title>
+        <meta name="description" content="Explore and manage tokens on boing.finance. Browse supported tokens, view details, and add to your favorites across multiple blockchains." />
+        <meta name="keywords" content="token directory, cryptocurrency tokens, token list, DeFi tokens, multi-chain tokens" />
+        <meta property="og:title" content="Token Directory - boing.finance" />
+        <meta property="og:description" content="Explore and manage tokens on boing.finance." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://boing.finance/tokens" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Token Directory - boing.finance" />
+        <meta name="twitter:description" content="Explore and manage tokens." />
+      </Helmet>
+      <div className="relative min-h-screen">
+        {/* Animated Background */}
+        <div className="absolute inset-0 z-0">
+          <AnimatedBackground />
         </div>
 
-        {/* Token Creation Info Section */}
-        <div id="token-creation" className="mb-8">
-          <h3 className="text-2xl font-bold text-white mb-6">How Token Creation Works</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-              <div className="text-3xl mb-4">🚀</div>
-              <h4 className="text-lg font-semibold text-white mb-2">Deploy Your Token</h4>
-              <p className="text-gray-300 text-sm">
-                Create any ERC-20 token on Ethereum or supported networks. 
-                Set your token's name, symbol, and total supply.
-              </p>
-              <div className="mt-4 p-3 bg-gray-750 rounded-lg">
-                <code className="text-xs text-green-400">
-                  {/* Deploy ERC-20 token */}
-                  {/* Customize parameters */}
-                  {/* No approval needed */}
-                </code>
-              </div>
-            </div>
-            
-            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-              <div className="text-3xl mb-4">🔗</div>
-              <h4 className="text-lg font-semibold text-white mb-2">Create Trading Pair</h4>
-              <p className="text-gray-300 text-sm">
-                Instantly create trading pairs for your token. 
-                Pair with ETH, USDC, or any other ERC-20 token.
-              </p>
-              <div className="mt-4 p-3 bg-gray-750 rounded-lg">
-                <code className="text-xs text-green-400">
-                  factory.createPair(myToken, USDC)
-                  {/* Instant pair creation */}
-                  {/* Community-driven */}
-                </code>
-              </div>
-            </div>
-            
-            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-              <div className="text-3xl mb-4">💧</div>
-              <h4 className="text-lg font-semibold text-white mb-2">Add Liquidity</h4>
-              <p className="text-gray-300 text-sm">
-                Provide initial liquidity to establish your token's price. 
-                Start earning fees from trades immediately.
-              </p>
-              <div className="mt-4 p-3 bg-gray-750 rounded-lg">
-                <code className="text-xs text-green-400">
-                  pair.mint(amount0, amount1)
-                  {/* Set initial price */}
-                  {/* Earn trading fees */}
-                </code>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="mb-8">
-          <h3 className="text-2xl font-bold text-white mb-6">Quick Actions</h3>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-lg font-semibold text-white">Deploy New Token</h4>
-                <span className="text-green-400 text-sm font-medium">No Approval</span>
-              </div>
-              <p className="text-gray-300 text-sm mb-4">
-                Create your own ERC-20 token and immediately start trading. Perfect for new projects, communities, or experiments.
-              </p>
-              <button
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200"
-              >
-                Deploy Token
-              </button>
-            </div>
-            
-            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-lg font-semibold text-white">Create Trading Pair</h4>
-                <span className="text-green-400 text-sm font-medium">Permissionless</span>
-              </div>
-              <p className="text-gray-300 text-sm mb-4">
-                Create trading pairs for any token combination. No waiting for exchange listings or approvals.
-              </p>
-              <a
-                href="/liquidity"
-                className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 text-center"
-              >
-                Create Pair
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* Search and Filter */}
-        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Search tokens by name, symbol, or address..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div className="flex gap-4">
-              <select
-                value={selectedChain}
-                onChange={(e) => setSelectedChain(e.target.value)}
-                className="bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="all">All Chains</option>
-                <option value="1">Ethereum</option>
-                <option value="137">Polygon</option>
-                <option value="56">BSC</option>
-              </select>
-              <select
-                value={`${sortBy}-${sortOrder}`}
-                onChange={(e) => {
-                  const [field, order] = e.target.value.split('-');
-                  setSortBy(field);
-                  setSortOrder(order);
-                }}
-                className="bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="marketCap-desc">Market Cap (High to Low)</option>
-                <option value="marketCap-asc">Market Cap (Low to High)</option>
-                <option value="volume24h-desc">Volume (High to Low)</option>
-                <option value="volume24h-asc">Volume (Low to High)</option>
-                <option value="change24h-desc">24h Change (High to Low)</option>
-                <option value="change24h-asc">24h Change (Low to High)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Tokens Table */}
-        <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-750">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Token</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Price</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">24h Change</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Market Cap</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">24h Volume</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Chain</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-700">
-                {filteredAndSortedTokens.length > 0 ? (
-                  filteredAndSortedTokens.map((token) => (
-                    <tr key={token.address} className="hover:bg-gray-750">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-                            <span className="text-white font-bold">{token.symbol[0]}</span>
-                          </div>
-                          <div>
-                            <div className="text-white font-medium">{token.symbol}</div>
-                            <div className="text-gray-400 text-sm">{token.name}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-white font-medium">
-                        {token.priceUsd.toFixed(2)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`font-medium ${token.change24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                          {token.change24h >= 0 ? '+' : ''}{token.change24h}%
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-white">
-                        ${token.marketCap.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-white">
-                        ${token.volume24h.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs rounded-full ${token.chainId === '1' ? 'bg-blue-100 text-blue-800' : token.chainId === '137' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'}`}>
-                          {token.chainId === '1' ? 'Ethereum' : token.chainId === '137' ? 'Polygon' : 'Unknown'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex space-x-2">
-                          <a
-                            href={`/swap?tokenIn=${token.address}`}
-                            className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition-colors"
-                          >
-                            Trade
-                          </a>
-                          <a
-                            href={`/liquidity?token=${token.address}`}
-                            className="text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded transition-colors"
-                          >
-                            Add LP
-                          </a>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="7" className="px-6 py-8 sm:py-12 text-center">
-                      <p className="text-gray-300 text-sm sm:text-base">No tokens found matching your criteria</p>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Token Creation CTA */}
-        <div className="mt-8 bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-xl p-8 border border-purple-500/30">
-          <div className="text-center">
-            <div className="text-4xl mb-4">🚀</div>
-            <h3 className="text-2xl font-bold text-white mb-4">Ready to Create Your Token?</h3>
-            <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
-              Don't see the token you want? Create your own! Deploy any ERC-20 token and instantly create trading pairs. 
-              No permission required - just deploy, add liquidity, and start trading.
+        {/* Content */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          {/* Header */}
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              Trending Tokens
+            </h1>
+            <p className="text-gray-300 text-base sm:text-lg">
+              Discover recently deployed tokens across different networks
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200"
-              >
-                Deploy New Token
-              </button>
-              <a
-                href="/liquidity"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200 text-center"
-              >
-                Create Trading Pair
-              </a>
-            </div>
           </div>
+
+          {/* Network Selection and Controls */}
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 border border-gray-700">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 sm:gap-4 mb-4">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <span className="text-gray-300 text-sm sm:text-base">Network:</span>
+                <select
+                  value={selectedChain}
+                  onChange={(e) => handleNetworkChange(parseInt(e.target.value))}
+                  className="flex-1 sm:flex-none bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+                >
+                  {Object.entries(NETWORKS).map(([id, network]) => (
+                    <option key={id} value={id}>
+                      {network.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+                <button
+                  onClick={syncWithWallet}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg transition-colors text-sm sm:text-base"
+                >
+                  Sync with Wallet
+                </button>
+                
+                <button
+                  onClick={scanTokens}
+                  disabled={isScanning}
+                  className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white px-4 sm:px-6 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
+                >
+                  {isScanning ? (
+                    <>
+                      <div className="w-3 sm:w-4 h-3 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Scanning...
+                    </>
+                  ) : (
+                    'Scan Tokens'
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {lastScanTime && (
+              <p className="text-xs sm:text-sm text-gray-400">
+                Last scanned: {lastScanTime.toLocaleString()}
+              </p>
+            )}
+          </div>
+
+          {/* Search Section */}
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 border border-gray-700">
+            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-white">Search Token</h2>
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 sm:gap-4">
+              <div className="flex-1 min-w-0 w-full sm:w-auto">
+                <input
+                  type="text"
+                  value={searchAddress}
+                  onChange={(e) => setSearchAddress(e.target.value)}
+                  onKeyPress={handleSearchKeyPress}
+                  placeholder="Enter token address (0x...)"
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 sm:px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+                />
+              </div>
+              
+              <div className="flex gap-2 w-full sm:w-auto">
+                <button
+                  onClick={searchToken}
+                  disabled={searching || !searchAddress.trim()}
+                  className="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white px-4 sm:px-6 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
+                >
+                  {searching ? (
+                    <>
+                      <div className="w-3 sm:w-4 h-3 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Searching...
+                    </>
+                  ) : (
+                    'Search'
+                  )}
+                </button>
+                
+                {searchedToken && (
+                  <button
+                    onClick={clearSearch}
+                    className="bg-gray-600 hover:bg-gray-700 text-white px-3 sm:px-4 py-2 rounded-lg transition-colors text-sm sm:text-base"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Search Results */}
+            {searchedToken && (
+              <div className="mt-4 sm:mt-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-3 text-white">Search Result</h3>
+                <div className="bg-gray-700/50 rounded-xl p-4 sm:p-6 border border-gray-600">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 space-y-2 sm:space-y-0">
+                    <div>
+                      <h4 className="text-lg sm:text-xl font-semibold text-white mb-1">{searchedToken.name}</h4>
+                      <p className="text-green-400 font-mono text-sm sm:text-base">{searchedToken.symbol}</p>
+                    </div>
+                    <div className="text-left sm:text-right">
+                      <span className="inline-block bg-green-600 text-white text-xs px-2 py-1 rounded-full">
+                        Found
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                    <div className="space-y-2 sm:space-y-3">
+                      <div className="flex flex-col sm:flex-row sm:justify-between">
+                        <span className="text-gray-400 text-xs sm:text-sm">Address:</span>
+                        <span className="font-mono text-gray-300 text-xs sm:text-sm break-all">{formatAddress(searchedToken.address)}</span>
+                      </div>
+                      
+                      <div className="flex flex-col sm:flex-row sm:justify-between">
+                        <span className="text-gray-400 text-xs sm:text-sm">Network:</span>
+                        <span className="text-gray-300 text-xs sm:text-sm">{getNetworkName(searchedToken.chainId)}</span>
+                      </div>
+                      
+                      <div className="flex flex-col sm:flex-row sm:justify-between">
+                        <span className="text-gray-400 text-xs sm:text-sm">Decimals:</span>
+                        <span className="text-gray-300 text-xs sm:text-sm">{searchedToken.decimals}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2 sm:space-y-3">
+                      <div className="flex flex-col sm:flex-row sm:justify-between">
+                        <span className="text-gray-400 text-xs sm:text-sm">Total Supply:</span>
+                        <span className="text-gray-300 text-xs sm:text-sm">
+                          {formatNumber(parseFloat(ethers.formatUnits(searchedToken.totalSupply, searchedToken.decimals)))}
+                        </span>
+                      </div>
+                      
+                      {searchedToken.owner && (
+                        <div className="flex flex-col sm:flex-row sm:justify-between">
+                          <span className="text-gray-400 text-xs sm:text-sm">Owner:</span>
+                          <span className="font-mono text-gray-300 text-xs sm:text-sm break-all">{formatAddress(searchedToken.owner)}</span>
+                        </div>
+                      )}
+                      
+                      <div className="flex flex-col sm:flex-row sm:justify-between">
+                        <span className="text-gray-400 text-xs sm:text-sm">Trending Score:</span>
+                        <span className="text-green-400 text-xs sm:text-sm">{searchedToken.trendingScore}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t border-gray-600">
+                    <button
+                      onClick={() => window.open(`https://sepolia.etherscan.io/address/${searchedToken.address}`, '_blank')}
+                      className="w-full bg-gray-600 hover:bg-gray-500 text-white py-2 rounded-lg transition-colors text-sm"
+                    >
+                      View on Explorer
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Error Display */}
+          {error && (
+            <div className="bg-red-900/50 border border-red-500 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+              <p className="text-red-200 text-sm sm:text-base">{error}</p>
+            </div>
+          )}
+
+          {/* Loading State */}
+          {loading && (
+            <div className="text-center py-8 sm:py-12">
+              <div className="w-6 sm:w-8 h-6 sm:h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-3 sm:mb-4"></div>
+              <p className="text-gray-300 mb-2 text-sm sm:text-base">{scanProgress.message}</p>
+              {scanProgress.total > 0 && (
+                <div className="w-full max-w-md mx-auto">
+                  <div className="bg-gray-700 rounded-full h-2 mb-2">
+                    <div 
+                      className="bg-purple-500 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${(scanProgress.current / scanProgress.total) * 100}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-xs sm:text-sm text-gray-400">
+                    {scanProgress.current} of {scanProgress.total} tokens processed
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Tokens Grid */}
+          {!loading && tokens.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              {tokens.map((token, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700 hover:border-purple-500 transition-all duration-200 cursor-pointer group"
+                  onClick={() => {
+                    setSearchAddress(token.address);
+                    searchToken();
+                  }}
+                >
+                  <div className="flex items-start justify-between mb-3 sm:mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 sm:w-10 h-8 sm:h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base">
+                        {token.symbol?.charAt(0) || 'T'}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-white font-semibold text-sm sm:text-base truncate">{token.name}</h3>
+                        <p className="text-purple-400 font-mono text-xs sm:text-sm">{token.symbol}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="inline-block bg-green-600 text-white text-xs px-2 py-1 rounded-full">
+                        {token.trendingScore}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 text-xs sm:text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Address:</span>
+                      <span className="font-mono text-gray-300 truncate ml-2">{formatAddress(token.address)}</span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Network:</span>
+                      <span className="text-gray-300">{getNetworkName(token.chainId)}</span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Supply:</span>
+                      <span className="text-gray-300">
+                        {formatNumber(parseFloat(ethers.formatUnits(token.totalSupply, token.decimals)))}
+                      </span>
+                    </div>
+                    
+                    {token.owner && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Owner:</span>
+                        <span className="font-mono text-gray-300 truncate ml-2">{formatAddress(token.owner)}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-600">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-gray-400">Deployed</span>
+                      <span className="text-xs sm:text-sm text-gray-300">
+                        {token.timestamp ? new Date(token.timestamp).toLocaleDateString() : 'Unknown'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* No Tokens State */}
+          {!loading && tokens.length === 0 && !error && (
+            <div className="text-center py-8 sm:py-12">
+              <div className="text-4xl sm:text-6xl mb-4">🔍</div>
+              <h3 className="text-xl sm:text-2xl font-semibold text-white mb-2">No Tokens Found</h3>
+              <p className="text-gray-300 text-sm sm:text-base mb-4">
+                Try scanning for tokens or searching for a specific token address.
+              </p>
+              <button
+                onClick={scanTokens}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors text-sm sm:text-base"
+              >
+                Scan for Tokens
+              </button>
+            </div>
+          )}
         </div>
+        <MochiAstronaut position="bottom-right" />
       </div>
-    </div>
+    </>
   );
 };
 

@@ -1,0 +1,27 @@
+name = "boing-finance"
+compatibility_date = "2024-01-01"
+
+[build]
+command = "npm run build"
+cwd = "."
+
+[build.upload]
+format = "service-worker"
+
+[env.production]
+name = "boing-finance-prod"
+
+[env.staging]
+name = "boing-finance-staging"
+
+# Environment variables
+[vars]
+REACT_APP_ENVIRONMENT = "development"
+
+[env.production.vars]
+REACT_APP_ENVIRONMENT = "production"
+REACT_APP_API_URL = "https://boing-api.your-subdomain.workers.dev"
+
+[env.staging.vars]
+REACT_APP_ENVIRONMENT = "staging"
+REACT_APP_API_URL = "https://boing-api-staging.your-subdomain.workers.dev" 

@@ -4,13 +4,14 @@ import { drizzle } from 'drizzle-orm/d1';
 import { sql } from 'drizzle-orm';
 import * as schema from './database/schema.js';
 import { createDEXRoutes } from './routes/dexRoutes.js';
+import { createAnalyticsRoutes } from './routes/analyticsRoutes.js';
 
 // Create main app
 const app = new Hono();
 
 // Global middleware
 app.use('*', cors({
-  origin: ['http://localhost:3000', 'https://your-frontend-domain.com'],
+  origin: ['http://localhost:3000', 'https://boing.finance'],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -42,7 +43,7 @@ app.get('/api/test', async (c) => {
     const db = drizzle(d1, { schema });
     
     // Test simple query
-    const result = await db.select({ count: sql`count(*)` }).from(schema.tokens);
+    const result = await db.select({ count: sql`count(*)` }).from(schema.knownTokens);
     
     return c.json({ 
       success: true, 
@@ -82,6 +83,34 @@ app.route('/api', async (c) => {
     return c.json({ 
       success: false, 
       error: 'Database connection failed',
+      message: error.message 
+    }, 500);
+  }
+});
+
+// Analytics routes
+app.route('/analytics', async (c) => {
+  try {
+    // Get D1 database from Cloudflare environment
+    const d1 = c.env.DB;
+    if (!d1) {
+      return c.json({ 
+        success: false, 
+        error: 'Database not configured' 
+      }, 500);
+    }
+
+    // Create database connection using D1
+    const db = drizzle(d1, { schema });
+    
+    // Create and return analytics routes
+    const analyticsRoutes = createAnalyticsRoutes(db);
+    return analyticsRoutes.fetch(c.req.raw, c.env, c.executionCtx);
+  } catch (error) {
+    console.error('Analytics database connection error:', error);
+    return c.json({ 
+      success: false, 
+      error: 'Analytics database connection failed',
       message: error.message 
     }, 500);
   }

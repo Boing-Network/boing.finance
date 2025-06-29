@@ -1,18 +1,18 @@
 // Environment configuration
 const config = {
   development: {
-    apiUrl: 'http://localhost:3001/api',
-    workerUrl: 'http://localhost:8787/api',
+    apiUrl: 'https://boing-api-staging.your-subdomain.workers.dev/api',
+    workerUrl: 'https://boing-api-staging.your-subdomain.workers.dev/api',
     environment: 'development'
   },
   staging: {
-    apiUrl: 'https://mochi-api-staging.your-subdomain.workers.dev/api',
-    workerUrl: 'https://mochi-api-staging.your-subdomain.workers.dev/api',
+    apiUrl: 'https://boing-api-staging.your-subdomain.workers.dev/api',
+    workerUrl: 'https://boing-api-staging.your-subdomain.workers.dev/api',
     environment: 'staging'
   },
   production: {
-    apiUrl: 'https://mochi-api-prod.your-subdomain.workers.dev/api',
-    workerUrl: 'https://mochi-api-prod.your-subdomain.workers.dev/api',
+    apiUrl: 'https://boing-api-prod.your-subdomain.workers.dev/api',
+    workerUrl: 'https://boing-api-prod.your-subdomain.workers.dev/api',
     environment: 'production'
   }
 };

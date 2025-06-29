@@ -1,0 +1,26 @@
+{
+  "network": "Polygon Mainnet",
+  "chainId": 137,
+  "deployer": "0xb24c5A62F8Da57967A08e11c88Fe18904f49920E",
+  "deploymentTime": "2025-06-29T17:04:49.731Z",
+  "contracts": {
+    "tokenImplementation": {
+      "address": "0x594f4560A5fd52b49E824689Ec09770DB249Eca5",
+      "name": "TokenImplementation"
+    },
+    "tokenFactory": {
+      "address": "0x1FAF7d4CAF23C1Ac79257ca74900011d2B7240A8",
+      "name": "TokenFactory"
+    }
+  },
+  "serviceFees": {
+    "basic": "25.0",
+    "professional": "75.0",
+    "enterprise": "150.0"
+  },
+  "configuration": {
+    "platformWallet": "0x7f279e722E3C4A54B62D7fA08b3AC7f109FE58E2",
+    "paused": false,
+    "implementation": "0x594f4560A5fd52b49E824689Ec09770DB249Eca5"
+  }
+}

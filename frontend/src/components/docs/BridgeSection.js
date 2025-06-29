@@ -29,7 +29,7 @@ const BridgeSection = () => {
             <div className="text-center p-4">
               <div className="text-2xl mb-2">🔒</div>
               <h4 className="text-white font-semibold mb-2">Secure</h4>
-              <p className="text-gray-300 text-sm">Multi-sig protection and audits</p>
+              <p className="text-gray-300 text-sm">Multi-sig protection and security features</p>
             </div>
             <div className="text-center p-4">
               <div className="text-2xl mb-2">⚡</div>
@@ -195,7 +195,7 @@ const BridgeSection = () => {
             <h4 className="text-lg font-semibold text-white mb-4">Security Features</h4>
             <ul className="space-y-2 text-gray-300">
               <li>• Multi-signature wallet protection</li>
-              <li>• Audited smart contracts</li>
+              <li>• Open source smart contracts</li>
               <li>• Validator network consensus</li>
               <li>• Time-lock mechanisms</li>
               <li>• Emergency pause functionality</li>

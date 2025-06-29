@@ -2,8 +2,8 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 import "./interfaces/IDEXFactory.sol";
 import "./interfaces/IDEXPair.sol";
 import "./DEXPair.sol";
@@ -15,10 +15,10 @@ import "./DEXPair.sol";
  */
 contract NetworkAwareDEXFactory is IDEXFactory, Ownable, ReentrancyGuard, Pausable {
     // Mapping from token pair to pair address
-    mapping(address => mapping(address => address)) public override getPair;
+    mapping(address => mapping(address => address)) private _getPair;
     
     // Array of all pairs
-    address[] public override allPairs;
+    address[] public allPairs;
     
     // Network-specific configurations
     mapping(uint256 => NetworkConfig) public networkConfigs;
@@ -27,10 +27,8 @@ contract NetworkAwareDEXFactory is IDEXFactory, Ownable, ReentrancyGuard, Pausab
     mapping(uint256 => address) public bridgeAddresses; // chainId => bridge address
     
     // Events
-    event PairCreated(address indexed token0, address indexed token1, address pair, uint256 allPairsLength);
     event NetworkConfigured(uint256 indexed chainId, NetworkConfig config);
     event FeeUpdated(uint256 indexed chainId, uint256 newFeeRate);
-    event BridgeAddressUpdated(uint256 chainId, address bridgeAddress);
     event GasOptimizationEnabled(uint256 indexed chainId, bool enabled);
     
     // Structs
@@ -59,14 +57,13 @@ contract NetworkAwareDEXFactory is IDEXFactory, Ownable, ReentrancyGuard, Pausab
      */
     function createPair(address tokenA, address tokenB) 
         external 
-        override 
         whenNotPaused 
         returns (address pair) 
     {
         require(tokenA != tokenB, "DEXFactory: IDENTICAL_ADDRESSES");
         (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
         require(token0 != address(0), "DEXFactory: ZERO_ADDRESS");
-        require(getPair[token0][token1] == address(0), "DEXFactory: PAIR_EXISTS");
+        require(_getPair[token0][token1] == address(0), "DEXFactory: PAIR_EXISTS");
         
         // Check network configuration
         uint256 chainId = block.chainid;
@@ -90,20 +87,18 @@ contract NetworkAwareDEXFactory is IDEXFactory, Ownable, ReentrancyGuard, Pausab
         // Set network-specific parameters
         _configurePairForNetwork(pair, config);
         
-        getPair[token0][token1] = pair;
-        getPair[token1][token0] = pair;
+        _getPair[token0][token1] = pair;
+        _getPair[token1][token0] = pair;
         allPairs.push(pair);
-        
-        emit PairCreated(token0, token1, pair, allPairs.length);
     }
     
     /**
-     * @dev Configure network-specific settings
+     * @dev Configure network-specific settings (internal version)
      */
-    function configureNetwork(
+    function _configureNetwork(
         uint256 chainId,
         bool supported,
-        uint256 feeRate,
+        uint256 _feeRate,
         uint256 gasLimit,
         uint256 blockTime,
         bool gasOptimizationEnabled,
@@ -113,10 +108,10 @@ contract NetworkAwareDEXFactory is IDEXFactory, Ownable, ReentrancyGuard, Pausab
         uint256 volumeThreshold,
         uint256 highVolumeFee,
         uint256 lowVolumeFee
-    ) external onlyOwner {
+    ) internal {
         networkConfigs[chainId] = NetworkConfig({
             supported: supported,
-            feeRate: feeRate,
+            feeRate: _feeRate,
             feeDenominator: 10000,
             gasLimit: gasLimit,
             blockTime: blockTime,
@@ -133,6 +128,26 @@ contract NetworkAwareDEXFactory is IDEXFactory, Ownable, ReentrancyGuard, Pausab
     }
     
     /**
+     * @dev Configure network-specific settings (external version)
+     */
+    function configureNetwork(
+        uint256 chainId,
+        bool supported,
+        uint256 _feeRate,
+        uint256 gasLimit,
+        uint256 blockTime,
+        bool gasOptimizationEnabled,
+        uint256 maxPairsPerToken,
+        uint256 minLiquidity,
+        bool adaptiveFees,
+        uint256 volumeThreshold,
+        uint256 highVolumeFee,
+        uint256 lowVolumeFee
+    ) external onlyOwner {
+        _configureNetwork(chainId, supported, _feeRate, gasLimit, blockTime, gasOptimizationEnabled, maxPairsPerToken, minLiquidity, adaptiveFees, volumeThreshold, highVolumeFee, lowVolumeFee);
+    }
+    
+    /**
      * @dev Get adaptive fee based on volume for smaller networks
      */
     function getAdaptiveFee(address token0, address token1) external view returns (uint256) {
@@ -145,7 +160,7 @@ contract NetworkAwareDEXFactory is IDEXFactory, Ownable, ReentrancyGuard, Pausab
         
         // Get pair address
         (address t0, address t1) = token0 < token1 ? (token0, token1) : (token1, token0);
-        address pairAddress = getPair[t0][t1];
+        address pairAddress = _getPair[t0][t1];
         
         if (pairAddress == address(0)) {
             return config.lowVolumeFee; // New pairs start with low fee
@@ -190,17 +205,16 @@ contract NetworkAwareDEXFactory is IDEXFactory, Ownable, ReentrancyGuard, Pausab
     /**
      * @dev Get all pairs count
      */
-    function allPairsLength() external view override returns (uint256) {
+    function allPairsLength() external view returns (uint256) {
         return allPairs.length;
     }
     
     /**
      * @dev Update fee rate for specific network
      */
-    function setNetworkFeeRate(uint256 chainId, uint256 _feeRate) external override onlyOwner {
+    function setNetworkFeeRate(uint256 chainId, uint256 _feeRate) external onlyOwner {
         require(networkConfigs[chainId].supported, "DEXFactory: Network not supported");
         require(_feeRate <= 1000, "DEXFactory: FEE_TOO_HIGH"); // Max 10%
-        
         networkConfigs[chainId].feeRate = _feeRate;
         emit FeeUpdated(chainId, _feeRate);
     }
@@ -208,7 +222,7 @@ contract NetworkAwareDEXFactory is IDEXFactory, Ownable, ReentrancyGuard, Pausab
     /**
      * @dev Set bridge address for cross-chain operations
      */
-    function setBridgeAddress(uint256 chainId, address bridgeAddress) external override onlyOwner {
+    function setBridgeAddress(uint256 chainId, address bridgeAddress) external onlyOwner {
         bridgeAddresses[chainId] = bridgeAddress;
         emit BridgeAddressUpdated(chainId, bridgeAddress);
     }
@@ -225,28 +239,23 @@ contract NetworkAwareDEXFactory is IDEXFactory, Ownable, ReentrancyGuard, Pausab
     /**
      * @dev Pause factory operations
      */
-    function pause() external override onlyOwner {
+    function pause() external onlyOwner {
         _pause();
     }
     
     /**
      * @dev Unpause factory operations
      */
-    function unpause() external override onlyOwner {
+    function unpause() external onlyOwner {
         _unpause();
     }
     
     /**
      * @dev Get pair address for two tokens
      */
-    function getPairAddress(address tokenA, address tokenB) 
-        external 
-        view 
-        override 
-        returns (address) 
-    {
+    function getPair(address tokenA, address tokenB) public view returns (address pair) {
         (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
-        return getPair[token0][token1];
+        return _getPair[token0][token1];
     }
     
     /**
@@ -255,25 +264,34 @@ contract NetworkAwareDEXFactory is IDEXFactory, Ownable, ReentrancyGuard, Pausab
     function pairExists(address tokenA, address tokenB) 
         external 
         view 
-        override 
         returns (bool) 
     {
         (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
-        return getPair[token0][token1] != address(0);
+        return _getPair[token0][token1] != address(0);
     }
     
     /**
      * @dev Get fee rate for current network
      */
-    function feeRate() external view override returns (uint256) {
+    function feeRate() external view returns (uint256) {
         return networkConfigs[block.chainid].feeRate;
     }
     
     /**
      * @dev Get fee denominator for current network
      */
-    function feeDenominator() external view override returns (uint256) {
+    function feeDenominator() external view returns (uint256) {
         return networkConfigs[block.chainid].feeDenominator;
+    }
+    
+    function setFeeRate(uint256 _feeRate) external onlyOwner {
+        require(_feeRate <= 1000, "DEXFactory: FEE_TOO_HIGH"); // Max 10%
+        networkConfigs[block.chainid].feeRate = _feeRate;
+        emit FeeUpdated(_feeRate);
+    }
+    
+    function getPairAddress(address tokenA, address tokenB) external view override returns (address) {
+        return getPair(tokenA, tokenB);
     }
     
     // Internal functions
@@ -304,49 +322,61 @@ contract NetworkAwareDEXFactory is IDEXFactory, Ownable, ReentrancyGuard, Pausab
         // Configure networks with optimized settings for smaller chains
         
         // Ethereum Mainnet
-        configureNetwork(1, true, 30, 300000, 12, false, 100, 1e18, true, 1000000e18, 25, 35);
+        _configureNetwork(1, true, 30, 300000, 12, false, 100, 1e18, true, 1000000e18, 25, 35);
         
         // Polygon (optimized for speed)
-        configureNetwork(137, true, 25, 300000, 2, true, 50, 1e18, true, 5000000e18, 20, 30);
+        _configureNetwork(137, true, 25, 300000, 2, true, 50, 1e18, true, 5000000e18, 20, 30);
         
         // BSC (optimized for cost)
-        configureNetwork(56, true, 25, 300000, 3, true, 50, 1e18, true, 5000000e18, 20, 30);
+        _configureNetwork(56, true, 25, 300000, 3, true, 50, 1e18, true, 5000000e18, 20, 30);
         
         // Fantom (ultra-fast, low fees)
-        configureNetwork(250, true, 20, 250000, 1, true, 30, 1e18, true, 3000000e18, 15, 25);
+        _configureNetwork(250, true, 20, 250000, 1, true, 30, 1e18, true, 3000000e18, 15, 25);
         
         // Avalanche (high throughput)
-        configureNetwork(43114, true, 25, 800000, 2, true, 40, 1e18, true, 3000000e18, 20, 30);
+        _configureNetwork(43114, true, 25, 800000, 2, true, 40, 1e18, true, 3000000e18, 20, 30);
         
         // Arbitrum (rollup optimization)
-        configureNetwork(42161, true, 20, 1000000, 1, true, 60, 1e18, true, 5000000e18, 15, 25);
+        _configureNetwork(42161, true, 20, 1000000, 1, true, 60, 1e18, true, 5000000e18, 15, 25);
         
         // Optimism (rollup optimization)
-        configureNetwork(10, true, 20, 300000, 2, true, 60, 1e18, true, 5000000e18, 15, 25);
+        _configureNetwork(10, true, 20, 300000, 2, true, 60, 1e18, true, 5000000e18, 15, 25);
         
         // Base (Coinbase backed)
-        configureNetwork(8453, true, 25, 300000, 2, true, 40, 1e18, true, 2000000e18, 20, 30);
+        _configureNetwork(8453, true, 25, 300000, 2, true, 40, 1e18, true, 2000000e18, 20, 30);
         
         // Linea (Consensys backed)
-        configureNetwork(59144, true, 25, 300000, 12, true, 40, 1e18, true, 2000000e18, 20, 30);
+        _configureNetwork(59144, true, 25, 300000, 12, true, 40, 1e18, true, 2000000e18, 20, 30);
         
         // Polygon zkEVM (zero-knowledge optimization)
-        configureNetwork(1101, true, 20, 300000, 1, true, 50, 1e18, true, 3000000e18, 15, 25);
+        _configureNetwork(1101, true, 20, 300000, 1, true, 50, 1e18, true, 3000000e18, 15, 25);
         
         // zkSync Era (zero-knowledge optimization)
-        configureNetwork(324, true, 20, 300000, 1, true, 50, 1e18, true, 3000000e18, 15, 25);
+        _configureNetwork(324, true, 20, 300000, 1, true, 50, 1e18, true, 3000000e18, 15, 25);
         
         // Scroll (zero-knowledge optimization)
-        configureNetwork(534352, true, 20, 300000, 2, true, 50, 1e18, true, 3000000e18, 15, 25);
+        _configureNetwork(534352, true, 20, 300000, 2, true, 50, 1e18, true, 3000000e18, 15, 25);
         
         // Moonbeam (parachain optimization)
-        configureNetwork(1284, true, 25, 150000, 12, true, 30, 1e18, true, 1000000e18, 20, 30);
+        _configureNetwork(1284, true, 25, 150000, 12, true, 30, 1e18, true, 1000000e18, 20, 30);
         
         // Moonriver (parachain optimization)
-        configureNetwork(1285, true, 25, 150000, 12, true, 30, 1e18, true, 1000000e18, 20, 30);
+        _configureNetwork(1285, true, 25, 150000, 12, true, 30, 1e18, true, 1000000e18, 20, 30);
+        
+        // PulseChain (Ethereum fork optimization)
+        _configureNetwork(804, true, 25, 300000, 3, true, 50, 1e18, true, 5000000e18, 20, 30);
+        
+        // Gnosis Chain (sidechain optimization)
+        _configureNetwork(100, true, 25, 300000, 5, true, 40, 1e18, true, 2000000e18, 20, 30);
         
         // Testnets
-        configureNetwork(11155111, true, 30, 300000, 12, false, 100, 1e18, true, 1000000e18, 25, 35);
-        configureNetwork(80001, true, 25, 300000, 2, true, 50, 1e18, true, 5000000e18, 20, 30);
+        _configureNetwork(11155111, true, 30, 300000, 12, false, 100, 1e18, true, 1000000e18, 25, 35);
+        _configureNetwork(80001, true, 25, 300000, 2, true, 50, 1e18, true, 5000000e18, 20, 30);
+        _configureNetwork(97, true, 25, 300000, 3, true, 50, 1e18, true, 5000000e18, 20, 30);
+        _configureNetwork(11155420, true, 20, 300000, 2, true, 60, 1e18, true, 5000000e18, 15, 25);
+        _configureNetwork(421614, true, 20, 1000000, 1, true, 60, 1e18, true, 5000000e18, 15, 25);
+        _configureNetwork(84532, true, 25, 300000, 2, true, 40, 1e18, true, 2000000e18, 20, 30);
+        _configureNetwork(369, true, 25, 300000, 3, true, 50, 1e18, true, 5000000e18, 20, 30);
+        _configureNetwork(10200, true, 25, 300000, 5, true, 40, 1e18, true, 2000000e18, 20, 30);
     }
 } 

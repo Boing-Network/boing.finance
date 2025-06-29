@@ -21,7 +21,11 @@
     "d1:generate": "node migrate-to-d1.js",
     "d1:setup": "npm run d1:generate && echo 'Now run: wrangler d1 create dex-database && wrangler d1 execute dex-database --file=./d1-schema.sql'",
     "test": "echo 'Add your test command here'",
-    "lint": "echo 'Add your lint command here'"
+    "lint": "echo 'Add your lint command here'",
+    "seed": "node insert-sepolia-data.js",
+    "seed:tokens": "node insert-deployed-tokens.js",
+    "migrate:d1": "node apply-d1-migration.js",
+    "test:db": "node check-db.js"
   },
   "dependencies": {
     "@cloudflare/workers-types": "^4.20231218.0",

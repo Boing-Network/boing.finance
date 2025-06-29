@@ -1,0 +1,26 @@
+{
+  "network": "Base Mainnet",
+  "chainId": 8453,
+  "deployer": "0xb24c5A62F8Da57967A08e11c88Fe18904f49920E",
+  "deploymentTime": "2025-06-29T17:15:51.984Z",
+  "contracts": {
+    "tokenImplementation": {
+      "address": "0x48b3c4E011a8eEF87C60c257eaa004dABb86Ce3b",
+      "name": "TokenImplementation"
+    },
+    "tokenFactory": {
+      "address": "0x594f4560A5fd52b49E824689Ec09770DB249Eca5",
+      "name": "TokenFactory"
+    }
+  },
+  "serviceFees": {
+    "basic": "0.01",
+    "professional": "0.03",
+    "enterprise": "0.06"
+  },
+  "configuration": {
+    "platformWallet": "0x7f279e722E3C4A54B62D7fA08b3AC7f109FE58E2",
+    "paused": false,
+    "implementation": "0x48b3c4E011a8eEF87C60c257eaa004dABb86Ce3b"
+  }
+}

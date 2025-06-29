@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useWallet } from '../contexts/WalletContext';
-import { getMainnetNetworks } from '../config/networks';
+import { getMainnetNetworks, getTestnetNetworks, getSupportedNetworks } from '../config/networks';
 import { ChevronDownIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 
 const NetworkSelector = () => {
@@ -8,7 +8,8 @@ const NetworkSelector = () => {
   const [showDropdown, setShowDropdown] = useState(false);
 
   const currentNetwork = getCurrentNetwork();
-  const supportedNetworks = getMainnetNetworks();
+  const mainnetNetworks = getMainnetNetworks();
+  const testnetNetworks = getTestnetNetworks();
 
   const handleNetworkSwitch = async (networkChainId) => {
     if (!isConnected) {
@@ -22,27 +23,22 @@ const NetworkSelector = () => {
   };
 
   const getNetworkIcon = (network) => {
-    // You can add network-specific icons here
+    if (!network || !network.chainId) return '🌐';
     const icons = {
       1: '🔵', // Ethereum
       137: '🟣', // Polygon
       56: '🟡', // BSC
-      250: '🔵', // Fantom
-      43114: '🔴', // Avalanche
       42161: '🔵', // Arbitrum
       10: '🔴', // Optimism
       8453: '🔵', // Base
-      59144: '🟣', // Linea
-      1101: '🟣', // Polygon zkEVM
-      324: '🔵', // zkSync
-      534352: '🟢', // Scroll
-      1284: '🌙', // Moonbeam
-      1285: '🌙', // Moonriver
+      11155111: '🧪', // Sepolia
+      80001: '🧪', // Mumbai
+      97: '🧪', // BSC Testnet
     };
     return icons[network.chainId] || '🌐';
   };
 
-  if (!isConnected) {
+  if (!isConnected || !currentNetwork) {
     return (
       <div className="flex items-center space-x-2 text-gray-400">
         <GlobeAltIcon className="w-4 h-4" />
@@ -63,34 +59,69 @@ const NetworkSelector = () => {
       </button>
 
       {showDropdown && (
-        <div className="absolute left-0 mt-2 w-64 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50 max-h-96 overflow-y-auto">
+        <div className="absolute left-0 mt-2 w-72 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50 max-h-96 overflow-y-auto">
           <div className="p-2">
-            <div className="text-xs text-gray-400 px-3 py-2 border-b border-gray-700">
-              Select Network
-            </div>
-            
-            {supportedNetworks.map((network) => (
-              <button
-                key={network.chainId}
-                onClick={() => handleNetworkSwitch(network.chainId)}
-                className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center space-x-3 ${
-                  chainId === network.chainId
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-300 hover:text-white hover:bg-gray-700'
-                }`}
-              >
-                <span className="text-lg">{getNetworkIcon(network)}</span>
-                <div className="flex-1">
-                  <div className="font-medium text-sm">{network.name}</div>
-                  <div className="text-xs text-gray-400">
-                    {network.nativeCurrency.symbol}
-                  </div>
+            {/* Mainnet Networks */}
+            {mainnetNetworks.length > 0 && (
+              <>
+                <div className="text-xs text-gray-400 px-3 py-2 border-b border-gray-700 font-medium">
+                  Mainnet Networks
                 </div>
-                {chainId === network.chainId && (
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
-                )}
-              </button>
-            ))}
+                {mainnetNetworks.map((network) => (
+                  <button
+                    key={network.chainId}
+                    onClick={() => handleNetworkSwitch(network.chainId)}
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center space-x-3 ${
+                      chainId === network.chainId
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                    }`}
+                  >
+                    <span className="text-lg">{getNetworkIcon(network)}</span>
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">{network.name}</div>
+                      <div className="text-xs text-gray-400">
+                        {network.nativeCurrency.symbol}
+                      </div>
+                    </div>
+                    {chainId === network.chainId && (
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    )}
+                  </button>
+                ))}
+              </>
+            )}
+
+            {/* Testnet Networks */}
+            {testnetNetworks.length > 0 && (
+              <>
+                <div className="text-xs text-gray-400 px-3 py-2 border-b border-gray-700 font-medium mt-2">
+                  Testnet Networks
+                </div>
+                {testnetNetworks.map((network) => (
+                  <button
+                    key={network.chainId}
+                    onClick={() => handleNetworkSwitch(network.chainId)}
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center space-x-3 ${
+                      chainId === network.chainId
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                    }`}
+                  >
+                    <span className="text-lg">{getNetworkIcon(network)}</span>
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">{network.name}</div>
+                      <div className="text-xs text-gray-400">
+                        {network.nativeCurrency.symbol} {network.features?.includes('dexDeployed') && '• DEX Deployed'}
+                      </div>
+                    </div>
+                    {chainId === network.chainId && (
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    )}
+                  </button>
+                ))}
+              </>
+            )}
           </div>
         </div>
       )}

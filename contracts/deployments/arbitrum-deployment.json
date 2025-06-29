@@ -1,0 +1,26 @@
+{
+  "network": "Arbitrum One Mainnet",
+  "chainId": 42161,
+  "deployer": "0xb24c5A62F8Da57967A08e11c88Fe18904f49920E",
+  "deploymentTime": "2025-06-29T17:30:07.562Z",
+  "contracts": {
+    "tokenImplementation": {
+      "address": "0x3213695638B2748678C6bcd812e8913C25f520B5",
+      "name": "TokenImplementation"
+    },
+    "tokenFactory": {
+      "address": "0x48b3c4E011a8eEF87C60c257eaa004dABb86Ce3b",
+      "name": "TokenFactory"
+    }
+  },
+  "serviceFees": {
+    "basic": "0.01",
+    "professional": "0.03",
+    "enterprise": "0.06"
+  },
+  "configuration": {
+    "platformWallet": "0x7f279e722E3C4A54B62D7fA08b3AC7f109FE58E2",
+    "paused": false,
+    "implementation": "0x3213695638B2748678C6bcd812e8913C25f520B5"
+  }
+}

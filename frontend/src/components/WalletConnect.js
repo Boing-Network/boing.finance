@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useWallet } from '../contexts/WalletContext';
 import { ChevronDownIcon, WalletIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { toast } from 'react-hot-toast';
 
 const WalletConnect = () => {
   const {
@@ -9,29 +10,59 @@ const WalletConnect = () => {
     isConnecting,
     connectWallet,
     disconnectWallet,
+    forceFreshConnection,
     getCurrentNetwork,
     getAccountBalance,
+    walletType
   } = useWallet();
 
   const [showDropdown, setShowDropdown] = useState(false);
   const [balance, setBalance] = useState(null);
+  const [balanceLoading, setBalanceLoading] = useState(false);
 
   // Get balance when account changes
   React.useEffect(() => {
+    let isMounted = true;
     if (isConnected && account) {
-      getAccountBalance().then(setBalance);
+      setBalanceLoading(true);
+      getAccountBalance().then((bal) => {
+        if (isMounted) {
+          setBalance(bal);
+          setBalanceLoading(false);
+        }
+      });
     } else {
       setBalance(null);
+      setBalanceLoading(false);
     }
+    return () => { isMounted = false; };
   }, [isConnected, account, getAccountBalance]);
 
   const handleConnect = async () => {
-    await connectWallet();
+    // Check if user was previously disconnected
+    const wasDisconnected = localStorage.getItem('userDisconnected') === 'true';
+    
+    if (wasDisconnected) {
+      // Use force fresh connection to ensure approval dialog
+      await forceFreshConnection();
+    } else {
+      // Use normal connection
+      await connectWallet();
+    }
   };
 
   const handleDisconnect = () => {
     disconnectWallet();
     setShowDropdown(false);
+    
+    // Show additional message about manual wallet disconnection and permission revocation
+    setTimeout(() => {
+      const walletName = walletType === 'coinbase' ? 'Coinbase Wallet' : walletType === 'metamask' ? 'MetaMask' : 'wallet';
+      toast.success(`Disconnected from app. To switch wallets or ensure complete privacy, please also disconnect from ${walletName} settings and revoke permissions.`, {
+        duration: 8000,
+        icon: '🔗',
+      });
+    }, 1000);
   };
 
   const formatAddress = (address) => {
@@ -90,14 +121,18 @@ const WalletConnect = () => {
               )}
 
               {/* Balance */}
-              {balance !== null && (
-                <div className="mb-4">
-                  <div className="text-sm text-gray-400 mb-1">Balance</div>
-                  <div className="text-white text-sm">
-                    {formatBalance(balance)} {currentNetwork?.nativeCurrency?.symbol || 'ETH'}
-                  </div>
+              <div className="mb-4">
+                <div className="text-sm text-gray-400 mb-1">Balance</div>
+                <div className="text-white text-sm min-h-[1.5em] flex items-center">
+                  {balanceLoading ? (
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block mr-2"></span>
+                  ) : balance !== null ? (
+                    <>{formatBalance(balance)} {currentNetwork?.nativeCurrency?.symbol || 'ETH'}</>
+                  ) : (
+                    '--'
+                  )}
                 </div>
-              )}
+              </div>
 
               {/* Disconnect Button */}
               <button
