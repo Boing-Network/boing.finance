@@ -28,7 +28,9 @@ const NetworksSection = () => {
         { name: 'Fantom', chainId: 250, symbol: 'FTM', features: ['Fast Finality', 'Low Fees'] },
         { name: 'Avalanche', chainId: 43114, symbol: 'AVAX', features: ['Subnet Support', 'High Throughput'] },
         { name: 'Moonbeam', chainId: 1284, symbol: 'GLMR', features: ['Parachain', 'Ethereum Compatibility'] },
-        { name: 'Moonriver', chainId: 1285, symbol: 'MOVR', features: ['Parachain', 'Ethereum Compatibility'] }
+        { name: 'Moonriver', chainId: 1285, symbol: 'MOVR', features: ['Parachain', 'Ethereum Compatibility'] },
+        { name: 'PulseChain', chainId: 804, symbol: 'PLS', features: ['Ethereum Fork', 'Low Fees'] },
+        { name: 'Gnosis Chain', chainId: 100, symbol: 'XDAI', features: ['Sidechain', 'Stablecoin Backed'] }
       ]
     }
   ];

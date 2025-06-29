@@ -77,7 +77,8 @@ const FeaturesSection = () => {
         'Solidity-based DEX contracts with security best practices',
         'Automated Market Maker (AMM) implementation',
         'Cross-chain bridge contracts with multi-sig security',
-        'Upgradeable contract architecture'
+        'Upgradeable contract architecture',
+        'Open source smart contracts'
       ]
     },
     {
@@ -102,7 +103,7 @@ const FeaturesSection = () => {
       category: 'Security',
       items: [
         'Multi-sig bridge security',
-        'Audited smart contracts',
+        'Open source smart contracts',
         'Rate limiting and DDoS protection',
         'Secure wallet integration'
       ]

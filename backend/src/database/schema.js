@@ -1,8 +1,8 @@
 import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
 
-// Tokens table
-export const tokens = sqliteTable('tokens', {
+// Known tokens table - stores metadata for tokens we know about
+export const knownTokens = sqliteTable('known_tokens', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   address: text('address').notNull().unique(),
   name: text('name').notNull(),
@@ -10,21 +10,110 @@ export const tokens = sqliteTable('tokens', {
   decimals: integer('decimals').notNull(),
   chainId: integer('chain_id').notNull(),
   totalSupply: text('total_supply'),
-  priceUsd: real('price_usd'),
-  volume24h: real('volume_24h'),
-  marketCap: real('market_cap'),
+  isVerified: integer('is_verified').default(0), // 0 = false, 1 = true
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`)
 }, (table) => ({
-  // Indexes for better query performance
-  addressIdx: index('tokens_address_idx').on(table.address),
-  chainIdIdx: index('tokens_chain_id_idx').on(table.chainId),
-  symbolIdx: index('tokens_symbol_idx').on(table.symbol),
-  volumeIdx: index('tokens_volume_24h_idx').on(table.volume24h),
-  marketCapIdx: index('tokens_market_cap_idx').on(table.marketCap)
+  addressIdx: index('known_tokens_address_idx').on(table.address),
+  chainIdIdx: index('known_tokens_chain_id_idx').on(table.chainId),
+  symbolIdx: index('known_tokens_symbol_idx').on(table.symbol)
 }));
 
-// Pairs table
+// User interactions table - tracks user actions for analytics
+export const userInteractions = sqliteTable('user_interactions', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull(), // Wallet address or session ID
+  action: text('action').notNull(), // 'swap', 'liquidity_add', 'liquidity_remove', 'search', 'view'
+  tokenAddress: text('token_address'),
+  pairAddress: text('pair_address'),
+  chainId: integer('chain_id'),
+  amount: text('amount'),
+  txHash: text('tx_hash'),
+  metadata: text('metadata'), // JSON string for additional data
+  timestamp: text('timestamp').default(sql`CURRENT_TIMESTAMP`)
+}, (table) => ({
+  userIdIdx: index('user_interactions_user_id_idx').on(table.userId),
+  actionIdx: index('user_interactions_action_idx').on(table.action),
+  chainIdIdx: index('user_interactions_chain_id_idx').on(table.chainId),
+  timestampIdx: index('user_interactions_timestamp_idx').on(table.timestamp)
+}));
+
+// Search analytics table - tracks search queries for insights
+export const searchAnalytics = sqliteTable('search_analytics', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  query: text('query').notNull(),
+  chainId: integer('chain_id'),
+  resultCount: integer('result_count').default(0),
+  clickCount: integer('click_count').default(0),
+  timestamp: text('timestamp').default(sql`CURRENT_TIMESTAMP`)
+}, (table) => ({
+  queryIdx: index('search_analytics_query_idx').on(table.query),
+  chainIdIdx: index('search_analytics_chain_id_idx').on(table.chainId),
+  timestampIdx: index('search_analytics_timestamp_idx').on(table.timestamp)
+}));
+
+// User preferences table - stores user settings and preferences
+export const userPreferences = sqliteTable('user_preferences', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull().unique(),
+  defaultChainId: integer('default_chain_id').default(1),
+  theme: text('theme').default('dark'),
+  language: text('language').default('en'),
+  notifications: integer('notifications').default(1), // 0 = disabled, 1 = enabled
+  slippageTolerance: real('slippage_tolerance').default(0.5),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`)
+}, (table) => ({
+  userIdIdx: index('user_preferences_user_id_idx').on(table.userId)
+}));
+
+// Analytics events table - general analytics tracking
+export const analyticsEvents = sqliteTable('analytics_events', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  eventType: text('event_type').notNull(), // 'page_view', 'button_click', 'error', etc.
+  eventName: text('event_name').notNull(),
+  userId: text('user_id'),
+  sessionId: text('session_id'),
+  chainId: integer('chain_id'),
+  metadata: text('metadata'), // JSON string for additional data
+  timestamp: text('timestamp').default(sql`CURRENT_TIMESTAMP`)
+}, (table) => ({
+  eventTypeIdx: index('analytics_events_type_idx').on(table.eventType),
+  eventNameIdx: index('analytics_events_name_idx').on(table.eventName),
+  userIdIdx: index('analytics_events_user_id_idx').on(table.userId),
+  timestampIdx: index('analytics_events_timestamp_idx').on(table.timestamp)
+}));
+
+// Cache table - for storing frequently accessed data
+export const cache = sqliteTable('cache', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  key: text('key').notNull().unique(),
+  value: text('value').notNull(),
+  expiresAt: text('expires_at'),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`)
+}, (table) => ({
+  keyIdx: index('cache_key_idx').on(table.key),
+  expiresAtIdx: index('cache_expires_at_idx').on(table.expiresAt)
+}));
+
+// Error logs table - for tracking application errors
+export const errorLogs = sqliteTable('error_logs', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  errorType: text('error_type').notNull(),
+  errorMessage: text('error_message').notNull(),
+  stackTrace: text('stack_trace'),
+  userId: text('user_id'),
+  chainId: integer('chain_id'),
+  userAgent: text('user_agent'),
+  timestamp: text('timestamp').default(sql`CURRENT_TIMESTAMP`)
+}, (table) => ({
+  errorTypeIdx: index('error_logs_type_idx').on(table.errorType),
+  userIdIdx: index('error_logs_user_id_idx').on(table.userId),
+  timestampIdx: index('error_logs_timestamp_idx').on(table.timestamp)
+}));
+
+// Legacy tables for backward compatibility (keeping the old structure)
+export const tokens = knownTokens;
 export const pairs = sqliteTable('pairs', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   address: text('address').notNull().unique(),
@@ -40,15 +129,12 @@ export const pairs = sqliteTable('pairs', {
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`)
 }, (table) => ({
-  // Indexes for better query performance
   addressIdx: index('pairs_address_idx').on(table.address),
   chainIdIdx: index('pairs_chain_id_idx').on(table.chainId),
   token0Idx: index('pairs_token0_address_idx').on(table.token0Address),
-  token1Idx: index('pairs_token1_address_idx').on(table.token1Address),
-  tokensIdx: index('pairs_tokens_idx').on(table.token0Address, table.token1Address)
+  token1Idx: index('pairs_token1_address_idx').on(table.token1Address)
 }));
 
-// Swaps table
 export const swaps = sqliteTable('swaps', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   txHash: text('tx_hash').notNull().unique(),
@@ -62,16 +148,13 @@ export const swaps = sqliteTable('swaps', {
   blockNumber: integer('block_number').notNull(),
   timestamp: text('timestamp').default(sql`CURRENT_TIMESTAMP`)
 }, (table) => ({
-  // Indexes for better query performance
   txHashIdx: index('swaps_tx_hash_idx').on(table.txHash),
   pairAddressIdx: index('swaps_pair_address_idx').on(table.pairAddress),
   senderIdx: index('swaps_sender_idx').on(table.sender),
   chainIdIdx: index('swaps_chain_id_idx').on(table.chainId),
-  timestampIdx: index('swaps_timestamp_idx').on(table.timestamp),
-  blockNumberIdx: index('swaps_block_number_idx').on(table.blockNumber)
+  timestampIdx: index('swaps_timestamp_idx').on(table.timestamp)
 }));
 
-// Liquidity events table
 export const liquidityEvents = sqliteTable('liquidity_events', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   txHash: text('tx_hash').notNull().unique(),
@@ -84,7 +167,6 @@ export const liquidityEvents = sqliteTable('liquidity_events', {
   blockNumber: integer('block_number').notNull(),
   timestamp: text('timestamp').default(sql`CURRENT_TIMESTAMP`)
 }, (table) => ({
-  // Indexes for better query performance
   txHashIdx: index('liquidity_events_tx_hash_idx').on(table.txHash),
   pairAddressIdx: index('liquidity_events_pair_address_idx').on(table.pairAddress),
   providerIdx: index('liquidity_events_provider_idx').on(table.provider),
@@ -93,7 +175,6 @@ export const liquidityEvents = sqliteTable('liquidity_events', {
   timestampIdx: index('liquidity_events_timestamp_idx').on(table.timestamp)
 }));
 
-// Bridge transactions table
 export const bridgeTransactions = sqliteTable('bridge_transactions', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   txHash: text('tx_hash').notNull().unique(),
@@ -114,6 +195,16 @@ export const bridgeTransactions = sqliteTable('bridge_transactions', {
 }));
 
 export const schema = {
+  // New D1-optimized tables
+  knownTokens,
+  userInteractions,
+  searchAnalytics,
+  userPreferences,
+  analyticsEvents,
+  cache,
+  errorLogs,
+  
+  // Legacy tables for backward compatibility
   tokens,
   pairs,
   swaps,

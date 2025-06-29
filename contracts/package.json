@@ -10,8 +10,12 @@
     "deploy:testnet": "hardhat run scripts/deploy.js --network testnet",
     "deploy:mainnet": "hardhat run scripts/deploy.js --network mainnet",
     "deploy:sepolia": "hardhat run scripts/deploy-sepolia.js --network sepolia",
+    "deploy:advanced-erc20": "hardhat run scripts/deploy-advanced-erc20.js --network sepolia",
+    "deploy:multi-network": "node scripts/deploy-token-factory-multi-network.js",
     "verify": "hardhat verify",
     "verify:sepolia": "hardhat run scripts/verify-sepolia.js --network sepolia",
+    "verify:multi-network": "node scripts/verify-multi-network.js",
+    "test:multi-network": "node scripts/test-multi-network-deployment.js",
     "coverage": "hardhat coverage",
     "lint": "solhint 'contracts/**/*.sol'",
     "lint:fix": "solhint 'contracts/**/*.sol' --fix",
@@ -19,16 +23,17 @@
     "clean": "hardhat clean"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^5.0.0",
     "@chainlink/contracts": "^0.8.0",
+    "@openzeppelin/contracts": "^5.3.0",
     "@uniswap/v2-core": "^1.0.1",
-    "@uniswap/v2-periphery": "^1.1.0-beta.0"
+    "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "dotenv": "^16.5.0"
   },
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
-    "@nomicfoundation/hardhat-network-helpers": "^1.0.8",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.8",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "@nomicfoundation/hardhat-verify": "^2.0.0",
     "@typechain/ethers-v6": "^0.5.0",
     "@typechain/hardhat": "^9.1.0",
@@ -37,9 +42,10 @@
     "chai": "^4.3.7",
     "ethers": "^6.8.1",
     "hardhat": "^2.19.0",
+    "hardhat-etherscan": "^1.0.1",
     "hardhat-gas-reporter": "^1.0.9",
+    "solhint": "^4.0.0",
     "solidity-coverage": "^0.8.5",
-    "typechain": "^8.3.1",
-    "solhint": "^4.0.0"
+    "typechain": "^8.3.1"
   }
-} 
+}

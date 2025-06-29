@@ -1,4 +1,4 @@
-# mochi - Decentralized Exchange
+# boing - Decentralized Exchange
 
 A modern decentralized exchange built with React, Cloudflare Workers, and D1 database. Supports cross-chain trading with optimized performance and scalability.
 
@@ -16,8 +16,7 @@ A modern decentralized exchange built with React, Cloudflare Workers, and D1 dat
 ```
 ├── frontend/          # React application
 ├── backend/           # Cloudflare Workers API
-├── contracts/         # Smart contracts (Solidity)
-└── docker-compose.yml # Local development setup
+└── contracts/         # Smart contracts (Solidity)
 ```
 
 ## 🛠️ Tech Stack
@@ -54,7 +53,7 @@ A modern decentralized exchange built with React, Cloudflare Workers, and D1 dat
 
 ```bash
 git clone <repository-url>
-cd mochi
+cd boing
 ```
 
 ### 2. Backend Setup
@@ -103,7 +102,7 @@ npm run deploy:sepolia
 2. **Create D1 Database**
    ```bash
    cd backend
-   wrangler d1 create mochi-database
+   wrangler d1 create boing-database
    ```
 
 3. **Generate Migration Files**
@@ -113,7 +112,7 @@ npm run deploy:sepolia
 
 4. **Apply Database Schema**
    ```bash
-   wrangler d1 execute mochi-database --file=./d1-schema.sql
+   wrangler d1 execute boing-database --file=./d1-schema.sql
    ```
 
 5. **Update Configuration**

@@ -1,0 +1,23 @@
+{
+  "network": "sepolia",
+  "chainId": "11155111",
+  "deployer": "0xb24c5A62F8Da57967A08e11c88Fe18904f49920E",
+  "contracts": {
+    "dexFactory": "0xAcB1ee4D411aA0c3C1C46999fB61E521D2D58851",
+    "dexRouter": "0x6354A9d4f779e85CE65535845F775DFEfe31AdB8",
+    "weth": "0xc832cde537bD890e9EB52fa5b8430b925C2a2A1F",
+    "crossChainBridge": "0x8c97Bcf628B23f7A6EC19610403C3f0190561355",
+    "priceOracle": "0x4C12de794D599f3B0Fcb479baAD4E42929cB5A02",
+    "tokens": {
+      "mockUSDC": "0x5Ce254ab41228D8d11FA29264a822887b914b87E",
+      "mockETH": "0x9C8259CB48dA8f3beAe8D69F29Df3aC7487c9D3A",
+      "mockDAI": "0xe9Cc8De05a0FC3829204D5415de9fF47Da7EA87d"
+    },
+    "pairs": {
+      "usdcEth": "0xcAfaF837edD067298F923a3B5a4310Ee3AA18fAf",
+      "usdcDai": "0xF4dA73695fE1b5b952Eb9aD25695074909Adf093"
+    }
+  },
+  "timestamp": "2025-06-27T10:44:15.723Z",
+  "blockNumber": 8639675
+}

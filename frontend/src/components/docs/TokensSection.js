@@ -84,7 +84,7 @@ const TokensSection = () => {
             <ul className="space-y-2 text-gray-300">
               <li>• Contract source code verified</li>
               <li>• Token metadata confirmed</li>
-              <li>• Security audit completed</li>
+              <li>• Open source code available</li>
               <li>• Community trust established</li>
               <li>• Regular trading volume</li>
             </ul>
@@ -113,7 +113,7 @@ const TokensSection = () => {
               <li>• <strong>Popular:</strong> High-volume, well-known tokens</li>
               <li>• <strong>Trending:</strong> Tokens with recent price action</li>
               <li>• <strong>New:</strong> Recently added tokens</li>
-              <li>• <strong>Verified:</strong> Audited and verified tokens</li>
+              <li>• <strong>Verified:</strong> Open source and verified tokens</li>
               <li>• <strong>Stablecoins:</strong> USD-pegged tokens</li>
             </ul>
           </div>

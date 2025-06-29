@@ -1,21 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { Toaster } from 'react-hot-toast';
+import { toast, ToastContainer } from 'react-toastify';
+import { HelmetProvider, Helmet } from 'react-helmet-async';
+import 'react-toastify/dist/ReactToastify.css';
+import { WalletProvider } from './contexts/WalletContext';
+import { useWalletConnection } from './hooks/useWalletConnection';
+import EnhancedAnimatedBackground from './components/EnhancedAnimatedBackground';
 import Logo from './components/Logo';
 import WalletConnect from './components/WalletConnect';
 import NetworkSelector from './components/NetworkSelector';
-import { WalletProvider } from './contexts/WalletContext';
+import TransactionHistoryModal from './components/TransactionHistoryModal';
 
 // Pages
 import Swap from './pages/Swap';
 import Liquidity from './pages/Liquidity';
 import Analytics from './pages/Analytics';
-import Pools from './pages/Pools';
 import Portfolio from './pages/Portfolio';
 import Bridge from './pages/Bridge';
 import Tokens from './pages/Tokens';
 import Docs from './pages/Docs';
+import DeployToken from './pages/DeployToken';
+import Whitepaper from './pages/Whitepaper';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
+import HelpCenter from './pages/HelpCenter';
+import ContactUs from './pages/ContactUs';
+import Status from './pages/Status';
+import BugReport from './pages/BugReport';
 
 // Styles
 import './styles/globals.css';
@@ -30,373 +42,556 @@ const queryClient = new QueryClient({
   },
 });
 
-function App() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+// Helper for coming soon
+const comingSoon = {
+  label: 'Coming Soon',
+  tooltip: 'This feature will be available after mainnet launch.'
+};
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+// Navigation data with categories
+const navigation = {
+  home: { name: 'Home', href: '/', icon: '🏠' },
+  trading: [
+    { name: 'Swap', href: '/swap', icon: '🔄', description: 'Trade tokens instantly', comingSoon: true },
+    { name: 'Bridge', href: '/bridge', icon: '🌉', description: 'Cross-chain transfers', comingSoon: true },
+    { name: 'Pools', href: '/pools', icon: '🏊', description: 'Liquidity pools', comingSoon: true },
+    { name: 'Tokens', href: '/tokens', icon: '🪙', description: 'Token management', comingSoon: true }
+  ],
+  analytics: [
+    { name: 'Analytics', href: '/analytics', icon: '📊', description: 'Market insights', comingSoon: true },
+    { name: 'Portfolio', href: '/portfolio', icon: '💼', description: 'Your holdings', comingSoon: true }
+  ],
+  deploy: { name: 'Deploy Token', href: '/deploy-token', icon: '🚀' }
+};
+
+function AppContent() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const [tradingDropdownOpen, setTradingDropdownOpen] = useState(false);
+  const [analyticsDropdownOpen, setAnalyticsDropdownOpen] = useState(false);
+  const { account } = useWalletConnection();
 
   const closeMenu = () => {
     setIsMenuOpen(false);
   };
 
-  const navigation = [
-    { name: 'Home', href: '/' },
-    { name: 'Swap', href: '/swap' },
-    { name: 'Liquidity', href: '/liquidity' },
-    { name: 'Pools', href: '/pools' },
-    { name: 'Analytics', href: '/analytics' },
-    { name: 'Portfolio', href: '/portfolio' },
-    { name: 'Bridge', href: '/bridge' },
-    { name: 'Tokens', href: '/tokens' },
-  ];
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <WalletProvider>
-        <Router>
-          <div className="App min-h-screen flex flex-col">
-            <header className="bg-gray-800 shadow-lg">
-              <div className="flex items-center py-6">
-                {/* Logo Section - Positioned at the very left edge of viewport */}
-                <div className="flex-shrink-0 pl-4 sm:pl-6 lg:pl-8">
-                  <a href="/" className="flex items-center hover:opacity-80 transition-opacity">
-                    <Logo size={32} className="mr-3" showText={false} />
-                    <h1 className="text-2xl font-bold text-white">mochi</h1>
-                  </a>
-                </div>
-                
-                {/* Navigation - Centered container */}
-                <div className="flex-1 flex justify-center">
-                  <div className="max-w-2xl mx-auto flex items-center justify-center w-full px-4 sm:px-6 lg:px-8">
-                    {/* Desktop Navigation */}
-                    <nav className="hidden md:flex space-x-6">
-                      {navigation.map((item) => (
-                        <a
-                          key={item.name}
-                          href={item.href}
-                          className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                          onClick={closeMenu}
-                        >
-                          {item.name}
-                        </a>
-                      ))}
-                    </nav>
-                  </div>
-                </div>
+    <div className="relative min-h-screen bg-gray-900">
+      <EnhancedAnimatedBackground />
+      
+      {/* Navigation */}
+      <nav className="relative z-30 bg-gray-900/80 backdrop-blur-sm border-b border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <button
+                onClick={() => window.location.href = '/'}
+                className="flex items-center space-x-2 text-white font-bold text-xl"
+              >
+                <Logo size={32} showText={true} />
+              </button>
+            </div>
 
-                {/* Wallet and Network Controls - Positioned at the very right edge of viewport */}
-                <div className="hidden md:flex items-center space-x-4 flex-shrink-0 pr-4 sm:pr-6 lg:pr-8">
+            {/* Desktop Navigation - Show on large screens and above */}
+            <div className="hidden lg:flex items-center justify-center flex-1">
+              <nav className="flex items-center space-x-4 xl:space-x-6">
+                {/* Home - Solo */}
+                <button
+                  onClick={() => window.location.href = navigation.home.href}
+                  className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2"
+                >
+                  <span className="text-lg">{navigation.home.icon}</span>
+                  <span>{navigation.home.name}</span>
+                </button>
+
+                {/* Trading Dropdown */}
+                <DropdownMenu
+                  label="Trading"
+                  items={navigation.trading}
+                  isOpen={tradingDropdownOpen}
+                  onToggle={() => {
+                    setTradingDropdownOpen(!tradingDropdownOpen);
+                    setAnalyticsDropdownOpen(false);
+                  }}
+                  onClose={() => setTradingDropdownOpen(false)}
+                />
+
+                {/* Analytics Dropdown */}
+                <DropdownMenu
+                  label="Analytics"
+                  items={navigation.analytics}
+                  isOpen={analyticsDropdownOpen}
+                  onToggle={() => {
+                    setAnalyticsDropdownOpen(!analyticsDropdownOpen);
+                    setTradingDropdownOpen(false);
+                  }}
+                  onClose={() => setAnalyticsDropdownOpen(false)}
+                />
+
+                {/* Deploy Token - Solo */}
+                <button
+                  onClick={() => window.location.href = navigation.deploy.href}
+                  className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2"
+                >
+                  <span className="text-lg">{navigation.deploy.icon}</span>
+                  <span>{navigation.deploy.name}</span>
+                </button>
+              </nav>
+            </div>
+
+            {/* Desktop Wallet Controls - Show on large screens and above */}
+            <div className="hidden lg:flex items-center space-x-3 xl:space-x-4 flex-shrink-0">
+              {/* History Button */}
+              <button
+                onClick={() => setHistoryModalOpen(true)}
+                className="text-gray-300 hover:text-white p-2 rounded-md transition-colors"
+                aria-label="View transaction history"
+              >
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+              <NetworkSelector />
+              <WalletConnect />
+            </div>
+
+            {/* Medium Screen Navigation - Show on medium screens only (md to lg) */}
+            <div className="hidden md:flex lg:hidden items-center space-x-2 flex-shrink-0">
+              {/* Compact Navigation for Medium Screens */}
+              <nav className="flex items-center space-x-2 mr-2">
+                <button
+                  onClick={() => window.location.href = navigation.home.href}
+                  className="text-gray-300 hover:text-white px-2 py-2 rounded-md text-xs font-medium transition-colors"
+                >
+                  {navigation.home.icon}
+                </button>
+                <DropdownMenu
+                  label="Trade"
+                  items={navigation.trading}
+                  isOpen={tradingDropdownOpen}
+                  onToggle={() => {
+                    setTradingDropdownOpen(!tradingDropdownOpen);
+                    setAnalyticsDropdownOpen(false);
+                  }}
+                  onClose={() => setTradingDropdownOpen(false)}
+                />
+                <DropdownMenu
+                  label="Analytics"
+                  items={navigation.analytics}
+                  isOpen={analyticsDropdownOpen}
+                  onToggle={() => {
+                    setAnalyticsDropdownOpen(!analyticsDropdownOpen);
+                    setTradingDropdownOpen(false);
+                  }}
+                  onClose={() => setAnalyticsDropdownOpen(false)}
+                />
+                <button
+                  onClick={() => window.location.href = navigation.deploy.href}
+                  className="text-gray-300 hover:text-white px-2 py-2 rounded-md text-xs font-medium transition-colors"
+                >
+                  {navigation.deploy.icon}
+                </button>
+              </nav>
+              {/* Compact Wallet Controls */}
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setHistoryModalOpen(true)}
+                  className="text-gray-300 hover:text-white p-1.5 rounded-md transition-colors"
+                  aria-label="View transaction history"
+                >
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </button>
+                <NetworkSelector />
+                <WalletConnect />
+              </div>
+            </div>
+
+            {/* Mobile menu button - Show on mobile and medium screens */}
+            <div className="md:hidden flex-shrink-0">
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="text-gray-300 hover:text-white focus:outline-none focus:text-white p-2 rounded-md transition-colors"
+                aria-label="Toggle menu"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  {isMenuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Navigation */}
+        {isMenuOpen && (
+          <div className="md:hidden border-t border-gray-700 bg-gray-800/95 backdrop-blur-sm">
+            <div className="px-4 py-3 space-y-3">
+              {/* Home */}
+              <button
+                onClick={() => {
+                  window.location.href = navigation.home.href;
+                  closeMenu();
+                }}
+                className="w-full text-left text-gray-300 hover:text-white px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 bg-gray-700/50"
+              >
+                <span className="text-xl">{navigation.home.icon}</span>
+                <span>{navigation.home.name}</span>
+              </button>
+
+              {/* Trading Section */}
+              <div className="bg-gray-700/50 rounded-lg p-3">
+                <h3 className="text-gray-400 text-sm font-medium mb-2 px-1">Trading</h3>
+                <div className="space-y-1">
+                  {navigation.trading.map((item) => (
+                    <button
+                      key={item.name}
+                      onClick={() => {
+                        if (!item.comingSoon) {
+                          window.location.href = item.href;
+                          closeMenu();
+                        }
+                      }}
+                      className={`w-full text-left text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${item.comingSoon ? 'text-gray-500 cursor-not-allowed opacity-60' : ''}`}
+                      disabled={item.comingSoon}
+                      title={item.comingSoon ? comingSoon.tooltip : ''}
+                    >
+                      <span className="text-lg">{item.icon}</span>
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <span>{item.name}</span>
+                          {item.comingSoon && (
+                            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>
+                          )}
+                        </div>
+                        {item.description && (
+                          <div className="text-xs text-gray-400">{item.description}</div>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Analytics Section */}
+              <div className="bg-gray-700/50 rounded-lg p-3">
+                <h3 className="text-gray-400 text-sm font-medium mb-2 px-1">Analytics</h3>
+                <div className="space-y-1">
+                  {navigation.analytics.map((item) => (
+                    <button
+                      key={item.name}
+                      onClick={() => {
+                        if (!item.comingSoon) {
+                          window.location.href = item.href;
+                          closeMenu();
+                        }
+                      }}
+                      className={`w-full text-left text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${item.comingSoon ? 'text-gray-500 cursor-not-allowed opacity-60' : ''}`}
+                      disabled={item.comingSoon}
+                      title={item.comingSoon ? comingSoon.tooltip : ''}
+                    >
+                      <span className="text-lg">{item.icon}</span>
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <span>{item.name}</span>
+                          {item.comingSoon && (
+                            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>
+                          )}
+                        </div>
+                        {item.description && (
+                          <div className="text-xs text-gray-400">{item.description}</div>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Deploy Token */}
+              <button
+                onClick={() => {
+                  window.location.href = navigation.deploy.href;
+                  closeMenu();
+                }}
+                className="w-full text-left text-gray-300 hover:text-white px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 bg-gray-700/50"
+              >
+                <span className="text-xl">{navigation.deploy.icon}</span>
+                <span>{navigation.deploy.name}</span>
+              </button>
+              
+              {/* Mobile Wallet Controls */}
+              <div className="space-y-3 pt-3 border-t border-gray-600">
+                <button
+                  onClick={() => {
+                    setHistoryModalOpen(true);
+                    closeMenu();
+                  }}
+                  className="w-full text-left text-gray-300 hover:text-white px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 bg-gray-700/50"
+                >
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>Transaction History</span>
+                </button>
+                <div className="space-y-2">
                   <NetworkSelector />
                   <WalletConnect />
                 </div>
-
-                {/* Mobile menu button - Positioned at the right edge */}
-                <div className="md:hidden flex-shrink-0 pr-4 sm:pr-6 lg:pr-8">
-                  <button
-                    onClick={toggleMenu}
-                    className="text-gray-300 hover:text-white focus:outline-none focus:text-white"
-                    aria-label="Toggle menu"
-                  >
-                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      {isMenuOpen ? (
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      ) : (
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                      )}
-                    </svg>
-                  </button>
-                </div>
               </div>
-
-              {/* Mobile Navigation */}
-              {isMenuOpen && (
-                <div className="md:hidden px-4 sm:px-6 lg:px-8 pb-4">
-                  <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-700 rounded-lg mb-4">
-                    {navigation.map((item) => (
-                      <a
-                        key={item.name}
-                        href={item.href}
-                        className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors"
-                        onClick={closeMenu}
-                      >
-                        {item.name}
-                      </a>
-                    ))}
-                  </div>
-                  
-                  {/* Mobile Wallet Controls */}
-                  <div className="px-2 pb-3 space-y-2">
-                    <NetworkSelector />
-                    <WalletConnect />
-                  </div>
-                </div>
-              )}
-            </header>
-            
-            <main className="flex-1">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/swap" element={<Swap />} />
-                <Route path="/liquidity" element={<Liquidity />} />
-                <Route path="/pools" element={<Pools />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/portfolio" element={<Portfolio />} />
-                <Route path="/bridge" element={<Bridge />} />
-                <Route path="/tokens" element={<Tokens />} />
-                <Route path="/docs" element={<Docs />} />
-              </Routes>
-            </main>
-            
-            <footer className="bg-gray-800 w-full border-t border-gray-700">
-              <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-                <div className="mb-4 md:mb-0 text-center md:text-left">
-                  <span className="text-white font-bold text-lg">mochi</span>
-                  <p className="text-gray-400 text-sm mt-2 max-w-xs">
-                    The next-generation cross-chain DEX. Trade, earn, and bridge assets across 15+ blockchain networks with ease.
-                  </p>
-                </div>
-                <div className="flex flex-col md:flex-row gap-6 items-center">
-                  <div className="flex flex-col gap-2 text-center md:text-left">
-                    <span className="text-gray-300 font-semibold mb-1">Community</span>
-                    <a href="https://twitter.com/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white text-sm">Twitter</a>
-                    <a href="https://discord.com/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white text-sm">Discord</a>
-                    <a href="mailto:support@mochi.exchange" className="text-gray-400 hover:text-white text-sm">Contact</a>
-                    <a href="/docs" className="text-blue-400 hover:text-blue-200 text-sm font-semibold mt-2">Docs</a>
-                  </div>
-                </div>
-                <div className="mt-6 md:mt-0 text-center md:text-right">
-                  <p className="text-gray-400 text-xs">&copy; 2025 mochi. All rights reserved.</p>
-                  <p className="text-gray-600 text-xs mt-1">Built with ❤️ for the DeFi community.</p>
-                </div>
-              </div>
-            </footer>
-            
-            {/* Toast notifications */}
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                duration: 4000,
-                style: {
-                  background: '#1f2937',
-                  color: '#fff',
-                  border: '1px solid #374151',
-                },
-                success: {
-                  iconTheme: {
-                    primary: '#10b981',
-                    secondary: '#fff',
-                  },
-                },
-                error: {
-                  iconTheme: {
-                    primary: '#ef4444',
-                    secondary: '#fff',
-                  },
-                },
-              }}
-            />
+            </div>
           </div>
-        </Router>
-      </WalletProvider>
+        )}
+      </nav>
+      
+      <main className="flex-1 relative">
+        {/* Page Content */}
+        <div className="relative z-10">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/swap" element={<Swap />} />
+            <Route path="/pools" element={<Liquidity />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/portfolio" element={<Portfolio />} />
+            <Route path="/bridge" element={<Bridge />} />
+            <Route path="/tokens" element={<Tokens />} />
+            <Route path="/docs" element={<Docs />} />
+            <Route path="/deploy-token" element={<DeployToken />} />
+            <Route path="/whitepaper" element={<Whitepaper />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/help-center" element={<HelpCenter />} />
+            <Route path="/contact-us" element={<ContactUs />} />
+            <Route path="/status" element={<Status />} />
+            <Route path="/bug-report" element={<BugReport />} />
+          </Routes>
+        </div>
+      </main>
+      
+      {/* Transaction History Modal */}
+      <TransactionHistoryModal
+        isOpen={historyModalOpen}
+        onClose={() => setHistoryModalOpen(false)}
+        account={account}
+      />
+      
+      <footer className="bg-gray-800 w-full border-t border-gray-700 relative z-20">
+        <div className="max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 sm:gap-10">
+            {/* Brand Section - Full width on mobile, spans 5 columns on larger screens */}
+            <div className="lg:col-span-5">
+              <div className="flex items-center mb-3 sm:mb-4">
+                <Logo size={20} className="mr-2 sm:mr-3" showText={false} />
+                <h3 className="text-base sm:text-lg font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">boing</h3>
+              </div>
+              <p className="text-gray-400 text-xs sm:text-sm mb-4 leading-relaxed">
+                The most advanced decentralized exchange with cross-chain capabilities, 
+                providing seamless trading across multiple networks.
+              </p>
+              <div className="flex space-x-3 sm:space-x-4">
+                <a href="https://twitter.com/boing_finance" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-1 sm:p-2">
+                  <span className="sr-only">Twitter</span>
+                  <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                  </svg>
+                </a>
+                <a href="https://t.me/boing_finance" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-1 sm:p-2">
+                  <span className="sr-only">Telegram</span>
+                  <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                  </svg>
+                </a>
+                <a href="https://discord.gg/7RDtQtQvBW" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-1 sm:p-2">
+                  <span className="sr-only">Discord</span>
+                  <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419-.019 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1568 2.4189Z"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+            
+            {/* Resources Links - spans 3 columns on larger screens */}
+            <div className="lg:col-span-3">
+              <h4 className="text-white font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Resources</h4>
+              <ul className="space-y-2 text-xs sm:text-sm">
+                <li><a href="/docs" className="text-gray-400 hover:text-white transition-colors block py-1">Documentation</a></li>
+                <li><a href="/whitepaper" className="text-gray-400 hover:text-white transition-colors block py-1">Whitepaper</a></li>
+                <li><a href="/terms" className="text-gray-400 hover:text-white transition-colors block py-1">Terms of Service</a></li>
+                <li><a href="/privacy" className="text-gray-400 hover:text-white transition-colors block py-1">Privacy Policy</a></li>
+              </ul>
+            </div>
+            
+            {/* Support Links - spans 3 columns on larger screens */}
+            <div className="lg:col-span-3">
+              <h4 className="text-white font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Support</h4>
+              <ul className="space-y-2 text-xs sm:text-sm">
+                <li><a href="/help-center" className="text-gray-400 hover:text-white transition-colors block py-1">Help Center</a></li>
+                <li><a href="/contact-us" className="text-gray-400 hover:text-white transition-colors block py-1">Contact Us</a></li>
+                <li><a href="/status" className="text-gray-400 hover:text-white transition-colors block py-1">Status</a></li>
+                <li><a href="/bug-report" className="text-gray-400 hover:text-white transition-colors block py-1">Bug Report</a></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-700">
+            <p className="text-gray-400 text-xs sm:text-sm text-center">
+              © 2025 boing. All rights reserved. Built with ❤️ for the DeFi community.
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <HelmetProvider>
+        <WalletProvider>
+          <Router>
+            <AppContent />
+            <ToastContainer
+              position="top-right"
+              autoClose={4000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="dark"
+            />
+          </Router>
+        </WalletProvider>
+      </HelmetProvider>
     </QueryClientProvider>
   );
 }
 
-// Simple Home component
+// Home component with all original features
 function Home() {
   return (
-    <div className="relative max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 overflow-x-hidden">
-      {/* Animated floating orbs/stars background */}
-      <AnimatedBackground />
-
-      <div className="text-center relative z-10">
-        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-6 sm:mb-8 fade-in">
-          Welcome to mochi
-        </h1>
-        <p className="text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8 px-4 fade-in delay-100">
-          A decentralized exchange for cross-chain trading
-        </p>
-        <div className="space-y-4 fade-in delay-200">
-          <a
-            href="/swap"
-            className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 text-sm sm:text-base shadow-lg animate-pulse"
-          >
-            Start Trading
-          </a>
-        </div>
-      </div>
-
-      {/* Floating Mochi Astronaut Mascot */}
-      <div className="flex justify-center mt-10 mb-8 relative z-10">
-        <MochiAstronaut />
-      </div>
-
-      {/* Feature Highlights Strip */}
-      <div className="flex flex-wrap justify-center gap-6 mb-12 fade-in delay-300">
-        <Highlight icon={<SwapIcon />} text="Lightning-fast swaps" />
-        <Highlight icon={<LiquidityIcon />} text="Earn with liquidity" />
-        <Highlight icon={<AnalyticsIcon />} text="Real-time analytics" />
-        <Highlight icon={<PortfolioIcon />} text="Unified portfolio" />
-        <Highlight icon={<BridgeIcon />} text="Cross-chain bridge" />
-        <Highlight icon={<TokensIcon />} text="All your tokens" />
-      </div>
-
-      {/* Animated SVG Hero Section */}
-      <div className="flex flex-col items-center justify-center mb-16 fade-in delay-400">
-        <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="animate-spin-slow mb-4">
-          <circle cx="100" cy="100" r="90" stroke="#00E0FF" strokeWidth="4" fill="none" opacity="0.2" />
-          <circle cx="100" cy="100" r="70" stroke="#7B61FF" strokeWidth="3" fill="none" opacity="0.15" />
-          <circle cx="100" cy="100" r="50" stroke="#00FFB2" strokeWidth="2" fill="none" opacity="0.12" />
-          <circle cx="100" cy="100" r="30" stroke="#fff" strokeWidth="1.5" fill="none" opacity="0.09" />
-          <animateTransform attributeName="transform" from="0 100 100" to="360 100 100" dur="18s" repeatCount="indefinite" />
-        </svg>
-        <p className="text-xl text-center text-text-muted max-w-2xl mb-2">Fast, secure, and user-friendly DeFi for everyone.</p>
-      </div>
-
-      {/* Features Section */}
-      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 fade-in delay-500">
-        <FeatureCard title="Swap" icon={<SwapIcon />} description="Instantly swap tokens across multiple blockchains with low fees and high speed." />
-        <FeatureCard title="Liquidity Pools" icon={<LiquidityIcon />} description="Provide liquidity, earn rewards, and help power decentralized trading." />
-        <FeatureCard title="Analytics" icon={<AnalyticsIcon />} description="Track your trading performance, pool stats, and market trends in real time." />
-        <FeatureCard title="Portfolio" icon={<PortfolioIcon />} description="Monitor your assets, balances, and earnings across all supported chains." />
-        <FeatureCard title="Bridge" icon={<BridgeIcon />} description="Seamlessly transfer tokens between different blockchains with our secure bridge." />
-        <FeatureCard title="Tokens" icon={<TokensIcon />} description="Explore supported tokens, view details, and manage your favorites." />
-      </div>
-
-      {/* Testimonials/Community Section */}
-      <div className="mt-16 mb-12 fade-in delay-600">
-        <h2 className="text-2xl font-bold text-white text-center mb-6">What our users say</h2>
-        <div className="flex flex-wrap justify-center gap-6">
-          <TestimonialCard name="Alex" text="Mochi is the smoothest DEX I've ever used!" />
-          <TestimonialCard name="Priya" text="Cross-chain swaps are so easy now. Love the design!" />
-          <TestimonialCard name="Samir" text="The analytics dashboard is a game changer for my trading." />
-        </div>
-      </div>
-
-      {/* Token Creation Info Banner */}
-      <div className="mt-8 mb-4 flex justify-center fade-in delay-800">
-        <div className="rounded-xl px-6 py-4 bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 max-w-2xl">
-          <div className="text-center">
-            <div className="text-lg font-semibold text-white mb-2">🚀 Create Your Own Tokens & Trading Pairs!</div>
-            <p className="text-gray-300 text-sm mb-3">
-              Unlike centralized exchanges, mochi allows anyone to deploy tokens and create trading pairs instantly. 
-              No permission required - just deploy, add liquidity, and start trading!
+    <>
+      <Helmet>
+        <title>boing.finance - Cross-Chain Decentralized Exchange</title>
+        <meta name="description" content="Trade tokens across multiple blockchains with boing.finance. Lightning-fast swaps, liquidity pools, cross-chain bridging, and comprehensive DeFi tools." />
+        <meta name="keywords" content="DEX, decentralized exchange, cross-chain, DeFi, token swap, liquidity pools, bridge, blockchain, cryptocurrency, trading" />
+        <meta property="og:title" content="boing.finance - Cross-Chain Decentralized Exchange" />
+        <meta property="og:description" content="Trade tokens across multiple blockchains with boing.finance. Lightning-fast swaps, liquidity pools, cross-chain bridging, and comprehensive DeFi tools." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://boing.finance" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="boing.finance - Cross-Chain Decentralized Exchange" />
+        <meta name="twitter:description" content="Trade tokens across multiple blockchains with boing.finance." />
+      </Helmet>
+      <div className="relative z-10 container mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center relative z-10">
+            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent mb-6">
+              boing.finance
+            </h1>
+            <p className="text-gray-300 text-lg leading-relaxed mb-12">
+              The ultimate multi-network DeFi platform for cross-chain trading, token deployment, and comprehensive financial tools across Ethereum, Polygon, BSC, Arbitrum, Optimism, and Base networks.
             </p>
-            <div className="flex flex-wrap gap-2 justify-center">
-              <a href="/tokens" className="text-purple-300 hover:text-purple-200 text-sm underline">Browse Tokens</a>
-              <span className="text-gray-500">•</span>
-              <a href="/liquidity" className="text-blue-300 hover:text-blue-200 text-sm underline">Create Pairs</a>
-              <span className="text-gray-500">•</span>
-              <a href="/swap" className="text-green-300 hover:text-green-200 text-sm underline">Start Trading</a>
+          </div>
+
+          {/* Floating Boing Astronaut Mascot */}
+          <div className="absolute top-20 right-10 hidden lg:block">
+            <BoingAstronaut />
+          </div>
+
+          {/* Feature Highlights Strip */}
+          <div className="flex flex-wrap justify-center gap-6 mb-12 fade-in delay-300">
+            <Highlight icon={<SwapIcon />} text="Lightning-fast swaps" />
+            <Highlight icon={<LiquidityIcon />} text="Earn with liquidity" />
+            <Highlight icon={<AnalyticsIcon />} text="Real-time analytics" />
+            <Highlight icon={<PortfolioIcon />} text="Unified portfolio" />
+            <Highlight icon={<BridgeIcon />} text="Cross-chain bridge" />
+            <Highlight icon={<TokensIcon />} text="All your tokens" />
+            <Highlight icon={<DeployTokenIcon />} text="Deploy tokens" />
+          </div>
+
+          {/* Animated SVG Hero Section */}
+          <div className="flex flex-col items-center justify-center mb-16 fade-in delay-400">
+            <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="animate-spin-slow mb-4">
+              <circle cx="100" cy="100" r="90" stroke="#00E0FF" strokeWidth="4" fill="none" opacity="0.2" />
+              <circle cx="100" cy="100" r="70" stroke="#7B61FF" strokeWidth="3" fill="none" opacity="0.15" />
+              <circle cx="100" cy="100" r="50" stroke="#00FFB2" strokeWidth="2" fill="none" opacity="0.12" />
+              <circle cx="100" cy="100" r="30" stroke="#fff" strokeWidth="1.5" fill="none" opacity="0.09" />
+              <animateTransform attributeName="transform" from="0 100 100" to="360 100 100" dur="18s" repeatCount="indefinite" />
+            </svg>
+            <p className="text-xl text-center text-text-muted max-w-2xl mb-2">Fast, secure, and user-friendly DeFi for everyone.</p>
+          </div>
+
+          {/* Features Section */}
+          <div className="mt-8 space-y-8 fade-in delay-500">
+            {/* First row - 6 cards in 3 columns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              <FeatureCard title="Swap" icon={<SwapIcon />} description="Instantly swap tokens across multiple blockchains with low fees and high speed." comingSoon />
+              <FeatureCard title="Liquidity Pools" icon={<LiquidityIcon />} description="Provide liquidity, earn rewards, and help power decentralized trading." comingSoon />
+              <FeatureCard title="Analytics" icon={<AnalyticsIcon />} description="Track your trading performance, pool stats, and market trends in real time." comingSoon />
+              <FeatureCard title="Portfolio" icon={<PortfolioIcon />} description="Monitor your assets, balances, and earnings across all supported chains." comingSoon />
+              <FeatureCard title="Bridge" icon={<BridgeIcon />} description="Seamlessly transfer tokens between different blockchains with our secure bridge." comingSoon />
+              <FeatureCard title="Tokens" icon={<TokensIcon />} description="Explore supported tokens, view details, and manage your favorites." comingSoon />
+            </div>
+            
+            {/* Second row - Deploy Token card centered */}
+            <div className="flex justify-center">
+              <div className="w-full max-w-md">
+                <a href="/deploy-token" className="block">
+                  <FeatureCard title="Deploy Token" icon={<DeployTokenIcon />} description="Create and deploy your own ERC20 tokens with just a few clicks." />
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Testimonials/Community Section */}
+          <div className="mt-16 mb-12 fade-in delay-600">
+            <h2 className="text-2xl font-bold text-white text-center mb-6">What our users say</h2>
+            <div className="flex flex-wrap justify-center gap-6">
+              <TestimonialCard name="Alex" text="Boing is the smoothest DEX I've ever used!" />
+              <TestimonialCard name="Priya" text="Cross-chain swaps are so easy now. Love the design!" />
+              <TestimonialCard name="Samir" text="The analytics dashboard is a game changer for my trading." />
+            </div>
+          </div>
+
+          {/* Token Creation Info Banner */}
+          <div className="mt-8 mb-4 flex justify-center fade-in delay-800">
+            <div className="rounded-xl px-6 py-4 bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 max-w-2xl">
+              <div className="text-center">
+                <div className="text-lg font-semibold text-white mb-2">🚀 Create Your Own Tokens & Trading Pairs!</div>
+                <p className="text-gray-300 text-sm mb-3">
+                  Unlike centralized exchanges, boing allows anyone to deploy tokens and create trading pairs instantly. 
+                  No permission required - just deploy, add liquidity, and start trading!
+                </p>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  <a href="/tokens" className="text-purple-300 hover:text-purple-200 text-sm underline transition-colors">Browse Tokens</a>
+                  <span className="text-gray-500">•</span>
+                  <a href="/deploy-token" className="text-blue-300 hover:text-blue-200 text-sm underline transition-colors">Deploy Token</a>
+                  <span className="text-gray-500">•</span>
+                  <a href="/pools" className="text-blue-300 hover:text-blue-200 text-sm underline transition-colors">Create Pairs</a>
+                  <span className="text-gray-500">•</span>
+                  <a href="/swap" className="text-green-300 hover:text-green-200 text-sm underline transition-colors">Start Trading</a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
-// Animated floating orbs/stars background
-function AnimatedBackground() {
+// Floating Boing Astronaut Mascot (SVG, up-down animation)
+function BoingAstronaut() {
   return (
-    <div className="pointer-events-none absolute inset-0 z-0">
-      <svg width="100%" height="100%" viewBox="0 0 1440 800" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute inset-0 w-full h-full">
-        {/* Floating orbs */}
-        <circle cx="200" cy="200" r="60" fill="#00E0FF" opacity="0.12">
-          <animate attributeName="cy" values="200;220;200" dur="6s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="1200" cy="300" r="40" fill="#7B61FF" opacity="0.10">
-          <animate attributeName="cy" values="300;320;300" dur="7s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="700" cy="600" r="80" fill="#00FFB2" opacity="0.08">
-          <animate attributeName="cy" values="600;620;600" dur="8s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="400" cy="700" r="30" fill="#fff" opacity="0.07">
-          <animate attributeName="cy" values="700;720;700" dur="5s" repeatCount="indefinite" />
-        </circle>
-        
-        {/* Additional floating elements */}
-        <circle cx="1000" cy="150" r="25" fill="#FF6B6B" opacity="0.09">
-          <animate attributeName="cx" values="1000;1020;1000" dur="9s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="300" cy="500" r="35" fill="#4ECDC4" opacity="0.11">
-          <animate attributeName="cy" values="500;480;500" dur="10s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="1100" cy="650" r="20" fill="#45B7D1" opacity="0.08">
-          <animate attributeName="cx" values="1100;1080;1100" dur="11s" repeatCount="indefinite" />
-        </circle>
-        
-        {/* Rotating geometric shapes */}
-        <rect x="150" y="100" width="40" height="40" fill="#FFD93D" opacity="0.06" rx="8">
-          <animateTransform attributeName="transform" type="rotate" values="0 170 120;360 170 120" dur="15s" repeatCount="indefinite" />
-        </rect>
-        <polygon points="1300,200 1320,180 1340,200 1320,220" fill="#FF8A80" opacity="0.07">
-          <animateTransform attributeName="transform" type="rotate" values="0 1320 200;360 1320 200" dur="12s" repeatCount="indefinite" />
-        </polygon>
-        <ellipse cx="600" cy="300" rx="30" ry="15" fill="#81C784" opacity="0.08">
-          <animateTransform attributeName="transform" type="rotate" values="0 600 300;360 600 300" dur="18s" repeatCount="indefinite" />
-        </ellipse>
-        
-        {/* Twinkling stars */}
-        <circle cx="300" cy="100" r="2" fill="#fff">
-          <animate attributeName="opacity" values="0.2;1;0.2" dur="2.5s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="900" cy="200" r="1.5" fill="#00E0FF">
-          <animate attributeName="opacity" values="0.3;1;0.3" dur="3s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="1300" cy="500" r="2" fill="#7B61FF">
-          <animate attributeName="opacity" values="0.2;1;0.2" dur="2.2s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="500" cy="150" r="1.8" fill="#FF6B6B">
-          <animate attributeName="opacity" values="0.1;0.8;0.1" dur="3.5s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="800" cy="400" r="1.2" fill="#4ECDC4">
-          <animate attributeName="opacity" values="0.2;1;0.2" dur="2.8s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="1200" cy="100" r="1.6" fill="#FFD93D">
-          <animate attributeName="opacity" values="0.3;0.9;0.3" dur="4s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="200" cy="600" r="1.4" fill="#FF8A80">
-          <animate attributeName="opacity" values="0.1;0.7;0.1" dur="3.2s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="1000" cy="700" r="1.7" fill="#81C784">
-          <animate attributeName="opacity" values="0.2;0.8;0.2" dur="2.9s" repeatCount="indefinite" />
-        </circle>
-        
-        {/* Floating particles */}
-        <circle cx="400" cy="300" r="3" fill="#00E0FF" opacity="0.4">
-          <animate attributeName="cy" values="300;280;300" dur="4s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="0.4;0.1;0.4" dur="4s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="800" cy="500" r="2" fill="#7B61FF" opacity="0.3">
-          <animate attributeName="cx" values="800;820;800" dur="5s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="0.3;0.05;0.3" dur="5s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="600" cy="700" r="2.5" fill="#00FFB2" opacity="0.35">
-          <animate attributeName="cy" values="700;680;700" dur="6s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="0.35;0.08;0.35" dur="6s" repeatCount="indefinite" />
-        </circle>
-        
-        {/* Pulsing elements */}
-        <circle cx="1000" cy="400" r="15" fill="#FF6B6B" opacity="0.05">
-          <animate attributeName="r" values="15;25;15" dur="8s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="0.05;0.15;0.05" dur="8s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="200" cy="400" r="12" fill="#4ECDC4" opacity="0.06">
-          <animate attributeName="r" values="12;20;12" dur="10s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="0.06;0.12;0.06" dur="10s" repeatCount="indefinite" />
-        </circle>
-      </svg>
-    </div>
-  );
-}
-
-// Floating Mochi Astronaut Mascot (SVG, up-down animation)
-function MochiAstronaut() {
-  return (
-    <svg width="100" height="100" viewBox="0 0 200 200" className="animate-float" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="80" height="80" viewBox="0 0 200 200" className="animate-float" fill="none" xmlns="http://www.w3.org/2000/svg">
       <g>
         <ellipse cx="100" cy="175" rx="28" ry="8" fill="#1e293b" opacity="0.13" />
         <ellipse cx="100" cy="85" rx="48" ry="44" fill="#fff" stroke="#bfc9d9" strokeWidth="3" />
@@ -426,9 +621,10 @@ function MochiAstronaut() {
 // Feature Highlights Strip
 function Highlight({ icon, text }) {
   return (
-    <div className="flex flex-col items-center px-4">
-      <div className="mb-1">{icon}</div>
-      <span className="text-sm text-text-muted animate-fade-in-up">{text}</span>
+    <div className="group relative flex items-center space-x-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-400/20 hover:border-cyan-400/40 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/20">
+      <span className="text-xl text-cyan-400 group-hover:text-cyan-300 transition-colors duration-300 animate-pulse">{icon}</span>
+      <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors duration-300">{text}</span>
+      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
     </div>
   );
 }
@@ -436,15 +632,12 @@ function Highlight({ icon, text }) {
 // Testimonials/Community Section
 function TestimonialCard({ name, text }) {
   return (
-    <div className="card p-4 w-64 animate-fade-in-up">
-      <div className="flex items-center mb-2">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className="mr-2">
-          <circle cx="16" cy="16" r="16" fill="#00E0FF" opacity="0.2" />
-          <text x="16" y="22" textAnchor="middle" fontSize="18" fill="#7B61FF" fontFamily="monospace">{name[0]}</text>
-        </svg>
-        <span className="font-semibold text-white">{name}</span>
+    <div className="group relative bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm border border-cyan-400/20 hover:border-cyan-400/40 rounded-xl p-4 max-w-xs hover:bg-gradient-to-br hover:from-gray-700/80 hover:to-gray-800/80 transition-all duration-500 hover:scale-105 hover:shadow-xl hover:shadow-cyan-500/20 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      <div className="relative z-10">
+        <p className="text-gray-300 group-hover:text-gray-200 text-sm mb-3 transition-colors duration-300">"{text}"</p>
+        <p className="text-white group-hover:text-cyan-100 font-medium text-sm transition-colors duration-300">— {name}</p>
       </div>
-      <p className="text-text-muted text-sm">{text}</p>
     </div>
   );
 }
@@ -452,65 +645,185 @@ function TestimonialCard({ name, text }) {
 // Animated SVG Feature Icons
 function SwapIcon() {
   return (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto animate-bounce">
-      <circle cx="20" cy="20" r="18" stroke="#00E0FF" strokeWidth="2" fill="#0A0A23" />
-      <path d="M12 20h16m0 0l-4-4m4 4l-4 4" stroke="#7B61FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-function LiquidityIcon() {
-  return (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto animate-pulse">
-      <ellipse cx="20" cy="28" rx="12" ry="6" fill="#00FFB2" opacity="0.3" />
-      <ellipse cx="20" cy="28" rx="8" ry="3.5" fill="#00E0FF" opacity="0.5" />
-      <circle cx="20" cy="16" r="8" fill="#7B61FF" opacity="0.7" />
-    </svg>
-  );
-}
-function AnalyticsIcon() {
-  return (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto animate-pulse">
-      <rect x="8" y="24" width="4" height="8" rx="2" fill="#00E0FF" />
-      <rect x="18" y="16" width="4" height="16" rx="2" fill="#7B61FF" />
-      <rect x="28" y="10" width="4" height="22" rx="2" fill="#00FFB2" />
-    </svg>
-  );
-}
-function PortfolioIcon() {
-  return (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto animate-spin-slow">
-      <circle cx="20" cy="20" r="16" stroke="#00FFB2" strokeWidth="2" fill="#0A0A23" />
-      <circle cx="20" cy="20" r="8" fill="#00E0FF" opacity="0.5" />
-      <circle cx="20" cy="20" r="4" fill="#7B61FF" />
-    </svg>
-  );
-}
-function BridgeIcon() {
-  return (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto animate-bounce">
-      <rect x="8" y="18" width="24" height="4" rx="2" fill="#00E0FF" />
-      <rect x="12" y="14" width="4" height="12" rx="2" fill="#7B61FF" />
-      <rect x="24" y="14" width="4" height="12" rx="2" fill="#00FFB2" />
-    </svg>
-  );
-}
-function TokensIcon() {
-  return (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto animate-pulse">
-      <circle cx="20" cy="20" r="14" fill="#7B61FF" opacity="0.5" />
-      <circle cx="20" cy="20" r="8" fill="#00E0FF" opacity="0.7" />
-      <circle cx="20" cy="20" r="4" fill="#00FFB2" />
+    <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
+      <defs>
+        <linearGradient id="swapGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#00E0FF" />
+          <stop offset="50%" stopColor="#00FFB2" />
+          <stop offset="100%" stopColor="#7B61FF" />
+        </linearGradient>
+      </defs>
+      <path fill="url(#swapGradient)" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" stroke="url(#swapGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-// Feature Card Component
-function FeatureCard({ title, icon, description }) {
+function LiquidityIcon() {
   return (
-    <div className="card flex flex-col items-center text-center p-6 shadow-lg hover:shadow-xl transition-all duration-200">
-      <div className="mb-4">{icon}</div>
-      <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
-      <p className="text-text-muted text-sm">{description}</p>
+    <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
+      <defs>
+        <linearGradient id="liquidityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#00E0FF" />
+          <stop offset="50%" stopColor="#00FFB2" />
+          <stop offset="100%" stopColor="#7B61FF" />
+        </linearGradient>
+      </defs>
+      <path fill="url(#liquidityGradient)" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" stroke="url(#liquidityGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function AnalyticsIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
+      <defs>
+        <linearGradient id="analyticsGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#00E0FF" />
+          <stop offset="50%" stopColor="#00FFB2" />
+          <stop offset="100%" stopColor="#7B61FF" />
+        </linearGradient>
+      </defs>
+      <path fill="url(#analyticsGradient)" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke="url(#analyticsGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function PortfolioIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
+      <defs>
+        <linearGradient id="portfolioGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#00E0FF" />
+          <stop offset="50%" stopColor="#00FFB2" />
+          <stop offset="100%" stopColor="#7B61FF" />
+        </linearGradient>
+      </defs>
+      <path fill="url(#portfolioGradient)" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke="url(#portfolioGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function BridgeIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
+      <defs>
+        <linearGradient id="bridgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#00E0FF" />
+          <stop offset="50%" stopColor="#00FFB2" />
+          <stop offset="100%" stopColor="#7B61FF" />
+        </linearGradient>
+      </defs>
+      <path fill="url(#bridgeGradient)" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke="url(#bridgeGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function TokensIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
+      <defs>
+        <linearGradient id="tokensGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#00E0FF" />
+          <stop offset="50%" stopColor="#00FFB2" />
+          <stop offset="100%" stopColor="#7B61FF" />
+        </linearGradient>
+      </defs>
+      <path fill="url(#tokensGradient)" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" stroke="url(#tokensGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function DeployTokenIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
+      <defs>
+        <linearGradient id="deployGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#00E0FF" />
+          <stop offset="50%" stopColor="#00FFB2" />
+          <stop offset="100%" stopColor="#7B61FF" />
+        </linearGradient>
+      </defs>
+      <path fill="url(#deployGradient)" d="M12 6v6m0 0v6m0-6h6m-6 0H6" stroke="url(#deployGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+// Feature Card Component (updated)
+function FeatureCard({ title, icon, description, comingSoon }) {
+  return (
+    <div
+      className={`group relative bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm border border-cyan-400/20 rounded-xl p-6 transition-all duration-500 overflow-hidden ${comingSoon ? 'opacity-60 cursor-not-allowed' : 'hover:border-cyan-400/40 hover:bg-gradient-to-br hover:from-gray-700/80 hover:to-gray-800/80 hover:scale-105 hover:shadow-xl hover:shadow-cyan-500/20'}`}
+      title={comingSoon ? 'This feature will be available after mainnet launch.' : ''}
+    >
+      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      <div className="relative z-10">
+        <div className="flex items-center mb-4">
+          <span className="text-2xl mr-3 text-cyan-400 group-hover:text-cyan-300 transition-colors duration-300 animate-pulse">{icon}</span>
+          <h3 className="text-lg font-semibold text-white group-hover:text-cyan-100 transition-colors duration-300 flex items-center">
+            {title}
+            {comingSoon && (
+              <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">Coming Soon</span>
+            )}
+          </h3>
+        </div>
+        <p className="text-gray-300 group-hover:text-gray-200 text-sm leading-relaxed transition-colors duration-300">{description}</p>
+      </div>
+    </div>
+  );
+}
+
+// Modified DropdownMenu to support coming soon
+function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
+  return (
+    <div className="relative">
+      <button
+        onClick={onToggle}
+        onBlur={() => setTimeout(onClose, 150)}
+        className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1 group"
+      >
+        <span>{label}</span>
+        <svg 
+          className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 w-48 bg-gray-800/95 backdrop-blur-sm border border-gray-700 rounded-lg shadow-xl z-50 animate-in slide-in-from-top-2 duration-200">
+          <div className="py-1">
+            {items.map((item) => (
+              <button
+                key={item.name}
+                onClick={() => {
+                  if (!item.comingSoon) {
+                    window.location.href = item.href;
+                    onClose();
+                  }
+                }}
+                className={`w-full text-left px-4 py-2 text-sm flex items-center space-x-3 group transition-colors ${item.comingSoon ? 'text-gray-500 cursor-not-allowed opacity-60' : 'text-gray-300 hover:text-white hover:bg-gray-700/50'}`}
+                disabled={item.comingSoon}
+                title={item.comingSoon ? comingSoon.tooltip : ''}
+              >
+                <span className="text-lg">{item.icon}</span>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span>{item.name}</span>
+                    {item.comingSoon && (
+                      <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>
+                    )}
+                  </div>
+                  {item.description && (
+                    <div className="text-xs text-gray-400">{item.description}</div>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

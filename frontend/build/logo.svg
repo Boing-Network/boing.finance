@@ -7,7 +7,7 @@
       <stop offset="0%" stop-color="#2e3a6a"/>
       <stop offset="100%" stop-color="#0b1426"/>
     </radialGradient>
-    <radialGradient id="mochi" cx="50%" cy="50%" r="60%">
+    <radialGradient id="boing" cx="50%" cy="50%" r="60%">
       <stop offset="0%" stop-color="#f8fafc"/>
       <stop offset="100%" stop-color="#e0e7ef"/>
     </radialGradient>
@@ -65,8 +65,8 @@
     <ellipse cx="100" cy="85" rx="48" ry="44" fill="#fff" stroke="#bfc9d9" stroke-width="3"/>
     <!-- Helmet visor (blue) -->
     <ellipse cx="100" cy="85" rx="42" ry="38" fill="url(#visor)" stroke="#7dd3fc" stroke-width="3"/>
-    <!-- Mochi head (large, round, inside helmet) -->
-    <ellipse cx="100" cy="90" rx="32" ry="30" fill="url(#mochi)" stroke="#bfc9d9" stroke-width="2"/>
+    <!-- Boing head (large, round, inside helmet) -->
+    <ellipse cx="100" cy="90" rx="32" ry="30" fill="url(#boing)" stroke="#bfc9d9" stroke-width="2"/>
     <!-- Face: big cute eyes, no mouth -->
     <ellipse cx="88" cy="95" rx="5" ry="5" fill="#60a5fa"/>
     <ellipse cx="112" cy="95" rx="5" ry="5" fill="#60a5fa"/>
