@@ -5,6 +5,7 @@ import { sql } from 'drizzle-orm';
 import * as schema from './database/schema.js';
 import { createDEXRoutes } from './routes/dexRoutes.js';
 import { createAnalyticsRoutes } from './routes/analyticsRoutes.js';
+import { createIPFSRoutes } from './routes/ipfsRoutes.js';
 
 // Create main app
 const app = new Hono();
@@ -38,13 +39,10 @@ app.get('/api/test', async (c) => {
         error: 'Database not configured' 
       }, 500);
     }
-
     // Create database connection using D1
     const db = drizzle(d1, { schema });
-    
     // Test simple query
     const result = await db.select({ count: sql`count(*)` }).from(schema.knownTokens);
-    
     return c.json({ 
       success: true, 
       message: 'Database connection successful',
@@ -60,61 +58,29 @@ app.get('/api/test', async (c) => {
   }
 });
 
-// API routes
-app.route('/api', async (c) => {
-  try {
-    // Get D1 database from Cloudflare environment
-    const d1 = c.env.DB;
-    if (!d1) {
-      return c.json({ 
-        success: false, 
-        error: 'Database not configured' 
-      }, 500);
-    }
-
-    // Create database connection using D1
-    const db = drizzle(d1, { schema });
-    
-    // Create and return DEX routes
-    const dexRoutes = createDEXRoutes(db);
-    return dexRoutes.fetch(c.req.raw, c.env, c.executionCtx);
-  } catch (error) {
-    console.error('Database connection error:', error);
-    return c.json({ 
-      success: false, 
-      error: 'Database connection failed',
-      message: error.message 
-    }, 500);
+// Middleware to inject DB into context
+const dbMiddleware = async (c, next) => {
+  const d1 = c.env.DB;
+  if (!d1) {
+    return c.json({ success: false, error: 'Database not configured' }, 500);
   }
-});
+  c.set('db', drizzle(d1, { schema }));
+  await next();
+};
 
-// Analytics routes
-app.route('/analytics', async (c) => {
-  try {
-    // Get D1 database from Cloudflare environment
-    const d1 = c.env.DB;
-    if (!d1) {
-      return c.json({ 
-        success: false, 
-        error: 'Database not configured' 
-      }, 500);
-    }
+// Mount DEX routes at /api
+const dexRoutes = createDEXRoutes();
+dexRoutes.use('*', dbMiddleware);
+app.route('/api', dexRoutes);
 
-    // Create database connection using D1
-    const db = drizzle(d1, { schema });
-    
-    // Create and return analytics routes
-    const analyticsRoutes = createAnalyticsRoutes(db);
-    return analyticsRoutes.fetch(c.req.raw, c.env, c.executionCtx);
-  } catch (error) {
-    console.error('Analytics database connection error:', error);
-    return c.json({ 
-      success: false, 
-      error: 'Analytics database connection failed',
-      message: error.message 
-    }, 500);
-  }
-});
+// Mount Analytics routes at /analytics
+const analyticsRoutes = createAnalyticsRoutes();
+analyticsRoutes.use('*', dbMiddleware);
+app.route('/analytics', analyticsRoutes);
+
+// Mount IPFS routes (including R2 upload) at /api
+const ipfsRoutes = createIPFSRoutes();
+app.route('/api', ipfsRoutes);
 
 // Error handling
 app.onError((err, c) => {

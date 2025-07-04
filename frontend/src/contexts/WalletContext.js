@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { ethers } from 'ethers';
-import { getNetworkByChainId, NETWORKS } from '../config/networks';
+import { getNetworkByChainId } from '../config/networks';
 import toast from 'react-hot-toast';
 
 const WalletContext = createContext();
@@ -23,45 +23,196 @@ export const WalletProvider = ({ children }) => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [walletType, setWalletType] = useState(null);
-  const [preferredWalletType, setPreferredWalletType] = useState(null);
   const [lastErrorTime, setLastErrorTime] = useState(0);
   const [userDisconnected, setUserDisconnected] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Debounce error messages to prevent spam
-  const showErrorWithDebounce = (message) => {
+  const showErrorWithDebounce = useCallback((message) => {
     const now = Date.now();
-    if (now - lastErrorTime > 2000) { // Only show error if 2 seconds have passed
+    if (now - lastErrorTime > 2000) {
       toast.error(message);
       setLastErrorTime(now);
     }
-  };
+  }, [lastErrorTime]);
 
-  // Initialize wallet connection on mount
-  useEffect(() => {
-    // Prevent multiple initializations
-    if (isInitialized) {
-      return;
+  const handleAccountsChanged = useCallback(async (accounts) => {
+    const wasDisconnected = localStorage.getItem('userDisconnected') === 'true';
+    if (wasDisconnected) return;
+    if (accounts.length === 0) {
+      disconnectWallet();
+    } else {
+      if (!userDisconnected) {
+        setAccount(accounts[0]);
+      }
     }
+  }, [userDisconnected]);
 
+  const handleChainChanged = useCallback(async (chainId) => {
+    const wasDisconnected = localStorage.getItem('userDisconnected') === 'true';
+    if (wasDisconnected || userDisconnected) return;
+    let newChainId;
+    if (typeof chainId === 'string') {
+      newChainId = chainId.startsWith('0x') ? parseInt(chainId, 16) : parseInt(chainId, 10);
+    } else {
+      newChainId = parseInt(chainId);
+    }
+    if (isNaN(newChainId)) return;
+    setChainId(newChainId);
+    const network = getNetworkByChainId(newChainId);
+    if (!network) {
+      showErrorWithDebounce(`Network with chain ID ${newChainId} is not supported. Please switch to a supported network.`);
+    }
+  }, [userDisconnected, showErrorWithDebounce]);
+
+  // Define disconnectWallet first
+  const disconnectWallet = useCallback(async () => {
+    try {
+      setAccount(null);
+      setProvider(null);
+      setSigner(null);
+      setChainId(null);
+      setIsConnected(false);
+      setWalletType(null);
+      setUserDisconnected(true);
+      
+      // Store disconnection state
+      localStorage.setItem('userDisconnected', 'true');
+      localStorage.removeItem('walletConnected');
+      localStorage.removeItem('walletType');
+      
+      console.log('Wallet disconnected successfully');
+    } catch (error) {
+      console.error('Error disconnecting wallet:', error);
+    }
+  }, []);
+
+  const handleDisconnect = useCallback(() => {
+    disconnectWallet();
+  }, [disconnectWallet]);
+
+  const setupEventListeners = useCallback(() => {
+    if (typeof window !== 'undefined' && window.ethereum) {
+      window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+      window.ethereum.removeListener('chainChanged', handleChainChanged);
+      window.ethereum.removeListener('disconnect', handleDisconnect);
+      window.ethereum.on('accountsChanged', handleAccountsChanged);
+      window.ethereum.on('chainChanged', handleChainChanged);
+      window.ethereum.on('disconnect', handleDisconnect);
+    }
+  }, [handleAccountsChanged, handleChainChanged, handleDisconnect]);
+
+  // Define connectWalletSilently first
+  const connectWalletSilently = useCallback(async (accountAddress = null, networkChainId = null, forceReconnect = false) => {
+    setIsConnecting(true);
+    
+    try {
+      if (typeof window === 'undefined') {
+        throw new Error('No wallet detected. Please install MetaMask or another Web3 wallet.');
+      }
+
+      const ethereumProvider = window.ethereum;
+
+      if (!ethereumProvider) {
+        throw new Error('No wallet detected. Please install MetaMask or another Web3 wallet.');
+      }
+
+      if (forceReconnect) {
+        setUserDisconnected(false);
+        localStorage.removeItem('userDisconnected');
+      }
+
+      const wasDisconnected = localStorage.getItem('userDisconnected') === 'true';
+      
+      if (wasDisconnected) {
+        localStorage.removeItem('walletConnected');
+        localStorage.removeItem('walletType');
+        setUserDisconnected(false);
+        localStorage.removeItem('userDisconnected');
+        
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
+      let detectedWalletType = 'unknown';
+      if (ethereumProvider.isCoinbaseWallet) {
+        detectedWalletType = 'coinbase';
+      } else if (ethereumProvider.isMetaMask) {
+        detectedWalletType = 'metamask';
+      }
+
+      const accounts = await ethereumProvider.request({
+        method: 'eth_requestAccounts'
+      });
+
+      if (accounts.length === 0) {
+        throw new Error('No accounts found');
+      }
+
+      const account = accountAddress || accounts[0];
+      const chainId = networkChainId || parseInt(await ethereumProvider.request({ method: 'eth_chainId' }), 16);
+
+      const provider = new ethers.BrowserProvider(ethereumProvider);
+      const signer = await provider.getSigner();
+
+      const network = getNetworkByChainId(chainId);
+      if (!network) {
+        showErrorWithDebounce(`Network with chain ID ${chainId} is not supported. Please switch to a supported network.`);
+        setIsConnecting(false);
+        return false;
+      }
+
+      setAccount(account);
+      setProvider(provider);
+      setSigner(signer);
+      setChainId(chainId);
+      setIsConnected(true);
+      setWalletType(detectedWalletType);
+
+      localStorage.setItem('walletConnected', 'true');
+      localStorage.setItem('walletType', detectedWalletType);
+      localStorage.removeItem('userDisconnected');
+
+      return true;
+
+    } catch (error) {
+      console.error('Error connecting wallet:', error);
+      toast.error(error.message || 'Failed to connect wallet');
+      return false;
+    } finally {
+      setIsConnecting(false);
+    }
+  }, [showErrorWithDebounce]);
+
+  const checkWalletConnection = useCallback(async () => {
+    if (typeof window !== 'undefined' && window.ethereum) {
+      try {
+        const wasDisconnected = localStorage.getItem('userDisconnected') === 'true';
+        if (wasDisconnected) return;
+        if (isConnected && account) return;
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        if (accounts.length > 0 && !userDisconnected) {
+          const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+          await connectWalletSilently(accounts[0], parseInt(chainId, 16));
+        }
+      } catch (error) {
+        console.error('Error checking wallet connection:', error);
+      }
+    }
+  }, [isConnected, account, userDisconnected, connectWalletSilently]);
+
+  // Update the useEffect to use the updated functions
+  useEffect(() => {
+    if (isInitialized) return;
     const initWallet = async () => {
-      console.log('🔄 Initializing wallet...');
-      // Check if user previously disconnected
       const wasDisconnected = localStorage.getItem('userDisconnected') === 'true';
       setUserDisconnected(wasDisconnected);
-      
-      // Only auto-connect if user hasn't explicitly disconnected
       if (!wasDisconnected) {
         await checkWalletConnection();
       }
-      console.log('🔗 Setting up event listeners...');
       setupEventListeners();
       setIsInitialized(true);
-      console.log('✅ Wallet initialization complete');
     };
     initWallet();
-
-    // Cleanup function to remove event listeners
     return () => {
       if (typeof window !== 'undefined' && window.ethereum) {
         window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
@@ -69,129 +220,7 @@ export const WalletProvider = ({ children }) => {
         window.ethereum.removeListener('disconnect', handleDisconnect);
       }
     };
-  }, [isInitialized]);
-
-  const setupEventListeners = () => {
-    console.log('🎧 Setting up event listeners...');
-    if (typeof window !== 'undefined' && window.ethereum) {
-      // Remove any existing listeners first to prevent duplicates
-      window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-      window.ethereum.removeListener('chainChanged', handleChainChanged);
-      window.ethereum.removeListener('disconnect', handleDisconnect);
-      
-      // Add new listeners
-      window.ethereum.on('accountsChanged', handleAccountsChanged);
-      window.ethereum.on('chainChanged', handleChainChanged);
-      window.ethereum.on('disconnect', handleDisconnect);
-      console.log('✅ Event listeners attached successfully');
-    } else {
-      console.log('❌ No ethereum provider found, cannot attach event listeners');
-    }
-  };
-
-  const checkWalletConnection = async () => {
-    if (typeof window !== 'undefined' && window.ethereum) {
-      try {
-        // Check if user has explicitly disconnected
-        const wasDisconnected = localStorage.getItem('userDisconnected') === 'true';
-        
-        if (wasDisconnected) {
-          return;
-        }
-
-        // Check if already connected to prevent duplicate connections
-        if (isConnected && account) {
-          return;
-        }
-
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-        if (accounts.length > 0 && !userDisconnected) {
-          const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-          // Auto-connect without showing toast
-          await connectWalletSilently(accounts[0], parseInt(chainId, 16));
-        }
-      } catch (error) {
-        console.error('Error checking wallet connection:', error);
-      }
-    }
-  };
-
-  const handleAccountsChanged = async (accounts) => {
-    // Check if user has explicitly disconnected
-    const wasDisconnected = localStorage.getItem('userDisconnected') === 'true';
-    
-    if (wasDisconnected) {
-      return;
-    }
-
-    if (accounts.length === 0) {
-      disconnectWallet();
-    } else {
-      // Only update account if user hasn't explicitly disconnected
-      if (!userDisconnected) {
-        setAccount(accounts[0]);
-      }
-    }
-  };
-
-  const handleChainChanged = async (chainId) => {
-    console.log('🔄 Chain changed event received:', chainId);
-    // Check if user has explicitly disconnected
-    const wasDisconnected = localStorage.getItem('userDisconnected') === 'true';
-    
-    if (wasDisconnected) {
-      console.log('❌ User has explicitly disconnected, ignoring chain change');
-      return;
-    }
-    
-    // Only handle chain changes if user hasn't explicitly disconnected
-    if (userDisconnected) {
-      console.log('❌ User is disconnected, ignoring chain change');
-      return;
-    }
-    
-    // Handle different formats of chainId
-    let newChainId;
-    if (typeof chainId === 'string') {
-      if (chainId.startsWith('0x')) {
-        newChainId = parseInt(chainId, 16);
-      } else {
-        newChainId = parseInt(chainId, 10);
-      }
-    } else {
-      newChainId = parseInt(chainId);
-    }
-    
-    if (isNaN(newChainId)) {
-      console.error('❌ Failed to parse chain ID:', chainId);
-      return;
-    }
-    
-    console.log('📊 Updating chainId state from', chainId, 'to', newChainId);
-    setChainId(newChainId);
-    // Check if the new network is supported
-    const network = getNetworkByChainId(newChainId);
-    if (!network) {
-      console.log('⚠️ Network not supported:', newChainId);
-      showErrorWithDebounce(`Network with chain ID ${newChainId} is not supported. Please switch to a supported network.`);
-    } else {
-      console.log('✅ Network supported:', network.name);
-    }
-  };
-
-  const handleDisconnect = () => {
-    disconnectWallet();
-  };
-
-  const setPreferredWallet = (walletType) => {
-    setPreferredWalletType(walletType);
-    localStorage.setItem('preferredWalletType', walletType);
-    console.log('Preferred wallet type set to:', walletType);
-  };
-
-  const getPreferredWallet = () => {
-    return preferredWalletType || localStorage.getItem('preferredWalletType');
-  };
+  }, [isInitialized, checkWalletConnection, handleAccountsChanged, handleChainChanged, handleDisconnect, setupEventListeners]);
 
   const detectWalletProviders = () => {
     const providers = {
@@ -284,147 +313,13 @@ export const WalletProvider = ({ children }) => {
     const providers = detectWalletProviders();
     
     if (targetWalletType === 'metamask') {
-      if (!providers.metamask) {
-        throw new Error('MetaMask not detected. Please make sure MetaMask is installed and unlocked.');
-      }
       return providers.metamask;
     } else if (targetWalletType === 'coinbase') {
-      if (!providers.coinbase) {
-        throw new Error('Coinbase Wallet not detected. Please make sure Coinbase Wallet is installed and unlocked.');
-      }
       return providers.coinbase;
     }
     
     // Fallback to current ethereum provider
     return window.ethereum;
-  };
-
-  const checkMetaMaskAvailability = () => {
-    // Check if MetaMask extension is installed
-    if (typeof window !== 'undefined') {
-      // Method 1: Check if MetaMask is in the providers array
-      if (window.ethereum && window.ethereum.providers) {
-        const metamaskProvider = window.ethereum.providers.find(p => p.isMetaMask && !p.isCoinbaseWallet);
-        if (metamaskProvider) {
-          return metamaskProvider;
-        }
-      }
-      
-      // Method 2: Check if MetaMask is available globally
-      if (window.metamask) {
-        return window.metamask;
-      }
-      
-      // Method 3: Check if MetaMask is the current provider
-      if (window.ethereum && window.ethereum.isMetaMask && !window.ethereum.isCoinbaseWallet) {
-        return window.ethereum;
-      }
-      
-      // Method 4: Try to detect MetaMask by checking for its extension
-      try {
-        // This is a more direct approach
-        if (window.ethereum && window.ethereum.providers) {
-          // Available providers logging removed
-        }
-      } catch (error) {
-        // Silent error handling
-      }
-    }
-    
-    return null;
-  };
-
-  const connectWalletSilently = async (accountAddress = null, networkChainId = null, forceReconnect = false) => {
-    setIsConnecting(true);
-    
-    try {
-      if (typeof window === 'undefined') {
-        throw new Error('No wallet detected. Please install MetaMask or another Web3 wallet.');
-      }
-
-      // Use the default ethereum provider
-      const ethereumProvider = window.ethereum;
-
-      if (!ethereumProvider) {
-        throw new Error('No wallet detected. Please install MetaMask or another Web3 wallet.');
-      }
-
-      // If forceReconnect is true, clear the disconnection flag
-      if (forceReconnect) {
-        setUserDisconnected(false);
-        localStorage.removeItem('userDisconnected');
-      }
-
-      // Check if user was previously disconnected
-      const wasDisconnected = localStorage.getItem('userDisconnected') === 'true';
-      
-      // If user was disconnected, we need to force a fresh connection
-      if (wasDisconnected) {
-        // Clear all connection state
-        localStorage.removeItem('walletConnected');
-        localStorage.removeItem('walletType');
-        setUserDisconnected(false);
-        localStorage.removeItem('userDisconnected');
-        
-        // Wait a moment to ensure state is cleared
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-
-      // Detect wallet type from the provider
-      let detectedWalletType = 'unknown';
-      if (ethereumProvider.isCoinbaseWallet) {
-        detectedWalletType = 'coinbase';
-      } else if (ethereumProvider.isMetaMask) {
-        detectedWalletType = 'metamask';
-      }
-
-      // Request account access - this will show the approval dialog
-      const accounts = await ethereumProvider.request({
-        method: 'eth_requestAccounts'
-      });
-
-      if (accounts.length === 0) {
-        throw new Error('No accounts found');
-      }
-
-      const account = accountAddress || accounts[0];
-      const chainId = networkChainId || parseInt(await ethereumProvider.request({ method: 'eth_chainId' }), 16);
-
-      // Create provider and signer
-      const provider = new ethers.BrowserProvider(ethereumProvider);
-      const signer = await provider.getSigner();
-
-      // Check if network is supported
-      const network = getNetworkByChainId(chainId);
-      if (!network) {
-        showErrorWithDebounce(`Network with chain ID ${chainId} is not supported. Please switch to a supported network.`);
-        setIsConnecting(false);
-        return false;
-      }
-
-      // Update state
-      setAccount(account);
-      setProvider(provider);
-      setSigner(signer);
-      setChainId(chainId);
-      setIsConnected(true);
-      setWalletType(detectedWalletType);
-
-      // Store connection in localStorage
-      localStorage.setItem('walletConnected', 'true');
-      localStorage.setItem('walletType', detectedWalletType);
-      localStorage.removeItem('userDisconnected'); // Clear disconnection flag
-
-      // Don't show toast for silent connections
-      return true;
-
-    } catch (error) {
-      console.error('Error connecting wallet:', error);
-      toast.error(error.message || 'Failed to connect wallet');
-      return false;
-    } finally {
-      setIsConnecting(false);
-    }
   };
 
   const connectWallet = async (accountAddress = null, networkChainId = null, forceReconnect = false) => {
@@ -521,132 +416,6 @@ export const WalletProvider = ({ children }) => {
     }
   };
 
-  const disconnectWallet = async () => {
-    try {
-      // Try to revoke permissions using available methods
-      if (typeof window !== 'undefined' && window.ethereum) {
-        // Get the current wallet provider
-        const currentWalletType = localStorage.getItem('walletType');
-        let ethereumProvider = window.ethereum;
-        
-        if (currentWalletType) {
-          ethereumProvider = getWalletProvider(currentWalletType);
-        }
-        
-        if (!ethereumProvider) {
-          ethereumProvider = window.ethereum;
-        }
-        
-        // Detect wallet type for specific disconnection methods
-        const isCoinbaseWallet = ethereumProvider.isCoinbaseWallet;
-        const isMetaMask = ethereumProvider.isMetaMask;
-
-        if (isCoinbaseWallet) {
-          // Coinbase Wallet specific disconnection
-          
-          // Method 1: Try Coinbase Wallet's disconnect method
-          try {
-            if (ethereumProvider.disconnect && typeof ethereumProvider.disconnect === 'function') {
-              await ethereumProvider.disconnect();
-            }
-          } catch (disconnectError) {
-            // Silent error handling
-          }
-
-          // Method 2: Try to clear connection by requesting accounts
-          try {
-            await ethereumProvider.request({
-              method: 'eth_accounts'
-            });
-          } catch (accountsError) {
-            // Silent error handling
-          }
-
-          // Method 3: Try to force account disconnection by requesting empty accounts
-          try {
-            // This might force Coinbase Wallet to clear the connection
-            await ethereumProvider.request({
-              method: 'eth_requestAccounts'
-            });
-          } catch (requestError) {
-            // Silent error handling
-          }
-
-        } else if (isMetaMask) {
-          // MetaMask specific disconnection
-          
-          // Method 1: Try wallet_revokePermissions (if available)
-          try {
-            if (ethereumProvider.request && typeof ethereumProvider.request === 'function') {
-              await ethereumProvider.request({
-                method: 'wallet_revokePermissions',
-                params: [{ eth_accounts: {} }]
-              });
-            }
-          } catch (revokeError) {
-            // Method 2: Try to disconnect using MetaMask's disconnect method
-            try {
-              if (ethereumProvider.disconnect && typeof ethereumProvider.disconnect === 'function') {
-                await ethereumProvider.disconnect();
-              }
-            } catch (disconnectError) {
-              // Silent error handling
-            }
-          }
-
-          // Method 3: Try to clear the connection by requesting empty accounts
-          try {
-            await ethereumProvider.request({
-              method: 'eth_accounts'
-            });
-          } catch (accountsError) {
-            // Silent error handling
-          }
-        } else {
-          // Generic disconnection for unknown wallet types
-          
-          try {
-            if (ethereumProvider.disconnect && typeof ethereumProvider.disconnect === 'function') {
-              await ethereumProvider.disconnect();
-            }
-          } catch (disconnectError) {
-            // Silent error handling
-          }
-
-          // Try generic permission revocation (only for MetaMask)
-          if (ethereumProvider.isMetaMask) {
-            try {
-              if (ethereumProvider.request && typeof ethereumProvider.request === 'function') {
-                await ethereumProvider.request({
-                  method: 'wallet_revokePermissions',
-                  params: [{ eth_accounts: {} }]
-                });
-              }
-            } catch (revokeError) {
-              // Silent error handling
-            }
-          }
-        }
-      }
-    } catch (error) {
-      // Silent error handling
-    }
-
-    // Clear all state
-    setAccount(null);
-    setProvider(null);
-    setSigner(null);
-    setChainId(null);
-    setIsConnected(false);
-    setWalletType(null);
-    setUserDisconnected(true);
-
-    // Clear localStorage
-    localStorage.removeItem('walletConnected');
-    localStorage.removeItem('walletType');
-    localStorage.setItem('userDisconnected', 'true'); // Set disconnection flag
-  };
-
   const forceFreshConnection = async () => {
     // This function forces a completely fresh connection
     // by clearing all cached state and requesting new permissions
@@ -692,7 +461,6 @@ export const WalletProvider = ({ children }) => {
         });
         
         if (existingAccounts.length > 0) {
-          const walletName = ethereumProvider.isCoinbaseWallet ? 'Coinbase Wallet' : 'MetaMask';
           // Wallet still has cached connection
         }
       } catch (accountsError) {
@@ -938,58 +706,6 @@ export const WalletProvider = ({ children }) => {
         }
       }
       return null;
-    }
-  };
-
-  const switchToWallet = async (targetWalletType) => {
-    console.log(`Attempting to switch to ${targetWalletType}...`);
-    
-    try {
-      const providers = detectWalletProviders();
-      
-      if (targetWalletType === 'metamask') {
-        if (!providers.metamask) {
-          // Try additional detection methods
-          const metamaskProvider = checkMetaMaskAvailability();
-          if (metamaskProvider) {
-            console.log('MetaMask found through additional detection');
-            return metamaskProvider;
-          }
-          
-          throw new Error('MetaMask not available. Please make sure MetaMask is installed and unlocked. If you have both MetaMask and Coinbase Wallet installed, try temporarily disabling Coinbase Wallet to test MetaMask connection.');
-        }
-        
-        // Try to switch to MetaMask provider
-        if (window.ethereum && window.ethereum.providers) {
-          // Find MetaMask in the providers array
-          const metamaskProvider = window.ethereum.providers.find(p => p.isMetaMask && !p.isCoinbaseWallet);
-          if (metamaskProvider) {
-            // Try to activate MetaMask
-            try {
-              await metamaskProvider.request({ method: 'eth_accounts' });
-              console.log('Successfully switched to MetaMask');
-              return metamaskProvider;
-            } catch (error) {
-              console.log('Failed to activate MetaMask:', error);
-            }
-          }
-        }
-        
-        // If we can't switch, use the detected MetaMask provider
-        return providers.metamask;
-        
-      } else if (targetWalletType === 'coinbase') {
-        if (!providers.coinbase) {
-          throw new Error('Coinbase Wallet not available. Please make sure Coinbase Wallet is installed and unlocked.');
-        }
-        return providers.coinbase;
-      }
-      
-      throw new Error(`Unknown wallet type: ${targetWalletType}`);
-      
-    } catch (error) {
-      console.error('Error switching wallet:', error);
-      throw error;
     }
   };
 

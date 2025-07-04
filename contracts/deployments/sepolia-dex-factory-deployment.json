@@ -1,0 +1,41 @@
+{
+  "network": "sepolia",
+  "chainId": 11155111,
+  "deployer": "0xb24c5A62F8Da57967A08e11c88Fe18904f49920E",
+  "timestamp": "2025-06-29T23:22:36.956Z",
+  "contracts": {
+    "DEXFactory": {
+      "address": "0x5b2bc0398F86553e88f8546E89d5E518Bb597cD2",
+      "transactionHash": "0x5703f03a59fff26555088586ab6b5f43a5bb9b65cd1e9c7ff320630f9f1b04e7",
+      "blockNumber": null,
+      "constructorArgs": [],
+      "features": {
+        "core": {
+          "feeRate": "30",
+          "feeDenominator": "10000",
+          "maxFeeRate": "1000",
+          "emergencyStop": false
+        },
+        "liquidityLocking": {
+          "maxLockDuration": "31536000",
+          "lockFeeRate": "30"
+        },
+        "security": {
+          "emergencyStop": false,
+          "pausable": true,
+          "reentrancyGuard": true,
+          "ownerControls": true
+        },
+        "statistics": {
+          "totalPairsCreated": "0",
+          "totalLiquidityLocked": "0",
+          "totalTradingFeesCollected": "0"
+        }
+      }
+    }
+  },
+  "verification": {
+    "etherscan": "https://sepolia.etherscan.io/address/0x5b2bc0398F86553e88f8546E89d5E518Bb597cD2",
+    "constructorArgs": "[]"
+  }
+}

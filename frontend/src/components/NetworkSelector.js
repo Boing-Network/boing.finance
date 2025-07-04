@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useWallet } from '../contexts/WalletContext';
-import { getMainnetNetworks, getTestnetNetworks, getSupportedNetworks } from '../config/networks';
+import { getMainnetNetworks, getTestnetNetworks } from '../config/networks';
 import { ChevronDownIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 
 const NetworkSelector = () => {

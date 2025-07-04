@@ -1,18 +1,6 @@
 import { ethers } from 'ethers';
 import { NETWORKS } from '../config/networks';
 
-// ERC-20 Token Creation Event Signatures
-const TOKEN_CREATION_EVENTS = {
-  // Standard ERC-20 Transfer event from zero address (common for new tokens)
-  TRANSFER_FROM_ZERO: '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
-  
-  // Pair creation events from DEX factories
-  PAIR_CREATED: '0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9',
-  
-  // Token deployment events (contract creation)
-  CONTRACT_CREATION: '0x0000000000000000000000000000000000000000000000000000000000000000'
-};
-
 // Basic ERC-20 ABI for token validation
 const ERC20_ABI = [
   'function name() view returns (string)',
@@ -46,17 +34,15 @@ const PAIR_ABI = [
   'function factory() view returns (address)'
 ];
 
-class TokenScanner {
-  constructor() {
-    this.providers = new Map();
-    this.cache = new Map();
-    this.cacheTimeout = 5 * 60 * 1000; // 5 minutes
-    this.requestQueue = [];
-    this.isProcessing = false;
-    this.lastRequestTime = 0;
-    this.minRequestInterval = 500; // Reduced to 500ms between requests
-    this.retryAttempts = 0;
-    this.maxRetries = 3;
+// Token scanner service for monitoring blockchain events
+export class TokenScanner {
+  constructor(provider, network) {
+    this.provider = provider;
+    this.network = network;
+    this.isScanning = false;
+    this.scanInterval = null;
+    this.lastScannedBlock = 0;
+    this.eventCallbacks = new Map();
   }
 
   // Get provider for a specific chain
@@ -212,9 +198,6 @@ class TokenScanner {
       console.log(`Found ${pairCount} pairs in factory ${factoryAddress}`);
 
       const newTokens = new Set();
-      const currentBlock = await provider.getBlockNumber();
-      const blocksPerHour = 3600;
-      const blocksToScan = hoursBack * blocksPerHour;
 
       // Scan recent pairs
       const startIndex = Math.max(0, pairCount - 50); // Last 50 pairs
@@ -548,7 +531,7 @@ class TokenScanner {
         'function getOwner() view returns (address)'
       ];
 
-      const contract = new ethers.Contract(tokenAddress, abi, provider);
+      // const contract = new ethers.Contract(tokenAddress, abi, provider);
 
       // Get basic token info with optimized batch requests
       const [name, symbol, decimals, totalSupply] = await Promise.all([

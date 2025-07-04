@@ -1,17 +1,23 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\AdvancedERC20.sol": {
-      "lastModificationDate": 1751103880274,
-      "contentHash": "6ff4f2669d7c5d7dc49b2da3cd21b559",
-      "sourceName": "contracts/AdvancedERC20.sol",
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\CrossChainBridge.sol": {
+      "lastModificationDate": 1751220371328,
+      "contentHash": "866dfbf5aa217e88cd6672e31df2e9a0",
+      "sourceName": "contracts/CrossChainBridge.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -31,54 +37,19 @@
         }
       },
       "imports": [
-        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/utils/Pausable.sol",
         "@openzeppelin/contracts/access/Ownable.sol",
-        "@openzeppelin/contracts/utils/Pausable.sol"
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/utils/cryptography/ECDSA.sol",
+        "@openzeppelin/contracts/utils/cryptography/EIP712.sol"
       ],
       "versionPragmas": [
         "^0.8.20"
       ],
       "artifacts": [
-        "AdvancedERC20"
-      ]
-    },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\access\\Ownable.sol": {
-      "lastModificationDate": 1750924662109,
-      "contentHash": "d3c790edc9ccf808a17c5a6cd13614fd",
-      "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "viaIR": true,
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../utils/Context.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "Ownable"
+        "CrossChainBridge"
       ]
     },
     "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\Pausable.sol": {
@@ -91,7 +62,13 @@
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -120,59 +97,23 @@
         "Pausable"
       ]
     },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\ERC20.sol": {
-      "lastModificationDate": 1750924661742,
-      "contentHash": "57d79df281f57bbb1b09214c7914f877",
-      "sourceName": "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\ReentrancyGuard.sol": {
+      "lastModificationDate": 1750924662138,
+      "contentHash": "190613e556d509d9e9a0ea43dc5d891d",
+      "sourceName": "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
             }
-          }
-        }
-      },
-      "imports": [
-        "./IERC20.sol",
-        "./extensions/IERC20Metadata.sol",
-        "../../utils/Context.sol",
-        "../../interfaces/draft-IERC6093.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "ERC20"
-      ]
-    },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\Context.sol": {
-      "lastModificationDate": 1750924661423,
-      "contentHash": "67bfbc07588eb8683b3fd8f6f909563e",
-      "sourceName": "@openzeppelin/contracts/utils/Context.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "viaIR": true,
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -196,7 +137,142 @@
         "^0.8.20"
       ],
       "artifacts": [
-        "Context"
+        "ReentrancyGuard"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\access\\Ownable.sol": {
+      "lastModificationDate": 1750924662109,
+      "contentHash": "d3c790edc9ccf808a17c5a6cd13614fd",
+      "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Ownable"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\cryptography\\EIP712.sol": {
+      "lastModificationDate": 1750924661577,
+      "contentHash": "b21731956bbef780b4cc856e8dda7426",
+      "sourceName": "@openzeppelin/contracts/utils/cryptography/EIP712.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./MessageHashUtils.sol",
+        "../ShortStrings.sol",
+        "../../interfaces/IERC5267.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "EIP712"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\cryptography\\ECDSA.sol": {
+      "lastModificationDate": 1750924661567,
+      "contentHash": "81de029d56aa803972be03c5d277cb6c",
+      "sourceName": "@openzeppelin/contracts/utils/cryptography/ECDSA.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ECDSA"
       ]
     },
     "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\IERC20.sol": {
@@ -209,7 +285,13 @@
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -236,17 +318,69 @@
         "IERC20"
       ]
     },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\interfaces\\draft-IERC6093.sol": {
-      "lastModificationDate": 1750924661533,
-      "contentHash": "267d92fe4de67b1bdb3302c08f387dbf",
-      "sourceName": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol",
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\utils\\SafeERC20.sol": {
+      "lastModificationDate": 1750924662152,
+      "contentHash": "1fb9edee1d763745a62d0b1954998792",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../IERC20.sol",
+        "../../../interfaces/IERC1363.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "SafeERC20"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\Context.sol": {
+      "lastModificationDate": 1750924661423,
+      "contentHash": "67bfbc07588eb8683b3fd8f6f909563e",
+      "sourceName": "@openzeppelin/contracts/utils/Context.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -270,22 +404,69 @@
         "^0.8.20"
       ],
       "artifacts": [
-        "IERC1155Errors",
-        "IERC20Errors",
-        "IERC721Errors"
+        "Context"
       ]
     },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\extensions\\IERC20Metadata.sol": {
-      "lastModificationDate": 1750924661995,
-      "contentHash": "794db3115001aa372c79326fcfd44b1f",
-      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\interfaces\\IERC5267.sol": {
+      "lastModificationDate": 1750924662030,
+      "contentHash": "94364524cb1a39dcbc3d3afff6d8e53e",
+      "sourceName": "@openzeppelin/contracts/interfaces/IERC5267.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC5267"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\ShortStrings.sol": {
+      "lastModificationDate": 1750924662156,
+      "contentHash": "c1be9487e5a64acf23b5d8028482e748",
+      "sourceName": "@openzeppelin/contracts/utils/ShortStrings.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -305,26 +486,32 @@
         }
       },
       "imports": [
-        "../IERC20.sol"
+        "./StorageSlot.sol"
       ],
       "versionPragmas": [
         "^0.8.20"
       ],
       "artifacts": [
-        "IERC20Metadata"
+        "ShortStrings"
       ]
     },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\interfaces\\IERC20.sol": {
-      "lastModificationDate": 1750924661985,
-      "contentHash": "79af12d64eacc7d77b9ee2ac4b4d51ee",
-      "sourceName": "@openzeppelin/contracts/interfaces/IERC20.sol",
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\cryptography\\MessageHashUtils.sol": {
+      "lastModificationDate": 1750924662097,
+      "contentHash": "260f3968eefa3bbd30520cff5384cd93",
+      "sourceName": "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -344,12 +531,281 @@
         }
       },
       "imports": [
-        "../token/ERC20/IERC20.sol"
+        "../Strings.sol"
       ],
       "versionPragmas": [
         "^0.8.20"
       ],
-      "artifacts": []
+      "artifacts": [
+        "MessageHashUtils"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\StorageSlot.sol": {
+      "lastModificationDate": 1750924662230,
+      "contentHash": "e656d64c4ce918f3d13030b91c935134",
+      "sourceName": "@openzeppelin/contracts/utils/StorageSlot.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "StorageSlot"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\Strings.sol": {
+      "lastModificationDate": 1750924662232,
+      "contentHash": "13dbc135f563c72a11b1cf4fbb5fb284",
+      "sourceName": "@openzeppelin/contracts/utils/Strings.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./math/Math.sol",
+        "./math/SafeCast.sol",
+        "./math/SignedMath.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Strings"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\math\\Math.sol": {
+      "lastModificationDate": 1750924662085,
+      "contentHash": "5ec781e33d3a9ac91ffdc83d94420412",
+      "sourceName": "@openzeppelin/contracts/utils/math/Math.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../Panic.sol",
+        "./SafeCast.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Math"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\math\\SignedMath.sol": {
+      "lastModificationDate": 1750924662186,
+      "contentHash": "ae3528afb8bdb0a7dcfba5b115ee8074",
+      "sourceName": "@openzeppelin/contracts/utils/math/SignedMath.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./SafeCast.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "SignedMath"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\math\\SafeCast.sol": {
+      "lastModificationDate": 1750924662148,
+      "contentHash": "2adca1150f58fc6f3d1f0a0f22ee7cca",
+      "sourceName": "@openzeppelin/contracts/utils/math/SafeCast.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "SafeCast"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\Panic.sol": {
+      "lastModificationDate": 1750924662126,
+      "contentHash": "2133dc13536b4a6a98131e431fac59e1",
+      "sourceName": "@openzeppelin/contracts/utils/Panic.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Panic"
+      ]
     },
     "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\interfaces\\IERC1363.sol": {
       "lastModificationDate": 1750924661959,
@@ -361,7 +817,13 @@
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -391,6 +853,49 @@
         "IERC1363"
       ]
     },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\interfaces\\IERC20.sol": {
+      "lastModificationDate": 1750924661985,
+      "contentHash": "79af12d64eacc7d77b9ee2ac4b4d51ee",
+      "sourceName": "@openzeppelin/contracts/interfaces/IERC20.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../token/ERC20/IERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": []
+    },
     "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\interfaces\\IERC165.sol": {
       "lastModificationDate": 1750924661972,
       "contentHash": "f808b485ee0cdc6768ee8385ae5f9a2a",
@@ -401,7 +906,13 @@
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -438,7 +949,13 @@
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -465,17 +982,23 @@
         "IERC165"
       ]
     },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\utils\\SafeERC20.sol": {
-      "lastModificationDate": 1750924662152,
-      "contentHash": "1fb9edee1d763745a62d0b1954998792",
-      "sourceName": "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\extensions\\IERC20Metadata.sol": {
+      "lastModificationDate": 1750924661995,
+      "contentHash": "794db3115001aa372c79326fcfd44b1f",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -495,27 +1018,32 @@
         }
       },
       "imports": [
-        "../IERC20.sol",
-        "../../../interfaces/IERC1363.sol"
+        "../IERC20.sol"
       ],
       "versionPragmas": [
         "^0.8.20"
       ],
       "artifacts": [
-        "SafeERC20"
+        "IERC20Metadata"
       ]
     },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\DEXRouter.sol": {
-      "lastModificationDate": 1750925984041,
-      "contentHash": "3a635bcf804f4119a27d312c4a6c7099",
-      "sourceName": "contracts/DEXRouter.sol",
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\ERC20.sol": {
+      "lastModificationDate": 1750924661742,
+      "contentHash": "57d79df281f57bbb1b09214c7914f877",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/ERC20.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -535,33 +1063,176 @@
         }
       },
       "imports": [
+        "./IERC20.sol",
+        "./extensions/IERC20Metadata.sol",
+        "../../utils/Context.sol",
+        "../../interfaces/draft-IERC6093.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC20"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\interfaces\\draft-IERC6093.sol": {
+      "lastModificationDate": 1750924661533,
+      "contentHash": "267d92fe4de67b1bdb3302c08f387dbf",
+      "sourceName": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC1155Errors",
+        "IERC20Errors",
+        "IERC721Errors"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\WETH.sol": {
+      "lastModificationDate": 1751453524598,
+      "contentHash": "67dfbd07ba7406d5636872c28f3de03e",
+      "sourceName": "contracts/WETH.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        "@openzeppelin/contracts/access/Ownable.sol",
         "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
         "@openzeppelin/contracts/utils/Pausable.sol",
-        "@openzeppelin/contracts/access/Ownable.sol",
         "@openzeppelin/contracts/token/ERC20/IERC20.sol",
         "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
-        "./interfaces/IDEXFactory.sol",
-        "./interfaces/IDEXPair.sol"
+        "@openzeppelin/contracts/utils/Address.sol"
       ],
       "versionPragmas": [
         "^0.8.20"
       ],
       "artifacts": [
-        "DEXRouter",
-        "IWETH"
+        "WETH"
       ]
     },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\interfaces\\IDEXFactory.sol": {
-      "lastModificationDate": 1750925952078,
-      "contentHash": "aa3d0d15c2ae0e423964d6aadc493b23",
-      "sourceName": "contracts/interfaces/IDEXFactory.sol",
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\Address.sol": {
+      "lastModificationDate": 1750924661309,
+      "contentHash": "5b9a49c25d7edbc48ffcbd2c7e8a40ef",
+      "sourceName": "@openzeppelin/contracts/utils/Address.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Errors.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Address"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\Errors.sol": {
+      "lastModificationDate": 1750924661839,
+      "contentHash": "6b5eac2b85500c3012977849cfd633d8",
+      "sourceName": "@openzeppelin/contracts/utils/Errors.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -585,87 +1256,12 @@
         "^0.8.20"
       ],
       "artifacts": [
-        "IDEXFactory"
-      ]
-    },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\interfaces\\IDEXPair.sol": {
-      "lastModificationDate": 1750925832107,
-      "contentHash": "c7c066caac2a126642e6cdbbd93d7224",
-      "sourceName": "contracts/interfaces/IDEXPair.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "viaIR": true,
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "IDEXCallee",
-        "IDEXPair"
-      ]
-    },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\ReentrancyGuard.sol": {
-      "lastModificationDate": 1750924662138,
-      "contentHash": "190613e556d509d9e9a0ea43dc5d891d",
-      "sourceName": "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "viaIR": true,
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "ReentrancyGuard"
+        "Errors"
       ]
     },
     "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\TokenImplementation.sol": {
-      "lastModificationDate": 1751170025178,
-      "contentHash": "b06ae93d6c9135fa871ae9540aa245d2",
+      "lastModificationDate": 1751292586448,
+      "contentHash": "cd22bb0dc9dc8e935326e2572ec95586",
       "sourceName": "contracts/TokenImplementation.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -673,7 +1269,13 @@
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -716,7 +1318,13 @@
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -743,46 +1351,6 @@
         "TokenStructs"
       ]
     },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\WETH.sol": {
-      "lastModificationDate": 1750850017810,
-      "contentHash": "bceeb712a57d1d1aceaefde0412a94b7",
-      "sourceName": "contracts/WETH.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "viaIR": true,
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        "@openzeppelin/contracts/access/Ownable.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "WETH"
-      ]
-    },
     "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\TokenFactory.sol": {
       "lastModificationDate": 1751186796122,
       "contentHash": "8ad55657059e45087218c307c8f45bd8",
@@ -793,7 +1361,13 @@
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -836,7 +1410,13 @@
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -876,7 +1456,13 @@
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -905,17 +1491,23 @@
         "Create2"
       ]
     },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\Errors.sol": {
-      "lastModificationDate": 1750924661839,
-      "contentHash": "6b5eac2b85500c3012977849cfd633d8",
-      "sourceName": "@openzeppelin/contracts/utils/Errors.sol",
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\DEXRouter.sol": {
+      "lastModificationDate": 1751453506478,
+      "contentHash": "ab47b7d58f5c702e3f634e48e1512739",
+      "sourceName": "contracts/DEXRouter.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -934,12 +1526,313 @@
           }
         }
       },
-      "imports": [],
+      "imports": [
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/utils/Pausable.sol",
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/utils/Address.sol",
+        "./interfaces/IDEXFactory.sol",
+        "./interfaces/IDEXPair.sol"
+      ],
       "versionPragmas": [
         "^0.8.20"
       ],
       "artifacts": [
-        "Errors"
+        "DEXRouter",
+        "IWETH"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\interfaces\\IDEXFactory.sol": {
+      "lastModificationDate": 1751462241275,
+      "contentHash": "c8c77ed117fcf8aee097bf936cf3c311",
+      "sourceName": "contracts/interfaces/IDEXFactory.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IDEXPair.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IDEXFactory"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\interfaces\\IDEXPair.sol": {
+      "lastModificationDate": 1751232234589,
+      "contentHash": "4701e5ded68a8943a0d4b48f2a376b3a",
+      "sourceName": "contracts/interfaces/IDEXPair.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IDEXFactory.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IDEXCallee",
+        "IDEXPair"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\DEXPair.sol": {
+      "lastModificationDate": 1751456542253,
+      "contentHash": "30090252dda5a9dd60dd926321c16ed5",
+      "sourceName": "contracts/DEXPair.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/utils/Pausable.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "./interfaces/IDEXPair.sol",
+        "./interfaces/IDEXFactory.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "DEXPair",
+        "UQ112x112"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\DEXFactoryMinimal.sol": {
+      "lastModificationDate": 1751457151306,
+      "contentHash": "d01fc8abb602c223c545c379b9cbc6c6",
+      "sourceName": "contracts/DEXFactoryMinimal.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "./interfaces/IDEXPair.sol",
+        "./DEXPair.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "DEXFactoryMinimal"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\DEXFactory.sol": {
+      "lastModificationDate": 1751462307594,
+      "contentHash": "958c08fb267b8a434ccd3d1fba41a85a",
+      "sourceName": "contracts/DEXFactory.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/utils/Pausable.sol",
+        "@openzeppelin/contracts/utils/Address.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "./interfaces/IDEXFactory.sol",
+        "./interfaces/IDEXPair.sol",
+        "./DEXPair.sol",
+        "./LiquidityLocker.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "DEXFactory"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\LiquidityLocker.sol": {
+      "lastModificationDate": 1751454744691,
+      "contentHash": "0e1734280c224bc0250b91df07e7f9d8",
+      "sourceName": "contracts/LiquidityLocker.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "LiquidityLocker"
       ]
     },
     "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\PriceOracle.sol": {
@@ -952,7 +1845,13 @@
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -993,7 +1892,13 @@
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1020,139 +1925,6 @@
         "AggregatorV3Interface"
       ]
     },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\NetworkAwareDEXFactory.sol": {
-      "lastModificationDate": 1750940690870,
-      "contentHash": "9c1ba3e7f9c66d422d368636a93efb06",
-      "sourceName": "contracts/NetworkAwareDEXFactory.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "viaIR": true,
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/access/Ownable.sol",
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-        "@openzeppelin/contracts/utils/Pausable.sol",
-        "./interfaces/IDEXFactory.sol",
-        "./interfaces/IDEXPair.sol",
-        "./DEXPair.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "NetworkAwareDEXFactory"
-      ]
-    },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\DEXPair.sol": {
-      "lastModificationDate": 1750926074435,
-      "contentHash": "f4afe8eb91ec451d6b1d3b340e11339c",
-      "sourceName": "contracts/DEXPair.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "viaIR": true,
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-        "@openzeppelin/contracts/utils/Pausable.sol",
-        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
-        "./interfaces/IDEXPair.sol",
-        "./interfaces/IDEXFactory.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "DEXPair",
-        "UQ112x112"
-      ]
-    },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\DEXFactory.sol": {
-      "lastModificationDate": 1750925942870,
-      "contentHash": "50c762f52751d753481a4421e431420f",
-      "sourceName": "contracts/DEXFactory.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "viaIR": true,
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/access/Ownable.sol",
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-        "@openzeppelin/contracts/utils/Pausable.sol",
-        "./interfaces/IDEXFactory.sol",
-        "./interfaces/IDEXPair.sol",
-        "./DEXPair.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "DEXFactory"
-      ]
-    },
     "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\MockToken.sol": {
       "lastModificationDate": 1750758678310,
       "contentHash": "9d23d34bb4cc567a61e76997089a836e",
@@ -1163,7 +1935,13 @@
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1193,17 +1971,23 @@
         "MockToken"
       ]
     },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\CrossChainBridge.sol": {
-      "lastModificationDate": 1750940721175,
-      "contentHash": "866dfbf5aa217e88cd6672e31df2e9a0",
-      "sourceName": "contracts/CrossChainBridge.sol",
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\DEXFactoryV2.sol": {
+      "lastModificationDate": 1751528173868,
+      "contentHash": "2ede4f938c77c02db382786a521e7319",
+      "sourceName": "contracts/DEXFactoryV2.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1223,32 +2007,82 @@
         }
       },
       "imports": [
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-        "@openzeppelin/contracts/utils/Pausable.sol",
         "@openzeppelin/contracts/access/Ownable.sol",
         "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
-        "@openzeppelin/contracts/utils/cryptography/ECDSA.sol",
-        "@openzeppelin/contracts/utils/cryptography/EIP712.sol"
+        "./interfaces/IDEXPair.sol",
+        "./DEXPair.sol"
       ],
       "versionPragmas": [
-        "^0.8.20"
+        "^0.8.19"
       ],
       "artifacts": [
-        "CrossChainBridge"
+        "DEXFactoryV2"
       ]
     },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\cryptography\\ECDSA.sol": {
-      "lastModificationDate": 1750924661567,
-      "contentHash": "81de029d56aa803972be03c5d277cb6c",
-      "sourceName": "@openzeppelin/contracts/utils/cryptography/ECDSA.sol",
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\contracts\\DEXFactoryProxy.sol": {
+      "lastModificationDate": 1751457468785,
+      "contentHash": "202aac22cc14b109a8a03f03b913843a",
+      "sourceName": "contracts/DEXFactoryProxy.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
           "viaIR": true,
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/proxy/Proxy.sol",
+        "@openzeppelin/contracts/utils/StorageSlot.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "Address",
+        "DEXFactoryProxy"
+      ]
+    },
+    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\proxy\\Proxy.sol": {
+      "lastModificationDate": 1750924662130,
+      "contentHash": "35308c2fa7be99a959494c37e8257c16",
+      "sourceName": "@openzeppelin/contracts/proxy/Proxy.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000,
+            "details": {
+              "yul": true,
+              "yulDetails": {
+                "optimizerSteps": "u"
+              }
+            }
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1272,394 +2106,7 @@
         "^0.8.20"
       ],
       "artifacts": [
-        "ECDSA"
-      ]
-    },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\cryptography\\EIP712.sol": {
-      "lastModificationDate": 1750924661577,
-      "contentHash": "b21731956bbef780b4cc856e8dda7426",
-      "sourceName": "@openzeppelin/contracts/utils/cryptography/EIP712.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "viaIR": true,
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./MessageHashUtils.sol",
-        "../ShortStrings.sol",
-        "../../interfaces/IERC5267.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "EIP712"
-      ]
-    },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\interfaces\\IERC5267.sol": {
-      "lastModificationDate": 1750924662030,
-      "contentHash": "94364524cb1a39dcbc3d3afff6d8e53e",
-      "sourceName": "@openzeppelin/contracts/interfaces/IERC5267.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "viaIR": true,
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "IERC5267"
-      ]
-    },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\ShortStrings.sol": {
-      "lastModificationDate": 1750924662156,
-      "contentHash": "c1be9487e5a64acf23b5d8028482e748",
-      "sourceName": "@openzeppelin/contracts/utils/ShortStrings.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "viaIR": true,
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./StorageSlot.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "ShortStrings"
-      ]
-    },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\cryptography\\MessageHashUtils.sol": {
-      "lastModificationDate": 1750924662097,
-      "contentHash": "260f3968eefa3bbd30520cff5384cd93",
-      "sourceName": "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "viaIR": true,
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../Strings.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "MessageHashUtils"
-      ]
-    },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\StorageSlot.sol": {
-      "lastModificationDate": 1750924662230,
-      "contentHash": "e656d64c4ce918f3d13030b91c935134",
-      "sourceName": "@openzeppelin/contracts/utils/StorageSlot.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "viaIR": true,
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "StorageSlot"
-      ]
-    },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\Strings.sol": {
-      "lastModificationDate": 1750924662232,
-      "contentHash": "13dbc135f563c72a11b1cf4fbb5fb284",
-      "sourceName": "@openzeppelin/contracts/utils/Strings.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "viaIR": true,
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./math/Math.sol",
-        "./math/SafeCast.sol",
-        "./math/SignedMath.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "Strings"
-      ]
-    },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\math\\Math.sol": {
-      "lastModificationDate": 1750924662085,
-      "contentHash": "5ec781e33d3a9ac91ffdc83d94420412",
-      "sourceName": "@openzeppelin/contracts/utils/math/Math.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "viaIR": true,
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../Panic.sol",
-        "./SafeCast.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "Math"
-      ]
-    },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\math\\SafeCast.sol": {
-      "lastModificationDate": 1750924662148,
-      "contentHash": "2adca1150f58fc6f3d1f0a0f22ee7cca",
-      "sourceName": "@openzeppelin/contracts/utils/math/SafeCast.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "viaIR": true,
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "SafeCast"
-      ]
-    },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\math\\SignedMath.sol": {
-      "lastModificationDate": 1750924662186,
-      "contentHash": "ae3528afb8bdb0a7dcfba5b115ee8074",
-      "sourceName": "@openzeppelin/contracts/utils/math/SignedMath.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "viaIR": true,
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./SafeCast.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "SignedMath"
-      ]
-    },
-    "C:\\Users\\chiku\\OneDrive\\Desktop\\coding-projects\\decentralization\\dex\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\Panic.sol": {
-      "lastModificationDate": 1750924662126,
-      "contentHash": "2133dc13536b4a6a98131e431fac59e1",
-      "sourceName": "@openzeppelin/contracts/utils/Panic.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "viaIR": true,
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "Panic"
+        "Proxy"
       ]
     }
   }

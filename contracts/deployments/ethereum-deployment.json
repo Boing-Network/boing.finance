@@ -2,14 +2,14 @@
   "network": "Ethereum Mainnet",
   "chainId": 1,
   "deployer": "0xb24c5A62F8Da57967A08e11c88Fe18904f49920E",
-  "deploymentTime": "2025-06-29T17:41:01.537Z",
+  "deploymentTime": "2025-07-02T07:55:13.023Z",
   "contracts": {
     "tokenImplementation": {
-      "address": "0x0C4BcF0e9707266Be1543240fC613A163B5b99d1",
+      "address": "0x75c2709245fbe56B6133515C49cD35F31533d5Dc",
       "name": "TokenImplementation"
     },
     "tokenFactory": {
-      "address": "0xa40Cac462b983f8F69Eb258411F588b3e575F90E",
+      "address": "0x3c656B835dF7A16574d4612C488bE03aAd2193Fc",
       "name": "TokenFactory"
     }
   },
@@ -21,6 +21,6 @@
   "configuration": {
     "platformWallet": "0x7f279e722E3C4A54B62D7fA08b3AC7f109FE58E2",
     "paused": false,
-    "implementation": "0x0C4BcF0e9707266Be1543240fC613A163B5b99d1"
+    "implementation": "0x75c2709245fbe56B6133515C49cD35F31533d5Dc"
   }
 }

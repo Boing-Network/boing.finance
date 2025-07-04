@@ -1,8 +1,10 @@
+import 'dotenv/config';
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { createDB } from './database/connection.js';
 import { createDEXRoutes } from './routes/dexRoutes.js';
+import { createIPFSRoutes } from './routes/ipfsRoutes.js';
 
 // Create main app
 const app = new Hono();
@@ -14,6 +16,12 @@ app.use('*', cors({
   allowHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
+
+// Debug middleware to log all requests
+app.use('*', async (c, next) => {
+  console.log(`[SERVER] ${c.req.method} ${c.req.url}`);
+  await next();
+});
 
 // Health check
 app.get('/', (c) => {
@@ -29,7 +37,12 @@ app.get('/', (c) => {
 (async () => {
   const { db } = await createDB();
   const dexRoutes = createDEXRoutes(db);
+  const ipfsRoutes = createIPFSRoutes();
+  
+  console.log('[SERVER] Registering routes...');
   app.route('/api', dexRoutes);
+  app.route('/ipfs', ipfsRoutes);
+  console.log('[SERVER] Routes registered successfully');
 
   // Error handling
   app.onError((err, c) => {

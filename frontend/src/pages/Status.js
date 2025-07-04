@@ -1,18 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
 const Status = () => {
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [lastUpdated, setLastUpdated] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
   // Mock status data - in a real app, this would come from an API
   const systemStatus = {
     overall: 'operational',
@@ -186,6 +175,9 @@ const Status = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="System Status - boing.finance" />
         <meta name="twitter:description" content="System status and uptime monitoring for boing.finance." />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
+        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
       </Helmet>
       
       <div className="min-h-screen bg-gray-900 text-white">
@@ -200,9 +192,9 @@ const Status = () => {
                 Real-time status of boing.finance services and infrastructure
               </p>
               <div className="flex justify-center items-center space-x-4 text-sm text-gray-400">
-                <span>Last updated: {lastUpdated.toLocaleString()}</span>
+                <span>Last updated: {new Date().toLocaleString()}</span>
                 <span>•</span>
-                <span>Current time: {currentTime.toLocaleString()}</span>
+                <span>Current time: {new Date().toLocaleString()}</span>
               </div>
             </div>
 

@@ -2,10 +2,9 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { AnalyticsRepository } from '../database/repositories/analyticsRepository.js';
 
-export function createAnalyticsRoutes(db) {
+export function createAnalyticsRoutes() {
   const app = new Hono();
-  const analyticsRepo = new AnalyticsRepository(db);
-  
+
   // Middleware
   app.use('*', cors({
     origin: ['http://localhost:3000', 'https://boing.finance'],
@@ -26,6 +25,8 @@ export function createAnalyticsRoutes(db) {
   // User Interactions
   app.post('/interactions', async (c) => {
     try {
+      const db = c.get('db');
+      const analyticsRepo = new AnalyticsRepository(db);
       const interactionData = await c.req.json();
       
       if (!interactionData.userId || !interactionData.action) {
@@ -41,6 +42,8 @@ export function createAnalyticsRoutes(db) {
 
   app.get('/interactions/:userId', async (c) => {
     try {
+      const db = c.get('db');
+      const analyticsRepo = new AnalyticsRepository(db);
       const userId = c.req.param('userId');
       const chainId = c.req.query('chainId') ? parseInt(c.req.query('chainId')) : null;
       const limit = parseInt(c.req.query('limit')) || 50;
@@ -54,6 +57,8 @@ export function createAnalyticsRoutes(db) {
 
   app.get('/interactions/:userId/stats', async (c) => {
     try {
+      const db = c.get('db');
+      const analyticsRepo = new AnalyticsRepository(db);
       const userId = c.req.param('userId');
       const timeRange = c.req.query('timeRange') || '24h';
       
@@ -67,6 +72,8 @@ export function createAnalyticsRoutes(db) {
   // Search Analytics
   app.post('/search', async (c) => {
     try {
+      const db = c.get('db');
+      const analyticsRepo = new AnalyticsRepository(db);
       const { query, chainId, resultCount } = await c.req.json();
       
       if (!query) {
@@ -82,6 +89,8 @@ export function createAnalyticsRoutes(db) {
 
   app.post('/search/click', async (c) => {
     try {
+      const db = c.get('db');
+      const analyticsRepo = new AnalyticsRepository(db);
       const { query } = await c.req.json();
       
       if (!query) {
@@ -97,6 +106,8 @@ export function createAnalyticsRoutes(db) {
 
   app.get('/search/popular', async (c) => {
     try {
+      const db = c.get('db');
+      const analyticsRepo = new AnalyticsRepository(db);
       const chainId = c.req.query('chainId') ? parseInt(c.req.query('chainId')) : null;
       const limit = parseInt(c.req.query('limit')) || 10;
       
@@ -110,6 +121,8 @@ export function createAnalyticsRoutes(db) {
   // User Preferences
   app.get('/preferences/:userId', async (c) => {
     try {
+      const db = c.get('db');
+      const analyticsRepo = new AnalyticsRepository(db);
       const userId = c.req.param('userId');
       
       const preferences = await analyticsRepo.getUserPreferences(userId);
@@ -121,6 +134,8 @@ export function createAnalyticsRoutes(db) {
 
   app.put('/preferences/:userId', async (c) => {
     try {
+      const db = c.get('db');
+      const analyticsRepo = new AnalyticsRepository(db);
       const userId = c.req.param('userId');
       const preferences = await c.req.json();
       
@@ -134,6 +149,8 @@ export function createAnalyticsRoutes(db) {
   // Analytics Events
   app.post('/events', async (c) => {
     try {
+      const db = c.get('db');
+      const analyticsRepo = new AnalyticsRepository(db);
       const eventData = await c.req.json();
       
       if (!eventData.eventType || !eventData.eventName) {
@@ -149,6 +166,8 @@ export function createAnalyticsRoutes(db) {
 
   app.get('/events/:eventType/stats', async (c) => {
     try {
+      const db = c.get('db');
+      const analyticsRepo = new AnalyticsRepository(db);
       const eventType = c.req.param('eventType');
       const timeRange = c.req.query('timeRange') || '24h';
       
@@ -162,6 +181,8 @@ export function createAnalyticsRoutes(db) {
   // Cache Management
   app.get('/cache/:key', async (c) => {
     try {
+      const db = c.get('db');
+      const analyticsRepo = new AnalyticsRepository(db);
       const key = c.req.param('key');
       
       const data = await analyticsRepo.getCachedData(key);
@@ -177,6 +198,8 @@ export function createAnalyticsRoutes(db) {
 
   app.post('/cache', async (c) => {
     try {
+      const db = c.get('db');
+      const analyticsRepo = new AnalyticsRepository(db);
       const { key, value, expiresInMinutes } = await c.req.json();
       
       if (!key || value === undefined) {
@@ -192,6 +215,8 @@ export function createAnalyticsRoutes(db) {
 
   app.delete('/cache/expired', async (c) => {
     try {
+      const db = c.get('db');
+      const analyticsRepo = new AnalyticsRepository(db);
       await analyticsRepo.clearExpiredCache();
       return c.json({ success: true, message: 'Expired cache cleared' });
     } catch (error) {
@@ -202,6 +227,8 @@ export function createAnalyticsRoutes(db) {
   // Error Logging
   app.post('/errors', async (c) => {
     try {
+      const db = c.get('db');
+      const analyticsRepo = new AnalyticsRepository(db);
       const errorData = await c.req.json();
       
       if (!errorData.errorType || !errorData.errorMessage) {
@@ -217,6 +244,8 @@ export function createAnalyticsRoutes(db) {
 
   app.get('/errors/stats', async (c) => {
     try {
+      const db = c.get('db');
+      const analyticsRepo = new AnalyticsRepository(db);
       const timeRange = c.req.query('timeRange') || '24h';
       
       const stats = await analyticsRepo.getErrorStats(timeRange);
@@ -229,6 +258,8 @@ export function createAnalyticsRoutes(db) {
   // Known Tokens
   app.post('/tokens', async (c) => {
     try {
+      const db = c.get('db');
+      const analyticsRepo = new AnalyticsRepository(db);
       const tokenData = await c.req.json();
       
       if (!tokenData.address || !tokenData.name || !tokenData.symbol) {
@@ -244,6 +275,8 @@ export function createAnalyticsRoutes(db) {
 
   app.get('/tokens', async (c) => {
     try {
+      const db = c.get('db');
+      const analyticsRepo = new AnalyticsRepository(db);
       const chainId = c.req.query('chainId') ? parseInt(c.req.query('chainId')) : null;
       const limit = parseInt(c.req.query('limit')) || 100;
       
@@ -256,6 +289,8 @@ export function createAnalyticsRoutes(db) {
 
   app.get('/tokens/search', async (c) => {
     try {
+      const db = c.get('db');
+      const analyticsRepo = new AnalyticsRepository(db);
       const query = c.req.query('q');
       const chainId = c.req.query('chainId') ? parseInt(c.req.query('chainId')) : null;
       const limit = parseInt(c.req.query('limit')) || 20;
@@ -274,6 +309,8 @@ export function createAnalyticsRoutes(db) {
   // Dashboard Stats
   app.get('/dashboard', async (c) => {
     try {
+      const db = c.get('db');
+      const analyticsRepo = new AnalyticsRepository(db);
       const timeRange = c.req.query('timeRange') || '24h';
       
       const stats = await analyticsRepo.getDashboardStats(timeRange);

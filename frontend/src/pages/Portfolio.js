@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from 'react-query';
 import axios from 'axios';
 import config from '../config';
@@ -119,6 +119,9 @@ export default function Portfolio() {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Portfolio - boing.finance" />
         <meta name="twitter:description" content="Manage your DeFi portfolio." />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
+        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
       </Helmet>
       <div className="relative min-h-screen">
         <div className="relative z-10 container mx-auto px-4 py-8">

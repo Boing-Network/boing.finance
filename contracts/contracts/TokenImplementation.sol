@@ -15,6 +15,9 @@ import "./TokenStructs.sol";
  */
 contract TokenImplementation is ERC20, Ownable, Pausable, ReentrancyGuard {
     uint8 private _decimals;
+    // Store name and symbol in our own variables to avoid storage collision
+    string private _tokenName;
+    string private _tokenSymbol;
     string private _logo;
     string private _website;
     string private _description;
@@ -118,6 +121,8 @@ contract TokenImplementation is ERC20, Ownable, Pausable, ReentrancyGuard {
     
     // Token metadata struct to reduce stack depth
     using TokenStructs for *;
+    
+    // Constructor with empty name/symbol - will be set in initialize
     constructor() ERC20("", "") Ownable(msg.sender) {}
     
     function initialize(
@@ -144,6 +149,11 @@ contract TokenImplementation is ERC20, Ownable, Pausable, ReentrancyGuard {
         }
         
         isInitialized = true;
+        
+        // Store name and symbol in our own variables
+        _tokenName = name;
+        _tokenSymbol = symbol;
+        
         _decimals = decimals_;
         _logo = meta.logo;
         _website = meta.website;
@@ -308,6 +318,14 @@ contract TokenImplementation is ERC20, Ownable, Pausable, ReentrancyGuard {
     }
     
     // Public view functions
+    function name() public view virtual override returns (string memory) {
+        return _tokenName;
+    }
+    
+    function symbol() public view virtual override returns (string memory) {
+        return _tokenSymbol;
+    }
+    
     function decimals() public view virtual override returns (uint8) {
         return _decimals;
     }
