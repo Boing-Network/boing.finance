@@ -1,46 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { toast, ToastContainer } from 'react-toastify';
+import { Toaster } from 'react-hot-toast';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
-import 'react-toastify/dist/ReactToastify.css';
 import { WalletProvider } from './contexts/WalletContext';
 import { useWalletConnection } from './hooks/useWalletConnection';
 import EnhancedAnimatedBackground from './components/EnhancedAnimatedBackground';
-import Logo from './components/Logo';
 import WalletConnect from './components/WalletConnect';
 import NetworkSelector from './components/NetworkSelector';
 import TransactionHistoryModal from './components/TransactionHistoryModal';
-
-// Pages
+import Logo from './components/Logo';
+import ShootingStars from './components/ShootingStars';
 import Swap from './pages/Swap';
 import Liquidity from './pages/Liquidity';
 import Analytics from './pages/Analytics';
 import Portfolio from './pages/Portfolio';
 import Bridge from './pages/Bridge';
-import Tokens from './pages/Tokens';
-import Docs from './pages/Docs';
 import DeployToken from './pages/DeployToken';
-import Whitepaper from './pages/Whitepaper';
-import Terms from './pages/Terms';
-import Privacy from './pages/Privacy';
+import CreatePool from './pages/CreatePool';
+import Tokens from './pages/Tokens';
+import Status from './pages/Status';
+import Docs from './pages/Docs';
 import HelpCenter from './pages/HelpCenter';
 import ContactUs from './pages/ContactUs';
-import Status from './pages/Status';
 import BugReport from './pages/BugReport';
-
-// Styles
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
+import Whitepaper from './pages/Whitepaper';
 import './styles/globals.css';
-
-// Create a client for React Query
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-    },
-  },
-});
 
 // Helper for coming soon
 const comingSoon = {
@@ -61,7 +47,10 @@ const navigation = {
     { name: 'Analytics', href: '/analytics', icon: '📊', description: 'Market insights', comingSoon: true },
     { name: 'Portfolio', href: '/portfolio', icon: '💼', description: 'Your holdings', comingSoon: true }
   ],
-  deploy: { name: 'Deploy Token', href: '/deploy-token', icon: '🚀' }
+  deployment: [
+    { name: 'Deploy Token', href: '/deploy-token', icon: '🚀', description: 'Create your own tokens' },
+    { name: 'Create Pool', href: '/create-pool', icon: '🏊', description: 'Create liquidity pools', comingSoon: true }
+  ]
 };
 
 function AppContent() {
@@ -69,6 +58,7 @@ function AppContent() {
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [tradingDropdownOpen, setTradingDropdownOpen] = useState(false);
   const [analyticsDropdownOpen, setAnalyticsDropdownOpen] = useState(false);
+  const [deploymentDropdownOpen, setDeploymentDropdownOpen] = useState(false);
   const { account } = useWalletConnection();
 
   const closeMenu = () => {
@@ -80,7 +70,8 @@ function AppContent() {
       <EnhancedAnimatedBackground />
       
       {/* Navigation */}
-      <nav className="relative z-30 bg-gray-900/80 backdrop-blur-sm border-b border-gray-800">
+      <nav className="relative z-30 bg-gradient-to-r from-slate-800/95 via-slate-900/95 to-slate-800/95 backdrop-blur-sm border-b border-cyan-500/30 shadow-lg shadow-cyan-500/20">
+        <ShootingStars />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -89,7 +80,7 @@ function AppContent() {
                 onClick={() => window.location.href = '/'}
                 className="flex items-center space-x-2 text-white font-bold text-xl"
               >
-                <Logo size={32} showText={true} />
+                <Logo size={40} showText={true} className="drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]" />
               </button>
             </div>
 
@@ -99,7 +90,7 @@ function AppContent() {
                 {/* Home - Solo */}
                 <button
                   onClick={() => window.location.href = navigation.home.href}
-                  className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2"
+                  className="text-gray-200 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2"
                 >
                   <span className="text-lg">{navigation.home.icon}</span>
                   <span>{navigation.home.name}</span>
@@ -113,6 +104,7 @@ function AppContent() {
                   onToggle={() => {
                     setTradingDropdownOpen(!tradingDropdownOpen);
                     setAnalyticsDropdownOpen(false);
+                    setDeploymentDropdownOpen(false);
                   }}
                   onClose={() => setTradingDropdownOpen(false)}
                 />
@@ -125,18 +117,23 @@ function AppContent() {
                   onToggle={() => {
                     setAnalyticsDropdownOpen(!analyticsDropdownOpen);
                     setTradingDropdownOpen(false);
+                    setDeploymentDropdownOpen(false);
                   }}
                   onClose={() => setAnalyticsDropdownOpen(false)}
                 />
 
-                {/* Deploy Token - Solo */}
-                <button
-                  onClick={() => window.location.href = navigation.deploy.href}
-                  className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2"
-                >
-                  <span className="text-lg">{navigation.deploy.icon}</span>
-                  <span>{navigation.deploy.name}</span>
-                </button>
+                {/* Deployment Dropdown */}
+                <DropdownMenu
+                  label="Deployment"
+                  items={navigation.deployment}
+                  isOpen={deploymentDropdownOpen}
+                  onToggle={() => {
+                    setDeploymentDropdownOpen(!deploymentDropdownOpen);
+                    setTradingDropdownOpen(false);
+                    setAnalyticsDropdownOpen(false);
+                  }}
+                  onClose={() => setDeploymentDropdownOpen(false)}
+                />
               </nav>
             </div>
 
@@ -145,7 +142,7 @@ function AppContent() {
               {/* History Button */}
               <button
                 onClick={() => setHistoryModalOpen(true)}
-                className="text-gray-300 hover:text-white p-2 rounded-md transition-colors"
+                className="text-gray-200 hover:text-white p-2 rounded-md transition-colors"
                 aria-label="View transaction history"
               >
                 <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,6 +170,7 @@ function AppContent() {
                   onToggle={() => {
                     setTradingDropdownOpen(!tradingDropdownOpen);
                     setAnalyticsDropdownOpen(false);
+                    setDeploymentDropdownOpen(false);
                   }}
                   onClose={() => setTradingDropdownOpen(false)}
                 />
@@ -183,15 +181,21 @@ function AppContent() {
                   onToggle={() => {
                     setAnalyticsDropdownOpen(!analyticsDropdownOpen);
                     setTradingDropdownOpen(false);
+                    setDeploymentDropdownOpen(false);
                   }}
                   onClose={() => setAnalyticsDropdownOpen(false)}
                 />
-                <button
-                  onClick={() => window.location.href = navigation.deploy.href}
-                  className="text-gray-300 hover:text-white px-2 py-2 rounded-md text-xs font-medium transition-colors"
-                >
-                  {navigation.deploy.icon}
-                </button>
+                <DropdownMenu
+                  label="Deployment"
+                  items={navigation.deployment}
+                  isOpen={deploymentDropdownOpen}
+                  onToggle={() => {
+                    setDeploymentDropdownOpen(!deploymentDropdownOpen);
+                    setTradingDropdownOpen(false);
+                    setAnalyticsDropdownOpen(false);
+                  }}
+                  onClose={() => setDeploymentDropdownOpen(false)}
+                />
               </nav>
               {/* Compact Wallet Controls */}
               <div className="flex items-center space-x-2">
@@ -230,7 +234,7 @@ function AppContent() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-700 bg-gray-800/95 backdrop-blur-sm">
+          <div className="md:hidden border-t border-cyan-500/30 bg-gradient-to-r from-slate-800/95 via-slate-900/95 to-slate-800/95 backdrop-blur-sm shadow-lg shadow-cyan-500/20">
             <div className="px-4 py-3 space-y-3">
               {/* Home */}
               <button
@@ -238,15 +242,15 @@ function AppContent() {
                   window.location.href = navigation.home.href;
                   closeMenu();
                 }}
-                className="w-full text-left text-gray-300 hover:text-white px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 bg-gray-700/50"
+                className="w-full text-left text-gray-200 hover:text-white px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 bg-gradient-to-r from-slate-700/80 via-slate-800/80 to-slate-700/80 border border-cyan-500/20"
               >
                 <span className="text-xl">{navigation.home.icon}</span>
                 <span>{navigation.home.name}</span>
               </button>
 
               {/* Trading Section */}
-              <div className="bg-gray-700/50 rounded-lg p-3">
-                <h3 className="text-gray-400 text-sm font-medium mb-2 px-1">Trading</h3>
+              <div className="bg-gradient-to-r from-slate-700/80 via-slate-800/80 to-slate-700/80 rounded-lg p-3 border border-cyan-500/20">
+                <h3 className="text-gray-200 text-sm font-medium mb-2 px-1">Trading</h3>
                 <div className="space-y-1">
                   {navigation.trading.map((item) => (
                     <button
@@ -257,7 +261,7 @@ function AppContent() {
                           closeMenu();
                         }
                       }}
-                      className={`w-full text-left text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${item.comingSoon ? 'text-gray-500 cursor-not-allowed opacity-60' : ''}`}
+                      className={`w-full text-left text-gray-200 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${item.comingSoon ? 'text-gray-400 cursor-not-allowed opacity-60' : ''}`}
                       disabled={item.comingSoon}
                       title={item.comingSoon ? comingSoon.tooltip : ''}
                     >
@@ -279,8 +283,8 @@ function AppContent() {
               </div>
 
               {/* Analytics Section */}
-              <div className="bg-gray-700/50 rounded-lg p-3">
-                <h3 className="text-gray-400 text-sm font-medium mb-2 px-1">Analytics</h3>
+              <div className="bg-gradient-to-r from-slate-700/80 via-slate-800/80 to-slate-700/80 rounded-lg p-3 border border-cyan-500/20">
+                <h3 className="text-gray-200 text-sm font-medium mb-2 px-1">Analytics</h3>
                 <div className="space-y-1">
                   {navigation.analytics.map((item) => (
                     <button
@@ -291,7 +295,7 @@ function AppContent() {
                           closeMenu();
                         }
                       }}
-                      className={`w-full text-left text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${item.comingSoon ? 'text-gray-500 cursor-not-allowed opacity-60' : ''}`}
+                      className={`w-full text-left text-gray-200 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${item.comingSoon ? 'text-gray-400 cursor-not-allowed opacity-60' : ''}`}
                       disabled={item.comingSoon}
                       title={item.comingSoon ? comingSoon.tooltip : ''}
                     >
@@ -312,26 +316,48 @@ function AppContent() {
                 </div>
               </div>
 
-              {/* Deploy Token */}
-              <button
-                onClick={() => {
-                  window.location.href = navigation.deploy.href;
-                  closeMenu();
-                }}
-                className="w-full text-left text-gray-300 hover:text-white px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 bg-gray-700/50"
-              >
-                <span className="text-xl">{navigation.deploy.icon}</span>
-                <span>{navigation.deploy.name}</span>
-              </button>
-              
+              {/* Deployment Section */}
+              <div className="bg-gradient-to-r from-slate-700/80 via-slate-800/80 to-slate-700/80 rounded-lg p-3 border border-cyan-500/20">
+                <h3 className="text-gray-200 text-sm font-medium mb-2 px-1">Deployment</h3>
+                <div className="space-y-1">
+                  {navigation.deployment.map((item) => (
+                    <button
+                      key={item.name}
+                      onClick={() => {
+                        if (!item.comingSoon) {
+                          window.location.href = item.href;
+                          closeMenu();
+                        }
+                      }}
+                      className={`w-full text-left text-gray-200 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${item.comingSoon ? 'text-gray-400 cursor-not-allowed opacity-60' : ''}`}
+                      disabled={item.comingSoon}
+                      title={item.comingSoon ? comingSoon.tooltip : ''}
+                    >
+                      <span className="text-lg">{item.icon}</span>
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <span>{item.name}</span>
+                          {item.comingSoon && (
+                            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>
+                          )}
+                        </div>
+                        {item.description && (
+                          <div className="text-xs text-gray-400">{item.description}</div>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Mobile Wallet Controls */}
-              <div className="space-y-3 pt-3 border-t border-gray-600">
+              <div className="space-y-3 pt-3 border-t border-cyan-500/20">
                 <button
                   onClick={() => {
                     setHistoryModalOpen(true);
                     closeMenu();
                   }}
-                  className="w-full text-left text-gray-300 hover:text-white px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 bg-gray-700/50"
+                  className="w-full text-left text-gray-200 hover:text-white px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 bg-gradient-to-r from-slate-700/80 via-slate-800/80 to-slate-700/80 border border-cyan-500/20"
                 >
                   <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -361,6 +387,7 @@ function AppContent() {
             <Route path="/tokens" element={<Tokens />} />
             <Route path="/docs" element={<Docs />} />
             <Route path="/deploy-token" element={<DeployToken />} />
+            <Route path="/create-pool" element={<CreatePool />} />
             <Route path="/whitepaper" element={<Whitepaper />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
@@ -379,33 +406,34 @@ function AppContent() {
         account={account}
       />
       
-      <footer className="bg-gray-800 w-full border-t border-gray-700 relative z-20">
+      <footer className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 w-full border-t border-cyan-500/30 shadow-lg shadow-cyan-500/20 relative z-20">
+        <ShootingStars />
         <div className="max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 sm:gap-10">
             {/* Brand Section - Full width on mobile, spans 5 columns on larger screens */}
             <div className="lg:col-span-5">
-              <div className="flex items-center mb-3 sm:mb-4">
-                <Logo size={20} className="mr-2 sm:mr-3" showText={false} />
-                <h3 className="text-base sm:text-lg font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">boing</h3>
+              <div className="flex items-center mb-4 sm:mb-6">
+                <Logo size={48} className="mr-3 sm:mr-4" showText={false} />
+                <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">boing</h3>
               </div>
-              <p className="text-gray-400 text-xs sm:text-sm mb-4 leading-relaxed">
+              <p className="text-gray-300 text-sm sm:text-base mb-4 leading-relaxed">
                 The most advanced decentralized exchange with cross-chain capabilities, 
                 providing seamless trading across multiple networks.
               </p>
               <div className="flex space-x-3 sm:space-x-4">
-                <a href="https://twitter.com/boing_finance" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-1 sm:p-2">
+                <a href="https://twitter.com/boing_finance" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors p-1 sm:p-2">
                   <span className="sr-only">Twitter</span>
                   <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
                   </svg>
                 </a>
-                <a href="https://t.me/boing_finance" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-1 sm:p-2">
+                <a href="https://t.me/boing_finance" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors p-1 sm:p-2">
                   <span className="sr-only">Telegram</span>
                   <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
                   </svg>
                 </a>
-                <a href="https://discord.gg/7RDtQtQvBW" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-1 sm:p-2">
+                <a href="https://discord.gg/7RDtQtQvBW" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors p-1 sm:p-2">
                   <span className="sr-only">Discord</span>
                   <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419-.019 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1568 2.4189Z"/>
@@ -418,10 +446,10 @@ function AppContent() {
             <div className="lg:col-span-3">
               <h4 className="text-white font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Resources</h4>
               <ul className="space-y-2 text-xs sm:text-sm">
-                <li><a href="/docs" className="text-gray-400 hover:text-white transition-colors block py-1">Documentation</a></li>
-                <li><a href="/whitepaper" className="text-gray-400 hover:text-white transition-colors block py-1">Whitepaper</a></li>
-                <li><a href="/terms" className="text-gray-400 hover:text-white transition-colors block py-1">Terms of Service</a></li>
-                <li><a href="/privacy" className="text-gray-400 hover:text-white transition-colors block py-1">Privacy Policy</a></li>
+                <li><a href="/docs" className="text-gray-300 hover:text-white transition-colors block py-1">Documentation</a></li>
+                <li><a href="/whitepaper" className="text-gray-300 hover:text-white transition-colors block py-1">Whitepaper</a></li>
+                <li><a href="/terms" className="text-gray-300 hover:text-white transition-colors block py-1">Terms of Service</a></li>
+                <li><a href="/privacy" className="text-gray-300 hover:text-white transition-colors block py-1">Privacy Policy</a></li>
               </ul>
             </div>
             
@@ -429,16 +457,16 @@ function AppContent() {
             <div className="lg:col-span-3">
               <h4 className="text-white font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Support</h4>
               <ul className="space-y-2 text-xs sm:text-sm">
-                <li><a href="/help-center" className="text-gray-400 hover:text-white transition-colors block py-1">Help Center</a></li>
-                <li><a href="/contact-us" className="text-gray-400 hover:text-white transition-colors block py-1">Contact Us</a></li>
-                <li><a href="/status" className="text-gray-400 hover:text-white transition-colors block py-1">Status</a></li>
-                <li><a href="/bug-report" className="text-gray-400 hover:text-white transition-colors block py-1">Bug Report</a></li>
+                <li><a href="/help-center" className="text-gray-300 hover:text-white transition-colors block py-1">Help Center</a></li>
+                <li><a href="/contact-us" className="text-gray-300 hover:text-white transition-colors block py-1">Contact Us</a></li>
+                <li><a href="/status" className="text-gray-300 hover:text-white transition-colors block py-1">Status</a></li>
+                <li><a href="/bug-report" className="text-gray-300 hover:text-white transition-colors block py-1">Bug Report</a></li>
               </ul>
             </div>
           </div>
           
-          <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-700">
-            <p className="text-gray-400 text-xs sm:text-sm text-center">
+          <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-cyan-500/20">
+            <p className="text-gray-300 text-xs sm:text-sm text-center">
               © 2025 boing. All rights reserved. Built with ❤️ for the DeFi community.
             </p>
           </div>
@@ -450,27 +478,28 @@ function AppContent() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <HelmetProvider>
-        <WalletProvider>
-          <Router>
-            <AppContent />
-            <ToastContainer
-              position="top-right"
-              autoClose={4000}
-              hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              theme="dark"
-            />
-          </Router>
-        </WalletProvider>
-      </HelmetProvider>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <WalletProvider>
+        <Router>
+          <Helmet>
+            <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+            <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
+            <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+          </Helmet>
+          <AppContent />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: '#1f2937',
+                color: '#fff',
+              },
+            }}
+          />
+        </Router>
+      </WalletProvider>
+    </HelmetProvider>
   );
 }
 
@@ -479,21 +508,101 @@ function Home() {
   return (
     <>
       <Helmet>
-        <title>boing.finance - Cross-Chain Decentralized Exchange</title>
-        <meta name="description" content="Trade tokens across multiple blockchains with boing.finance. Lightning-fast swaps, liquidity pools, cross-chain bridging, and comprehensive DeFi tools." />
-        <meta name="keywords" content="DEX, decentralized exchange, cross-chain, DeFi, token swap, liquidity pools, bridge, blockchain, cryptocurrency, trading" />
-        <meta property="og:title" content="boing.finance - Cross-Chain Decentralized Exchange" />
-        <meta property="og:description" content="Trade tokens across multiple blockchains with boing.finance. Lightning-fast swaps, liquidity pools, cross-chain bridging, and comprehensive DeFi tools." />
+        <title>Boing Finance - Deploy Tokens & Trade Crypto | Cross-Chain DEX</title>
+        <meta name="description" content="Deploy your own tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance. The most user-friendly decentralized exchange for token deployment and cross-chain trading." />
+        <meta name="keywords" content="deploy token, crypto, blockchain, DEX, decentralized exchange, liquidity pool, cross-chain, token creation, cryptocurrency, DeFi, trading, swap, boing finance, token deployment, create token, ERC20, token launch" />
+        <meta property="og:title" content="Boing Finance - Deploy Tokens & Trade Crypto | Cross-Chain DEX" />
+        <meta property="og:description" content="Deploy your own tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance. The most user-friendly decentralized exchange for token deployment and cross-chain trading." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance" />
+        <meta property="og:site_name" content="Boing Finance" />
+        <meta property="og:locale" content="en_US" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="boing.finance - Cross-Chain Decentralized Exchange" />
-        <meta name="twitter:description" content="Trade tokens across multiple blockchains with boing.finance." />
+        <meta name="twitter:title" content="Boing Finance - Deploy Tokens & Trade Crypto" />
+        <meta name="twitter:description" content="Deploy your own tokens, create liquidity pools, and trade across multiple blockchains. The most user-friendly DEX for token deployment." />
+        <meta name="twitter:site" content="@boingfinance" />
+        <link rel="canonical" href="https://boing.finance" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
+        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+        
+        {/* Structured Data for Homepage */}
+        <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Boing Finance",
+          "url": "https://boing.finance",
+          "description": "Deploy tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance - the most user-friendly decentralized exchange (DEX) for token deployment and cross-chain trading.",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://boing.finance/search?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        })}
+        </script>
+        
+        {/* Structured Data for Organization */}
+        <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Boing Finance",
+          "url": "https://boing.finance",
+          "logo": "https://boing.finance/logo.svg",
+          "description": "Deploy tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance - the most user-friendly decentralized exchange (DEX) for token deployment and cross-chain trading.",
+          "sameAs": [
+            "https://twitter.com/boingfinance"
+          ]
+        })}
+        </script>
+        
+        {/* Structured Data for FAQ */}
+        <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "How do I deploy a token on Boing Finance?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "To deploy a token on Boing Finance, connect your wallet, navigate to the Deploy Token page, fill in your token details (name, symbol, supply), configure security features, and click deploy. No coding required!"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What blockchains does Boing Finance support?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Boing Finance supports multiple blockchains including Ethereum, Polygon, BSC, Arbitrum, Optimism, and Base for cross-chain token deployment and trading."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is Boing Finance safe to use?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, Boing Finance implements advanced security features including mint authority removal, anti-bot protection, and comprehensive smart contract audits to ensure safe token deployment and trading."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How much does it cost to deploy a token?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Token deployment costs vary by network. Basic deployment starts at 0.01 ETH on Ethereum, with different pricing for other networks. Check our Deploy Token page for current pricing."
+              }
+            }
+          ]
+        })}
+        </script>
       </Helmet>
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center relative z-10">
-            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 bg-clip-text text-transparent mb-6 leading-tight pb-2 drop-shadow-[0_0_20px_rgba(6,182,212,0.4)]">
               boing.finance
             </h1>
             <p className="text-gray-300 text-lg leading-relaxed mb-12">
@@ -551,15 +660,7 @@ function Home() {
             </div>
           </div>
 
-          {/* Testimonials/Community Section */}
-          <div className="mt-16 mb-12 fade-in delay-600">
-            <h2 className="text-2xl font-bold text-white text-center mb-6">What our users say</h2>
-            <div className="flex flex-wrap justify-center gap-6">
-              <TestimonialCard name="Alex" text="Boing is the smoothest DEX I've ever used!" />
-              <TestimonialCard name="Priya" text="Cross-chain swaps are so easy now. Love the design!" />
-              <TestimonialCard name="Samir" text="The analytics dashboard is a game changer for my trading." />
-            </div>
-          </div>
+
 
           {/* Token Creation Info Banner */}
           <div className="mt-8 mb-4 flex justify-center fade-in delay-800">
@@ -571,13 +672,13 @@ function Home() {
                   No permission required - just deploy, add liquidity, and start trading!
                 </p>
                 <div className="flex flex-wrap gap-2 justify-center">
-                  <a href="/tokens" className="text-purple-300 hover:text-purple-200 text-sm underline transition-colors">Browse Tokens</a>
+                  <span className="text-gray-500 text-sm cursor-not-allowed">Browse Tokens</span>
                   <span className="text-gray-500">•</span>
                   <a href="/deploy-token" className="text-blue-300 hover:text-blue-200 text-sm underline transition-colors">Deploy Token</a>
                   <span className="text-gray-500">•</span>
-                  <a href="/pools" className="text-blue-300 hover:text-blue-200 text-sm underline transition-colors">Create Pairs</a>
+                  <span className="text-gray-500 text-sm cursor-not-allowed">Create Pairs</span>
                   <span className="text-gray-500">•</span>
-                  <a href="/swap" className="text-green-300 hover:text-green-200 text-sm underline transition-colors">Start Trading</a>
+                  <span className="text-gray-500 text-sm cursor-not-allowed">Start Trading</span>
                 </div>
               </div>
             </div>
@@ -629,18 +730,7 @@ function Highlight({ icon, text }) {
   );
 }
 
-// Testimonials/Community Section
-function TestimonialCard({ name, text }) {
-  return (
-    <div className="group relative bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm border border-cyan-400/20 hover:border-cyan-400/40 rounded-xl p-4 max-w-xs hover:bg-gradient-to-br hover:from-gray-700/80 hover:to-gray-800/80 transition-all duration-500 hover:scale-105 hover:shadow-xl hover:shadow-cyan-500/20 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-      <div className="relative z-10">
-        <p className="text-gray-300 group-hover:text-gray-200 text-sm mb-3 transition-colors duration-300">"{text}"</p>
-        <p className="text-white group-hover:text-cyan-100 font-medium text-sm transition-colors duration-300">— {name}</p>
-      </div>
-    </div>
-  );
-}
+
 
 // Animated SVG Feature Icons
 function SwapIcon() {

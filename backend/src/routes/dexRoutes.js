@@ -5,14 +5,9 @@ import { SwapService } from '../services/swapService.js';
 import { LiquidityService } from '../services/liquidityService.js';
 import { eq } from 'drizzle-orm';
 
-export function createDEXRoutes(db) {
+export function createDEXRoutes() {
   const app = new Hono();
   
-  // Initialize services
-  const tokenRepo = new TokenRepository(db);
-  const swapService = new SwapService(db);
-  const liquidityService = new LiquidityService(db);
-
   // Middleware
   app.use('*', cors({
     origin: ['http://localhost:3000', 'https://your-frontend-domain.com'],
@@ -33,13 +28,13 @@ export function createDEXRoutes(db) {
   // Token routes
   app.get('/tokens', async (c) => {
     try {
+      const db = c.get('db');
+      const tokenRepo = new TokenRepository(db);
       const page = parseInt(c.req.query('page')) || 1;
       const limit = parseInt(c.req.query('limit')) || 20;
       const chainId = c.req.query('chainId') ? parseInt(c.req.query('chainId')) : null;
-      
       const tokens = await tokenRepo.getAllTokens(page, limit, chainId);
       const total = await tokenRepo.getTokenCount(chainId);
-      
       return c.json({
         success: true,
         data: tokens,
@@ -65,6 +60,8 @@ export function createDEXRoutes(db) {
         return c.json({ success: false, error: 'Search query is required' }, 400);
       }
       
+      const db = c.get('db');
+      const tokenRepo = new TokenRepository(db);
       const tokens = await tokenRepo.searchTokens(query, chainId, limit);
       return c.json({ success: true, data: tokens });
     } catch (error) {
@@ -77,6 +74,8 @@ export function createDEXRoutes(db) {
       const chainId = c.req.query('chainId') ? parseInt(c.req.query('chainId')) : null;
       const limit = parseInt(c.req.query('limit')) || 10;
       
+      const db = c.get('db');
+      const tokenRepo = new TokenRepository(db);
       const tokens = await tokenRepo.getTopTokensByVolume(chainId, limit);
       return c.json({ success: true, data: tokens });
     } catch (error) {
@@ -89,6 +88,8 @@ export function createDEXRoutes(db) {
       const chainId = c.req.query('chainId') ? parseInt(c.req.query('chainId')) : null;
       const limit = parseInt(c.req.query('limit')) || 10;
       
+      const db = c.get('db');
+      const tokenRepo = new TokenRepository(db);
       const tokens = await tokenRepo.getTopTokensByMarketCap(chainId, limit);
       return c.json({ success: true, data: tokens });
     } catch (error) {
@@ -101,6 +102,8 @@ export function createDEXRoutes(db) {
       const address = c.req.param('address');
       const chainId = c.req.query('chainId') ? parseInt(c.req.query('chainId')) : null;
       
+      const db = c.get('db');
+      const tokenRepo = new TokenRepository(db);
       const token = await tokenRepo.getTokenByAddress(address, chainId);
       if (!token) {
         return c.json({ success: false, error: 'Token not found' }, 404);
@@ -124,6 +127,8 @@ export function createDEXRoutes(db) {
         return c.json({ success: false, error: 'Missing required parameters' }, 400);
       }
       
+      const db = c.get('db');
+      const swapService = new SwapService(db);
       const quote = await swapService.getSwapQuote(tokenIn, tokenOut, amountIn, chainId);
       return c.json({ success: true, data: quote });
     } catch (error) {
@@ -139,6 +144,8 @@ export function createDEXRoutes(db) {
         return c.json({ success: false, error: 'Missing required swap data' }, 400);
       }
       
+      const db = c.get('db');
+      const swapService = new SwapService(db);
       const result = await swapService.executeSwap(swapData);
       return c.json({ success: true, data: result });
     } catch (error) {
@@ -153,6 +160,8 @@ export function createDEXRoutes(db) {
       const page = parseInt(c.req.query('page')) || 1;
       const limit = parseInt(c.req.query('limit')) || 20;
       
+      const db = c.get('db');
+      const swapService = new SwapService(db);
       const history = await swapService.getSwapHistory(address, chainId, page, limit);
       return c.json({ success: true, data: history });
     } catch (error) {
@@ -165,6 +174,8 @@ export function createDEXRoutes(db) {
       const chainId = c.req.query('chainId') ? parseInt(c.req.query('chainId')) : null;
       const limit = parseInt(c.req.query('limit')) || 50;
       
+      const db = c.get('db');
+      const swapService = new SwapService(db);
       const swaps = await swapService.getRecentSwaps(chainId, limit);
       return c.json({ success: true, data: swaps });
     } catch (error) {
@@ -177,6 +188,8 @@ export function createDEXRoutes(db) {
       const chainId = c.req.query('chainId') ? parseInt(c.req.query('chainId')) : null;
       const timeRange = c.req.query('timeRange') || '24h';
       
+      const db = c.get('db');
+      const swapService = new SwapService(db);
       const stats = await swapService.getSwapStats(chainId, timeRange);
       return c.json({ success: true, data: stats });
     } catch (error) {
@@ -193,6 +206,8 @@ export function createDEXRoutes(db) {
         return c.json({ success: false, error: 'Missing required liquidity data' }, 400);
       }
       
+      const db = c.get('db');
+      const liquidityService = new LiquidityService(db);
       const result = await liquidityService.addLiquidity(liquidityData);
       return c.json({ success: true, data: result });
     } catch (error) {
@@ -208,6 +223,8 @@ export function createDEXRoutes(db) {
         return c.json({ success: false, error: 'Missing required liquidity data' }, 400);
       }
       
+      const db = c.get('db');
+      const liquidityService = new LiquidityService(db);
       const result = await liquidityService.removeLiquidity(liquidityData);
       return c.json({ success: true, data: result });
     } catch (error) {
@@ -220,6 +237,8 @@ export function createDEXRoutes(db) {
       const provider = c.req.param('provider');
       const chainId = c.req.query('chainId') ? parseInt(c.req.query('chainId')) : null;
       
+      const db = c.get('db');
+      const liquidityService = new LiquidityService(db);
       const positions = await liquidityService.getUserLiquidityPositions(provider, chainId);
       return c.json({ success: true, data: positions });
     } catch (error) {
@@ -233,6 +252,8 @@ export function createDEXRoutes(db) {
       const page = parseInt(c.req.query('page')) || 1;
       const limit = parseInt(c.req.query('limit')) || 20;
       
+      const db = c.get('db');
+      const liquidityService = new LiquidityService(db);
       const pools = await liquidityService.getAllPools(chainId, page, limit);
       return c.json({ success: true, data: pools });
     } catch (error) {
@@ -244,6 +265,8 @@ export function createDEXRoutes(db) {
     try {
       const address = c.req.param('address');
       
+      const db = c.get('db');
+      const liquidityService = new LiquidityService(db);
       const stats = await liquidityService.getPoolLiquidityStats(address);
       return c.json({ success: true, data: stats });
     } catch (error) {
@@ -258,6 +281,8 @@ export function createDEXRoutes(db) {
       const page = parseInt(c.req.query('page')) || 1;
       const limit = parseInt(c.req.query('limit')) || 20;
       
+      const db = c.get('db');
+      const liquidityService = new LiquidityService(db);
       const events = await liquidityService.getLiquidityEvents(pairAddress, chainId, page, limit);
       return c.json({ success: true, data: events });
     } catch (error) {
@@ -270,6 +295,9 @@ export function createDEXRoutes(db) {
     try {
       const chainId = c.req.query('chainId') ? parseInt(c.req.query('chainId')) : null;
       
+      const db = c.get('db');
+      const swapService = new SwapService(db);
+      const liquidityService = new LiquidityService(db);
       const [swapStats, topTokens, topPools] = await Promise.all([
         swapService.getSwapStats(chainId, '24h'),
         tokenRepo.getTopTokensByVolume(chainId, 5),
@@ -295,12 +323,14 @@ export function createDEXRoutes(db) {
     const chainId = c.req.query('chainId') ? parseInt(c.req.query('chainId')) : null;
     try {
       // Get all tokens
-      const tokensList = await c.env.db.select().from(c.env.schema.tokens);
+      const db = c.get('db');
+      const tokenRepo = new TokenRepository(db);
+      const tokensList = await db.select().from(c.env.schema.tokens);
       // Get all user liquidity events
-      const liquidityEvents = await c.env.db.select().from(c.env.schema.liquidityEvents)
+      const liquidityEvents = await db.select().from(c.env.schema.liquidityEvents)
         .where(eq(c.env.schema.liquidityEvents.provider, address));
       // Get all user swaps
-      const swaps = await c.env.db.select().from(c.env.schema.swaps)
+      const swaps = await db.select().from(c.env.schema.swaps)
         .where(eq(c.env.schema.swaps.sender, address));
 
       // Aggregate token balances from liquidity events and swaps
@@ -318,7 +348,7 @@ export function createDEXRoutes(db) {
       let totalValue = 0;
       let tokens = [];
       for (const pairAddress in tokenBalances) {
-        const pair = await c.env.db.select().from(c.env.schema.pairs)
+        const pair = await db.select().from(c.env.schema.pairs)
           .where(eq(c.env.schema.pairs.address, pairAddress));
         if (!pair[0]) continue;
         const token0 = tokensList.find(t => t.address === pair[0].token0Address);
@@ -367,7 +397,8 @@ export function createDEXRoutes(db) {
     try {
       // Check for recent successful transactions (last 24h)
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const recent = await c.env.db.select().from(c.env.schema.bridgeTransactions)
+      const db = c.get('db');
+      const recent = await db.select().from(c.env.schema.bridgeTransactions)
         .where(c.env.schema.bridgeTransactions.status === 'completed' && c.env.schema.bridgeTransactions.timestamp > since);
       const status = recent.length > 0 ? 'operational' : 'degraded';
       return c.json({
@@ -387,7 +418,7 @@ export function createDEXRoutes(db) {
   app.get('/bridge/transactions', async (c) => {
     try {
       const address = c.req.query('address');
-      let query = c.env.db.select().from(c.env.schema.bridgeTransactions);
+      let query = c.get('db').select().from(c.env.schema.bridgeTransactions);
       if (address) {
         query = query.where(c.env.schema.bridgeTransactions.userAddress === address);
       }

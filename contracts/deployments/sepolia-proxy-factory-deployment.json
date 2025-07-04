@@ -1,0 +1,28 @@
+{
+  "network": "sepolia",
+  "chainId": 11155111,
+  "deployer": "0xb24c5A62F8Da57967A08e11c88Fe18904f49920E",
+  "timestamp": "2025-07-02T12:02:52.607Z",
+  "contracts": {
+    "liquidityLocker": {
+      "address": "0xF7b03fd3B117E62346753d493Fd1bd9236723b19",
+      "transactionHash": "0x7dd955aad6083794184dbacbafd2f370ab8b8cd0c323751ba5285bb968264012"
+    },
+    "factoryV2Implementation": {
+      "address": "0x4984c57Ba1C8648B4aDb139E629A5654a88461d0",
+      "transactionHash": "0x8890d2cf220824bfb517ed7ecd4a890ac0cc6eb9537309f2d8762b8fd48960d4"
+    },
+    "factoryProxy": {
+      "address": "0x2f8D9c919c193A1B89A6feE7482cdc866601798E",
+      "transactionHash": "0x8bae9bdbee236e6009b55c9b9f97e20bd5ee3090149a5f684ea645737d065d1b"
+    },
+    "weth": {
+      "address": "0x84Bc69f960375fC4c22c63f3a22891f83b059bb8",
+      "transactionHash": "0x6edb88a3a23f6b683ba4cd6879cdfc7b6274ada9ad6b37e100a025665ade208a"
+    },
+    "dexRouter": {
+      "address": "0x6049dBA78EA58dd731D165CA54161a77f17C6649",
+      "transactionHash": "0xb66bdf54f5a77c84d65e98bd47c29a0bf3a8fe92a7536d2dd508a64f28b7ddb2"
+    }
+  }
+}

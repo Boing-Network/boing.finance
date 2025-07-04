@@ -16,6 +16,8 @@ import SecurityBadges from '../components/SecurityBadges';
 import { InfoTooltip, WarningTooltip, HelpTooltip } from '../components/Tooltip';
 import { Helmet } from 'react-helmet-async';
 import { getContractAddress } from '../config/contracts';
+import LogoUpload from '../components/LogoUpload';
+import { uploadMetadataToIPFS, createTokenMetadata } from '../utils/ipfsUpload';
 
 // Import ABI and bytecode from the artifacts
 const ERC20_ABI = AdvancedERC20Artifact.abi;
@@ -456,6 +458,12 @@ export default function DeployToken() {
   const [pendingRenounceContract, setPendingRenounceContract] = useState(null);
   const [showOwnershipRenounceModal, setShowOwnershipRenounceModal] = useState(false);
 
+  // Logo and metadata state
+  const [logoUrl, setLogoUrl] = useState('');
+  const [logoUploadResult, setLogoUploadResult] = useState(null);
+  const [metadataUrl, setMetadataUrl] = useState('');
+  const [uploadingMetadata, setUploadingMetadata] = useState(false);
+
   // Get current network
   const network = getCurrentNetwork();
 
@@ -656,6 +664,62 @@ export default function DeployToken() {
     </div>
   );
 
+  // Logo upload handlers
+  const handleLogoUpload = (uploadResult) => {
+    setLogoUploadResult(uploadResult);
+    setLogoUrl(uploadResult.url);
+  };
+
+  const handleLogoChange = (url) => {
+    setLogoUrl(url);
+    if (!url) {
+      setLogoUploadResult(null);
+    }
+  };
+
+  const uploadTokenMetadata = async () => {
+    if (!logoUrl && !name && !symbol) {
+      return null; // No metadata to upload
+    }
+
+    setUploadingMetadata(true);
+    try {
+      const tokenData = {
+        name,
+        symbol,
+        description,
+        logoUrl,
+        website,
+        network: network?.name || 'Unknown',
+        decimals,
+        initialSupply,
+        twitter: socialLinks.twitter,
+        telegram: socialLinks.telegram,
+        discord: socialLinks.discord,
+        github: socialLinks.github,
+        medium: socialLinks.medium,
+        reddit: socialLinks.reddit,
+        renounceMint: isFeatureAllowed('renounceMint') ? renounceMint : false,
+        enableBlacklist: isFeatureAllowed('enableBlacklist') ? enableBlacklist : false,
+        antiBotEnabled: isFeatureAllowed('antiBot') ? antiBotEnabled : false,
+        antiWhaleEnabled: isFeatureAllowed('antiWhale') ? antiWhaleEnabled : false,
+        pauseFunctionEnabled: isFeatureAllowed('pauseFunction') ? pauseFunctionEnabled : false,
+        timelockEnabled: isFeatureAllowed('timelock') ? timelockEnabled : false
+      };
+
+      const metadata = createTokenMetadata(tokenData);
+      const uploadResult = await uploadMetadataToIPFS(metadata);
+      setMetadataUrl(uploadResult.url);
+      return uploadResult.url;
+    } catch (error) {
+      console.error('Metadata upload error:', error);
+      toast.error('Failed to upload metadata to IPFS');
+      return null;
+    } finally {
+      setUploadingMetadata(false);
+    }
+  };
+
   const handleDeploy = async (e) => {
     e.preventDefault();
     if (!isConnected || !signer) {
@@ -689,6 +753,20 @@ export default function DeployToken() {
     setTxHash('');
     setTokenAddress('');
     try {
+      // Upload logo and metadata to IPFS first
+      let finalLogoUrl = logoUrl || 'https://placeholder.com/logo.png';
+      let metadataUrl = null;
+      
+      if (logoUrl || name || symbol) {
+        toast.loading('Uploading metadata to IPFS...', { id: 'metadata-upload' });
+        metadataUrl = await uploadTokenMetadata();
+        toast.dismiss('metadata-upload');
+        
+        if (metadataUrl) {
+          toast.success('Metadata uploaded to IPFS successfully!');
+        }
+      }
+
       // Get service charge amount for current network
       let currentPricing;
       try {
@@ -748,7 +826,7 @@ export default function DeployToken() {
         decimals,
         supply,
         (isFeatureAllowed('enableFreezing') && enableFreezing) ? (freezingAuthority || deployerAddress) : "0x0000000000000000000000000000000000000000",
-        'https://placeholder.com/logo.png', // Logo URI - placeholder instead of empty string
+        finalLogoUrl, // Use actual logo URL instead of placeholder
         website,
         description || 'No description provided',
         socialLinks.twitter || 'https://twitter.com/placeholder',
@@ -844,7 +922,7 @@ export default function DeployToken() {
         
         // Create token metadata struct
         const tokenMetadata = {
-          logo: 'https://placeholder.com/logo.png',
+          logo: finalLogoUrl, // Use actual logo URL instead of placeholder
           website: website,
           description: description || 'No description provided',
           twitter: socialLinks.twitter || '',
@@ -1114,16 +1192,49 @@ export default function DeployToken() {
   return (
     <>
       <Helmet>
-        <title>Deploy Token - boing.finance</title>
-        <meta name="description" content="Create and deploy your own ERC20 tokens with boing.finance. No coding required - deploy tokens in minutes with our easy-to-use interface." />
-        <meta name="keywords" content="deploy token, ERC20, create token, token deployment, smart contract, DeFi token" />
-        <meta property="og:title" content="Deploy Token - boing.finance" />
-        <meta property="og:description" content="Create and deploy your own ERC20 tokens with boing.finance." />
+        <title>Deploy Token - Create Your Own Crypto Token | Boing Finance</title>
+        <meta name="description" content="Deploy your own cryptocurrency token in minutes with Boing Finance. No coding required - create ERC20 tokens with advanced security features, professional infrastructure, and cross-chain support." />
+        <meta name="keywords" content="deploy token, crypto, create token, cryptocurrency, ERC20, token deployment, smart contract, DeFi token, blockchain token, token creation, launch token, crypto token maker" />
+        <meta property="og:title" content="Deploy Token - Create Your Own Crypto Token | Boing Finance" />
+        <meta property="og:description" content="Deploy your own cryptocurrency token in minutes with Boing Finance. No coding required - create ERC20 tokens with advanced security features and cross-chain support." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/deploy-token" />
+        <meta property="og:site_name" content="Boing Finance" />
+        <meta property="og:locale" content="en_US" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Deploy Token - boing.finance" />
-        <meta name="twitter:description" content="Create and deploy your own ERC20 tokens." />
+        <meta name="twitter:title" content="Deploy Token - Create Your Own Crypto Token" />
+        <meta name="twitter:description" content="Deploy your own cryptocurrency token in minutes with Boing Finance. No coding required - create ERC20 tokens with advanced security features." />
+        <meta name="twitter:site" content="@boingfinance" />
+        <link rel="canonical" href="https://boing.finance/deploy-token" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
+        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+        
+        {/* Structured Data for DeployToken Page */}
+        <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Deploy Token - Create Your Own Crypto Token",
+          "url": "https://boing.finance/deploy-token",
+          "description": "Deploy your own cryptocurrency token in minutes with Boing Finance. No coding required - create ERC20 tokens with advanced security features, professional infrastructure, and cross-chain support.",
+          "mainEntity": {
+            "@type": "Service",
+            "name": "Token Deployment Service",
+            "description": "Professional token deployment service with advanced security features and cross-chain support",
+            "provider": {
+              "@type": "Organization",
+              "name": "Boing Finance"
+            },
+            "offers": {
+              "@type": "Offer",
+              "price": "0.01",
+              "priceCurrency": "ETH",
+              "description": "Deploy your own ERC20 token with advanced security features"
+            }
+          }
+        })}
+        </script>
       </Helmet>
       <div className="relative min-h-screen">
         <div className="relative z-10 container mx-auto px-4 py-8">
@@ -1301,7 +1412,13 @@ export default function DeployToken() {
 
                   {/* Logo Information */}
                   <div className="mt-4 sm:mt-6">
-                    <LogoInfo />
+                    <h3 className="text-lg sm:text-xl font-bold text-white mb-4">Token Logo</h3>
+                    <LogoUpload
+                      onLogoUpload={handleLogoUpload}
+                      onLogoChange={handleLogoChange}
+                      currentLogo={logoUrl}
+                      disabled={deploying}
+                    />
                   </div>
                 </div>
 
@@ -1637,6 +1754,56 @@ export default function DeployToken() {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Metadata Information */}
+            {metadataUrl && (
+              <div className="bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 mt-6 sm:mt-8 border border-gray-700">
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">Token Metadata</h3>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-300 mb-2">IPFS Metadata URL:</p>
+                    <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                      <code className="bg-gray-700 px-3 py-2 rounded text-xs sm:text-sm font-mono break-all text-gray-200">
+                        {metadataUrl}
+                      </code>
+                      <button
+                        onClick={() => navigator.clipboard.writeText(metadataUrl)}
+                        className="text-blue-400 hover:text-blue-300 transition-colors text-sm"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {logoUrl && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-300 mb-2">Logo URL:</p>
+                      <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                        <code className="bg-gray-700 px-3 py-2 rounded text-xs sm:text-sm font-mono break-all text-gray-200">
+                          {logoUrl}
+                        </code>
+                        <button
+                          onClick={() => navigator.clipboard.writeText(logoUrl)}
+                          className="text-blue-400 hover:text-blue-300 transition-colors text-sm"
+                        >
+                          Copy
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
+                    <h4 className="text-sm font-medium text-blue-300 mb-2">Metadata Information</h4>
+                    <div className="space-y-2 text-xs text-blue-200">
+                      <p><strong>Status:</strong> Stored on IPFS (decentralized storage)</p>
+                      <p><strong>Content:</strong> Token name, symbol, description, logo, social links, and security features</p>
+                      <p><strong>Accessibility:</strong> Available through multiple IPFS gateways</p>
+                      <p><strong>Blockchain Integration:</strong> Logo URL and metadata are stored in the smart contract</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 

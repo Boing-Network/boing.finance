@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import "./IDEXFactory.sol";
+
 interface IDEXPair {
     event Mint(address indexed sender, uint256 amount0, uint256 amount1);
     event Burn(address indexed sender, uint256 amount0, uint256 amount1, address indexed to);
@@ -48,7 +50,8 @@ interface IDEXPair {
     function skim(address to) external;
     function sync() external;
 
-    function initialize(address, address) external;
+    function initialize(address token0, address token1) external;
+    function initialize(address token0, address token1, IDEXFactory.PoolSecurityConfig calldata securityConfig) external;
 }
 
 interface IDEXCallee {

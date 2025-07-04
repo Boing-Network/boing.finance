@@ -354,13 +354,43 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "",
+          "name": "token0",
           "type": "address"
         },
         {
           "internalType": "address",
-          "name": "",
+          "name": "token1",
           "type": "address"
+        }
+      ],
+      "name": "initialize",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token0",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "token1",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "emergencyStop",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct IDEXFactory.PoolSecurityConfig",
+          "name": "securityConfig",
+          "type": "tuple"
         }
       ],
       "name": "initialize",

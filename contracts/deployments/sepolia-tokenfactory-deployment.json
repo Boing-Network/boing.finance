@@ -1,0 +1,42 @@
+{
+  "network": "sepolia",
+  "chainId": 11155111,
+  "deployer": "0xb24c5A62F8Da57967A08e11c88Fe18904f49920E",
+  "platformWallet": "0xb24c5a62f8da57967a08e11c88fe18904f49920e",
+  "timestamp": "2025-06-30T14:10:24.951Z",
+  "contracts": {
+    "TokenImplementation": {
+      "address": "0x3240BA1CedFCb7876fef576493Aef88212E68cbf",
+      "transactionHash": "0xe94acb8df0d0ce697201dd38499612db89ac970ba3e93e850df1ba98e483c807",
+      "blockNumber": 8662268,
+      "constructorArgs": [],
+      "features": {
+        "name": "Updated TokenImplementation with metadata support",
+        "description": "Supports logo, website, description, social links, and all security features"
+      }
+    },
+    "TokenFactory": {
+      "address": "0x04162CEFbFC104DD722c9f9a06e135995D231898",
+      "transactionHash": "0xfd11fe03c24e20811d130da6d328d889bdd77d6fac6216c1db8384dc7f38898b",
+      "blockNumber": 8662269,
+      "constructorArgs": [
+        "0xb24c5a62f8da57967a08e11c88fe18904f49920e",
+        "0x3240BA1CedFCb7876fef576493Aef88212E68cbf"
+      ],
+      "features": {
+        "name": "Updated TokenFactory with metadata support",
+        "description": "Supports deploying tokens with full metadata and security features"
+      }
+    }
+  },
+  "verification": {
+    "etherscan": {
+      "TokenImplementation": "https://sepolia.etherscan.io/address/0x3240BA1CedFCb7876fef576493Aef88212E68cbf",
+      "TokenFactory": "https://sepolia.etherscan.io/address/0x04162CEFbFC104DD722c9f9a06e135995D231898"
+    },
+    "constructorArgs": {
+      "TokenImplementation": "[]",
+      "TokenFactory": "[\"0xb24c5a62f8da57967a08e11c88fe18904f49920e\", \"0x3240BA1CedFCb7876fef576493Aef88212E68cbf\"]"
+    }
+  }
+}

@@ -5,7 +5,11 @@ async function main() {
   console.log("=" .repeat(50));
   
   // Token details from deployment
-  const tokenAddress = "0x42e57fdF9e503e7fEB1f4f67716c7d9334B37CbA";
+  const tokenAddress = process.env.TOKEN_ADDRESS || "";
+  if (!tokenAddress || !/^0x[a-fA-F0-9]{40}$/.test(tokenAddress)) {
+    console.error("❌ ERROR: Please provide a valid token address in the TOKEN_ADDRESS environment variable.");
+    process.exit(1);
+  }
   const txHash = "0x5c53c68acf64bf48cd06699b1f2d7bc708a297e5e7557433327198c3007c4cf8";
   
   console.log("📍 Token Address:", tokenAddress);

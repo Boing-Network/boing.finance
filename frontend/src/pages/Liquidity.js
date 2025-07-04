@@ -168,6 +168,9 @@ const Liquidity = () => {
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:title" content="Liquidity Pools - boing.finance" />
           <meta name="twitter:description" content="Provide liquidity to earn rewards." />
+          <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
+        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
         </Helmet>
         <div className="relative max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 overflow-x-hidden">
           <AnimatedBackground />
@@ -199,6 +202,9 @@ const Liquidity = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Liquidity Pools - boing.finance" />
         <meta name="twitter:description" content="Provide liquidity to earn rewards." />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
+        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
       </Helmet>
       <div className="relative min-h-screen">
         <AnimatedBackground />
@@ -217,16 +223,17 @@ const Liquidity = () => {
             </p>
             <div className="flex flex-wrap justify-center gap-3 mt-4 sm:mt-6">
               <button
-                className="bg-white/20 hover:bg-white/30 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors border border-white/30 text-sm sm:text-base"
+                disabled
+                className="bg-gray-600 text-gray-400 px-3 sm:px-4 py-2 rounded-lg font-medium cursor-not-allowed border border-gray-500 text-sm sm:text-base"
               >
                 📊 View All Pools
               </button>
-              <a
-                href="/swap"
-                className="bg-white/20 hover:bg-white/30 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors border border-white/30 text-sm sm:text-base"
+              <button
+                disabled
+                className="bg-gray-600 text-gray-400 px-3 sm:px-4 py-2 rounded-lg font-medium cursor-not-allowed border border-gray-500 text-sm sm:text-base"
               >
                 🔄 Start Trading
-              </a>
+              </button>
               <a
                 href="/docs"
                 className="bg-white/20 hover:bg-white/30 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors border border-white/30 text-sm sm:text-base"
@@ -333,7 +340,8 @@ const Liquidity = () => {
 
                 <div className="mt-4 sm:mt-6">
                   <button
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition duration-200 text-center block text-sm sm:text-base"
+                    disabled
+                    className="w-full bg-gray-600 text-gray-400 font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg cursor-not-allowed text-center block text-sm sm:text-base"
                   >
                     View All Pools
                   </button>
@@ -347,8 +355,8 @@ const Liquidity = () => {
                 <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Quick Actions</h3>
                 <div className="space-y-2 sm:space-y-3">
                   <button
-                    onClick={handleCreatePair}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition duration-200 text-sm sm:text-base"
+                    disabled
+                    className="w-full bg-gray-600 text-gray-400 font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg cursor-not-allowed text-sm sm:text-base"
                   >
                     📊 Create New Pair
                   </button>
@@ -358,12 +366,12 @@ const Liquidity = () => {
                   >
                     🪙 Create Token
                   </a>
-                  <a
-                    href="/swap"
-                    className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition duration-200 text-center text-sm sm:text-base"
+                  <button
+                    disabled
+                    className="w-full bg-gray-600 text-gray-400 font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg cursor-not-allowed text-center text-sm sm:text-base"
                   >
                     🔄 Start Trading
-                  </a>
+                  </button>
                 </div>
               </div>
 

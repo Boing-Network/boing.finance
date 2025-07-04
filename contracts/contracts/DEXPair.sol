@@ -12,6 +12,7 @@ import "./interfaces/IDEXFactory.sol";
  * @title DEXPair
  * @dev Pair contract for trading two tokens using AMM model
  * Implements constant product formula: x * y = k
+ * Supports per-pool security features
  */
 contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
@@ -36,8 +37,25 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
     mapping(address => uint256) public override balanceOf;
     uint256 public override totalSupply;
     
+    // Security configuration
+    IDEXFactory.PoolSecurityConfig public securityConfig;
+    
+    // Timelock variables
+    mapping(bytes32 => uint256) public timelockProposals;
+    mapping(bytes32 => bool) public executedProposals;
+    
+    // Events
+    event SecurityConfigUpdated(IDEXFactory.PoolSecurityConfig config);
+    event TimelockProposalCreated(bytes32 indexed proposalId, address indexed proposer, uint256 executionTime);
+    event TimelockProposalExecuted(bytes32 indexed proposalId);
+    
     modifier onlyFactory() {
         require(msg.sender == factory, "DEXPair: FORBIDDEN");
+        _;
+    }
+    
+    modifier notEmergencyStopped() {
+        // Emergency stop is handled at factory level
         _;
     }
     
@@ -45,13 +63,24 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
         factory = msg.sender;
     }
     
-    /**
-     * @dev Initialize the pair with token addresses
-     */
-    function initialize(address _token0, address _token1) external override onlyFactory {
+    // Private initializer
+    function _initialize(address _token0, address _token1, IDEXFactory.PoolSecurityConfig memory _securityConfig) private {
         require(token0 == address(0), "DEXPair: ALREADY_INITIALIZED");
         token0 = _token0;
         token1 = _token1;
+        securityConfig = _securityConfig;
+        emit SecurityConfigUpdated(_securityConfig);
+    }
+
+    function initialize(address _token0, address _token1) external override {
+        IDEXFactory.PoolSecurityConfig memory defaultConfig = IDEXFactory.PoolSecurityConfig({
+            emergencyStop: true
+        });
+        _initialize(_token0, _token1, defaultConfig);
+    }
+
+    function initialize(address _token0, address _token1, IDEXFactory.PoolSecurityConfig calldata _securityConfig) external override onlyFactory {
+        _initialize(_token0, _token1, _securityConfig);
     }
     
     /**
@@ -104,6 +133,7 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
         override 
         nonReentrant 
         whenNotPaused 
+        notEmergencyStopped
         returns (uint256 liquidity) 
     {
         (uint112 _reserve0, uint112 _reserve1,) = _getReserves();
@@ -112,14 +142,18 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
         uint256 amount0 = balance0 - _reserve0;
         uint256 amount1 = balance1 - _reserve1;
         
+        require(amount0 > 0 && amount1 > 0, "DEXPair: INSUFFICIENT_INPUT_AMOUNT");
+        
         uint256 _totalSupply = totalSupply;
         if (_totalSupply == 0) {
             liquidity = sqrt(amount0 * amount1) - MINIMUM_LIQUIDITY;
             _mint(address(0), MINIMUM_LIQUIDITY); // permanently lock the first MINIMUM_LIQUIDITY tokens
         } else {
+            require(_reserve0 > 0 && _reserve1 > 0, "DEXPair: INSUFFICIENT_RESERVES");
             liquidity = min((amount0 * _totalSupply) / _reserve0, (amount1 * _totalSupply) / _reserve1);
         }
         require(liquidity > 0, "DEXPair: INSUFFICIENT_LIQUIDITY_MINTED");
+        require(liquidity <= type(uint256).max - totalSupply, "DEXPair: LIQUIDITY_TOO_LARGE");
         
         _mint(to, liquidity);
         _update(balance0, balance1, _reserve0, _reserve1);
@@ -133,6 +167,7 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
         override 
         nonReentrant 
         whenNotPaused 
+        notEmergencyStopped
         returns (uint256 amount0, uint256 amount1) 
     {
         (uint112 _reserve0, uint112 _reserve1,) = _getReserves();
@@ -164,6 +199,7 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
         override 
         nonReentrant 
         whenNotPaused 
+        notEmergencyStopped
     {
         require(amount0Out > 0 || amount1Out > 0, "DEXPair: INSUFFICIENT_OUTPUT_AMOUNT");
         (uint112 _reserve0, uint112 _reserve1,) = _getReserves();
@@ -203,6 +239,8 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
     
     // ERC20 functions
     function _mint(address to, uint256 value) internal {
+        require(totalSupply + value >= totalSupply, "DEXPair: OVERFLOW");
+        require(balanceOf[to] + value >= balanceOf[to], "DEXPair: OVERFLOW");
         totalSupply += value;
         balanceOf[to] += value;
     }

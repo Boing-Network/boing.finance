@@ -1,16 +1,18 @@
 // Contract addresses configuration for different networks
 export const CONTRACTS = {
-  // Sepolia Testnet
+  // Sepolia Testnet (UPDATED - DEXFactoryV2 with createPairWithLiquidity function)
   11155111: {
-    dexFactory: '0xAcB1ee4D411aA0c3C1C46999fB61E521D2D58851',
-    dexRouter: '0x6354A9d4f779e85CE65535845F775DFEfe31AdB8',
-    weth: '0xc832cde537bD890e9EB52fa5b8430b925C2a2A1F',
+    // DEXFactory System (LATEST - DEXFactoryV2 with single-transaction pool creation)
+    dexFactory: '0x9A351D41CaC5bF4AD41557FF21697c2B83C97eBA',
+    dexRouter: '0xF3fb8731Ff3df2Bb11241aF722De7EE7DB5fCE46',
+    weth: '0x45171753D0d5418c8f396c6627bd8b849e614CE5',
+    liquidityLocker: '0xF6790906D13EA40F64AcDffE9E2ce7ff2aB91F53',
     crossChainBridge: '0x8c97Bcf628B23f7A6EC19610403C3f0190561355',
     priceOracle: '0x4C12de794D599f3B0Fcb479baAD4E42929cB5A02',
     advancedERC20: '0x6E5D899889C02d4Ff6b68900e5e06297318F9e3C',
-    // TokenFactory System (UPDATED - Fresh deployment with custom security parameters)
-    tokenFactory: '0xF6837c7142A97bE35ef04148522748EA288b494b',
-    tokenImplementation: '0x8e576F4F8e841B9B688f71b4A92C7cED26267e68',
+    // TokenFactory System (UPDATED - Fixed name/symbol issue)
+    tokenFactory: '0x04162CEFbFC104DD722c9f9a06e135995D231898',
+    tokenImplementation: '0x3240BA1CedFCb7876fef576493Aef88212E68cbf',
     tokens: {
       mockUSDC: '0x5Ce254ab41228D8d11FA29264a822887b914b87E',
       mockETH: '0x9C8259CB48dA8f3beAe8D69F29Df3aC7487c9D3A',
@@ -22,25 +24,25 @@ export const CONTRACTS = {
     }
   },
 
-  // Ethereum Mainnet (UPDATED - Fresh deployment)
+  // Ethereum Mainnet (UPDATED - Latest Deployment)
   1: {
     dexFactory: '0x0000000000000000000000000000000000000000',
     dexRouter: '0x0000000000000000000000000000000000000000',
     weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // Real WETH address
     crossChainBridge: '0x0000000000000000000000000000000000000000',
     priceOracle: '0x0000000000000000000000000000000000000000',
-    // TokenFactory System (DEPLOYED)
-    tokenFactory: '0xa40Cac462b983f8F69Eb258411F588b3e575F90E',
-    tokenImplementation: '0x0C4BcF0e9707266Be1543240fC613A163B5b99d1',
+    // TokenFactory System (LATEST - Enhanced Version)
+    tokenFactory: '0x3c656B835dF7A16574d4612C488bE03aAd2193Fc',
+    tokenImplementation: '0x75c2709245fbe56B6133515C49cD35F31533d5Dc',
     tokens: {
-      usdc: '0xA0b86a33E6441b8C4C8C8C8C8C8C8C8C8C8C8C8', // Placeholder
+      usdc: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // Real USDC address
       usdt: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
       dai: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
     },
     pairs: {}
   },
 
-  // Base Mainnet (NEWLY DEPLOYED)
+  // Base Mainnet (UPDATED - Enhanced Version)
   8453: {
     dexFactory: '0x0000000000000000000000000000000000000000', // Not deployed yet
     dexRouter: '0x0000000000000000000000000000000000000000', // Not deployed yet
@@ -48,9 +50,9 @@ export const CONTRACTS = {
     crossChainBridge: '0x0000000000000000000000000000000000000000', // Not deployed yet
     priceOracle: '0x0000000000000000000000000000000000000000', // Not deployed yet
     advancedERC20: '0x3c90c507B831353a6D21C34204007466C799667f', // ✅ DEPLOYED
-    // TokenFactory System (DEPLOYED)
-    tokenFactory: '0x594f4560A5fd52b49E824689Ec09770DB249Eca5',
-    tokenImplementation: '0x48b3c4E011a8eEF87C60c257eaa004dABb86Ce3b',
+    // TokenFactory System (LATEST - Enhanced Version)
+    tokenFactory: '0xBC0180d73C45901eC98eebeB3a97cF2BC8f8d5Ef',
+    tokenImplementation: '0x92524Eb972d70005Eea9Ff8e89307D1e03005cF3',
     tokens: {
       usdc: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // USDC on Base
       usdt: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb', // USDT on Base
@@ -66,9 +68,9 @@ export const CONTRACTS = {
     weth: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', // WMATIC address
     crossChainBridge: '0x0000000000000000000000000000000000000000',
     priceOracle: '0x0000000000000000000000000000000000000000',
-    // TokenFactory System (DEPLOYED)
-    tokenFactory: '0x1FAF7d4CAF23C1Ac79257ca74900011d2B7240A8',
-    tokenImplementation: '0x594f4560A5fd52b49E824689Ec09770DB249Eca5',
+    // TokenFactory System (UPDATED - Fixed Name/Symbol Issue)
+    tokenFactory: '0xDb165D34B49f21FE6773FE27E3e61BE6E1c2C7cc',
+    tokenImplementation: '0xB210Cd7D62f4788943d57e6bb13d33B723393aD7',
     tokens: {
       usdc: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
       usdt: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
@@ -77,7 +79,7 @@ export const CONTRACTS = {
     pairs: {}
   },
 
-  // BSC Mainnet (NEWLY DEPLOYED)
+  // BSC Mainnet (UPDATED - Enhanced Version)
   56: {
     dexFactory: '0x0000000000000000000000000000000000000000', // Not deployed yet
     dexRouter: '0x0000000000000000000000000000000000000000', // Not deployed yet
@@ -85,9 +87,9 @@ export const CONTRACTS = {
     crossChainBridge: '0x0000000000000000000000000000000000000000', // Not deployed yet
     priceOracle: '0x0000000000000000000000000000000000000000', // Not deployed yet
     advancedERC20: '0x0000000000000000000000000000000000000000', // Not deployed yet
-    // TokenFactory System (DEPLOYED)
-    tokenFactory: '0x594f4560A5fd52b49E824689Ec09770DB249Eca5',
-    tokenImplementation: '0x48b3c4E011a8eEF87C60c257eaa004dABb86Ce3b',
+    // TokenFactory System (LATEST - Enhanced Version)
+    tokenFactory: '0xB210Cd7D62f4788943d57e6bb13d33B723393aD7',
+    tokenImplementation: '0xd3Ccd760974CdCBE8dE6169bbF7d2Bc618c87F36',
     tokens: {
       usdc: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',
       usdt: '0x55d398326f99059fF775485246999027B3197955',
@@ -96,7 +98,7 @@ export const CONTRACTS = {
     pairs: {}
   },
 
-  // Optimism Mainnet (NEWLY DEPLOYED)
+  // Optimism Mainnet (UPDATED - Enhanced Version)
   10: {
     dexFactory: '0x0000000000000000000000000000000000000000', // Not deployed yet
     dexRouter: '0x0000000000000000000000000000000000000000', // Not deployed yet
@@ -104,9 +106,9 @@ export const CONTRACTS = {
     crossChainBridge: '0x0000000000000000000000000000000000000000', // Not deployed yet
     priceOracle: '0x0000000000000000000000000000000000000000', // Not deployed yet
     advancedERC20: '0x0000000000000000000000000000000000000000', // Not deployed yet
-    // TokenFactory System (DEPLOYED)
-    tokenFactory: '0xd3Ccd760974CdCBE8dE6169bbF7d2Bc618c87F36',
-    tokenImplementation: '0x84CA5c112CcEB034a2fE74f83026875c9d9f705B',
+    // TokenFactory System (LATEST - Enhanced Version)
+    tokenFactory: '0x92524Eb972d70005Eea9Ff8e89307D1e03005cF3',
+    tokenImplementation: '0x61907A03243513931196023FA4Ac31Ec8Df3Def4',
     tokens: {
       usdc: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607', // USDC on Optimism
       usdt: '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58', // USDT on Optimism
@@ -115,57 +117,67 @@ export const CONTRACTS = {
     pairs: {}
   },
 
-  // Arbitrum One Mainnet (NEWLY DEPLOYED)
+  // Arbitrum One Mainnet (UPDATED - Latest Deployment)
   42161: {
     dexFactory: '0x0000000000000000000000000000000000000000',
     dexRouter: '0x0000000000000000000000000000000000000000',
-    weth: '0x0000000000000000000000000000000000000000',
+    weth: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', // WETH on Arbitrum
     crossChainBridge: '0x0000000000000000000000000000000000000000',
     priceOracle: '0x0000000000000000000000000000000000000000',
-    // TokenFactory System (DEPLOYED)
-    tokenFactory: '0x48b3c4E011a8eEF87C60c257eaa004dABb86Ce3b',
-    tokenImplementation: '0x3213695638B2748678C6bcd812e8913C25f520B5',
-    tokens: {},
+    // TokenFactory System (LATEST - Enhanced Version)
+    tokenFactory: '0xd3Ccd760974CdCBE8dE6169bbF7d2Bc618c87F36',
+    tokenImplementation: '0x84CA5c112CcEB034a2fE74f83026875c9d9f705B',
+    tokens: {
+      usdc: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8', // USDC on Arbitrum
+      usdt: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', // USDT on Arbitrum
+      dai: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1' // DAI on Arbitrum
+    },
     pairs: {}
   },
 
   // Sepolia testnet
   sepolia: {
-    tokenFactory: "0xF6837c7142A97bE35ef04148522748EA288b494b", // Freshly deployed with custom security parameters
-    tokenImplementation: "0x8e576F4F8e841B9B688f71b4A92C7cED26267e68",
+    tokenFactory: "0xFCE72cbF657D39b7Bf2913865924A8229A21703d", // Updated deployment
+    tokenImplementation: "0xCbCcE707b62615163d4582fC74476Dce747874B5", // Updated deployment
     // Previous deployments (for reference)
     previousTokenFactory: "0x1eDA8d360aC7E74f3e5Edf1E86984787E8BB1072",
     previousTokenImplementation: "0xE4A6b9163accC9526732767E5e8da2C69661DCFF"
   },
   
-  // Ethereum mainnet (placeholder)
+  // Ethereum mainnet (UPDATED)
   mainnet: {
-    tokenFactory: "0xa40Cac462b983f8F69Eb258411F588b3e575F90E",
-    tokenImplementation: "0x0C4BcF0e9707266Be1543240fC613A163B5b99d1"
+    tokenFactory: "0x3c656B835dF7A16574d4612C488bE03aAd2193Fc",
+    tokenImplementation: "0x75c2709245fbe56B6133515C49cD35F31533d5Dc"
   },
   
-  // Polygon (placeholder)
+  // Polygon (UPDATED)
   polygon: {
-    tokenFactory: '0x1FAF7d4CAF23C1Ac79257ca74900011d2B7240A8',
-    tokenImplementation: '0x594f4560A5fd52b49E824689Ec09770DB249Eca5'
+    tokenFactory: '0xDb165D34B49f21FE6773FE27E3e61BE6E1c2C7cc',
+    tokenImplementation: '0xB210Cd7D62f4788943d57e6bb13d33B723393aD7'
   },
   
-  // BSC (placeholder)
+  // BSC (UPDATED)
   bsc: {
-    tokenFactory: "0x594f4560A5fd52b49E824689Ec09770DB249Eca5",
-    tokenImplementation: "0x48b3c4E011a8eEF87C60c257eaa004dABb86Ce3b"
+    tokenFactory: "0xB210Cd7D62f4788943d57e6bb13d33B723393aD7",
+    tokenImplementation: "0xd3Ccd760974CdCBE8dE6169bbF7d2Bc618c87F36"
   },
   
-  // Arbitrum (placeholder)
+  // Arbitrum (UPDATED)
   arbitrum: {
-    tokenFactory: '0x48b3c4E011a8eEF87C60c257eaa004dABb86Ce3b',
-    tokenImplementation: '0x3213695638B2748678C6bcd812e8913C25f520B5'
+    tokenFactory: '0xd3Ccd760974CdCBE8dE6169bbF7d2Bc618c87F36',
+    tokenImplementation: '0x84CA5c112CcEB034a2fE74f83026875c9d9f705B'
   },
   
-  // Base (placeholder)
+  // Optimism (UPDATED)
+  optimism: {
+    tokenFactory: '0x92524Eb972d70005Eea9Ff8e89307D1e03005cF3',
+    tokenImplementation: '0x61907A03243513931196023FA4Ac31Ec8Df3Def4'
+  },
+  
+  // Base (UPDATED)
   base: {
-    tokenFactory: '0x594f4560A5fd52b49E824689Ec09770DB249Eca5',
-    tokenImplementation: '0x48b3c4E011a8eEF87C60c257eaa004dABb86Ce3b'
+    tokenFactory: '0xBC0180d73C45901eC98eebeB3a97cF2BC8f8d5Ef',
+    tokenImplementation: '0x92524Eb972d70005Eea9Ff8e89307D1e03005cF3'
   }
 };
 

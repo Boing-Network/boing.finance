@@ -129,6 +129,9 @@ const BugReport = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Bug Report - boing.finance" />
         <meta name="twitter:description" content="Report bugs and issues with boing.finance." />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
+        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
       </Helmet>
       
       <div className="min-h-screen bg-gray-900 text-white">

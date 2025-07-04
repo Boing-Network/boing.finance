@@ -224,6 +224,9 @@ const Tokens = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Token Directory - boing.finance" />
         <meta name="twitter:description" content="Explore and manage tokens." />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
+        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
       </Helmet>
       <div className="relative min-h-screen">
         {/* Animated Background */}

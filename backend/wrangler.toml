@@ -28,6 +28,12 @@ binding = "DB"
 database_name = "boing-database"
 database_id = "fad0eff6-b010-4310-af96-0b68fc5ebab5"
 
+# R2 Bucket for file storage
+[[r2_buckets]]
+binding = "BOING_STORAGE"
+bucket_name = "boing-storage"
+preview_bucket_name = "boing-storage-preview"
+
 # Environment-specific D1 databases
 [env.production.d1_databases]
 binding = "DB"
@@ -58,6 +64,6 @@ database_id = "fad0eff6-b010-4310-af96-0b68fc5ebab5"
 # [triggers]
 # crons = ["0 */6 * * *"] # Run every 6 hours
 
-# Limits
-[limits]
-cpu_ms = 50 
+# Limits - Removed CPU limits for Free plan compatibility
+# [limits]
+# cpu_ms = 50 

@@ -1,0 +1,38 @@
+{
+  "network": "sepolia",
+  "chainId": 11155111,
+  "deployer": "0xb24c5A62F8Da57967A08e11c88Fe18904f49920E",
+  "timestamp": "2025-07-03T09:16:01.623Z",
+  "contracts": {
+    "LiquidityLocker": {
+      "address": "0x187E7ee6396B99D1b362200B62F6d02125c94044",
+      "transactionHash": "0x00217885e8925a730b517d7449ff8add6e0e502808726168009b3cee5cae535b",
+      "blockNumber": null,
+      "constructorArgs": [
+        "0xb24c5A62F8Da57967A08e11c88Fe18904f49920E"
+      ]
+    },
+    "DEXFactoryV2": {
+      "address": "0x291A02126420b53eCaAE518466Ac65C8482D3feb",
+      "transactionHash": "0x6a7bfa85f0b46bf3ba36efd67afe29fb076a9e66acfa085d140e754021e348ba",
+      "blockNumber": null,
+      "constructorArgs": [
+        "0x187E7ee6396B99D1b362200B62F6d02125c94044"
+      ]
+    },
+    "WETH": {
+      "address": "0x49c39B1792CCE5fAf861Ed12Cd2d89bBabfE6c5C",
+      "transactionHash": "0x5bccb73a5a000491cfc4a0738d3558b9c6a4267794647590b8d3b8ea505e32cf",
+      "blockNumber": null
+    },
+    "DEXRouter": {
+      "address": "0x972c117e983AD0D97b4182b2Fb7b39635b29E47d",
+      "transactionHash": "0xb5a7169e3178b58b6aa38e696a87b582507802a75f46ec8d5eb4314803706dac",
+      "blockNumber": null,
+      "constructorArgs": [
+        "0x291A02126420b53eCaAE518466Ac65C8482D3feb",
+        "0x49c39B1792CCE5fAf861Ed12Cd2d89bBabfE6c5C"
+      ]
+    }
+  }
+}
