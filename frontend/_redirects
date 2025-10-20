@@ -1,1 +1,9 @@
+# Redirect www to non-www (for consistency)
+https://www.boing.finance/* https://boing.finance/:splat 301!
+http://www.boing.finance/* https://boing.finance/:splat 301!
+
+# Force HTTPS
+http://boing.finance/* https://boing.finance/:splat 301!
+
+# SPA fallback - serve index.html for all routes
 /*    /index.html   200 

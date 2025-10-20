@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { WalletProvider } from './contexts/WalletContext';
 import { useWalletConnection } from './hooks/useWalletConnection';
 import EnhancedAnimatedBackground from './components/EnhancedAnimatedBackground';
@@ -12,6 +13,7 @@ import Logo from './components/Logo';
 import ShootingStars from './components/ShootingStars';
 import Swap from './pages/Swap';
 import Liquidity from './pages/Liquidity';
+import Pools from './pages/Pools';
 import Analytics from './pages/Analytics';
 import Portfolio from './pages/Portfolio';
 import Bridge from './pages/Bridge';
@@ -28,6 +30,16 @@ import Terms from './pages/Terms';
 import Whitepaper from './pages/Whitepaper';
 import './styles/globals.css';
 
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
 // Helper for coming soon
 const comingSoon = {
   label: 'Coming Soon',
@@ -38,18 +50,18 @@ const comingSoon = {
 const navigation = {
   home: { name: 'Home', href: '/', icon: '🏠' },
   trading: [
-    { name: 'Swap', href: '/swap', icon: '🔄', description: 'Trade tokens instantly', comingSoon: true },
+    { name: 'Swap', href: '/swap', icon: '🔄', description: 'Trade tokens instantly' },
     { name: 'Bridge', href: '/bridge', icon: '🌉', description: 'Cross-chain transfers', comingSoon: true },
-    { name: 'Pools', href: '/pools', icon: '🏊', description: 'Liquidity pools', comingSoon: true },
+    { name: 'Pools', href: '/pools', icon: '🏊', description: 'Liquidity pools' },
     { name: 'Tokens', href: '/tokens', icon: '🪙', description: 'Token management', comingSoon: true }
   ],
   analytics: [
     { name: 'Analytics', href: '/analytics', icon: '📊', description: 'Market insights', comingSoon: true },
-    { name: 'Portfolio', href: '/portfolio', icon: '💼', description: 'Your holdings', comingSoon: true }
+    { name: 'Portfolio', href: '/portfolio', icon: '💼', description: 'Your holdings' }
   ],
   deployment: [
     { name: 'Deploy Token', href: '/deploy-token', icon: '🚀', description: 'Create your own tokens' },
-    { name: 'Create Pool', href: '/create-pool', icon: '🏊', description: 'Create liquidity pools', comingSoon: true }
+    { name: 'Create Pool', href: '/create-pool', icon: '🏊', description: 'Create liquidity pools' }
   ]
 };
 
@@ -380,7 +392,8 @@ function AppContent() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/swap" element={<Swap />} />
-            <Route path="/pools" element={<Liquidity />} />
+            <Route path="/pools" element={<Pools />} />
+            <Route path="/liquidity" element={<Liquidity />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/bridge" element={<Bridge />} />
@@ -478,28 +491,30 @@ function AppContent() {
 
 function App() {
   return (
-    <HelmetProvider>
-      <WalletProvider>
-        <Router>
-          <Helmet>
-            <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-            <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
-            <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
-          </Helmet>
-          <AppContent />
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: '#1f2937',
-                color: '#fff',
-              },
-            }}
-          />
-        </Router>
-      </WalletProvider>
-    </HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <HelmetProvider>
+        <WalletProvider>
+          <Router>
+            <Helmet>
+              <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+              <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
+              <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+            </Helmet>
+            <AppContent />
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: '#1f2937',
+                  color: '#fff',
+                },
+              }}
+            />
+          </Router>
+        </WalletProvider>
+      </HelmetProvider>
+    </QueryClientProvider>
   );
 }
 

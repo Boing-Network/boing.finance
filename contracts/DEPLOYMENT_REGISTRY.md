@@ -479,13 +479,13 @@ constructor(
 - **TokenFactory:** https://sepolia.etherscan.io/address/0x04162CEFbFC104DD722c9f9a06e135995D231898#code
 - **Status:** ✅ Deployed & Verified
 
-**DEXFactory System (LATEST - Enhanced Modular Architecture):**
-- **LiquidityLocker Address:** `0x543BF0f0EC5BEbeDD32c374a5D0D2c36aa85adbE`
-- **DEXFactory Address:** `0x82Db4B9f008A800f32c5A9f631ff3516C7f584F5`
-- **WETH Address:** `0xE19d077Ff383F72C32706Fe66f562c4188150e73`
-- **DEXRouter Address:** `0x096F3b7ce692A203F7E282c0E0dD2d872d7728dd`
-- **Deployment Date:** July 2, 2025
-- **Status:** ✅ Deployed & Verified (Enhanced Version)
+**DEXFactory System (LATEST - DEXFactoryV2 with Enhanced Features):**
+- **LiquidityLocker Address:** `0x187E7ee6396B99D1b362200B62F6d02125c94044`
+- **DEXFactory Address:** `0x291A02126420b53eCaAE518466Ac65C8482D3feb`
+- **WETH Address:** `0x49c39B1792CCE5fAf861Ed12Cd2d89bBabfE6c5C`
+- **DEXRouter Address:** `0x972c117e983AD0D97b4182b2Fb7b39635b29E47d`
+- **Deployment Date:** July 5, 2025
+- **Status:** ✅ Deployed & Verified (DEXFactoryV2 - Currently Active)
 
 **DEXFactory System Features:**
 - ✅ Core pair creation with CREATE2
@@ -496,16 +496,23 @@ constructor(
 - ✅ Modular LiquidityLocker contract
 
 **Verification Status:**
-- **LiquidityLocker:** https://sepolia.etherscan.io/address/0x543BF0f0EC5BEbeDD32c374a5D0D2c36aa85adbE#code
-- **DEXFactory:** https://sepolia.etherscan.io/address/0x82Db4B9f008A800f32c5A9f631ff3516C7f584F5#code
-- **WETH:** https://sepolia.etherscan.io/address/0xE19d077Ff383F72C32706Fe66f562c4188150e73#code
-- **DEXRouter:** https://sepolia.etherscan.io/address/0x096F3b7ce692A203F7E282c0E0dD2d872d7728dd#code
+- **LiquidityLocker:** https://sepolia.etherscan.io/address/0x187E7ee6396B99D1b362200B62F6d02125c94044#code
+- **DEXFactory:** https://sepolia.etherscan.io/address/0x291A02126420b53eCaAE518466Ac65C8482D3feb#code
+- **WETH:** https://sepolia.etherscan.io/address/0x49c39B1792CCE5fAf861Ed12Cd2d89bBabfE6c5C#code
+- **DEXRouter:** https://sepolia.etherscan.io/address/0x972c117e983AD0D97b4182b2Fb7b39635b29E47d#code
 
 **Previous DEXFactory System (Testing Phase):**
 - **DEXFactory Address:** `0x5b2bc0398F86553e88f8546E89d5E518Bb597cD2`
 - **DEXRouter Address:** `0x6354A9d4f779e85CE65535845F775DFEfe31AdB8`
 - **WETH Address:** `0xc832cde537bD890e9EB52fa5b8430b925C2a2A1F`
 - **Status:** ✅ Deployed & Verified (Previous Version)
+
+**Alternative DEXFactory System (Modular Architecture):**
+- **DEXFactory Address:** `0x82Db4B9f008A800f32c5A9f631ff3516C7f584F5`
+- **DEXRouter Address:** `0x096F3b7ce692A203F7E282c0E0dD2d872d7728dd`
+- **WETH Address:** `0xE19d077Ff383F72C32706Fe66f562c4188150e73`
+- **LiquidityLocker Address:** `0x543BF0f0EC5BEbeDD32c374a5D0D2c36aa85adbE`
+- **Status:** ✅ Deployed & Verified (Alternative Version - Not Currently Active)
 
 ---
 

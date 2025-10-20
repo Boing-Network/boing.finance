@@ -52,7 +52,7 @@ function ToggleButton({ enabled, onToggle, disabled, size = "md" }) {
 
 
 function CreatePool() {
-  const { isConnected, account } = useWalletConnection();
+  const { isConnected, account, connectWallet } = useWalletConnection();
   const { chainId } = useWallet();
   
   // Add CSS for range slider
@@ -637,6 +637,10 @@ function CreatePool() {
       const token0AmountWei = ethers.parseUnits(token0Amount, token0Decimals);
       const token1AmountWei = ethers.parseUnits(token1Amount, token1Decimals);
       
+      // Variables for permit signatures
+      let usePermitSignatures = false;
+      let permitData = null;
+      
       // Validate amounts
       if (token0AmountWei === 0n || token1AmountWei === 0n) {
         throw new Error('Token amounts must be greater than 0');
@@ -664,35 +668,105 @@ function CreatePool() {
         }
       });
 
-      // Check if approval is needed before approving
+      // Check if approval is needed - try permit signatures first, fallback to regular approvals
       const approvalNeeded = needsApproval();
       
       if (approvalNeeded.token0 || approvalNeeded.token1) {
-        console.log('Approval needed:', approvalNeeded);
+        console.log('Approval needed - attempting permit signatures for gasless approval');
         
-        const token0Contract = new ethers.Contract(token0, [
-          'function approve(address spender, uint256 amount) external returns (bool)'
-        ], signer);
+        // Try to use permit signatures for gasless approvals
+        let usePermitSignatures = false;
+        let permitData = null;
         
-        const token1Contract = new ethers.Contract(token1, [
-          'function approve(address spender, uint256 amount) external returns (bool)'
-        ], signer);
-        
-        const factoryAddress = getContractAddress(chainId, 'dexFactory');
-        
-        // Only approve if needed - approve maximum amount to avoid repeated approvals
-        if (approvalNeeded.token0) {
-          console.log('Approving token0 with maximum allowance');
-          await token0Contract.approve(factoryAddress, ethers.MaxUint256);
+        try {
+          console.log('Generating permit signatures for gasless approval...');
+          permitData = await generatePermitSignatures(token0, token1, token0AmountWei, token1AmountWei, signer, account);
+          
+          // Check if we have valid permit signatures
+          if (permitData.deadlineA > 0 || permitData.deadlineB > 0) {
+            usePermitSignatures = true;
+            console.log('Permit signatures generated successfully - will use gasless approval');
+            toast('Using gasless approval with permit signatures!', {
+              duration: 3000,
+              icon: '⚡'
+            });
+          } else {
+            console.log('Permit signatures not available - falling back to regular approvals');
+          }
+        } catch (error) {
+          console.log('Permit signature generation failed - falling back to regular approvals:', error);
         }
         
-        if (approvalNeeded.token1) {
-          console.log('Approving token1 with maximum allowance');
-          await token1Contract.approve(factoryAddress, ethers.MaxUint256);
+        // If permit signatures failed or are not available, use regular approvals
+        if (!usePermitSignatures) {
+          console.log('Using regular approval transactions');
+          
+          const factoryAddress = getContractAddress(chainId, 'dexFactory');
+          
+          // Handle approvals for tokens that need them
+          const token0Contract = new ethers.Contract(token0, [
+            'function approve(address spender, uint256 amount) external returns (bool)'
+          ], signer);
+          
+          const token1Contract = new ethers.Contract(token1, [
+            'function approve(address spender, uint256 amount) external returns (bool)'
+          ], signer);
+          
+          // Show approval notification
+          toast('Token approvals required. Please approve both tokens in your wallet.', {
+            duration: 5000,
+            icon: 'ℹ️'
+          });
+          
+          // Handle approvals sequentially to avoid confusion
+          if (approvalNeeded.token0) {
+            console.log('Approving token0 with maximum allowance');
+            toast(`Approving ${getToken0Symbol()}... Please confirm in your wallet.`, {
+              duration: 3000,
+              icon: '⏳'
+            });
+            
+            try {
+              await token0Contract.approve(factoryAddress, ethers.MaxUint256);
+              toast.success(`${getToken0Symbol()} approved successfully!`);
+            } catch (error) {
+              if (error.code === 'ACTION_REJECTED') {
+                toast.error(`${getToken0Symbol()} approval was rejected. Please try again and approve the transaction.`);
+                throw new Error(`${getToken0Symbol()} approval rejected by user`);
+              } else {
+                toast.error(`Failed to approve ${getToken0Symbol()}: ${error.message}`);
+                throw error;
+              }
+            }
+          }
+          
+          if (approvalNeeded.token1) {
+            console.log('Approving token1 with maximum allowance');
+            toast(`Approving ${getToken1Symbol()}... Please confirm in your wallet.`, {
+              duration: 3000,
+              icon: '⏳'
+            });
+            
+            try {
+              await token1Contract.approve(factoryAddress, ethers.MaxUint256);
+              toast.success(`${getToken1Symbol()} approved successfully!`);
+            } catch (error) {
+              if (error.code === 'ACTION_REJECTED') {
+                toast.error(`${getToken1Symbol()} approval was rejected. Please try again and approve the transaction.`);
+                throw new Error(`${getToken1Symbol()} approval rejected by user`);
+              } else {
+                toast.error(`Failed to approve ${getToken1Symbol()}: ${error.message}`);
+                throw error;
+              }
+            }
+          }
+          
+          // Update allowances after approval
+          await checkTokenAllowances();
+          
+          console.log('All approvals completed successfully');
+          toast.success('All token approvals completed! Proceeding with pool creation...');
         }
-        
-        // Update allowances after approval
-        await checkTokenAllowances();
       } else {
         console.log('No approval needed - sufficient allowances exist');
       }
@@ -718,16 +792,103 @@ function CreatePool() {
         description: `Initial liquidity lock for ${getToken0Symbol()}-${getToken1Symbol()} pool`
       });
       
-      const createPairWithLiquidityTx = await dexFactory.createPairWithLiquidity(
-        token0,
-        token1,
-        token0AmountWei,
-        token1AmountWei,
-        enableLiquidityLock,
-        lockDuration, // lockDuration is already a number, will be converted to BigInt by ethers
-        `Initial liquidity lock for ${getToken0Symbol()}-${getToken1Symbol()} pool`,
-        { gasLimit: 8000000 }
-      );
+      let createPairWithLiquidityTx;
+      
+      // Try to use the single transaction approach, with permit signatures if available
+      console.log('Attempting single transaction approach for pool creation');
+      
+      try {
+        // If we have permit signatures, use the permit-based function
+        if (usePermitSignatures && permitData) {
+          console.log('Using permit-based single transaction approach');
+          createPairWithLiquidityTx = await dexFactory.createPairWithLiquidityPermit(
+            token0,
+            token1,
+            token0AmountWei,
+            token1AmountWei,
+            enableLiquidityLock,
+            lockDuration,
+            `Initial liquidity lock for ${getToken0Symbol()}-${getToken1Symbol()} pool`,
+            permitData.deadlineA,
+            permitData.vA,
+            permitData.rA,
+            permitData.sA,
+            permitData.deadlineB,
+            permitData.vB,
+            permitData.rB,
+            permitData.sB,
+            { gasLimit: 8000000 }
+          );
+        } else {
+          // Use the regular single transaction approach
+          console.log('Using regular single transaction approach');
+          createPairWithLiquidityTx = await dexFactory.createPairWithLiquidity(
+            token0,
+            token1,
+            token0AmountWei,
+            token1AmountWei,
+            enableLiquidityLock,
+            lockDuration,
+            `Initial liquidity lock for ${getToken0Symbol()}-${getToken1Symbol()} pool`,
+            { gasLimit: 8000000 }
+          );
+        }
+        console.log('Single transaction approach successful');
+      } catch (error) {
+        console.log('Single transaction approach failed, falling back to separate steps:', error.message);
+        
+        // Fallback: Create pair first, then add liquidity
+        console.log('Creating pair first...');
+        const createPairTx = await dexFactory.createPair(token0, token1, { gasLimit: 4000000 });
+        await createPairTx.wait();
+        
+        // Get the created pair address
+        const pairAddress = await dexFactory.getPair(token0, token1);
+        console.log('Pair created at:', pairAddress);
+        
+        // Add liquidity to the pair
+        console.log('Adding liquidity to pair...');
+        const pairContract = new ethers.Contract(pairAddress, [
+          'function mint(address to) external returns (uint256 liquidity)'
+        ], signer);
+        
+        // Transfer tokens to pair contract
+        const token0Contract = new ethers.Contract(token0, [
+          'function transfer(address to, uint256 amount) external returns (bool)'
+        ], signer);
+        
+        const token1Contract = new ethers.Contract(token1, [
+          'function transfer(address to, uint256 amount) external returns (bool)'
+        ], signer);
+        
+        await token0Contract.transfer(pairAddress, token0AmountWei);
+        await token1Contract.transfer(pairAddress, token1AmountWei);
+        
+        // Mint liquidity
+        const mintTx = await pairContract.mint(account, { gasLimit: 4000000 });
+        await mintTx.wait();
+        
+        console.log('Fallback approach completed successfully');
+        
+        // Set transaction hash for UI
+        setTransactionHash(createPairTx.hash);
+        
+        // Show success message
+        toast.success('Pool created successfully using fallback method!');
+        setTransactionStatus('success');
+        
+        // Reset form and return early
+        setToken0('');
+        setToken1('');
+        setToken0Amount('');
+        setToken1Amount('');
+        setToken0Decimals(18);
+        setToken1Decimals(18);
+        setToken0Info(null);
+        setToken1Info(null);
+        
+        return;
+      }
       
       setTransactionHash(createPairWithLiquidityTx.hash);
       
@@ -827,8 +988,9 @@ function CreatePool() {
       
       // If we don't have full receipt details, show a note
       if (!receipt.blockNumber || !receipt.gasUsed) {
-        toast.info('Transaction confirmed but some details unavailable. Check Etherscan for full details.', {
-          duration: 8000
+        toast('Transaction confirmed but some details unavailable. Check Etherscan for full details.', {
+          duration: 8000,
+          icon: 'ℹ️'
         });
       }
       
@@ -860,41 +1022,61 @@ function CreatePool() {
       setTransactionStatus('error');
       setTransactionError(error.message);
       
-      // Handle RPC connection errors specifically
-      if (error.message.includes('Failed to fetch') || error.message.includes('UNKNOWN_ERROR')) {
+      // Handle specific error types with user-friendly messages
+      if (error.code === 'ACTION_REJECTED') {
+        toast.error('Transaction was rejected. Please try again and approve the transaction in your wallet.', {
+          duration: 8000
+        });
+        setTransactionError('Transaction rejected by user. Please approve the transaction in your wallet.');
+      } else if (error.message.includes('approval rejected by user')) {
+        toast.error('Token approval was rejected. Please try again and approve the token spending.', {
+          duration: 8000
+        });
+        setTransactionError('Token approval rejected. Please approve token spending in your wallet.');
+      } else if (error.message.includes('Failed to fetch') || error.message.includes('UNKNOWN_ERROR')) {
         toast.error('Network connection issue. Please check your internet connection and try again.');
         setTransactionError('Network connection error. Please check the transaction hash on Etherscan to see if it was successful.');
-      }
-      
-      // Provide more specific error messages
-      if (error.code === 'ACTION_REJECTED') {
-        toast.error('Transaction was rejected by user');
       } else if (error.message.includes('insufficient funds')) {
-        toast.error('Insufficient funds for transaction');
+        toast.error('Insufficient funds for transaction. Please check your wallet balance.');
+        setTransactionError('Insufficient funds for transaction.');
       } else if (error.message.includes('already exists')) {
-        toast.error('Pool already exists for this token pair');
+        toast.error('Pool already exists for this token pair.');
+        setTransactionError('Pool already exists for this token pair.');
       } else if (error.message.includes('ID')) {
-        toast.error('Cannot create pool with identical tokens');
+        toast.error('Cannot create pool with identical tokens.');
+        setTransactionError('Cannot create pool with identical tokens.');
       } else if (error.message.includes('ZA')) {
-        toast.error('Invalid token address (zero address)');
+        toast.error('Invalid token address (zero address).');
+        setTransactionError('Invalid token address.');
       } else if (error.message.includes('INV_AMOUNTS')) {
-        toast.error('Invalid token amounts (must be greater than 0)');
+        toast.error('Invalid token amounts (must be greater than 0).');
+        setTransactionError('Invalid token amounts.');
       } else if (error.message.includes('MINT_FAILED')) {
-        toast.error('Failed to mint liquidity tokens');
+        toast.error('Failed to mint liquidity tokens. Please try again.');
+        setTransactionError('Failed to mint liquidity tokens.');
       } else if (error.message.includes('TF_A_FAILED') || error.message.includes('TF_B_FAILED')) {
-        toast.error('Token transfer failed - check your token balances and approvals');
+        toast.error('Token transfer failed. Please check your token balances and approvals.');
+        setTransactionError('Token transfer failed - check balances and approvals.');
       } else if (error.message.includes('TF_LP_FAILED')) {
-        toast.error('LP token transfer failed - liquidity locking issue');
+        toast.error('LP token transfer failed - liquidity locking issue.');
+        setTransactionError('LP token transfer failed.');
       } else if (error.message.includes('LOCK_FAILED')) {
-        toast.error('Liquidity locking failed');
+        toast.error('Liquidity locking failed. Please try again.');
+        setTransactionError('Liquidity locking failed.');
       } else if (error.message.includes('INV_DURATION')) {
-        toast.error('Invalid lock duration (must be greater than 0)');
+        toast.error('Invalid lock duration (must be greater than 0).');
+        setTransactionError('Invalid lock duration.');
       } else if (error.message.includes('NO_LOCKER')) {
-        toast.error('Liquidity locker not configured');
+        toast.error('Liquidity locker not configured.');
+        setTransactionError('Liquidity locker not configured.');
       } else if (error.message.includes('timeout')) {
         toast.error('Transaction confirmation timeout. Please check the transaction hash on Etherscan.');
+        setTransactionError('Transaction confirmation timeout.');
       } else {
-        toast.error(`Failed to create pool: ${error.message}`);
+        toast.error(`Failed to create pool: ${error.message}`, {
+          duration: 8000
+        });
+        setTransactionError(`Failed to create pool: ${error.message}`);
       }
     } finally {
       setIsCreating(false);
@@ -961,6 +1143,83 @@ function CreatePool() {
     }
   };
 
+  // Generate permit signatures for both tokens
+  const generatePermitSignatures = async (token0Address, token1Address, amount0, amount1, signer, owner) => {
+    const factoryAddress = getContractAddress(chainId, 'dexFactory');
+    const deadline = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
+    
+    const permitData = {
+      deadlineA: 0,
+      vA: 0,
+      rA: ethers.ZeroHash,
+      sA: ethers.ZeroHash,
+      deadlineB: 0,
+      vB: 0,
+      rB: ethers.ZeroHash,
+      sB: ethers.ZeroHash
+    };
+    
+    try {
+      // Try to generate permit for token0
+      const token0Contract = new ethers.Contract(token0Address, [
+        'function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external',
+        'function nonces(address owner) external view returns (uint256)',
+        'function DOMAIN_SEPARATOR() external view returns (bytes32)'
+      ], signer);
+      
+      const nonce0 = await token0Contract.nonces(owner);
+      const domainSeparator0 = await token0Contract.DOMAIN_SEPARATOR();
+      
+      const permitHash0 = ethers.solidityPackedKeccak256(
+        ['bytes32', 'address', 'address', 'uint256', 'uint256', 'uint256'],
+        [domainSeparator0, owner, factoryAddress, amount0, nonce0, deadline]
+      );
+      
+      const signature0 = await signer.signMessage(ethers.getBytes(permitHash0));
+      const { v: v0, r: r0, s: s0 } = ethers.Signature.from(signature0);
+      
+      permitData.deadlineA = deadline;
+      permitData.vA = v0;
+      permitData.rA = r0;
+      permitData.sA = s0;
+      
+      console.log('Permit signature generated for token0');
+    } catch (error) {
+      console.log('Permit not supported for token0, will use existing allowance');
+    }
+    
+    try {
+      // Try to generate permit for token1
+      const token1Contract = new ethers.Contract(token1Address, [
+        'function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external',
+        'function nonces(address owner) external view returns (uint256)',
+        'function DOMAIN_SEPARATOR() external view returns (bytes32)'
+      ], signer);
+      
+      const nonce1 = await token1Contract.nonces(owner);
+      const domainSeparator1 = await token1Contract.DOMAIN_SEPARATOR();
+      
+      const permitHash1 = ethers.solidityPackedKeccak256(
+        ['bytes32', 'address', 'address', 'uint256', 'uint256', 'uint256'],
+        [domainSeparator1, owner, factoryAddress, amount1, nonce1, deadline]
+      );
+      
+      const signature1 = await signer.signMessage(ethers.getBytes(permitHash1));
+      const { v: v1, r: r1, s: s1 } = ethers.Signature.from(signature1);
+      
+      permitData.deadlineB = deadline;
+      permitData.vB = v1;
+      permitData.rB = r1;
+      permitData.sB = s1;
+      
+      console.log('Permit signature generated for token1');
+    } catch (error) {
+      console.log('Permit not supported for token1, will use existing allowance');
+    }
+    
+    return permitData;
+  };
+
   if (!isConnected) {
     return (
       <>
@@ -980,7 +1239,10 @@ function CreatePool() {
                 <div className="text-6xl mb-4">🔗</div>
                 <h2 className="text-xl font-semibold text-white mb-2">Wallet Required</h2>
                 <p className="text-gray-400 mb-6">Please connect your wallet to create liquidity pools</p>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200">
+                <button 
+                  onClick={connectWallet}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200"
+                >
                   Connect Wallet
                 </button>
               </div>
@@ -1396,10 +1658,42 @@ function CreatePool() {
                     <li>Initial liquidity: <span className="font-semibold">{token0Amount || '0'} / {token1Amount || '0'}</span></li>
                     <li>Lock description: <span className="font-semibold">{enableLiquidityLock ? (lockDescription || 'None') : 'N/A'}</span></li>
                   </ul>
-                  <div className="mt-3 text-xs text-cyan-400">
-                    Tip: Locking liquidity and using a low trading fee can help attract more users and build trust.
+                </div>
+              </div>
+
+              {/* Approval Process Info */}
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold mb-2 text-white">⚠️ Important: Token Approvals</h4>
+                <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
+                  <p className="text-sm text-gray-300 mb-3">
+                    When creating a pool, you'll need to approve token spending for both tokens. This allows the DEX to transfer your tokens to create the pool.
+                  </p>
+                  <ul className="text-sm text-gray-300 space-y-2">
+                    <li className="flex items-start">
+                      <span className="text-blue-400 mr-2">•</span>
+                      You'll see separate approval requests for each token
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-400 mr-2">•</span>
+                      Approve each transaction in your wallet when prompted
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-400 mr-2">•</span>
+                      After approvals, the pool creation will proceed automatically
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-400 mr-2">•</span>
+                      Approvals are one-time and can be revoked later if needed
+                    </li>
+                  </ul>
+                  <div className="mt-3 p-2 bg-yellow-900/20 border border-yellow-500/30 rounded text-xs text-yellow-200">
+                    <strong>Note:</strong> If you reject any approval transaction, the pool creation will be cancelled. You can try again by clicking "Create Pool" again.
                   </div>
                 </div>
+              </div>
+              
+              <div className="mt-3 text-xs text-cyan-400">
+                Tip: Locking liquidity and using a low trading fee can help attract more users and build trust.
               </div>
 
 

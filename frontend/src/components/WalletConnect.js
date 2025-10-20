@@ -66,7 +66,7 @@ const WalletConnect = () => {
   };
 
   const formatAddress = (address) => {
-    if (!address) return '';
+    if (!address || typeof address !== 'string') return '';
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
@@ -106,7 +106,7 @@ const WalletConnect = () => {
               {/* Account Info */}
               <div className="mb-4">
                 <div className="text-sm text-gray-400 mb-1">Connected Account</div>
-                <div className="text-white font-mono text-sm break-all">{account}</div>
+                <div className="text-white font-mono text-sm break-all">{account || 'No account'}</div>
               </div>
 
               {/* Network Info */}

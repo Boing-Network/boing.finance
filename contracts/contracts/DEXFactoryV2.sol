@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 import "./interfaces/IDEXPair.sol";
 import "./DEXPair.sol";
 
@@ -79,6 +80,96 @@ contract DEXFactoryV2 is IDEXFactory, Ownable {
         
         // Create the pair
         pair = _createPair(tokenA, tokenB);
+        
+        // Transfer tokens from user to pair contract
+        require(IERC20(tokenA).transferFrom(msg.sender, pair, amountA), "TF_A_FAILED");
+        require(IERC20(tokenB).transferFrom(msg.sender, pair, amountB), "TF_B_FAILED");
+        
+        if (shouldLockLiquidity) {
+            require(liquidityLocker != address(0), "NO_LOCKER");
+            require(lockDuration > 0, "INV_DURATION");
+            
+            // Mint initial liquidity directly to the factory for locking
+            liquidity = IDEXPair(pair).mint(address(this));
+            require(liquidity > 0, "MINT_FAILED");
+            
+            // Calculate lock fee (0.1% of LP tokens)
+            uint256 lockFee = (liquidity * 10) / 10000; // 0.1%
+            uint256 lockAmount = liquidity - lockFee;
+            
+            // Lock the liquidity directly (factory already owns the LP tokens)
+            (bool success, ) = liquidityLocker.call(
+                abi.encodeWithSignature(
+                    "lockLiquidity(address,address,uint256,uint256,string,uint256)",
+                    pair, msg.sender, lockAmount, lockDuration, lockDescription, lockFee
+                )
+            );
+            require(success, "LOCK_FAILED");
+            
+            emit InitialLiquidityLocked(pair, msg.sender, lockAmount, lockDuration);
+        } else {
+            // Mint initial liquidity to the user
+            liquidity = IDEXPair(pair).mint(msg.sender);
+            require(liquidity > 0, "MINT_FAILED");
+        }
+    }
+
+    /**
+     * @dev Create pair with liquidity using permit signatures (single transaction)
+     * @param tokenA First token address
+     * @param tokenB Second token address
+     * @param amountA Amount of tokenA for initial liquidity
+     * @param amountB Amount of tokenB for initial liquidity
+     * @param shouldLockLiquidity Whether to lock the initial liquidity
+     * @param lockDuration Duration to lock liquidity (if locking)
+     * @param lockDescription Description for the lock (if locking)
+     * @param permitA Permit data for tokenA (deadline, v, r, s)
+     * @param permitB Permit data for tokenB (deadline, v, r, s)
+     * @return pair The created pair address
+     * @return liquidity The amount of LP tokens minted
+     */
+    function createPairWithLiquidityPermit(
+        address tokenA,
+        address tokenB,
+        uint256 amountA,
+        uint256 amountB,
+        bool shouldLockLiquidity,
+        uint256 lockDuration,
+        string memory lockDescription,
+        uint256 deadlineA,
+        uint8 vA,
+        bytes32 rA,
+        bytes32 sA,
+        uint256 deadlineB,
+        uint8 vB,
+        bytes32 rB,
+        bytes32 sB
+    ) external returns (address pair, uint256 liquidity) {
+        require(tokenA != tokenB, "ID"); // Identical addresses
+        require(tokenA != address(0) && tokenB != address(0), "ZA"); // Zero address
+        require(amountA > 0 && amountB > 0, "INV_AMOUNTS"); // Valid amounts
+        
+        // Create the pair
+        pair = _createPair(tokenA, tokenB);
+        
+        // Use permit to approve tokens (gasless approval)
+        if (deadlineA > 0) {
+            try IERC20Permit(tokenA).permit(msg.sender, address(this), amountA, deadlineA, vA, rA, sA) {
+                // Permit successful
+            } catch {
+                // Permit failed, try to use existing allowance
+                require(IERC20(tokenA).allowance(msg.sender, address(this)) >= amountA, "INSUFFICIENT_ALLOWANCE_A");
+            }
+        }
+        
+        if (deadlineB > 0) {
+            try IERC20Permit(tokenB).permit(msg.sender, address(this), amountB, deadlineB, vB, rB, sB) {
+                // Permit successful
+            } catch {
+                // Permit failed, try to use existing allowance
+                require(IERC20(tokenB).allowance(msg.sender, address(this)) >= amountB, "INSUFFICIENT_ALLOWANCE_B");
+            }
+        }
         
         // Transfer tokens from user to pair contract
         require(IERC20(tokenA).transferFrom(msg.sender, pair, amountA), "TF_A_FAILED");

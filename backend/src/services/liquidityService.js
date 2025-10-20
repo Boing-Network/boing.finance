@@ -259,4 +259,82 @@ export class LiquidityService {
       throw new Error(`Failed to get liquidity events: ${error.message}`);
     }
   }
+
+  // Get user's created pools
+  async getUserCreatedPools(address, chainId = null) {
+    try {
+      let query = this.db.select().from(pairs)
+        .where(eq(pairs.creator, address));
+      
+      if (chainId) {
+        query = query.where(eq(pairs.chainId, chainId));
+      }
+      
+      const pools = await query
+        .orderBy(desc(pairs.createdAt));
+
+      return pools;
+    } catch (error) {
+      throw new Error(`Failed to get user created pools: ${error.message}`);
+    }
+  }
+
+  // Get pool analytics
+  async getPoolAnalytics(pairAddress, chainId = null) {
+    try {
+      const pair = await this.db.select().from(pairs)
+        .where(eq(pairs.address, pairAddress));
+
+      if (!pair[0]) {
+        throw new Error('Pair not found');
+      }
+
+      const pairData = pair[0];
+      
+      // Get recent liquidity events for volume calculation
+      const recentEvents = await this.db.select().from(liquidityEvents)
+        .where(eq(liquidityEvents.pairAddress, pairAddress))
+        .orderBy(desc(liquidityEvents.timestamp))
+        .limit(100);
+
+      // Calculate 24h volume (simplified)
+      const now = new Date();
+      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const volume24h = recentEvents
+        .filter(event => new Date(event.timestamp) > oneDayAgo)
+        .reduce((sum, event) => sum + parseFloat(event.amount0) + parseFloat(event.amount1), 0);
+
+      // Calculate total liquidity
+      const totalLiquidity = parseFloat(pairData.reserve0) + parseFloat(pairData.reserve1);
+
+      return {
+        pairAddress,
+        totalLiquidity: totalLiquidity.toString(),
+        volume24h: volume24h.toString(),
+        feeRate: pairData.feeRate,
+        reserve0: pairData.reserve0,
+        reserve1: pairData.reserve1,
+        totalSupply: pairData.totalSupply
+      };
+    } catch (error) {
+      throw new Error(`Failed to get pool analytics: ${error.message}`);
+    }
+  }
+
+  // Collect fees from pool
+  async collectFees(poolAddress, chainId) {
+    try {
+      // This is a placeholder implementation
+      // In a real implementation, this would interact with the smart contract
+      // to collect accumulated fees for the user
+      
+      return {
+        success: true,
+        feesCollected: '0',
+        message: 'Fee collection is not yet implemented'
+      };
+    } catch (error) {
+      throw new Error(`Failed to collect fees: ${error.message}`);
+    }
+  }
 } 

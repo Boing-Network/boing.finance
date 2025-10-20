@@ -3,10 +3,10 @@ export const CONTRACTS = {
   // Sepolia Testnet (UPDATED - DEXFactoryV2 with createPairWithLiquidity function)
   11155111: {
     // DEXFactory System (LATEST - DEXFactoryV2 with single-transaction pool creation)
-    dexFactory: '0x9A351D41CaC5bF4AD41557FF21697c2B83C97eBA',
-    dexRouter: '0xF3fb8731Ff3df2Bb11241aF722De7EE7DB5fCE46',
-    weth: '0x45171753D0d5418c8f396c6627bd8b849e614CE5',
-    liquidityLocker: '0xF6790906D13EA40F64AcDffE9E2ce7ff2aB91F53',
+    dexFactory: '0x291A02126420b53eCaAE518466Ac65C8482D3feb',
+    dexRouter: '0x972c117e983AD0D97b4182b2Fb7b39635b29E47d',
+    weth: '0x49c39B1792CCE5fAf861Ed12Cd2d89bBabfE6c5C',
+    liquidityLocker: '0x187E7ee6396B99D1b362200B62F6d02125c94044',
     crossChainBridge: '0x8c97Bcf628B23f7A6EC19610403C3f0190561355',
     priceOracle: '0x4C12de794D599f3B0Fcb479baAD4E42929cB5A02',
     advancedERC20: '0x6E5D899889C02d4Ff6b68900e5e06297318F9e3C',
@@ -14,9 +14,19 @@ export const CONTRACTS = {
     tokenFactory: '0x04162CEFbFC104DD722c9f9a06e135995D231898',
     tokenImplementation: '0x3240BA1CedFCb7876fef576493Aef88212E68cbf',
     tokens: {
+      // Mock tokens from your DEX
       mockUSDC: '0x5Ce254ab41228D8d11FA29264a822887b914b87E',
       mockETH: '0x9C8259CB48dA8f3beAe8D69F29Df3aC7487c9D3A',
-      mockDAI: '0xe9Cc8De05a0FC3829204D5415de9fF47Da7EA87d'
+      mockDAI: '0xe9Cc8De05a0FC3829204D5415de9fF47Da7EA87d',
+      // Common Sepolia tokens
+      WETH: '0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9',
+      USDC: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
+      LINK: '0x779877A7B0D9E8603169DdbD7836e478b4624789',
+      ENS: '0x6090A6e47849629b7245Dfa1Ca21D94cd15878Ef',
+      USDT: '0x7169D38820dfd117C3FA1f22a697dBA58d90BA06',
+      DAI: '0x68194a729C2450ad26072b3D33ADaCbcef39D574',
+      // Add your custom tokens here if they're commonly used
+      BOING: '0x6E5D899889C02d4Ff6b68900e5e06297318F9e3C' // Your BOING token
     },
     pairs: {
       usdcEth: '0xcAfaF837edD067298F923a3B5a4310Ee3AA18fAf',

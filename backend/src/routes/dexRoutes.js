@@ -3,7 +3,7 @@ import { cors } from 'hono/cors';
 import { TokenRepository } from '../database/repositories/tokenRepository.js';
 import { SwapService } from '../services/swapService.js';
 import { LiquidityService } from '../services/liquidityService.js';
-import { eq } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 
 export function createDEXRoutes() {
   const app = new Hono();
@@ -261,6 +261,54 @@ export function createDEXRoutes() {
     }
   });
 
+  // Get user's created pools
+  app.get('/liquidity/created/:address', async (c) => {
+    try {
+      const address = c.req.param('address');
+      const chainId = c.req.query('chainId') ? parseInt(c.req.query('chainId')) : null;
+      
+      const db = c.get('db');
+      const liquidityService = new LiquidityService(db);
+      const pools = await liquidityService.getUserCreatedPools(address, chainId);
+      return c.json({ success: true, data: pools });
+    } catch (error) {
+      return c.json({ success: false, error: error.message }, 500);
+    }
+  });
+
+  // Get pool analytics
+  app.get('/liquidity/analytics/:address', async (c) => {
+    try {
+      const address = c.req.param('address');
+      const chainId = c.req.query('chainId') ? parseInt(c.req.query('chainId')) : null;
+      
+      const db = c.get('db');
+      const liquidityService = new LiquidityService(db);
+      const analytics = await liquidityService.getPoolAnalytics(address, chainId);
+      return c.json({ success: true, data: analytics });
+    } catch (error) {
+      return c.json({ success: false, error: error.message }, 500);
+    }
+  });
+
+  // Collect fees from pool
+  app.post('/liquidity/collect-fees', async (c) => {
+    try {
+      const { poolAddress, chainId } = await c.req.json();
+      
+      if (!poolAddress) {
+        return c.json({ success: false, error: 'Pool address is required' }, 400);
+      }
+      
+      const db = c.get('db');
+      const liquidityService = new LiquidityService(db);
+      const result = await liquidityService.collectFees(poolAddress, chainId);
+      return c.json({ success: true, data: result });
+    } catch (error) {
+      return c.json({ success: false, error: error.message }, 500);
+    }
+  });
+
   app.get('/liquidity/pool/:address', async (c) => {
     try {
       const address = c.req.param('address');
@@ -428,6 +476,161 @@ export function createDEXRoutes() {
         data: txs
       });
     } catch (error) {
+      return c.json({ success: false, error: error.message }, 500);
+    }
+  });
+
+  // General transactions endpoint (dynamic)
+  app.get('/transactions/:address', async (c) => {
+    try {
+      const address = c.req.param('address');
+      const filter = c.req.query('filter') || 'all';
+      const db = c.get('db');
+      
+      // Get swaps for the user
+      const swaps = await db.select().from(c.env.schema.swaps)
+        .where(eq(c.env.schema.swaps.sender, address))
+        .orderBy(desc(c.env.schema.swaps.timestamp))
+        .limit(50);
+      
+      // Get liquidity events for the user
+      const liquidityEvents = await db.select().from(c.env.schema.liquidityEvents)
+        .where(eq(c.env.schema.liquidityEvents.provider, address))
+        .orderBy(desc(c.env.schema.liquidityEvents.timestamp))
+        .limit(50);
+      
+      // Get bridge transactions for the user
+      const bridgeTransactions = await db.select().from(c.env.schema.bridgeTransactions)
+        .where(eq(c.env.schema.bridgeTransactions.userAddress, address))
+        .orderBy(desc(c.env.schema.bridgeTransactions.timestamp))
+        .limit(50);
+      
+      // Combine and format all transactions
+      const allTransactions = [
+        ...swaps.map(swap => ({
+          id: `swap_${swap.id}`,
+          type: 'swap',
+          status: 'confirmed', // Assuming confirmed if in database
+          from: swap.tokenIn,
+          to: swap.tokenOut,
+          amount: swap.amountIn,
+          value: swap.amountOut,
+          timestamp: swap.timestamp,
+          txHash: swap.txHash,
+          chainId: swap.chainId,
+          blockNumber: swap.blockNumber
+        })),
+        ...liquidityEvents.map(event => ({
+          id: `liquidity_${event.id}`,
+          type: 'liquidity',
+          status: 'confirmed',
+          action: event.action,
+          pair: `${event.pairAddress}`,
+          amount: event.amount0,
+          value: event.amount1,
+          timestamp: event.timestamp,
+          txHash: event.txHash,
+          chainId: event.chainId,
+          blockNumber: event.blockNumber
+        })),
+        ...bridgeTransactions.map(bridge => ({
+          id: `bridge_${bridge.id}`,
+          type: 'bridge',
+          status: bridge.status,
+          from: bridge.token,
+          to: bridge.token,
+          amount: bridge.amount,
+          fromChain: bridge.fromChain,
+          toChain: bridge.toChain,
+          timestamp: bridge.timestamp,
+          txHash: bridge.txHash,
+          chainId: bridge.fromChain
+        }))
+      ];
+      
+      // Sort by timestamp (newest first)
+      allTransactions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      
+      // Apply filter if specified
+      let filteredTransactions = allTransactions;
+      if (filter !== 'all') {
+        filteredTransactions = allTransactions.filter(tx => tx.type === filter);
+      }
+      
+      return c.json({
+        success: true,
+        data: filteredTransactions
+      });
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      return c.json({ success: false, error: error.message }, 500);
+    }
+  });
+
+  // Add new transaction endpoint
+  app.post('/transactions', async (c) => {
+    try {
+      const transactionData = await c.req.json();
+      const db = c.get('db');
+      
+      let result;
+      
+      switch (transactionData.type) {
+        case 'swap':
+          result = await db.insert(c.env.schema.swaps).values({
+            txHash: transactionData.txHash,
+            pairAddress: transactionData.pairAddress || '',
+            sender: transactionData.sender,
+            tokenIn: transactionData.tokenIn,
+            tokenOut: transactionData.tokenOut,
+            amountIn: transactionData.amountIn,
+            amountOut: transactionData.amountOut,
+            chainId: transactionData.chainId,
+            blockNumber: transactionData.blockNumber,
+            timestamp: transactionData.timestamp
+          });
+          break;
+          
+        case 'liquidity':
+          result = await db.insert(c.env.schema.liquidityEvents).values({
+            txHash: transactionData.txHash,
+            pairAddress: transactionData.pairAddress,
+            provider: transactionData.provider,
+            action: transactionData.action,
+            amount0: transactionData.amount0,
+            amount1: transactionData.amount1,
+            chainId: transactionData.chainId,
+            blockNumber: transactionData.blockNumber,
+            timestamp: transactionData.timestamp
+          });
+          break;
+          
+        case 'bridge':
+          result = await db.insert(c.env.schema.bridgeTransactions).values({
+            txHash: transactionData.txHash,
+            fromChain: transactionData.fromChain,
+            toChain: transactionData.toChain,
+            userAddress: transactionData.userAddress,
+            token: transactionData.token,
+            amount: transactionData.amount,
+            status: transactionData.status,
+            timestamp: transactionData.timestamp
+          });
+          break;
+          
+        default:
+          return c.json({ success: false, error: 'Invalid transaction type' }, 400);
+      }
+      
+      return c.json({
+        success: true,
+        data: {
+          id: result.insertId,
+          ...transactionData
+        }
+      });
+    } catch (error) {
+      console.error('Error adding transaction:', error);
       return c.json({ success: false, error: error.message }, 500);
     }
   });

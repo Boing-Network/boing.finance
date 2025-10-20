@@ -1,83 +1,104 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { getApiUrl } from '../config.js';
 import { useWalletConnection } from '../hooks/useWalletConnection';
+import { transactionTrackingService } from '../services/transactionTrackingService.js';
+import toast from 'react-hot-toast';
 
 export default function TransactionHistoryModal({ isOpen, onClose }) {
   const { account } = useWalletConnection();
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, pending, completed, failed
+  const [filter, setFilter] = useState('all'); // all, swap, liquidity, bridge
+  const [error, setError] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const pollingIntervalRef = useRef(null);
 
   const loadTransactions = useCallback(async () => {
     if (!account) {
       setTransactions([]);
       setLoading(false);
+      setError(null);
       return;
     }
 
     setLoading(true);
+    setError(null);
     try {
       const apiUrl = getApiUrl();
       const response = await axios.get(`${apiUrl}/transactions/${account}?filter=${filter}`);
       if (response.data.success) {
-        setTransactions(response.data.data);
+        const newTransactions = response.data.data;
+        
+        // Check if we have new transactions (for notification)
+        if (transactions.length > 0 && newTransactions.length > transactions.length) {
+          const newCount = newTransactions.length - transactions.length;
+          console.log(`Found ${newCount} new transactions`);
+        }
+        
+        setTransactions(newTransactions);
+        setLastUpdated(new Date());
+      } else {
+        setError('Failed to load transactions');
       }
     } catch (error) {
       console.error('Failed to load transactions:', error);
-      // Fallback to mock data for demo
-      setTransactions(getMockTransactions());
+      setError('Failed to load transactions. Please try again.');
+      setTransactions([]);
     } finally {
       setLoading(false);
     }
   }, [account, filter]);
 
+  // Subscribe to transaction updates
   useEffect(() => {
-    if (isOpen) {
-      loadTransactions();
-    }
-  }, [isOpen, loadTransactions]);
+    if (isOpen && account) {
+      const unsubscribe = transactionTrackingService.subscribe((newTransactions) => {
+        console.log('Received new transaction update:', newTransactions);
+        // Add new transactions to the beginning of the list
+        setTransactions(prev => {
+          const existingIds = new Set(prev.map(tx => tx.txHash));
+          const uniqueNewTransactions = newTransactions.filter(tx => !existingIds.has(tx.txHash));
+          
+          // Show notification for new transactions
+          if (uniqueNewTransactions.length > 0) {
+            toast.success(`${uniqueNewTransactions.length} new transaction${uniqueNewTransactions.length > 1 ? 's' : ''} added to history!`);
+          }
+          
+          return [...uniqueNewTransactions, ...prev];
+        });
+        setLastUpdated(new Date());
+      });
 
-  const getMockTransactions = () => {
-    return [
-      {
-        id: '1',
-        type: 'swap',
-        status: 'confirmed',
-        from: 'ETH',
-        to: 'USDC',
-        amount: '1.5',
-        value: '3000',
-        timestamp: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
-        txHash: '0x1234...5678',
-        chainId: 1
-      },
-      {
-        id: '2',
-        type: 'liquidity',
-        status: 'confirmed',
-        action: 'add',
-        pair: 'ETH/USDC',
-        amount: '500',
-        timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-        txHash: '0x8765...4321',
-        chainId: 1
-      },
-      {
-        id: '3',
-        type: 'bridge',
-        status: 'pending',
-        from: 'ETH',
-        to: 'USDC',
-        amount: '100',
-        fromChain: 1,
-        toChain: 137,
-        timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-        txHash: '0xabcd...efgh',
-        chainId: 1
+      return unsubscribe;
+    }
+  }, [isOpen, account]);
+
+  // Start polling for real-time updates when modal is open
+  useEffect(() => {
+    if (isOpen && account) {
+      // Load immediately
+      loadTransactions();
+      
+      // Set up polling every 10 seconds
+      pollingIntervalRef.current = setInterval(() => {
+        loadTransactions();
+      }, 10000);
+      
+      return () => {
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
+        }
+      };
+    } else {
+      // Clear polling when modal is closed or account changes
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
       }
-    ];
-  };
+    }
+  }, [isOpen, account, loadTransactions]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -170,7 +191,8 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
       1: 'https://etherscan.io/tx/',
       137: 'https://polygonscan.com/tx/',
       56: 'https://bscscan.com/tx/',
-      42161: 'https://arbiscan.io/tx/'
+      42161: 'https://arbiscan.io/tx/',
+      11155111: 'https://sepolia.etherscan.io/tx/' // Sepolia testnet
     };
     const explorer = explorers[chainId] || explorers[1];
     window.open(explorer + txHash, '_blank');
@@ -189,7 +211,22 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
           &times;
         </button>
         
-        <h2 className="text-xl font-bold text-white mb-4">Transaction History</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-white">Transaction History</h2>
+          <div className="flex items-center space-x-4">
+            {lastUpdated && (
+              <div className="text-gray-400 text-xs">
+                Last updated: {formatTime(lastUpdated.toISOString())}
+              </div>
+            )}
+            {pollingIntervalRef.current && (
+              <div className="flex items-center space-x-2 text-green-400 text-sm">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span>Live updates</span>
+              </div>
+            )}
+          </div>
+        </div>
         
         {/* Filter Tabs */}
         <div className="flex space-x-1 mb-6 bg-gray-700 rounded-lg p-1">
@@ -223,6 +260,18 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
                 </div>
               ))}
             </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <div className="text-4xl mb-4">⚠️</div>
+              <h4 className="text-lg font-semibold text-white mb-2">Error Loading Transactions</h4>
+              <p className="text-gray-400 mb-4">{error}</p>
+              <button
+                onClick={loadTransactions}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200"
+              >
+                Try Again
+              </button>
+            </div>
           ) : transactions.length > 0 ? (
             <div className="space-y-3">
               {transactions.map((tx) => (
@@ -249,8 +298,8 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
                     </div>
                     <div className="text-right">
                       <p className="text-white font-medium">
-                        {tx.type === 'swap' && `$${tx.value}`}
-                        {tx.type === 'liquidity' && `$${tx.amount}`}
+                        {tx.type === 'swap' && `${tx.value} ${tx.to}`}
+                        {tx.type === 'liquidity' && `${tx.amount} ${tx.action}`}
                         {tx.type === 'bridge' && `${tx.amount} ${tx.from}`}
                       </p>
                       <button

@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import SecurityBadges from './SecurityBadges';
+import walletTokenService from '../services/walletTokenService';
 
-export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, currentNetwork }) {
+export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, currentNetwork, account, provider, chainId }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [customTokens, setCustomTokens] = useState([]);
   const [importAddress, setImportAddress] = useState('');
   const [importing, setImporting] = useState(false);
-  const [activeTab, setActiveTab] = useState('popular'); // popular, custom, import
+  const [activeTab, setActiveTab] = useState('my-tokens'); // my-tokens, popular, custom, import
+  const [userTokens, setUserTokens] = useState([]);
+  const [loadingUserTokens, setLoadingUserTokens] = useState(false);
 
   // Popular tokens by network
   const popularTokens = {
@@ -48,6 +51,29 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
       setCustomTokens(JSON.parse(saved));
     }
   }, [currentNetwork]);
+
+  // Fetch user tokens when modal opens and user is connected
+  useEffect(() => {
+    if (isOpen && account && provider && chainId) {
+      fetchUserTokens();
+    }
+  }, [isOpen, account, provider, chainId]);
+
+  const fetchUserTokens = async () => {
+    if (!account || !provider || !chainId) return;
+    
+    setLoadingUserTokens(true);
+    try {
+      walletTokenService.initialize(provider, account, chainId, true); // Enable debug
+      const tokens = await walletTokenService.getUserTokens();
+      console.log('Fetched user tokens:', tokens);
+      setUserTokens(tokens);
+    } catch (error) {
+      console.error('Failed to fetch user tokens:', error);
+    } finally {
+      setLoadingUserTokens(false);
+    }
+  };
 
   const saveCustomTokens = (tokens) => {
     setCustomTokens(tokens);
@@ -112,6 +138,8 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
 
   const getCurrentTokens = () => {
     switch (activeTab) {
+      case 'my-tokens':
+        return userTokens;
       case 'popular':
         return popularTokens[currentNetwork] || [];
       case 'custom':
@@ -152,6 +180,7 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
         {/* Tabs */}
         <div className="flex space-x-1 mb-4 bg-gray-700 rounded-lg p-1">
           {[
+            { key: 'my-tokens', label: 'My Tokens' },
             { key: 'popular', label: 'Popular' },
             { key: 'custom', label: 'Custom' },
             { key: 'import', label: 'Import' }
@@ -201,7 +230,12 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
             </div>
           ) : (
             <div className="space-y-2">
-              {filterTokens(getCurrentTokens()).length > 0 ? (
+              {activeTab === 'my-tokens' && loadingUserTokens ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                  <p className="text-gray-400">Loading your tokens...</p>
+                </div>
+              ) : filterTokens(getCurrentTokens()).length > 0 ? (
                 filterTokens(getCurrentTokens()).map((token) => (
                   <div
                     key={token.address}
@@ -213,6 +247,9 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
                       <div>
                         <p className="text-white font-medium">{token.symbol}</p>
                         <p className="text-gray-400 text-sm">{token.name}</p>
+                        {activeTab === 'my-tokens' && token.balance && (
+                          <p className="text-blue-400 text-xs">Balance: {token.formattedBalance}</p>
+                        )}
                       </div>
                     </div>
                     {activeTab === 'custom' && (
@@ -236,7 +273,9 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
                   <div className="text-4xl mb-4">🔍</div>
                   <h4 className="text-lg font-semibold text-white mb-2">No Tokens Found</h4>
                   <p className="text-gray-400">
-                    {activeTab === 'popular' 
+                    {activeTab === 'my-tokens' 
+                      ? 'No tokens found in your wallet on this network.'
+                      : activeTab === 'popular' 
                       ? 'No popular tokens match your search.'
                       : 'No custom tokens added yet.'
                     }
