@@ -35,15 +35,24 @@ bucket_name = "boing-storage"
 preview_bucket_name = "boing-storage-preview"
 
 # Environment-specific D1 databases
-[env.production.d1_databases]
+[[env.production.d1_databases]]
 binding = "DB"
 database_name = "boing-database-prod"
 database_id = "fad0eff6-b010-4310-af96-0b68fc5ebab5"
 
-[env.staging.d1_databases]
+[[env.staging.d1_databases]]
 binding = "DB"
 database_name = "boing-database-staging"
 database_id = "fad0eff6-b010-4310-af96-0b68fc5ebab5"
+
+# Environment-specific R2 buckets
+[[env.production.r2_buckets]]
+binding = "BOING_STORAGE"
+bucket_name = "boing-storage"
+
+[[env.staging.r2_buckets]]
+binding = "BOING_STORAGE"
+bucket_name = "boing-storage-preview"
 
 # KV Namespace for caching (optional)
 # Run: wrangler kv:namespace create "BOING_CACHE"
