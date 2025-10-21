@@ -1251,7 +1251,10 @@ export default function DeployToken() {
             </div>
 
             {/* Service Plan Selection */}
-            <div className="bg-gray-800 rounded-2xl shadow-xl p-6 mb-8 border border-gray-700">
+            <div className="rounded-2xl shadow-xl p-6 mb-8 border" style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'var(--border-color)'
+            }}>
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-bold text-white">Choose Your Service Plan</h2>
@@ -1344,7 +1347,10 @@ export default function DeployToken() {
             </div>
 
             {/* Main Form */}
-            <div className="bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 border border-gray-700">
+            <div className="rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 border" style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'var(--border-color)'
+            }}>
               <form onSubmit={handleDeploy} className="space-y-6 sm:space-y-8">
                 {/* Basic Information */}
                 <div>
@@ -1718,7 +1724,10 @@ export default function DeployToken() {
 
             {/* Deployment Status */}
             {(txHash || tokenAddress) && (
-              <div className="bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 mt-6 sm:mt-8 border border-gray-700">
+              <div className="rounded-2xl shadow-xl p-4 sm:p-6 mt-6 sm:mt-8 border" style={{
+                backgroundColor: 'var(--bg-card)',
+                borderColor: 'var(--border-color)'
+              }}>
                 <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">Deployment Status</h3>
                 
                 {txHash && (
@@ -1759,7 +1768,10 @@ export default function DeployToken() {
 
             {/* Metadata Information */}
             {metadataUrl && (
-              <div className="bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 mt-6 sm:mt-8 border border-gray-700">
+              <div className="rounded-2xl shadow-xl p-4 sm:p-6 mt-6 sm:mt-8 border" style={{
+                backgroundColor: 'var(--bg-card)',
+                borderColor: 'var(--border-color)'
+              }}>
                 <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">Token Metadata</h3>
                 <div className="space-y-4">
                   <div>

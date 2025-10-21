@@ -87,7 +87,7 @@ function AppContent() {
       
       {/* Navigation */}
       <nav className="relative z-30 backdrop-blur-sm border-b border-cyan-500/30 shadow-lg shadow-cyan-500/20" style={{ 
-        background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
+        background: 'linear-gradient(to right, var(--bg-secondary), var(--bg-tertiary), var(--bg-secondary))',
         borderColor: 'var(--border-color)'
       }}>
         <ShootingStars />
@@ -517,7 +517,7 @@ function AppContent() {
       />
       
       <footer className="w-full border-t border-cyan-500/30 shadow-lg shadow-cyan-500/20 relative z-20" style={{
-        background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
+        background: 'linear-gradient(to right, var(--bg-secondary), var(--bg-tertiary), var(--bg-secondary))',
         borderColor: 'var(--border-color)'
       }}>
         <ShootingStars />

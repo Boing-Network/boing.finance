@@ -1698,12 +1698,18 @@ const Swap = () => {
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
       </Helmet>
-      <div className="relative min-h-screen">
+      <div className="relative min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
         <AnimatedBackground />
         <MochiAstronaut position="top-right" />
         {/* Settings Button */}
         <button
-          className="absolute top-6 right-6 z-30 bg-gray-800 hover:bg-gray-700 p-2 rounded-full shadow-lg"
+          className="absolute top-6 right-6 z-30 p-2 rounded-full shadow-lg"
+          style={{
+            backgroundColor: 'var(--bg-card)',
+            border: '1px solid var(--border-color)'
+          }}
+          onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--bg-tertiary)'}
+          onMouseLeave={(e) => e.target.style.backgroundColor = 'var(--bg-card)'}
           onClick={() => setSettingsOpen(true)}
           aria-label="Open settings"
         >
@@ -1713,7 +1719,10 @@ const Swap = () => {
         </button>
 
         {/* Gas Priority Indicator */}
-        <div className="absolute top-6 right-20 z-30 bg-gray-800 px-3 py-2 rounded-lg shadow-lg">
+        <div className="absolute top-6 right-20 z-30 px-3 py-2 rounded-lg shadow-lg" style={{
+          backgroundColor: 'var(--bg-card)',
+          border: '1px solid var(--border-color)'
+        }}>
           <div className="flex items-center space-x-2">
             <div className={`w-2 h-2 rounded-full ${
               settings.gasPriority === 'high' ? 'bg-red-400' : 
@@ -1744,7 +1753,10 @@ const Swap = () => {
           </div>
 
           {/* Swap Interface */}
-          <div className="bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg mb-4 sm:mb-6">
+          <div className="rounded-xl p-4 sm:p-6 shadow-lg mb-4 sm:mb-6" style={{
+            backgroundColor: 'var(--bg-card)',
+            border: '1px solid var(--border-color)'
+          }}>
             {/* Network Status Indicator */}
             <div className="mb-4 p-3 rounded-lg border">
               {(() => {
@@ -1798,7 +1810,10 @@ const Swap = () => {
 
                 {/* Token In Dropdown */}
                 {tokenInDropdownOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-80 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
+                  <div className="absolute top-full left-0 mt-2 w-80 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto" style={{
+                    backgroundColor: 'var(--bg-card)',
+                    border: '1px solid var(--border-color)'
+                  }}>
                     <div className="p-3 border-b border-gray-700">
                       <h3 className="text-white font-medium mb-2">Select Token</h3>
                       <div className="relative">
@@ -1891,7 +1906,10 @@ const Swap = () => {
 
                 {/* Token Out Dropdown */}
                 {tokenOutDropdownOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-80 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
+                  <div className="absolute top-full left-0 mt-2 w-80 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto" style={{
+                    backgroundColor: 'var(--bg-card)',
+                    border: '1px solid var(--border-color)'
+                  }}>
                     <div className="p-3 border-b border-gray-700">
                       <h3 className="text-white font-medium mb-2">Select Token</h3>
                       <div className="relative">
