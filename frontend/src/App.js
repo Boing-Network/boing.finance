@@ -28,6 +28,7 @@ import BugReport from './pages/BugReport';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import Whitepaper from './pages/Whitepaper';
+import ExecutiveSummary from './pages/ExecutiveSummary';
 import './styles/globals.css';
 
 // Create a client
@@ -408,6 +409,7 @@ function AppContent() {
             <Route path="/contact-us" element={<ContactUs />} />
             <Route path="/status" element={<Status />} />
             <Route path="/bug-report" element={<BugReport />} />
+            <Route path="/executive-summary" element={<ExecutiveSummary />} />
           </Routes>
         </div>
       </main>
