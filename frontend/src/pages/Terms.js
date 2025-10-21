@@ -35,6 +35,8 @@ const Terms = () => {
                 <span>Last Updated: January 2025</span>
                 <span>•</span>
                 <span>Version 1.0</span>
+                <span>•</span>
+                <span>boing.finance LLC (Florida)</span>
               </div>
             </div>
 
