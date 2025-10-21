@@ -1364,7 +1364,12 @@ export default function DeployToken() {
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400 text-sm sm:text-base"
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                        style={{
+                          backgroundColor: 'var(--bg-tertiary)',
+                          border: '1px solid var(--border-color)',
+                          color: 'var(--text-primary)'
+                        }}
                         placeholder="My Awesome Token"
                         required
                       />
@@ -1378,7 +1383,12 @@ export default function DeployToken() {
                         type="text"
                         value={symbol}
                         onChange={(e) => setSymbol(e.target.value)}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400 text-sm sm:text-base"
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                        style={{
+                          backgroundColor: 'var(--bg-tertiary)',
+                          border: '1px solid var(--border-color)',
+                          color: 'var(--text-primary)'
+                        }}
                         placeholder="MAT"
                         maxLength={10}
                         required
@@ -1408,7 +1418,12 @@ export default function DeployToken() {
                         type="number"
                         value={initialSupply}
                         onChange={(e) => setInitialSupply(e.target.value)}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400 text-sm sm:text-base"
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                        style={{
+                          backgroundColor: 'var(--bg-tertiary)',
+                          border: '1px solid var(--border-color)',
+                          color: 'var(--text-primary)'
+                        }}
                         placeholder="1000000"
                         min="1"
                         required
@@ -1440,7 +1455,12 @@ export default function DeployToken() {
                         type="url"
                         value={website}
                         onChange={(e) => setWebsite(e.target.value)}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400 text-sm sm:text-base"
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                        style={{
+                          backgroundColor: 'var(--bg-tertiary)',
+                          border: '1px solid var(--border-color)',
+                          color: 'var(--text-primary)'
+                        }}
                         placeholder="https://yourproject.com"
                         required
                       />
@@ -1453,7 +1473,12 @@ export default function DeployToken() {
                       <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400 text-sm sm:text-base"
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                        style={{
+                          backgroundColor: 'var(--bg-tertiary)',
+                          border: '1px solid var(--border-color)',
+                          color: 'var(--text-primary)'
+                        }}
                         rows={4}
                         placeholder="Describe your project, its purpose, and key features..."
                       />
@@ -1694,7 +1719,12 @@ export default function DeployToken() {
                           type="url"
                           value={value}
                           onChange={(e) => handleSocialLinkChange(platform, e.target.value)}
-                          className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400 text-sm sm:text-base"
+                          className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                        style={{
+                          backgroundColor: 'var(--bg-tertiary)',
+                          border: '1px solid var(--border-color)',
+                          color: 'var(--text-primary)'
+                        }}
                           placeholder={`https://${platform}.com/yourproject`}
                         />
                       </div>
@@ -1734,7 +1764,10 @@ export default function DeployToken() {
                   <div className="mb-4">
                     <p className="text-sm font-medium text-gray-300 mb-2">Transaction Hash:</p>
                     <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                      <code className="bg-gray-700 px-3 py-2 rounded text-xs sm:text-sm font-mono break-all text-gray-200">
+                      <code className="px-3 py-2 rounded text-xs sm:text-sm font-mono break-all" style={{
+                        backgroundColor: 'var(--bg-tertiary)',
+                        color: 'var(--text-secondary)'
+                      }}>
                         {txHash}
                       </code>
                       <button
@@ -1751,7 +1784,10 @@ export default function DeployToken() {
                   <div>
                     <p className="text-sm font-medium text-gray-300 mb-2">Token Address:</p>
                     <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                      <code className="bg-gray-700 px-3 py-2 rounded text-xs sm:text-sm font-mono break-all text-gray-200">
+                      <code className="px-3 py-2 rounded text-xs sm:text-sm font-mono break-all" style={{
+                        backgroundColor: 'var(--bg-tertiary)',
+                        color: 'var(--text-secondary)'
+                      }}>
                         {tokenAddress}
                       </code>
                       <button
@@ -1777,7 +1813,10 @@ export default function DeployToken() {
                   <div>
                     <p className="text-sm font-medium text-gray-300 mb-2">IPFS Metadata URL:</p>
                     <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                      <code className="bg-gray-700 px-3 py-2 rounded text-xs sm:text-sm font-mono break-all text-gray-200">
+                      <code className="px-3 py-2 rounded text-xs sm:text-sm font-mono break-all" style={{
+                        backgroundColor: 'var(--bg-tertiary)',
+                        color: 'var(--text-secondary)'
+                      }}>
                         {metadataUrl}
                       </code>
                       <button
@@ -1793,7 +1832,10 @@ export default function DeployToken() {
                     <div>
                       <p className="text-sm font-medium text-gray-300 mb-2">Logo URL:</p>
                       <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                        <code className="bg-gray-700 px-3 py-2 rounded text-xs sm:text-sm font-mono break-all text-gray-200">
+                        <code className="px-3 py-2 rounded text-xs sm:text-sm font-mono break-all" style={{
+                        backgroundColor: 'var(--bg-tertiary)',
+                        color: 'var(--text-secondary)'
+                      }}>
                           {logoUrl}
                         </code>
                         <button
@@ -1820,7 +1862,10 @@ export default function DeployToken() {
             )}
 
             {/* Deployment Tips */}
-            <div className="bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 mt-6 sm:mt-8 border border-gray-700">
+            <div className="rounded-2xl shadow-xl p-4 sm:p-6 mt-6 sm:mt-8 border" style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'var(--border-color)'
+            }}>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-2 sm:space-y-0">
                 <h3 className="text-xl sm:text-2xl font-bold text-white">Deployment Tips</h3>
                 <button
@@ -1878,7 +1923,14 @@ export default function DeployToken() {
                   <div className="flex justify-end space-x-4">
                     <button
                       onClick={() => setShowOwnershipRenounceModal(false)}
-                      className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                      className="px-4 py-2 rounded transition-colors"
+                      style={{
+                        backgroundColor: 'var(--bg-tertiary)',
+                        color: 'var(--text-primary)',
+                        border: '1px solid var(--border-color)'
+                      }}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--bg-secondary)'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = 'var(--bg-tertiary)'}
                     >
                       Cancel
                     </button>
@@ -1909,7 +1961,14 @@ export default function DeployToken() {
                   <div className="flex justify-end space-x-4">
                     <button
                       onClick={() => { setShowRenounceModal(false); setPendingRenounceContract(null); }}
-                      className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                      className="px-4 py-2 rounded transition-colors"
+                      style={{
+                        backgroundColor: 'var(--bg-tertiary)',
+                        color: 'var(--text-primary)',
+                        border: '1px solid var(--border-color)'
+                      }}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--bg-secondary)'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = 'var(--bg-tertiary)'}
                     >Cancel</button>
                     <button
                       onClick={handleConfirmRenounce}
