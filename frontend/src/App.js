@@ -82,11 +82,14 @@ function AppContent() {
   };
 
   return (
-    <div className="relative min-h-screen bg-gray-900">
+    <div className="relative min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
       <EnhancedAnimatedBackground />
       
       {/* Navigation */}
-      <nav className="relative z-30 bg-gradient-to-r from-slate-800/95 via-slate-900/95 to-slate-800/95 backdrop-blur-sm border-b border-cyan-500/30 shadow-lg shadow-cyan-500/20">
+      <nav className="relative z-30 backdrop-blur-sm border-b border-cyan-500/30 shadow-lg shadow-cyan-500/20" style={{ 
+        background: 'linear-gradient(to right, var(--bg-secondary), var(--bg-tertiary), var(--bg-secondary))',
+        borderColor: 'var(--border-color)'
+      }}>
         <ShootingStars />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -94,7 +97,8 @@ function AppContent() {
             <div className="flex-shrink-0">
               <button
                 onClick={() => window.location.href = '/'}
-                className="flex items-center space-x-2 text-white font-bold text-xl"
+                className="flex items-center space-x-2 font-bold text-xl"
+                style={{ color: 'var(--text-primary)' }}
               >
                 <Logo size={40} showText={true} className="drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]" />
               </button>
@@ -106,7 +110,13 @@ function AppContent() {
                 {/* Home - Solo */}
                 <button
                   onClick={() => window.location.href = navigation.home.href}
-                  className="text-gray-200 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2"
+                  className="px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2"
+                  style={{ 
+                    color: 'var(--text-secondary)',
+                    ':hover': { color: 'var(--text-primary)' }
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+                  onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
                 >
                   <span className="text-lg">{navigation.home.icon}</span>
                   <span>{navigation.home.name}</span>
@@ -160,7 +170,10 @@ function AppContent() {
               {/* History Button */}
               <button
                 onClick={() => setHistoryModalOpen(true)}
-                className="text-gray-200 hover:text-white p-2 rounded-md transition-colors"
+                className="p-2 rounded-md transition-colors"
+                style={{ color: 'var(--text-secondary)' }}
+                onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+                onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
                 aria-label="View transaction history"
               >
                 <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -253,7 +266,10 @@ function AppContent() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-cyan-500/30 bg-gradient-to-r from-slate-800/95 via-slate-900/95 to-slate-800/95 backdrop-blur-sm shadow-lg shadow-cyan-500/20">
+          <div className="md:hidden border-t border-cyan-500/30 backdrop-blur-sm shadow-lg shadow-cyan-500/20" style={{
+            background: 'linear-gradient(to right, var(--bg-secondary), var(--bg-tertiary), var(--bg-secondary))',
+            borderColor: 'var(--border-color)'
+          }}>
             <div className="px-4 py-3 space-y-3">
               {/* Home */}
               <button
@@ -261,15 +277,25 @@ function AppContent() {
                   window.location.href = navigation.home.href;
                   closeMenu();
                 }}
-                className="w-full text-left text-gray-200 hover:text-white px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 bg-gradient-to-r from-slate-700/80 via-slate-800/80 to-slate-700/80 border border-cyan-500/20"
+                className="w-full text-left px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 border border-cyan-500/20"
+                style={{
+                  color: 'var(--text-secondary)',
+                  background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
+                  borderColor: 'var(--border-color)'
+                }}
+                onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+                onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
               >
                 <span className="text-xl">{navigation.home.icon}</span>
                 <span>{navigation.home.name}</span>
               </button>
 
               {/* Trading Section */}
-              <div className="bg-gradient-to-r from-slate-700/80 via-slate-800/80 to-slate-700/80 rounded-lg p-3 border border-cyan-500/20">
-                <h3 className="text-gray-200 text-sm font-medium mb-2 px-1">Trading</h3>
+              <div className="rounded-lg p-3 border border-cyan-500/20" style={{
+                background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
+                borderColor: 'var(--border-color)'
+              }}>
+                <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>Trading</h3>
                 <div className="space-y-1">
                   {navigation.trading.map((item) => (
                     <button
@@ -280,7 +306,20 @@ function AppContent() {
                           closeMenu();
                         }
                       }}
-                      className={`w-full text-left text-gray-200 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${item.comingSoon ? 'text-gray-400 cursor-not-allowed opacity-60' : ''}`}
+                      className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${item.comingSoon ? 'cursor-not-allowed opacity-60' : ''}`}
+                      style={{
+                        color: item.comingSoon ? 'var(--text-tertiary)' : 'var(--text-secondary)'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!item.comingSoon) {
+                          e.target.style.color = 'var(--text-primary)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!item.comingSoon) {
+                          e.target.style.color = 'var(--text-secondary)';
+                        }
+                      }}
                       disabled={item.comingSoon}
                       title={item.comingSoon ? comingSoon.tooltip : ''}
                     >
@@ -293,7 +332,7 @@ function AppContent() {
                           )}
                         </div>
                         {item.description && (
-                          <div className="text-xs text-gray-400">{item.description}</div>
+                          <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{item.description}</div>
                         )}
                       </div>
                     </button>
@@ -302,8 +341,11 @@ function AppContent() {
               </div>
 
               {/* Analytics Section */}
-              <div className="bg-gradient-to-r from-slate-700/80 via-slate-800/80 to-slate-700/80 rounded-lg p-3 border border-cyan-500/20">
-                <h3 className="text-gray-200 text-sm font-medium mb-2 px-1">Analytics</h3>
+              <div className="rounded-lg p-3 border border-cyan-500/20" style={{
+                background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
+                borderColor: 'var(--border-color)'
+              }}>
+                <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>Analytics</h3>
                 <div className="space-y-1">
                   {navigation.analytics.map((item) => (
                     <button
@@ -314,7 +356,20 @@ function AppContent() {
                           closeMenu();
                         }
                       }}
-                      className={`w-full text-left text-gray-200 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${item.comingSoon ? 'text-gray-400 cursor-not-allowed opacity-60' : ''}`}
+                      className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${item.comingSoon ? 'cursor-not-allowed opacity-60' : ''}`}
+                      style={{
+                        color: item.comingSoon ? 'var(--text-tertiary)' : 'var(--text-secondary)'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!item.comingSoon) {
+                          e.target.style.color = 'var(--text-primary)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!item.comingSoon) {
+                          e.target.style.color = 'var(--text-secondary)';
+                        }
+                      }}
                       disabled={item.comingSoon}
                       title={item.comingSoon ? comingSoon.tooltip : ''}
                     >
@@ -327,7 +382,7 @@ function AppContent() {
                           )}
                         </div>
                         {item.description && (
-                          <div className="text-xs text-gray-400">{item.description}</div>
+                          <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{item.description}</div>
                         )}
                       </div>
                     </button>
@@ -336,8 +391,11 @@ function AppContent() {
               </div>
 
               {/* Deployment Section */}
-              <div className="bg-gradient-to-r from-slate-700/80 via-slate-800/80 to-slate-700/80 rounded-lg p-3 border border-cyan-500/20">
-                <h3 className="text-gray-200 text-sm font-medium mb-2 px-1">Deployment</h3>
+              <div className="rounded-lg p-3 border border-cyan-500/20" style={{
+                background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
+                borderColor: 'var(--border-color)'
+              }}>
+                <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>Deployment</h3>
                 <div className="space-y-1">
                   {navigation.deployment.map((item) => (
                     <button
@@ -348,7 +406,20 @@ function AppContent() {
                           closeMenu();
                         }
                       }}
-                      className={`w-full text-left text-gray-200 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${item.comingSoon ? 'text-gray-400 cursor-not-allowed opacity-60' : ''}`}
+                      className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${item.comingSoon ? 'cursor-not-allowed opacity-60' : ''}`}
+                      style={{
+                        color: item.comingSoon ? 'var(--text-tertiary)' : 'var(--text-secondary)'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!item.comingSoon) {
+                          e.target.style.color = 'var(--text-primary)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!item.comingSoon) {
+                          e.target.style.color = 'var(--text-secondary)';
+                        }
+                      }}
                       disabled={item.comingSoon}
                       title={item.comingSoon ? comingSoon.tooltip : ''}
                     >
@@ -361,7 +432,7 @@ function AppContent() {
                           )}
                         </div>
                         {item.description && (
-                          <div className="text-xs text-gray-400">{item.description}</div>
+                          <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{item.description}</div>
                         )}
                       </div>
                     </button>
@@ -370,20 +441,31 @@ function AppContent() {
               </div>
 
               {/* Mobile Wallet Controls */}
-              <div className="space-y-3 pt-3 border-t border-cyan-500/20">
+              <div className="space-y-3 pt-3 border-t border-cyan-500/20" style={{ borderColor: 'var(--border-color)' }}>
                 <button
                   onClick={() => {
                     setHistoryModalOpen(true);
                     closeMenu();
                   }}
-                  className="w-full text-left text-gray-200 hover:text-white px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 bg-gradient-to-r from-slate-700/80 via-slate-800/80 to-slate-700/80 border border-cyan-500/20"
+                  className="w-full text-left px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 border border-cyan-500/20"
+                  style={{
+                    color: 'var(--text-secondary)',
+                    background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
+                    borderColor: 'var(--border-color)'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+                  onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
                 >
                   <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <span>Transaction History</span>
                 </button>
-                <div className="w-full text-left text-gray-200 px-3 py-3 rounded-lg text-base font-medium flex items-center space-x-3 bg-gradient-to-r from-slate-700/80 via-slate-800/80 to-slate-700/80 border border-cyan-500/20">
+                <div className="w-full text-left px-3 py-3 rounded-lg text-base font-medium flex items-center space-x-3 border border-cyan-500/20" style={{
+                  color: 'var(--text-secondary)',
+                  background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
+                  borderColor: 'var(--border-color)'
+                }}>
                   <span>Theme</span>
                   <div className="ml-auto">
                     <ThemeToggle />
@@ -638,7 +720,7 @@ function Home() {
             <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 bg-clip-text text-transparent mb-6 leading-tight pb-2 drop-shadow-[0_0_20px_rgba(6,182,212,0.4)]">
               boing.finance
             </h1>
-            <p className="text-gray-300 text-lg leading-relaxed mb-12">
+            <p className="text-lg leading-relaxed mb-12" style={{ color: 'var(--text-secondary)' }}>
               The ultimate multi-network DeFi platform for cross-chain trading, token deployment, and comprehensive financial tools across Ethereum, Polygon, BSC, Arbitrum, Optimism, and Base networks.
             </p>
           </div>
@@ -668,7 +750,7 @@ function Home() {
               <circle cx="100" cy="100" r="30" stroke="#fff" strokeWidth="1.5" fill="none" opacity="0.09" />
               <animateTransform attributeName="transform" from="0 100 100" to="360 100 100" dur="18s" repeatCount="indefinite" />
             </svg>
-            <p className="text-xl text-center text-text-muted max-w-2xl mb-2">Fast, secure, and user-friendly DeFi for everyone.</p>
+            <p className="text-xl text-center max-w-2xl mb-2" style={{ color: 'var(--text-secondary)' }}>Fast, secure, and user-friendly DeFi for everyone.</p>
           </div>
 
           {/* Features Section */}
@@ -699,19 +781,19 @@ function Home() {
           <div className="mt-8 mb-4 flex justify-center fade-in delay-800">
             <div className="rounded-xl px-6 py-4 bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 max-w-2xl">
               <div className="text-center">
-                <div className="text-lg font-semibold text-white mb-2">🚀 Create Your Own Tokens & Trading Pairs!</div>
-                <p className="text-gray-300 text-sm mb-3">
+                <div className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>🚀 Create Your Own Tokens & Trading Pairs!</div>
+                <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
                   Unlike centralized exchanges, boing allows anyone to deploy tokens and create trading pairs instantly. 
                   No permission required - just deploy, add liquidity, and start trading!
                 </p>
                 <div className="flex flex-wrap gap-2 justify-center">
-                  <span className="text-gray-500 text-sm cursor-not-allowed">Browse Tokens</span>
-                  <span className="text-gray-500">•</span>
-                  <a href="/deploy-token" className="text-blue-300 hover:text-blue-200 text-sm underline transition-colors">Deploy Token</a>
-                  <span className="text-gray-500">•</span>
-                  <span className="text-gray-500 text-sm cursor-not-allowed">Create Pairs</span>
-                  <span className="text-gray-500">•</span>
-                  <span className="text-gray-500 text-sm cursor-not-allowed">Start Trading</span>
+                  <span className="text-sm cursor-not-allowed" style={{ color: 'var(--text-tertiary)' }}>Browse Tokens</span>
+                  <span style={{ color: 'var(--text-tertiary)' }}>•</span>
+                  <a href="/deploy-token" className="text-sm underline transition-colors" style={{ color: 'var(--primary-color)' }}>Deploy Token</a>
+                  <span style={{ color: 'var(--text-tertiary)' }}>•</span>
+                  <span className="text-sm cursor-not-allowed" style={{ color: 'var(--text-tertiary)' }}>Create Pairs</span>
+                  <span style={{ color: 'var(--text-tertiary)' }}>•</span>
+                  <span className="text-sm cursor-not-allowed" style={{ color: 'var(--text-tertiary)' }}>Start Trading</span>
                 </div>
               </div>
             </div>
@@ -757,7 +839,9 @@ function Highlight({ icon, text }) {
   return (
     <div className="group relative flex items-center space-x-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-400/20 hover:border-cyan-400/40 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/20">
       <span className="text-xl text-cyan-400 group-hover:text-cyan-300 transition-colors duration-300 animate-pulse">{icon}</span>
-      <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors duration-300">{text}</span>
+      <span className="text-sm font-medium transition-colors duration-300" style={{ 
+        color: 'var(--text-secondary)'
+      }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>{text}</span>
       <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
     </div>
   );
@@ -875,21 +959,25 @@ function DeployTokenIcon() {
 function FeatureCard({ title, icon, description, comingSoon }) {
   return (
     <div
-      className={`group relative bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm border border-cyan-400/20 rounded-xl p-6 transition-all duration-500 overflow-hidden ${comingSoon ? 'opacity-60 cursor-not-allowed' : 'hover:border-cyan-400/40 hover:bg-gradient-to-br hover:from-gray-700/80 hover:to-gray-800/80 hover:scale-105 hover:shadow-xl hover:shadow-cyan-500/20'}`}
+      className={`group relative backdrop-blur-sm border border-cyan-400/20 rounded-xl p-6 transition-all duration-500 overflow-hidden ${comingSoon ? 'opacity-60 cursor-not-allowed' : 'hover:border-cyan-400/40 hover:scale-105 hover:shadow-xl hover:shadow-cyan-500/20'}`}
+      style={{
+        background: 'linear-gradient(to bottom right, var(--bg-card), var(--bg-secondary))',
+        borderColor: comingSoon ? 'var(--border-color)' : 'rgba(34, 211, 238, 0.2)'
+      }}
       title={comingSoon ? 'This feature will be available after mainnet launch.' : ''}
     >
       <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
       <div className="relative z-10">
         <div className="flex items-center mb-4">
           <span className="text-2xl mr-3 text-cyan-400 group-hover:text-cyan-300 transition-colors duration-300 animate-pulse">{icon}</span>
-          <h3 className="text-lg font-semibold text-white group-hover:text-cyan-100 transition-colors duration-300 flex items-center">
+          <h3 className="text-lg font-semibold transition-colors duration-300 flex items-center" style={{ color: 'var(--text-primary)' }}>
             {title}
             {comingSoon && (
               <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">Coming Soon</span>
             )}
           </h3>
         </div>
-        <p className="text-gray-300 group-hover:text-gray-200 text-sm leading-relaxed transition-colors duration-300">{description}</p>
+        <p className="text-sm leading-relaxed transition-colors duration-300" style={{ color: 'var(--text-secondary)' }}>{description}</p>
       </div>
     </div>
   );
@@ -902,7 +990,10 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
       <button
         onClick={onToggle}
         onBlur={() => setTimeout(onClose, 150)}
-        className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1 group"
+        className="px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1 group"
+        style={{ color: 'var(--text-secondary)' }}
+        onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+        onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
       >
         <span>{label}</span>
         <svg 
@@ -915,7 +1006,10 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
         </svg>
       </button>
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-48 bg-gray-800/95 backdrop-blur-sm border border-gray-700 rounded-lg shadow-xl z-50 animate-in slide-in-from-top-2 duration-200">
+        <div className="absolute top-full left-0 mt-1 w-48 backdrop-blur-sm rounded-lg shadow-xl z-50 animate-in slide-in-from-top-2 duration-200" style={{
+          backgroundColor: 'var(--bg-card)',
+          border: '1px solid var(--border-color)'
+        }}>
           <div className="py-1">
             {items.map((item) => (
               <button
@@ -926,7 +1020,22 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
                     onClose();
                   }
                 }}
-                className={`w-full text-left px-4 py-2 text-sm flex items-center space-x-3 group transition-colors ${item.comingSoon ? 'text-gray-500 cursor-not-allowed opacity-60' : 'text-gray-300 hover:text-white hover:bg-gray-700/50'}`}
+                className={`w-full text-left px-4 py-2 text-sm flex items-center space-x-3 group transition-colors ${item.comingSoon ? 'cursor-not-allowed opacity-60' : ''}`}
+                style={{
+                  color: item.comingSoon ? 'var(--text-tertiary)' : 'var(--text-secondary)'
+                }}
+                onMouseEnter={(e) => {
+                  if (!item.comingSoon) {
+                    e.target.style.color = 'var(--text-primary)';
+                    e.target.style.backgroundColor = 'var(--bg-tertiary)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!item.comingSoon) {
+                    e.target.style.color = 'var(--text-secondary)';
+                    e.target.style.backgroundColor = 'transparent';
+                  }
+                }}
                 disabled={item.comingSoon}
                 title={item.comingSoon ? comingSoon.tooltip : ''}
               >
