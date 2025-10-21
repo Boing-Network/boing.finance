@@ -23,6 +23,7 @@ import Tokens from './pages/Tokens';
 import Status from './pages/Status';
 import Docs from './pages/Docs';
 import HelpCenter from './pages/HelpCenter';
+import HelpArticle from './pages/HelpArticle';
 import ContactUs from './pages/ContactUs';
 import BugReport from './pages/BugReport';
 import Privacy from './pages/Privacy';
@@ -406,6 +407,7 @@ function AppContent() {
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/help-center" element={<HelpCenter />} />
+            <Route path="/help-center/article/:articleId" element={<HelpArticle />} />
             <Route path="/contact-us" element={<ContactUs />} />
             <Route path="/status" element={<Status />} />
             <Route path="/bug-report" element={<BugReport />} />

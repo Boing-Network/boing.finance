@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
 
 const HelpCenter = () => {
   const [activeCategory, setActiveCategory] = useState('getting-started');
@@ -235,18 +236,20 @@ const HelpCenter = () => {
                 {filteredArticles.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredArticles.map((article) => (
-                      <div key={article.id} className="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-gray-600 transition-colors">
-                        <div className="text-sm text-blue-400 mb-2">{article.category}</div>
-                        <h3 className="text-lg font-semibold text-white mb-2">{article.title}</h3>
-                        <p className="text-gray-300 text-sm mb-3">{article.content}</p>
-                        <div className="flex flex-wrap gap-1">
-                          {article.tags.map((tag) => (
-                            <span key={tag} className="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded">
-                              {tag}
-                            </span>
-                          ))}
+                      <Link key={article.id} to={`/help-center/article/${article.id}`} className="block">
+                        <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer">
+                          <div className="text-sm text-blue-400 mb-2">{article.category}</div>
+                          <h3 className="text-lg font-semibold text-white mb-2">{article.title}</h3>
+                          <p className="text-gray-300 text-sm mb-3">{article.content}</p>
+                          <div className="flex flex-wrap gap-1">
+                            {article.tags.map((tag) => (
+                              <span key={tag} className="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 ) : (
@@ -298,17 +301,19 @@ const HelpCenter = () => {
                     
                     <div className="space-y-4">
                       {currentCategory.articles.map((article) => (
-                        <div key={article.id} className="border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition-colors">
-                          <h3 className="text-lg font-semibold text-white mb-2">{article.title}</h3>
-                          <p className="text-gray-300 text-sm mb-3">{article.content}</p>
-                          <div className="flex flex-wrap gap-1">
-                            {article.tags.map((tag) => (
-                              <span key={tag} className="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded">
-                                {tag}
-                              </span>
-                            ))}
+                        <Link key={article.id} to={`/help-center/article/${article.id}`} className="block">
+                          <div className="border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition-colors cursor-pointer">
+                            <h3 className="text-lg font-semibold text-white mb-2">{article.title}</h3>
+                            <p className="text-gray-300 text-sm mb-3">{article.content}</p>
+                            <div className="flex flex-wrap gap-1">
+                              {article.tags.map((tag) => (
+                                <span key={tag} className="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
                           </div>
-                        </div>
+                        </Link>
                       ))}
                     </div>
                   </div>
