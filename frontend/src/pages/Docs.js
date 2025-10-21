@@ -115,7 +115,7 @@ const Docs = () => {
           <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 pb-8 sm:pb-12">
             {/* Sidebar Navigation */}
             <div className="lg:w-1/4">
-              <div className="bg-gray-800 rounded-xl p-4 sm:p-6 border border-gray-700 lg:sticky lg:top-8">
+              <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-xl p-4 sm:p-6 border border lg:sticky lg:top-8">
                 <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Table of Contents</h3>
                 <nav className="space-y-1 sm:space-y-2">
                   {sections.map((section) => (
@@ -138,7 +138,7 @@ const Docs = () => {
 
             {/* Main Content */}
             <div className="lg:w-3/4">
-              <div className="bg-gray-800 rounded-xl p-4 sm:p-6 lg:p-8 border border-gray-700">
+              <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-xl p-4 sm:p-6 lg:p-8 border border">
                 {activeSection === 'overview' && <OverviewSection />}
                 {activeSection === 'features' && <FeaturesSection />}
                 {activeSection === 'networks' && <NetworksSection />}

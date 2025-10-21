@@ -191,7 +191,7 @@ const HelpCenter = () => {
                   placeholder="Search for help articles..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 pl-12 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg px-4 py-3 pl-12 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <div className="absolute left-4 top-3 text-gray-400">
                   🔍
@@ -203,7 +203,7 @@ const HelpCenter = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <a
                 href="mailto:support@boing.finance"
-                className="bg-gray-700 hover:bg-gray-600 text-white p-4 rounded-lg transition-colors text-center"
+                className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} hover:bg-gray-600 text-white p-4 rounded-lg transition-colors text-center"
               >
                 <div className="text-2xl mb-2">📧</div>
                 <div className="font-semibold">Email Support</div>
@@ -237,13 +237,13 @@ const HelpCenter = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredArticles.map((article) => (
                       <Link key={article.id} to={`/help-center/article/${article.id}`} className="block">
-                        <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-4 border border hover:border-gray-600 transition-colors cursor-pointer">
+                        <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-4 border border hover:border transition-colors cursor-pointer">
                           <div className="text-sm text-blue-400 mb-2">{article.category}</div>
                           <h3 className="text-lg font-semibold text-white mb-2">{article.title}</h3>
                           <p className="text-gray-300 text-sm mb-3">{article.content}</p>
                           <div className="flex flex-wrap gap-1">
                             {article.tags.map((tag) => (
-                              <span key={tag} className="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded">
+                              <span key={tag} className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} text-gray-300 text-xs px-2 py-1 rounded">
                                 {tag}
                               </span>
                             ))}
@@ -280,7 +280,7 @@ const HelpCenter = () => {
                           className={`w-full text-left p-3 rounded-lg transition-colors flex items-center space-x-3 ${
                             activeCategory === category.id
                               ? 'bg-blue-600 text-white'
-                              : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                              : 'text-gray-300 hover:text-white'
                           }`}
                         >
                           <span className="text-lg">{category.icon}</span>
@@ -302,12 +302,12 @@ const HelpCenter = () => {
                     <div className="space-y-4">
                       {currentCategory.articles.map((article) => (
                         <Link key={article.id} to={`/help-center/article/${article.id}`} className="block">
-                          <div className="border border rounded-lg p-4 hover:border-gray-600 transition-colors cursor-pointer">
+                          <div className="border border rounded-lg p-4 hover:border transition-colors cursor-pointer">
                             <h3 className="text-lg font-semibold text-white mb-2">{article.title}</h3>
                             <p className="text-gray-300 text-sm mb-3">{article.content}</p>
                             <div className="flex flex-wrap gap-1">
                               {article.tags.map((tag) => (
-                                <span key={tag} className="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded">
+                                <span key={tag} className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} text-gray-300 text-xs px-2 py-1 rounded">
                                   {tag}
                                 </span>
                               ))}
@@ -333,7 +333,7 @@ const HelpCenter = () => {
                   <div className="space-y-2">
                     <a
                       href="mailto:support@boing.finance"
-                      className="block bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+                      className="block style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
                     >
                       Email Support Team
                     </a>
@@ -360,7 +360,7 @@ const HelpCenter = () => {
                     </a>
                     <a
                       href="mailto:bugs@boing.finance"
-                      className="block bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+                      className="block style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
                     >
                       Email Bug Report
                     </a>
