@@ -196,28 +196,28 @@ const Privacy = () => {
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
                     <h4 className="text-lg font-semibold text-white mb-2">Access and Portability</h4>
                     <p className="text-gray-300 text-sm">
                       Request access to your personal information and receive a copy in a portable format.
                     </p>
                   </div>
                   
-                  <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
                     <h4 className="text-lg font-semibold text-white mb-2">Correction</h4>
                     <p className="text-gray-300 text-sm">
                       Request correction of inaccurate or incomplete personal information.
                     </p>
                   </div>
                   
-                  <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
                     <h4 className="text-lg font-semibold text-white mb-2">Deletion</h4>
                     <p className="text-gray-300 text-sm">
                       Request deletion of your personal information, subject to legal requirements.
                     </p>
                   </div>
                   
-                  <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
                     <h4 className="text-lg font-semibold text-white mb-2">Objection</h4>
                     <p className="text-gray-300 text-sm">
                       Object to processing of your personal information in certain circumstances.

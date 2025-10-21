@@ -65,15 +65,15 @@ const Whitepaper = () => {
                   The protocol leverages advanced smart contract technology, automated market maker (AMM) mechanisms, and cross-chain bridge infrastructure to enable users to trade tokens across Ethereum, Polygon, Arbitrum, and other supported networks without the need for centralized intermediaries.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                  <div className="bg-gray-700 rounded-lg p-4 text-center">
+                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4 text-center">
                     <div className="text-2xl font-bold text-blue-400 mb-2">Multi-Chain</div>
                     <div className="text-sm text-gray-300">Support for multiple blockchain networks</div>
                   </div>
-                  <div className="bg-gray-700 rounded-lg p-4 text-center">
+                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4 text-center">
                     <div className="text-2xl font-bold text-green-400 mb-2">AMM</div>
                     <div className="text-sm text-gray-300">Automated market maker protocol</div>
                   </div>
-                  <div className="bg-gray-700 rounded-lg p-4 text-center">
+                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4 text-center">
                     <div className="text-2xl font-bold text-purple-400 mb-2">Bridge</div>
                     <div className="text-sm text-gray-300">Cross-chain asset transfer</div>
                   </div>
@@ -110,28 +110,28 @@ const Whitepaper = () => {
                 <h3 className="text-xl font-semibold text-white mb-4">Core Components</h3>
                 
                 <div className="space-y-6">
-                  <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
                     <h4 className="text-lg font-semibold text-white mb-2">DEX Factory</h4>
                     <p className="text-gray-300 text-sm">
                       The factory contract responsible for creating and managing trading pairs across different networks. Each network has its own factory instance that maintains the registry of all trading pairs.
                     </p>
                   </div>
                   
-                  <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
                     <h4 className="text-lg font-semibold text-white mb-2">DEX Pair</h4>
                     <p className="text-gray-300 text-sm">
                       Individual trading pair contracts that implement the constant product AMM formula (x * y = k). Each pair manages liquidity for two specific tokens and handles swap operations.
                     </p>
                   </div>
                   
-                  <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
                     <h4 className="text-lg font-semibold text-white mb-2">DEX Router</h4>
                     <p className="text-gray-300 text-sm">
                       The main interface for users to interact with the DEX. Handles swap routing, slippage protection, and ensures optimal trade execution across multiple pairs.
                     </p>
                   </div>
                   
-                  <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
                     <h4 className="text-lg font-semibold text-white mb-2">Cross-Chain Bridge</h4>
                     <p className="text-gray-300 text-sm">
                       Smart contracts that facilitate the transfer of assets between different blockchain networks. Implements security measures including multi-signature validation and time locks.
@@ -151,14 +151,14 @@ const Whitepaper = () => {
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                  <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
                     <h4 className="text-lg font-semibold text-white mb-2">Lock & Mint</h4>
                     <p className="text-gray-300 text-sm">
                       Assets are locked on the source chain and equivalent tokens are minted on the destination chain, maintaining the total supply across networks.
                     </p>
                   </div>
                   
-                  <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
                     <h4 className="text-lg font-semibold text-white mb-2">Burn & Release</h4>
                     <p className="text-gray-300 text-sm">
                       When bridging back, tokens are burned on the destination chain and the original assets are released on the source chain.
@@ -187,7 +187,7 @@ const Whitepaper = () => {
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
                     <h4 className="text-lg font-semibold text-white mb-2">Token Details</h4>
                     <ul className="text-gray-300 text-sm space-y-1">
                       <li>• Name: BOING</li>
@@ -198,7 +198,7 @@ const Whitepaper = () => {
                     </ul>
                   </div>
                   
-                  <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
                     <h4 className="text-lg font-semibold text-white mb-2">Distribution</h4>
                     <ul className="text-gray-300 text-sm space-y-1">
                       <li>• Community Rewards: 40%</li>
@@ -231,7 +231,7 @@ const Whitepaper = () => {
                 </p>
                 
                 <div className="space-y-4">
-                  <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
                     <h4 className="text-lg font-semibold text-white mb-2">Proposal Types</h4>
                     <ul className="text-gray-300 text-sm space-y-1">
                       <li>• Protocol parameter changes</li>
@@ -242,7 +242,7 @@ const Whitepaper = () => {
                     </ul>
                   </div>
                   
-                  <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
                     <h4 className="text-lg font-semibold text-white mb-2">Voting Mechanism</h4>
                     <ul className="text-gray-300 text-sm space-y-1">
                       <li>• One token, one vote</li>
@@ -323,7 +323,7 @@ const Whitepaper = () => {
                     </p>
                   </div>
                   
-                  <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
                     <h4 className="text-lg font-semibold text-white mb-2">📋 Phase 3: Advanced Features (Post-Funding - Q2-Q3 2025)</h4>
                     <ul className="text-gray-300 text-sm space-y-1">
                       <li>• <strong>Professional security audits</strong> - Third-party smart contract audits</li>
@@ -334,7 +334,7 @@ const Whitepaper = () => {
                     </ul>
                   </div>
                   
-                  <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
                     <h4 className="text-lg font-semibold text-white mb-2">🎯 Phase 4: Ecosystem & Governance (Future - Q4 2025+)</h4>
                     <ul className="text-gray-300 text-sm space-y-1">
                       <li>• <strong>DAO governance implementation</strong> - Community-driven protocol decisions</li>
