@@ -105,8 +105,8 @@ const Docs = () => {
         <div className="relative z-10 px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center mb-8 sm:mb-12 mt-8 sm:mt-12">
-            <h1 className="text-3xl sm:text-4xl font-bold style={{ color: 'var(--text-primary)' }} mb-3 sm:mb-4">boing.finance Documentation</h1>
-            <p className="text-lg sm:text-xl style={{ color: 'var(--text-secondary)' }} max-w-3xl mx-auto">
+            <h1 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4" style={{ color: 'var(--text-primary)' }}>boing.finance Documentation</h1>
+            <p className="text-lg sm:text-xl max-w-3xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
               Complete guide to the boing.finance decentralized exchange platform - your gateway to cross-chain trading
             </p>
           </div>
@@ -116,7 +116,7 @@ const Docs = () => {
             {/* Sidebar Navigation */}
             <div className="lg:w-1/4">
               <div className="rounded-xl p-4 sm:p-6 border lg:sticky lg:top-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h3 className="text-base sm:text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-3 sm:mb-4">Table of Contents</h3>
+                <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4" style={{ color: 'var(--text-primary)' }}>Table of Contents</h3>
                 <nav className="space-y-1 sm:space-y-2">
                   {sections.map((section) => (
                     <button

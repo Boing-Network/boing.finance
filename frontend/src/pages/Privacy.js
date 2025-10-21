@@ -25,13 +25,13 @@ const Privacy = () => {
           <div className="max-w-4xl mx-auto">
             {/* Header */}
             <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-5xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
                 Privacy Policy
               </h1>
-              <p className="text-xl style={{ color: 'var(--text-secondary)' }} mb-6">
+              <p className="text-xl mb-6" style={{ color: 'var(--text-secondary)' }}>
                 boing.finance - Cross-Chain Decentralized Exchange
               </p>
-              <div className="flex justify-center space-x-4 text-sm style={{ color: 'var(--text-tertiary)' }}">
+              <div className="flex justify-center space-x-4 text-sm" style={{ color: 'var(--text-tertiary)' }}>
                 <span>Last Updated: January 2025</span>
                 <span>•</span>
                 <span>Version 1.0</span>
@@ -41,8 +41,8 @@ const Privacy = () => {
             </div>
 
             {/* Introduction */}
-            <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 mb-8 border border">
-              <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed">
+            <div className="rounded-lg p-6 mb-8 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+              <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                 At boing.finance, we are committed to protecting your privacy and ensuring the security of your personal 
                 information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information 
                 when you use our decentralized exchange platform and related services.
@@ -80,7 +80,7 @@ const Privacy = () => {
                 </ul>
 
                 <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-3">1.3 Blockchain Data</h3>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed">
+                <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   Since our Service operates on public blockchains, certain information is publicly available:
                 </p>
                 <ul className="list-disc list-inside style={{ color: 'var(--text-secondary)' }} space-y-2">
@@ -106,7 +106,7 @@ const Privacy = () => {
                   <li>Communicating with users about updates and features</li>
                   <li>Complying with legal obligations and regulations</li>
                 </ul>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed">
+                <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   We do not sell, rent, or trade your personal information to third parties for marketing purposes.
                 </p>
               </section>
@@ -142,7 +142,7 @@ const Privacy = () => {
                 </ul>
 
                 <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-3">3.3 Business Transfers</h3>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed">
+                <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   In the event of a merger, acquisition, or sale of assets, your information may be transferred as 
                   part of the transaction, subject to the same privacy protections.
                 </p>
@@ -182,7 +182,7 @@ const Privacy = () => {
                   <li>Resolve disputes and enforce agreements</li>
                   <li>Improve our platform and services</li>
                 </ul>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed">
+                <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   When we no longer need your information, we will securely delete or anonymize it in accordance 
                   with applicable laws and regulations.
                 </p>
@@ -242,7 +242,7 @@ const Privacy = () => {
                   <li>Preference cookies to remember your settings</li>
                   <li>Security cookies to protect against fraud</li>
                 </ul>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed">
+                <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   You can control cookie settings through your browser preferences. However, disabling certain cookies 
                   may affect the functionality of our Service.
                 </p>
@@ -272,7 +272,7 @@ const Privacy = () => {
                   Your information may be transferred to and processed in countries other than your own. We ensure 
                   appropriate safeguards are in place to protect your information during international transfers.
                 </p>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed">
+                <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   For users in the European Economic Area (EEA), we rely on adequacy decisions, standard contractual 
                   clauses, or other appropriate safeguards for international data transfers.
                 </p>
@@ -281,7 +281,7 @@ const Privacy = () => {
               {/* Children's Privacy */}
               <section className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">10. Children's Privacy</h2>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed">
+                <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   Our Service is not intended for children under the age of 18. We do not knowingly collect personal 
                   information from children under 18. If you believe we have collected information from a child under 
                   18, please contact us immediately.
@@ -300,7 +300,7 @@ const Privacy = () => {
                   <li>Sending email notifications to registered users</li>
                   <li>Displaying prominent notices on our platform</li>
                 </ul>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed">
+                <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   Your continued use of the Service after any changes constitutes acceptance of the updated Privacy Policy.
                 </p>
               </section>

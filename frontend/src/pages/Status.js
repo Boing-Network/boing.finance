@@ -198,9 +198,9 @@ const Status = () => {
             </div>
 
             {/* Overall Status */}
-            <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border mb-8">
+            <div className="rounded-lg p-6 border mb-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }}">Overall System Status</h2>
+                <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Overall System Status</h2>
                 <div className={`px-4 py-2 rounded-lg border ${getStatusColor(systemStatus.overall)}`}>
                   <span className="flex items-center space-x-2">
                     <span>{getStatusIcon(systemStatus.overall)}</span>
@@ -212,25 +212,25 @@ const Status = () => {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                   <div className="text-2xl font-bold text-green-400 mb-1">{systemStatus.uptime}</div>
-                  <div className="style={{ color: 'var(--text-secondary)' }} text-sm">Uptime (30 days)</div>
+                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Uptime (30 days)</div>
                 </div>
                 <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                   <div className="text-2xl font-bold text-blue-400 mb-1">{systemStatus.responseTime}</div>
-                  <div className="style={{ color: 'var(--text-secondary)' }} text-sm">Avg Response Time</div>
+                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Avg Response Time</div>
                 </div>
                 <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                   <div className="text-2xl font-bold text-purple-400 mb-1">{systemStatus.lastIncident}</div>
-                  <div className="style={{ color: 'var(--text-secondary)' }} text-sm">Last Incident</div>
+                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Last Incident</div>
                 </div>
                 <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                   <div className="text-2xl font-bold text-green-400 mb-1">6/6</div>
-                  <div className="style={{ color: 'var(--text-secondary)' }} text-sm">Services Operational</div>
+                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Services Operational</div>
                 </div>
               </div>
             </div>
 
             {/* Services Status */}
-            <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border mb-8">
+            <div className="rounded-lg p-6 border mb-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
               <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Service Status</h2>
               <div className="space-y-4">
                 {services.map((service) => (
@@ -239,7 +239,7 @@ const Status = () => {
                       <span className="text-2xl">{getStatusIcon(service.status)}</span>
                       <div>
                         <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }}">{service.name}</h3>
-                        <p className="style={{ color: 'var(--text-secondary)' }} text-sm">{service.description}</p>
+                        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{service.description}</p>
                       </div>
                     </div>
                     <div className="text-right">
@@ -255,7 +255,7 @@ const Status = () => {
             </div>
 
             {/* Network Status */}
-            <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border mb-8">
+            <div className="rounded-lg p-6 border mb-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
               <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Supported Networks</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {networks.map((network) => (
@@ -286,7 +286,7 @@ const Status = () => {
             </div>
 
             {/* Recent Incidents */}
-            <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border mb-8">
+            <div className="rounded-lg p-6 border mb-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
               <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Recent Incidents</h2>
               <div className="space-y-4">
                 {recentIncidents.map((incident) => (
@@ -307,7 +307,7 @@ const Status = () => {
                         </div>
                       </div>
                     </div>
-                    <p className="style={{ color: 'var(--text-secondary)' }} text-sm">{incident.description}</p>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{incident.description}</p>
                   </div>
                 ))}
               </div>
@@ -320,7 +320,7 @@ const Status = () => {
             </div>
 
             {/* Performance Metrics */}
-            <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border mb-8">
+            <div className="rounded-lg p-6 border mb-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
               <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Performance Metrics</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
