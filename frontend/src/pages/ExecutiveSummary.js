@@ -72,8 +72,8 @@ const ExecutiveSummary = () => {
             <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-6 mb-8">
               <h3 className="text-xl font-bold text-white mb-4">🚀 Live Platform Demo</h3>
               <div className="space-y-2">
-                <p><strong>Frontend:</strong> <a href="https://ee46c902.boing-finance.pages.dev" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:text-green-300 underline">https://ee46c902.boing-finance.pages.dev</a></p>
-                <p><strong>Backend API:</strong> <a href="https://boing-api-prod.nico-chikuji.workers.dev" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:text-green-300 underline">https://boing-api-prod.nico-chikuji.workers.dev</a></p>
+                <p><strong>Frontend:</strong> <a href="https://boing.finance" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:text-green-300 underline">https://boing.finance</a></p>
+                <p><strong>Backend API:</strong> <a href="https://api.boing.finance" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:text-green-300 underline">https://api.boing.finance</a></p>
                 <p className="text-green-200 text-sm"><em>Fully functional cross-chain DeFi platform ready for testing</em></p>
               </div>
             </div>
@@ -272,13 +272,13 @@ const ExecutiveSummary = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-300">Live Platform:</span>
-                    <span className="text-white font-semibold">https://ee46c902.boing-finance.pages.dev</span>
+                    <span className="text-white font-semibold">https://boing.finance</span>
                   </div>
                 </div>
                 <div className="space-y-4">
                   <div className="flex justify-between">
                     <span className="text-gray-300">API Endpoint:</span>
-                    <span className="text-white font-semibold">https://boing-api-prod.nico-chikuji.workers.dev</span>
+                    <span className="text-white font-semibold">https://api.boing.finance</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-300">Legal Entity:</span>
