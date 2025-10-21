@@ -210,19 +210,19 @@ const Status = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-gray-700 rounded-lg p-4 text-center">
+                <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4 text-center">
                   <div className="text-2xl font-bold text-green-400 mb-1">{systemStatus.uptime}</div>
                   <div className="text-gray-300 text-sm">Uptime (30 days)</div>
                 </div>
-                <div className="bg-gray-700 rounded-lg p-4 text-center">
+                <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4 text-center">
                   <div className="text-2xl font-bold text-blue-400 mb-1">{systemStatus.responseTime}</div>
                   <div className="text-gray-300 text-sm">Avg Response Time</div>
                 </div>
-                <div className="bg-gray-700 rounded-lg p-4 text-center">
+                <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4 text-center">
                   <div className="text-2xl font-bold text-purple-400 mb-1">{systemStatus.lastIncident}</div>
                   <div className="text-gray-300 text-sm">Last Incident</div>
                 </div>
-                <div className="bg-gray-700 rounded-lg p-4 text-center">
+                <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4 text-center">
                   <div className="text-2xl font-bold text-green-400 mb-1">6/6</div>
                   <div className="text-gray-300 text-sm">Services Operational</div>
                 </div>
@@ -234,7 +234,7 @@ const Status = () => {
               <h2 className="text-2xl font-bold text-white mb-6">Service Status</h2>
               <div className="space-y-4">
                 {services.map((service) => (
-                  <div key={service.name} className="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
+                  <div key={service.name} className="flex items-center justify-between p-4 style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg">
                     <div className="flex items-center space-x-4">
                       <span className="text-2xl">{getStatusIcon(service.status)}</span>
                       <div>
@@ -259,7 +259,7 @@ const Status = () => {
               <h2 className="text-2xl font-bold text-white mb-6">Supported Networks</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {networks.map((network) => (
-                  <div key={network.name} className="bg-gray-700 rounded-lg p-4">
+                  <div key={network.name} className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-lg font-semibold text-white">{network.name}</h3>
                       <div className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(network.status)}`}>
@@ -302,7 +302,7 @@ const Status = () => {
                         <div className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(incident.status)}`}>
                           {incident.status}
                         </div>
-                        <div className={`px-2 py-1 rounded-full text-xs font-medium ${getImpactColor(incident.impact)} bg-gray-700`}>
+                        <div className={`px-2 py-1 rounded-full text-xs font-medium ${getImpactColor(incident.impact)} style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}`}>
                           {incident.impact} impact
                         </div>
                       </div>
@@ -323,7 +323,7 @@ const Status = () => {
             <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border mb-8">
               <h2 className="text-2xl font-bold text-white mb-6">Performance Metrics</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-gray-700 rounded-lg p-4">
+                <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
                   <h3 className="text-lg font-semibold text-white mb-3">Response Times</h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
@@ -341,7 +341,7 @@ const Status = () => {
                   </div>
                 </div>
                 
-                <div className="bg-gray-700 rounded-lg p-4">
+                <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
                   <h3 className="text-lg font-semibold text-white mb-3">Error Rates</h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
@@ -359,7 +359,7 @@ const Status = () => {
                   </div>
                 </div>
                 
-                <div className="bg-gray-700 rounded-lg p-4">
+                <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
                   <h3 className="text-lg font-semibold text-white mb-3">Platform Status</h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
@@ -389,7 +389,7 @@ const Status = () => {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <a
                     href="mailto:support@boing.finance"
-                    className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-colors"
+                    className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-colors"
                   >
                     Email Support
                   </a>

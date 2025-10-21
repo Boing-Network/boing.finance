@@ -52,6 +52,23 @@ function AnimatedBackground() {
           <animate attributeName="cy" values="90;92;90" dur="5s" repeatCount="indefinite" />
         </circle>
         
+        {/* Additional Top Half Orbs */}
+        <circle cx="10" cy="15" r="3.5" fill="#FF6B6B" opacity="0.11">
+          <animate attributeName="cy" values="15;17;15" dur="9s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="90" cy="10" r="2.8" fill="#4ECDC4" opacity="0.09">
+          <animate attributeName="cy" values="10;12;10" dur="8s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="50" cy="5" r="3.2" fill="#FFD93D" opacity="0.10">
+          <animate attributeName="cy" values="5;7;5" dur="7s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="70" cy="25" r="2.3" fill="#FF8A80" opacity="0.08">
+          <animate attributeName="cy" values="25;27;25" dur="10s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="30" cy="8" r="2.7" fill="#81C784" opacity="0.09">
+          <animate attributeName="cy" values="8;10;8" dur="11s" repeatCount="indefinite" />
+        </circle>
+        
         {/* Additional Large Orbs */}
         <circle cx="15" cy="50" r="3.5" fill="#FF6B6B" opacity="0.09">
           <animate attributeName="cx" values="15;16;15" dur="12s" repeatCount="indefinite" />
@@ -142,6 +159,29 @@ function AnimatedBackground() {
           <animate attributeName="opacity" values="0.2;0.8;0.2" dur="2.9s" repeatCount="indefinite" />
         </circle>
         
+        {/* Additional Top Half Twinkling Stars */}
+        <circle cx="5" cy="8" r="0.09" fill="#FFB74D">
+          <animate attributeName="opacity" values="0.2;1;0.2" dur="2.3s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="95" cy="12" r="0.11" fill="#00FFB2">
+          <animate attributeName="opacity" values="0.1;0.9;0.1" dur="3.7s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="12" cy="25" r="0.08" fill="#7B61FF">
+          <animate attributeName="opacity" values="0.3;1;0.3" dur="2.1s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="88" cy="18" r="0.10" fill="#FF6B6B">
+          <animate attributeName="opacity" values="0.2;0.8;0.2" dur="3.1s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="45" cy="3" r="0.12" fill="#4ECDC4">
+          <animate attributeName="opacity" values="0.1;0.7;0.1" dur="2.9s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="62" cy="15" r="0.07" fill="#FFD93D">
+          <animate attributeName="opacity" values="0.3;1;0.3" dur="2.4s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="35" cy="6" r="0.09" fill="#FF8A80">
+          <animate attributeName="opacity" values="0.2;0.9;0.2" dur="3.3s" repeatCount="indefinite" />
+        </circle>
+        
         {/* New Twinkling Stars */}
         <circle cx="15" cy="25" r="0.08" fill="#FFB74D">
           <animate attributeName="opacity" values="0.2;1;0.2" dur="2.7s" repeatCount="indefinite" />
@@ -174,6 +214,33 @@ function AnimatedBackground() {
         <circle cx="45" cy="90" r="0.15" fill="#00FFB2" opacity="0.35">
           <animate attributeName="cy" values="90;88;90" dur="6s" repeatCount="indefinite" />
           <animate attributeName="opacity" values="0.35;0.08;0.35" dur="6s" repeatCount="indefinite" />
+        </circle>
+        
+        {/* Additional Top Half Floating Particles */}
+        <circle cx="15" cy="20" r="0.16" fill="#FF6B6B" opacity="0.3">
+          <animate attributeName="cx" values="15;16;15" dur="6s" repeatCount="indefinite" />
+          <animate attributeName="cy" values="20;18;20" dur="4s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.3;0.05;0.3" dur="6s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="85" cy="15" r="0.14" fill="#4ECDC4" opacity="0.25">
+          <animate attributeName="cx" values="85;84;85" dur="7s" repeatCount="indefinite" />
+          <animate attributeName="cy" values="15;17;15" dur="5s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.25;0.08;0.25" dur="7s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="50" cy="8" r="0.19" fill="#FFD93D" opacity="0.4">
+          <animate attributeName="cx" values="50;51;50" dur="8s" repeatCount="indefinite" />
+          <animate attributeName="cy" values="8;10;8" dur="6s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.4;0.1;0.4" dur="8s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="25" cy="12" r="0.13" fill="#FF8A80" opacity="0.35">
+          <animate attributeName="cx" values="25;26;25" dur="9s" repeatCount="indefinite" />
+          <animate attributeName="cy" values="12;14;12" dur="7s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.35;0.08;0.35" dur="9s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="75" cy="22" r="0.17" fill="#81C784" opacity="0.3">
+          <animate attributeName="cx" values="75;76;75" dur="5s" repeatCount="indefinite" />
+          <animate attributeName="cy" values="22;20;22" dur="3s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.3;0.05;0.3" dur="5s" repeatCount="indefinite" />
         </circle>
         
         {/* New Floating Particles */}
@@ -1671,7 +1738,7 @@ export default function DeployToken() {
                       <select
                         value={decimals}
                         onChange={(e) => setDecimals(parseInt(e.target.value))}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white text-sm sm:text-base"
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white text-sm sm:text-base"
                       >
                         <option value={18}>18 (Standard)</option>
                         <option value={6}>6 (USDC style)</option>

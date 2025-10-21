@@ -51,7 +51,7 @@ const NetworkSelector = () => {
     <div className="relative">
       <button
         onClick={() => setShowDropdown(!showDropdown)}
-        className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+        className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} hover:bg-gray-600 text-white px-3 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
       >
         <span className="text-lg">{getNetworkIcon(currentNetwork)}</span>
         <span className="text-sm">{currentNetwork?.name || 'Unknown Network'}</span>
@@ -74,7 +74,7 @@ const NetworkSelector = () => {
                     className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center space-x-3 ${
                       chainId === network.chainId
                         ? 'bg-blue-600 text-white'
-                        : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                        : 'text-gray-300 hover:text-white hover:bg-opacity-10'
                     }`}
                   >
                     <span className="text-lg">{getNetworkIcon(network)}</span>
@@ -105,7 +105,7 @@ const NetworkSelector = () => {
                     className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center space-x-3 ${
                       chainId === network.chainId
                         ? 'bg-blue-600 text-white'
-                        : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                        : 'text-gray-300 hover:text-white hover:bg-opacity-10'
                     }`}
                   >
                     <span className="text-lg">{getNetworkIcon(network)}</span>

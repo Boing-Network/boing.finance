@@ -125,7 +125,7 @@ const Docs = () => {
                       className={`w-full text-left px-2 sm:px-3 py-2 rounded-lg transition-colors text-sm sm:text-base ${
                         activeSection === section.id
                           ? 'bg-blue-600 text-white'
-                          : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                          : 'text-gray-300 hover:text-white hover:bg-opacity-10'
                       }`}
                     >
                       <span className="mr-2">{section.icon}</span>
