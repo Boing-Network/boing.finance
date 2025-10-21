@@ -896,14 +896,14 @@ const HelpArticle = () => {
         <Helmet>
           <title>Article Not Found - boing.finance Help Center</title>
         </Helmet>
-        <div className="min-h-screen bg-gray-900 text-white">
+        <div className="min-h-screen bg-gray-900 style={{ color: 'var(--text-primary)' }}">
           <div className="container mx-auto px-4 py-8">
             <div className="max-w-4xl mx-auto text-center">
               <h1 className="text-4xl font-bold mb-4">Article Not Found</h1>
-              <p className="text-xl text-gray-300 mb-8">The requested help article could not be found.</p>
+              <p className="text-xl style={{ color: 'var(--text-secondary)' }} mb-8">The requested help article could not be found.</p>
               <Link 
                 to="/help-center" 
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors"
+                className="bg-blue-600 hover:bg-blue-700 style={{ color: 'var(--text-primary)' }} px-6 py-3 rounded-lg transition-colors"
               >
                 Return to Help Center
               </Link>
@@ -921,26 +921,26 @@ const HelpArticle = () => {
         <meta name="description" content={`${article.title} - Help article for boing.finance ${article.category.toLowerCase()}`} />
       </Helmet>
       
-      <div className="min-h-screen bg-gray-900 text-white">
+      <div className="min-h-screen bg-gray-900 style={{ color: 'var(--text-primary)' }}">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
             {/* Breadcrumb */}
             <nav className="mb-8">
-              <div className="flex items-center space-x-2 text-sm text-gray-400">
-                <Link to="/" className="hover:text-white transition-colors">Home</Link>
+              <div className="flex items-center space-x-2 text-sm style={{ color: 'var(--text-tertiary)' }}">
+                <Link to="/" className="hover:style={{ color: 'var(--text-primary)' }} transition-colors">Home</Link>
                 <span>›</span>
-                <Link to="/help-center" className="hover:text-white transition-colors">Help Center</Link>
+                <Link to="/help-center" className="hover:style={{ color: 'var(--text-primary)' }} transition-colors">Help Center</Link>
                 <span>›</span>
-                <span className="text-white">{article.category}</span>
+                <span className="style={{ color: 'var(--text-primary)' }}">{article.category}</span>
                 <span>›</span>
-                <span className="text-white">{article.title}</span>
+                <span className="style={{ color: 'var(--text-primary)' }}">{article.title}</span>
               </div>
             </nav>
 
             {/* Article Header */}
             <div className="mb-8">
               <div className="text-sm text-blue-400 mb-2">{article.category}</div>
-              <h1 className="text-4xl font-bold text-white mb-4">{article.title}</h1>
+              <h1 className="text-4xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">{article.title}</h1>
             </div>
 
             {/* Article Content */}
@@ -955,13 +955,13 @@ const HelpArticle = () => {
             <div className="flex justify-between items-center">
               <Link 
                 to="/help-center" 
-                className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-colors"
+                className="bg-gray-700 hover:bg-gray-600 style={{ color: 'var(--text-primary)' }} px-6 py-3 rounded-lg transition-colors"
               >
                 ← Back to Help Center
               </Link>
               <Link 
                 to="/contact-us" 
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors"
+                className="bg-blue-600 hover:bg-blue-700 style={{ color: 'var(--text-primary)' }} px-6 py-3 rounded-lg transition-colors"
               >
                 Contact Support →
               </Link>

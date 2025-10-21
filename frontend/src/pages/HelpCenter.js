@@ -170,10 +170,10 @@ const HelpCenter = () => {
           <div className="max-w-6xl mx-auto">
             {/* Header */}
             <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              <h1 className="text-4xl md:text-5xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">
                 Help Center
               </h1>
-              <p className="text-xl text-gray-300 mb-6">
+              <p className="text-xl style={{ color: 'var(--text-secondary)' }} mb-6">
                 Find answers to your questions and get support for boing.finance
               </p>
               <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
@@ -191,9 +191,9 @@ const HelpCenter = () => {
                   placeholder="Search for help articles..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg px-4 py-3 pl-12 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg px-4 py-3 pl-12 style={{ color: 'var(--text-primary)' }} placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <div className="absolute left-4 top-3 text-gray-400">
+                <div className="absolute left-4 top-3 style={{ color: 'var(--text-tertiary)' }}">
                   🔍
                 </div>
               </div>
@@ -203,15 +203,15 @@ const HelpCenter = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <a
                 href="mailto:support@boing.finance"
-                className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} hover:bg-gray-600 text-white p-4 rounded-lg transition-colors text-center"
+                className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} hover:bg-gray-600 style={{ color: 'var(--text-primary)' }} p-4 rounded-lg transition-colors text-center"
               >
                 <div className="text-2xl mb-2">📧</div>
                 <div className="font-semibold">Email Support</div>
-                <div className="text-sm text-gray-300">Primary support channel</div>
+                <div className="text-sm style={{ color: 'var(--text-secondary)' }}">Primary support channel</div>
               </a>
               <a
                 href="/bug-report"
-                className="bg-red-600 hover:bg-red-700 text-white p-4 rounded-lg transition-colors text-center"
+                className="bg-red-600 hover:bg-red-700 style={{ color: 'var(--text-primary)' }} p-4 rounded-lg transition-colors text-center"
               >
                 <div className="text-2xl mb-2">🐛</div>
                 <div className="font-semibold">Bug Report</div>
@@ -219,7 +219,7 @@ const HelpCenter = () => {
               </a>
               <a
                 href="/contact-us"
-                className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-lg transition-colors text-center"
+                className="bg-blue-600 hover:bg-blue-700 style={{ color: 'var(--text-primary)' }} p-4 rounded-lg transition-colors text-center"
               >
                 <div className="text-2xl mb-2">💬</div>
                 <div className="font-semibold">Contact Us</div>
@@ -230,7 +230,7 @@ const HelpCenter = () => {
             {/* Search Results or Category Content */}
             {searchQuery ? (
               <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-white mb-4">
+                <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">
                   Search Results for "{searchQuery}"
                 </h2>
                 {filteredArticles.length > 0 ? (
@@ -239,11 +239,11 @@ const HelpCenter = () => {
                       <Link key={article.id} to={`/help-center/article/${article.id}`} className="block">
                         <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-4 border border hover:border transition-colors cursor-pointer">
                           <div className="text-sm text-blue-400 mb-2">{article.category}</div>
-                          <h3 className="text-lg font-semibold text-white mb-2">{article.title}</h3>
-                          <p className="text-gray-300 text-sm mb-3">{article.content}</p>
+                          <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">{article.title}</h3>
+                          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mb-3">{article.content}</p>
                           <div className="flex flex-wrap gap-1">
                             {article.tags.map((tag) => (
-                              <span key={tag} className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} text-gray-300 text-xs px-2 py-1 rounded">
+                              <span key={tag} className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} style={{ color: 'var(--text-secondary)' }} text-xs px-2 py-1 rounded">
                                 {tag}
                               </span>
                             ))}
@@ -255,11 +255,11 @@ const HelpCenter = () => {
                 ) : (
                   <div className="text-center py-12">
                     <div className="text-6xl mb-4">🔍</div>
-                    <h3 className="text-xl font-semibold text-white mb-2">No results found</h3>
-                    <p className="text-gray-300 mb-4">Try different keywords or browse our categories below</p>
+                    <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-2">No results found</h3>
+                    <p className="style={{ color: 'var(--text-secondary)' }} mb-4">Try different keywords or browse our categories below</p>
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+                      className="bg-blue-600 hover:bg-blue-700 style={{ color: 'var(--text-primary)' }} px-6 py-2 rounded-lg transition-colors"
                     >
                       Clear Search
                     </button>
@@ -271,7 +271,7 @@ const HelpCenter = () => {
                 {/* Categories Sidebar */}
                 <div className="lg:col-span-1">
                   <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-4 border border">
-                    <h3 className="text-lg font-semibold text-white mb-4">Categories</h3>
+                    <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Categories</h3>
                     <div className="space-y-2">
                       {helpCategories.map((category) => (
                         <button
@@ -279,9 +279,22 @@ const HelpCenter = () => {
                           onClick={() => setActiveCategory(category.id)}
                           className={`w-full text-left p-3 rounded-lg transition-colors flex items-center space-x-3 ${
                             activeCategory === category.id
-                              ? 'bg-blue-600 text-white'
-                              : 'text-gray-300 hover:text-white'
+                              ? 'bg-blue-600'
+                              : ''
                           }`}
+                          style={{
+                            color: activeCategory === category.id ? 'var(--text-primary)' : 'var(--text-secondary)'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (activeCategory !== category.id) {
+                              e.target.style.color = 'var(--text-primary)';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (activeCategory !== category.id) {
+                              e.target.style.color = 'var(--text-secondary)';
+                            }
+                          }}
                         >
                           <span className="text-lg">{category.icon}</span>
                           <span className="font-medium">{category.title}</span>
@@ -296,18 +309,18 @@ const HelpCenter = () => {
                   <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                     <div className="flex items-center space-x-3 mb-6">
                       <span className="text-2xl">{currentCategory.icon}</span>
-                      <h2 className="text-2xl font-bold text-white">{currentCategory.title}</h2>
+                      <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }}">{currentCategory.title}</h2>
                     </div>
                     
                     <div className="space-y-4">
                       {currentCategory.articles.map((article) => (
                         <Link key={article.id} to={`/help-center/article/${article.id}`} className="block">
                           <div className="border border rounded-lg p-4 hover:border transition-colors cursor-pointer">
-                            <h3 className="text-lg font-semibold text-white mb-2">{article.title}</h3>
-                            <p className="text-gray-300 text-sm mb-3">{article.content}</p>
+                            <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">{article.title}</h3>
+                            <p className="style={{ color: 'var(--text-secondary)' }} text-sm mb-3">{article.content}</p>
                             <div className="flex flex-wrap gap-1">
                               {article.tags.map((tag) => (
-                                <span key={tag} className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} text-gray-300 text-xs px-2 py-1 rounded">
+                                <span key={tag} className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} style={{ color: 'var(--text-secondary)' }} text-xs px-2 py-1 rounded">
                                   {tag}
                                 </span>
                               ))}
@@ -323,23 +336,23 @@ const HelpCenter = () => {
 
             {/* Additional Support */}
             <div className="mt-12 style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
-              <h2 className="text-2xl font-bold text-white mb-4 text-center">Still Need Help?</h2>
+              <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4 text-center">Still Need Help?</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold text-white mb-2">Direct Support</h3>
-                  <p className="text-gray-300 text-sm mb-4">
+                  <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">Direct Support</h3>
+                  <p className="style={{ color: 'var(--text-secondary)' }} text-sm mb-4">
                     As a solo-founder project, we provide direct email support for all inquiries.
                   </p>
                   <div className="space-y-2">
                     <a
                       href="mailto:support@boing.finance"
-                      className="block style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+                      className="block style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} hover:bg-gray-600 style={{ color: 'var(--text-primary)' }} px-4 py-2 rounded-lg transition-colors"
                     >
                       Email Support Team
                     </a>
                     <a
                       href="/contact-us"
-                      className="block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                      className="block bg-blue-600 hover:bg-blue-700 style={{ color: 'var(--text-primary)' }} px-4 py-2 rounded-lg transition-colors"
                     >
                       Contact Form
                     </a>
@@ -347,20 +360,20 @@ const HelpCenter = () => {
                 </div>
                 
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold text-white mb-2">Bug Reports</h3>
-                  <p className="text-gray-300 text-sm mb-4">
+                  <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">Bug Reports</h3>
+                  <p className="style={{ color: 'var(--text-secondary)' }} text-sm mb-4">
                     Help us improve the platform by reporting bugs and issues you encounter.
                   </p>
                   <div className="space-y-2">
                     <a
                       href="/bug-report"
-                      className="block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+                      className="block bg-red-600 hover:bg-red-700 style={{ color: 'var(--text-primary)' }} px-4 py-2 rounded-lg transition-colors"
                     >
                       Report a Bug
                     </a>
                     <a
                       href="mailto:bugs@boing.finance"
-                      className="block style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+                      className="block style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} hover:bg-gray-600 style={{ color: 'var(--text-primary)' }} px-4 py-2 rounded-lg transition-colors"
                     >
                       Email Bug Report
                     </a>

@@ -1589,14 +1589,14 @@ export default function DeployToken() {
             }}>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-white">Choose Your Service Plan</h2>
+                  <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }}">Choose Your Service Plan</h2>
                   {network && (
-                    <p className="text-sm text-gray-400 mt-1">
+                    <p className="text-sm style={{ color: 'var(--text-tertiary)' }} mt-1">
                       Pricing for <span className="text-blue-400 font-medium">{network.name}</span> network
                     </p>
                   )}
                   {!network && (
-                    <p className="text-sm text-gray-400 mt-1">
+                    <p className="text-sm style={{ color: 'var(--text-tertiary)' }} mt-1">
                       Connect wallet to see network-specific pricing
                     </p>
                   )}
@@ -1652,20 +1652,20 @@ export default function DeployToken() {
                   >
                     {selectedPlan === key && (
                       <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-4 h-4 style={{ color: 'var(--text-primary)' }}" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                       </div>
                     )}
                     
                     <div className="text-center">
-                      <h3 className="text-xl font-bold text-white mb-2">{plan.name}</h3>
+                      <h3 className="text-xl font-bold style={{ color: 'var(--text-primary)' }} mb-2">{plan.name}</h3>
                       <div className="text-3xl font-bold text-blue-400 mb-4">
                         {plan.prices[network?.chainId || 1].amount} {plan.prices[network?.chainId || 1].currency}
                       </div>
                       
                       {showPricing && (
-                        <ul className="text-sm text-gray-300 space-y-2 mb-4">
+                        <ul className="text-sm style={{ color: 'var(--text-secondary)' }} space-y-2 mb-4">
                           {plan.features.map((feature, index) => (
                             <li key={index} className="flex items-center">
                               <svg className="w-4 h-4 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -1690,10 +1690,10 @@ export default function DeployToken() {
               <form onSubmit={handleDeploy} className="space-y-6 sm:space-y-8">
                 {/* Basic Information */}
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">Basic Token Information</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4 sm:mb-6">Basic Token Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
                         Token Name *
                       </label>
                       <input
@@ -1712,7 +1712,7 @@ export default function DeployToken() {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
                         Token Symbol *
                       </label>
                       <input
@@ -1732,13 +1732,13 @@ export default function DeployToken() {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
                         Decimals
                       </label>
                       <select
                         value={decimals}
                         onChange={(e) => setDecimals(parseInt(e.target.value))}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white text-sm sm:text-base"
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
                       >
                         <option value={18}>18 (Standard)</option>
                         <option value={6}>6 (USDC style)</option>
@@ -1747,7 +1747,7 @@ export default function DeployToken() {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
                         Initial Supply *
                       </label>
                       <input
@@ -1769,7 +1769,7 @@ export default function DeployToken() {
 
                   {/* Logo Information */}
                   <div className="mt-4 sm:mt-6">
-                    <h3 className="text-lg sm:text-xl font-bold text-white mb-4">Token Logo</h3>
+                    <h3 className="text-lg sm:text-xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">Token Logo</h3>
                     <LogoUpload
                       onLogoUpload={handleLogoUpload}
                       onLogoChange={handleLogoChange}
@@ -1781,10 +1781,10 @@ export default function DeployToken() {
 
                 {/* Project Information */}
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">Project Information</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4 sm:mb-6">Project Information</h3>
                   <div className="space-y-4 sm:space-y-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
                         Website URL *
                       </label>
                       <input
@@ -1803,7 +1803,7 @@ export default function DeployToken() {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
                         Project Description
                       </label>
                       <textarea
@@ -1824,7 +1824,7 @@ export default function DeployToken() {
 
                 {/* Security Features */}
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">Security Features</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4 sm:mb-6">Security Features</h3>
                   <div className="space-y-3 sm:space-y-4">
                     {SECURITY_FEATURES.map((feature, index) => {
                       const isAllowed = isFeatureAllowed(feature.featureKey);
@@ -1839,8 +1839,8 @@ export default function DeployToken() {
                             <div className="flex items-start sm:items-center space-x-3">
                               <span className="text-xl sm:text-2xl flex-shrink-0">{feature.icon}</span>
                               <div className="min-w-0 flex-1">
-                                <h4 className="font-medium text-white text-sm sm:text-base">{feature.name}</h4>
-                                <p className="text-xs sm:text-sm text-gray-300 mt-1">{feature.description}</p>
+                                <h4 className="font-medium style={{ color: 'var(--text-primary)' }} text-sm sm:text-base">{feature.name}</h4>
+                                <p className="text-xs sm:text-sm style={{ color: 'var(--text-secondary)' }} mt-1">{feature.description}</p>
                                 <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-900 text-blue-200 rounded-full mt-1">
                                   {feature.risk} Risk
                                 </span>
@@ -1955,7 +1955,7 @@ export default function DeployToken() {
                                 type="text"
                                 value={freezingAuthority}
                                 onChange={(e) => setFreezingAuthority(e.target.value)}
-                                className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400 text-sm"
+                                className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent style={{ color: 'var(--text-primary)' }} placeholder-gray-400 text-sm"
                                 placeholder="0x..."
                               />
                             </div>
@@ -1967,13 +1967,13 @@ export default function DeployToken() {
                                 type="number"
                                 value={cooldownPeriod}
                                 onChange={(e) => setCooldownPeriod(e.target.value)}
-                                className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400 text-sm"
+                                className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent style={{ color: 'var(--text-primary)' }} placeholder-gray-400 text-sm"
                                 placeholder="30"
                                 min="1"
                                 max="3600"
                                 step="1"
                               />
-                              <p className="text-xs sm:text-sm text-gray-400 mt-1">
+                              <p className="text-xs sm:text-sm style={{ color: 'var(--text-tertiary)' }} mt-1">
                                 Cooldown period between transactions in seconds (1-3600)
                                 {cooldownPeriod === '30' && <span className="text-blue-400 ml-1">• Default: 30 seconds</span>}
                               </p>
@@ -1992,9 +1992,9 @@ export default function DeployToken() {
                                   onChange={(e) => setMaxWalletPercentage(Number(e.target.value))}
                                   className="flex-1"
                                 />
-                                <span className="text-xs sm:text-sm w-12 sm:w-16 text-gray-300">{maxWalletPercentage}%</span>
+                                <span className="text-xs sm:text-sm w-12 sm:w-16 style={{ color: 'var(--text-secondary)' }}">{maxWalletPercentage}%</span>
                               </div>
-                              <p className="text-xs sm:text-sm text-gray-400 mt-1">
+                              <p className="text-xs sm:text-sm style={{ color: 'var(--text-tertiary)' }} mt-1">
                                 Maximum wallet holdings as percentage of total supply (0.1% - 5%)
                                 {maxWalletPercentage === '2' && <span className="text-blue-400 ml-1">• Default: 2%</span>}
                               </p>
@@ -2012,9 +2012,9 @@ export default function DeployToken() {
                                   onChange={(e) => setTimelockDelay(Number(e.target.value))}
                                   className="flex-1"
                                 />
-                                <span className="text-xs sm:text-sm w-12 sm:w-20 text-gray-300">{timelockDelay}h</span>
+                                <span className="text-xs sm:text-sm w-12 sm:w-20 style={{ color: 'var(--text-secondary)' }}">{timelockDelay}h</span>
                               </div>
-                              <p className="text-xs sm:text-sm text-gray-400 mt-1">
+                              <p className="text-xs sm:text-sm style={{ color: 'var(--text-tertiary)' }} mt-1">
                                 Timelock delay for administrative functions (1-168 hours)
                                 {timelockDelay === '24' && <span className="text-blue-400 ml-1">• Default: 24 hours</span>}
                               </p>
@@ -2027,13 +2027,13 @@ export default function DeployToken() {
                                 type="number"
                                 value={maxTxAmount}
                                 onChange={(e) => setMaxTxAmount(e.target.value)}
-                                className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400 text-sm"
+                                className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent style={{ color: 'var(--text-primary)' }} placeholder-gray-400 text-sm"
                                 placeholder="1.0"
                                 min="0.1"
                                 max="10"
                                 step="0.1"
                               />
-                              <p className="text-xs sm:text-sm text-gray-400 mt-1">
+                              <p className="text-xs sm:text-sm style={{ color: 'var(--text-tertiary)' }} mt-1">
                                 Maximum transaction amount as percentage of total supply (0.1% - 10%)
                                 {maxTxAmount === '1' && <span className="text-blue-400 ml-1">• Default: 1%</span>}
                               </p>
@@ -2047,11 +2047,11 @@ export default function DeployToken() {
 
                 {/* Social Links */}
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">Social Links</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4 sm:mb-6">Social Links</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     {Object.entries(socialLinks).map(([platform, value]) => (
                       <div key={platform}>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <label className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
                           {platform.charAt(0).toUpperCase() + platform.slice(1)} URL
                         </label>
                         <input
@@ -2076,7 +2076,7 @@ export default function DeployToken() {
                   <button
                     type="submit"
                     disabled={deploying || !isConnected}
-                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-lg transition-colors text-base sm:text-lg"
+                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 style={{ color: 'var(--text-primary)' }} font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-lg transition-colors text-base sm:text-lg"
                   >
                     {deploying ? (
                       <div className="flex items-center justify-center">
@@ -2097,11 +2097,11 @@ export default function DeployToken() {
                 backgroundColor: 'var(--bg-card)',
                 borderColor: 'var(--border-color)'
               }}>
-                <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">Deployment Status</h3>
+                <h3 className="text-xl sm:text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">Deployment Status</h3>
                 
                 {txHash && (
                   <div className="mb-4">
-                    <p className="text-sm font-medium text-gray-300 mb-2">Transaction Hash:</p>
+                    <p className="text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">Transaction Hash:</p>
                     <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                       <code className="px-3 py-2 rounded text-xs sm:text-sm font-mono break-all" style={{
                         backgroundColor: 'var(--bg-tertiary)',
@@ -2121,7 +2121,7 @@ export default function DeployToken() {
                 
                 {tokenAddress && (
                   <div>
-                    <p className="text-sm font-medium text-gray-300 mb-2">Token Address:</p>
+                    <p className="text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">Token Address:</p>
                     <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                       <code className="px-3 py-2 rounded text-xs sm:text-sm font-mono break-all" style={{
                         backgroundColor: 'var(--bg-tertiary)',
@@ -2147,10 +2147,10 @@ export default function DeployToken() {
                 backgroundColor: 'var(--bg-card)',
                 borderColor: 'var(--border-color)'
               }}>
-                <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">Token Metadata</h3>
+                <h3 className="text-xl sm:text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">Token Metadata</h3>
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm font-medium text-gray-300 mb-2">IPFS Metadata URL:</p>
+                    <p className="text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">IPFS Metadata URL:</p>
                     <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                       <code className="px-3 py-2 rounded text-xs sm:text-sm font-mono break-all" style={{
                         backgroundColor: 'var(--bg-tertiary)',
@@ -2169,7 +2169,7 @@ export default function DeployToken() {
                   
                   {logoUrl && (
                     <div>
-                      <p className="text-sm font-medium text-gray-300 mb-2">Logo URL:</p>
+                      <p className="text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">Logo URL:</p>
                       <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                         <code className="px-3 py-2 rounded text-xs sm:text-sm font-mono break-all" style={{
                         backgroundColor: 'var(--bg-tertiary)',
@@ -2206,7 +2206,7 @@ export default function DeployToken() {
               borderColor: 'var(--border-color)'
             }}>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-2 sm:space-y-0">
-                <h3 className="text-xl sm:text-2xl font-bold text-white">Deployment Tips</h3>
+                <h3 className="text-xl sm:text-2xl font-bold style={{ color: 'var(--text-primary)' }}">Deployment Tips</h3>
                 <button
                   onClick={() => setShowGuide(!showGuide)}
                   className="text-blue-400 hover:text-blue-300 font-medium transition-colors text-sm sm:text-base"
@@ -2220,7 +2220,7 @@ export default function DeployToken() {
                   {DEPLOYMENT_TIPS.map((tip, index) => (
                     <div key={index} className="flex items-start space-x-3">
                       <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                      <p className="text-sm sm:text-base text-gray-300">{tip}</p>
+                      <p className="text-sm sm:text-base style={{ color: 'var(--text-secondary)' }}">{tip}</p>
                     </div>
                   ))}
                 </div>
@@ -2236,10 +2236,10 @@ export default function DeployToken() {
                 }}>
                   <div className="flex items-start space-x-3 mb-4">
                     <span className="text-yellow-400 text-2xl">⚠️</span>
-                    <h3 className="text-lg sm:text-xl font-bold text-white">Ownership Renouncement Notice</h3>
+                    <h3 className="text-lg sm:text-xl font-bold style={{ color: 'var(--text-primary)' }}">Ownership Renouncement Notice</h3>
                   </div>
                   
-                  <div className="space-y-4 text-sm sm:text-base text-gray-300 mb-6">
+                  <div className="space-y-4 text-sm sm:text-base style={{ color: 'var(--text-secondary)' }} mb-6">
                     <p>
                       <strong>Important:</strong> Ownership renouncement is <strong>not automatic</strong> during deployment.
                     </p>
@@ -2281,7 +2281,7 @@ export default function DeployToken() {
                         setRenounceOwnership(true);
                         setShowOwnershipRenounceModal(false);
                       }}
-                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                      className="px-4 py-2 bg-blue-600 style={{ color: 'var(--text-primary)' }} rounded hover:bg-blue-700 transition-colors"
                     >
                       Enable Feature
                     </button>
@@ -2297,8 +2297,8 @@ export default function DeployToken() {
                   backgroundColor: 'var(--bg-card)',
                   border: '1px solid var(--border-color)'
                 }}>
-                  <h3 className="text-lg sm:text-xl font-bold text-white mb-4">Renounce Ownership Confirmation</h3>
-                  <p className="text-sm sm:text-base text-gray-300 mb-6">
+                  <h3 className="text-lg sm:text-xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">Renounce Ownership Confirmation</h3>
+                  <p className="text-sm sm:text-base style={{ color: 'var(--text-secondary)' }} mb-6">
                     You have selected <span className="font-semibold text-blue-400">Renounce Ownership</span>.<br/>
                     This requires a <span className="font-semibold text-yellow-400">second on-chain transaction</span> after deployment.<br/>
                     Are you sure you want to proceed?
@@ -2317,7 +2317,7 @@ export default function DeployToken() {
                     >Cancel</button>
                     <button
                       onClick={handleConfirmRenounce}
-                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                      className="px-4 py-2 bg-blue-600 style={{ color: 'var(--text-primary)' }} rounded hover:bg-blue-700"
                     >Yes, Renounce Ownership</button>
                   </div>
                 </div>

@@ -124,7 +124,7 @@ const Status = () => {
       case 'maintenance':
         return 'text-blue-400 bg-blue-900/20 border-blue-500/30';
       default:
-        return 'text-gray-400 bg-gray-900/20 border-gray-500/30';
+        return 'bg-gray-900/20 border-gray-500/30';
     }
   };
 
@@ -152,7 +152,7 @@ const Status = () => {
       case 'none':
         return 'text-green-400';
       default:
-        return 'text-gray-400';
+        return '';
     }
   };
 
@@ -179,10 +179,10 @@ const Status = () => {
           <div className="max-w-6xl mx-auto">
             {/* Header */}
             <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
                 System Status
               </h1>
-              <p className="text-xl text-gray-300 mb-6">
+              <p className="text-xl mb-6" style={{ color: 'var(--text-secondary)' }}>
                 Real-time status of boing.finance services and infrastructure
               </p>
               <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
@@ -190,7 +190,7 @@ const Status = () => {
                   <strong>Note:</strong> boing.finance is a solo-founder project. While our platform is fully functional, we are currently seeking funding for infrastructure scaling and team expansion.
                 </p>
               </div>
-              <div className="flex justify-center items-center space-x-4 text-sm text-gray-400">
+              <div className="flex justify-center items-center space-x-4 text-sm style={{ color: 'var(--text-tertiary)' }}">
                 <span>Last updated: {new Date().toLocaleString()}</span>
                 <span>•</span>
                 <span>Current time: {new Date().toLocaleString()}</span>
@@ -200,7 +200,7 @@ const Status = () => {
             {/* Overall Status */}
             <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border mb-8">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">Overall System Status</h2>
+                <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }}">Overall System Status</h2>
                 <div className={`px-4 py-2 rounded-lg border ${getStatusColor(systemStatus.overall)}`}>
                   <span className="flex items-center space-x-2">
                     <span>{getStatusIcon(systemStatus.overall)}</span>
@@ -210,44 +210,44 @@ const Status = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4 text-center">
+                <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                   <div className="text-2xl font-bold text-green-400 mb-1">{systemStatus.uptime}</div>
-                  <div className="text-gray-300 text-sm">Uptime (30 days)</div>
+                  <div className="style={{ color: 'var(--text-secondary)' }} text-sm">Uptime (30 days)</div>
                 </div>
-                <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4 text-center">
+                <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                   <div className="text-2xl font-bold text-blue-400 mb-1">{systemStatus.responseTime}</div>
-                  <div className="text-gray-300 text-sm">Avg Response Time</div>
+                  <div className="style={{ color: 'var(--text-secondary)' }} text-sm">Avg Response Time</div>
                 </div>
-                <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4 text-center">
+                <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                   <div className="text-2xl font-bold text-purple-400 mb-1">{systemStatus.lastIncident}</div>
-                  <div className="text-gray-300 text-sm">Last Incident</div>
+                  <div className="style={{ color: 'var(--text-secondary)' }} text-sm">Last Incident</div>
                 </div>
-                <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4 text-center">
+                <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                   <div className="text-2xl font-bold text-green-400 mb-1">6/6</div>
-                  <div className="text-gray-300 text-sm">Services Operational</div>
+                  <div className="style={{ color: 'var(--text-secondary)' }} text-sm">Services Operational</div>
                 </div>
               </div>
             </div>
 
             {/* Services Status */}
             <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border mb-8">
-              <h2 className="text-2xl font-bold text-white mb-6">Service Status</h2>
+              <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Service Status</h2>
               <div className="space-y-4">
                 {services.map((service) => (
                   <div key={service.name} className="flex items-center justify-between p-4 style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg">
                     <div className="flex items-center space-x-4">
                       <span className="text-2xl">{getStatusIcon(service.status)}</span>
                       <div>
-                        <h3 className="text-lg font-semibold text-white">{service.name}</h3>
-                        <p className="text-gray-300 text-sm">{service.description}</p>
+                        <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }}">{service.name}</h3>
+                        <p className="style={{ color: 'var(--text-secondary)' }} text-sm">{service.description}</p>
                       </div>
                     </div>
                     <div className="text-right">
                       <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(service.status)}`}>
                         {service.status}
                       </div>
-                      <div className="text-gray-300 text-sm mt-1">{service.uptime} uptime</div>
-                      <div className="text-gray-400 text-xs">{service.responseTime} avg</div>
+                      <div className="style={{ color: 'var(--text-secondary)' }} text-sm mt-1">{service.uptime} uptime</div>
+                      <div className="style={{ color: 'var(--text-tertiary)' }} text-xs">{service.responseTime} avg</div>
                     </div>
                   </div>
                 ))}
@@ -256,28 +256,28 @@ const Status = () => {
 
             {/* Network Status */}
             <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border mb-8">
-              <h2 className="text-2xl font-bold text-white mb-6">Supported Networks</h2>
+              <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Supported Networks</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {networks.map((network) => (
-                  <div key={network.name} className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
+                  <div key={network.name} className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-lg font-semibold text-white">{network.name}</h3>
+                      <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }}">{network.name}</h3>
                       <div className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(network.status)}`}>
                         {getStatusIcon(network.status)} {network.status}
                       </div>
                     </div>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-300">Block Height:</span>
-                        <span className="text-white">{network.blockHeight}</span>
+                        <span className="style={{ color: 'var(--text-secondary)' }}">Block Height:</span>
+                        <span className="style={{ color: 'var(--text-primary)' }}">{network.blockHeight}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-300">Gas Price:</span>
-                        <span className="text-white">{network.gasPrice}</span>
+                        <span className="style={{ color: 'var(--text-secondary)' }}">Gas Price:</span>
+                        <span className="style={{ color: 'var(--text-primary)' }}">{network.gasPrice}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-300">Last Block:</span>
-                        <span className="text-white">{network.lastBlock}</span>
+                        <span className="style={{ color: 'var(--text-secondary)' }}">Last Block:</span>
+                        <span className="style={{ color: 'var(--text-primary)' }}">{network.lastBlock}</span>
                       </div>
                     </div>
                   </div>
@@ -287,14 +287,14 @@ const Status = () => {
 
             {/* Recent Incidents */}
             <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border mb-8">
-              <h2 className="text-2xl font-bold text-white mb-6">Recent Incidents</h2>
+              <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Recent Incidents</h2>
               <div className="space-y-4">
                 {recentIncidents.map((incident) => (
                   <div key={incident.id} className="border border rounded-lg p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <h3 className="text-lg font-semibold text-white mb-1">{incident.title}</h3>
-                        <p className="text-gray-400 text-sm">
+                        <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-1">{incident.title}</h3>
+                        <p className="style={{ color: 'var(--text-tertiary)' }} text-sm">
                           {incident.date} at {incident.time} • Duration: {incident.duration}
                         </p>
                       </div>
@@ -307,13 +307,13 @@ const Status = () => {
                         </div>
                       </div>
                     </div>
-                    <p className="text-gray-300 text-sm">{incident.description}</p>
+                    <p className="style={{ color: 'var(--text-secondary)' }} text-sm">{incident.description}</p>
                   </div>
                 ))}
               </div>
               
               <div className="mt-6 text-center">
-                <p className="text-gray-400 text-sm">
+                <p className="style={{ color: 'var(--text-tertiary)' }} text-sm">
                   Incident history will be maintained as the platform scales with funding.
                 </p>
               </div>
@@ -321,58 +321,58 @@ const Status = () => {
 
             {/* Performance Metrics */}
             <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border mb-8">
-              <h2 className="text-2xl font-bold text-white mb-6">Performance Metrics</h2>
+              <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Performance Metrics</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-white mb-3">Response Times</h3>
+                <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                  <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-3">Response Times</h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-300">Average:</span>
-                      <span className="text-white">150ms</span>
+                      <span className="style={{ color: 'var(--text-secondary)' }}">Average:</span>
+                      <span className="style={{ color: 'var(--text-primary)' }}">150ms</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-300">P95:</span>
-                      <span className="text-white">300ms</span>
+                      <span className="style={{ color: 'var(--text-secondary)' }}">P95:</span>
+                      <span className="style={{ color: 'var(--text-primary)' }}">300ms</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-300">P99:</span>
-                      <span className="text-white">500ms</span>
+                      <span className="style={{ color: 'var(--text-secondary)' }}">P99:</span>
+                      <span className="style={{ color: 'var(--text-primary)' }}">500ms</span>
                     </div>
                   </div>
                 </div>
                 
-                <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-white mb-3">Error Rates</h3>
+                <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                  <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-3">Error Rates</h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-300">4xx Errors:</span>
+                      <span className="style={{ color: 'var(--text-secondary)' }}">4xx Errors:</span>
                       <span className="text-yellow-400">0.1%</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-300">5xx Errors:</span>
+                      <span className="style={{ color: 'var(--text-secondary)' }}">5xx Errors:</span>
                       <span className="text-red-400">0.01%</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-300">Success Rate:</span>
+                      <span className="style={{ color: 'var(--text-secondary)' }}">Success Rate:</span>
                       <span className="text-green-400">99.9%</span>
                     </div>
                   </div>
                 </div>
                 
-                <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-white mb-3">Platform Status</h3>
+                <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                  <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-3">Platform Status</h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-300">Status:</span>
+                      <span className="style={{ color: 'var(--text-secondary)' }}">Status:</span>
                       <span className="text-green-400">Operational</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-300">Networks:</span>
-                      <span className="text-white">6 Active</span>
+                      <span className="style={{ color: 'var(--text-secondary)' }}">Networks:</span>
+                      <span className="style={{ color: 'var(--text-primary)' }}">6 Active</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-300">Smart Contracts:</span>
-                      <span className="text-white">17+ Deployed</span>
+                      <span className="style={{ color: 'var(--text-secondary)' }}">Smart Contracts:</span>
+                      <span className="style={{ color: 'var(--text-primary)' }}">17+ Deployed</span>
                     </div>
                   </div>
                 </div>
@@ -380,28 +380,28 @@ const Status = () => {
             </div>
 
             {/* Contact Information */}
-            <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
+            <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-white mb-4">Contact Support</h2>
-                <p className="text-gray-300 mb-6">
+                <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">Contact Support</h2>
+                <p className="style={{ color: 'var(--text-secondary)' }} mb-6">
                   For status updates and technical support, contact our team directly
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <a
                     href="mailto:support@boing.finance"
-                    className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-colors"
+                    className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} hover:bg-gray-600 style={{ color: 'var(--text-primary)' }} px-6 py-3 rounded-lg transition-colors"
                   >
                     Email Support
                   </a>
                   <a
                     href="/contact-us"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors"
+                    className="bg-blue-600 hover:bg-blue-700 style={{ color: 'var(--text-primary)' }} px-6 py-3 rounded-lg transition-colors"
                   >
                     Contact Form
                   </a>
                   <a
                     href="/bug-report"
-                    className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-colors"
+                    className="bg-red-600 hover:bg-red-700 style={{ color: 'var(--text-primary)' }} px-6 py-3 rounded-lg transition-colors"
                   >
                     Report Issues
                   </a>

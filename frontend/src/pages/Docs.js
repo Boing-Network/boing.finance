@@ -105,8 +105,8 @@ const Docs = () => {
         <div className="relative z-10 px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center mb-8 sm:mb-12 mt-8 sm:mt-12">
-            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3 sm:mb-4">boing.finance Documentation</h1>
-            <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
+            <h1 className="text-3xl sm:text-4xl font-bold style={{ color: 'var(--text-primary)' }} mb-3 sm:mb-4">boing.finance Documentation</h1>
+            <p className="text-lg sm:text-xl style={{ color: 'var(--text-secondary)' }} max-w-3xl mx-auto">
               Complete guide to the boing.finance decentralized exchange platform - your gateway to cross-chain trading
             </p>
           </div>
@@ -115,8 +115,8 @@ const Docs = () => {
           <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 pb-8 sm:pb-12">
             {/* Sidebar Navigation */}
             <div className="lg:w-1/4">
-              <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-xl p-4 sm:p-6 border border lg:sticky lg:top-8">
-                <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Table of Contents</h3>
+              <div className="rounded-xl p-4 sm:p-6 border lg:sticky lg:top-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+                <h3 className="text-base sm:text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-3 sm:mb-4">Table of Contents</h3>
                 <nav className="space-y-1 sm:space-y-2">
                   {sections.map((section) => (
                     <button
@@ -124,9 +124,22 @@ const Docs = () => {
                       onClick={() => setActiveSection(section.id)}
                       className={`w-full text-left px-2 sm:px-3 py-2 rounded-lg transition-colors text-sm sm:text-base ${
                         activeSection === section.id
-                          ? 'bg-blue-600 text-white'
-                          : 'text-gray-300 hover:text-white hover:bg-opacity-10'
+                          ? 'bg-blue-600'
+                          : 'hover:bg-opacity-10'
                       }`}
+                      style={{
+                        color: activeSection === section.id ? 'var(--text-primary)' : 'var(--text-secondary)'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (activeSection !== section.id) {
+                          e.target.style.color = 'var(--text-primary)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (activeSection !== section.id) {
+                          e.target.style.color = 'var(--text-secondary)';
+                        }
+                      }}
                     >
                       <span className="mr-2">{section.icon}</span>
                       {section.title}
@@ -138,7 +151,7 @@ const Docs = () => {
 
             {/* Main Content */}
             <div className="lg:w-3/4">
-              <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-xl p-4 sm:p-6 lg:p-8 border border">
+              <div className="rounded-xl p-4 sm:p-6 lg:p-8 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
                 {activeSection === 'overview' && <OverviewSection />}
                 {activeSection === 'features' && <FeaturesSection />}
                 {activeSection === 'networks' && <NetworksSection />}
