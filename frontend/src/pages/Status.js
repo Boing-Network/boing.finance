@@ -190,7 +190,7 @@ const Status = () => {
                   <strong>Note:</strong> boing.finance is a solo-founder project. While our platform is fully functional, we are currently seeking funding for infrastructure scaling and team expansion.
                 </p>
               </div>
-              <div className="flex justify-center items-center space-x-4 text-sm style={{ color: 'var(--text-tertiary)' }}">
+              <div className="flex justify-center items-center space-x-4 text-sm" style={{ color: 'var(--text-tertiary)' }}>
                 <span>Last updated: {new Date().toLocaleString()}</span>
                 <span>•</span>
                 <span>Current time: {new Date().toLocaleString()}</span>
@@ -229,9 +229,18 @@ const Status = () => {
               </div>
             </div>
 
+            {/* Divider */}
+            <div className="flex items-center justify-center my-8">
+              <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border-color)' }}></div>
+              <div className="px-4 py-2 rounded-full border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+                <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Service Status</span>
+              </div>
+              <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border-color)' }}></div>
+            </div>
+
             {/* Services Status */}
             <div className="rounded-lg p-6 border mb-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-              <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Service Status</h2>
+              <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Service Status</h2>
               <div className="space-y-4">
                 {services.map((service) => (
                   <div key={service.name} className="flex items-center justify-between p-4 style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg">
@@ -254,9 +263,18 @@ const Status = () => {
               </div>
             </div>
 
+            {/* Divider */}
+            <div className="flex items-center justify-center my-8">
+              <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border-color)' }}></div>
+              <div className="px-4 py-2 rounded-full border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+                <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Supported Networks</span>
+              </div>
+              <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border-color)' }}></div>
+            </div>
+
             {/* Network Status */}
             <div className="rounded-lg p-6 border mb-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-              <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Supported Networks</h2>
+              <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Supported Networks</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {networks.map((network) => (
                   <div key={network.name} className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
@@ -287,7 +305,7 @@ const Status = () => {
 
             {/* Recent Incidents */}
             <div className="rounded-lg p-6 border mb-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-              <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Recent Incidents</h2>
+              <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Recent Incidents</h2>
               <div className="space-y-4">
                 {recentIncidents.map((incident) => (
                   <div key={incident.id} className="border border rounded-lg p-4">
@@ -321,7 +339,7 @@ const Status = () => {
 
             {/* Performance Metrics */}
             <div className="rounded-lg p-6 border mb-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-              <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Performance Metrics</h2>
+              <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Performance Metrics</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                   <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-3">Response Times</h3>
@@ -389,13 +407,13 @@ const Status = () => {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <a
                     href="mailto:support@boing.finance"
-                    className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} hover:bg-gray-600 style={{ color: 'var(--text-primary)' }} px-6 py-3 rounded-lg transition-colors"
+                    className="hover:bg-gray-600 px-6 py-3 rounded-lg transition-colors border" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
                   >
                     Email Support
                   </a>
                   <a
                     href="/contact-us"
-                    className="bg-blue-600 hover:bg-blue-700 style={{ color: 'var(--text-primary)' }} px-6 py-3 rounded-lg transition-colors"
+                    className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition-colors" style={{ color: 'var(--text-primary)' }}
                   >
                     Contact Form
                   </a>
