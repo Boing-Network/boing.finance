@@ -139,7 +139,7 @@ const ContactUs = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Contact Form */}
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <h2 className="text-2xl font-bold text-white mb-6">Send us a Message</h2>
                 
                 {submitStatus === 'success' && (
@@ -258,7 +258,7 @@ const ContactUs = () => {
               {/* Contact Information */}
               <div className="space-y-6">
                 {/* Direct Contact Methods */}
-                <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                   <h2 className="text-2xl font-bold text-white mb-6">Direct Contact</h2>
                   <div className="space-y-4">
                     {contactMethods.map((method) => (
@@ -281,7 +281,7 @@ const ContactUs = () => {
                 </div>
 
                 {/* Support Channels */}
-                <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                   <h2 className="text-2xl font-bold text-white mb-6">Support Channels</h2>
                   <div className="space-y-4">
                     {supportChannels.map((channel) => (
@@ -302,7 +302,7 @@ const ContactUs = () => {
                 </div>
 
                 {/* Support Information */}
-                <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                   <h2 className="text-2xl font-bold text-white mb-4">Support Information</h2>
                   <div className="space-y-2 text-gray-300">
                     <div className="flex justify-between">
@@ -328,17 +328,17 @@ const ContactUs = () => {
             </div>
 
             {/* FAQ Section */}
-            <div className="mt-12 bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div className="mt-12 style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
               <h2 className="text-2xl font-bold text-white mb-6 text-center">Frequently Asked Questions</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <div className="border border-gray-700 rounded-lg p-4">
+                  <div className="border border rounded-lg p-4">
                     <h3 className="text-lg font-semibold text-white mb-2">How quickly do you respond?</h3>
                     <p className="text-gray-300 text-sm">
                       We typically respond to general inquiries within 24 hours. Security issues are addressed within 4 hours.
                     </p>
                   </div>
-                  <div className="border border-gray-700 rounded-lg p-4">
+                  <div className="border border rounded-lg p-4">
                     <h3 className="text-lg font-semibold text-white mb-2">Can I get technical support?</h3>
                     <p className="text-gray-300 text-sm">
                       Yes! Our technical support team is available to help with any platform-related issues.
@@ -346,13 +346,13 @@ const ContactUs = () => {
                   </div>
                 </div>
                 <div className="space-y-4">
-                  <div className="border border-gray-700 rounded-lg p-4">
+                  <div className="border border rounded-lg p-4">
                     <h3 className="text-lg font-semibold text-white mb-2">Do you offer business partnerships?</h3>
                     <p className="text-gray-300 text-sm">
                       Absolutely! We're always interested in strategic partnerships. Contact our business team.
                     </p>
                   </div>
-                  <div className="border border-gray-700 rounded-lg p-4">
+                  <div className="border border rounded-lg p-4">
                     <h3 className="text-lg font-semibold text-white mb-2">How can I report a security issue?</h3>
                     <p className="text-gray-300 text-sm">
                       For security vulnerabilities, please email security@boing.finance immediately. We take security seriously.

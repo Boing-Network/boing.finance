@@ -198,7 +198,7 @@ const Status = () => {
             </div>
 
             {/* Overall Status */}
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-8">
+            <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border mb-8">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-white">Overall System Status</h2>
                 <div className={`px-4 py-2 rounded-lg border ${getStatusColor(systemStatus.overall)}`}>
@@ -230,7 +230,7 @@ const Status = () => {
             </div>
 
             {/* Services Status */}
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-8">
+            <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border mb-8">
               <h2 className="text-2xl font-bold text-white mb-6">Service Status</h2>
               <div className="space-y-4">
                 {services.map((service) => (
@@ -255,7 +255,7 @@ const Status = () => {
             </div>
 
             {/* Network Status */}
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-8">
+            <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border mb-8">
               <h2 className="text-2xl font-bold text-white mb-6">Supported Networks</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {networks.map((network) => (
@@ -286,11 +286,11 @@ const Status = () => {
             </div>
 
             {/* Recent Incidents */}
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-8">
+            <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border mb-8">
               <h2 className="text-2xl font-bold text-white mb-6">Recent Incidents</h2>
               <div className="space-y-4">
                 {recentIncidents.map((incident) => (
-                  <div key={incident.id} className="border border-gray-700 rounded-lg p-4">
+                  <div key={incident.id} className="border border rounded-lg p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <h3 className="text-lg font-semibold text-white mb-1">{incident.title}</h3>
@@ -320,7 +320,7 @@ const Status = () => {
             </div>
 
             {/* Performance Metrics */}
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-8">
+            <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border mb-8">
               <h2 className="text-2xl font-bold text-white mb-6">Performance Metrics</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-gray-700 rounded-lg p-4">
@@ -380,7 +380,7 @@ const Status = () => {
             </div>
 
             {/* Contact Information */}
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
               <div className="text-center">
                 <h2 className="text-2xl font-bold text-white mb-4">Contact Support</h2>
                 <p className="text-gray-300 mb-6">

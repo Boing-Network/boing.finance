@@ -156,7 +156,7 @@ const BugReport = () => {
               {/* Guidelines Sidebar */}
               <div className="lg:col-span-1 space-y-6">
                 {/* Reporting Guidelines */}
-                <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                   <h2 className="text-xl font-bold text-white mb-4">Reporting Guidelines</h2>
                   <div className="space-y-4">
                     {reportingGuidelines.map((guideline) => (
@@ -172,7 +172,7 @@ const BugReport = () => {
                 </div>
 
                 {/* Security Guidelines */}
-                <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                   <h2 className="text-xl font-bold text-white mb-4">Security Guidelines</h2>
                   <div className="space-y-2">
                     {securityGuidelines.map((guideline, index) => (
@@ -185,7 +185,7 @@ const BugReport = () => {
                 </div>
 
                 {/* Alternative Reporting */}
-                <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                   <h2 className="text-xl font-bold text-white mb-4">Other Ways to Report</h2>
                   <div className="space-y-3">
                     <a
@@ -212,7 +212,7 @@ const BugReport = () => {
 
               {/* Bug Report Form */}
               <div className="lg:col-span-2">
-                <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                   <h2 className="text-2xl font-bold text-white mb-6">Submit Bug Report</h2>
                   
                   {submitStatus === 'success' && (
@@ -482,7 +482,7 @@ const BugReport = () => {
             </div>
 
             {/* Additional Information */}
-            <div className="mt-12 bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div className="mt-12 style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
               <h2 className="text-2xl font-bold text-white mb-6 text-center">What Happens Next?</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="text-center">

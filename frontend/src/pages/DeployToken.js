@@ -26,7 +26,35 @@ const TOKEN_FACTORY_ABI = TokenFactoryArtifact.abi;
 const TOKEN_IMPLEMENTATION_ABI = TokenImplementationArtifact.abi;
 
 function AnimatedBackground() {
-  return null; // Removed since it's now applied centrally
+  return (
+    <div className="fixed inset-0 z-0 overflow-hidden">
+      {/* Animated gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 animate-pulse"></div>
+      
+      {/* Floating particles */}
+      <div className="absolute inset-0">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-cyan-400 rounded-full opacity-30 animate-pulse"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${2 + Math.random() * 3}s`
+            }}
+          ></div>
+        ))}
+      </div>
+      
+      {/* Animated circles */}
+      <div className="absolute inset-0">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-500/10 rounded-full animate-ping"></div>
+        <div className="absolute top-3/4 right-1/4 w-32 h-32 bg-cyan-500/10 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 right-1/3 w-48 h-48 bg-purple-500/10 rounded-full animate-ping" style={{ animationDelay: '2s' }}></div>
+      </div>
+    </div>
+  );
 }
 
 // MochiAstronaut component
@@ -1237,6 +1265,7 @@ export default function DeployToken() {
         </script>
       </Helmet>
       <div className="relative min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
+        <AnimatedBackground />
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">
             {/* Header */}
@@ -1309,9 +1338,13 @@ export default function DeployToken() {
                     key={key}
                     className={`relative p-6 rounded-xl border-2 cursor-pointer transition-all ${
                       selectedPlan === key
-                        ? 'border-blue-500 bg-gray-700'
-                        : 'border-gray-600 hover:border-gray-500 bg-gray-800'
+                        ? 'border-blue-500'
+                        : 'hover:border-gray-500'
                     }`}
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      borderColor: selectedPlan === key ? '#3b82f6' : 'var(--border-color)'
+                    }}
                     onClick={() => setSelectedPlan(key)}
                   >
                     {selectedPlan === key && (
@@ -1495,7 +1528,10 @@ export default function DeployToken() {
                       const restrictionMessage = getFeatureRestrictionMessage(feature.featureKey);
                       
                       return (
-                        <div key={index} className={`p-3 sm:p-4 rounded-lg border ${isAllowed ? 'border-gray-600 bg-gray-700' : 'border-gray-700 bg-gray-800'}`}>
+                        <div key={index} className="p-3 sm:p-4 rounded-lg border" style={{
+                          backgroundColor: 'var(--bg-card)',
+                          borderColor: 'var(--border-color)'
+                        }}>
                           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
                             <div className="flex items-start sm:items-center space-x-3">
                               <span className="text-xl sm:text-2xl flex-shrink-0">{feature.icon}</span>
@@ -1891,7 +1927,10 @@ export default function DeployToken() {
             {/* Ownership Renouncement Notice Modal */}
             {showOwnershipRenounceModal && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
-                <div className="bg-gray-800 rounded-xl p-4 sm:p-8 shadow-xl max-w-md w-full">
+                <div className="rounded-xl p-4 sm:p-8 shadow-xl max-w-md w-full" style={{
+                  backgroundColor: 'var(--bg-card)',
+                  border: '1px solid var(--border-color)'
+                }}>
                   <div className="flex items-start space-x-3 mb-4">
                     <span className="text-yellow-400 text-2xl">⚠️</span>
                     <h3 className="text-lg sm:text-xl font-bold text-white">Ownership Renouncement Notice</h3>
@@ -1951,7 +1990,10 @@ export default function DeployToken() {
             {/* Renounce Ownership Confirmation Modal */}
             {showRenounceModal && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
-                <div className="bg-gray-800 rounded-xl p-4 sm:p-8 shadow-xl max-w-md w-full">
+                <div className="rounded-xl p-4 sm:p-8 shadow-xl max-w-md w-full" style={{
+                  backgroundColor: 'var(--bg-card)',
+                  border: '1px solid var(--border-color)'
+                }}>
                   <h3 className="text-lg sm:text-xl font-bold text-white mb-4">Renounce Ownership Confirmation</h3>
                   <p className="text-sm sm:text-base text-gray-300 mb-6">
                     You have selected <span className="font-semibold text-blue-400">Renounce Ownership</span>.<br/>

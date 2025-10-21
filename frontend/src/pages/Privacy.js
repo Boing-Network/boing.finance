@@ -41,7 +41,7 @@ const Privacy = () => {
             </div>
 
             {/* Introduction */}
-            <div className="bg-gray-800 rounded-lg p-6 mb-8 border border-gray-700">
+            <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 mb-8 border border">
               <p className="text-gray-300 leading-relaxed">
                 At boing.finance, we are committed to protecting your privacy and ensuring the security of your personal 
                 information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information 
@@ -52,7 +52,7 @@ const Privacy = () => {
             {/* Privacy Sections */}
             <div className="space-y-8">
               {/* Information We Collect */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <h2 className="text-2xl font-bold text-white mb-4">1. Information We Collect</h2>
                 
                 <h3 className="text-lg font-semibold text-white mb-3">1.1 Information You Provide</h3>
@@ -92,7 +92,7 @@ const Privacy = () => {
               </section>
 
               {/* How We Use Information */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <h2 className="text-2xl font-bold text-white mb-4">2. How We Use Information</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   We use the information we collect for the following purposes:
@@ -112,7 +112,7 @@ const Privacy = () => {
               </section>
 
               {/* Information Sharing */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <h2 className="text-2xl font-bold text-white mb-4">3. Information Sharing and Disclosure</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   We may share your information in the following circumstances:
@@ -149,7 +149,7 @@ const Privacy = () => {
               </section>
 
               {/* Data Security */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <h2 className="text-2xl font-bold text-white mb-4">4. Data Security</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   We implement appropriate technical and organizational measures to protect your information:
@@ -171,7 +171,7 @@ const Privacy = () => {
               </section>
 
               {/* Data Retention */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <h2 className="text-2xl font-bold text-white mb-4">5. Data Retention</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   We retain your information for as long as necessary to:
@@ -189,7 +189,7 @@ const Privacy = () => {
               </section>
 
               {/* Your Rights */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <h2 className="text-2xl font-bold text-white mb-4">6. Your Rights and Choices</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   Depending on your location, you may have certain rights regarding your personal information:
@@ -231,7 +231,7 @@ const Privacy = () => {
               </section>
 
               {/* Cookies and Tracking */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <h2 className="text-2xl font-bold text-white mb-4">7. Cookies and Tracking Technologies</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   We use cookies and similar tracking technologies to enhance your experience:
@@ -249,7 +249,7 @@ const Privacy = () => {
               </section>
 
               {/* Third-Party Services */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <h2 className="text-2xl font-bold text-white mb-4">8. Third-Party Services</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   Our Service may contain links to third-party websites or integrate with third-party services. 
@@ -266,7 +266,7 @@ const Privacy = () => {
               </section>
 
               {/* International Transfers */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <h2 className="text-2xl font-bold text-white mb-4">9. International Data Transfers</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   Your information may be transferred to and processed in countries other than your own. We ensure 
@@ -279,7 +279,7 @@ const Privacy = () => {
               </section>
 
               {/* Children's Privacy */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <h2 className="text-2xl font-bold text-white mb-4">10. Children's Privacy</h2>
                 <p className="text-gray-300 leading-relaxed">
                   Our Service is not intended for children under the age of 18. We do not knowingly collect personal 
@@ -289,7 +289,7 @@ const Privacy = () => {
               </section>
 
               {/* Changes to Privacy Policy */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <h2 className="text-2xl font-bold text-white mb-4">11. Changes to This Privacy Policy</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   We may update this Privacy Policy from time to time to reflect changes in our practices or applicable 
@@ -306,7 +306,7 @@ const Privacy = () => {
               </section>
 
               {/* Contact Information */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <h2 className="text-2xl font-bold text-white mb-4">12. Contact Us</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   If you have any questions about this Privacy Policy or our privacy practices, please contact us:
@@ -324,7 +324,7 @@ const Privacy = () => {
             </div>
 
             {/* Footer Note */}
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 text-center mt-8">
+            <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border text-center mt-8">
               <p className="text-gray-300 text-sm">
                 This Privacy Policy was last updated on January 2025. We are committed to protecting your privacy 
                 and will continue to review and improve our privacy practices.

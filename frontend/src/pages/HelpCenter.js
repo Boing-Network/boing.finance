@@ -184,7 +184,7 @@ const HelpCenter = () => {
             </div>
 
             {/* Search Bar */}
-            <div className="bg-gray-800 rounded-lg p-6 mb-8 border border-gray-700">
+            <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 mb-8 border border">
               <div className="relative max-w-2xl mx-auto">
                 <input
                   type="text"
@@ -237,7 +237,7 @@ const HelpCenter = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredArticles.map((article) => (
                       <Link key={article.id} to={`/help-center/article/${article.id}`} className="block">
-                        <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer">
+                        <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-4 border border hover:border-gray-600 transition-colors cursor-pointer">
                           <div className="text-sm text-blue-400 mb-2">{article.category}</div>
                           <h3 className="text-lg font-semibold text-white mb-2">{article.title}</h3>
                           <p className="text-gray-300 text-sm mb-3">{article.content}</p>
@@ -270,7 +270,7 @@ const HelpCenter = () => {
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 {/* Categories Sidebar */}
                 <div className="lg:col-span-1">
-                  <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                  <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-4 border border">
                     <h3 className="text-lg font-semibold text-white mb-4">Categories</h3>
                     <div className="space-y-2">
                       {helpCategories.map((category) => (
@@ -293,7 +293,7 @@ const HelpCenter = () => {
 
                 {/* Category Content */}
                 <div className="lg:col-span-3">
-                  <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                  <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                     <div className="flex items-center space-x-3 mb-6">
                       <span className="text-2xl">{currentCategory.icon}</span>
                       <h2 className="text-2xl font-bold text-white">{currentCategory.title}</h2>
@@ -302,7 +302,7 @@ const HelpCenter = () => {
                     <div className="space-y-4">
                       {currentCategory.articles.map((article) => (
                         <Link key={article.id} to={`/help-center/article/${article.id}`} className="block">
-                          <div className="border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition-colors cursor-pointer">
+                          <div className="border border rounded-lg p-4 hover:border-gray-600 transition-colors cursor-pointer">
                             <h3 className="text-lg font-semibold text-white mb-2">{article.title}</h3>
                             <p className="text-gray-300 text-sm mb-3">{article.content}</p>
                             <div className="flex flex-wrap gap-1">
@@ -322,7 +322,7 @@ const HelpCenter = () => {
             )}
 
             {/* Additional Support */}
-            <div className="mt-12 bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div className="mt-12 style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
               <h2 className="text-2xl font-bold text-white mb-4 text-center">Still Need Help?</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="text-center">

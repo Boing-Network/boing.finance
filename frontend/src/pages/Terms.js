@@ -41,7 +41,10 @@ const Terms = () => {
             </div>
 
             {/* Introduction */}
-            <div className="bg-gray-800 rounded-lg p-6 mb-8 border border-gray-700">
+            <div className="rounded-lg p-6 mb-8 border" style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'var(--border-color)'
+            }}>
               <p className="text-gray-300 leading-relaxed">
                 These Terms of Service ("Terms") govern your use of the boing.finance platform, including our website, 
                 decentralized exchange protocol, and related services (collectively, the "Service"). By accessing or 
@@ -53,7 +56,10 @@ const Terms = () => {
             {/* Terms Sections */}
             <div className="space-y-8">
               {/* Acceptance of Terms */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="rounded-lg p-6 border" style={{
+                backgroundColor: 'var(--bg-card)',
+                borderColor: 'var(--border-color)'
+              }}>
                 <h2 className="text-2xl font-bold text-white mb-4">1. Acceptance of Terms</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   By accessing or using boing.finance, you confirm that you accept these Terms and agree to comply with them. 
@@ -67,7 +73,10 @@ const Terms = () => {
               </section>
 
               {/* Description of Service */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="rounded-lg p-6 border" style={{
+                backgroundColor: 'var(--bg-card)',
+                borderColor: 'var(--border-color)'
+              }}>
                 <h2 className="text-2xl font-bold text-white mb-4">2. Description of Service</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   boing.finance is a decentralized exchange protocol that enables users to:
@@ -86,7 +95,10 @@ const Terms = () => {
               </section>
 
               {/* Eligibility */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="rounded-lg p-6 border" style={{
+                backgroundColor: 'var(--bg-card)',
+                borderColor: 'var(--border-color)'
+              }}>
                 <h2 className="text-2xl font-bold text-white mb-4">3. Eligibility</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   To use the Service, you must:
@@ -104,7 +116,10 @@ const Terms = () => {
               </section>
 
               {/* User Responsibilities */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="rounded-lg p-6 border" style={{
+                backgroundColor: 'var(--bg-card)',
+                borderColor: 'var(--border-color)'
+              }}>
                 <h2 className="text-2xl font-bold text-white mb-4">4. User Responsibilities</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   You are responsible for:
@@ -124,7 +139,10 @@ const Terms = () => {
               </section>
 
               {/* Risks and Disclaimers */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="rounded-lg p-6 border" style={{
+                backgroundColor: 'var(--bg-card)',
+                borderColor: 'var(--border-color)'
+              }}>
                 <h2 className="text-2xl font-bold text-white mb-4">5. Risks and Disclaimers</h2>
                 <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 mb-4">
                   <h3 className="text-lg font-semibold text-red-400 mb-2">Important Risk Disclosures</h3>
@@ -148,7 +166,10 @@ const Terms = () => {
               </section>
 
               {/* Limitation of Liability */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="rounded-lg p-6 border" style={{
+                backgroundColor: 'var(--bg-card)',
+                borderColor: 'var(--border-color)'
+              }}>
                 <h2 className="text-2xl font-bold text-white mb-4">6. Limitation of Liability</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL BOING.FINANCE, ITS AFFILIATES, DIRECTORS, 
@@ -163,7 +184,10 @@ const Terms = () => {
               </section>
 
               {/* Intellectual Property */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="rounded-lg p-6 border" style={{
+                backgroundColor: 'var(--bg-card)',
+                borderColor: 'var(--border-color)'
+              }}>
                 <h2 className="text-2xl font-bold text-white mb-4">7. Intellectual Property</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   The Service and its original content, features, and functionality are owned by boing.finance and are 
@@ -177,7 +201,10 @@ const Terms = () => {
               </section>
 
               {/* Privacy */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="rounded-lg p-6 border" style={{
+                backgroundColor: 'var(--bg-card)',
+                borderColor: 'var(--border-color)'
+              }}>
                 <h2 className="text-2xl font-bold text-white mb-4">8. Privacy</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   Your privacy is important to us. Please review our Privacy Policy, which also governs your use of the 
@@ -190,7 +217,10 @@ const Terms = () => {
               </section>
 
               {/* Termination */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="rounded-lg p-6 border" style={{
+                backgroundColor: 'var(--bg-card)',
+                borderColor: 'var(--border-color)'
+              }}>
                 <h2 className="text-2xl font-bold text-white mb-4">9. Termination</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   We may terminate or suspend your access to the Service immediately, without prior notice or liability, 
@@ -208,7 +238,10 @@ const Terms = () => {
               </section>
 
               {/* Governing Law */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="rounded-lg p-6 border" style={{
+                backgroundColor: 'var(--bg-card)',
+                borderColor: 'var(--border-color)'
+              }}>
                 <h2 className="text-2xl font-bold text-white mb-4">10. Governing Law</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   These Terms shall be interpreted and governed by the laws of [Jurisdiction], without regard to its 
@@ -221,7 +254,10 @@ const Terms = () => {
               </section>
 
               {/* Changes to Terms */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="rounded-lg p-6 border" style={{
+                backgroundColor: 'var(--bg-card)',
+                borderColor: 'var(--border-color)'
+              }}>
                 <h2 className="text-2xl font-bold text-white mb-4">11. Changes to Terms</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a 
@@ -235,7 +271,10 @@ const Terms = () => {
               </section>
 
               {/* Contact Information */}
-              <section className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <section className="rounded-lg p-6 border" style={{
+                backgroundColor: 'var(--bg-card)',
+                borderColor: 'var(--border-color)'
+              }}>
                 <h2 className="text-2xl font-bold text-white mb-4">12. Contact Information</h2>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   If you have any questions about these Terms, please contact us:
@@ -249,7 +288,10 @@ const Terms = () => {
             </div>
 
             {/* Footer Note */}
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 text-center mt-8">
+            <div className="rounded-lg p-6 border text-center mt-8" style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'var(--border-color)'
+            }}>
               <p className="text-gray-300 text-sm">
                 These Terms of Service were last updated on January 2025. Please review them carefully before using 
                 the boing.finance platform.
