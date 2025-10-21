@@ -292,46 +292,68 @@ const Whitepaper = () => {
             <section id="roadmap" className="mb-12">
               <h2 className="text-3xl font-bold text-white mb-6">8. Development Roadmap</h2>
               <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <div className="mb-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                  <p className="text-blue-200 text-sm">
+                    <strong>Current Status:</strong> boing.finance is currently in early development phase with core infrastructure deployed. Many features are developed locally but not yet available in production due to funding constraints. The roadmap below reflects realistic milestones based on current capabilities and funding needs.
+                  </p>
+                </div>
+                
                 <div className="space-y-6">
-                  <div className="bg-gray-700 rounded-lg p-4">
-                    <h4 className="text-lg font-semibold text-white mb-2">Phase 1: Foundation (Q1 2025)</h4>
+                  <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
+                    <h4 className="text-lg font-semibold text-white mb-2">✅ Phase 1: Foundation (Completed - Q4 2024)</h4>
                     <ul className="text-gray-300 text-sm space-y-1">
-                      <li>• Core DEX functionality on Ethereum</li>
-                      <li>• Basic AMM pools</li>
-                      <li>• Token swap interface</li>
-                      <li>• Initial liquidity provision</li>
+                      <li>• Core smart contract deployment across 6 networks</li>
+                      <li>• Token deployment functionality (ERC-20 factory)</li>
+                      <li>• Basic platform infrastructure and UI</li>
+                      <li>• Cross-chain contract architecture</li>
+                      <li>• 17+ smart contracts deployed and verified</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4">
+                    <h4 className="text-lg font-semibold text-white mb-2">🚧 Phase 2: Core Features (In Development - Q1 2025)</h4>
+                    <ul className="text-gray-300 text-sm space-y-1">
+                      <li>• <strong>Swap functionality</strong> - Token trading interface (locally developed, needs funding for production)</li>
+                      <li>• <strong>Liquidity pools</strong> - AMM pool creation and management (locally developed, needs funding for production)</li>
+                      <li>• <strong>Cross-chain bridge</strong> - Asset transfer between networks (locally developed, needs funding for production)</li>
+                      <li>• <strong>Basic analytics</strong> - Trading data and pool statistics (locally developed, needs funding for production)</li>
+                    </ul>
+                    <p className="text-yellow-200 text-xs mt-2">
+                      <em>Note: These features are developed locally but require funding for production deployment, testing, and security audits.</em>
+                    </p>
+                  </div>
+                  
+                  <div className="bg-gray-700 rounded-lg p-4">
+                    <h4 className="text-lg font-semibold text-white mb-2">📋 Phase 3: Advanced Features (Post-Funding - Q2-Q3 2025)</h4>
+                    <ul className="text-gray-300 text-sm space-y-1">
+                      <li>• <strong>Professional security audits</strong> - Third-party smart contract audits</li>
+                      <li>• <strong>Advanced analytics dashboard</strong> - Comprehensive market data and portfolio tracking</li>
+                      <li>• <strong>Token management interface</strong> - Token discovery and portfolio management</li>
+                      <li>• <strong>Mobile application</strong> - iOS and Android apps</li>
+                      <li>• <strong>Team expansion</strong> - Hiring specialized developers and security experts</li>
                     </ul>
                   </div>
                   
                   <div className="bg-gray-700 rounded-lg p-4">
-                    <h4 className="text-lg font-semibold text-white mb-2">Phase 2: Expansion (Q2 2025)</h4>
+                    <h4 className="text-lg font-semibold text-white mb-2">🎯 Phase 4: Ecosystem & Governance (Future - Q4 2025+)</h4>
                     <ul className="text-gray-300 text-sm space-y-1">
-                      <li>• Cross-chain bridge implementation</li>
-                      <li>• Polygon and Arbitrum integration</li>
-                      <li>• Advanced analytics dashboard</li>
-                      <li>• Mobile app development</li>
+                      <li>• <strong>DAO governance implementation</strong> - Community-driven protocol decisions</li>
+                      <li>• <strong>Token staking and rewards</strong> - BOING token utility and staking mechanisms</li>
+                      <li>• <strong>Additional network integrations</strong> - Support for more blockchain networks</li>
+                      <li>• <strong>DeFi protocol integrations</strong> - Partnerships with other DeFi protocols</li>
+                      <li>• <strong>Institutional features</strong> - Advanced trading tools and compliance features</li>
                     </ul>
                   </div>
-                  
-                  <div className="bg-gray-700 rounded-lg p-4">
-                    <h4 className="text-lg font-semibold text-white mb-2">Phase 3: Governance (Q3 2025)</h4>
-                    <ul className="text-gray-300 text-sm space-y-1">
-                      <li>• DAO governance implementation</li>
-                      <li>• Token staking and rewards</li>
-                      <li>• Additional network integrations</li>
-                      <li>• Advanced trading features</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="bg-gray-700 rounded-lg p-4">
-                    <h4 className="text-lg font-semibold text-white mb-2">Phase 4: Ecosystem (Q4 2025)</h4>
-                    <ul className="text-gray-300 text-sm space-y-1">
-                      <li>• DeFi protocol integrations</li>
-                      <li>• Institutional features</li>
-                      <li>• Advanced cross-chain DeFi tools</li>
-                      <li>• Global expansion and partnerships</li>
-                    </ul>
-                  </div>
+                </div>
+                
+                <div className="mt-6 p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
+                  <h4 className="text-lg font-semibold text-white mb-2">⚠️ Current Limitations</h4>
+                  <ul className="text-gray-300 text-sm space-y-1">
+                    <li>• <strong>Funding constraints</strong> - Many features are developed but not deployed due to lack of resources</li>
+                    <li>• <strong>Solo development</strong> - All development done by single founder, limiting feature velocity</li>
+                    <li>• <strong>No professional audits</strong> - Smart contracts need third-party security audits</li>
+                    <li>• <strong>Limited user base</strong> - Platform lacks marketing budget for user acquisition</li>
+                  </ul>
                 </div>
               </div>
             </section>
@@ -341,13 +363,16 @@ const Whitepaper = () => {
               <h2 className="text-3xl font-bold text-white mb-6">9. Conclusion</h2>
               <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
                 <p className="text-gray-300 leading-relaxed mb-4">
-                  boing.finance represents a significant step forward in the evolution of decentralized finance by addressing the critical need for cross-chain interoperability. Our comprehensive approach combines advanced smart contract technology with user-friendly interfaces to create a seamless trading experience across multiple blockchain networks.
+                  boing.finance represents a promising foundation for cross-chain decentralized finance, with core infrastructure already deployed across multiple blockchain networks. Our platform addresses the critical need for interoperability in the DeFi ecosystem through a modular architecture designed for scalability and security.
                 </p>
                 <p className="text-gray-300 leading-relaxed mb-4">
-                  Through our commitment to security, transparency, and community governance, we aim to build a robust and sustainable DeFi ecosystem that serves the needs of both retail and institutional users. The protocol's modular architecture ensures scalability and adaptability to future developments in the blockchain space.
+                  Currently in early development phase, boing.finance has successfully deployed 17+ smart contracts across 6 networks and provides functional token deployment capabilities. Many advanced features are developed locally but await funding for production deployment, professional audits, and team expansion.
+                </p>
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  As a solo-founder project seeking investment, we are committed to transparency about our current capabilities and limitations. With proper funding, we aim to complete feature deployment, conduct professional security audits, and build a robust team to serve both retail and institutional DeFi users.
                 </p>
                 <p className="text-gray-300 leading-relaxed">
-                  As we continue to develop and expand the boing.finance ecosystem, we invite the broader DeFi community to participate in our journey toward a more interconnected and accessible financial future.
+                  We invite the DeFi community and potential investors to join us in building a more interconnected and accessible financial future through responsible development and community-driven governance.
                 </p>
               </div>
             </section>
@@ -358,15 +383,20 @@ const Whitepaper = () => {
               <p className="text-gray-300 mb-4">
                 Join the boing.finance community and help shape the future of cross-chain DeFi.
               </p>
+              <div className="mb-4 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                <p className="text-blue-200 text-sm">
+                  <strong>Note:</strong> As a solo-founder project seeking funding, we currently provide direct email support. Social media channels and community platforms will be established post-funding.
+                </p>
+              </div>
               <div className="flex justify-center space-x-4">
-                <a href="https://discord.gg/7RDtQtQvBW" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 transition-colors">
-                  Discord
+                <a href="mailto:support@boing.finance" className="text-blue-400 hover:text-blue-300 transition-colors">
+                  📧 Email Support
                 </a>
-                <a href="https://t.me/boing_finance" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 transition-colors">
-                  Telegram
+                <a href="mailto:invest@boing.finance" className="text-blue-400 hover:text-blue-300 transition-colors">
+                  💼 Investment Inquiries
                 </a>
-                <a href="https://twitter.com/boing_finance" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 transition-colors">
-                  Twitter
+                <a href="/contact-us" className="text-blue-400 hover:text-blue-300 transition-colors">
+                  💬 Contact Form
                 </a>
               </div>
             </div>
