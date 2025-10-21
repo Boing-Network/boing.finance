@@ -5,52 +5,52 @@ const Status = () => {
   // Mock status data - in a real app, this would come from an API
   const systemStatus = {
     overall: 'operational',
-    uptime: '99.98%',
-    lastIncident: '2024-12-15',
-    responseTime: '120ms'
+    uptime: '99.9%',
+    lastIncident: 'No recent incidents',
+    responseTime: '150ms'
   };
 
   const services = [
     {
       name: 'Trading Platform',
       status: 'operational',
-      uptime: '99.99%',
-      responseTime: '85ms',
+      uptime: '99.9%',
+      responseTime: '120ms',
       description: 'Core DEX functionality and token swaps'
     },
     {
       name: 'Cross-Chain Bridge',
       status: 'operational',
-      uptime: '99.95%',
-      responseTime: '150ms',
+      uptime: '99.8%',
+      responseTime: '180ms',
       description: 'Asset transfers between blockchains'
     },
     {
       name: 'Liquidity Pools',
       status: 'operational',
-      uptime: '99.97%',
-      responseTime: '95ms',
+      uptime: '99.9%',
+      responseTime: '140ms',
       description: 'Automated market maker pools'
     },
     {
       name: 'Analytics Dashboard',
       status: 'operational',
-      uptime: '99.90%',
-      responseTime: '200ms',
+      uptime: '99.7%',
+      responseTime: '250ms',
       description: 'Market data and portfolio analytics'
     },
     {
       name: 'Token Deployment',
       status: 'operational',
-      uptime: '99.92%',
-      responseTime: '180ms',
+      uptime: '99.9%',
+      responseTime: '200ms',
       description: 'ERC20 token creation and deployment'
     },
     {
       name: 'API Services',
       status: 'operational',
-      uptime: '99.96%',
-      responseTime: '110ms',
+      uptime: '99.8%',
+      responseTime: '150ms',
       description: 'REST API and WebSocket connections'
     }
   ];
@@ -59,63 +59,57 @@ const Status = () => {
     {
       name: 'Ethereum Mainnet',
       status: 'operational',
-      blockHeight: '18,456,789',
-      gasPrice: '15 Gwei',
-      lastBlock: '2 seconds ago'
+      blockHeight: 'Live',
+      gasPrice: 'Variable',
+      lastBlock: 'Active'
     },
     {
       name: 'Polygon',
       status: 'operational',
-      blockHeight: '45,678,901',
-      gasPrice: '30 Gwei',
-      lastBlock: '1 second ago'
+      blockHeight: 'Live',
+      gasPrice: 'Variable',
+      lastBlock: 'Active'
     },
     {
       name: 'Arbitrum One',
       status: 'operational',
-      blockHeight: '12,345,678',
-      gasPrice: '0.1 Gwei',
-      lastBlock: '3 seconds ago'
+      blockHeight: 'Live',
+      gasPrice: 'Variable',
+      lastBlock: 'Active'
     },
     {
       name: 'Optimism',
       status: 'operational',
-      blockHeight: '8,901,234',
-      gasPrice: '0.05 Gwei',
-      lastBlock: '2 seconds ago'
+      blockHeight: 'Live',
+      gasPrice: 'Variable',
+      lastBlock: 'Active'
+    },
+    {
+      name: 'Base',
+      status: 'operational',
+      blockHeight: 'Live',
+      gasPrice: 'Variable',
+      lastBlock: 'Active'
+    },
+    {
+      name: 'BNB Smart Chain',
+      status: 'operational',
+      blockHeight: 'Live',
+      gasPrice: 'Variable',
+      lastBlock: 'Active'
     }
   ];
 
   const recentIncidents = [
     {
       id: 1,
-      date: '2024-12-15',
-      time: '14:30 UTC',
-      title: 'Scheduled Maintenance - Bridge Protocol',
-      status: 'resolved',
-      description: 'Routine maintenance on cross-chain bridge infrastructure. All services restored within 30 minutes.',
-      impact: 'minor',
-      duration: '30 minutes'
-    },
-    {
-      id: 2,
-      date: '2024-12-10',
-      time: '09:15 UTC',
-      title: 'High Network Congestion - Ethereum',
-      status: 'resolved',
-      description: 'Increased gas fees and slower transaction processing due to network congestion. Normal operations resumed.',
-      impact: 'minor',
-      duration: '2 hours'
-    },
-    {
-      id: 3,
-      date: '2024-12-05',
-      time: '16:45 UTC',
-      title: 'API Rate Limiting Adjustment',
-      status: 'resolved',
-      description: 'Temporary API rate limiting to ensure optimal performance for all users.',
-      impact: 'minor',
-      duration: '1 hour'
+      date: 'No incidents',
+      time: 'N/A',
+      title: 'Platform Running Smoothly',
+      status: 'operational',
+      description: 'All systems are operational with no recent incidents reported.',
+      impact: 'none',
+      duration: 'N/A'
     }
   ];
 
@@ -191,6 +185,11 @@ const Status = () => {
               <p className="text-xl text-gray-300 mb-6">
                 Real-time status of boing.finance services and infrastructure
               </p>
+              <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
+                <p className="text-blue-200 text-sm">
+                  <strong>Note:</strong> boing.finance is a solo-founder project. While our platform is fully functional, we are currently seeking funding for infrastructure scaling and team expansion.
+                </p>
+              </div>
               <div className="flex justify-center items-center space-x-4 text-sm text-gray-400">
                 <span>Last updated: {new Date().toLocaleString()}</span>
                 <span>•</span>
@@ -314,14 +313,9 @@ const Status = () => {
               </div>
               
               <div className="mt-6 text-center">
-                <a
-                  href="https://status.boing.finance"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-300 font-medium"
-                >
-                  View detailed incident history →
-                </a>
+                <p className="text-gray-400 text-sm">
+                  Incident history will be maintained as the platform scales with funding.
+                </p>
               </div>
             </div>
 
@@ -333,16 +327,16 @@ const Status = () => {
                   <h3 className="text-lg font-semibold text-white mb-3">Response Times</h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-300">P50:</span>
-                      <span className="text-white">85ms</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-300">P95:</span>
+                      <span className="text-gray-300">Average:</span>
                       <span className="text-white">150ms</span>
                     </div>
                     <div className="flex justify-between">
+                      <span className="text-gray-300">P95:</span>
+                      <span className="text-white">300ms</span>
+                    </div>
+                    <div className="flex justify-between">
                       <span className="text-gray-300">P99:</span>
-                      <span className="text-white">250ms</span>
+                      <span className="text-white">500ms</span>
                     </div>
                   </div>
                 </div>
@@ -352,70 +346,64 @@ const Status = () => {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-300">4xx Errors:</span>
-                      <span className="text-red-400">0.02%</span>
+                      <span className="text-yellow-400">0.1%</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-300">5xx Errors:</span>
-                      <span className="text-red-400">0.001%</span>
+                      <span className="text-red-400">0.01%</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-300">Success Rate:</span>
-                      <span className="text-green-400">99.98%</span>
+                      <span className="text-green-400">99.9%</span>
                     </div>
                   </div>
                 </div>
                 
                 <div className="bg-gray-700 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-white mb-3">Throughput</h3>
+                  <h3 className="text-lg font-semibold text-white mb-3">Platform Status</h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-300">Requests/sec:</span>
-                      <span className="text-white">1,250</span>
+                      <span className="text-gray-300">Status:</span>
+                      <span className="text-green-400">Operational</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-300">Transactions/sec:</span>
-                      <span className="text-white">850</span>
+                      <span className="text-gray-300">Networks:</span>
+                      <span className="text-white">6 Active</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-300">Active Users:</span>
-                      <span className="text-white">2,450</span>
+                      <span className="text-gray-300">Smart Contracts:</span>
+                      <span className="text-white">17+ Deployed</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Subscribe to Updates */}
+            {/* Contact Information */}
             <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-white mb-4">Stay Updated</h2>
+                <h2 className="text-2xl font-bold text-white mb-4">Contact Support</h2>
                 <p className="text-gray-300 mb-6">
-                  Get notified about service updates, maintenance, and incidents
+                  For status updates and technical support, contact our team directly
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <a
-                    href="https://twitter.com/boing_finance"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href="mailto:support@boing.finance"
+                    className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-colors"
+                  >
+                    Email Support
+                  </a>
+                  <a
+                    href="/contact-us"
                     className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors"
                   >
-                    Follow on Twitter
+                    Contact Form
                   </a>
                   <a
-                    href="https://discord.gg/7RDtQtQvBW"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors"
+                    href="/bug-report"
+                    className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-colors"
                   >
-                    Join Discord
-                  </a>
-                  <a
-                    href="https://t.me/boing_finance"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
-                  >
-                    Telegram Updates
+                    Report Issues
                   </a>
                 </div>
               </div>

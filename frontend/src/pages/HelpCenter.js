@@ -175,6 +175,11 @@ const HelpCenter = () => {
               <p className="text-xl text-gray-300 mb-6">
                 Find answers to your questions and get support for boing.finance
               </p>
+              <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
+                <p className="text-blue-200 text-sm">
+                  <strong>Note:</strong> boing.finance is currently in early development phase. While our platform is fully functional, we are a solo-founder project seeking funding for expansion and feature development.
+                </p>
+              </div>
             </div>
 
             {/* Search Bar */}
@@ -196,32 +201,28 @@ const HelpCenter = () => {
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <a
-                href="https://discord.gg/7RDtQtQvBW"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-lg transition-colors text-center"
-              >
-                <div className="text-2xl mb-2">💬</div>
-                <div className="font-semibold">Join Discord</div>
-                <div className="text-sm text-blue-200">Get real-time help</div>
-              </a>
-              <a
-                href="https://t.me/boing_finance"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-lg transition-colors text-center"
-              >
-                <div className="text-2xl mb-2">📱</div>
-                <div className="font-semibold">Telegram Support</div>
-                <div className="text-sm text-blue-200">Quick questions</div>
-              </a>
-              <a
                 href="mailto:support@boing.finance"
                 className="bg-gray-700 hover:bg-gray-600 text-white p-4 rounded-lg transition-colors text-center"
               >
                 <div className="text-2xl mb-2">📧</div>
                 <div className="font-semibold">Email Support</div>
-                <div className="text-sm text-gray-300">Detailed inquiries</div>
+                <div className="text-sm text-gray-300">Primary support channel</div>
+              </a>
+              <a
+                href="/bug-report"
+                className="bg-red-600 hover:bg-red-700 text-white p-4 rounded-lg transition-colors text-center"
+              >
+                <div className="text-2xl mb-2">🐛</div>
+                <div className="font-semibold">Bug Report</div>
+                <div className="text-sm text-red-200">Report issues</div>
+              </a>
+              <a
+                href="/contact-us"
+                className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-lg transition-colors text-center"
+              >
+                <div className="text-2xl mb-2">💬</div>
+                <div className="font-semibold">Contact Us</div>
+                <div className="text-sm text-blue-200">General inquiries</div>
               </a>
             </div>
 
@@ -320,34 +321,9 @@ const HelpCenter = () => {
               <h2 className="text-2xl font-bold text-white mb-4 text-center">Still Need Help?</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold text-white mb-2">Community Support</h3>
-                  <p className="text-gray-300 text-sm mb-4">
-                    Join our community channels for real-time help and discussions.
-                  </p>
-                  <div className="space-y-2">
-                    <a
-                      href="https://discord.gg/7RDtQtQvBW"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors"
-                    >
-                      Join Discord Community
-                    </a>
-                    <a
-                      href="https://t.me/boing_finance"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
-                    >
-                      Join Telegram Group
-                    </a>
-                  </div>
-                </div>
-                
-                <div className="text-center">
                   <h3 className="text-lg font-semibold text-white mb-2">Direct Support</h3>
                   <p className="text-gray-300 text-sm mb-4">
-                    Contact our support team directly for personalized assistance.
+                    As a solo-founder project, we provide direct email support for all inquiries.
                   </p>
                   <div className="space-y-2">
                     <a
@@ -357,10 +333,31 @@ const HelpCenter = () => {
                       Email Support Team
                     </a>
                     <a
+                      href="/contact-us"
+                      className="block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                    >
+                      Contact Form
+                    </a>
+                  </div>
+                </div>
+                
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-white mb-2">Bug Reports</h3>
+                  <p className="text-gray-300 text-sm mb-4">
+                    Help us improve the platform by reporting bugs and issues you encounter.
+                  </p>
+                  <div className="space-y-2">
+                    <a
                       href="/bug-report"
                       className="block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
                     >
                       Report a Bug
+                    </a>
+                    <a
+                      href="mailto:bugs@boing.finance"
+                      className="block bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+                    >
+                      Email Bug Report
                     </a>
                   </div>
                 </div>

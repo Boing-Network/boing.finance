@@ -57,7 +57,7 @@ const ContactUs = () => {
       description: 'For detailed inquiries and support requests',
       contact: 'support@boing.finance',
       link: 'mailto:support@boing.finance',
-      response: 'Within 24 hours'
+      response: 'Within 48 hours'
     },
     {
       icon: '🔒',
@@ -65,39 +65,39 @@ const ContactUs = () => {
       description: 'For security vulnerabilities and urgent matters',
       contact: 'security@boing.finance',
       link: 'mailto:security@boing.finance',
-      response: 'Within 4 hours'
+      response: 'Within 24 hours'
     },
     {
       icon: '💼',
       title: 'Business Inquiries',
-      description: 'For partnerships and business opportunities',
+      description: 'For partnerships and investment opportunities',
       contact: 'business@boing.finance',
       link: 'mailto:business@boing.finance',
-      response: 'Within 48 hours'
+      response: 'Within 72 hours'
     }
   ];
 
-  const socialChannels = [
+  const supportChannels = [
     {
-      icon: '💬',
-      title: 'Discord Community',
-      description: 'Join our community for real-time discussions and support',
-      link: 'https://discord.gg/7RDtQtQvBW',
-      members: '10,000+ members'
+      icon: '📧',
+      title: 'Email Support',
+      description: 'Primary support channel for all inquiries',
+      link: 'mailto:support@boing.finance',
+      status: 'Available'
     },
     {
-      icon: '📱',
-      title: 'Telegram Group',
-      description: 'Quick questions and community updates',
-      link: 'https://t.me/boing_finance',
-      members: '5,000+ members'
+      icon: '🐛',
+      title: 'Bug Reports',
+      description: 'Report bugs and technical issues',
+      link: '/bug-report',
+      status: 'Available'
     },
     {
-      icon: '🐦',
-      title: 'Twitter',
-      description: 'Follow us for updates and announcements',
-      link: 'https://twitter.com/boing_finance',
-      followers: '25,000+ followers'
+      icon: '💼',
+      title: 'Business Contact',
+      description: 'For partnerships and investment inquiries',
+      link: 'mailto:business@boing.finance',
+      status: 'Available'
     }
   ];
 
@@ -130,6 +130,11 @@ const ContactUs = () => {
               <p className="text-xl text-gray-300 mb-6">
                 Get in touch with our team. We're here to help!
               </p>
+              <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
+                <p className="text-blue-200 text-sm">
+                  <strong>Note:</strong> boing.finance is a solo-founder project. While we provide direct support, response times may vary as we're currently seeking funding for team expansion.
+                </p>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -275,49 +280,47 @@ const ContactUs = () => {
                   </div>
                 </div>
 
-                {/* Community Channels */}
+                {/* Support Channels */}
                 <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                  <h2 className="text-2xl font-bold text-white mb-6">Join Our Community</h2>
+                  <h2 className="text-2xl font-bold text-white mb-6">Support Channels</h2>
                   <div className="space-y-4">
-                    {socialChannels.map((channel) => (
+                    {supportChannels.map((channel) => (
                       <a
                         key={channel.title}
                         href={channel.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="flex items-start space-x-4 p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
                       >
                         <span className="text-2xl">{channel.icon}</span>
                         <div className="flex-1">
                           <h3 className="text-lg font-semibold text-white mb-1">{channel.title}</h3>
                           <p className="text-gray-300 text-sm mb-2">{channel.description}</p>
-                          <p className="text-blue-400 text-sm">{channel.members}</p>
+                          <p className="text-green-400 text-sm">{channel.status}</p>
                         </div>
                       </a>
                     ))}
                   </div>
                 </div>
 
-                {/* Office Hours */}
+                {/* Support Information */}
                 <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                  <h2 className="text-2xl font-bold text-white mb-4">Support Hours</h2>
+                  <h2 className="text-2xl font-bold text-white mb-4">Support Information</h2>
                   <div className="space-y-2 text-gray-300">
                     <div className="flex justify-between">
-                      <span>Monday - Friday:</span>
-                      <span>9:00 AM - 6:00 PM UTC</span>
+                      <span>Response Time:</span>
+                      <span>24-48 hours</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Saturday:</span>
-                      <span>10:00 AM - 4:00 PM UTC</span>
+                      <span>Security Issues:</span>
+                      <span>Within 24 hours</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Sunday:</span>
-                      <span>Community Support Only</span>
+                      <span>Business Inquiries:</span>
+                      <span>Within 72 hours</span>
                     </div>
                   </div>
                   <div className="mt-4 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
                     <p className="text-blue-200 text-sm">
-                      <strong>Note:</strong> For urgent security issues, we provide 24/7 emergency support.
+                      <strong>Note:</strong> As a solo-founder project, response times may vary. We're actively seeking funding to expand our support team.
                     </p>
                   </div>
                 </div>

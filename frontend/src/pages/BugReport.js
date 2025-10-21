@@ -145,6 +145,11 @@ const BugReport = () => {
               <p className="text-xl text-gray-300 mb-6">
                 Help us improve boing.finance by reporting bugs and issues
               </p>
+              <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
+                <p className="text-blue-200 text-sm">
+                  <strong>Note:</strong> As a solo-founder project, we appreciate detailed bug reports to help us prioritize fixes and improvements. Your feedback is invaluable for our growth.
+                </p>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -184,26 +189,22 @@ const BugReport = () => {
                   <h2 className="text-xl font-bold text-white mb-4">Other Ways to Report</h2>
                   <div className="space-y-3">
                     <a
-                      href="https://discord.gg/7RDtQtQvBW"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors text-center"
-                    >
-                      Discord #bug-reports
-                    </a>
-                    <a
                       href="mailto:bugs@boing.finance"
                       className="block bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors text-center"
                     >
                       Email Bug Report
                     </a>
                     <a
-                      href="https://github.com/boing-finance/issues"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors text-center"
+                      href="/contact-us"
+                      className="block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-center"
                     >
-                      GitHub Issues
+                      Contact Form
+                    </a>
+                    <a
+                      href="mailto:support@boing.finance"
+                      className="block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-center"
+                    >
+                      General Support
                     </a>
                   </div>
                 </div>
@@ -488,21 +489,21 @@ const BugReport = () => {
                   <div className="text-3xl mb-3">📋</div>
                   <h3 className="text-lg font-semibold text-white mb-2">Review</h3>
                   <p className="text-gray-300 text-sm">
-                    Our team will review your bug report and categorize it by severity and impact.
+                    As a solo founder, I'll review your bug report and prioritize it based on severity and impact.
                   </p>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl mb-3">🔧</div>
                   <h3 className="text-lg font-semibold text-white mb-2">Investigation</h3>
                   <p className="text-gray-300 text-sm">
-                    We'll investigate the issue, reproduce it if possible, and determine the root cause.
+                    I'll investigate the issue, reproduce it if possible, and work on a solution as quickly as possible.
                   </p>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl mb-3">✅</div>
                   <h3 className="text-lg font-semibold text-white mb-2">Resolution</h3>
                   <p className="text-gray-300 text-sm">
-                    We'll fix the issue and update you on the progress. Critical bugs are prioritized.
+                    I'll fix the issue and update you on the progress. Critical bugs receive immediate attention.
                   </p>
                 </div>
               </div>
