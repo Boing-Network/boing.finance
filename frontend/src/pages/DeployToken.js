@@ -1236,15 +1236,15 @@ export default function DeployToken() {
         })}
         </script>
       </Helmet>
-      <div className="relative min-h-screen">
+      <div className="relative min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">
             {/* Header */}
             <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold text-white mb-4">
+              <h1 className="text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
                 Deploy Your Token
               </h1>
-              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              <p className="text-xl max-w-3xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
                 Create and deploy your own ERC-20 token with advanced security features, 
                 comprehensive documentation, and professional-grade infrastructure.
               </p>

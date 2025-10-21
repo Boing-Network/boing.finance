@@ -87,7 +87,7 @@ function AppContent() {
       
       {/* Navigation */}
       <nav className="relative z-30 backdrop-blur-sm border-b border-cyan-500/30 shadow-lg shadow-cyan-500/20" style={{ 
-        background: 'linear-gradient(to right, var(--bg-secondary), var(--bg-tertiary), var(--bg-secondary))',
+        background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
         borderColor: 'var(--border-color)'
       }}>
         <ShootingStars />
@@ -516,7 +516,10 @@ function AppContent() {
         account={account}
       />
       
-      <footer className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 w-full border-t border-cyan-500/30 shadow-lg shadow-cyan-500/20 relative z-20">
+      <footer className="w-full border-t border-cyan-500/30 shadow-lg shadow-cyan-500/20 relative z-20" style={{
+        background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
+        borderColor: 'var(--border-color)'
+      }}>
         <ShootingStars />
         <div className="max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 sm:gap-10">
@@ -526,24 +529,24 @@ function AppContent() {
                 <Logo size={48} className="mr-3 sm:mr-4" showText={false} />
                 <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">boing</h3>
               </div>
-              <p className="text-gray-300 text-sm sm:text-base mb-4 leading-relaxed">
+              <p className="text-sm sm:text-base mb-4 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                 The most advanced decentralized exchange with cross-chain capabilities, 
                 providing seamless trading across multiple networks.
               </p>
               <div className="flex space-x-3 sm:space-x-4">
-                <a href="https://twitter.com/boing_finance" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors p-1 sm:p-2">
+                <a href="https://twitter.com/boing_finance" target="_blank" rel="noopener noreferrer" className="transition-colors p-1 sm:p-2" style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>
                   <span className="sr-only">Twitter</span>
                   <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
                   </svg>
                 </a>
-                <a href="https://t.me/boing_finance" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors p-1 sm:p-2">
+                <a href="https://t.me/boing_finance" target="_blank" rel="noopener noreferrer" className="transition-colors p-1 sm:p-2" style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>
                   <span className="sr-only">Telegram</span>
                   <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
                   </svg>
                 </a>
-                <a href="https://discord.gg/7RDtQtQvBW" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors p-1 sm:p-2">
+                <a href="https://discord.gg/7RDtQtQvBW" target="_blank" rel="noopener noreferrer" className="transition-colors p-1 sm:p-2" style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>
                   <span className="sr-only">Discord</span>
                   <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419-.019 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1568 2.4189Z"/>
@@ -554,29 +557,29 @@ function AppContent() {
             
             {/* Resources Links - spans 3 columns on larger screens */}
             <div className="lg:col-span-3">
-              <h4 className="text-white font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Resources</h4>
+              <h4 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>Resources</h4>
               <ul className="space-y-2 text-xs sm:text-sm">
-                <li><a href="/docs" className="text-gray-300 hover:text-white transition-colors block py-1">Documentation</a></li>
-                <li><a href="/whitepaper" className="text-gray-300 hover:text-white transition-colors block py-1">Whitepaper</a></li>
-                <li><a href="/terms" className="text-gray-300 hover:text-white transition-colors block py-1">Terms of Service</a></li>
-                <li><a href="/privacy" className="text-gray-300 hover:text-white transition-colors block py-1">Privacy Policy</a></li>
+                <li><a href="/docs" className="transition-colors block py-1" style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>Documentation</a></li>
+                <li><a href="/whitepaper" className="transition-colors block py-1" style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>Whitepaper</a></li>
+                <li><a href="/terms" className="transition-colors block py-1" style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>Terms of Service</a></li>
+                <li><a href="/privacy" className="transition-colors block py-1" style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>Privacy Policy</a></li>
               </ul>
             </div>
             
             {/* Support Links - spans 3 columns on larger screens */}
             <div className="lg:col-span-3">
-              <h4 className="text-white font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Support</h4>
+              <h4 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>Support</h4>
               <ul className="space-y-2 text-xs sm:text-sm">
-                <li><a href="/help-center" className="text-gray-300 hover:text-white transition-colors block py-1">Help Center</a></li>
-                <li><a href="/contact-us" className="text-gray-300 hover:text-white transition-colors block py-1">Contact Us</a></li>
-                <li><a href="/status" className="text-gray-300 hover:text-white transition-colors block py-1">Status</a></li>
-                <li><a href="/bug-report" className="text-gray-300 hover:text-white transition-colors block py-1">Bug Report</a></li>
+                <li><a href="/help-center" className="transition-colors block py-1" style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>Help Center</a></li>
+                <li><a href="/contact-us" className="transition-colors block py-1" style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>Contact Us</a></li>
+                <li><a href="/status" className="transition-colors block py-1" style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>Status</a></li>
+                <li><a href="/bug-report" className="transition-colors block py-1" style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>Bug Report</a></li>
               </ul>
             </div>
           </div>
           
-          <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-cyan-500/20">
-            <p className="text-gray-300 text-xs sm:text-sm text-center">
+          <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-cyan-500/20" style={{ borderColor: 'var(--border-color)' }}>
+            <p className="text-xs sm:text-sm text-center" style={{ color: 'var(--text-secondary)' }}>
               © 2025 boing. All rights reserved. Built with ❤️ for the DeFi community.
             </p>
           </div>
