@@ -4,11 +4,13 @@ import { Toaster } from 'react-hot-toast';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { WalletProvider } from './contexts/WalletContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { useWalletConnection } from './hooks/useWalletConnection';
 import EnhancedAnimatedBackground from './components/EnhancedAnimatedBackground';
 import WalletConnect from './components/WalletConnect';
 import NetworkSelector from './components/NetworkSelector';
 import TransactionHistoryModal from './components/TransactionHistoryModal';
+import ThemeToggle from './components/ThemeToggle';
 import Logo from './components/Logo';
 import ShootingStars from './components/ShootingStars';
 import Swap from './pages/Swap';
@@ -153,6 +155,8 @@ function AppContent() {
 
             {/* Desktop Wallet Controls - Show on large screens and above */}
             <div className="hidden lg:flex items-center space-x-3 xl:space-x-4 flex-shrink-0">
+              {/* Theme Toggle */}
+              <ThemeToggle />
               {/* History Button */}
               <button
                 onClick={() => setHistoryModalOpen(true)}
@@ -213,6 +217,7 @@ function AppContent() {
               </nav>
               {/* Compact Wallet Controls */}
               <div className="flex items-center space-x-2">
+                <ThemeToggle />
                 <button
                   onClick={() => setHistoryModalOpen(true)}
                   className="text-gray-300 hover:text-white p-1.5 rounded-md transition-colors"
@@ -378,6 +383,12 @@ function AppContent() {
                   </svg>
                   <span>Transaction History</span>
                 </button>
+                <div className="w-full text-left text-gray-200 px-3 py-3 rounded-lg text-base font-medium flex items-center space-x-3 bg-gradient-to-r from-slate-700/80 via-slate-800/80 to-slate-700/80 border border-cyan-500/20">
+                  <span>Theme</span>
+                  <div className="ml-auto">
+                    <ThemeToggle />
+                  </div>
+                </div>
                 <div className="space-y-2">
                   <NetworkSelector />
                   <WalletConnect />
@@ -497,8 +508,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <HelmetProvider>
-        <WalletProvider>
-          <Router>
+        <ThemeProvider>
+          <WalletProvider>
+            <Router>
             <Helmet>
               <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
               <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
@@ -510,13 +522,15 @@ function App() {
               toastOptions={{
                 duration: 4000,
                 style: {
-                  background: '#1f2937',
-                  color: '#fff',
+                  background: 'var(--bg-card)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border-color)',
                 },
               }}
             />
           </Router>
         </WalletProvider>
+        </ThemeProvider>
       </HelmetProvider>
     </QueryClientProvider>
   );

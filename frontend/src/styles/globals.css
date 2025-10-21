@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom CSS Variables */
+/* Custom CSS Variables - Light Theme */
 :root {
   --primary-color: #3b82f6;
   --secondary-color: #8b5cf6;
@@ -10,11 +10,34 @@
   --success-color: #10b981;
   --warning-color: #f59e0b;
   --error-color: #ef4444;
-  --background-dark: #0f172a;
-  --background-light: #1e293b;
+  
+  /* Light Theme Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --bg-card: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --border-color: #e2e8f0;
+  --border-hover: #cbd5e1;
+  --shadow: rgba(0, 0, 0, 0.1);
+  --shadow-hover: rgba(0, 0, 0, 0.15);
+}
+
+/* Dark Theme Colors */
+.dark {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --bg-card: #1e293b;
   --text-primary: #f8fafc;
   --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
   --border-color: #334155;
+  --border-hover: #475569;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --shadow-hover: rgba(0, 0, 0, 0.4);
 }
 
 /* Base Styles */
@@ -28,9 +51,10 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #0A0A23;
-  color: #E0E0E0;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Custom Scrollbar */
@@ -39,7 +63,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--background-light);
+  background: var(--bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -53,15 +77,17 @@ body {
 
 /* Glass Morphism Effect */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-card);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 6px var(--shadow);
 }
 
 .glass-dark {
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--bg-card);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 6px var(--shadow);
 }
 
 /* Gradient Text */
@@ -78,25 +104,55 @@ body {
 }
 
 .btn-secondary {
-  @apply bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  @apply font-medium py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50;
+}
+
+.btn-secondary:hover {
+  background: var(--border-hover);
 }
 
 .btn-outline {
-  @apply border border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  @apply font-medium py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50;
+}
+
+.btn-outline:hover {
+  color: var(--text-primary);
+  border-color: var(--border-hover);
 }
 
 /* Card Styles */
 .card {
-  @apply bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 6px var(--shadow);
+  @apply rounded-xl p-6;
 }
 
 .card-hover {
-  @apply card hover:border-gray-600 hover:shadow-xl transition-all duration-200;
+  @apply card transition-all duration-200;
+}
+
+.card-hover:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 8px 25px var(--shadow-hover);
 }
 
 /* Input Styles */
 .input-field {
-  @apply bg-gray-700 border border-gray-600 text-white placeholder-gray-400 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  @apply rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
+}
+
+.input-field::placeholder {
+  color: var(--text-tertiary);
 }
 
 /* Loading Animation */
