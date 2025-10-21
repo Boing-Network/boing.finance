@@ -39,7 +39,7 @@ const Whitepaper = () => {
             </div>
 
             {/* Table of Contents */}
-            <div className="bg-gray-800 rounded-lg p-6 mb-8 border border-gray-700">
+            <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 mb-8 border border">
               <h2 className="text-2xl font-bold text-white mb-4">Table of Contents</h2>
               <ul className="space-y-2 text-gray-300">
                 <li><a href="#executive-summary" className="hover:text-blue-400 transition-colors">1. Executive Summary</a></li>
@@ -57,7 +57,7 @@ const Whitepaper = () => {
             {/* Executive Summary */}
             <section id="executive-summary" className="mb-12">
               <h2 className="text-3xl font-bold text-white mb-6">1. Executive Summary</h2>
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <p className="text-gray-300 leading-relaxed mb-4">
                   boing.finance is a next-generation decentralized exchange (DEX) protocol designed to facilitate seamless cross-chain trading and liquidity provision across multiple blockchain networks. Our platform addresses the critical need for interoperability in the DeFi ecosystem by providing a unified interface for trading assets across different blockchains.
                 </p>
@@ -84,7 +84,7 @@ const Whitepaper = () => {
             {/* Introduction */}
             <section id="introduction" className="mb-12">
               <h2 className="text-3xl font-bold text-white mb-6">2. Introduction</h2>
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <h3 className="text-xl font-semibold text-white mb-4">Problem Statement</h3>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   The current DeFi landscape is fragmented across multiple blockchain networks, each with its own ecosystem of tokens, liquidity pools, and trading protocols. This fragmentation creates significant barriers for users who want to access assets across different chains, requiring multiple wallets, complex bridging processes, and exposure to various risks.
@@ -106,7 +106,7 @@ const Whitepaper = () => {
             {/* Technical Architecture */}
             <section id="technical-architecture" className="mb-12">
               <h2 className="text-3xl font-bold text-white mb-6">3. Technical Architecture</h2>
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <h3 className="text-xl font-semibold text-white mb-4">Core Components</h3>
                 
                 <div className="space-y-6">
@@ -144,7 +144,7 @@ const Whitepaper = () => {
             {/* Cross-Chain Bridge */}
             <section id="cross-chain-bridge" className="mb-12">
               <h2 className="text-3xl font-bold text-white mb-6">4. Cross-Chain Bridge Protocol</h2>
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <h3 className="text-xl font-semibold text-white mb-4">Bridge Architecture</h3>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   The cross-chain bridge enables seamless asset transfers between supported networks through a combination of smart contracts and validator nodes.
@@ -180,7 +180,7 @@ const Whitepaper = () => {
             {/* Tokenomics */}
             <section id="tokenomics" className="mb-12">
               <h2 className="text-3xl font-bold text-white mb-6">5. Tokenomics</h2>
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <h3 className="text-xl font-semibold text-white mb-4">BOING Token</h3>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   The BOING token serves as the governance and utility token for the boing.finance ecosystem.
@@ -224,7 +224,7 @@ const Whitepaper = () => {
             {/* Governance */}
             <section id="governance" className="mb-12">
               <h2 className="text-3xl font-bold text-white mb-6">6. Governance</h2>
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <h3 className="text-xl font-semibold text-white mb-4">DAO Structure</h3>
                 <p className="text-gray-300 leading-relaxed mb-4">
                   boing.finance operates as a decentralized autonomous organization (DAO) where token holders participate in governance decisions.
@@ -258,7 +258,7 @@ const Whitepaper = () => {
             {/* Security */}
             <section id="security" className="mb-12">
               <h2 className="text-3xl font-bold text-white mb-6">7. Security Considerations</h2>
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <h3 className="text-xl font-semibold text-white mb-4">Smart Contract Security</h3>
                 <ul className="list-disc list-inside text-gray-300 space-y-2 mb-6">
                   <li>Reentrancy protection on all external calls</li>
@@ -291,7 +291,7 @@ const Whitepaper = () => {
             {/* Roadmap */}
             <section id="roadmap" className="mb-12">
               <h2 className="text-3xl font-bold text-white mb-6">8. Development Roadmap</h2>
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <div className="mb-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
                   <p className="text-blue-200 text-sm">
                     <strong>Current Status:</strong> boing.finance is currently in early development phase with core infrastructure deployed. Many features are developed locally but not yet available in production due to funding constraints. The roadmap below reflects realistic milestones based on current capabilities and funding needs.
@@ -361,7 +361,7 @@ const Whitepaper = () => {
             {/* Conclusion */}
             <section id="conclusion" className="mb-12">
               <h2 className="text-3xl font-bold text-white mb-6">9. Conclusion</h2>
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border">
                 <p className="text-gray-300 leading-relaxed mb-4">
                   boing.finance represents a promising foundation for cross-chain decentralized finance, with core infrastructure already deployed across multiple blockchain networks. Our platform addresses the critical need for interoperability in the DeFi ecosystem through a modular architecture designed for scalability and security.
                 </p>
@@ -378,7 +378,7 @@ const Whitepaper = () => {
             </section>
 
             {/* Contact Information */}
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 text-center">
+            <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border text-center">
               <h3 className="text-xl font-semibold text-white mb-4">Get Involved</h3>
               <p className="text-gray-300 mb-4">
                 Join the boing.finance community and help shape the future of cross-chain DeFi.

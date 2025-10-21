@@ -190,7 +190,7 @@ const BugReport = () => {
                   <div className="space-y-3">
                     <a
                       href="mailto:bugs@boing.finance"
-                      className="block bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors text-center"
+                      className="block style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors text-center"
                     >
                       Email Bug Report
                     </a>
@@ -240,7 +240,7 @@ const BugReport = () => {
                           value={formData.title}
                           onChange={handleInputChange}
                           required
-                          className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           placeholder="Brief description of the bug"
                         />
                       </div>
@@ -256,7 +256,7 @@ const BugReport = () => {
                             value={formData.severity}
                             onChange={handleInputChange}
                             required
-                            className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                           >
                             {severityLevels.map((level) => (
                               <option key={level.value} value={level.value}>
@@ -276,7 +276,7 @@ const BugReport = () => {
                             value={formData.category}
                             onChange={handleInputChange}
                             required
-                            className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                           >
                             {bugCategories.map((category) => (
                               <option key={category.value} value={category.value}>
@@ -303,7 +303,7 @@ const BugReport = () => {
                           onChange={handleInputChange}
                           required
                           rows={4}
-                          className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                          className="w-full style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                           placeholder="Describe the bug in detail..."
                         />
                       </div>
@@ -319,7 +319,7 @@ const BugReport = () => {
                           onChange={handleInputChange}
                           required
                           rows={4}
-                          className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                          className="w-full style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                           placeholder="1. Go to...&#10;2. Click on...&#10;3. Observe..."
                         />
                       </div>
@@ -335,7 +335,7 @@ const BugReport = () => {
                             value={formData.expected}
                             onChange={handleInputChange}
                             rows={3}
-                            className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                            className="w-full style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                             placeholder="What should happen?"
                           />
                         </div>
@@ -350,7 +350,7 @@ const BugReport = () => {
                             value={formData.actual}
                             onChange={handleInputChange}
                             rows={3}
-                            className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                            className="w-full style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                             placeholder="What actually happens?"
                           />
                         </div>
@@ -371,7 +371,7 @@ const BugReport = () => {
                             name="browser"
                             value={formData.browser}
                             onChange={handleInputChange}
-                            className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                           >
                             <option value="">Select browser</option>
                             {browsers.map((browser) => (
@@ -391,7 +391,7 @@ const BugReport = () => {
                             name="wallet"
                             value={formData.wallet}
                             onChange={handleInputChange}
-                            className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                           >
                             <option value="">Select wallet</option>
                             {wallets.map((wallet) => (
@@ -411,7 +411,7 @@ const BugReport = () => {
                             name="network"
                             value={formData.network}
                             onChange={handleInputChange}
-                            className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                           >
                             <option value="">Select network</option>
                             {networks.map((network) => (
@@ -439,7 +439,7 @@ const BugReport = () => {
                             name="email"
                             value={formData.email}
                             onChange={handleInputChange}
-                            className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="your@email.com"
                           />
                         </div>
@@ -454,7 +454,7 @@ const BugReport = () => {
                             name="walletAddress"
                             value={formData.walletAddress}
                             onChange={handleInputChange}
-                            className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="0x..."
                           />
                         </div>

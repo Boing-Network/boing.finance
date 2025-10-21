@@ -944,7 +944,7 @@ const HelpArticle = () => {
             </div>
 
             {/* Article Content */}
-            <div className="bg-gray-800 rounded-lg p-8 border border-gray-700 mb-8">
+            <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-8 border border mb-8">
               <div 
                 className="prose prose-invert max-w-none"
                 dangerouslySetInnerHTML={{ __html: article.content }}

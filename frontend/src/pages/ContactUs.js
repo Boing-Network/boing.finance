@@ -164,7 +164,7 @@ const ContactUs = () => {
                         value={formData.name}
                         onChange={handleInputChange}
                         required
-                        className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Your name"
                       />
                     </div>
@@ -180,7 +180,7 @@ const ContactUs = () => {
                         value={formData.email}
                         onChange={handleInputChange}
                         required
-                        className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="your@email.com"
                       />
                     </div>
@@ -196,7 +196,7 @@ const ContactUs = () => {
                       value={formData.category}
                       onChange={handleInputChange}
                       required
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       {contactCategories.map((category) => (
                         <option key={category.value} value={category.value}>
@@ -217,7 +217,7 @@ const ContactUs = () => {
                       value={formData.subject}
                       onChange={handleInputChange}
                       required
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Brief subject of your inquiry"
                     />
                   </div>
@@ -233,7 +233,7 @@ const ContactUs = () => {
                       onChange={handleInputChange}
                       required
                       rows={6}
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      className="w-full style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} border border rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                       placeholder="Please provide details about your inquiry..."
                     />
                   </div>
@@ -262,7 +262,7 @@ const ContactUs = () => {
                   <h2 className="text-2xl font-bold text-white mb-6">Direct Contact</h2>
                   <div className="space-y-4">
                     {contactMethods.map((method) => (
-                      <div key={method.title} className="flex items-start space-x-4 p-4 bg-gray-700 rounded-lg">
+                      <div key={method.title} className="flex items-start space-x-4 p-4 style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg">
                         <span className="text-2xl">{method.icon}</span>
                         <div className="flex-1">
                           <h3 className="text-lg font-semibold text-white mb-1">{method.title}</h3>
@@ -288,7 +288,7 @@ const ContactUs = () => {
                       <a
                         key={channel.title}
                         href={channel.link}
-                        className="flex items-start space-x-4 p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
+                        className="flex items-start space-x-4 p-4 style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg hover:bg-gray-600 transition-colors"
                       >
                         <span className="text-2xl">{channel.icon}</span>
                         <div className="flex-1">
