@@ -28,7 +28,7 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
       const apiUrl = getApiUrl();
       const response = await axios.get(`${apiUrl}/transactions/${account}?filter=${filter}`);
       if (response.data.success) {
-        const newTransactions = response.data.data;
+        const newTransactions = response.data.data || [];
         
         // Check if we have new transactions (for notification)
         if (transactions.length > 0 && newTransactions.length > transactions.length) {
@@ -38,17 +38,36 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
         
         setTransactions(newTransactions);
         setLastUpdated(new Date());
+        setError(null); // Clear any previous errors
       } else {
-        setError('Failed to load transactions');
+        // If API returns success: false but no error, treat as no transactions
+        setTransactions([]);
+        setError(null);
+        setLastUpdated(new Date());
       }
     } catch (error) {
       console.error('Failed to load transactions:', error);
-      setError('Failed to load transactions. Please try again.');
-      setTransactions([]);
+      
+      // Check if it's a network error or API not available
+      if (error.code === 'NETWORK_ERROR' || error.response?.status >= 500) {
+        // API not available - show no transactions state instead of error
+        setTransactions([]);
+        setError(null);
+        setLastUpdated(new Date());
+      } else if (error.response?.status === 404) {
+        // No transactions found - this is normal for new users
+        setTransactions([]);
+        setError(null);
+        setLastUpdated(new Date());
+      } else {
+        // Only show error for actual API errors, not missing data
+        setError('Unable to load transaction history. Features are still being deployed.');
+        setTransactions([]);
+      }
     } finally {
       setLoading(false);
     }
-  }, [account, filter]);
+  }, [account, filter, transactions.length]);
 
   // Subscribe to transaction updates
   useEffect(() => {
@@ -80,10 +99,10 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
       // Load immediately
       loadTransactions();
       
-      // Set up polling every 10 seconds
+      // Set up polling every 30 seconds (less aggressive since most features aren't deployed yet)
       pollingIntervalRef.current = setInterval(() => {
         loadTransactions();
-      }, 10000);
+      }, 30000);
       
       return () => {
         if (pollingIntervalRef.current) {
@@ -263,8 +282,13 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
           ) : error ? (
             <div className="text-center py-8">
               <div className="text-4xl mb-4">⚠️</div>
-              <h4 className="text-lg font-semibold text-white mb-2">Error Loading Transactions</h4>
+              <h4 className="text-lg font-semibold text-white mb-2">Unable to Load Transaction History</h4>
               <p className="text-gray-400 mb-4">{error}</p>
+              <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 max-w-md mx-auto mb-4">
+                <p className="text-yellow-200 text-sm">
+                  <strong>Tip:</strong> Transaction history will be available once trading features are deployed to mainnet.
+                </p>
+              </div>
               <button
                 onClick={loadTransactions}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200"
@@ -316,8 +340,16 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
           ) : (
             <div className="text-center py-8">
               <div className="text-4xl mb-4">📋</div>
-              <h4 className="text-lg font-semibold text-white mb-2">No Transactions</h4>
-              <p className="text-gray-400">Start trading to see your transaction history here.</p>
+              <h4 className="text-lg font-semibold text-white mb-2">No Transactions Yet</h4>
+              <p className="text-gray-400 mb-4">
+                Transaction history will appear here once you start using the platform features.
+              </p>
+              <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 max-w-md mx-auto">
+                <p className="text-blue-200 text-sm">
+                  <strong>Note:</strong> Most trading features are currently in development. 
+                  Only token deployment is available at this time.
+                </p>
+              </div>
             </div>
           )}
         </div>
