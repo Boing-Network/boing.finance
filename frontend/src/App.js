@@ -52,18 +52,18 @@ const comingSoon = {
 const navigation = {
   home: { name: 'Home', href: '/', icon: '🏠' },
   trading: [
-    { name: 'Swap', href: '/swap', icon: '🔄', description: 'Trade tokens instantly' },
+    { name: 'Swap', href: '/swap', icon: '🔄', description: 'Trade tokens instantly', comingSoon: true },
     { name: 'Bridge', href: '/bridge', icon: '🌉', description: 'Cross-chain transfers', comingSoon: true },
-    { name: 'Pools', href: '/pools', icon: '🏊', description: 'Liquidity pools' },
+    { name: 'Pools', href: '/pools', icon: '🏊', description: 'Liquidity pools', comingSoon: true },
     { name: 'Tokens', href: '/tokens', icon: '🪙', description: 'Token management', comingSoon: true }
   ],
   analytics: [
     { name: 'Analytics', href: '/analytics', icon: '📊', description: 'Market insights', comingSoon: true },
-    { name: 'Portfolio', href: '/portfolio', icon: '💼', description: 'Your holdings' }
+    { name: 'Portfolio', href: '/portfolio', icon: '💼', description: 'Your holdings', comingSoon: true }
   ],
   deployment: [
     { name: 'Deploy Token', href: '/deploy-token', icon: '🚀', description: 'Create your own tokens' },
-    { name: 'Create Pool', href: '/create-pool', icon: '🏊', description: 'Create liquidity pools' }
+    { name: 'Create Pool', href: '/create-pool', icon: '🏊', description: 'Create liquidity pools', comingSoon: true }
   ]
 };
 
