@@ -51,7 +51,7 @@ const NetworkSelector = () => {
     <div className="relative">
       <button
         onClick={() => setShowDropdown(!showDropdown)}
-        className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} hover:bg-gray-600 text-white px-3 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+        className="bg-theme-secondary hover:bg-theme-tertiary text-theme-primary px-3 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2 border border-theme"
       >
         <span className="text-lg">{getNetworkIcon(currentNetwork)}</span>
         <span className="text-sm">{currentNetwork?.name || 'Unknown Network'}</span>
@@ -59,12 +59,12 @@ const NetworkSelector = () => {
       </button>
 
       {showDropdown && (
-        <div className="absolute left-0 mt-2 w-72 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50 max-h-96 overflow-y-auto">
+        <div className="absolute left-0 mt-2 w-72 bg-theme-card rounded-lg shadow-lg border border-theme z-50 max-h-96 overflow-y-auto">
           <div className="p-2">
             {/* Mainnet Networks */}
             {mainnetNetworks.length > 0 && (
               <>
-                <div className="text-xs text-gray-400 px-3 py-2 border-b border-gray-700 font-medium">
+                <div className="text-xs text-theme-tertiary px-3 py-2 border-b border-theme font-medium">
                   Mainnet Networks
                 </div>
                 {mainnetNetworks.map((network) => (
@@ -74,13 +74,13 @@ const NetworkSelector = () => {
                     className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center space-x-3 ${
                       chainId === network.chainId
                         ? 'bg-blue-600 text-white'
-                        : 'text-gray-300 hover:text-white hover:bg-opacity-10'
+                        : 'text-theme-secondary hover:text-theme-primary hover:bg-theme-secondary'
                     }`}
                   >
                     <span className="text-lg">{getNetworkIcon(network)}</span>
                     <div className="flex-1">
                       <div className="font-medium text-sm">{network.name}</div>
-                      <div className="text-xs text-gray-400">
+                      <div className="text-xs text-theme-tertiary">
                         {network.nativeCurrency.symbol}
                       </div>
                     </div>
@@ -95,7 +95,7 @@ const NetworkSelector = () => {
             {/* Testnet Networks */}
             {testnetNetworks.length > 0 && (
               <>
-                <div className="text-xs text-gray-400 px-3 py-2 border-b border-gray-700 font-medium mt-2">
+                <div className="text-xs text-theme-tertiary px-3 py-2 border-b border-theme font-medium mt-2">
                   Testnet Networks
                 </div>
                 {testnetNetworks.map((network) => (
@@ -105,13 +105,13 @@ const NetworkSelector = () => {
                     className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center space-x-3 ${
                       chainId === network.chainId
                         ? 'bg-blue-600 text-white'
-                        : 'text-gray-300 hover:text-white hover:bg-opacity-10'
+                        : 'text-theme-secondary hover:text-theme-primary hover:bg-theme-secondary'
                     }`}
                   >
                     <span className="text-lg">{getNetworkIcon(network)}</span>
                     <div className="flex-1">
                       <div className="font-medium text-sm">{network.name}</div>
-                      <div className="text-xs text-gray-400">
+                      <div className="text-xs text-theme-tertiary">
                         {network.nativeCurrency.symbol} {network.features?.includes('dexDeployed') && '• DEX Deployed'}
                       </div>
                     </div>

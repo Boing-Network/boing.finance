@@ -1744,10 +1744,10 @@ const Swap = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           {/* Header */}
           <div className="text-center mb-6 sm:mb-8">
-            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 sm:mb-4">
+            <h1 className="text-3xl sm:text-4xl font-bold text-theme-primary mb-2 sm:mb-4">
               Swap Tokens
             </h1>
-            <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl text-theme-secondary max-w-2xl mx-auto">
               Trade tokens instantly with the best rates across multiple networks
             </p>
           </div>

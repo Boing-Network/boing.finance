@@ -4,8 +4,8 @@ const BridgeSection = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-3xl font-bold text-white mb-6">Cross-Chain Bridge Guide</h2>
-        <p className="text-gray-300 text-lg leading-relaxed mb-8">
+        <h2 className="text-3xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Cross-Chain Bridge Guide</h2>
+        <p className="style={{ color: 'var(--text-secondary)' }} text-lg leading-relaxed mb-8">
           Learn how to transfer tokens between different blockchain networks using mochi's cross-chain bridge. 
           Our bridge infrastructure enables seamless asset movement across 15+ supported networks.
         </p>
@@ -13,9 +13,9 @@ const BridgeSection = () => {
 
       {/* What is Cross-Chain Bridging */}
       <div>
-        <h3 className="text-2xl font-bold text-white mb-6">What is Cross-Chain Bridging?</h3>
-        <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-          <p className="text-gray-300 mb-4">
+        <h3 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">What is Cross-Chain Bridging?</h3>
+        <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+          <p className="style={{ color: 'var(--text-secondary)' }} mb-4">
             Cross-chain bridging allows you to transfer tokens from one blockchain network to another. 
             This enables you to access different DeFi protocols, take advantage of lower gas fees, 
             or participate in network-specific opportunities.
@@ -23,18 +23,18 @@ const BridgeSection = () => {
           <div className="grid md:grid-cols-3 gap-4">
             <div className="text-center p-4">
               <div className="text-2xl mb-2">🌉</div>
-              <h4 className="text-white font-semibold mb-2">Network Transfer</h4>
-              <p className="text-gray-300 text-sm">Move tokens between blockchains</p>
+              <h4 className="style={{ color: 'var(--text-primary)' }} font-semibold mb-2">Network Transfer</h4>
+              <p className="style={{ color: 'var(--text-secondary)' }} text-sm">Move tokens between blockchains</p>
             </div>
             <div className="text-center p-4">
               <div className="text-2xl mb-2">🔒</div>
-              <h4 className="text-white font-semibold mb-2">Secure</h4>
-              <p className="text-gray-300 text-sm">Multi-sig protection and security features</p>
+              <h4 className="style={{ color: 'var(--text-primary)' }} font-semibold mb-2">Secure</h4>
+              <p className="style={{ color: 'var(--text-secondary)' }} text-sm">Multi-sig protection and security features</p>
             </div>
             <div className="text-center p-4">
               <div className="text-2xl mb-2">⚡</div>
-              <h4 className="text-white font-semibold mb-2">Fast</h4>
-              <p className="text-gray-300 text-sm">Optimized for speed and efficiency</p>
+              <h4 className="style={{ color: 'var(--text-primary)' }} font-semibold mb-2">Fast</h4>
+              <p className="style={{ color: 'var(--text-secondary)' }} text-sm">Optimized for speed and efficiency</p>
             </div>
           </div>
         </div>
@@ -42,35 +42,35 @@ const BridgeSection = () => {
 
       {/* How Bridging Works */}
       <div>
-        <h3 className="text-2xl font-bold text-white mb-6">How Cross-Chain Bridging Works</h3>
+        <h3 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">How Cross-Chain Bridging Works</h3>
         <div className="space-y-6">
-          <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-            <h4 className="text-lg font-semibold text-white mb-4">Step 1: Initiate Transfer</h4>
+          <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+            <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Step 1: Initiate Transfer</h4>
             <div className="space-y-3">
-              <p className="text-gray-300">1. Select source network and token</p>
-              <p className="text-gray-300">2. Choose destination network</p>
-              <p className="text-gray-300">3. Enter amount to transfer</p>
-              <p className="text-gray-300">4. Review fees and estimated time</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">1. Select source network and token</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">2. Choose destination network</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">3. Enter amount to transfer</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">4. Review fees and estimated time</p>
             </div>
           </div>
 
-          <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-            <h4 className="text-lg font-semibold text-white mb-4">Step 2: Lock and Mint</h4>
+          <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+            <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Step 2: Lock and Mint</h4>
             <div className="space-y-3">
-              <p className="text-gray-300">1. Tokens are locked on source network</p>
-              <p className="text-gray-300">2. Validators verify the transaction</p>
-              <p className="text-gray-300">3. Equivalent tokens are minted on destination</p>
-              <p className="text-gray-300">4. Transaction is recorded on both networks</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">1. Tokens are locked on source network</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">2. Validators verify the transaction</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">3. Equivalent tokens are minted on destination</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">4. Transaction is recorded on both networks</p>
             </div>
           </div>
 
-          <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-            <h4 className="text-lg font-semibold text-white mb-4">Step 3: Confirmation</h4>
+          <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+            <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Step 3: Confirmation</h4>
             <div className="space-y-3">
-              <p className="text-gray-300">1. Wait for required confirmations</p>
-              <p className="text-gray-300">2. Receive tokens on destination network</p>
-              <p className="text-gray-300">3. Transaction hash provided for tracking</p>
-              <p className="text-gray-300">4. Bridge status updated in real-time</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">1. Wait for required confirmations</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">2. Receive tokens on destination network</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">3. Transaction hash provided for tracking</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">4. Bridge status updated in real-time</p>
             </div>
           </div>
         </div>
@@ -78,11 +78,11 @@ const BridgeSection = () => {
 
       {/* Supported Networks */}
       <div>
-        <h3 className="text-2xl font-bold text-white mb-6">Supported Bridge Routes</h3>
+        <h3 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Supported Bridge Routes</h3>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-            <h4 className="text-lg font-semibold text-white mb-4">Major Networks</h4>
-            <ul className="space-y-2 text-gray-300">
+          <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+            <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Major Networks</h4>
+            <ul className="space-y-2 style={{ color: 'var(--text-secondary)' }}">
               <li>• Ethereum ↔ Polygon</li>
               <li>• Ethereum ↔ Arbitrum</li>
               <li>• Ethereum ↔ Optimism</li>
@@ -92,9 +92,9 @@ const BridgeSection = () => {
             </ul>
           </div>
 
-          <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-            <h4 className="text-lg font-semibold text-white mb-4">Layer 2 Networks</h4>
-            <ul className="space-y-2 text-gray-300">
+          <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+            <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Layer 2 Networks</h4>
+            <ul className="space-y-2 style={{ color: 'var(--text-secondary)' }}">
               <li>• Arbitrum ↔ Optimism</li>
               <li>• Base ↔ Linea</li>
               <li>• zkSync ↔ Scroll</li>
@@ -108,14 +108,14 @@ const BridgeSection = () => {
 
       {/* Bridge Fees */}
       <div>
-        <h3 className="text-2xl font-bold text-white mb-6">Bridge Fees and Costs</h3>
+        <h3 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Bridge Fees and Costs</h3>
         <div className="grid md:grid-cols-3 gap-6">
-          <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-            <h4 className="text-lg font-semibold text-white mb-4">Network Fees</h4>
-            <p className="text-gray-300 mb-3">
+          <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+            <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Network Fees</h4>
+            <p className="style={{ color: 'var(--text-secondary)' }} mb-3">
               Gas fees for transactions on both source and destination networks.
             </p>
-            <div className="space-y-2 text-sm text-gray-300">
+            <div className="space-y-2 text-sm style={{ color: 'var(--text-secondary)' }}">
               <div>• <strong>Source:</strong> Lock/burn transaction</div>
               <div>• <strong>Destination:</strong> Mint transaction</div>
               <div>• <strong>Varies by:</strong> Network congestion</div>
@@ -123,12 +123,12 @@ const BridgeSection = () => {
             </div>
           </div>
 
-          <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-            <h4 className="text-lg font-semibold text-white mb-4">Bridge Fees</h4>
-            <p className="text-gray-300 mb-3">
+          <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+            <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Bridge Fees</h4>
+            <p className="style={{ color: 'var(--text-secondary)' }} mb-3">
               Small percentage fee for bridge infrastructure and maintenance.
             </p>
-            <div className="space-y-2 text-sm text-gray-300">
+            <div className="space-y-2 text-sm style={{ color: 'var(--text-secondary)' }}">
               <div>• <strong>Standard:</strong> 0.1% of transfer amount</div>
               <div>• <strong>Minimum:</strong> $1 equivalent</div>
               <div>• <strong>Maximum:</strong> $50 equivalent</div>
@@ -136,12 +136,12 @@ const BridgeSection = () => {
             </div>
           </div>
 
-          <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-            <h4 className="text-lg font-semibold text-white mb-4">Processing Time</h4>
-            <p className="text-gray-300 mb-3">
+          <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+            <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Processing Time</h4>
+            <p className="style={{ color: 'var(--text-secondary)' }} mb-3">
               Time required for bridge confirmation and token delivery.
             </p>
-            <div className="space-y-2 text-sm text-gray-300">
+            <div className="space-y-2 text-sm style={{ color: 'var(--text-secondary)' }}">
               <div>• <strong>Fast networks:</strong> 2-5 minutes</div>
               <div>• <strong>Standard:</strong> 5-15 minutes</div>
               <div>• <strong>Ethereum:</strong> 10-30 minutes</div>
@@ -153,35 +153,35 @@ const BridgeSection = () => {
 
       {/* Using the Bridge */}
       <div>
-        <h3 className="text-2xl font-bold text-white mb-6">How to Use the Bridge</h3>
+        <h3 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">How to Use the Bridge</h3>
         <div className="space-y-6">
-          <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-            <h4 className="text-lg font-semibold text-white mb-4">Step 1: Connect and Select</h4>
+          <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+            <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Step 1: Connect and Select</h4>
             <div className="space-y-3">
-              <p className="text-gray-300">1. Connect your wallet to mochi</p>
-              <p className="text-gray-300">2. Navigate to the Bridge page</p>
-              <p className="text-gray-300">3. Select source network from dropdown</p>
-              <p className="text-gray-300">4. Choose destination network</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">1. Connect your wallet to mochi</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">2. Navigate to the Bridge page</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">3. Select source network from dropdown</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">4. Choose destination network</p>
             </div>
           </div>
 
-          <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-            <h4 className="text-lg font-semibold text-white mb-4">Step 2: Choose Token and Amount</h4>
+          <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+            <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Step 2: Choose Token and Amount</h4>
             <div className="space-y-3">
-              <p className="text-gray-300">1. Select the token you want to bridge</p>
-              <p className="text-gray-300">2. Enter the amount to transfer</p>
-              <p className="text-gray-300">3. Review the exchange rate and fees</p>
-              <p className="text-gray-300">4. Check your balance and gas fees</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">1. Select the token you want to bridge</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">2. Enter the amount to transfer</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">3. Review the exchange rate and fees</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">4. Check your balance and gas fees</p>
             </div>
           </div>
 
-          <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-            <h4 className="text-lg font-semibold text-white mb-4">Step 3: Confirm and Transfer</h4>
+          <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+            <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Step 3: Confirm and Transfer</h4>
             <div className="space-y-3">
-              <p className="text-gray-300">1. Review all transaction details</p>
-              <p className="text-gray-300">2. Confirm the transfer in your wallet</p>
-              <p className="text-gray-300">3. Wait for source network confirmation</p>
-              <p className="text-gray-300">4. Monitor bridge status for completion</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">1. Review all transaction details</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">2. Confirm the transfer in your wallet</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">3. Wait for source network confirmation</p>
+              <p className="style={{ color: 'var(--text-secondary)' }}">4. Monitor bridge status for completion</p>
             </div>
           </div>
         </div>
@@ -189,11 +189,11 @@ const BridgeSection = () => {
 
       {/* Bridge Security */}
       <div>
-        <h3 className="text-2xl font-bold text-white mb-6">Bridge Security</h3>
+        <h3 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Bridge Security</h3>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-            <h4 className="text-lg font-semibold text-white mb-4">Security Features</h4>
-            <ul className="space-y-2 text-gray-300">
+          <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+            <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Security Features</h4>
+            <ul className="space-y-2 style={{ color: 'var(--text-secondary)' }}">
               <li>• Multi-signature wallet protection</li>
               <li>• Open source smart contracts</li>
               <li>• Validator network consensus</li>
@@ -203,9 +203,9 @@ const BridgeSection = () => {
             </ul>
           </div>
 
-          <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-            <h4 className="text-lg font-semibold text-white mb-4">Risk Mitigation</h4>
-            <ul className="space-y-2 text-gray-300">
+          <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+            <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Risk Mitigation</h4>
+            <ul className="space-y-2 style={{ color: 'var(--text-secondary)' }}">
               <li>• Start with small amounts</li>
               <li>• Verify contract addresses</li>
               <li>• Use official bridge only</li>
@@ -219,11 +219,11 @@ const BridgeSection = () => {
 
       {/* Troubleshooting */}
       <div>
-        <h3 className="text-2xl font-bold text-white mb-6">Troubleshooting Bridge Issues</h3>
+        <h3 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Troubleshooting Bridge Issues</h3>
         <div className="space-y-4">
           <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6">
-            <h4 className="text-lg font-semibold text-white mb-3">Transaction Stuck</h4>
-            <div className="space-y-2 text-gray-300">
+            <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-3">Transaction Stuck</h4>
+            <div className="space-y-2 style={{ color: 'var(--text-secondary)' }}">
               <p><strong>Possible causes:</strong></p>
               <ul className="list-disc list-inside space-y-1 text-sm">
                 <li>Network congestion on source or destination</li>
@@ -235,8 +235,8 @@ const BridgeSection = () => {
           </div>
 
           <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-6">
-            <h4 className="text-lg font-semibold text-white mb-3">High Fees</h4>
-            <div className="space-y-2 text-gray-300">
+            <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-3">High Fees</h4>
+            <div className="space-y-2 style={{ color: 'var(--text-secondary)' }}">
               <p><strong>Solutions:</strong></p>
               <ul className="list-disc list-inside space-y-1 text-sm">
                 <li>Wait for lower gas periods</li>
@@ -248,8 +248,8 @@ const BridgeSection = () => {
           </div>
 
           <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-6">
-            <h4 className="text-lg font-semibold text-white mb-3">Token Not Received</h4>
-            <div className="space-y-2 text-gray-300">
+            <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-3">Token Not Received</h4>
+            <div className="space-y-2 style={{ color: 'var(--text-secondary)' }}">
               <p><strong>Check these:</strong></p>
               <ul className="list-disc list-inside space-y-1 text-sm">
                 <li>Verify destination network in wallet</li>
@@ -264,11 +264,11 @@ const BridgeSection = () => {
 
       {/* Best Practices */}
       <div>
-        <h3 className="text-2xl font-bold text-white mb-6">Bridge Best Practices</h3>
+        <h3 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Bridge Best Practices</h3>
         <div className="grid md:grid-cols-2 gap-6">
           <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-6">
-            <h4 className="text-lg font-semibold text-white mb-4">✅ Do's</h4>
-            <ul className="space-y-2 text-gray-300">
+            <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4">✅ Do's</h4>
+            <ul className="space-y-2 style={{ color: 'var(--text-secondary)' }}">
               <li>• Always verify network addresses</li>
               <li>• Start with small test transfers</li>
               <li>• Keep transaction hashes for tracking</li>
@@ -279,8 +279,8 @@ const BridgeSection = () => {
           </div>
 
           <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6">
-            <h4 className="text-lg font-semibold text-white mb-4">❌ Don'ts</h4>
-            <ul className="space-y-2 text-gray-300">
+            <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4">❌ Don'ts</h4>
+            <ul className="space-y-2 style={{ color: 'var(--text-secondary)' }}">
               <li>• Don't bridge during network maintenance</li>
               <li>• Don't use unofficial bridge interfaces</li>
               <li>• Don't ignore gas fee warnings</li>

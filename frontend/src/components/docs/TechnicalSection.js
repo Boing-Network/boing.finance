@@ -4,20 +4,20 @@ const TechnicalSection = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-3xl font-bold text-white mb-4">Technical Specifications</h2>
-        <p className="text-gray-300 text-lg">
+        <h2 className="text-3xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">Technical Specifications</h2>
+        <p className="style={{ color: 'var(--text-secondary)' }} text-lg">
           Comprehensive technical documentation for boing.finance, including smart contract architecture, 
           protocol specifications, and integration details.
         </p>
       </div>
 
       {/* Smart Contract Architecture */}
-      <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-        <h3 className="text-xl font-semibold text-white mb-4">Smart Contract Architecture</h3>
+      <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+        <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Smart Contract Architecture</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h4 className="text-lg font-medium text-white mb-3">Core Contracts</h4>
-            <ul className="space-y-2 text-gray-300">
+            <h4 className="text-lg font-medium style={{ color: 'var(--text-primary)' }} mb-3">Core Contracts</h4>
+            <ul className="space-y-2 style={{ color: 'var(--text-secondary)' }}">
               <li className="flex items-start">
                 <span className="text-blue-400 mr-2">•</span>
                 <div>
@@ -53,8 +53,8 @@ const TechnicalSection = () => {
             </ul>
           </div>
           <div>
-            <h4 className="text-lg font-medium text-white mb-3">Supporting Contracts</h4>
-            <ul className="space-y-2 text-gray-300">
+            <h4 className="text-lg font-medium style={{ color: 'var(--text-primary)' }} mb-3">Supporting Contracts</h4>
+            <ul className="space-y-2 style={{ color: 'var(--text-secondary)' }}">
               <li className="flex items-start">
                 <span className="text-green-400 mr-2">•</span>
                 <div>
@@ -85,12 +85,12 @@ const TechnicalSection = () => {
       </div>
 
       {/* Protocol Specifications */}
-      <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-        <h3 className="text-xl font-semibold text-white mb-4">Protocol Specifications</h3>
+      <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+        <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Protocol Specifications</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h4 className="text-lg font-medium text-white mb-3">AMM Model</h4>
-            <ul className="space-y-2 text-gray-300">
+            <h4 className="text-lg font-medium style={{ color: 'var(--text-primary)' }} mb-3">AMM Model</h4>
+            <ul className="space-y-2 style={{ color: 'var(--text-secondary)' }}">
               <li>• <strong>Constant Product Formula:</strong> x * y = k</li>
               <li>• <strong>Automated Market Making</strong> for continuous liquidity</li>
               <li>• <strong>Price Discovery</strong> through supply and demand</li>
@@ -98,8 +98,8 @@ const TechnicalSection = () => {
             </ul>
           </div>
           <div>
-            <h4 className="text-lg font-medium text-white mb-3">Fee Structure</h4>
-            <ul className="space-y-2 text-gray-300">
+            <h4 className="text-lg font-medium style={{ color: 'var(--text-primary)' }} mb-3">Fee Structure</h4>
+            <ul className="space-y-2 style={{ color: 'var(--text-secondary)' }}">
               <li>• <strong>Trading Fee:</strong> 0.3% per swap</li>
               <li>• <strong>Protocol Fee:</strong> 0.05% (0.25% to LPs)</li>
               <li>• <strong>Bridge Fee:</strong> Variable based on network</li>
@@ -110,12 +110,12 @@ const TechnicalSection = () => {
       </div>
 
       {/* Security Features */}
-      <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-        <h3 className="text-xl font-semibold text-white mb-4">Security Features</h3>
+      <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+        <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Security Features</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-gray-700 rounded-lg p-4">
-            <h4 className="text-lg font-medium text-white mb-2">🔒 Access Control</h4>
-            <ul className="text-sm text-gray-300 space-y-1">
+            <h4 className="text-lg font-medium style={{ color: 'var(--text-primary)' }} mb-2">🔒 Access Control</h4>
+            <ul className="text-sm style={{ color: 'var(--text-secondary)' }} space-y-1">
               <li>• Role-based permissions</li>
               <li>• Multi-signature support</li>
               <li>• Timelock mechanisms</li>
@@ -123,8 +123,8 @@ const TechnicalSection = () => {
             </ul>
           </div>
           <div className="bg-gray-700 rounded-lg p-4">
-            <h4 className="text-lg font-medium text-white mb-2">🛡️ Protection</h4>
-            <ul className="text-sm text-gray-300 space-y-1">
+            <h4 className="text-lg font-medium style={{ color: 'var(--text-primary)' }} mb-2">🛡️ Protection</h4>
+            <ul className="text-sm style={{ color: 'var(--text-secondary)' }} space-y-1">
               <li>• Reentrancy guards</li>
               <li>• Overflow protection</li>
               <li>• Slippage controls</li>
@@ -132,8 +132,8 @@ const TechnicalSection = () => {
             </ul>
           </div>
           <div className="bg-gray-700 rounded-lg p-4">
-            <h4 className="text-lg font-medium text-white mb-2">🔍 Auditing</h4>
-            <ul className="text-sm text-gray-300 space-y-1">
+            <h4 className="text-lg font-medium style={{ color: 'var(--text-primary)' }} mb-2">🔍 Auditing</h4>
+            <ul className="text-sm style={{ color: 'var(--text-secondary)' }} space-y-1">
               <li>• Open source code review</li>
               <li>• Community security feedback</li>
               <li>• Internal testing procedures</li>
@@ -144,12 +144,12 @@ const TechnicalSection = () => {
       </div>
 
       {/* Gas Optimization */}
-      <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-        <h3 className="text-xl font-semibold text-white mb-4">Gas Optimization</h3>
+      <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+        <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Gas Optimization</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h4 className="text-lg font-medium text-white mb-3">Optimization Techniques</h4>
-            <ul className="space-y-2 text-gray-300">
+            <h4 className="text-lg font-medium style={{ color: 'var(--text-primary)' }} mb-3">Optimization Techniques</h4>
+            <ul className="space-y-2 style={{ color: 'var(--text-secondary)' }}">
               <li>• <strong>Batch Operations:</strong> Multiple swaps in single transaction</li>
               <li>• <strong>Gas Estimation:</strong> Accurate cost prediction</li>
               <li>• <strong>Efficient Storage:</strong> Optimized data structures</li>
@@ -157,8 +157,8 @@ const TechnicalSection = () => {
             </ul>
           </div>
           <div>
-            <h4 className="text-lg font-medium text-white mb-3">Network-Specific Optimizations</h4>
-            <ul className="space-y-2 text-gray-300">
+            <h4 className="text-lg font-medium style={{ color: 'var(--text-primary)' }} mb-3">Network-Specific Optimizations</h4>
+            <ul className="space-y-2 style={{ color: 'var(--text-secondary)' }}">
               <li>• <strong>Ethereum:</strong> Layer 2 integration support</li>
               <li>• <strong>Polygon:</strong> Optimized for low gas fees</li>
               <li>• <strong>BSC:</strong> High throughput optimizations</li>
@@ -169,11 +169,11 @@ const TechnicalSection = () => {
       </div>
 
       {/* Network Integration */}
-      <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-        <h3 className="text-xl font-semibold text-white mb-4">Network Integration</h3>
+      <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+        <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Network Integration</h3>
         <div className="space-y-4">
           <div>
-            <h4 className="text-lg font-medium text-white mb-3">Supported Networks</h4>
+            <h4 className="text-lg font-medium style={{ color: 'var(--text-primary)' }} mb-3">Supported Networks</h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
                 { name: 'Ethereum', icon: '🔵', type: 'Mainnet' },
@@ -191,7 +191,7 @@ const TechnicalSection = () => {
               ].map((network, index) => (
                 <div key={index} className="bg-gray-700 rounded-lg p-3 text-center">
                   <div className="text-2xl mb-1">{network.icon}</div>
-                  <div className="text-white font-medium text-sm">{network.name}</div>
+                  <div className="style={{ color: 'var(--text-primary)' }} font-medium text-sm">{network.name}</div>
                   <div className="text-gray-400 text-xs">{network.type}</div>
                 </div>
               ))}
@@ -201,12 +201,12 @@ const TechnicalSection = () => {
       </div>
 
       {/* Development Tools */}
-      <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-        <h3 className="text-xl font-semibold text-white mb-4">Development Tools</h3>
+      <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+        <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Development Tools</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h4 className="text-lg font-medium text-white mb-3">SDK & Libraries</h4>
-            <ul className="space-y-2 text-gray-300">
+            <h4 className="text-lg font-medium style={{ color: 'var(--text-primary)' }} mb-3">SDK & Libraries</h4>
+            <ul className="space-y-2 style={{ color: 'var(--text-secondary)' }}">
               <li>• <strong>JavaScript SDK:</strong> Easy integration for web apps</li>
               <li>• <strong>React Hooks:</strong> Pre-built components</li>
               <li>• <strong>TypeScript Support:</strong> Full type safety</li>
@@ -214,8 +214,8 @@ const TechnicalSection = () => {
             </ul>
           </div>
           <div>
-            <h4 className="text-lg font-medium text-white mb-3">Testing & Deployment</h4>
-            <ul className="space-y-2 text-gray-300">
+            <h4 className="text-lg font-medium style={{ color: 'var(--text-primary)' }} mb-3">Testing & Deployment</h4>
+            <ul className="space-y-2 style={{ color: 'var(--text-secondary)' }}">
               <li>• <strong>Hardhat Integration:</strong> Development framework</li>
               <li>• <strong>Test Suites:</strong> Comprehensive testing</li>
               <li>• <strong>Deployment Scripts:</strong> Automated deployment</li>

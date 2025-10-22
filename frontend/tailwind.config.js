@@ -3,15 +3,29 @@ module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
+  darkMode: 'class', // Enable class-based dark mode
   theme: {
     extend: {
       colors: {
-        background: '#0A0A23',
-        primary: '#00E0FF',
-        secondary: '#7B61FF',
+        // Theme-aware colors using CSS variables
+        background: 'var(--bg-primary)',
+        'background-secondary': 'var(--bg-secondary)',
+        'background-tertiary': 'var(--bg-tertiary)',
+        'background-card': 'var(--bg-card)',
+        primary: 'var(--primary-color)',
+        secondary: 'var(--secondary-color)',
+        accent: 'var(--accent-color)',
+        success: 'var(--success-color)',
+        warning: 'var(--warning-color)',
+        error: 'var(--error-color)',
+        text: 'var(--text-primary)',
+        'text-secondary': 'var(--text-secondary)',
+        'text-tertiary': 'var(--text-tertiary)',
+        border: 'var(--border-color)',
+        'border-hover': 'var(--border-hover)',
+        // Legacy colors for backward compatibility
+        'text-muted': 'var(--text-tertiary)',
         highlight: '#00FFB2',
-        text: '#FFFFFF',
-        'text-muted': '#E0E0E0',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

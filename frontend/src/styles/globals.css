@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom CSS Variables - Light Theme */
+/* Custom CSS Variables - Light Theme (Default) */
 :root {
   --primary-color: #3b82f6;
   --secondary-color: #8b5cf6;
@@ -11,18 +11,18 @@
   --warning-color: #f59e0b;
   --error-color: #ef4444;
   
-  /* Light Theme Colors - Darker, more pleasant tones */
-  --bg-primary: #e2e8f0;
-  --bg-secondary: #cbd5e1;
-  --bg-tertiary: #94a3b8;
-  --bg-card: #f1f5f9;
+  /* Light Theme Colors - Clean and modern */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --bg-card: #ffffff;
   --text-primary: #0f172a;
   --text-secondary: #1e293b;
   --text-tertiary: #334155;
-  --border-color: #94a3b8;
-  --border-hover: #64748b;
-  --shadow: rgba(0, 0, 0, 0.1);
-  --shadow-hover: rgba(0, 0, 0, 0.15);
+  --border-color: #e2e8f0;
+  --border-hover: #cbd5e1;
+  --shadow: rgba(0, 0, 0, 0.05);
+  --shadow-hover: rgba(0, 0, 0, 0.1);
 }
 
 /* Dark Theme Colors */
@@ -252,33 +252,113 @@ body {
   }
 }
 
+/* Theme-aware utility classes */
+.text-theme-primary {
+  color: var(--text-primary);
+}
+
+.text-theme-secondary {
+  color: var(--text-secondary);
+}
+
+.text-theme-tertiary {
+  color: var(--text-tertiary);
+}
+
+.bg-theme-primary {
+  background-color: var(--bg-primary);
+}
+
+.bg-theme-secondary {
+  background-color: var(--bg-secondary);
+}
+
+.bg-theme-card {
+  background-color: var(--bg-card);
+}
+
+.border-theme {
+  border-color: var(--border-color);
+}
+
+.border-theme-hover:hover {
+  border-color: var(--border-hover);
+}
+
+.shadow-theme {
+  box-shadow: 0 4px 6px var(--shadow);
+}
+
+.shadow-theme-hover:hover {
+  box-shadow: 0 8px 25px var(--shadow-hover);
+}
+
 a, .link {
-  color: #00E0FF;
-  text-shadow: 0 0 8px #00E0FF88;
+  color: var(--primary-color);
   transition: color 0.2s;
 }
-a:hover, .link:hover {
+
+/* Light mode - subtle effects */
+:root a, :root .link {
+  text-shadow: none;
+}
+
+/* Dark mode - neon effects */
+.dark a, .dark .link {
+  color: #00E0FF;
+  text-shadow: 0 0 8px #00E0FF88;
+}
+
+:root a:hover, :root .link:hover {
+  color: var(--secondary-color);
+  text-shadow: none;
+}
+
+.dark a:hover, .dark .link:hover {
   color: #7B61FF;
   text-shadow: 0 0 12px #7B61FF99;
 }
 
 button, .btn {
   background: transparent;
-  color: #00E0FF;
+  color: var(--primary-color);
   border: none;
   border-radius: 0.5rem;
   box-shadow: none;
   transition: color 0.2s, background 0.2s;
 }
-button:hover, .btn:hover {
+
+/* Light mode - subtle effects */
+:root button, :root .btn {
+  color: var(--primary-color);
+}
+
+/* Dark mode - neon effects */
+.dark button, .dark .btn {
+  color: #00E0FF;
+}
+
+:root button:hover, :root .btn:hover {
+  color: var(--secondary-color);
+  background: transparent;
+  box-shadow: none;
+}
+
+.dark button:hover, .dark .btn:hover {
   color: #7B61FF;
   background: transparent;
   box-shadow: none;
 }
 
 .card, .panel {
-  background: #10101A;
+  background: var(--bg-card);
   border-radius: 1rem;
+  box-shadow: 0 2px 24px var(--shadow);
+}
+
+/* Dark mode - neon effects */
+.dark .card, .dark .panel {
+  background: #10101A;
   box-shadow: 0 2px 24px #00E0FF22;
 }
 

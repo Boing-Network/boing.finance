@@ -190,7 +190,7 @@ function AppContent() {
               <nav className="flex items-center space-x-2 mr-2">
                 <button
                   onClick={() => window.location.href = navigation.home.href}
-                  className="style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'} px-2 py-2 rounded-md text-xs font-medium transition-colors"
+                  className="text-theme-secondary hover:text-theme-primary px-2 py-2 rounded-md text-xs font-medium transition-colors"
                 >
                   {navigation.home.icon}
                 </button>
@@ -233,7 +233,7 @@ function AppContent() {
                 <ThemeToggle />
                 <button
                   onClick={() => setHistoryModalOpen(true)}
-                  className="style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'} p-1.5 rounded-md transition-colors"
+                  className="text-theme-secondary hover:text-theme-primary p-1.5 rounded-md transition-colors"
                   aria-label="View transaction history"
                 >
                   <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -249,7 +249,7 @@ function AppContent() {
             <div className="md:hidden flex-shrink-0">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'} focus:outline-none focus:text-white p-2 rounded-md transition-colors"
+                className="text-theme-secondary hover:text-theme-primary focus:outline-none p-2 rounded-md transition-colors"
                 aria-label="Toggle menu"
               >
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

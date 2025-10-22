@@ -221,9 +221,9 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-4xl max-h-[80vh] relative">
+      <div className="bg-theme-card rounded-lg shadow-lg p-6 w-full max-w-4xl max-h-[80vh] relative border border-theme">
         <button
-          className="absolute top-4 right-4 text-gray-400 hover:text-white"
+          className="absolute top-4 right-4 text-theme-tertiary hover:text-theme-primary"
           onClick={onClose}
           aria-label="Close transaction history"
         >
@@ -231,10 +231,10 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
         </button>
         
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-white">Transaction History</h2>
+          <h2 className="text-xl font-bold text-theme-primary">Transaction History</h2>
           <div className="flex items-center space-x-4">
             {lastUpdated && (
-              <div className="text-gray-400 text-xs">
+              <div className="text-theme-tertiary text-xs">
                 Last updated: {formatTime(lastUpdated.toISOString())}
               </div>
             )}
@@ -248,7 +248,7 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
         </div>
         
         {/* Filter Tabs */}
-        <div className="flex space-x-1 mb-6 bg-gray-700 rounded-lg p-1">
+        <div className="flex space-x-1 mb-6 bg-theme-secondary rounded-lg p-1">
           {[
             { key: 'all', label: 'All' },
             { key: 'swap', label: 'Swaps' },
@@ -261,7 +261,7 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                 filter === tab.key
                   ? 'bg-blue-600 text-white'
-                  : 'text-gray-300 hover:text-white'
+                  : 'text-theme-secondary hover:text-theme-primary'
               }`}
             >
               {tab.label}
@@ -275,15 +275,15 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
             <div className="space-y-4">
               {[...Array(3)].map((_, i) => (
                 <div key={i} className="animate-pulse">
-                  <div className="bg-gray-700 rounded-lg h-20"></div>
+                  <div className="bg-theme-secondary rounded-lg h-20"></div>
                 </div>
               ))}
             </div>
           ) : error ? (
             <div className="text-center py-8">
               <div className="text-4xl mb-4">⚠️</div>
-              <h4 className="text-lg font-semibold text-white mb-2">Unable to Load Transaction History</h4>
-              <p className="text-gray-400 mb-4">{error}</p>
+              <h4 className="text-lg font-semibold text-theme-primary mb-2">Unable to Load Transaction History</h4>
+              <p className="text-theme-secondary mb-4">{error}</p>
               <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 max-w-md mx-auto mb-4">
                 <p className="text-yellow-200 text-sm">
                   <strong>Tip:</strong> Transaction history will be available once trading features are deployed to mainnet.
@@ -299,13 +299,13 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
           ) : transactions.length > 0 ? (
             <div className="space-y-3">
               {transactions.map((tx) => (
-                <div key={tx.id} className="bg-gray-750 rounded-lg p-4 hover:bg-gray-700 transition-colors">
+                <div key={tx.id} className="bg-theme-secondary rounded-lg p-4 hover:bg-theme-tertiary transition-colors border border-theme">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       {getTypeIcon(tx.type)}
                       <div>
                         <div className="flex items-center space-x-2">
-                          <p className="text-white font-medium">
+                          <p className="text-theme-primary font-medium">
                             {tx.type === 'swap' && `${tx.from} → ${tx.to}`}
                             {tx.type === 'liquidity' && `${tx.action} ${tx.pair}`}
                             {tx.type === 'bridge' && `${tx.from} → ${tx.to} (${tx.fromChain}→${tx.toChain})`}
@@ -315,13 +315,13 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
                             <span className="text-xs capitalize">{tx.status}</span>
                           </span>
                         </div>
-                        <p className="text-gray-400 text-sm">
+                        <p className="text-theme-secondary text-sm">
                           {tx.amount} {tx.type === 'swap' ? tx.from : ''} • {formatTime(tx.timestamp)}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-white font-medium">
+                      <p className="text-theme-primary font-medium">
                         {tx.type === 'swap' && `${tx.value} ${tx.to}`}
                         {tx.type === 'liquidity' && `${tx.amount} ${tx.action}`}
                         {tx.type === 'bridge' && `${tx.amount} ${tx.from}`}
@@ -340,8 +340,8 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
           ) : (
             <div className="text-center py-8">
               <div className="text-4xl mb-4">📋</div>
-              <h4 className="text-lg font-semibold text-white mb-2">No Transactions Yet</h4>
-              <p className="text-gray-400 mb-4">
+              <h4 className="text-lg font-semibold text-theme-primary mb-2">No Transactions Yet</h4>
+              <p className="text-theme-secondary mb-4">
                 Transaction history will appear here once you start using the platform features.
               </p>
               <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 max-w-md mx-auto">

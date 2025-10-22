@@ -75,16 +75,16 @@ const SmartContractsSection = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-3xl font-bold text-white mb-4">Smart Contracts</h2>
-        <p className="text-gray-300 text-lg">
+        <h2 className="text-3xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">Smart Contracts</h2>
+        <p className="style={{ color: 'var(--text-secondary)' }} text-lg">
           Complete overview of all deployed smart contracts across supported networks. 
           All contracts are verified on their respective block explorers.
         </p>
       </div>
 
       {/* Network Selector */}
-      <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-        <h3 className="text-xl font-semibold text-white mb-4">Select Network</h3>
+      <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+        <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Select Network</h3>
         <div className="flex flex-wrap gap-3">
           {supportedNetworks.map(({ chainId, network }) => (
             <button
@@ -92,14 +92,14 @@ const SmartContractsSection = () => {
               onClick={() => setSelectedNetwork(chainId.toString())}
               className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
                 selectedNetwork === chainId.toString()
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:text-white hover:bg-gray-600'
+                  ? 'bg-blue-600 style={{ color: 'var(--text-primary)' }}'
+                  : 'bg-gray-700 style={{ color: 'var(--text-secondary)' }} hover:style={{ color: 'var(--text-primary)' }} hover:bg-gray-600'
               }`}
             >
               <span className="text-lg">{getNetworkIcon(chainId)}</span>
               <span>{network.name}</span>
               {network.isTestnet && (
-                <span className="text-xs bg-yellow-600 text-white px-2 py-1 rounded">
+                <span className="text-xs bg-yellow-600 style={{ color: 'var(--text-primary)' }} px-2 py-1 rounded">
                   TESTNET
                 </span>
               )}
@@ -110,21 +110,21 @@ const SmartContractsSection = () => {
 
       {/* Network Info */}
       {currentNetwork && (
-        <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
+        <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
           <div className="flex items-center space-x-3 mb-4">
             <span className="text-2xl">{getNetworkIcon(currentNetwork.chainId)}</span>
             <div>
-              <h3 className="text-xl font-semibold text-white">{currentNetwork.name}</h3>
+              <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }}">{currentNetwork.name}</h3>
               <p className="text-gray-400">Chain ID: {currentNetwork.chainId}</p>
             </div>
             {currentNetwork.isTestnet && (
-              <span className="bg-yellow-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+              <span className="bg-yellow-600 style={{ color: 'var(--text-primary)' }} px-3 py-1 rounded-full text-sm font-medium">
                 Testnet
               </span>
             )}
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm style={{ color: 'var(--text-secondary)' }}">
             <div>
               <span className="font-medium">Explorer:</span>
               <a 
@@ -155,11 +155,11 @@ const SmartContractsSection = () => {
       {/* Contracts List */}
       {contracts && (
         <div className="space-y-6">
-          <h3 className="text-2xl font-semibold text-white">Deployed Contracts</h3>
+          <h3 className="text-2xl font-semibold style={{ color: 'var(--text-primary)' }}">Deployed Contracts</h3>
           
           {/* Core DEX Contracts */}
           <div>
-            <h4 className="text-lg font-semibold text-white mb-4 border-b border-gray-600 pb-2">
+            <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4 border-b style={{ borderColor: 'var(--border-color)' }} pb-2">
               Core DEX Contracts
             </h4>
             <div className="grid gap-4">
@@ -184,7 +184,7 @@ const SmartContractsSection = () => {
           {/* Mock Tokens */}
           {contracts.tokens && Object.keys(contracts.tokens).length > 0 && (
             <div>
-              <h4 className="text-lg font-semibold text-white mb-4 border-b border-gray-600 pb-2">
+              <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4 border-b style={{ borderColor: 'var(--border-color)' }} pb-2">
                 Mock Tokens (Testing)
               </h4>
               <div className="grid gap-4">
@@ -209,7 +209,7 @@ const SmartContractsSection = () => {
           {/* Trading Pairs */}
           {contracts.pairs && Object.keys(contracts.pairs).length > 0 && (
             <div>
-              <h4 className="text-lg font-semibold text-white mb-4 border-b border-gray-600 pb-2">
+              <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4 border-b style={{ borderColor: 'var(--border-color)' }} pb-2">
                 Trading Pairs
               </h4>
               <div className="grid gap-4">
@@ -235,9 +235,9 @@ const SmartContractsSection = () => {
 
       {/* No Contracts Message */}
       {(!contracts || Object.keys(contracts).length === 0) && (
-        <div className="bg-gray-750 rounded-lg p-8 border border-gray-600 text-center">
+        <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-8 border style={{ borderColor: 'var(--border-color)' }} text-center">
           <div className="text-6xl mb-4">🏗️</div>
-          <h3 className="text-xl font-semibold text-white mb-2">No Contracts Deployed</h3>
+          <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-2">No Contracts Deployed</h3>
           <p className="text-gray-400">
             No smart contracts have been deployed on {currentNetwork?.name || 'this network'} yet.
           </p>
@@ -246,11 +246,11 @@ const SmartContractsSection = () => {
 
       {/* Contract Verification Info */}
       <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-white mb-3">✅ Contract Verification</h3>
-        <p className="text-gray-300 mb-4">
+        <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-3">✅ Contract Verification</h3>
+        <p className="style={{ color: 'var(--text-secondary)' }} mb-4">
           All deployed contracts are verified on their respective block explorers. This means:
         </p>
-        <ul className="text-gray-300 space-y-2">
+        <ul className="style={{ color: 'var(--text-secondary)' }} space-y-2">
           <li>• <strong>Source Code Available:</strong> Full contract source code is publicly viewable</li>
           <li>• <strong>Transparency:</strong> Anyone can audit and verify the contract logic</li>
           <li>• <strong>Security:</strong> Verified contracts are more trustworthy for users</li>
@@ -260,10 +260,10 @@ const SmartContractsSection = () => {
 
       {/* Security Features */}
       <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-white mb-3">🔒 Security Features</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-300">
+        <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-3">🔒 Security Features</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 style={{ color: 'var(--text-secondary)' }}">
           <div>
-            <h4 className="font-semibold text-white mb-2">Smart Contract Security</h4>
+            <h4 className="font-semibold style={{ color: 'var(--text-primary)' }} mb-2">Smart Contract Security</h4>
             <ul className="space-y-1 text-sm">
               <li>• Reentrancy protection</li>
               <li>• Overflow protection</li>
@@ -272,7 +272,7 @@ const SmartContractsSection = () => {
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold text-white mb-2">Platform Security</h4>
+            <h4 className="font-semibold style={{ color: 'var(--text-primary)' }} mb-2">Platform Security</h4>
             <ul className="space-y-1 text-sm">
               <li>• Multi-sig bridge security</li>
               <li>• Time-lock mechanisms</li>
@@ -295,19 +295,19 @@ const ContractCard = ({ name, address, network, icon, description }) => {
   const explorerUrl = getExplorerUrl(address, network);
   
   return (
-    <div className="bg-gray-750 rounded-lg p-6 border border-gray-600 hover:border-gray-500 transition-colors">
+    <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }} hover:border-gray-500 transition-colors">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-3">
           <span className="text-2xl">{icon}</span>
           <div>
-            <h5 className="text-lg font-semibold text-white capitalize">
+            <h5 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} capitalize">
               {name.replace(/([A-Z])/g, ' $1').trim()}
             </h5>
             <p className="text-gray-400 text-sm">{description}</p>
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <span className="bg-green-600 text-white px-2 py-1 rounded text-xs font-medium">
+          <span className="bg-green-600 style={{ color: 'var(--text-primary)' }} px-2 py-1 rounded text-xs font-medium">
             Verified
           </span>
         </div>
@@ -322,7 +322,7 @@ const ContractCard = ({ name, address, network, icon, description }) => {
             </code>
             <button
               onClick={() => navigator.clipboard.writeText(address)}
-              className="text-gray-400 hover:text-white transition-colors"
+              className="text-gray-400 hover:style={{ color: 'var(--text-primary)' }} transition-colors"
               title="Copy address"
             >
               📋
@@ -335,7 +335,7 @@ const ContractCard = ({ name, address, network, icon, description }) => {
             href={explorerUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2"
+            className="bg-blue-600 hover:bg-blue-700 style={{ color: 'var(--text-primary)' }} px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2"
           >
             <span>🔍</span>
             <span>View on Explorer</span>
@@ -344,7 +344,7 @@ const ContractCard = ({ name, address, network, icon, description }) => {
             href={`${explorerUrl}#code`}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2"
+            className="bg-gray-600 hover:bg-gray-700 style={{ color: 'var(--text-primary)' }} px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2"
           >
             <span>📄</span>
             <span>View Source</span>

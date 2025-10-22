@@ -139,14 +139,14 @@ const BugReport = () => {
           <div className="max-w-4xl mx-auto">
             {/* Header */}
             <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-5xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">
+              <h1 className="text-4xl md:text-5xl font-bold text-theme-primary mb-4">
                 Bug Report
               </h1>
-              <p className="text-xl text-gray-300 mb-6">
+              <p className="text-xl text-theme-secondary mb-6">
                 Help us improve boing.finance by reporting bugs and issues
               </p>
-              <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
-                <p className="text-blue-200 text-sm">
+              <div className="rounded-lg p-4 mb-6 border" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                   <strong>Note:</strong> As a solo-founder project, we appreciate detailed bug reports to help us prioritize fixes and improvements. Your feedback is invaluable for our growth.
                 </p>
               </div>
@@ -157,14 +157,14 @@ const BugReport = () => {
               <div className="lg:col-span-1 space-y-6">
                 {/* Reporting Guidelines */}
                 <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                  <h2 className="text-xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">Reporting Guidelines</h2>
+                  <h2 className="text-xl font-bold text-theme-primary mb-4">Reporting Guidelines</h2>
                   <div className="space-y-4">
                     {reportingGuidelines.map((guideline) => (
                       <div key={guideline.title} className="flex items-start space-x-3">
                         <span className="text-2xl">{guideline.icon}</span>
                         <div>
-                          <h3 className="text-sm font-semibold style={{ color: 'var(--text-primary)' }} mb-1">{guideline.title}</h3>
-                          <p className="text-gray-300 text-xs">{guideline.description}</p>
+                          <h3 className="text-sm font-semibold text-theme-primary mb-1">{guideline.title}</h3>
+                          <p className="text-theme-secondary text-xs">{guideline.description}</p>
                         </div>
                       </div>
                     ))}
@@ -173,12 +173,12 @@ const BugReport = () => {
 
                 {/* Security Guidelines */}
                 <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                  <h2 className="text-xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">Security Guidelines</h2>
+                  <h2 className="text-xl font-bold text-theme-primary mb-4">Security Guidelines</h2>
                   <div className="space-y-2">
                     {securityGuidelines.map((guideline, index) => (
                       <div key={index} className="flex items-start space-x-2">
                         <span className="text-red-400 text-sm">⚠️</span>
-                        <p className="text-gray-300 text-xs">{guideline}</p>
+                        <p className="text-theme-secondary text-xs">{guideline}</p>
                       </div>
                     ))}
                   </div>
@@ -186,23 +186,23 @@ const BugReport = () => {
 
                 {/* Alternative Reporting */}
                 <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                  <h2 className="text-xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">Other Ways to Report</h2>
+                  <h2 className="text-xl font-bold text-theme-primary mb-4">Other Ways to Report</h2>
                   <div className="space-y-3">
                     <a
                       href="mailto:bugs@boing.finance"
-                      className="block hover:bg-gray-600 px-4 py-2 rounded-lg transition-colors text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                      className="block bg-theme-secondary hover:bg-theme-tertiary px-4 py-2 rounded-lg transition-colors text-center text-theme-primary"
                     >
                       Email Bug Report
                     </a>
                     <a
                       href="/contact-us"
-                      className="block bg-blue-600 hover:bg-blue-700 style={{ color: 'var(--text-primary)' }} px-4 py-2 rounded-lg transition-colors text-center"
+                      className="block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-center"
                     >
                       Contact Form
                     </a>
                     <a
                       href="mailto:support@boing.finance"
-                      className="block bg-green-600 hover:bg-green-700 style={{ color: 'var(--text-primary)' }} px-4 py-2 rounded-lg transition-colors text-center"
+                      className="block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-center"
                     >
                       General Support
                     </a>
@@ -213,13 +213,13 @@ const BugReport = () => {
               {/* Bug Report Form */}
               <div className="lg:col-span-2">
                 <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                  <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Submit Bug Report</h2>
+                  <h2 className="text-2xl font-bold text-theme-primary mb-6">Submit Bug Report</h2>
                   
                   {submitStatus === 'success' && (
-                    <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4 mb-6">
+                    <div className="rounded-lg p-4 mb-6 border" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--success-color)' }}>
                       <div className="flex items-center space-x-2">
-                        <span className="text-green-400">✅</span>
-                        <p className="text-green-200">Thank you! Your bug report has been submitted successfully. We'll investigate and get back to you soon.</p>
+                        <span style={{ color: 'var(--success-color)' }}>✅</span>
+                        <p style={{ color: 'var(--text-secondary)' }}>Thank you! Your bug report has been submitted successfully. We'll investigate and get back to you soon.</p>
                       </div>
                     </div>
                   )}
@@ -227,10 +227,10 @@ const BugReport = () => {
                   <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Basic Information */}
                     <div className="space-y-4">
-                      <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }}">Basic Information</h3>
+                      <h3 className="text-lg font-semibold text-theme-primary">Basic Information</h3>
                       
                       <div>
-                        <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-2">
+                        <label htmlFor="title" className="block text-sm font-medium text-theme-secondary mb-2">
                           Bug Title *
                         </label>
                         <input
@@ -240,14 +240,19 @@ const BugReport = () => {
                           value={formData.title}
                           onChange={handleInputChange}
                           required
-                          className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                          className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          style={{ 
+                            backgroundColor: 'var(--bg-secondary)', 
+                            borderColor: 'var(--border-color)', 
+                            color: 'var(--text-primary)' 
+                          }}
                           placeholder="Brief description of the bug"
                         />
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label htmlFor="severity" className="block text-sm font-medium text-gray-300 mb-2">
+                          <label htmlFor="severity" className="block text-sm font-medium text-theme-secondary mb-2">
                             Severity *
                           </label>
                           <select
@@ -256,7 +261,12 @@ const BugReport = () => {
                             value={formData.severity}
                             onChange={handleInputChange}
                             required
-                            className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                            className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          style={{ 
+                            backgroundColor: 'var(--bg-secondary)', 
+                            borderColor: 'var(--border-color)', 
+                            color: 'var(--text-primary)' 
+                          }}
                           >
                             {severityLevels.map((level) => (
                               <option key={level.value} value={level.value}>
@@ -267,7 +277,7 @@ const BugReport = () => {
                         </div>
 
                         <div>
-                          <label htmlFor="category" className="block text-sm font-medium text-gray-300 mb-2">
+                          <label htmlFor="category" className="block text-sm font-medium text-theme-secondary mb-2">
                             Category *
                           </label>
                           <select
@@ -276,7 +286,12 @@ const BugReport = () => {
                             value={formData.category}
                             onChange={handleInputChange}
                             required
-                            className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                            className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          style={{ 
+                            backgroundColor: 'var(--bg-secondary)', 
+                            borderColor: 'var(--border-color)', 
+                            color: 'var(--text-primary)' 
+                          }}
                           >
                             {bugCategories.map((category) => (
                               <option key={category.value} value={category.value}>
@@ -290,10 +305,10 @@ const BugReport = () => {
 
                     {/* Bug Description */}
                     <div className="space-y-4">
-                      <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }}">Bug Description</h3>
+                      <h3 className="text-lg font-semibold text-theme-primary">Bug Description</h3>
                       
                       <div>
-                        <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-2">
+                        <label htmlFor="description" className="block text-sm font-medium text-theme-secondary mb-2">
                           Detailed Description *
                         </label>
                         <textarea
@@ -303,13 +318,18 @@ const BugReport = () => {
                           onChange={handleInputChange}
                           required
                           rows={4}
-                          className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                          className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                          style={{ 
+                            backgroundColor: 'var(--bg-secondary)', 
+                            borderColor: 'var(--border-color)', 
+                            color: 'var(--text-primary)' 
+                          }}
                           placeholder="Describe the bug in detail..."
                         />
                       </div>
 
                       <div>
-                        <label htmlFor="steps" className="block text-sm font-medium text-gray-300 mb-2">
+                        <label htmlFor="steps" className="block text-sm font-medium text-theme-secondary mb-2">
                           Steps to Reproduce *
                         </label>
                         <textarea
@@ -319,14 +339,19 @@ const BugReport = () => {
                           onChange={handleInputChange}
                           required
                           rows={4}
-                          className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                          className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                          style={{ 
+                            backgroundColor: 'var(--bg-secondary)', 
+                            borderColor: 'var(--border-color)', 
+                            color: 'var(--text-primary)' 
+                          }}
                           placeholder="1. Go to...&#10;2. Click on...&#10;3. Observe..."
                         />
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label htmlFor="expected" className="block text-sm font-medium text-gray-300 mb-2">
+                          <label htmlFor="expected" className="block text-sm font-medium text-theme-secondary mb-2">
                             Expected Behavior
                           </label>
                           <textarea
@@ -335,13 +360,18 @@ const BugReport = () => {
                             value={formData.expected}
                             onChange={handleInputChange}
                             rows={3}
-                            className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                            className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                          style={{ 
+                            backgroundColor: 'var(--bg-secondary)', 
+                            borderColor: 'var(--border-color)', 
+                            color: 'var(--text-primary)' 
+                          }}
                             placeholder="What should happen?"
                           />
                         </div>
 
                         <div>
-                          <label htmlFor="actual" className="block text-sm font-medium text-gray-300 mb-2">
+                          <label htmlFor="actual" className="block text-sm font-medium text-theme-secondary mb-2">
                             Actual Behavior
                           </label>
                           <textarea
@@ -350,7 +380,12 @@ const BugReport = () => {
                             value={formData.actual}
                             onChange={handleInputChange}
                             rows={3}
-                            className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                            className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                          style={{ 
+                            backgroundColor: 'var(--bg-secondary)', 
+                            borderColor: 'var(--border-color)', 
+                            color: 'var(--text-primary)' 
+                          }}
                             placeholder="What actually happens?"
                           />
                         </div>
@@ -359,11 +394,11 @@ const BugReport = () => {
 
                     {/* Environment Information */}
                     <div className="space-y-4">
-                      <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }}">Environment Information</h3>
+                      <h3 className="text-lg font-semibold text-theme-primary">Environment Information</h3>
                       
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                          <label htmlFor="browser" className="block text-sm font-medium text-gray-300 mb-2">
+                          <label htmlFor="browser" className="block text-sm font-medium text-theme-secondary mb-2">
                             Browser
                           </label>
                           <select
@@ -371,7 +406,12 @@ const BugReport = () => {
                             name="browser"
                             value={formData.browser}
                             onChange={handleInputChange}
-                            className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                            className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          style={{ 
+                            backgroundColor: 'var(--bg-secondary)', 
+                            borderColor: 'var(--border-color)', 
+                            color: 'var(--text-primary)' 
+                          }}
                           >
                             <option value="">Select browser</option>
                             {browsers.map((browser) => (
@@ -383,7 +423,7 @@ const BugReport = () => {
                         </div>
 
                         <div>
-                          <label htmlFor="wallet" className="block text-sm font-medium text-gray-300 mb-2">
+                          <label htmlFor="wallet" className="block text-sm font-medium text-theme-secondary mb-2">
                             Wallet
                           </label>
                           <select
@@ -391,7 +431,12 @@ const BugReport = () => {
                             name="wallet"
                             value={formData.wallet}
                             onChange={handleInputChange}
-                            className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                            className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          style={{ 
+                            backgroundColor: 'var(--bg-secondary)', 
+                            borderColor: 'var(--border-color)', 
+                            color: 'var(--text-primary)' 
+                          }}
                           >
                             <option value="">Select wallet</option>
                             {wallets.map((wallet) => (
@@ -403,7 +448,7 @@ const BugReport = () => {
                         </div>
 
                         <div>
-                          <label htmlFor="network" className="block text-sm font-medium text-gray-300 mb-2">
+                          <label htmlFor="network" className="block text-sm font-medium text-theme-secondary mb-2">
                             Network
                           </label>
                           <select
@@ -411,7 +456,12 @@ const BugReport = () => {
                             name="network"
                             value={formData.network}
                             onChange={handleInputChange}
-                            className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                            className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          style={{ 
+                            backgroundColor: 'var(--bg-secondary)', 
+                            borderColor: 'var(--border-color)', 
+                            color: 'var(--text-primary)' 
+                          }}
                           >
                             <option value="">Select network</option>
                             {networks.map((network) => (
@@ -426,11 +476,11 @@ const BugReport = () => {
 
                     {/* Contact Information */}
                     <div className="space-y-4">
-                      <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }}">Contact Information (Optional)</h3>
+                      <h3 className="text-lg font-semibold text-theme-primary">Contact Information (Optional)</h3>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+                          <label htmlFor="email" className="block text-sm font-medium text-theme-secondary mb-2">
                             Email Address
                           </label>
                           <input
@@ -439,13 +489,18 @@ const BugReport = () => {
                             name="email"
                             value={formData.email}
                             onChange={handleInputChange}
-                            className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                            className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          style={{ 
+                            backgroundColor: 'var(--bg-secondary)', 
+                            borderColor: 'var(--border-color)', 
+                            color: 'var(--text-primary)' 
+                          }}
                             placeholder="your@email.com"
                           />
                         </div>
 
                         <div>
-                          <label htmlFor="walletAddress" className="block text-sm font-medium text-gray-300 mb-2">
+                          <label htmlFor="walletAddress" className="block text-sm font-medium text-theme-secondary mb-2">
                             Wallet Address (Optional)
                           </label>
                           <input
@@ -454,7 +509,12 @@ const BugReport = () => {
                             name="walletAddress"
                             value={formData.walletAddress}
                             onChange={handleInputChange}
-                            className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                            className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          style={{ 
+                            backgroundColor: 'var(--bg-secondary)', 
+                            borderColor: 'var(--border-color)', 
+                            color: 'var(--text-primary)' 
+                          }}
                             placeholder="0x..."
                           />
                         </div>
@@ -465,7 +525,7 @@ const BugReport = () => {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-600 style={{ color: 'var(--text-primary)' }} font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center"
+                      className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center"
                     >
                       {isSubmitting ? (
                         <>
@@ -483,26 +543,26 @@ const BugReport = () => {
 
             {/* Additional Information */}
             <div className="mt-12 rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-              <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6 text-center">What Happens Next?</h2>
+              <h2 className="text-2xl font-bold text-theme-primary mb-6 text-center">What Happens Next?</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="text-center">
                   <div className="text-3xl mb-3">📋</div>
-                  <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">Review</h3>
-                  <p className="text-gray-300 text-sm">
+                  <h3 className="text-lg font-semibold text-theme-primary mb-2">Review</h3>
+                  <p className="text-theme-secondary text-sm">
                     As a solo founder, I'll review your bug report and prioritize it based on severity and impact.
                   </p>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl mb-3">🔧</div>
-                  <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">Investigation</h3>
-                  <p className="text-gray-300 text-sm">
+                  <h3 className="text-lg font-semibold text-theme-primary mb-2">Investigation</h3>
+                  <p className="text-theme-secondary text-sm">
                     I'll investigate the issue, reproduce it if possible, and work on a solution as quickly as possible.
                   </p>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl mb-3">✅</div>
-                  <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">Resolution</h3>
-                  <p className="text-gray-300 text-sm">
+                  <h3 className="text-lg font-semibold text-theme-primary mb-2">Resolution</h3>
+                  <p className="text-theme-secondary text-sm">
                     I'll fix the issue and update you on the progress. Critical bugs receive immediate attention.
                   </p>
                 </div>

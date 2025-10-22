@@ -308,7 +308,7 @@ const Status = () => {
               <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Recent Incidents</h2>
               <div className="space-y-4">
                 {recentIncidents.map((incident) => (
-                  <div key={incident.id} className="border border rounded-lg p-4">
+                  <div key={incident.id} className="border rounded-lg p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-1">{incident.title}</h3>

@@ -378,7 +378,7 @@ const Whitepaper = () => {
             </section>
 
             {/* Contact Information */}
-            <div className="style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} rounded-lg p-6 border border text-center">
+            <div className="rounded-lg p-6 border text-center" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
               <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Get Involved</h3>
               <p className="style={{ color: 'var(--text-secondary)' }} mb-4">
                 Join the boing.finance community and help shape the future of cross-chain DeFi.

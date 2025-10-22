@@ -93,7 +93,7 @@ const WalletConnect = () => {
       <div className="relative">
         <button
           onClick={() => setShowDropdown(!showDropdown)}
-          className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+          className="bg-theme-secondary hover:bg-theme-tertiary text-theme-primary px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2 border border-theme"
         >
           <WalletIcon className="w-4 h-4" />
           <span>{formatAddress(account)}</span>
@@ -101,31 +101,31 @@ const WalletConnect = () => {
         </button>
 
         {showDropdown && (
-          <div className="absolute right-0 mt-2 w-64 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50">
+          <div className="absolute right-0 mt-2 w-64 bg-theme-card rounded-lg shadow-lg border border-theme z-50">
             <div className="p-4">
               {/* Account Info */}
               <div className="mb-4">
-                <div className="text-sm text-gray-400 mb-1">Connected Account</div>
-                <div className="text-white font-mono text-sm break-all">{account || 'No account'}</div>
+                <div className="text-sm text-theme-tertiary mb-1">Connected Account</div>
+                <div className="text-theme-primary font-mono text-sm break-all">{account || 'No account'}</div>
               </div>
 
               {/* Network Info */}
               {currentNetwork && (
                 <div className="mb-4">
-                  <div className="text-sm text-gray-400 mb-1">Network</div>
+                  <div className="text-sm text-theme-tertiary mb-1">Network</div>
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                    <span className="text-white text-sm">{currentNetwork.name}</span>
+                    <span className="text-theme-primary text-sm">{currentNetwork.name}</span>
                   </div>
                 </div>
               )}
 
               {/* Balance */}
               <div className="mb-4">
-                <div className="text-sm text-gray-400 mb-1">Balance</div>
-                <div className="text-white text-sm min-h-[1.5em] flex items-center">
+                <div className="text-sm text-theme-tertiary mb-1">Balance</div>
+                <div className="text-theme-primary text-sm min-h-[1.5em] flex items-center">
                   {balanceLoading ? (
-                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block mr-2"></span>
+                    <span className="w-4 h-4 border-2 border-theme-primary border-t-transparent rounded-full animate-spin inline-block mr-2"></span>
                   ) : balance !== null ? (
                     <>{formatBalance(balance)} {currentNetwork?.nativeCurrency?.symbol || 'ETH'}</>
                   ) : (

@@ -227,20 +227,20 @@ const FAQSection = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-3xl font-bold text-white mb-4">Frequently Asked Questions</h2>
-        <p className="text-gray-300 text-lg">
+        <h2 className="text-3xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">Frequently Asked Questions</h2>
+        <p className="style={{ color: 'var(--text-secondary)' }} text-lg">
           Find answers to common questions about boing.finance. Can't find what you're looking for? 
           Contact our support team for assistance.
         </p>
       </div>
 
       {/* Search Bar */}
-      <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
+      <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
         <div className="relative">
           <input
             type="text"
             placeholder="Search FAQs..."
-            className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full bg-gray-700 border style={{ borderColor: 'var(--border-color)' }} rounded-lg px-4 py-3 style={{ color: 'var(--text-primary)' }} placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <div className="absolute right-3 top-3 text-gray-400">
             🔍
@@ -251,20 +251,20 @@ const FAQSection = () => {
       {/* FAQ Categories */}
       <div className="space-y-6">
         {faqCategories.map((category) => (
-          <div key={category.title} className="bg-gray-750 rounded-lg p-6 border border-gray-600">
-            <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
+          <div key={category.title} className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+            <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4 flex items-center">
               <span className="mr-3">{category.icon}</span>
               {category.title}
             </h3>
             
             <div className="space-y-3">
               {category.items.map((item) => (
-                <div key={item.id} className="border border-gray-600 rounded-lg">
+                <div key={item.id} className="border style={{ borderColor: 'var(--border-color)' }} rounded-lg">
                   <button
                     onClick={() => toggleItem(item.id)}
                     className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-gray-700 transition-colors"
                   >
-                    <span className="text-white font-medium">{item.question}</span>
+                    <span className="style={{ color: 'var(--text-primary)' }} font-medium">{item.question}</span>
                     <span className="text-gray-400 text-xl">
                       {openItems.has(item.id) ? '−' : '+'}
                     </span>
@@ -272,7 +272,7 @@ const FAQSection = () => {
                   
                   {openItems.has(item.id) && (
                     <div className="px-4 pb-3">
-                      <p className="text-gray-300 text-sm leading-relaxed">
+                      <p className="style={{ color: 'var(--text-secondary)' }} text-sm leading-relaxed">
                         {item.answer}
                       </p>
                     </div>
@@ -285,17 +285,17 @@ const FAQSection = () => {
       </div>
 
       {/* Contact Support */}
-      <div className="bg-gray-750 rounded-lg p-6 border border-gray-600">
+      <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
         <div className="text-center">
-          <h3 className="text-xl font-semibold text-white mb-4">Still Need Help?</h3>
-          <p className="text-gray-300 mb-6">
+          <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Still Need Help?</h3>
+          <p className="style={{ color: 'var(--text-secondary)' }} mb-6">
             Can't find the answer you're looking for? Our support team is here to help.
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <a
               href="mailto:support@boing.finance"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center justify-center"
+              className="bg-blue-600 hover:bg-blue-700 style={{ color: 'var(--text-primary)' }} px-6 py-3 rounded-lg transition-colors flex items-center justify-center"
             >
               📧 Email Support
             </a>
@@ -303,7 +303,7 @@ const FAQSection = () => {
               href="https://discord.gg/7RDtQtQvBW"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center justify-center"
+              className="bg-purple-600 hover:bg-purple-700 style={{ color: 'var(--text-primary)' }} px-6 py-3 rounded-lg transition-colors flex items-center justify-center"
             >
               💬 Discord
             </a>
@@ -311,7 +311,7 @@ const FAQSection = () => {
               href="https://t.me/boing_finance"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors flex items-center justify-center"
+              className="bg-blue-500 hover:bg-blue-600 style={{ color: 'var(--text-primary)' }} px-6 py-3 rounded-lg transition-colors flex items-center justify-center"
             >
               📱 Telegram
             </a>

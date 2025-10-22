@@ -176,8 +176,8 @@ const HelpCenter = () => {
               <p className="text-xl mb-6" style={{ color: 'var(--text-secondary)' }}>
                 Find answers to your questions and get support for boing.finance
               </p>
-              <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
-                <p className="text-blue-200 text-sm">
+              <div className="rounded-lg p-4 mb-6 border" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                   <strong>Note:</strong> boing.finance is currently in early development phase. While our platform is fully functional, we are a solo-founder project seeking funding for expansion and feature development.
                 </p>
               </div>
@@ -315,7 +315,7 @@ const HelpCenter = () => {
                     <div className="space-y-4">
                       {currentCategory.articles.map((article) => (
                         <Link key={article.id} to={`/help-center/article/${article.id}`} className="block">
-                          <div className="border border rounded-lg p-4 hover:border transition-colors cursor-pointer">
+                          <div className="border rounded-lg p-4 hover:border transition-colors cursor-pointer">
                             <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{article.title}</h3>
                             <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>{article.content}</p>
                             <div className="flex flex-wrap gap-1">
