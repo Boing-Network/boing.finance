@@ -28,33 +28,33 @@ const APISection = () => {
         <h3 className="text-xl font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>API Overview</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-gray-700 rounded-lg p-4">
-            <div className="text-2xl mb-2">🔌</div>
-            <h4 className="text-lg font-medium  mb-2"
-          style={{ color: 'var(--text-primary)'  }}>REST API</h4>
-            <p className=" text-sm"
-          style={{ color: 'var(--text-secondary)'  }}>
-              HTTP endpoints for data retrieval and transaction submission
-            </p>
-          </div>
-          <div className="bg-gray-700 rounded-lg p-4">
-            <div className="text-2xl mb-2">⚡</div>
-            <h4 className="text-lg font-medium  mb-2"
-          style={{ color: 'var(--text-primary)'  }}>WebSocket</h4>
-            <p className=" text-sm"
-          style={{ color: 'var(--text-secondary)'  }}>
-              Real-time data streams for live updates and notifications
-            </p>
-          </div>
-          <div className="bg-gray-700 rounded-lg p-4">
-            <div className="text-2xl mb-2">📦</div>
-            <h4 className="text-lg font-medium  mb-2"
-          style={{ color: 'var(--text-primary)'  }}>SDK</h4>
-            <p className=" text-sm"
-          style={{ color: 'var(--text-secondary)'  }}>
-              JavaScript/TypeScript libraries for easy integration
-            </p>
-          </div>
+            <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+              <div className="text-2xl mb-2">🔌</div>
+              <h4 className="text-lg font-medium  mb-2"
+           style={{ color: 'var(--text-primary)'  }}>REST API</h4>
+              <p className=" text-sm"
+           style={{ color: 'var(--text-secondary)'  }}>
+                HTTP endpoints for data retrieval and transaction submission
+              </p>
+            </div>
+            <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+              <div className="text-2xl mb-2">⚡</div>
+              <h4 className="text-lg font-medium  mb-2"
+           style={{ color: 'var(--text-primary)'  }}>WebSocket</h4>
+              <p className=" text-sm"
+           style={{ color: 'var(--text-secondary)'  }}>
+                Real-time data streams for live updates and notifications
+              </p>
+            </div>
+            <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+              <div className="text-2xl mb-2">📦</div>
+              <h4 className="text-lg font-medium  mb-2"
+           style={{ color: 'var(--text-primary)'  }}>SDK</h4>
+              <p className=" text-sm"
+           style={{ color: 'var(--text-secondary)'  }}>
+                JavaScript/TypeScript libraries for easy integration
+              </p>
+            </div>
         </div>
       </div>
 
@@ -68,11 +68,12 @@ const APISection = () => {
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
                 activeTab === tab.id
-                  ? 'bg-blue-600'
-                  : 'bg-gray-700 hover:bg-gray-600'
+                  ? ''
+                  : 'hover:opacity-80'
               }`}
               style={{
-                color: activeTab === tab.id ? 'var(--text-primary)' : 'var(--text-secondary)'
+                color: activeTab === tab.id ? 'var(--text-primary)' : 'var(--text-secondary)',
+                backgroundColor: activeTab === tab.id ? 'var(--primary-color)' : 'var(--bg-secondary)'
               }}
             >
               <span>{tab.icon}</span>
@@ -98,12 +99,14 @@ const RESTAPIContent = () => (
           style={{ color: 'var(--text-primary)'  }}>REST API Endpoints</h4>
       <p className=" mb-4"
           style={{ color: 'var(--text-secondary)'  }}>
-        Base URL: <code className="bg-gray-800 px-2 py-1 rounded text-blue-400">https://api.boing.finance/v1</code>
+        Base URL: <code className="px-2 py-1 rounded"
+          style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--primary-color)' }}>https://api.boing.finance/v1</code>
       </p>
     </div>
 
     {/* Market Data Endpoints */}
-    <div className="bg-gray-700 rounded-lg p-4">
+    <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
       <h5 className="text-md font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>📊 Market Data</h5>
       <div className="space-y-3">
@@ -131,7 +134,8 @@ const RESTAPIContent = () => (
     </div>
 
     {/* Liquidity Endpoints */}
-    <div className="bg-gray-700 rounded-lg p-4">
+    <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
       <h5 className="text-md font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>💧 Liquidity</h5>
       <div className="space-y-3">
@@ -159,7 +163,8 @@ const RESTAPIContent = () => (
     </div>
 
     {/* Trading Endpoints */}
-    <div className="bg-gray-700 rounded-lg p-4">
+    <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
       <h5 className="text-md font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>💱 Trading</h5>
       <div className="space-y-3">
@@ -182,7 +187,8 @@ const RESTAPIContent = () => (
     </div>
 
     {/* Bridge Endpoints */}
-    <div className="bg-gray-700 rounded-lg p-4">
+    <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
       <h5 className="text-md font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>🌉 Bridge</h5>
       <div className="space-y-3">
@@ -213,11 +219,13 @@ const WebSocketContent = () => (
           style={{ color: 'var(--text-primary)'  }}>WebSocket API</h4>
       <p className=" mb-4"
           style={{ color: 'var(--text-secondary)'  }}>
-        WebSocket URL: <code className="bg-gray-800 px-2 py-1 rounded text-blue-400">wss://api.boing.finance/ws</code>
+        WebSocket URL: <code className="px-2 py-1 rounded"
+          style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--primary-color)' }}>wss://api.boing.finance/ws</code>
       </p>
     </div>
 
-    <div className="bg-gray-700 rounded-lg p-4">
+    <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
       <h5 className="text-md font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>📡 Real-time Events</h5>
       <div className="space-y-3">
@@ -244,10 +252,12 @@ const WebSocketContent = () => (
       </div>
     </div>
 
-    <div className="bg-gray-700 rounded-lg p-4">
+    <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
       <h5 className="text-md font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>🔌 Connection Example</h5>
-      <pre className="bg-gray-800 p-4 rounded text-sm  overflow-x-auto"
+      <pre className="p-4 rounded text-sm overflow-x-auto"
+          style={{ backgroundColor: 'var(--bg-tertiary)' }}
           style={{ color: 'var(--text-secondary)'  }}>
 {`const ws = new WebSocket('wss://api.boing.finance/ws');
 
@@ -276,14 +286,17 @@ const SDKContent = () => (
           style={{ color: 'var(--text-primary)'  }}>JavaScript SDK</h4>
       <p className=" mb-4"
           style={{ color: 'var(--text-secondary)'  }}>
-        Install: <code className="bg-gray-800 px-2 py-1 rounded text-blue-400">npm install @boing-finance/sdk</code>
+        Install: <code className="px-2 py-1 rounded"
+          style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--primary-color)' }}>npm install @boing-finance/sdk</code>
       </p>
     </div>
 
-    <div className="bg-gray-700 rounded-lg p-4">
+    <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
       <h5 className="text-md font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>🚀 Quick Start</h5>
-      <pre className="bg-gray-800 p-4 rounded text-sm  overflow-x-auto"
+      <pre className="p-4 rounded text-sm overflow-x-auto"
+          style={{ backgroundColor: 'var(--bg-tertiary)' }}
           style={{ color: 'var(--text-secondary)'  }}>
 {`import { BoingFinance } from '@boing-finance/sdk';
 
@@ -304,7 +317,8 @@ const quote = await boing.getSwapQuote({
       </pre>
     </div>
 
-    <div className="bg-gray-700 rounded-lg p-4">
+    <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
       <h5 className="text-md font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>📦 SDK Features</h5>
       <ul className="space-y-2 "
@@ -331,10 +345,12 @@ const ExamplesContent = () => (
       </p>
     </div>
 
-    <div className="bg-gray-700 rounded-lg p-4">
+    <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
       <h5 className="text-md font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>💱 Swap Example</h5>
-      <pre className="bg-gray-800 p-4 rounded text-sm  overflow-x-auto"
+      <pre className="p-4 rounded text-sm overflow-x-auto"
+          style={{ backgroundColor: 'var(--bg-tertiary)' }}
           style={{ color: 'var(--text-secondary)'  }}>
 {`// Get swap quote
 const response = await fetch('https://api.boing.finance/v1/swap/quote', {
@@ -353,10 +369,12 @@ console.log('Swap quote:', quote);`}
       </pre>
     </div>
 
-    <div className="bg-gray-700 rounded-lg p-4">
+    <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
       <h5 className="text-md font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>💧 Add Liquidity Example</h5>
-      <pre className="bg-gray-800 p-4 rounded text-sm  overflow-x-auto"
+      <pre className="p-4 rounded text-sm overflow-x-auto"
+          style={{ backgroundColor: 'var(--bg-tertiary)' }}
           style={{ color: 'var(--text-secondary)'  }}>
 {`// Add liquidity to pool
 const response = await fetch('https://api.boing.finance/v1/liquidity/add', {
@@ -376,10 +394,12 @@ console.log('Liquidity added:', result);`}
       </pre>
     </div>
 
-    <div className="bg-gray-700 rounded-lg p-4">
+    <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
       <h5 className="text-md font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>🌉 Bridge Example</h5>
-      <pre className="bg-gray-800 p-4 rounded text-sm  overflow-x-auto"
+      <pre className="p-4 rounded text-sm overflow-x-auto"
+          style={{ backgroundColor: 'var(--bg-tertiary)' }}
           style={{ color: 'var(--text-secondary)'  }}>
 {`// Initiate cross-chain transfer
 const response = await fetch('https://api.boing.finance/v1/bridge/initiate', {

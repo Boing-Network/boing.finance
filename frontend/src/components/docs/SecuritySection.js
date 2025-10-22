@@ -59,7 +59,8 @@ const SecuritySection = () => {
             <h4 className="text-lg font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>🛡️ Security Features</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gray-700 rounded-lg p-4">
+              <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
                 <h5 className="text-md font-medium  mb-2"
           style={{ color: 'var(--text-primary)'  }}>Access Control</h5>
                 <ul className="text-sm  space-y-1"
@@ -70,7 +71,8 @@ const SecuritySection = () => {
                   <li>• Ownership renunciation capabilities</li>
                 </ul>
               </div>
-              <div className="bg-gray-700 rounded-lg p-4">
+              <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
                 <h5 className="text-md font-medium  mb-2"
           style={{ color: 'var(--text-primary)'  }}>Protection Mechanisms</h5>
                 <ul className="text-sm  space-y-1"
@@ -87,7 +89,8 @@ const SecuritySection = () => {
           <div>
             <h4 className="text-lg font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>🔍 Code Quality</h4>
-            <div className="bg-gray-700 rounded-lg p-4">
+            <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
               <ul className="text-sm  space-y-2"
           style={{ color: 'var(--text-secondary)'  }}>
                 <li>• <strong>Open Source:</strong> All contracts are open source and verifiable</li>
@@ -110,7 +113,8 @@ const SecuritySection = () => {
             <h4 className="text-lg font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>🔐 Wallet Security</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gray-700 rounded-lg p-4">
+              <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
                 <h5 className="text-md font-medium  mb-2"
           style={{ color: 'var(--text-primary)'  }}>Best Practices</h5>
                 <ul className="text-sm  space-y-1"
@@ -121,7 +125,8 @@ const SecuritySection = () => {
                   <li>• Regularly update wallet software</li>
                 </ul>
               </div>
-              <div className="bg-gray-700 rounded-lg p-4">
+              <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
                 <h5 className="text-md font-medium  mb-2"
           style={{ color: 'var(--text-primary)'  }}>Transaction Safety</h5>
                 <ul className="text-sm  space-y-1"
@@ -167,7 +172,8 @@ const SecuritySection = () => {
             <h4 className="text-lg font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>🌐 Cross-Chain Security</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gray-700 rounded-lg p-4">
+              <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
                 <h5 className="text-md font-medium  mb-2"
           style={{ color: 'var(--text-primary)'  }}>Bridge Security</h5>
                 <ul className="text-sm  space-y-1"
@@ -178,7 +184,8 @@ const SecuritySection = () => {
                   <li>• Bridge state monitoring</li>
                 </ul>
               </div>
-              <div className="bg-gray-700 rounded-lg p-4">
+              <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
                 <h5 className="text-md font-medium  mb-2"
           style={{ color: 'var(--text-primary)'  }}>Network Validation</h5>
                 <ul className="text-sm  space-y-1"
@@ -195,7 +202,8 @@ const SecuritySection = () => {
           <div>
             <h4 className="text-lg font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>🔗 Oracle Security</h4>
-            <div className="bg-gray-700 rounded-lg p-4">
+            <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
               <ul className="text-sm  space-y-2"
           style={{ color: 'var(--text-secondary)'  }}>
                 <li>• <strong>Chainlink Integration:</strong> Industry-standard price feeds</li>
@@ -218,7 +226,8 @@ const SecuritySection = () => {
             <h4 className="text-lg font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>🚨 Emergency Procedures</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gray-700 rounded-lg p-4">
+              <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
                 <h5 className="text-md font-medium  mb-2"
           style={{ color: 'var(--text-primary)'  }}>Detection & Response</h5>
                 <ul className="text-sm  space-y-1"
@@ -229,7 +238,8 @@ const SecuritySection = () => {
                   <li>• Emergency pause capabilities</li>
                 </ul>
               </div>
-              <div className="bg-gray-700 rounded-lg p-4">
+              <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
                 <h5 className="text-md font-medium  mb-2"
           style={{ color: 'var(--text-primary)'  }}>Communication</h5>
                 <ul className="text-sm  space-y-1"
@@ -246,7 +256,8 @@ const SecuritySection = () => {
           <div>
             <h4 className="text-lg font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>📞 Security Contacts</h4>
-            <div className="bg-gray-700 rounded-lg p-4">
+            <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <h5 className="text-md font-medium  mb-2"
@@ -282,7 +293,8 @@ const SecuritySection = () => {
         <h3 className="text-xl font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Security Checklist</h3>
         <div className="space-y-4">
-          <div className="bg-gray-700 rounded-lg p-4">
+          <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
             <h4 className="text-lg font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>✅ Before Trading</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -303,7 +315,8 @@ const SecuritySection = () => {
             </div>
           </div>
 
-          <div className="bg-gray-700 rounded-lg p-4">
+          <div className="rounded-lg p-4"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}>
             <h4 className="text-lg font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>🛡️ Ongoing Security</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
