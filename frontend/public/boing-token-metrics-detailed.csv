@@ -1,0 +1,32 @@
+Sheet Name,Category,Allocation %,Tokens,Price Range,Value Range (USD),Vesting Schedule,Cliff Period,Release Schedule,Notes
+Token Distribution,Public Sale (IDO),15%,150000000,$0.10 - $0.25,$15000000 - $37500000,25% TGE + 75% over 12 months,0 months,Monthly release over 12 months,Main IDO allocation
+Token Distribution,Team & Advisors,20%,200000000,$0.10 - $0.25,$20000000 - $50000000,4-year linear vesting,12 months,2.08% monthly after cliff,Founder and advisory team
+Token Distribution,Development Fund,30%,300000000,$0.10 - $0.25,$30000000 - $75000000,Milestone-based release,0 months,10% Q3 2025 + 15% Q4 2025 + 20% Q1 2026 + 25% Q2 2026 + 30% Q3 2026+,Platform development and R&D
+Token Distribution,Liquidity Mining,25%,250000000,$0.10 - $0.25,$25000000 - $62500000,3-year distribution,0 months,Decreasing rewards over 36 months,Incentivize platform usage
+Token Distribution,Marketing & Partnerships,15%,150000000,$0.10 - $0.25,$15000000 - $37500000,2-year distribution,0 months,10% TGE + 3.75% monthly over 24 months,Community building and partnerships
+Token Distribution,Reserve Fund,10%,100000000,$0.10 - $0.25,$10000000 - $25000000,5-year linear vesting,0 months,1.67% monthly over 60 months,Emergency fund and opportunities
+Token Distribution,Total,100%,1000000000,$0.10 - $0.25,$100000000 - $250000000,,,,Total token supply
+Vesting Schedule,Public Sale TGE,25%,37500000,$0.10 - $0.25,$3750000 - $9375000,Immediate release,0 months,100% at TGE,IDO participants immediate allocation
+Vesting Schedule,Public Sale Vesting,75%,112500000,$0.10 - $0.25,$11250000 - $28125000,12-month linear,0 months,9.375% monthly over 12 months,IDO participants vesting
+Vesting Schedule,Team Cliff,0%,0,$0.10 - $0.25,$0 - $0,12-month cliff,12 months,0% during cliff,Team tokens locked for 12 months
+Vesting Schedule,Team Vesting,20%,200000000,$0.10 - $0.25,$20000000 - $50000000,48-month linear,12 months,2.08% monthly after cliff,Team tokens after cliff
+Vesting Schedule,Development Q3 2025,3%,30000000,$0.10 - $0.25,$3000000 - $7500000,Immediate release,0 months,100% at milestone,First development milestone
+Vesting Schedule,Development Q4 2025,4.5%,45000000,$0.10 - $0.25,$4500000 - $11250000,Immediate release,0 months,100% at milestone,Second development milestone
+Vesting Schedule,Development Q1 2026,6%,60000000,$0.10 - $0.25,$6000000 - $15000000,Immediate release,0 months,100% at milestone,Third development milestone
+Vesting Schedule,Development Q2 2026,7.5%,75000000,$0.10 - $0.25,$7500000 - $18750000,Immediate release,0 months,100% at milestone,Fourth development milestone
+Vesting Schedule,Development Q3 2026+,9%,90000000,$0.10 - $0.25,$9000000 - $22500000,Immediate release,0 months,100% at milestone,Final development milestone
+Vesting Schedule,Marketing TGE,1.5%,15000000,$0.10 - $0.25,$1500000 - $3750000,Immediate release,0 months,100% at TGE,Marketing immediate allocation
+Vesting Schedule,Marketing Vesting,13.5%,135000000,$0.10 - $0.25,$13500000 - $33750000,24-month linear,0 months,0.56% monthly over 24 months,Marketing vesting
+Vesting Schedule,Liquidity Mining,25%,250000000,$0.10 - $0.25,$25000000 - $62500000,36-month distribution,0 months,Decreasing rewards over 36 months,Liquidity mining rewards
+Vesting Schedule,Reserve Fund,10%,100000000,$0.10 - $0.25,$10000000 - $25000000,60-month linear,0 months,0.17% monthly over 60 months,Reserve fund vesting
+Price Ranges,IDO Price,15%,150000000,$0.10 - $0.25,$15000000 - $37500000,25% TGE + 75% over 12 months,0 months,Monthly release over 12 months,Public sale price range
+Price Ranges,Listing Price,15%,150000000,$0.15 - $0.30,$22500000 - $45000000,25% TGE + 75% over 12 months,0 months,Monthly release over 12 months,Expected listing price range
+Price Ranges,KOL Price,2%,20000000,$0.08 - $0.20,$1600000 - $4000000,50% TGE + 50% over 6 months,0 months,Monthly release over 6 months,KOL allocation with discount
+Price Ranges,Team Price,20%,200000000,$0.10 - $0.25,$20000000 - $50000000,4-year linear vesting,12 months,2.08% monthly after cliff,Team allocation at IDO price
+Price Ranges,Development Price,30%,300000000,$0.10 - $0.25,$30000000 - $75000000,Milestone-based release,0 months,Milestone-based release,Development fund at IDO price
+Price Ranges,Marketing Price,15%,150000000,$0.10 - $0.25,$15000000 - $37500000,2-year distribution,0 months,10% TGE + 3.75% monthly over 24 months,Marketing at IDO price
+Price Ranges,Reserve Price,10%,100000000,$0.10 - $0.25,$10000000 - $25000000,5-year linear vesting,0 months,1.67% monthly over 60 months,Reserve at IDO price
+Market Cap,IDO Market Cap,15%,150000000,$0.10 - $0.25,$15000000 - $37500000,25% TGE + 75% over 12 months,0 months,Monthly release over 12 months,Market cap at IDO price
+Market Cap,Listing Market Cap,100%,1000000000,$0.15 - $0.30,$150000000 - $300000000,Full vesting schedule,0 months,Full vesting schedule,Market cap at listing price
+Market Cap,Fully Diluted,100%,1000000000,$0.10 - $0.25,$100000000 - $250000000,Full vesting schedule,0 months,Full vesting schedule,Fully diluted market cap
+Market Cap,Current Circulating,25%,250000000,$0.10 - $0.25,$25000000 - $62500000,TGE releases only,0 months,TGE releases only,Current circulating supply
