@@ -29,7 +29,7 @@ const ExecutiveSummary = () => {
                 boing.finance
               </h1>
               <div className="text-xl mb-6" style={{ color: 'var(--text-secondary)' }}>
-                Executive Summary for Poolz.finance Investment
+                Executive Summary for Investment Opportunity
               </div>
             </div>
 
@@ -58,19 +58,19 @@ const ExecutiveSummary = () => {
                 </div>
                 <div className="space-y-4">
                   <div className="flex justify-between">
-                    <span style={{ color: 'var(--text-secondary)' }}>Equity Offered:</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>Token Allocation:</span>
                     <span className="font-semibold"
-          style={{ color: 'var(--text-primary)' }}>3-8%</span>
+          style={{ color: 'var(--text-primary)' }}>10-20% of Total Supply</span>
                   </div>
                   <div className="flex justify-between">
-                    <span style={{ color: 'var(--text-secondary)' }}>Valuation:</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>Token Price:</span>
                     <span className="font-semibold"
-          style={{ color: 'var(--text-primary)' }}>$3M - $8M pre-money</span>
+          style={{ color: 'var(--text-primary)' }}>$0.10 - $0.25 per token</span>
                   </div>
                   <div className="flex justify-between">
                     <span style={{ color: 'var(--text-secondary)' }}>Investment Type:</span>
                     <span className="font-semibold"
-          style={{ color: 'var(--text-primary)' }}>SAFE or Convertible Note</span>
+          style={{ color: 'var(--text-primary)' }}>Token Sale / IDO</span>
                   </div>
                 </div>
               </div>
@@ -257,12 +257,12 @@ const ExecutiveSummary = () => {
             <div className="rounded-lg p-8 border mb-8"
           style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
               <h2 className="text-2xl font-bold mb-6"
-          style={{ color: 'var(--text-primary)' }}>Use of Funds</h2>
+          style={{ color: 'var(--text-primary)' }}>Use of Funds (Token Sale Proceeds)</h2>
               <ul className="space-y-3" style={{ color: 'var(--text-secondary)' }}>
                 <li>• <strong>Development Team (50% - $100K-250K)</strong> - Hire 1-2 specialized blockchain developers, mobile app development, advanced feature development</li>
-                <li>• <strong>Marketing & Growth (30% - $60K-150K)</strong> - User acquisition campaigns, community building, strategic partnerships</li>
+                <li>• <strong>Marketing & Growth (30% - $60K-150K)</strong> - User acquisition campaigns, community building, strategic partnerships, token listing</li>
                 <li>• <strong>Infrastructure & Security (15% - $30K-75K)</strong> - Professional security audits, infrastructure scaling, monitoring tools</li>
-                <li>• <strong>Operations & Legal (5% - $10K-25K)</strong> - Business development, legal and regulatory compliance</li>
+                <li>• <strong>Operations & Legal (5% - $10K-25K)</strong> - Business development, legal and regulatory compliance, token distribution</li>
               </ul>
             </div>
 
@@ -292,9 +292,9 @@ const ExecutiveSummary = () => {
           style={{ backgroundColor: 'var(--secondary-bg)', borderColor: 'var(--secondary-color)' }}>
                 <ul className="space-y-2" style={{ color: 'var(--warning-text)' }}>
                   <li>• <strong>Amount:</strong> $200K - $500K</li>
-                  <li>• <strong>Equity:</strong> 3-8%</li>
-                  <li>• <strong>Valuation:</strong> $3M - $8M pre-money</li>
-                  <li>• <strong>Security Type:</strong> SAFE (Simple Agreement for Future Equity) or Convertible Note</li>
+                  <li>• <strong>Token Allocation:</strong> 10-20% of Total Supply</li>
+                  <li>• <strong>Token Price:</strong> $0.10 - $0.25 per token</li>
+                  <li>• <strong>Investment Type:</strong> Token Sale / IDO (Initial Decentralized Offering)</li>
                 </ul>
               </div>
             </div>
