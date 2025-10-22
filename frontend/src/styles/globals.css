@@ -23,6 +23,23 @@
   --border-hover: #cbd5e1;
   --shadow: rgba(0, 0, 0, 0.05);
   --shadow-hover: rgba(0, 0, 0, 0.1);
+  
+  /* Colored box backgrounds and text */
+  --success-bg: rgba(16, 185, 129, 0.1);
+  --success-text: #065f46;
+  --success-hover: #047857;
+  --info-bg: rgba(59, 130, 246, 0.1);
+  --info-text: #1e40af;
+  --info-hover: #1d4ed8;
+  --warning-bg: rgba(245, 158, 11, 0.1);
+  --warning-text: #92400e;
+  --warning-hover: #b45309;
+  --error-bg: rgba(239, 68, 68, 0.1);
+  --error-text: #991b1b;
+  --error-hover: #b91c1c;
+  --secondary-bg: rgba(139, 92, 246, 0.1);
+  --secondary-text: #6b21a8;
+  --secondary-hover: #7c3aed;
 }
 
 /* Dark Theme Colors */
@@ -38,6 +55,23 @@
   --border-hover: #475569;
   --shadow: rgba(0, 0, 0, 0.3);
   --shadow-hover: rgba(0, 0, 0, 0.4);
+  
+  /* Colored box backgrounds and text - Dark Theme */
+  --success-bg: rgba(16, 185, 129, 0.2);
+  --success-text: #6ee7b7;
+  --success-hover: #34d399;
+  --info-bg: rgba(59, 130, 246, 0.2);
+  --info-text: #93c5fd;
+  --info-hover: #60a5fa;
+  --warning-bg: rgba(245, 158, 11, 0.2);
+  --warning-text: #fbbf24;
+  --warning-hover: #f59e0b;
+  --error-bg: rgba(239, 68, 68, 0.2);
+  --error-text: #fca5a5;
+  --error-hover: #f87171;
+  --secondary-bg: rgba(139, 92, 246, 0.2);
+  --secondary-text: #c4b5fd;
+  --secondary-hover: #a78bfa;
 }
 
 /* Base Styles */
