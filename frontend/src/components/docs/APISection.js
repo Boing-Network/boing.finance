@@ -13,35 +13,45 @@ const APISection = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-3xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">API Reference</h2>
-        <p className="style={{ color: 'var(--text-secondary)' }} text-lg">
+        <h2 className="text-3xl font-bold mb-4"
+          style={{ color: 'var(--text-primary)' }}>API Reference</h2>
+        <p className="text-lg"
+          style={{ color: 'var(--text-secondary)' }}>
           Complete API documentation for integrating with boing.finance. Access real-time data, 
           execute trades, and manage liquidity programmatically.
         </p>
       </div>
 
       {/* API Overview */}
-      <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
-        <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">API Overview</h3>
+      <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
+          style={{ backgroundColor: 'var(--bg-card)'  }}>
+        <h3 className="text-xl font-semibold  mb-4"
+          style={{ color: 'var(--text-primary)'  }}>API Overview</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-gray-700 rounded-lg p-4">
             <div className="text-2xl mb-2">🔌</div>
-            <h4 className="text-lg font-medium style={{ color: 'var(--text-primary)' }} mb-2">REST API</h4>
-            <p className="style={{ color: 'var(--text-secondary)' }} text-sm">
+            <h4 className="text-lg font-medium  mb-2"
+          style={{ color: 'var(--text-primary)'  }}>REST API</h4>
+            <p className=" text-sm"
+          style={{ color: 'var(--text-secondary)'  }}>
               HTTP endpoints for data retrieval and transaction submission
             </p>
           </div>
           <div className="bg-gray-700 rounded-lg p-4">
             <div className="text-2xl mb-2">⚡</div>
-            <h4 className="text-lg font-medium style={{ color: 'var(--text-primary)' }} mb-2">WebSocket</h4>
-            <p className="style={{ color: 'var(--text-secondary)' }} text-sm">
+            <h4 className="text-lg font-medium  mb-2"
+          style={{ color: 'var(--text-primary)'  }}>WebSocket</h4>
+            <p className=" text-sm"
+          style={{ color: 'var(--text-secondary)'  }}>
               Real-time data streams for live updates and notifications
             </p>
           </div>
           <div className="bg-gray-700 rounded-lg p-4">
             <div className="text-2xl mb-2">📦</div>
-            <h4 className="text-lg font-medium style={{ color: 'var(--text-primary)' }} mb-2">SDK</h4>
-            <p className="style={{ color: 'var(--text-secondary)' }} text-sm">
+            <h4 className="text-lg font-medium  mb-2"
+          style={{ color: 'var(--text-primary)'  }}>SDK</h4>
+            <p className=" text-sm"
+          style={{ color: 'var(--text-secondary)'  }}>
               JavaScript/TypeScript libraries for easy integration
             </p>
           </div>
@@ -49,7 +59,8 @@ const APISection = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="style={{ backgroundColor: 'var(--bg-card)' }} rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}">
+      <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
+          style={{ backgroundColor: 'var(--bg-card)'  }}>
         <div className="flex flex-wrap gap-2 mb-6">
           {tabs.map((tab) => (
             <button
@@ -57,9 +68,12 @@ const APISection = () => {
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
                 activeTab === tab.id
-                  ? 'bg-blue-600 style={{ color: 'var(--text-primary)' }}'
-                  : 'bg-gray-700 style={{ color: 'var(--text-secondary)' }} hover:style={{ color: 'var(--text-primary)' }} hover:bg-gray-600'
+                  ? 'bg-blue-600'
+                  : 'bg-gray-700 hover:bg-gray-600'
               }`}
+              style={{
+                color: activeTab === tab.id ? 'var(--text-primary)' : 'var(--text-secondary)'
+              }}
             >
               <span>{tab.icon}</span>
               <span>{tab.name}</span>
@@ -80,92 +94,112 @@ const APISection = () => {
 const RESTAPIContent = () => (
   <div className="space-y-6">
     <div>
-      <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4">REST API Endpoints</h4>
-      <p className="style={{ color: 'var(--text-secondary)' }} mb-4">
+      <h4 className="text-lg font-semibold  mb-4"
+          style={{ color: 'var(--text-primary)'  }}>REST API Endpoints</h4>
+      <p className=" mb-4"
+          style={{ color: 'var(--text-secondary)'  }}>
         Base URL: <code className="bg-gray-800 px-2 py-1 rounded text-blue-400">https://api.boing.finance/v1</code>
       </p>
     </div>
 
     {/* Market Data Endpoints */}
     <div className="bg-gray-700 rounded-lg p-4">
-      <h5 className="text-md font-medium style={{ color: 'var(--text-primary)' }} mb-3">📊 Market Data</h5>
+      <h5 className="text-md font-medium  mb-3"
+          style={{ color: 'var(--text-primary)'  }}>📊 Market Data</h5>
       <div className="space-y-3">
         <div>
           <code className="text-green-400">GET /pairs</code>
-          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mt-1">Get all trading pairs</p>
+          <p className=" text-sm mt-1"
+          style={{ color: 'var(--text-secondary)'  }}>Get all trading pairs</p>
         </div>
         <div>
           <code className="text-green-400">GET /pairs/{'{pairAddress}'}</code>
-          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mt-1">Get specific pair details</p>
+          <p className=" text-sm mt-1"
+          style={{ color: 'var(--text-secondary)'  }}>Get specific pair details</p>
         </div>
         <div>
           <code className="text-green-400">GET /pairs/{'{pairAddress}'}/price</code>
-          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mt-1">Get current price for a pair</p>
+          <p className=" text-sm mt-1"
+          style={{ color: 'var(--text-secondary)'  }}>Get current price for a pair</p>
         </div>
         <div>
           <code className="text-green-400">GET /pairs/{'{pairAddress}'}/volume</code>
-          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mt-1">Get 24h trading volume</p>
+          <p className=" text-sm mt-1"
+          style={{ color: 'var(--text-secondary)'  }}>Get 24h trading volume</p>
         </div>
       </div>
     </div>
 
     {/* Liquidity Endpoints */}
     <div className="bg-gray-700 rounded-lg p-4">
-      <h5 className="text-md font-medium style={{ color: 'var(--text-primary)' }} mb-3">💧 Liquidity</h5>
+      <h5 className="text-md font-medium  mb-3"
+          style={{ color: 'var(--text-primary)'  }}>💧 Liquidity</h5>
       <div className="space-y-3">
         <div>
           <code className="text-green-400">GET /liquidity/pools</code>
-          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mt-1">Get all liquidity pools</p>
+          <p className=" text-sm mt-1"
+          style={{ color: 'var(--text-secondary)'  }}>Get all liquidity pools</p>
         </div>
         <div>
           <code className="text-green-400">GET /liquidity/pools/{'{poolAddress}'}</code>
-          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mt-1">Get specific pool details</p>
+          <p className=" text-sm mt-1"
+          style={{ color: 'var(--text-secondary)'  }}>Get specific pool details</p>
         </div>
         <div>
           <code className="text-green-400">POST /liquidity/add</code>
-          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mt-1">Add liquidity to a pool</p>
+          <p className=" text-sm mt-1"
+          style={{ color: 'var(--text-secondary)'  }}>Add liquidity to a pool</p>
         </div>
         <div>
           <code className="text-green-400">POST /liquidity/remove</code>
-          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mt-1">Remove liquidity from a pool</p>
+          <p className=" text-sm mt-1"
+          style={{ color: 'var(--text-secondary)'  }}>Remove liquidity from a pool</p>
         </div>
       </div>
     </div>
 
     {/* Trading Endpoints */}
     <div className="bg-gray-700 rounded-lg p-4">
-      <h5 className="text-md font-medium style={{ color: 'var(--text-primary)' }} mb-3">💱 Trading</h5>
+      <h5 className="text-md font-medium  mb-3"
+          style={{ color: 'var(--text-primary)'  }}>💱 Trading</h5>
       <div className="space-y-3">
         <div>
           <code className="text-green-400">POST /swap/quote</code>
-          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mt-1">Get swap quote</p>
+          <p className=" text-sm mt-1"
+          style={{ color: 'var(--text-secondary)'  }}>Get swap quote</p>
         </div>
         <div>
           <code className="text-green-400">POST /swap/execute</code>
-          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mt-1">Execute a swap</p>
+          <p className=" text-sm mt-1"
+          style={{ color: 'var(--text-secondary)'  }}>Execute a swap</p>
         </div>
         <div>
           <code className="text-green-400">GET /swap/history/{'{address}'}</code>
-          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mt-1">Get swap history for address</p>
+          <p className=" text-sm mt-1"
+          style={{ color: 'var(--text-secondary)'  }}>Get swap history for address</p>
         </div>
       </div>
     </div>
 
     {/* Bridge Endpoints */}
     <div className="bg-gray-700 rounded-lg p-4">
-      <h5 className="text-md font-medium style={{ color: 'var(--text-primary)' }} mb-3">🌉 Bridge</h5>
+      <h5 className="text-md font-medium  mb-3"
+          style={{ color: 'var(--text-primary)'  }}>🌉 Bridge</h5>
       <div className="space-y-3">
         <div>
           <code className="text-green-400">GET /bridge/status/{'{txHash}'}</code>
-          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mt-1">Get bridge transaction status</p>
+          <p className=" text-sm mt-1"
+          style={{ color: 'var(--text-secondary)'  }}>Get bridge transaction status</p>
         </div>
         <div>
           <code className="text-green-400">POST /bridge/initiate</code>
-          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mt-1">Initiate cross-chain transfer</p>
+          <p className=" text-sm mt-1"
+          style={{ color: 'var(--text-secondary)'  }}>Initiate cross-chain transfer</p>
         </div>
         <div>
           <code className="text-green-400">GET /bridge/history/{'{address}'}</code>
-          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mt-1">Get bridge history for address</p>
+          <p className=" text-sm mt-1"
+          style={{ color: 'var(--text-secondary)'  }}>Get bridge history for address</p>
         </div>
       </div>
     </div>
@@ -175,37 +209,46 @@ const RESTAPIContent = () => (
 const WebSocketContent = () => (
   <div className="space-y-6">
     <div>
-      <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4">WebSocket API</h4>
-      <p className="style={{ color: 'var(--text-secondary)' }} mb-4">
+      <h4 className="text-lg font-semibold  mb-4"
+          style={{ color: 'var(--text-primary)'  }}>WebSocket API</h4>
+      <p className=" mb-4"
+          style={{ color: 'var(--text-secondary)'  }}>
         WebSocket URL: <code className="bg-gray-800 px-2 py-1 rounded text-blue-400">wss://api.boing.finance/ws</code>
       </p>
     </div>
 
     <div className="bg-gray-700 rounded-lg p-4">
-      <h5 className="text-md font-medium style={{ color: 'var(--text-primary)' }} mb-3">📡 Real-time Events</h5>
+      <h5 className="text-md font-medium  mb-3"
+          style={{ color: 'var(--text-primary)'  }}>📡 Real-time Events</h5>
       <div className="space-y-3">
         <div>
           <code className="text-yellow-400">price_update</code>
-          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mt-1">Real-time price updates for trading pairs</p>
+          <p className=" text-sm mt-1"
+          style={{ color: 'var(--text-secondary)'  }}>Real-time price updates for trading pairs</p>
         </div>
         <div>
           <code className="text-yellow-400">swap_executed</code>
-          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mt-1">New swap transaction notifications</p>
+          <p className=" text-sm mt-1"
+          style={{ color: 'var(--text-secondary)'  }}>New swap transaction notifications</p>
         </div>
         <div>
           <code className="text-yellow-400">liquidity_change</code>
-          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mt-1">Liquidity pool updates</p>
+          <p className=" text-sm mt-1"
+          style={{ color: 'var(--text-secondary)'  }}>Liquidity pool updates</p>
         </div>
         <div>
           <code className="text-yellow-400">bridge_status</code>
-          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mt-1">Cross-chain bridge status updates</p>
+          <p className=" text-sm mt-1"
+          style={{ color: 'var(--text-secondary)'  }}>Cross-chain bridge status updates</p>
         </div>
       </div>
     </div>
 
     <div className="bg-gray-700 rounded-lg p-4">
-      <h5 className="text-md font-medium style={{ color: 'var(--text-primary)' }} mb-3">🔌 Connection Example</h5>
-      <pre className="bg-gray-800 p-4 rounded text-sm style={{ color: 'var(--text-secondary)' }} overflow-x-auto">
+      <h5 className="text-md font-medium  mb-3"
+          style={{ color: 'var(--text-primary)'  }}>🔌 Connection Example</h5>
+      <pre className="bg-gray-800 p-4 rounded text-sm  overflow-x-auto"
+          style={{ color: 'var(--text-secondary)'  }}>
 {`const ws = new WebSocket('wss://api.boing.finance/ws');
 
 ws.onopen = () => {
@@ -229,15 +272,19 @@ ws.onmessage = (event) => {
 const SDKContent = () => (
   <div className="space-y-6">
     <div>
-      <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4">JavaScript SDK</h4>
-      <p className="style={{ color: 'var(--text-secondary)' }} mb-4">
+      <h4 className="text-lg font-semibold  mb-4"
+          style={{ color: 'var(--text-primary)'  }}>JavaScript SDK</h4>
+      <p className=" mb-4"
+          style={{ color: 'var(--text-secondary)'  }}>
         Install: <code className="bg-gray-800 px-2 py-1 rounded text-blue-400">npm install @boing-finance/sdk</code>
       </p>
     </div>
 
     <div className="bg-gray-700 rounded-lg p-4">
-      <h5 className="text-md font-medium style={{ color: 'var(--text-primary)' }} mb-3">🚀 Quick Start</h5>
-      <pre className="bg-gray-800 p-4 rounded text-sm style={{ color: 'var(--text-secondary)' }} overflow-x-auto">
+      <h5 className="text-md font-medium  mb-3"
+          style={{ color: 'var(--text-primary)'  }}>🚀 Quick Start</h5>
+      <pre className="bg-gray-800 p-4 rounded text-sm  overflow-x-auto"
+          style={{ color: 'var(--text-secondary)'  }}>
 {`import { BoingFinance } from '@boing-finance/sdk';
 
 const boing = new BoingFinance({
@@ -258,8 +305,10 @@ const quote = await boing.getSwapQuote({
     </div>
 
     <div className="bg-gray-700 rounded-lg p-4">
-      <h5 className="text-md font-medium style={{ color: 'var(--text-primary)' }} mb-3">📦 SDK Features</h5>
-      <ul className="space-y-2 style={{ color: 'var(--text-secondary)' }}">
+      <h5 className="text-md font-medium  mb-3"
+          style={{ color: 'var(--text-primary)'  }}>📦 SDK Features</h5>
+      <ul className="space-y-2 "
+          style={{ color: 'var(--text-secondary)'  }}>
         <li>• <strong>TypeScript Support:</strong> Full type definitions</li>
         <li>• <strong>Multi-Network:</strong> Support for all supported networks</li>
         <li>• <strong>Wallet Integration:</strong> Easy wallet connection</li>
@@ -274,15 +323,19 @@ const quote = await boing.getSwapQuote({
 const ExamplesContent = () => (
   <div className="space-y-6">
     <div>
-      <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Code Examples</h4>
-      <p className="style={{ color: 'var(--text-secondary)' }} mb-4">
+      <h4 className="text-lg font-semibold  mb-4"
+          style={{ color: 'var(--text-primary)'  }}>Code Examples</h4>
+      <p className=" mb-4"
+          style={{ color: 'var(--text-secondary)'  }}>
         Practical examples for common use cases and integrations.
       </p>
     </div>
 
     <div className="bg-gray-700 rounded-lg p-4">
-      <h5 className="text-md font-medium style={{ color: 'var(--text-primary)' }} mb-3">💱 Swap Example</h5>
-      <pre className="bg-gray-800 p-4 rounded text-sm style={{ color: 'var(--text-secondary)' }} overflow-x-auto">
+      <h5 className="text-md font-medium  mb-3"
+          style={{ color: 'var(--text-primary)'  }}>💱 Swap Example</h5>
+      <pre className="bg-gray-800 p-4 rounded text-sm  overflow-x-auto"
+          style={{ color: 'var(--text-secondary)'  }}>
 {`// Get swap quote
 const response = await fetch('https://api.boing.finance/v1/swap/quote', {
   method: 'POST',
@@ -301,8 +354,10 @@ console.log('Swap quote:', quote);`}
     </div>
 
     <div className="bg-gray-700 rounded-lg p-4">
-      <h5 className="text-md font-medium style={{ color: 'var(--text-primary)' }} mb-3">💧 Add Liquidity Example</h5>
-      <pre className="bg-gray-800 p-4 rounded text-sm style={{ color: 'var(--text-secondary)' }} overflow-x-auto">
+      <h5 className="text-md font-medium  mb-3"
+          style={{ color: 'var(--text-primary)'  }}>💧 Add Liquidity Example</h5>
+      <pre className="bg-gray-800 p-4 rounded text-sm  overflow-x-auto"
+          style={{ color: 'var(--text-secondary)'  }}>
 {`// Add liquidity to pool
 const response = await fetch('https://api.boing.finance/v1/liquidity/add', {
   method: 'POST',
@@ -322,8 +377,10 @@ console.log('Liquidity added:', result);`}
     </div>
 
     <div className="bg-gray-700 rounded-lg p-4">
-      <h5 className="text-md font-medium style={{ color: 'var(--text-primary)' }} mb-3">🌉 Bridge Example</h5>
-      <pre className="bg-gray-800 p-4 rounded text-sm style={{ color: 'var(--text-secondary)' }} overflow-x-auto">
+      <h5 className="text-md font-medium  mb-3"
+          style={{ color: 'var(--text-primary)'  }}>🌉 Bridge Example</h5>
+      <pre className="bg-gray-800 p-4 rounded text-sm  overflow-x-auto"
+          style={{ color: 'var(--text-secondary)'  }}>
 {`// Initiate cross-chain transfer
 const response = await fetch('https://api.boing.finance/v1/bridge/initiate', {
   method: 'POST',
