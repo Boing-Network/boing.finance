@@ -1,0 +1,8 @@
+Category,Allocation %,Tokens,Price Range,Value Range (USD),Vesting Schedule,Cliff Period,Release Schedule,Notes
+Public Sale (IDO),15%,150000000,$0.10 - $0.25,$15000000 - $37500000,25% TGE + 75% over 12 months,0 months,Monthly release over 12 months,Main IDO allocation
+Team & Advisors,20%,200000000,$0.10 - $0.25,$20000000 - $50000000,4-year linear vesting,12 months,2.08% monthly after cliff,Founder and advisory team
+Development Fund,30%,300000000,$0.10 - $0.25,$30000000 - $75000000,Milestone-based release,0 months,10% Q3 2025 + 15% Q4 2025 + 20% Q1 2026 + 25% Q2 2026 + 30% Q3 2026+,Platform development and R&D
+Liquidity Mining,25%,250000000,$0.10 - $0.25,$25000000 - $62500000,3-year distribution,0 months,Decreasing rewards over 36 months,Incentivize platform usage
+Marketing & Partnerships,15%,150000000,$0.10 - $0.25,$15000000 - $37500000,2-year distribution,0 months,10% TGE + 3.75% monthly over 24 months,Community building and partnerships
+Reserve Fund,10%,100000000,$0.10 - $0.25,$10000000 - $25000000,5-year linear vesting,0 months,1.67% monthly over 60 months,Emergency fund and opportunities
+Total,100%,1000000000,$0.10 - $0.25,$100000000 - $250000000,,,,Total token supply
