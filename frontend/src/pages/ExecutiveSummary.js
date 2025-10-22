@@ -7,7 +7,7 @@ const ExecutiveSummary = () => {
       <Helmet>
         <title>Executive Summary - boing.finance Investment Opportunity</title>
         <meta name="description" content="Executive Summary for boing.finance investment opportunity - Cross-chain DeFi platform seeking funding for expansion" />
-        <meta name="keywords" content="executive summary, investment, boing.finance, DeFi, DEX, funding" />
+        <meta name="keywords" content="executive summary, investment, boing.finance, DeFi, DEX, funding, poolz" />
         <meta property="og:title" content="Executive Summary - boing.finance Investment Opportunity" />
         <meta property="og:description" content="Executive Summary for boing.finance investment opportunity" />
         <meta property="og:type" content="website" />
@@ -29,7 +29,7 @@ const ExecutiveSummary = () => {
                 boing.finance
               </h1>
               <div className="text-xl mb-6" style={{ color: 'var(--text-secondary)' }}>
-                Executive Summary for Republic.com Investment
+                Executive Summary for Poolz.finance Investment
               </div>
             </div>
 
@@ -53,19 +53,19 @@ const ExecutiveSummary = () => {
                   <div className="flex justify-between">
                     <span style={{ color: 'var(--text-secondary)' }}>Funding Goal:</span>
                     <span className="font-semibold"
-          style={{ color: 'var(--text-primary)' }}>$500,000 - $1,000,000</span>
+          style={{ color: 'var(--text-primary)' }}>$200,000 - $500,000</span>
                   </div>
                 </div>
                 <div className="space-y-4">
                   <div className="flex justify-between">
                     <span style={{ color: 'var(--text-secondary)' }}>Equity Offered:</span>
                     <span className="font-semibold"
-          style={{ color: 'var(--text-primary)' }}>5-10%</span>
+          style={{ color: 'var(--text-primary)' }}>3-8%</span>
                   </div>
                   <div className="flex justify-between">
                     <span style={{ color: 'var(--text-secondary)' }}>Valuation:</span>
                     <span className="font-semibold"
-          style={{ color: 'var(--text-primary)' }}>$5M - $10M pre-money</span>
+          style={{ color: 'var(--text-primary)' }}>$3M - $8M pre-money</span>
                   </div>
                   <div className="flex justify-between">
                     <span style={{ color: 'var(--text-secondary)' }}>Investment Type:</span>
@@ -186,9 +186,9 @@ const ExecutiveSummary = () => {
                 <h3 className="text-lg font-bold mb-4"
           style={{ color: 'var(--text-primary)' }}>Financial Projections:</h3>
                 <ul className="space-y-2" style={{ color: 'var(--warning-text)' }}>
-                  <li>• <strong>Year 1:</strong> $500K ARR with 100K users</li>
-                  <li>• <strong>Year 2:</strong> $5M ARR with 1M users</li>
-                  <li>• <strong>Year 3:</strong> $25M ARR with 5M users</li>
+                  <li>• <strong>Year 1:</strong> $200K ARR with 50K users</li>
+                  <li>• <strong>Year 2:</strong> $2M ARR with 500K users</li>
+                  <li>• <strong>Year 3:</strong> $10M ARR with 2M users</li>
                 </ul>
               </div>
             </div>
@@ -259,10 +259,10 @@ const ExecutiveSummary = () => {
               <h2 className="text-2xl font-bold mb-6"
           style={{ color: 'var(--text-primary)' }}>Use of Funds</h2>
               <ul className="space-y-3" style={{ color: 'var(--text-secondary)' }}>
-                <li>• <strong>Development Team (60% - $300K-600K)</strong> - Hire specialized blockchain developers, mobile app development, advanced feature development (currently on hold)</li>
-                <li>• <strong>Marketing & Growth (25% - $125K-250K)</strong> - User acquisition campaigns, community building, strategic partnerships</li>
-                <li>• <strong>Infrastructure & Security (10% - $50K-100K)</strong> - Professional security audits (currently none conducted), infrastructure scaling</li>
-                <li>• <strong>Operations & Legal (5% - $25K-50K)</strong> - Business development, legal and regulatory compliance</li>
+                <li>• <strong>Development Team (50% - $100K-250K)</strong> - Hire 1-2 specialized blockchain developers, mobile app development, advanced feature development</li>
+                <li>• <strong>Marketing & Growth (30% - $60K-150K)</strong> - User acquisition campaigns, community building, strategic partnerships</li>
+                <li>• <strong>Infrastructure & Security (15% - $30K-75K)</strong> - Professional security audits, infrastructure scaling, monitoring tools</li>
+                <li>• <strong>Operations & Legal (5% - $10K-25K)</strong> - Business development, legal and regulatory compliance</li>
               </ul>
             </div>
 
@@ -291,9 +291,9 @@ const ExecutiveSummary = () => {
               <div className="rounded-lg p-6 border"
           style={{ backgroundColor: 'var(--secondary-bg)', borderColor: 'var(--secondary-color)' }}>
                 <ul className="space-y-2" style={{ color: 'var(--warning-text)' }}>
-                  <li>• <strong>Amount:</strong> $500K - $1M</li>
-                  <li>• <strong>Equity:</strong> 5-10%</li>
-                  <li>• <strong>Valuation:</strong> $5M - $10M pre-money</li>
+                  <li>• <strong>Amount:</strong> $200K - $500K</li>
+                  <li>• <strong>Equity:</strong> 3-8%</li>
+                  <li>• <strong>Valuation:</strong> $3M - $8M pre-money</li>
                   <li>• <strong>Security Type:</strong> SAFE (Simple Agreement for Future Equity) or Convertible Note</li>
                 </ul>
               </div>
