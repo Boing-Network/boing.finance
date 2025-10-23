@@ -1,17 +1,16 @@
 {
   "version": "1",
   "name": "Boing Finance",
-  "subtitle": "Cross-Chain DeFi Platform",
-  "description": "Deploy tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance - the most user-friendly decentralized exchange for token deployment and cross-chain trading.",
+  "subtitle": "Deploy tokens, create pools, and trade across chains",
+  "description": "The most user-friendly decentralized exchange for token deployment and cross-chain trading. Deploy tokens, create liquidity pools, and trade across multiple blockchains with ease.",
+  "iconUrl": "https://0ce87f2c.boing-finance.pages.dev/icon.png",
   "screenshotUrls": [
     "https://0ce87f2c.boing-finance.pages.dev/screenshot-portrait.png"
   ],
-  "iconUrl": "https://0ce87f2c.boing-finance.pages.dev/logo.svg",
+  "imageUrl": "https://0ce87f2c.boing-finance.pages.dev/og-image.svg",
+  "heroImageUrl": "https://0ce87f2c.boing-finance.pages.dev/og-image.svg",
   "splashImageUrl": "https://0ce87f2c.boing-finance.pages.dev/og-image.svg",
-  "splashBackgroundColor": "#0a0a0a",
-  "homeUrl": "https://0ce87f2c.boing-finance.pages.dev",
-  "webhookUrl": "https://0ce87f2c.boing-finance.pages.dev/api/webhook",
-  "primaryCategory": "finance",
+  "splashBackgroundColor": "#6200EA",
   "tags": [
     "defi",
     "dex",
@@ -20,13 +19,19 @@
     "cross-chain",
     "liquidity",
     "swap",
-    "bridge"
+    "bridge",
+    "ethereum",
+    "base"
   ],
-  "heroImageUrl": "https://0ce87f2c.boing-finance.pages.dev/og-image.svg",
-  "tagline": "The ultimate multi-network DeFi platform",
+  "tagline": "Deploy, Trade, and Build the Future of DeFi",
+  "buttonTitle": "Open Boing Finance",
   "ogTitle": "Boing Finance - Cross-Chain DeFi Platform",
-  "ogDescription": "Deploy tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance.",
+  "ogDescription": "Deploy tokens, create liquidity pools, and trade across multiple blockchains with the most user-friendly DeFi platform.",
   "ogImageUrl": "https://0ce87f2c.boing-finance.pages.dev/og-image.svg",
+  "castShareUrl": "https://warpcast.com/~/compose?text=Check+out+Boing+Finance+-+the+ultimate+cross-chain+DeFi+platform!+Deploy+tokens%2C+create+pools%2C+and+trade+across+chains+with+ease.",
+  "homeUrl": "https://0ce87f2c.boing-finance.pages.dev",
+  "webhookUrl": "https://0ce87f2c.boing-finance.pages.dev/api/webhook",
+  "primaryCategory": "finance",
   "noindex": false,
   "baseBuilder": {
     "ownerAddress": "0xEa9C8A5c669725A19e1890001d7c553771EE6cFc"
