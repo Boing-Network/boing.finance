@@ -41,7 +41,7 @@
 <body>
     <div class="container">
         <h1>Generate Splash Image</h1>
-        <p>This will create a splash image with the correct purple background (#6200EA)</p>
+        <p>This will create a splash image with the correct dark background (#0f172a)</p>
         
         <canvas id="splashCanvas" width="1080" height="1920"></canvas>
         
@@ -62,8 +62,8 @@
             canvas.height = 1920 * dpr;
             ctx.scale(dpr, dpr);
             
-            // Set purple background to match manifest
-            ctx.fillStyle = '#6200EA';
+            // Set dark background to match manifest
+            ctx.fillStyle = '#0f172a';
             ctx.fillRect(0, 0, 1080, 1920);
             
             // Add subtle gradient overlay
@@ -99,7 +99,7 @@
             ctx.fillStyle = '#00E0FF';
             ctx.fillText('●●●', 540, 1100);
             
-            console.log('✅ Splash image generated with purple background (#6200EA)');
+            console.log('✅ Splash image generated with dark background (#0f172a)');
         }
         
         function downloadSplash() {
