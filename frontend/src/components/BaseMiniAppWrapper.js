@@ -1,75 +1,59 @@
 import React, { useEffect, useState } from 'react';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 
-// Base MiniApp SDK integration wrapper
+// Farcaster MiniApp SDK integration wrapper
 const BaseMiniAppWrapper = ({ children }) => {
-  const [miniApp, setMiniApp] = useState(null);
-  const [isBaseApp, setIsBaseApp] = useState(false);
+  const [sdk, setSdk] = useState(null);
+  const [isFarcasterApp, setIsFarcasterApp] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { account, switchNetwork } = useWalletConnection();
 
   useEffect(() => {
     const initializeMiniApp = async () => {
       try {
-        // Check if we're running inside Base App
-        const isInBaseApp = window.parent !== window || 
-                           window.location !== window.parent.location ||
-                           document.referrer.includes('base.org') ||
-                           window.location.href.includes('base.org');
+        // Check if we're running inside Farcaster
+        const isInFarcaster = window.parent !== window || 
+                             window.location !== window.parent.location ||
+                             document.referrer.includes('farcaster.xyz') ||
+                             window.location.href.includes('farcaster.xyz') ||
+                             window.location.href.includes('warpcast.com');
 
-        setIsBaseApp(isInBaseApp);
+        setIsFarcasterApp(isInFarcaster);
 
-        if (isInBaseApp) {
+        if (isInFarcaster) {
           try {
-            // Check if Base MiniApp SDK is available
-            if (typeof window !== 'undefined' && window.minikit) {
-              const { MiniApp } = window.minikit;
-              
-              const miniAppInstance = new MiniApp({
-                // Configuration for Base MiniApp
-                theme: 'dark', // Match your app's theme
-                features: {
-                  wallet: true,
-                  transactions: true,
-                  analytics: true
-                }
-              });
+            // Dynamically import Farcaster MiniApp SDK
+            const { sdk: farcasterSdk } = await import('@farcaster/miniapp-sdk');
+            
+            setSdk(farcasterSdk);
 
-              setMiniApp(miniAppInstance);
+            // Set up event listeners
+            farcasterSdk.on('walletConnected', (wallet) => {
+              console.log('Wallet connected via Farcaster:', wallet);
+            });
 
-              // Initialize the mini app
-              await miniAppInstance.initialize();
+            farcasterSdk.on('networkChanged', (network) => {
+              console.log('Network changed via Farcaster:', network);
+            });
 
-              // Set up event listeners
-              miniAppInstance.on('walletConnected', (wallet) => {
-                console.log('Wallet connected via Base App:', wallet);
-              });
+            farcasterSdk.on('transactionCompleted', (tx) => {
+              console.log('Transaction completed via Farcaster:', tx);
+            });
 
-              miniAppInstance.on('networkChanged', (network) => {
-                console.log('Network changed via Base App:', network);
-                // Auto-switch to Base network if user is in Base App
-                if (network.chainId === 8453) {
-                  switchNetwork(8453);
-                }
-              });
-
-              miniAppInstance.on('transactionCompleted', (tx) => {
-                console.log('Transaction completed via Base App:', tx);
-              });
-
-              // Signal that the app is ready
-              miniAppInstance.actions.ready();
-            } else {
-              console.warn('Base MiniApp SDK not available');
-            }
+            // Signal that the app is ready - THIS IS CRITICAL!
+            await farcasterSdk.actions.ready();
+            console.log('✅ Farcaster MiniApp ready() called successfully');
           } catch (error) {
-            console.warn('Base MiniApp SDK not available or failed to initialize:', error);
-            // Continue without Base App features
+            console.warn('Farcaster MiniApp SDK not available or failed to initialize:', error);
+            // Continue without Farcaster features
           }
+        } else {
+          // Not in Farcaster, just set loading to false
+          console.log('Not running in Farcaster environment');
         }
       } catch (error) {
-        console.warn('Base MiniApp initialization failed:', error);
-        // Continue without Base App features
+        console.warn('MiniApp initialization failed:', error);
+        // Continue without MiniApp features
       } finally {
         setIsLoading(false);
       }
@@ -78,9 +62,9 @@ const BaseMiniAppWrapper = ({ children }) => {
     initializeMiniApp();
   }, [switchNetwork]);
 
-  // Auto-switch to Base network when in Base App
+  // Auto-switch to Base network when in Farcaster App
   useEffect(() => {
-    if (isBaseApp && account && miniApp) {
+    if (isFarcasterApp && account && sdk) {
       // Check if user is on Base network, if not, suggest switching
       const currentChainId = window.ethereum?.chainId;
       if (currentChainId && parseInt(currentChainId, 16) !== 8453) {
@@ -88,7 +72,7 @@ const BaseMiniAppWrapper = ({ children }) => {
         console.log('Consider switching to Base network for optimal experience');
       }
     }
-  }, [isBaseApp, account, miniApp]);
+  }, [isFarcasterApp, account, sdk]);
 
   // Show loading state while initializing
   if (isLoading) {
@@ -102,16 +86,16 @@ const BaseMiniAppWrapper = ({ children }) => {
     );
   }
 
-  // Render children with Base App context
+  // Render children with Farcaster App context
   return (
-    <div className="base-mini-app-container">
-      {isBaseApp && (
-        <div className="base-app-indicator">
-          <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-2 mb-4 mx-4">
+    <div className="farcaster-mini-app-container">
+      {isFarcasterApp && (
+        <div className="farcaster-app-indicator">
+          <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-2 mb-4 mx-4">
             <div className="flex items-center space-x-2 text-sm">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
               <span style={{ color: 'var(--text-secondary)' }}>
-                Running in Base App - Optimized for Base network
+                Running in Farcaster - Optimized for DeFi
               </span>
             </div>
           </div>
@@ -122,38 +106,40 @@ const BaseMiniAppWrapper = ({ children }) => {
   );
 };
 
-// Hook to access Base MiniApp instance
-export const useBaseMiniApp = () => {
-  const [miniApp, setMiniApp] = useState(null);
-  const [isBaseApp, setIsBaseApp] = useState(false);
+// Hook to access Farcaster MiniApp instance
+export const useFarcasterMiniApp = () => {
+  const [sdk, setSdk] = useState(null);
+  const [isFarcasterApp, setIsFarcasterApp] = useState(false);
 
   useEffect(() => {
-    const checkBaseApp = () => {
-      const isInBaseApp = window.parent !== window || 
-                         window.location !== window.parent.location ||
-                         document.referrer.includes('base.org') ||
-                         window.location.href.includes('base.org');
+    const checkFarcasterApp = () => {
+      const isInFarcaster = window.parent !== window || 
+                           window.location !== window.parent.location ||
+                           document.referrer.includes('farcaster.xyz') ||
+                           window.location.href.includes('farcaster.xyz') ||
+                           window.location.href.includes('warpcast.com');
       
-      setIsBaseApp(isInBaseApp);
+      setIsFarcasterApp(isInFarcaster);
     };
 
-    checkBaseApp();
+    checkFarcasterApp();
   }, []);
 
-  return { miniApp, isBaseApp };
+  return { sdk, isFarcasterApp };
 };
 
-// Utility functions for Base App integration
-export const baseAppUtils = {
-  // Check if running in Base App
-  isInBaseApp: () => {
+// Utility functions for Farcaster App integration
+export const farcasterAppUtils = {
+  // Check if running in Farcaster
+  isInFarcaster: () => {
     return window.parent !== window || 
            window.location !== window.parent.location ||
-           document.referrer.includes('base.org') ||
-           window.location.href.includes('base.org');
+           document.referrer.includes('farcaster.xyz') ||
+           window.location.href.includes('farcaster.xyz') ||
+           window.location.href.includes('warpcast.com');
   },
 
-  // Get Base network configuration
+  // Get Base network configuration (Farcaster supports Base)
   getBaseNetworkConfig: () => ({
     chainId: 8453,
     chainName: 'Base',

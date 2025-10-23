@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useWalletConnection } from '../hooks/useWalletConnection';
-import { baseAppUtils } from './BaseMiniAppWrapper';
+import { farcasterAppUtils } from './BaseMiniAppWrapper';
 
 const BaseNetworkOptimizer = () => {
   const { account, switchNetwork } = useWalletConnection();
@@ -9,7 +9,7 @@ const BaseNetworkOptimizer = () => {
 
   useEffect(() => {
     const checkBaseApp = () => {
-      const inBaseApp = baseAppUtils.isInBaseApp();
+      const inBaseApp = farcasterAppUtils.isInFarcaster();
       setIsBaseApp(inBaseApp);
       
       // Show prompt if in Base App but not on Base network
@@ -94,7 +94,7 @@ export const useBaseOptimization = () => {
     };
 
     const checkBaseApp = () => {
-      const inBaseApp = baseAppUtils.isInBaseApp();
+      const inBaseApp = farcasterAppUtils.isInFarcaster();
       setIsBaseApp(inBaseApp);
     };
 

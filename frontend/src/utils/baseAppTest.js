@@ -1,5 +1,5 @@
 // Base App integration test utilities
-import { baseAppUtils } from '../components/BaseMiniAppWrapper';
+import { farcasterAppUtils } from '../components/BaseMiniAppWrapper';
 import { baseUtils } from '../config/baseConfig';
 
 export const testBaseAppIntegration = () => {
@@ -13,7 +13,7 @@ export const testBaseAppIntegration = () => {
 
   try {
     // Test Base App detection
-    results.isBaseApp = baseAppUtils.isInBaseApp();
+    results.isBaseApp = farcasterAppUtils.isInFarcaster();
     console.log('Base App detection:', results.isBaseApp);
 
     // Test Base network detection
