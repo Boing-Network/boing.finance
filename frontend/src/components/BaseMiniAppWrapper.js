@@ -11,20 +11,36 @@ const BaseMiniAppWrapper = ({ children }) => {
   useEffect(() => {
     const initializeMiniApp = async () => {
       try {
-        // Check if we're running inside Farcaster
+        // Check if we're running inside Farcaster (improved detection)
         const isInFarcaster = window.parent !== window || 
                              window.location !== window.parent.location ||
                              document.referrer.includes('farcaster.xyz') ||
+                             document.referrer.includes('warpcast.com') ||
                              window.location.href.includes('farcaster.xyz') ||
-                             window.location.href.includes('warpcast.com');
+                             window.location.href.includes('warpcast.com') ||
+                             window.navigator.userAgent.includes('Farcaster') ||
+                             window.navigator.userAgent.includes('Warpcast') ||
+                             // Check for Farcaster-specific environment variables or globals
+                             window.farcaster ||
+                             window.warpcast ||
+                             // Check URL parameters that might indicate Farcaster
+                             new URLSearchParams(window.location.search).has('farcaster') ||
+                             new URLSearchParams(window.location.search).has('warpcast');
 
         setIsFarcasterApp(isInFarcaster);
 
         if (isInFarcaster) {
+          console.log('🔍 Detected Farcaster environment');
+          console.log('User Agent:', window.navigator.userAgent);
+          console.log('Referrer:', document.referrer);
+          console.log('URL:', window.location.href);
+          
           try {
             // Dynamically import Farcaster MiniApp SDK
+            console.log('📦 Loading Farcaster MiniApp SDK...');
             const { sdk: farcasterSdk } = await import('@farcaster/miniapp-sdk');
             
+            console.log('✅ Farcaster MiniApp SDK loaded successfully');
             setSdk(farcasterSdk);
 
             // Set up event listeners
@@ -41,15 +57,20 @@ const BaseMiniAppWrapper = ({ children }) => {
             });
 
             // Signal that the app is ready - THIS IS CRITICAL!
+            console.log('🚀 Calling farcasterSdk.actions.ready()...');
             await farcasterSdk.actions.ready();
             console.log('✅ Farcaster MiniApp ready() called successfully');
           } catch (error) {
-            console.warn('Farcaster MiniApp SDK not available or failed to initialize:', error);
+            console.error('❌ Farcaster MiniApp SDK failed to initialize:', error);
+            console.error('Error details:', error.message, error.stack);
             // Continue without Farcaster features
           }
         } else {
           // Not in Farcaster, just set loading to false
-          console.log('Not running in Farcaster environment');
+          console.log('ℹ️ Not running in Farcaster environment');
+          console.log('User Agent:', window.navigator.userAgent);
+          console.log('Referrer:', document.referrer);
+          console.log('URL:', window.location.href);
         }
       } catch (error) {
         console.warn('MiniApp initialization failed:', error);

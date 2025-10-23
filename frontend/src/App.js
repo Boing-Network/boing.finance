@@ -606,7 +606,7 @@ function App() {
                   <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
                   
                   {/* Farcaster Mini App Embed Meta Tags */}
-                  <meta name="fc:frame" content='{"version":"next","imageUrl":"https://boing.finance/hero-image.png","button":{"title":"Open boing.finance","action":{"type":"launch_frame","name":"boing.finance","url":"https://boing.finance"}}}' />
+                  <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://boing.finance/hero-image.png","button":{"title":"Open boing.finance","action":{"type":"launch_miniapp","url":"https://boing.finance"}}}' />
                   
                   {/* Open Graph Meta Tags for better sharing */}
                   <meta property="og:title" content="boing.finance - DeFi Platform" />
