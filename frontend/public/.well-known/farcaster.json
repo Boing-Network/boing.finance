@@ -1,66 +1,23 @@
 {
+  "version": "1",
   "name": "Boing Finance",
-  "description": "Cross-chain DEX for token deployment, trading, and liquidity management across multiple blockchains",
-  "icon": "https://5be29797.boing-finance.pages.dev/logo.svg",
-  "splash": "https://5be29797.boing-finance.pages.dev/og-image.svg",
-  "category": "finance",
+  "subtitle": "Cross-Chain DeFi Platform",
+  "description": "Deploy tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance - the most user-friendly decentralized exchange for token deployment and cross-chain trading.",
+  "iconUrl": "https://e02b33cd.boing-finance.pages.dev/logo.svg",
+  "splashImageUrl": "https://e02b33cd.boing-finance.pages.dev/og-image.svg",
+  "splashBackgroundColor": "#0a0a0a",
+  "homeUrl": "https://e02b33cd.boing-finance.pages.dev",
+  "webhookUrl": "https://e02b33cd.boing-finance.pages.dev/api/webhook",
+  "primaryCategory": "finance",
   "tags": ["defi", "dex", "trading", "tokens", "cross-chain", "liquidity", "swap", "bridge"],
-  "url": "https://5be29797.boing-finance.pages.dev",
-  "version": "1.0.0",
-  "author": "Boing Finance",
-  "homepage": "https://5be29797.boing-finance.pages.dev",
-  "repository": "https://github.com/chiku524/dex",
-  "support": "https://5be29797.boing-finance.pages.dev/help-center",
-  "privacy": "https://5be29797.boing-finance.pages.dev/privacy",
-  "terms": "https://5be29797.boing-finance.pages.dev/terms",
-  "networks": [
-    {
-      "name": "Ethereum",
-      "chainId": 1,
-      "symbol": "ETH"
-    },
-    {
-      "name": "Base",
-      "chainId": 8453,
-      "symbol": "ETH"
-    },
-    {
-      "name": "Polygon",
-      "chainId": 137,
-      "symbol": "MATIC"
-    },
-    {
-      "name": "BNB Smart Chain",
-      "chainId": 56,
-      "symbol": "BNB"
-    },
-    {
-      "name": "Arbitrum One",
-      "chainId": 42161,
-      "symbol": "ETH"
-    },
-    {
-      "name": "Optimism",
-      "chainId": 10,
-      "symbol": "ETH"
-    }
+  "heroImageUrl": "https://e02b33cd.boing-finance.pages.dev/og-image.svg",
+  "tagline": "The ultimate multi-network DeFi platform",
+  "ogTitle": "Boing Finance - Cross-Chain DeFi Platform",
+  "ogDescription": "Deploy tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance.",
+  "ogImageUrl": "https://e02b33cd.boing-finance.pages.dev/og-image.svg",
+  "screenshotUrls": [
+    "https://e02b33cd.boing-finance.pages.dev/screenshot-portrait.png",
+    "https://e02b33cd.boing-finance.pages.dev/screenshot-landscape.png"
   ],
-  "features": [
-    "token-deployment",
-    "cross-chain-trading",
-    "liquidity-pools",
-    "portfolio-tracking",
-    "analytics",
-    "bridge"
-  ],
-  "screenshots": [
-    "https://5be29797.boing-finance.pages.dev/screenshot-1.png",
-    "https://5be29797.boing-finance.pages.dev/screenshot-2.png",
-    "https://5be29797.boing-finance.pages.dev/screenshot-3.png"
-  ],
-  "social": {
-    "twitter": "https://twitter.com/boing_finance",
-    "telegram": "https://t.me/boing_finance",
-    "discord": "https://discord.gg/7RDtQtQvBW"
-  }
+  "noindex": false
 }
