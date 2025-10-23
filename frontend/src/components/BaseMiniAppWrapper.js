@@ -10,22 +10,37 @@ const BaseMiniAppWrapper = ({ children }) => {
 
   useEffect(() => {
     const initializeMiniApp = async () => {
+      // Set a maximum timeout for initialization
+      const initTimeout = setTimeout(() => {
+        console.log('⏰ Initialization timeout reached, proceeding anyway');
+        setIsLoading(false);
+      }, 15000); // 15 second timeout
+      
       try {
-        // Check if we're running inside Farcaster (improved detection)
+        // Check if we're running inside Farcaster (improved mobile detection)
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        const isMobile = /iphone|ipad|ipod|android|mobile|webos|blackberry|windows phone/i.test(userAgent);
+        
         const isInFarcaster = window.parent !== window || 
                              window.location !== window.parent.location ||
                              document.referrer.includes('farcaster.xyz') ||
                              document.referrer.includes('warpcast.com') ||
                              window.location.href.includes('farcaster.xyz') ||
                              window.location.href.includes('warpcast.com') ||
-                             window.navigator.userAgent.includes('Farcaster') ||
-                             window.navigator.userAgent.includes('Warpcast') ||
+                             userAgent.includes('farcaster') ||
+                             userAgent.includes('warpcast') ||
                              // Check for Farcaster-specific environment variables or globals
                              window.farcaster ||
                              window.warpcast ||
                              // Check URL parameters that might indicate Farcaster
                              new URLSearchParams(window.location.search).has('farcaster') ||
-                             new URLSearchParams(window.location.search).has('warpcast');
+                             new URLSearchParams(window.location.search).has('warpcast') ||
+                             // Additional mobile-specific checks
+                             (isMobile && (window.location.hostname.includes('farcaster') || 
+                                          window.location.hostname.includes('warpcast'))) ||
+                             // Check for Farcaster-specific headers or meta tags
+                             document.querySelector('meta[name="farcaster"]') ||
+                             document.querySelector('meta[name="warpcast"]');
 
         setIsFarcasterApp(isInFarcaster);
 
@@ -34,6 +49,7 @@ const BaseMiniAppWrapper = ({ children }) => {
           console.log('User Agent:', window.navigator.userAgent);
           console.log('Referrer:', document.referrer);
           console.log('URL:', window.location.href);
+          console.log('Is Mobile:', isMobile);
           
           try {
             // Dynamically import Farcaster MiniApp SDK
@@ -58,24 +74,66 @@ const BaseMiniAppWrapper = ({ children }) => {
 
             // Signal that the app is ready - THIS IS CRITICAL!
             console.log('🚀 Calling farcasterSdk.actions.ready()...');
-            await farcasterSdk.actions.ready();
+            
+            // Add timeout for mobile devices
+            const readyPromise = farcasterSdk.actions.ready();
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('SDK ready() timeout')), 10000)
+            );
+            
+            await Promise.race([readyPromise, timeoutPromise]);
             console.log('✅ Farcaster MiniApp ready() called successfully');
           } catch (error) {
             console.error('❌ Farcaster MiniApp SDK failed to initialize:', error);
             console.error('Error details:', error.message, error.stack);
+            
+            // For mobile devices, try a fallback approach
+            if (isMobile) {
+              console.log('🔄 Attempting mobile fallback...');
+              try {
+                // Try to call ready() without waiting
+                if (window.farcaster && window.farcaster.actions) {
+                  window.farcaster.actions.ready();
+                  console.log('✅ Mobile fallback successful');
+                }
+              } catch (fallbackError) {
+                console.error('❌ Mobile fallback failed:', fallbackError);
+              }
+            }
             // Continue without Farcaster features
           }
         } else {
-          // Not in Farcaster, just set loading to false
+          // Not in Farcaster, but check if we should try anyway on mobile
           console.log('ℹ️ Not running in Farcaster environment');
           console.log('User Agent:', window.navigator.userAgent);
           console.log('Referrer:', document.referrer);
           console.log('URL:', window.location.href);
+          console.log('Is Mobile:', isMobile);
+          
+          // For mobile devices, try to initialize SDK anyway as a fallback
+          if (isMobile) {
+            console.log('🔄 Mobile fallback: Attempting SDK initialization anyway...');
+            try {
+              const { sdk: farcasterSdk } = await import('@farcaster/miniapp-sdk');
+              console.log('✅ Mobile fallback SDK loaded');
+              setSdk(farcasterSdk);
+              
+              // Try to call ready() without waiting
+              farcasterSdk.actions.ready().catch(err => {
+                console.log('ℹ️ Mobile fallback ready() failed (expected):', err.message);
+              });
+              
+              console.log('✅ Mobile fallback initialization complete');
+            } catch (fallbackError) {
+              console.log('ℹ️ Mobile fallback failed (expected):', fallbackError.message);
+            }
+          }
         }
       } catch (error) {
         console.warn('MiniApp initialization failed:', error);
         // Continue without MiniApp features
       } finally {
+        clearTimeout(initTimeout);
         setIsLoading(false);
       }
     };
