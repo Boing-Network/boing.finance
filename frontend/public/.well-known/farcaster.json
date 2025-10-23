@@ -3,21 +3,21 @@
   "name": "Boing Finance",
   "subtitle": "Cross-Chain DeFi Platform",
   "description": "Deploy tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance - the most user-friendly decentralized exchange for token deployment and cross-chain trading.",
-  "iconUrl": "https://e02b33cd.boing-finance.pages.dev/logo.svg",
-  "splashImageUrl": "https://e02b33cd.boing-finance.pages.dev/og-image.svg",
+  "iconUrl": "https://f02671e4.boing-finance.pages.dev/logo.svg",
+  "splashImageUrl": "https://f02671e4.boing-finance.pages.dev/og-image.svg",
   "splashBackgroundColor": "#0a0a0a",
-  "homeUrl": "https://e02b33cd.boing-finance.pages.dev",
-  "webhookUrl": "https://e02b33cd.boing-finance.pages.dev/api/webhook",
+  "homeUrl": "https://f02671e4.boing-finance.pages.dev",
+  "webhookUrl": "https://f02671e4.boing-finance.pages.dev/api/webhook",
   "primaryCategory": "finance",
   "tags": ["defi", "dex", "trading", "tokens", "cross-chain", "liquidity", "swap", "bridge"],
-  "heroImageUrl": "https://e02b33cd.boing-finance.pages.dev/og-image.svg",
+  "heroImageUrl": "https://f02671e4.boing-finance.pages.dev/og-image.svg",
   "tagline": "The ultimate multi-network DeFi platform",
   "ogTitle": "Boing Finance - Cross-Chain DeFi Platform",
   "ogDescription": "Deploy tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance.",
-  "ogImageUrl": "https://e02b33cd.boing-finance.pages.dev/og-image.svg",
+  "ogImageUrl": "https://f02671e4.boing-finance.pages.dev/og-image.svg",
   "screenshotUrls": [
-    "https://e02b33cd.boing-finance.pages.dev/screenshot-portrait.png",
-    "https://e02b33cd.boing-finance.pages.dev/screenshot-landscape.png"
+    "https://f02671e4.boing-finance.pages.dev/screenshot-portrait.png",
+    "https://f02671e4.boing-finance.pages.dev/screenshot-landscape.png"
   ],
   "noindex": false
 }
