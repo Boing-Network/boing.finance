@@ -7,9 +7,9 @@
   "screenshotUrls": [
     "https://0ce87f2c.boing-finance.pages.dev/screenshot-portrait.png"
   ],
-  "imageUrl": "https://0ce87f2c.boing-finance.pages.dev/og-image.svg",
-  "heroImageUrl": "https://0ce87f2c.boing-finance.pages.dev/og-image.svg",
-  "splashImageUrl": "https://0ce87f2c.boing-finance.pages.dev/og-image.svg",
+  "imageUrl": "https://0ce87f2c.boing-finance.pages.dev/image.png",
+  "heroImageUrl": "https://0ce87f2c.boing-finance.pages.dev/hero.png",
+  "splashImageUrl": "https://0ce87f2c.boing-finance.pages.dev/splash.png",
   "splashBackgroundColor": "#6200EA",
   "tags": [
     "defi",
