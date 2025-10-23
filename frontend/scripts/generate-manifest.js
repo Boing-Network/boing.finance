@@ -38,8 +38,8 @@ try {
       splashBackgroundColor: "#6200EA",
       homeUrl: "https://boing.finance/",
       webhookUrl: "https://boing.finance/api/webhook",
-      subtitle: "Deploy tokens, create pools, and trade across chains.",
-      description: "The most user-friendly decentralized exchange for token deployment and cross-chain trading. Deploy tokens, create liquidity pools, and trade across multiple blockchains with ease.",
+      subtitle: "Deploy, trade, and build DeFi",
+      description: "User-friendly DEX for token deployment and cross-chain trading. Deploy tokens, create pools, and trade across multiple blockchains.",
       screenshotUrls: [
         "https://boing.finance/screenshot-portrait.png"
       ],

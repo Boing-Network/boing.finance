@@ -604,6 +604,13 @@ function App() {
                   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
                   <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
                   <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+                  
+                  {/* Farcaster Mini App Embed Meta Tags */}
+                  <meta name="fc:miniapp" content="1" />
+                  <meta name="fc:miniapp:version" content="1" />
+                  <meta name="fc:miniapp:image" content="https://boing.finance/hero-image.png" />
+                  <meta name="fc:miniapp:button" content="Open boing.finance" />
+                  <meta name="fc:miniapp:action" content="https://boing.finance/" />
                 </Helmet>
                 <AppContent />
                 <Toaster
