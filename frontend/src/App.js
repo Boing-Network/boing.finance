@@ -606,18 +606,20 @@ function App() {
                   <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
                   
                   {/* Farcaster Mini App Embed Meta Tags */}
-                  <meta name="fc:miniapp" content="1" />
-                  <meta name="fc:miniapp:version" content="1" />
-                  <meta name="fc:miniapp:image" content="https://boing.finance/hero-image.png" />
-                  <meta name="fc:miniapp:button" content="Open boing.finance" />
-                  <meta name="fc:miniapp:action" content="https://boing.finance/" />
+                  <meta name="fc:frame" content='{"version":"next","imageUrl":"https://boing.finance/hero-image.png","button":{"title":"Open boing.finance","action":{"type":"launch_frame","name":"boing.finance","url":"https://boing.finance"}}}' />
                   
-                  {/* Additional Farcaster Meta Tags */}
-                  <meta property="fc:frame" content="vNext" />
-                  <meta property="fc:frame:image" content="https://boing.finance/hero-image.png" />
-                  <meta property="fc:frame:button:1" content="Open boing.finance" />
-                  <meta property="fc:frame:button:1:action" content="link" />
-                  <meta property="fc:frame:button:1:target" content="https://boing.finance/" />
+                  {/* Open Graph Meta Tags for better sharing */}
+                  <meta property="og:title" content="boing.finance - DeFi Platform" />
+                  <meta property="og:description" content="Deploy tokens, create liquidity pools, and trade across multiple networks with ease." />
+                  <meta property="og:image" content="https://boing.finance/hero-image.png" />
+                  <meta property="og:url" content="https://boing.finance/" />
+                  <meta property="og:type" content="website" />
+                  
+                  {/* Twitter Card Meta Tags */}
+                  <meta name="twitter:card" content="summary_large_image" />
+                  <meta name="twitter:title" content="boing.finance - DeFi Platform" />
+                  <meta name="twitter:description" content="Deploy tokens, create liquidity pools, and trade across multiple networks with ease." />
+                  <meta name="twitter:image" content="https://boing.finance/hero-image.png" />
                 </Helmet>
                 <AppContent />
                 <Toaster
