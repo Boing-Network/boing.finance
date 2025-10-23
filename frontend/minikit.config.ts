@@ -1,7 +1,7 @@
 // Base MiniApp configuration following Base documentation
 // https://docs.base.org/mini-apps/quickstart/create-new-miniapp#minikit-quickstart
 
-const ROOT_URL = process.env.REACT_APP_FRONTEND_URL || 'https://ffe11ce3.boing-finance.pages.dev';
+const ROOT_URL = process.env.REACT_APP_FRONTEND_URL || 'https://d81d8855.boing-finance.pages.dev';
 
 export const minikitConfig = {
   accountAssociation: {
