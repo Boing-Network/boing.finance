@@ -60,7 +60,7 @@ const Docs = () => {
         <div className="relative z-10 px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center mb-8 sm:mb-12 mt-8 sm:mt-12">
-            <h1 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4" style={{ color: 'var(--text-primary)' }}>boing.finance Documentation</h1>
+            <h1 className="text-3xl sm:text-4xl font-normal mb-3 sm:mb-4" style={{ color: 'var(--text-primary)' }}>boing.finance Documentation</h1>
             <p className="text-lg sm:text-xl max-w-3xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
               Complete guide to the boing.finance decentralized exchange platform - your gateway to cross-chain trading
             </p>
