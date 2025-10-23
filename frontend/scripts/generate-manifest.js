@@ -53,7 +53,8 @@ try {
         ogTitle: "boing.finance - DeFi Platform",
         ogDescription: "Deploy tokens, create liquidity pools, and trade across multiple networks with ease.",
         ogImageUrl: "https://boing.finance/hero-image.png",
-        castShareUrl: "https://warpcast.com/~/compose?text=🚀+Check+out+Boing+Finance!+Deploy+tokens+and+trade+across+chains+with+ease.+https://boing.finance"
+        castShareUrl: "https://warpcast.com/~/compose?text=🚀+Check+out+Boing+Finance!+Deploy+tokens+and+trade+across+chains+with+ease.+https://boing.finance",
+        noindex: false
       }
     };
   
