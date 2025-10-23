@@ -20,46 +20,55 @@ const BaseMiniAppWrapper = ({ children }) => {
         setIsBaseApp(isInBaseApp);
 
         if (isInBaseApp) {
-          // Dynamically import the Base MiniApp SDK
-          const { MiniApp } = await import('@base/minikit');
-          
-          const miniAppInstance = new MiniApp({
-            // Configuration for Base MiniApp
-            theme: 'dark', // Match your app's theme
-            features: {
-              wallet: true,
-              transactions: true,
-              analytics: true
+          try {
+            // Check if Base MiniApp SDK is available
+            if (typeof window !== 'undefined' && window.BaseMiniApp) {
+              const { MiniApp } = window.BaseMiniApp;
+            
+            const miniAppInstance = new MiniApp({
+              // Configuration for Base MiniApp
+              theme: 'dark', // Match your app's theme
+              features: {
+                wallet: true,
+                transactions: true,
+                analytics: true
+              }
+            });
+
+            setMiniApp(miniAppInstance);
+
+            // Initialize the mini app
+            await miniAppInstance.initialize();
+
+            // Set up event listeners
+            miniAppInstance.on('walletConnected', (wallet) => {
+              console.log('Wallet connected via Base App:', wallet);
+            });
+
+            miniAppInstance.on('networkChanged', (network) => {
+              console.log('Network changed via Base App:', network);
+              // Auto-switch to Base network if user is in Base App
+              if (network.chainId === 8453) {
+                switchNetwork(8453);
+              }
+            });
+
+            miniAppInstance.on('transactionCompleted', (tx) => {
+              console.log('Transaction completed via Base App:', tx);
+            });
+
+              // Signal that the app is ready
+              miniAppInstance.actions.ready();
+            } else {
+              console.warn('Base MiniApp SDK not available');
             }
-          });
-
-          setMiniApp(miniAppInstance);
-
-          // Initialize the mini app
-          await miniAppInstance.initialize();
-
-          // Set up event listeners
-          miniAppInstance.on('walletConnected', (wallet) => {
-            console.log('Wallet connected via Base App:', wallet);
-          });
-
-          miniAppInstance.on('networkChanged', (network) => {
-            console.log('Network changed via Base App:', network);
-            // Auto-switch to Base network if user is in Base App
-            if (network.chainId === 8453) {
-              switchNetwork(8453);
-            }
-          });
-
-          miniAppInstance.on('transactionCompleted', (tx) => {
-            console.log('Transaction completed via Base App:', tx);
-          });
-
-          // Signal that the app is ready
-          miniAppInstance.actions.ready();
+          } catch (error) {
+            console.warn('Base MiniApp SDK not available or failed to initialize:', error);
+            // Continue without Base App features
+          }
         }
       } catch (error) {
-        console.warn('Base MiniApp SDK not available or failed to initialize:', error);
+        console.warn('Base MiniApp initialization failed:', error);
         // Continue without Base App features
       } finally {
         setIsLoading(false);
