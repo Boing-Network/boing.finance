@@ -13,8 +13,10 @@ export const minikitConfig = {
     version: "1",
     name: "boing.finance",
     iconUrl: "https://boing.finance/icon.png",
+    imageUrl: "https://boing.finance/image.png",
+    buttonTitle: "Open boing.finance",
     splashImageUrl: "https://boing.finance/splash.png",
-    splashBackgroundColor: "#6200EA",
+    splashBackgroundColor: "#0f172a",
     homeUrl: "https://boing.finance/",
     webhookUrl: "https://boing.finance/api/webhook",
     subtitle: "Deploy, trade, and build DeFi",
@@ -34,7 +36,8 @@ export const minikitConfig = {
     tagline: "Cross-Chain DeFi Made Easy",
     ogTitle: "boing.finance - DeFi Platform",
     ogDescription: "Deploy tokens, create liquidity pools, and trade across multiple networks with ease.",
-    ogImageUrl: "https://boing.finance/hero-image.png"
+    ogImageUrl: "https://boing.finance/hero-image.png",
+    castShareUrl: "https://warpcast.com/~/compose?text=🚀+Check+out+Boing+Finance!+Deploy+tokens+and+trade+across+chains+with+ease.+https://boing.finance"
   }
 } as const;
 

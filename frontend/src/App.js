@@ -606,11 +606,7 @@ function App() {
                   <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
                   
                   {/* Farcaster Mini App Embed Meta Tags */}
-                  <meta name="fc:miniapp" content="1" />
-                  <meta name="fc:miniapp:version" content="1" />
-                  <meta name="fc:miniapp:image" content="https://boing.finance/hero-image.png" />
-                  <meta name="fc:miniapp:button" content="Open boing.finance" />
-                  <meta name="fc:miniapp:action" content="https://boing.finance/" />
+                  <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://boing.finance/hero-image.png","button":{"title":"Open boing.finance","action":{"type":"launch_miniapp","name":"boing.finance","url":"https://boing.finance/"}}}' />
                   
                   {/* Additional Farcaster Meta Tags */}
                   <meta property="fc:frame" content="vNext" />
