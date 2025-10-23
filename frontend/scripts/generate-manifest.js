@@ -33,7 +33,15 @@ try {
         splashImageUrl: "https://boing.finance/splash.png",
         splashBackgroundColor: "#0f172a",
         heroImageUrl: "https://boing.finance/hero.png",
-        tagline: "Cross-Chain DeFi Made Easy"
+        tagline: "Cross-Chain DeFi Made Easy",
+        primaryCategory: "finance",
+        tags: [
+          "defi",
+          "dex",
+          "tokens",
+          "swap",
+          "liquidity"
+        ]
       }
     };
   
