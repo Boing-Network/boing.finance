@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boing Finance - Image Creator</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #0a0a0a;
+            color: white;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .image-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px solid #6200EA;
+            border-radius: 10px;
+            background: #1a1a1a;
+        }
+        .image-container {
+            margin: 20px 0;
+            border: 1px solid #333;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+        }
+        .instructions {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .size-label {
+            font-weight: bold;
+            color: #6200EA;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .description {
+            color: #ccc;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        /* Hero image - landscape */
+        .hero-container {
+            width: 1920px;
+            height: 1080px;
+            transform: scale(0.25);
+            transform-origin: top left;
+            background: linear-gradient(135deg, #6200EA, #0a0a0a);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            z-index: 2;
+        }
+        .hero-title {
+            font-size: 120px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .hero-subtitle {
+            font-size: 48px;
+            margin-bottom: 30px;
+            color: #ccc;
+        }
+        .hero-features {
+            font-size: 32px;
+            color: #aaa;
+        }
+        
+        /* Preview image - social card */
+        .preview-container {
+            width: 1200px;
+            height: 630px;
+            transform: scale(0.3);
+            transform-origin: top left;
+            background: linear-gradient(135deg, #6200EA, #0a0a0a);
+            position: relative;
+            overflow: hidden;
+        }
+        .preview-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            z-index: 2;
+        }
+        .preview-title {
+            font-size: 80px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .preview-subtitle {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #ccc;
+        }
+        .preview-features {
+            font-size: 24px;
+            color: #aaa;
+        }
+        
+        /* Splash screen - portrait */
+        .splash-container {
+            width: 1080px;
+            height: 1920px;
+            transform: scale(0.2);
+            transform-origin: top left;
+            background: linear-gradient(135deg, #6200EA, #0a0a0a);
+            position: relative;
+            overflow: hidden;
+        }
+        .splash-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            z-index: 2;
+        }
+        .splash-title {
+            font-size: 100px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .splash-subtitle {
+            font-size: 40px;
+            margin-bottom: 40px;
+            color: #ccc;
+        }
+        .splash-features {
+            font-size: 28px;
+            color: #aaa;
+            margin-bottom: 50px;
+        }
+        .loading-dots {
+            font-size: 60px;
+            color: #6200EA;
+        }
+        
+        .download-btn {
+            background: #6200EA;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+        .download-btn:hover {
+            background: #7c3aed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="instructions">
+            <h1>🚀 Boing Finance - Image Creator</h1>
+            <p>This page creates the required images for your Farcaster manifest. Right-click on each image and save it with the appropriate filename.</p>
+            <p><strong>Instructions:</strong></p>
+            <ol>
+                <li>Right-click on each image below</li>
+                <li>Select "Save image as..." or "Copy image"</li>
+                <li>Save with the filename shown above each image</li>
+                <li>Replace the files in your public directory</li>
+            </ol>
+        </div>
+
+        <div class="image-section">
+            <div class="size-label">Hero Image (1920x1080) - hero.png</div>
+            <div class="description">Large banner image for app store listings and featured sections</div>
+            <div class="image-container">
+                <div class="hero-container">
+                    <div class="hero-content">
+                        <div class="hero-title">BOING</div>
+                        <div class="hero-subtitle">Finance</div>
+                        <div class="hero-features">Cross-Chain DeFi Platform</div>
+                    </div>
+                </div>
+            </div>
+            <button class="download-btn" onclick="downloadImage('hero')">Download Hero Image</button>
+        </div>
+
+        <div class="image-section">
+            <div class="size-label">Preview Image (1200x630) - image.png</div>
+            <div class="description">Thumbnail/preview image shown in app cards and listings</div>
+            <div class="image-container">
+                <div class="preview-container">
+                    <div class="preview-content">
+                        <div class="preview-title">BOING</div>
+                        <div class="preview-subtitle">Finance</div>
+                        <div class="preview-features">Deploy • Trade • Build</div>
+                    </div>
+                </div>
+            </div>
+            <button class="download-btn" onclick="downloadImage('preview')">Download Preview Image</button>
+        </div>
+
+        <div class="image-section">
+            <div class="size-label">Splash Screen (1080x1920) - splash.png</div>
+            <div class="description">Image shown while the app is loading</div>
+            <div class="image-container">
+                <div class="splash-container">
+                    <div class="splash-content">
+                        <div class="splash-title">BOING</div>
+                        <div class="splash-subtitle">Finance</div>
+                        <div class="splash-features">Cross-Chain DeFi Platform</div>
+                        <div class="loading-dots">●●●</div>
+                    </div>
+                </div>
+            </div>
+            <button class="download-btn" onclick="downloadImage('splash')">Download Splash Image</button>
+        </div>
+    </div>
+
+    <script>
+        function downloadImage(type) {
+            const containers = {
+                'hero': document.querySelector('.hero-container'),
+                'preview': document.querySelector('.preview-container'),
+                'splash': document.querySelector('.splash-container')
+            };
+            
+            const container = containers[type];
+            if (!container) return;
+            
+            // Create a canvas to capture the image
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size to the actual size (before scaling)
+            const rect = container.getBoundingClientRect();
+            const scale = type === 'hero' ? 4 : type === 'preview' ? 3.33 : 5; // Inverse of transform scale
+            canvas.width = rect.width * scale;
+            canvas.height = rect.height * scale;
+            
+            // Create a temporary container with the full size
+            const tempContainer = container.cloneNode(true);
+            tempContainer.style.transform = 'scale(1)';
+            tempContainer.style.position = 'absolute';
+            tempContainer.style.left = '-9999px';
+            tempContainer.style.top = '0';
+            document.body.appendChild(tempContainer);
+            
+            // Use html2canvas if available, otherwise provide instructions
+            if (typeof html2canvas !== 'undefined') {
+                html2canvas(tempContainer).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `${type}.png`;
+                    link.href = canvas.toDataURL();
+                    link.click();
+                });
+            } else {
+                alert('Please right-click on the image and select "Save image as..." to download.');
+            }
+            
+            document.body.removeChild(tempContainer);
+        }
+    </script>
+</body>
+</html>
