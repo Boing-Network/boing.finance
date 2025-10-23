@@ -23,38 +23,39 @@ try {
   
   console.log(`📍 Using ROOT_URL: ${rootUrl}`);
   
-  // Generate the manifest from the config structure (matching Farcaster webapp requirements)
-  const manifest = {
-    version: "1",
-    name: "Boing Finance",
-    subtitle: "Deploy tokens, create pools, and trade across chains",
-    description: "The most user-friendly decentralized exchange for token deployment and cross-chain trading. Deploy tokens, create liquidity pools, and trade across multiple blockchains with ease.",
-    iconUrl: `${rootUrl}/icon.png`,
-    screenshotUrls: [`${rootUrl}/screenshot-portrait.png`],
-    imageUrl: `${rootUrl}/image.png`,
-    heroImageUrl: `https://boing.finance/hero.png`,
-    splashImageUrl: `${rootUrl}/splash.png`,
-    splashBackgroundColor: "#6200EA",
-    tags: ["defi", "dex", "trading", "tokens", "cross-chain", "liquidity", "swap", "bridge", "ethereum", "base"],
-    tagline: "Deploy, Trade, and Build the Future of DeFi",
-    buttonTitle: "Open Boing Finance",
-    ogTitle: "Boing Finance - Cross-Chain DeFi Platform",
-    ogDescription: "Deploy tokens, create liquidity pools, and trade across multiple blockchains with the most user-friendly DeFi platform.",
-    ogImageUrl: `${rootUrl}/og-image.svg`,
-    castShareUrl: `https://warpcast.com/~/compose?text=Check+out+Boing+Finance+-+the+ultimate+cross-chain+DeFi+platform!+Deploy+tokens%2C+create+pools%2C+and+trade+across+chains+with+ease.`,
-    homeUrl: rootUrl,
-    webhookUrl: `${rootUrl}/api/webhook`,
-    primaryCategory: "finance",
-    noindex: false,
-    baseBuilder: {
-      ownerAddress: "0xEa9C8A5c669725A19e1890001d7c553771EE6cFc"
-    },
-    accountAssociation: {
-      "header": "eyJmaWQiOjEzOTc5MzcsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg1RTQ2MEQ2OWNjMThiYjBjOEU3MGVkNzVBM2E5QTk2QjdDZTRBMzcyIn0",
-      "payload": "eyJkb21haW4iOiJib2luZy5maW5hbmNlIn0",
-      "signature": "buQTkbWCkIjwXglpFMrM40rjUrVfEbfe00/rzyno2YMl8Xf7cLyZKfBZd9HAxaIzIaji7+M7/sIC2j7C2HtHIRw="
-    }
-  };
+    // Generate the manifest from the config structure (matching Farcaster webapp requirements)
+    const manifest = {
+      frame: {
+        name: "boing.finance",
+        version: "1",
+        iconUrl: "https://boing.finance/icon.png",
+        homeUrl: "https://boing.finance/",
+        imageUrl: "https://boing.finance/image.png",
+        buttonTitle: "Open boing.finance",
+        splashImageUrl: "https://boing.finance/splash.png",
+        splashBackgroundColor: "#6200EA",
+        webhookUrl: "https://boing.finance/api/webhook",
+        subtitle: "Deploy tokens, create pools, and trade across chains.",
+        description: "The most user-friendly decentralized exchange for token deployment and cross-chain trading. Deploy tokens, create liquidity pools, and trade across multiple blockchains with ease.",
+        primaryCategory: "finance",
+        heroImageUrl: "https://boing.finance/hero.png",
+        screenshotUrls: [
+          "https://boing.finance/screenshot-portrait.png"
+        ],
+        tags: [
+          "defi",
+          "dex",
+          "tokens",
+          "cross-chain",
+          "liquidity"
+        ],
+        tagline: "Cross-Chain DeFi Made Easy",
+        ogTitle: "boing.finance - DeFi Platform",
+        ogDescription: "Deploy tokens, create liquidity pools, and trade across multiple networks with ease.",
+        ogImageUrl: "https://boing.finance/hero-image.png",
+        castShareUrl: "https://warpcast.com/~/compose?text=🚀+Check+out+Boing+Finance!+Deploy+tokens+and+trade+across+chains+with+ease.+https://boing.finance"
+      }
+    };
   
   // Write the manifest to the .well-known directory
   const manifestPath = path.join(__dirname, '..', 'public', '.well-known', 'farcaster.json');
