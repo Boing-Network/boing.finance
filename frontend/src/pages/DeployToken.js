@@ -18,6 +18,7 @@ import { Helmet } from 'react-helmet-async';
 import { getContractAddress } from '../config/contracts';
 import LogoUpload from '../components/LogoUpload';
 import { uploadMetadataToIPFS, createTokenMetadata } from '../utils/ipfsUpload';
+import EnhancedAnimatedBackground from '../components/EnhancedAnimatedBackground';
 
 // Import ABI and bytecode from the artifacts
 const ERC20_ABI = AdvancedERC20Artifact.abi;
@@ -1190,6 +1191,7 @@ export default function DeployToken() {
         </script>
       </Helmet>
       <div className="relative min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
+        <EnhancedAnimatedBackground />
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">
             {/* Header */}

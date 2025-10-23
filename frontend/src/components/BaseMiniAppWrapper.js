@@ -22,40 +22,40 @@ const BaseMiniAppWrapper = ({ children }) => {
         if (isInBaseApp) {
           try {
             // Check if Base MiniApp SDK is available
-            if (typeof window !== 'undefined' && window.BaseMiniApp) {
-              const { MiniApp } = window.BaseMiniApp;
-            
-            const miniAppInstance = new MiniApp({
-              // Configuration for Base MiniApp
-              theme: 'dark', // Match your app's theme
-              features: {
-                wallet: true,
-                transactions: true,
-                analytics: true
-              }
-            });
+            if (typeof window !== 'undefined' && window.minikit) {
+              const { MiniApp } = window.minikit;
+              
+              const miniAppInstance = new MiniApp({
+                // Configuration for Base MiniApp
+                theme: 'dark', // Match your app's theme
+                features: {
+                  wallet: true,
+                  transactions: true,
+                  analytics: true
+                }
+              });
 
-            setMiniApp(miniAppInstance);
+              setMiniApp(miniAppInstance);
 
-            // Initialize the mini app
-            await miniAppInstance.initialize();
+              // Initialize the mini app
+              await miniAppInstance.initialize();
 
-            // Set up event listeners
-            miniAppInstance.on('walletConnected', (wallet) => {
-              console.log('Wallet connected via Base App:', wallet);
-            });
+              // Set up event listeners
+              miniAppInstance.on('walletConnected', (wallet) => {
+                console.log('Wallet connected via Base App:', wallet);
+              });
 
-            miniAppInstance.on('networkChanged', (network) => {
-              console.log('Network changed via Base App:', network);
-              // Auto-switch to Base network if user is in Base App
-              if (network.chainId === 8453) {
-                switchNetwork(8453);
-              }
-            });
+              miniAppInstance.on('networkChanged', (network) => {
+                console.log('Network changed via Base App:', network);
+                // Auto-switch to Base network if user is in Base App
+                if (network.chainId === 8453) {
+                  switchNetwork(8453);
+                }
+              });
 
-            miniAppInstance.on('transactionCompleted', (tx) => {
-              console.log('Transaction completed via Base App:', tx);
-            });
+              miniAppInstance.on('transactionCompleted', (tx) => {
+                console.log('Transaction completed via Base App:', tx);
+              });
 
               // Signal that the app is ready
               miniAppInstance.actions.ready();
