@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Splash Image</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #0f172a;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        canvas {
+            border: 2px solid #00E0FF;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        button {
+            background: #00E0FF;
+            color: #0f172a;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #00B8E6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Generate Splash Image</h1>
+        <p>This will create a splash image with the correct purple background (#6200EA)</p>
+        
+        <canvas id="splashCanvas" width="1080" height="1920"></canvas>
+        
+        <div>
+            <button onclick="generateSplash()">Generate Splash Image</button>
+            <button onclick="downloadSplash()">Download Splash Image</button>
+        </div>
+    </div>
+
+    <script>
+        function generateSplash() {
+            const canvas = document.getElementById('splashCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size accounting for device pixel ratio
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = 1080 * dpr;
+            canvas.height = 1920 * dpr;
+            ctx.scale(dpr, dpr);
+            
+            // Set purple background to match manifest
+            ctx.fillStyle = '#6200EA';
+            ctx.fillRect(0, 0, 1080, 1920);
+            
+            // Add subtle gradient overlay
+            const gradient = ctx.createLinearGradient(0, 0, 1080, 1920);
+            gradient.addColorStop(0, 'rgba(0, 224, 255, 0.1)');
+            gradient.addColorStop(0.5, 'rgba(123, 97, 255, 0.1)');
+            gradient.addColorStop(1, 'rgba(0, 255, 178, 0.1)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 1080, 1920);
+            
+            // Add title
+            ctx.font = 'normal 100px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.textRenderingOptimization = 'optimizeQuality';
+            ctx.imageSmoothingEnabled = true;
+            
+            // Create gradient for text
+            const titleGradient = ctx.createLinearGradient(0, 0, 1080, 0);
+            titleGradient.addColorStop(0, '#00E0FF');
+            titleGradient.addColorStop(0.5, '#ffffff');
+            titleGradient.addColorStop(1, '#7B61FF');
+            ctx.fillStyle = titleGradient;
+            ctx.fillText('boing.finance', 540, 800);
+            
+            // Add subtitle
+            ctx.font = 'normal 28px Inter, sans-serif';
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillText('Cross-Chain DeFi Platform', 540, 950);
+            
+            // Add loading dots
+            ctx.font = 'normal 60px Inter, sans-serif';
+            ctx.fillStyle = '#00E0FF';
+            ctx.fillText('●●●', 540, 1100);
+            
+            console.log('✅ Splash image generated with purple background (#6200EA)');
+        }
+        
+        function downloadSplash() {
+            const canvas = document.getElementById('splashCanvas');
+            const link = document.createElement('a');
+            link.download = 'splash.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // Generate on page load
+        window.onload = generateSplash;
+    </script>
+</body>
+</html>

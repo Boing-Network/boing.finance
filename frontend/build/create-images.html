@@ -273,7 +273,7 @@
             height: 1920px;
             transform: scale(0.2);
             transform-origin: top left;
-            background: var(--bg-primary);
+            background: #6200EA;
             position: relative;
             overflow: hidden;
             border-radius: 15px;
@@ -662,8 +662,8 @@
             splashCanvas.height = 1920 * dpr;
             splashCtx.scale(dpr, dpr);
             
-            // Set canvas background
-            splashCtx.fillStyle = '#0f172a';
+            // Set canvas background to match manifest splashBackgroundColor
+            splashCtx.fillStyle = '#6200EA';
             splashCtx.fillRect(0, 0, 1080, 1920);
             
             // Add gradient background

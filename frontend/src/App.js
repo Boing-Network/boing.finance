@@ -611,6 +611,13 @@ function App() {
                   <meta name="fc:miniapp:image" content="https://boing.finance/hero-image.png" />
                   <meta name="fc:miniapp:button" content="Open boing.finance" />
                   <meta name="fc:miniapp:action" content="https://boing.finance/" />
+                  
+                  {/* Additional Farcaster Meta Tags */}
+                  <meta property="fc:frame" content="vNext" />
+                  <meta property="fc:frame:image" content="https://boing.finance/hero-image.png" />
+                  <meta property="fc:frame:button:1" content="Open boing.finance" />
+                  <meta property="fc:frame:button:1:action" content="link" />
+                  <meta property="fc:frame:button:1:target" content="https://boing.finance/" />
                 </Helmet>
                 <AppContent />
                 <Toaster
