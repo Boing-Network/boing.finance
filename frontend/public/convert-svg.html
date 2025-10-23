@@ -3,62 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SVG to PNG Converter</title>
+    <title>boing.finance - SVG to PNG Converter</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
         body {
             margin: 0;
             padding: 20px;
-            background: white;
-            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+            color: white;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100vh;
         }
         .container {
             max-width: 1200px;
             margin: 0 auto;
         }
+        .instructions {
+            background: linear-gradient(135deg, #2a2a2a 0%, #3a3a3a 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid #00ff88;
+        }
+        .instructions h1 {
+            color: #00ff88;
+            margin-top: 0;
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+        .instructions p {
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .instructions ol {
+            color: #aaa;
+            line-height: 1.8;
+        }
         .image-container {
             margin: 20px 0;
-            border: 1px solid #ddd;
+            border: 1px solid #333;
             padding: 10px;
             background: white;
-        }
-        .instructions {
-            background: #f0f0f0;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
         .size-label {
-            font-weight: bold;
-            color: #333;
+            font-weight: 700;
+            color: #00ff88;
             margin-bottom: 10px;
+            font-size: 20px;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
         }
+        .description {
+            color: #ccc;
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        /* Animated background particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+            opacity: 0.6;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+        
         /* Hero image - landscape */
         .hero-container {
             width: 1920px;
             height: 1080px;
-            transform: scale(0.3);
+            transform: scale(0.25);
             transform-origin: top left;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px;
         }
+        .hero-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, #00ff88 0%, #00cc6a 25%, #00ff88 50%, #00cc6a 75%, #00ff88 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            opacity: 0.1;
+            z-index: 1;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
         /* Preview image - social card */
         .preview-container {
             width: 1200px;
             height: 630px;
             transform: scale(0.4);
             transform-origin: top left;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px;
         }
+        .preview-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, #00ff88 0%, #00cc6a 25%, #00ff88 50%, #00cc6a 75%, #00ff88 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 6s ease infinite;
+            opacity: 0.08;
+            z-index: 1;
+        }
+        
         /* Splash screen - portrait */
         .splash-container {
             width: 1080px;
             height: 1920px;
             transform: scale(0.3);
             transform-origin: top left;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px;
+        }
+        .splash-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, #00ff88 0%, #00cc6a 25%, #00ff88 50%, #00cc6a 75%, #00ff88 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 10s ease infinite;
+            opacity: 0.1;
+            z-index: 1;
+        }
+        
+        .download-btn {
+            background: linear-gradient(45deg, #00ff88, #00cc6a);
+            color: #0a0a0a;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 136, 0.5);
+            background: linear-gradient(45deg, #00cc6a, #00ff88);
         }
     </style>
 </head>
 <body>
+    <div class="particles" id="particles"></div>
+    
     <div class="container">
         <div class="instructions">
-            <h2>SVG to PNG Converter</h2>
+            <h1>🎨 boing.finance - SVG to PNG Converter</h1>
             <p>This page displays the twitter-cover.svg in different sizes for conversion to PNG.</p>
             <p><strong>Instructions:</strong></p>
             <ol>
@@ -71,24 +209,94 @@
 
         <div class="image-container">
             <div class="size-label">Hero Image (1920x1080) - Landscape Banner</div>
+            <div class="description">Large banner image for app store listings and featured sections</div>
             <div class="hero-container">
-                <img src="twitter-cover.svg" alt="Hero Image" style="width: 100%; height: 100%; object-fit: cover;">
+                <img src="twitter-cover.svg" alt="Hero Image" style="width: 100%; height: 100%; object-fit: cover; position: relative; z-index: 2;">
             </div>
+            <button class="download-btn" onclick="downloadImage('hero')">Download Hero Image</button>
         </div>
 
         <div class="image-container">
             <div class="size-label">Preview Image (1200x630) - Social Card</div>
+            <div class="description">Thumbnail/preview image shown in app cards and listings</div>
             <div class="preview-container">
-                <img src="twitter-cover.svg" alt="Preview Image" style="width: 100%; height: 100%; object-fit: cover;">
+                <img src="twitter-cover.svg" alt="Preview Image" style="width: 100%; height: 100%; object-fit: cover; position: relative; z-index: 2;">
             </div>
+            <button class="download-btn" onclick="downloadImage('preview')">Download Preview Image</button>
         </div>
 
         <div class="image-container">
             <div class="size-label">Splash Screen (1080x1920) - Portrait Loading Screen</div>
+            <div class="description">Image shown while the app is loading</div>
             <div class="splash-container">
-                <img src="twitter-cover.svg" alt="Splash Screen" style="width: 100%; height: 100%; object-fit: cover;">
+                <img src="twitter-cover.svg" alt="Splash Screen" style="width: 100%; height: 100%; object-fit: cover; position: relative; z-index: 2;">
             </div>
+            <button class="download-btn" onclick="downloadImage('splash')">Download Splash Image</button>
         </div>
     </div>
+
+    <script>
+        // Create animated particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        function downloadImage(type) {
+            const containers = {
+                'hero': document.querySelector('.hero-container'),
+                'preview': document.querySelector('.preview-container'),
+                'splash': document.querySelector('.splash-container')
+            };
+            
+            const container = containers[type];
+            if (!container) return;
+            
+            // Create a canvas to capture the image
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size to the actual size (before scaling)
+            const rect = container.getBoundingClientRect();
+            const scale = type === 'hero' ? 4 : type === 'preview' ? 2.5 : 3.33; // Inverse of transform scale
+            canvas.width = rect.width * scale;
+            canvas.height = rect.height * scale;
+            
+            // Create a temporary container with the full size
+            const tempContainer = container.cloneNode(true);
+            tempContainer.style.transform = 'scale(1)';
+            tempContainer.style.position = 'absolute';
+            tempContainer.style.left = '-9999px';
+            tempContainer.style.top = '0';
+            document.body.appendChild(tempContainer);
+            
+            // Use html2canvas if available, otherwise provide instructions
+            if (typeof html2canvas !== 'undefined') {
+                html2canvas(tempContainer).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `${type}.png`;
+                    link.href = canvas.toDataURL();
+                    link.click();
+                });
+            } else {
+                alert('Please right-click on the image and select "Save image as..." to download.');
+            }
+            
+            document.body.removeChild(tempContainer);
+        }
+        
+        // Initialize particles when page loads
+        document.addEventListener('DOMContentLoaded', createParticles);
+    </script>
 </body>
 </html>
