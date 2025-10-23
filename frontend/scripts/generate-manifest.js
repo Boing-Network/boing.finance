@@ -25,6 +25,11 @@ try {
   
     // Generate the manifest from the config structure (matching Farcaster requirements)
     const manifest = {
+      accountAssociation: {
+        header: "eyJmaWQiOjEzOTc5MzcsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg1RTQ2MEQ2OWNjMThiYjBjOEU3MGVkNzVBM2E5QTk2QjdDZTRBMzcyIn0",
+        payload: "eyJkb21haW4iOiJib2luZy5maW5hbmNlIn0",
+        signature: "buQTkbWCkIjwXglpFMrM40rjUrVfEbfe00/rzyno2YMl8Xf7cLyZKfBZd9HAxaIzIaji7+M7/sIC2j7C2HtHIRw="
+      },
       miniapp: {
         version: "1",
         name: "boing.finance",
