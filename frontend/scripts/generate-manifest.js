@@ -23,12 +23,13 @@ try {
   
   console.log(`📍 Using ROOT_URL: ${rootUrl}`);
   
-  // Generate the manifest from the config structure
+  // Generate the manifest from the config structure (matching Base documentation exactly)
   const manifest = {
     version: "1",
     name: "Boing Finance",
     subtitle: "Cross-Chain DeFi Platform",
     description: "Deploy tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance - the most user-friendly decentralized exchange for token deployment and cross-chain trading.",
+    screenshotUrls: [`${rootUrl}/screenshot-portrait.png`],
     iconUrl: `${rootUrl}/logo.svg`,
     splashImageUrl: `${rootUrl}/og-image.svg`,
     splashBackgroundColor: "#0a0a0a",
@@ -41,10 +42,6 @@ try {
     ogTitle: "Boing Finance - Cross-Chain DeFi Platform",
     ogDescription: "Deploy tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance.",
     ogImageUrl: `${rootUrl}/og-image.svg`,
-    screenshotUrls: [
-      `${rootUrl}/screenshot-portrait.png`,
-      `${rootUrl}/screenshot-landscape.png`
-    ],
     noindex: false,
     baseBuilder: {
       ownerAddress: "0xEa9C8A5c669725A19e1890001d7c553771EE6cFc"
