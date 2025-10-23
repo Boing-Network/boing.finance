@@ -1,7 +1,7 @@
 // Base MiniApp configuration following Base documentation
 // https://docs.base.org/mini-apps/quickstart/create-new-miniapp#minikit-quickstart
 
-const ROOT_URL = process.env.REACT_APP_FRONTEND_URL || 'https://d81d8855.boing-finance.pages.dev';
+const ROOT_URL = process.env.REACT_APP_FRONTEND_URL || 'https://0ce87f2c.boing-finance.pages.dev';
 
 export const minikitConfig = {
   accountAssociation: {
@@ -31,6 +31,10 @@ export const minikitConfig = {
     ogTitle: "Boing Finance - Cross-Chain DeFi Platform",
     ogDescription: "Deploy tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance.",
     ogImageUrl: `${ROOT_URL}/og-image.svg`,
+    noindex: false,
+    baseBuilder: {
+      ownerAddress: "0xEa9C8A5c669725A19e1890001d7c553771EE6cFc"
+    }
   },
 } as const;
 
