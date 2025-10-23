@@ -17,7 +17,7 @@ export const minikitConfig = {
     iconUrl: `${ROOT_URL}/icon.png`,
     screenshotUrls: [`${ROOT_URL}/screenshot-portrait.png`],
     imageUrl: `${ROOT_URL}/image.png`,
-    heroImageUrl: `${ROOT_URL}/hero.png`,
+    heroImageUrl: `${ROOT_URL}/twitter-cover.svg`,
     splashImageUrl: `${ROOT_URL}/splash.png`,
     splashBackgroundColor: "#6200EA",
     tags: ["defi", "dex", "trading", "tokens", "cross-chain", "liquidity", "swap", "bridge", "ethereum", "base"],

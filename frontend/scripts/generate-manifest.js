@@ -32,7 +32,7 @@ try {
     iconUrl: `${rootUrl}/icon.png`,
     screenshotUrls: [`${rootUrl}/screenshot-portrait.png`],
     imageUrl: `${rootUrl}/image.png`,
-    heroImageUrl: `${rootUrl}/hero.png`,
+    heroImageUrl: `${rootUrl}/twitter-cover.svg`,
     splashImageUrl: `${rootUrl}/splash.png`,
     splashBackgroundColor: "#6200EA",
     tags: ["defi", "dex", "trading", "tokens", "cross-chain", "liquidity", "swap", "bridge", "ethereum", "base"],
