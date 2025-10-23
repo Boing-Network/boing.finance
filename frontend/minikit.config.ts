@@ -4,8 +4,7 @@
 const ROOT_URL = process.env.REACT_APP_FRONTEND_URL || 'https://0ce87f2c.boing-finance.pages.dev';
 
 export const minikitConfig = {
-  accountAssociation: {
-    // This will be added after domain verification
+  accountAssociation: { // this will be added in step 5
     "header": "",
     "payload": "",
     "signature": ""
@@ -15,10 +14,7 @@ export const minikitConfig = {
     name: "Boing Finance", 
     subtitle: "Cross-Chain DeFi Platform", 
     description: "Deploy tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance - the most user-friendly decentralized exchange for token deployment and cross-chain trading.",
-    screenshotUrls: [
-      `${ROOT_URL}/screenshot-portrait.png`,
-      `${ROOT_URL}/screenshot-landscape.png`
-    ],
+    screenshotUrls: [`${ROOT_URL}/screenshot-portrait.png`],
     iconUrl: `${ROOT_URL}/logo.svg`,
     splashImageUrl: `${ROOT_URL}/og-image.svg`,
     splashBackgroundColor: "#0a0a0a",
