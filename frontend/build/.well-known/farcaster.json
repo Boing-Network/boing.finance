@@ -1,18 +1,18 @@
 {
   "name": "Boing Finance",
   "description": "Cross-chain DEX for token deployment, trading, and liquidity management across multiple blockchains",
-  "icon": "https://boing.finance/logo.svg",
-  "splash": "https://boing.finance/og-image.svg",
+  "icon": "https://5be29797.boing-finance.pages.dev/logo.svg",
+  "splash": "https://5be29797.boing-finance.pages.dev/og-image.svg",
   "category": "finance",
   "tags": ["defi", "dex", "trading", "tokens", "cross-chain", "liquidity", "swap", "bridge"],
-  "url": "https://boing.finance",
+  "url": "https://5be29797.boing-finance.pages.dev",
   "version": "1.0.0",
   "author": "Boing Finance",
-  "homepage": "https://boing.finance",
-  "repository": "https://github.com/boing-finance/dex",
-  "support": "https://boing.finance/help-center",
-  "privacy": "https://boing.finance/privacy",
-  "terms": "https://boing.finance/terms",
+  "homepage": "https://5be29797.boing-finance.pages.dev",
+  "repository": "https://github.com/chiku524/dex",
+  "support": "https://5be29797.boing-finance.pages.dev/help-center",
+  "privacy": "https://5be29797.boing-finance.pages.dev/privacy",
+  "terms": "https://5be29797.boing-finance.pages.dev/terms",
   "networks": [
     {
       "name": "Ethereum",
@@ -54,9 +54,9 @@
     "bridge"
   ],
   "screenshots": [
-    "https://boing.finance/screenshot-1.png",
-    "https://boing.finance/screenshot-2.png",
-    "https://boing.finance/screenshot-3.png"
+    "https://5be29797.boing-finance.pages.dev/screenshot-1.png",
+    "https://5be29797.boing-finance.pages.dev/screenshot-2.png",
+    "https://5be29797.boing-finance.pages.dev/screenshot-3.png"
   ],
   "social": {
     "twitter": "https://twitter.com/boing_finance",
