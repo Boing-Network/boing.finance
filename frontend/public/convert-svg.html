@@ -124,6 +124,20 @@
             border-radius: 15px;
         }
         
+        .hero-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, var(--primary-color) 0%, var(--secondary-color) 25%, var(--accent-color) 50%, var(--success-color) 75%, var(--primary-color) 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            opacity: 0.1;
+            z-index: 1;
+        }
+        
         /* Preview image - social card */
         .preview-container {
             width: 1200px;
@@ -136,6 +150,20 @@
             border-radius: 15px;
         }
         
+        .preview-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, var(--primary-color) 0%, var(--secondary-color) 25%, var(--accent-color) 50%, var(--success-color) 75%, var(--primary-color) 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 6s ease infinite;
+            opacity: 0.08;
+            z-index: 1;
+        }
+        
         /* Splash screen - portrait */
         .splash-container {
             width: 1080px;
@@ -146,6 +174,20 @@
             position: relative;
             overflow: hidden;
             border-radius: 15px;
+        }
+        
+        .splash-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, var(--primary-color) 0%, var(--secondary-color) 25%, var(--accent-color) 50%, var(--success-color) 75%, var(--primary-color) 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 10s ease infinite;
+            opacity: 0.1;
+            z-index: 1;
         }
         
         .download-btn {
@@ -170,6 +212,13 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0, 224, 255, 0.5);
             background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+        }
+        
+        /* Animations */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
     </style>
 </head>

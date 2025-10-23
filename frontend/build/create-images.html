@@ -144,6 +144,20 @@
             border-radius: 15px;
         }
         
+        .hero-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, var(--primary-color) 0%, var(--secondary-color) 25%, var(--accent-color) 50%, var(--success-color) 75%, var(--primary-color) 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            opacity: 0.1;
+            z-index: 1;
+        }
+        
         .hero-content {
             position: absolute;
             top: 50%;
@@ -156,9 +170,9 @@
         }
         
         .hero-title {
-            font-size: 120px;
+            font-size: 100px;
             font-weight: 900;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
             text-shadow: 0 0 30px rgba(0, 224, 255, 0.8);
             background: linear-gradient(45deg, var(--primary-color), #ffffff, var(--secondary-color));
             background-size: 200% 200%;
@@ -166,15 +180,6 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             animation: textShine 3s ease-in-out infinite;
-        }
-        
-        .hero-subtitle {
-            font-size: 48px;
-            margin-bottom: 30px;
-            color: var(--primary-color);
-            font-weight: 600;
-            text-shadow: 0 0 20px rgba(0, 224, 255, 0.5);
-            animation: pulse 2s ease-in-out infinite;
         }
         
         .hero-features {
@@ -196,6 +201,20 @@
             border-radius: 15px;
         }
         
+        .preview-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, var(--primary-color) 0%, var(--secondary-color) 25%, var(--accent-color) 50%, var(--success-color) 75%, var(--primary-color) 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 6s ease infinite;
+            opacity: 0.08;
+            z-index: 1;
+        }
+        
         .preview-content {
             position: absolute;
             top: 50%;
@@ -208,9 +227,9 @@
         }
         
         .preview-title {
-            font-size: 80px;
+            font-size: 70px;
             font-weight: 900;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             text-shadow: 0 0 25px rgba(0, 224, 255, 0.8);
             background: linear-gradient(45deg, var(--primary-color), #ffffff, var(--secondary-color));
             background-size: 200% 200%;
@@ -218,14 +237,6 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             animation: textShine 2.5s ease-in-out infinite;
-        }
-        
-        .preview-subtitle {
-            font-size: 32px;
-            margin-bottom: 20px;
-            color: var(--primary-color);
-            font-weight: 600;
-            text-shadow: 0 0 15px rgba(0, 224, 255, 0.5);
         }
         
         .preview-features {
@@ -246,6 +257,20 @@
             border-radius: 15px;
         }
         
+        .splash-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, var(--primary-color) 0%, var(--secondary-color) 25%, var(--accent-color) 50%, var(--success-color) 75%, var(--primary-color) 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 10s ease infinite;
+            opacity: 0.1;
+            z-index: 1;
+        }
+        
         .splash-content {
             position: absolute;
             top: 50%;
@@ -258,9 +283,9 @@
         }
         
         .splash-title {
-            font-size: 100px;
+            font-size: 80px;
             font-weight: 900;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
             text-shadow: 0 0 30px rgba(0, 224, 255, 0.8);
             background: linear-gradient(45deg, var(--primary-color), #ffffff, var(--secondary-color));
             background-size: 200% 200%;
@@ -268,14 +293,6 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             animation: textShine 4s ease-in-out infinite;
-        }
-        
-        .splash-subtitle {
-            font-size: 40px;
-            margin-bottom: 40px;
-            color: var(--primary-color);
-            font-weight: 600;
-            text-shadow: 0 0 20px rgba(0, 224, 255, 0.5);
         }
         
         .splash-features {
@@ -474,8 +491,7 @@
             <div class="image-container">
                 <div class="hero-container">
                     <div class="hero-content">
-                        <div class="hero-title">boing</div>
-                        <div class="hero-subtitle">finance</div>
+                        <div class="hero-title">boing.finance</div>
                         <div class="hero-features">Cross-Chain DeFi Platform</div>
                     </div>
                 </div>
@@ -489,9 +505,8 @@
             <div class="image-container">
                 <div class="preview-container">
                     <div class="preview-content">
-                        <div class="preview-title">boing</div>
-                        <div class="preview-subtitle">finance</div>
-                        <div class="preview-features">Deploy • Trade • Build</div>
+                        <div class="preview-title">boing.finance</div>
+                        <div class="preview-features">Deploy • Trade • Swap</div>
                     </div>
                 </div>
             </div>
@@ -504,8 +519,7 @@
             <div class="image-container">
                 <div class="splash-container">
                     <div class="splash-content">
-                        <div class="splash-title">boing</div>
-                        <div class="splash-subtitle">finance</div>
+                        <div class="splash-title">boing.finance</div>
                         <div class="splash-features">Cross-Chain DeFi Platform</div>
                         <div class="loading-dots">●●●</div>
                     </div>
