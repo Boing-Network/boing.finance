@@ -145,6 +145,15 @@
             z-index: 5;
         }
         
+        .hero-canvas {
+            width: 1920px;
+            height: 1080px;
+            transform: scale(0.25);
+            transform-origin: top left;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+        
         .hero-container::before {
             content: '';
             position: absolute;
@@ -204,6 +213,15 @@
             z-index: 5;
         }
         
+        .preview-canvas {
+            width: 1200px;
+            height: 630px;
+            transform: scale(0.3);
+            transform-origin: top left;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+        
         .preview-container::before {
             content: '';
             position: absolute;
@@ -260,6 +278,15 @@
             overflow: hidden;
             border-radius: 15px;
             z-index: 5;
+        }
+        
+        .splash-canvas {
+            width: 1080px;
+            height: 1920px;
+            transform: scale(0.2);
+            transform-origin: top left;
+            border-radius: 15px;
+            cursor: pointer;
         }
         
         .splash-container::before {
@@ -501,6 +528,7 @@
                         <div class="hero-features">Cross-Chain DeFi Platform</div>
                     </div>
                 </div>
+                <canvas id="heroCanvas" class="hero-canvas" width="1920" height="1080"></canvas>
             </div>
             <button class="download-btn" onclick="downloadImage('hero')">Download Hero Image</button>
         </div>
@@ -515,6 +543,7 @@
                         <div class="preview-features">Deploy • Trade • Swap</div>
                     </div>
                 </div>
+                <canvas id="previewCanvas" class="preview-canvas" width="1200" height="630"></canvas>
             </div>
             <button class="download-btn" onclick="downloadImage('preview')">Download Preview Image</button>
         </div>
@@ -530,54 +559,161 @@
                         <div class="loading-dots">●●●</div>
                     </div>
                 </div>
+                <canvas id="splashCanvas" class="splash-canvas" width="1080" height="1920"></canvas>
             </div>
             <button class="download-btn" onclick="downloadImage('splash')">Download Splash Image</button>
         </div>
     </div>
 
     <script>
-        function downloadImage(type) {
-            const containers = {
-                'hero': document.querySelector('.hero-container'),
-                'preview': document.querySelector('.preview-container'),
-                'splash': document.querySelector('.splash-container')
-            };
+        // Render content to canvas elements
+        function renderToCanvas() {
+            // Get device pixel ratio for crisp rendering
+            const dpr = window.devicePixelRatio || 1;
             
-            const container = containers[type];
-            if (!container) return;
+            // Hero Canvas
+            const heroCanvas = document.getElementById('heroCanvas');
+            const heroCtx = heroCanvas.getContext('2d');
             
-            // Create a canvas to capture the image
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
+            // Set canvas size accounting for device pixel ratio
+            heroCanvas.width = 1920 * dpr;
+            heroCanvas.height = 1080 * dpr;
+            heroCtx.scale(dpr, dpr);
             
-            // Set canvas size to the actual size (before scaling)
-            const rect = container.getBoundingClientRect();
-            const scale = type === 'hero' ? 4 : type === 'preview' ? 3.33 : 5; // Inverse of transform scale
-            canvas.width = rect.width * scale;
-            canvas.height = rect.height * scale;
+            // Set canvas background
+            heroCtx.fillStyle = '#0f172a';
+            heroCtx.fillRect(0, 0, 1920, 1080);
             
-            // Create a temporary container with the full size
-            const tempContainer = container.cloneNode(true);
-            tempContainer.style.transform = 'scale(1)';
-            tempContainer.style.position = 'absolute';
-            tempContainer.style.left = '-9999px';
-            tempContainer.style.top = '0';
-            document.body.appendChild(tempContainer);
+            // Add gradient background
+            const heroGradient = heroCtx.createLinearGradient(0, 0, 1920, 1080);
+            heroGradient.addColorStop(0, 'rgba(0, 224, 255, 0.1)');
+            heroGradient.addColorStop(0.5, 'rgba(123, 97, 255, 0.1)');
+            heroGradient.addColorStop(1, 'rgba(0, 255, 178, 0.1)');
+            heroCtx.fillStyle = heroGradient;
+            heroCtx.fillRect(0, 0, 1920, 1080);
             
-            // Use html2canvas if available, otherwise provide instructions
-            if (typeof html2canvas !== 'undefined') {
-                html2canvas(tempContainer).then(canvas => {
-                    const link = document.createElement('a');
-                    link.download = `${type}.png`;
-                    link.href = canvas.toDataURL();
-                    link.click();
-                });
-            } else {
-                alert('Please right-click on the image and select "Save image as..." to download.');
-            }
+            // Add title
+            heroCtx.font = 'normal 120px Inter, sans-serif';
+            heroCtx.textAlign = 'center';
+            heroCtx.textBaseline = 'middle';
+            heroCtx.textRenderingOptimization = 'optimizeQuality';
+            heroCtx.imageSmoothingEnabled = true;
             
-            document.body.removeChild(tempContainer);
+            // Create gradient for text
+            const titleGradient = heroCtx.createLinearGradient(0, 0, 1920, 0);
+            titleGradient.addColorStop(0, '#00E0FF');
+            titleGradient.addColorStop(0.5, '#ffffff');
+            titleGradient.addColorStop(1, '#7B61FF');
+            heroCtx.fillStyle = titleGradient;
+            heroCtx.fillText('boing.finance', 960, 400);
+            
+            // Add subtitle
+            heroCtx.font = 'normal 32px Inter, sans-serif';
+            heroCtx.fillStyle = '#cbd5e1';
+            heroCtx.fillText('Cross-Chain DeFi Platform', 960, 500);
+            
+            // Preview Canvas
+            const previewCanvas = document.getElementById('previewCanvas');
+            const previewCtx = previewCanvas.getContext('2d');
+            
+            // Set canvas size accounting for device pixel ratio
+            previewCanvas.width = 1200 * dpr;
+            previewCanvas.height = 630 * dpr;
+            previewCtx.scale(dpr, dpr);
+            
+            // Set canvas background
+            previewCtx.fillStyle = '#0f172a';
+            previewCtx.fillRect(0, 0, 1200, 630);
+            
+            // Add gradient background
+            const previewGradient = previewCtx.createLinearGradient(0, 0, 1200, 630);
+            previewGradient.addColorStop(0, 'rgba(0, 224, 255, 0.08)');
+            previewGradient.addColorStop(0.5, 'rgba(123, 97, 255, 0.08)');
+            previewGradient.addColorStop(1, 'rgba(0, 255, 178, 0.08)');
+            previewCtx.fillStyle = previewGradient;
+            previewCtx.fillRect(0, 0, 1200, 630);
+            
+            // Add title
+            previewCtx.font = 'normal 80px Inter, sans-serif';
+            previewCtx.textAlign = 'center';
+            previewCtx.textBaseline = 'middle';
+            previewCtx.textRenderingOptimization = 'optimizeQuality';
+            previewCtx.imageSmoothingEnabled = true;
+            
+            // Create gradient for text
+            const previewTitleGradient = previewCtx.createLinearGradient(0, 0, 1200, 0);
+            previewTitleGradient.addColorStop(0, '#00E0FF');
+            previewTitleGradient.addColorStop(0.5, '#ffffff');
+            previewTitleGradient.addColorStop(1, '#7B61FF');
+            previewCtx.fillStyle = previewTitleGradient;
+            previewCtx.fillText('boing.finance', 600, 250);
+            
+            // Add subtitle
+            previewCtx.font = 'normal 24px Inter, sans-serif';
+            previewCtx.fillStyle = '#cbd5e1';
+            previewCtx.fillText('Deploy • Trade • Swap', 600, 350);
+            
+            // Splash Canvas
+            const splashCanvas = document.getElementById('splashCanvas');
+            const splashCtx = splashCanvas.getContext('2d');
+            
+            // Set canvas size accounting for device pixel ratio
+            splashCanvas.width = 1080 * dpr;
+            splashCanvas.height = 1920 * dpr;
+            splashCtx.scale(dpr, dpr);
+            
+            // Set canvas background
+            splashCtx.fillStyle = '#0f172a';
+            splashCtx.fillRect(0, 0, 1080, 1920);
+            
+            // Add gradient background
+            const splashGradient = splashCtx.createLinearGradient(0, 0, 1080, 1920);
+            splashGradient.addColorStop(0, 'rgba(0, 224, 255, 0.1)');
+            splashGradient.addColorStop(0.5, 'rgba(123, 97, 255, 0.1)');
+            splashGradient.addColorStop(1, 'rgba(0, 255, 178, 0.1)');
+            splashCtx.fillStyle = splashGradient;
+            splashCtx.fillRect(0, 0, 1080, 1920);
+            
+            // Add title
+            splashCtx.font = 'normal 100px Inter, sans-serif';
+            splashCtx.textAlign = 'center';
+            splashCtx.textBaseline = 'middle';
+            splashCtx.textRenderingOptimization = 'optimizeQuality';
+            splashCtx.imageSmoothingEnabled = true;
+            
+            // Create gradient for text
+            const splashTitleGradient = splashCtx.createLinearGradient(0, 0, 1080, 0);
+            splashTitleGradient.addColorStop(0, '#00E0FF');
+            splashTitleGradient.addColorStop(0.5, '#ffffff');
+            splashTitleGradient.addColorStop(1, '#7B61FF');
+            splashCtx.fillStyle = splashTitleGradient;
+            splashCtx.fillText('boing.finance', 540, 800);
+            
+            // Add subtitle
+            splashCtx.font = 'normal 28px Inter, sans-serif';
+            splashCtx.fillStyle = '#cbd5e1';
+            splashCtx.fillText('Cross-Chain DeFi Platform', 540, 950);
+            
+            // Add loading dots
+            splashCtx.font = 'normal 60px Inter, sans-serif';
+            splashCtx.fillStyle = '#00E0FF';
+            splashCtx.fillText('●●●', 540, 1100);
         }
+        
+        function downloadImage(type) {
+            const canvasId = type + 'Canvas';
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.download = `${type}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // Render canvases when page loads
+        document.addEventListener('DOMContentLoaded', renderToCanvas);
     </script>
 </body>
 </html>

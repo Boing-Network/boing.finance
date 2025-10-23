@@ -82,6 +82,76 @@ app.route('/analytics', analyticsRoutes);
 const ipfsRoutes = createIPFSRoutes();
 app.route('/api', ipfsRoutes);
 
+// Webhook routes
+app.post('/api/webhook', async (c) => {
+  try {
+    console.log('🔔 Farcaster webhook received:', {
+      timestamp: new Date().toISOString(),
+      headers: Object.fromEntries(c.req.raw.headers.entries()),
+      body: await c.req.json()
+    });
+
+    // Handle different types of Farcaster events
+    const body = await c.req.json();
+    const { type, data } = body;
+
+    switch (type) {
+      case 'user_interaction':
+        console.log('👤 User interaction:', data);
+        break;
+      
+      case 'user_follow':
+        console.log('➕ User followed:', data);
+        break;
+      
+      case 'user_unfollow':
+        console.log('➖ User unfollowed:', data);
+        break;
+      
+      case 'app_install':
+        console.log('📱 App installed:', data);
+        break;
+      
+      case 'app_uninstall':
+        console.log('🗑️ App uninstalled:', data);
+        break;
+      
+      case 'analytics':
+        console.log('📊 Analytics data:', data);
+        break;
+      
+      default:
+        console.log('❓ Unknown webhook type:', type, data);
+    }
+
+    return c.json({
+      success: true,
+      message: 'Webhook received successfully',
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('❌ Webhook error:', error);
+    
+    return c.json({
+      success: false,
+      message: 'Webhook processed with errors',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Webhook health check
+app.get('/api/webhook/health', (c) => {
+  return c.json({
+    success: true,
+    message: 'Webhook endpoint is healthy',
+    timestamp: new Date().toISOString(),
+    service: 'boing.finance'
+  });
+});
+
 // Error handling
 app.onError((err, c) => {
   console.error('Worker Error:', err);
