@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { WalletProvider } from './contexts/WalletContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { useWalletConnection } from './hooks/useWalletConnection';
+import BaseMiniAppWrapper from './components/BaseMiniAppWrapper';
+import BaseNetworkOptimizer from './components/BaseNetworkOptimizer';
 import EnhancedAnimatedBackground from './components/EnhancedAnimatedBackground';
 import WalletConnect from './components/WalletConnect';
 import NetworkSelector from './components/NetworkSelector';
@@ -84,6 +86,7 @@ function AppContent() {
   return (
     <div className="relative min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
       <EnhancedAnimatedBackground />
+      <BaseNetworkOptimizer />
       
       {/* Navigation */}
       <nav className="relative z-30 backdrop-blur-sm border-b border-cyan-500/30 shadow-lg shadow-cyan-500/20" style={{ 
@@ -595,26 +598,28 @@ function App() {
       <HelmetProvider>
         <ThemeProvider>
           <WalletProvider>
-            <Router>
-            <Helmet>
-              <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-              <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
-              <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
-            </Helmet>
-            <AppContent />
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                duration: 4000,
-                style: {
-                  background: 'var(--bg-card)',
-                  color: 'var(--text-primary)',
-                  border: '1px solid var(--border-color)',
-                },
-              }}
-            />
-          </Router>
-        </WalletProvider>
+            <BaseMiniAppWrapper>
+              <Router>
+                <Helmet>
+                  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+                  <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
+                  <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+                </Helmet>
+                <AppContent />
+                <Toaster
+                  position="top-right"
+                  toastOptions={{
+                    duration: 4000,
+                    style: {
+                      background: 'var(--bg-card)',
+                      color: 'var(--text-primary)',
+                      border: '1px solid var(--border-color)',
+                    },
+                  }}
+                />
+              </Router>
+            </BaseMiniAppWrapper>
+          </WalletProvider>
         </ThemeProvider>
       </HelmetProvider>
     </QueryClientProvider>

@@ -11,53 +11,6 @@ import { transactionTrackingService } from '../services/transactionTrackingServi
 import externalSwapService from '../services/externalSwapService';
 import ExternalDEXQuotes from '../components/ExternalDEXQuotes';
 
-// Add AnimatedBackground and MochiAstronaut imports (define in this file for now)
-function AnimatedBackground() {
-  return null; // Removed since it's now applied centrally
-}
-function MochiAstronaut({ position = "top-right" }) {
-  const getPositionClasses = () => {
-    switch (position) {
-      case "top-right":
-        return "absolute right-0 top-0 mt-4 mr-4 z-20";
-      case "bottom-right":
-        return "absolute right-0 bottom-0 mb-4 mr-4 z-20";
-      case "top-left":
-        return "absolute left-0 top-0 mt-4 ml-4 z-20";
-      case "bottom-left":
-        return "absolute left-0 bottom-0 mb-4 ml-4 z-20";
-      default:
-        return "absolute right-0 top-0 mt-4 mr-4 z-20";
-    }
-  };
-
-  return (
-    <svg width="60" height="60" viewBox="0 0 200 200" className={`animate-float ${getPositionClasses()}`} fill="none" xmlns="http://www.w3.org/2000/svg">
-      <g>
-        <ellipse cx="100" cy="175" rx="28" ry="8" fill="#1e293b" opacity="0.13" />
-        <ellipse cx="100" cy="85" rx="48" ry="44" fill="#fff" stroke="#bfc9d9" strokeWidth="3" />
-        <ellipse cx="100" cy="85" rx="42" ry="38" fill="#00E0FF" fillOpacity="0.2" stroke="#7dd3fc" strokeWidth="3" />
-        <ellipse cx="100" cy="90" rx="32" ry="30" fill="#f8fafc" stroke="#bfc9d9" strokeWidth="2" />
-        <ellipse cx="88" cy="95" rx="5" ry="5" fill="#60a5fa" />
-        <ellipse cx="112" cy="95" rx="5" ry="5" fill="#60a5fa" />
-        <ellipse cx="88" cy="94" rx="1.2" ry="2" fill="#fff" opacity="0.7" />
-        <ellipse cx="112" cy="94" rx="1.2" ry="2" fill="#fff" opacity="0.7" />
-        <ellipse cx="85" cy="75" rx="12" ry="6" fill="#fff" opacity="0.18" />
-        <ellipse cx="100" cy="140" rx="28" ry="24" fill="#e0e7ef" stroke="#bfc9d9" strokeWidth="2" />
-        <ellipse cx="78" cy="135" rx="7" ry="13" fill="#e0e7ef" stroke="#bfc9d9" strokeWidth="2" />
-        <ellipse cx="122" cy="135" rx="7" ry="13" fill="#e0e7ef" stroke="#bfc9d9" strokeWidth="2" />
-        <ellipse cx="72" cy="147" rx="6" ry="6" fill="#f8fafc" stroke="#bfc9d9" strokeWidth="2" />
-        <ellipse cx="128" cy="147" rx="6" ry="6" fill="#f8fafc" stroke="#bfc9d9" strokeWidth="2" />
-        <ellipse cx="88" cy="165" rx="7" ry="12" fill="#e0e7ef" stroke="#bfc9d9" strokeWidth="2" />
-        <ellipse cx="112" cy="165" rx="7" ry="12" fill="#e0e7ef" stroke="#bfc9d9" strokeWidth="2" />
-        <ellipse cx="88" cy="180" rx="8" ry="4" fill="#a5b4fc" />
-        <ellipse cx="112" cy="180" rx="8" ry="4" fill="#a5b4fc" />
-        <ellipse cx="100" cy="150" rx="10" ry="8" fill="#bae6fd" stroke="#7dd3fc" strokeWidth="1.5" />
-      </g>
-      <animateTransform attributeName="transform" type="translate" values="0 0; 0 -12; 0 0" dur="4s" repeatCount="indefinite" />
-    </svg>
-  );
-}
 
 const Swap = () => {
   const { isConnected, account } = useWalletConnection();
@@ -1699,8 +1652,6 @@ const Swap = () => {
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
       </Helmet>
       <div className="relative min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
-        <AnimatedBackground />
-        <MochiAstronaut position="top-right" />
         {/* Settings Button */}
         <button
           className="absolute top-6 right-6 z-30 p-2 rounded-full shadow-lg"

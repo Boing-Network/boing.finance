@@ -1,0 +1,66 @@
+{
+  "name": "Boing Finance",
+  "description": "Cross-chain DEX for token deployment, trading, and liquidity management across multiple blockchains",
+  "icon": "https://boing.finance/logo.svg",
+  "splash": "https://boing.finance/og-image.svg",
+  "category": "finance",
+  "tags": ["defi", "dex", "trading", "tokens", "cross-chain", "liquidity", "swap", "bridge"],
+  "url": "https://boing.finance",
+  "version": "1.0.0",
+  "author": "Boing Finance",
+  "homepage": "https://boing.finance",
+  "repository": "https://github.com/boing-finance/dex",
+  "support": "https://boing.finance/help-center",
+  "privacy": "https://boing.finance/privacy",
+  "terms": "https://boing.finance/terms",
+  "networks": [
+    {
+      "name": "Ethereum",
+      "chainId": 1,
+      "symbol": "ETH"
+    },
+    {
+      "name": "Base",
+      "chainId": 8453,
+      "symbol": "ETH"
+    },
+    {
+      "name": "Polygon",
+      "chainId": 137,
+      "symbol": "MATIC"
+    },
+    {
+      "name": "BNB Smart Chain",
+      "chainId": 56,
+      "symbol": "BNB"
+    },
+    {
+      "name": "Arbitrum One",
+      "chainId": 42161,
+      "symbol": "ETH"
+    },
+    {
+      "name": "Optimism",
+      "chainId": 10,
+      "symbol": "ETH"
+    }
+  ],
+  "features": [
+    "token-deployment",
+    "cross-chain-trading",
+    "liquidity-pools",
+    "portfolio-tracking",
+    "analytics",
+    "bridge"
+  ],
+  "screenshots": [
+    "https://boing.finance/screenshot-1.png",
+    "https://boing.finance/screenshot-2.png",
+    "https://boing.finance/screenshot-3.png"
+  ],
+  "social": {
+    "twitter": "https://twitter.com/boing_finance",
+    "telegram": "https://t.me/boing_finance",
+    "discord": "https://discord.gg/7RDtQtQvBW"
+  }
+}
