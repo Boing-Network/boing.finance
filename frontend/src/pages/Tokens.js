@@ -8,7 +8,6 @@ import axios from 'axios';
 import config from '../config';
 import TokenManagementModal from '../components/TokenManagementModal';
 import NetworkSelector from '../components/NetworkSelector';
-import GasFeeEstimator from '../components/GasFeeEstimator';
 import { InfoTooltip, WarningTooltip, HelpTooltip } from '../components/Tooltip';
 import { Helmet } from 'react-helmet-async';
 
