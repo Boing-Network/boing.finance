@@ -1,18 +1,18 @@
 // Environment configuration
 const config = {
   development: {
-    apiUrl: 'https://boing-api-staging.your-subdomain.workers.dev/api',
-    workerUrl: 'https://boing-api-staging.your-subdomain.workers.dev/api',
+    apiUrl: 'https://boing-api.nico-chikuji.workers.dev/api',
+    workerUrl: 'https://boing-api.nico-chikuji.workers.dev/api',
     environment: 'development'
   },
   staging: {
-    apiUrl: 'https://boing-api-staging.your-subdomain.workers.dev/api',
-    workerUrl: 'https://boing-api-staging.your-subdomain.workers.dev/api',
+    apiUrl: 'https://boing-api-staging.nico-chikuji.workers.dev/api',
+    workerUrl: 'https://boing-api-staging.nico-chikuji.workers.dev/api',
     environment: 'staging'
   },
   production: {
-    apiUrl: 'https://boing-api-prod.your-subdomain.workers.dev/api',
-    workerUrl: 'https://boing-api-prod.your-subdomain.workers.dev/api',
+    apiUrl: 'https://boing-api-prod.nico-chikuji.workers.dev/api',
+    workerUrl: 'https://boing-api-prod.nico-chikuji.workers.dev/api',
     environment: 'production'
   }
 };
