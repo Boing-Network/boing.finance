@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useNetwork } from '../hooks/useNetwork';
-import BridgeStatus from '../components/BridgeStatus';
 import TokenManagementModal from '../components/TokenManagementModal';
 import { InfoTooltip, WarningTooltip, HelpTooltip } from '../components/Tooltip';
 import toast from 'react-hot-toast';

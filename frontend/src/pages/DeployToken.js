@@ -11,7 +11,6 @@ import { getApiUrl } from '../config';
 import axios from 'axios';
 import TokenManagementModal from '../components/TokenManagementModal';
 import NetworkSelector from '../components/NetworkSelector';
-import GasFeeEstimator from '../components/GasFeeEstimator';
 import SecurityBadges from '../components/SecurityBadges';
 import { InfoTooltip, WarningTooltip, HelpTooltip } from '../components/Tooltip';
 import { Helmet } from 'react-helmet-async';
