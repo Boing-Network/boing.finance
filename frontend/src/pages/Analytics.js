@@ -4,6 +4,7 @@ import axios from 'axios';
 import config from '../config';
 import { Helmet } from 'react-helmet-async';
 import coingeckoService from '../services/coingeckoService';
+import OptimizedImage from '../components/OptimizedImage';
 
 // BoingAstronaut component
 

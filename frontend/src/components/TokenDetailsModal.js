@@ -10,6 +10,7 @@ import { tokenFavorites } from '../utils/tokenFavorites';
 import { getNetworkByChainId } from '../config/networks';
 import toast from 'react-hot-toast';
 import LoadingSpinner from './LoadingSpinner';
+import OptimizedImage from './OptimizedImage';
 
 const TokenDetailsModal = ({ token, isOpen, onClose, network }) => {
   const [isFavorite, setIsFavorite] = useState(false);

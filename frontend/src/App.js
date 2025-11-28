@@ -691,18 +691,43 @@ function Home() {
         })}
         </script>
         
-        {/* Structured Data for Organization */}
+        {/* Enhanced Structured Data for Organization */}
         <script type="application/ld+json">
         {JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Organization",
-          "name": "Boing Finance",
+          "name": "boing.finance",
           "url": "https://boing.finance",
-          "logo": "https://boing.finance/logo.svg",
-          "description": "Deploy tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance - the most user-friendly decentralized exchange (DEX) for token deployment and cross-chain trading.",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://boing.finance/logo.svg"
+          },
+          "description": "Deploy tokens, create liquidity pools, and trade across multiple blockchains with boing.finance - the most user-friendly decentralized exchange (DEX) for token deployment and cross-chain trading.",
           "sameAs": [
             "https://twitter.com/boingfinance"
-          ]
+          ],
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "Customer Service",
+            "url": "https://boing.finance/contact-us"
+          }
+        })}
+        </script>
+        
+        {/* Structured Data for FinancialProduct */}
+        <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FinancialProduct",
+          "name": "boing.finance DeFi Platform",
+          "description": "Decentralized exchange for token deployment, liquidity pools, and cross-chain trading.",
+          "provider": {
+            "@type": "Organization",
+            "name": "boing.finance",
+            "url": "https://boing.finance"
+          },
+          "category": "Cryptocurrency Exchange",
+          "areaServed": "Worldwide"
         })}
         </script>
         
