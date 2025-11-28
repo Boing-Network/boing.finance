@@ -40,6 +40,9 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      - name: Install Wrangler
+        run: npm install -g wrangler@latest
+
       - name: Build for Production
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event.inputs.environment == 'production')
         working-directory: frontend
@@ -58,27 +61,21 @@ jobs:
           REACT_APP_BACKEND_URL: https://boing-api-staging.nico-chikuji.workers.dev
           CI: false
 
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: boing-finance-prod
-          directory: frontend/build
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          wranglerVersion: '3'
+      - name: Deploy to Cloudflare Pages (Production)
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event.inputs.environment == 'production')
+        working-directory: frontend
+        run: wrangler pages deploy build --project-name=boing-finance-prod --branch=main
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy to Cloudflare Pages (Staging)
-        uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: boing-finance
-          directory: frontend/build
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          wranglerVersion: '3'
         if: github.ref == 'refs/heads/staging' || github.event.inputs.environment == 'staging'
+        working-directory: frontend
+        run: wrangler pages deploy build --project-name=boing-finance --branch=staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deployment Summary
         if: always()
