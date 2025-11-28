@@ -43,6 +43,11 @@ jobs:
       - name: Install Wrangler
         run: npm install -g wrangler@latest
 
+      - name: Authenticate Wrangler
+        run: |
+          echo "CLOUDFLARE_API_TOKEN=${{ secrets.CLOUDFLARE_API_TOKEN }}" >> $GITHUB_ENV
+          echo "CLOUDFLARE_ACCOUNT_ID=${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" >> $GITHUB_ENV
+
       - name: Build for Production
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event.inputs.environment == 'production')
         working-directory: frontend
@@ -64,7 +69,11 @@ jobs:
       - name: Deploy to Cloudflare Pages (Production)
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event.inputs.environment == 'production')
         working-directory: frontend
-        run: wrangler pages deploy build --project-name=boing-finance-prod --branch=main
+        run: |
+          wrangler pages deploy build \
+            --project-name=boing-finance-prod \
+            --branch=main \
+            --compatibility-date=2024-01-01
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -72,7 +81,11 @@ jobs:
       - name: Deploy to Cloudflare Pages (Staging)
         if: github.ref == 'refs/heads/staging' || github.event.inputs.environment == 'staging'
         working-directory: frontend
-        run: wrangler pages deploy build --project-name=boing-finance --branch=staging
+        run: |
+          wrangler pages deploy build \
+            --project-name=boing-finance \
+            --branch=staging \
+            --compatibility-date=2024-01-01
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
