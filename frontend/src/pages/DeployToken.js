@@ -18,6 +18,10 @@ import { getContractAddress } from '../config/contracts';
 import LogoUpload from '../components/LogoUpload';
 import { uploadMetadataToIPFS, createTokenMetadata } from '../utils/ipfsUpload';
 import EnhancedAnimatedBackground from '../components/EnhancedAnimatedBackground';
+import TokenPreview from '../components/TokenPreview';
+import DeploymentProgress from '../components/DeploymentProgress';
+import DeploymentHistory from '../components/DeploymentHistory';
+import { deploymentHistory as deploymentHistoryUtil } from '../utils/deploymentHistory';
 
 // Import ABI and bytecode from the artifacts
 const ERC20_ABI = AdvancedERC20Artifact.abi;
@@ -417,6 +421,13 @@ export default function DeployToken() {
   const [metadataUrl, setMetadataUrl] = useState('');
   const [uploadingMetadata, setUploadingMetadata] = useState(false);
 
+  // Enhanced deployment features
+  const [showPreview, setShowPreview] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [deploymentSteps, setDeploymentSteps] = useState([]);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [deploymentError, setDeploymentError] = useState(null);
+
   // Get current network
   const network = getCurrentNetwork();
 
@@ -705,8 +716,41 @@ export default function DeployToken() {
     setDeploying(true);
     setTxHash('');
     setTokenAddress('');
+    setDeploymentError(null);
+    
+    // Initialize deployment steps
+    const steps = [
+      { title: 'Preparing deployment', description: 'Validating token parameters...', estimatedTime: '5s' },
+      { title: 'Uploading metadata', description: 'Storing token metadata on IPFS...', estimatedTime: '10s' },
+      { title: 'Deploying contract', description: 'Creating smart contract on blockchain...', estimatedTime: '30s' },
+      { title: 'Confirming transaction', description: 'Waiting for blockchain confirmation...', estimatedTime: '15s' },
+      { title: 'Finalizing', description: 'Saving deployment details...', estimatedTime: '5s' }
+    ];
+    setDeploymentSteps(steps);
+    setCurrentStepIndex(0);
+
+    // Create deployment record
+    const deploymentId = Date.now().toString();
+    const deploymentRecord = {
+      id: deploymentId,
+      name,
+      symbol,
+      network: network,
+      chainId: network?.chainId,
+      status: 'deploying',
+      deployerAddress: await signer.getAddress(),
+      timestamp: Date.now(),
+      date: new Date().toISOString()
+    };
+    deploymentHistoryUtil.add(deploymentRecord);
+
     try {
-      // Upload logo and metadata to IPFS first
+      // Step 1: Prepare deployment
+      setCurrentStepIndex(0);
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Step 2: Upload logo and metadata to IPFS
+      setCurrentStepIndex(1);
       let finalLogoUrl = logoUrl || 'https://placeholder.com/logo.png';
       let metadataUrl = null;
       
@@ -911,7 +955,8 @@ export default function DeployToken() {
           timelockDelay: securityConfig.timelockDelay.toString()
         });
         
-        // Deploy token through factory with custom security configuration
+        // Step 3: Deploy token through factory
+        setCurrentStepIndex(2);
         const tx = await tokenFactory.deployToken(
           name,
           symbol,
@@ -925,9 +970,11 @@ export default function DeployToken() {
         );
         
         setTxHash(tx.hash);
+        deploymentHistoryUtil.updateStatus(deploymentId, 'deploying', tx.hash);
         toast.success(`Token deployment transaction sent! Hash: ${tx.hash}`);
         
-        // Wait for deployment
+        // Step 4: Wait for deployment
+        setCurrentStepIndex(3);
         const receipt = await tx.wait();
         
         // Find the TokenDeployed event to get the deployed token address
@@ -944,6 +991,19 @@ export default function DeployToken() {
           const parsedEvent = tokenFactory.interface.parseLog(tokenDeployedEvent);
           const deployedAddress = parsedEvent.args.tokenAddress;
           setTokenAddress(deployedAddress);
+          
+          // Step 5: Finalize
+          setCurrentStepIndex(4);
+          
+          // Update deployment history
+          deploymentHistoryUtil.updateStatus(deploymentId, 'completed', tx.hash);
+          deploymentHistoryUtil.add({
+            ...deploymentRecord,
+            contractAddress: deployedAddress,
+            txHash: tx.hash,
+            status: 'completed',
+            metadataUrl
+          });
           
           toast.success(`Token deployed successfully! Address: ${deployedAddress}`);
           
@@ -993,8 +1053,6 @@ export default function DeployToken() {
           const existingDeployments = JSON.parse(localStorage.getItem('tokenDeployments') || '[]');
           existingDeployments.push(deploymentInfo);
           localStorage.setItem('tokenDeployments', JSON.stringify(existingDeployments));
-          
-          toast.success(`Token deployed successfully! Address: ${deployedAddress}`);
           
           // Show success message with next steps
           const nextSteps = [
@@ -1120,9 +1178,14 @@ export default function DeployToken() {
       
     } catch (error) {
       console.error('Deployment error:', error);
+      setDeploymentError(error.message);
+      if (deploymentId) {
+        deploymentHistoryUtil.updateStatus(deploymentId, 'failed');
+      }
       toast.error(`Deployment failed: ${error.message}`);
     } finally {
       setDeploying(false);
+      setCurrentStepIndex(0);
     }
   };
 
@@ -1202,7 +1265,89 @@ export default function DeployToken() {
                 Create and deploy your own ERC-20 token with advanced security features, 
                 comprehensive documentation, and professional-grade infrastructure.
               </p>
+              
+              {/* Quick Actions */}
+              <div className="flex items-center justify-center space-x-4 mt-4">
+                <button
+                  onClick={() => setShowPreview(!showPreview)}
+                  className="px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+                  style={{
+                    backgroundColor: showPreview ? 'var(--bg-secondary)' : 'var(--bg-tertiary)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--border-color)'
+                  }}
+                >
+                  {showPreview ? 'Hide' : 'Show'} Preview
+                </button>
+                <button
+                  onClick={() => setShowHistory(!showHistory)}
+                  className="px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+                  style={{
+                    backgroundColor: showHistory ? 'var(--bg-secondary)' : 'var(--bg-tertiary)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--border-color)'
+                  }}
+                >
+                  Deployment History
+                </button>
+              </div>
             </div>
+
+            {/* Token Preview */}
+            {showPreview && (
+              <div className="mb-8">
+                <TokenPreview
+                  name={name}
+                  symbol={symbol}
+                  logoUrl={logoUrl}
+                  description={description}
+                  initialSupply={initialSupply}
+                  decimals={decimals}
+                  network={network}
+                  socialLinks={socialLinks}
+                  securityFeatures={{
+                    renounceMint: isFeatureAllowed('renounceMint') ? renounceMint : false,
+                    antiBot: isFeatureAllowed('antiBot') ? antiBotEnabled : false,
+                    antiWhale: isFeatureAllowed('antiWhale') ? antiWhaleEnabled : false
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Deployment Progress */}
+            {deploying && deploymentSteps.length > 0 && (
+              <div className="mb-8 rounded-xl border p-6" style={{
+                backgroundColor: 'var(--bg-card)',
+                borderColor: 'var(--border-color)'
+              }}>
+                <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                  Deployment Progress
+                </h3>
+                <DeploymentProgress
+                  steps={deploymentSteps}
+                  currentStep={currentStepIndex}
+                  error={deploymentError}
+                />
+              </div>
+            )}
+
+            {/* Deployment History Modal */}
+            {showHistory && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
+                <div className="rounded-xl p-6 shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" style={{
+                  backgroundColor: 'var(--bg-card)',
+                  border: '1px solid var(--border-color)'
+                }}>
+                  <DeploymentHistory
+                    onSelectDeployment={(deployment) => {
+                      // Load deployment details
+                      setShowHistory(false);
+                    }}
+                    onClose={() => setShowHistory(false)}
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Service Plan Selection */}
             <div className="rounded-2xl shadow-xl p-6 mb-8 border" style={{
