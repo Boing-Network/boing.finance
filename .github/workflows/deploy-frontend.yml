@@ -48,7 +48,6 @@ jobs:
           REACT_APP_ENVIRONMENT: production
           REACT_APP_BACKEND_URL: https://boing-api-prod.nico-chikuji.workers.dev
           CI: false
-          DISABLE_ESLINT_PLUGIN: true
 
       - name: Build for Staging
         if: github.ref == 'refs/heads/staging' || github.event.inputs.environment == 'staging'
@@ -58,7 +57,6 @@ jobs:
           REACT_APP_ENVIRONMENT: staging
           REACT_APP_BACKEND_URL: https://boing-api-staging.nico-chikuji.workers.dev
           CI: false
-          DISABLE_ESLINT_PLUGIN: true
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@v1

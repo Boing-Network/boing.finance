@@ -82,6 +82,6 @@ jobs:
         working-directory: frontend
         run: |
           npm ci
-          CI=false DISABLE_ESLINT_PLUGIN=true npm run build || echo "⚠️ Build completed with warnings (non-blocking)"
+          CI=false npm run build || echo "⚠️ Build completed with warnings (non-blocking)"
           echo "✅ Frontend build check passed"
 
