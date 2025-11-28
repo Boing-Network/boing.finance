@@ -90,7 +90,6 @@ jobs:
           wrangler pages deploy build \
             --project-name=boing-finance-prod \
             --branch=main \
-            --compatibility-date=2024-01-01 \
             --commit-dirty=true || {
               echo "⚠️ Deployment failed. Checking if project exists..."
               echo "If project doesn't exist, it will be created automatically."
@@ -112,7 +111,6 @@ jobs:
           wrangler pages deploy build \
             --project-name=boing-finance \
             --branch=staging \
-            --compatibility-date=2024-01-01 \
             --commit-dirty=true || {
               echo "⚠️ Deployment failed. Checking if project exists..."
               echo "If project doesn't exist, it will be created automatically."
