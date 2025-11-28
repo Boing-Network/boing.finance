@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useWalletConnection } from '../hooks/useWalletConnection';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import config from '../config';
 import SettingsModal from '../components/SettingsModal';

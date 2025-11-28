@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import { useWallet } from '../contexts/WalletContext';
 import { NETWORKS } from '../config/networks';
 import TokenScanner from '../services/tokenScanner';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import config from '../config';
 import TokenManagementModal from '../components/TokenManagementModal';

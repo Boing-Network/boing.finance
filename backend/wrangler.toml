@@ -67,12 +67,16 @@ bucket_name = "boing-storage"
 binding = "BOING_STORAGE"
 bucket_name = "boing-storage-preview"
 
-# KV Namespace for caching (optional)
-# Run: wrangler kv:namespace create "BOING_CACHE"
+# KV Namespace for caching (optional - for advanced caching)
+# To enable KV caching, run: wrangler kv:namespace create "BOING_CACHE"
+# Then add the namespace ID below
 # [[kv_namespaces]]
 # binding = "CACHE"
 # id = "" # Add your KV namespace ID here
 # preview_id = "" # Add your KV preview namespace ID here
+#
+# Note: Currently using HTTP cache headers for caching.
+# KV can be added later for more advanced caching needs.
 
 # Secrets (set via wrangler secret put)
 # ETHEREUM_RPC_URL

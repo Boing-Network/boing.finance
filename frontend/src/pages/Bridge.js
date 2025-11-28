@@ -6,7 +6,7 @@ import { InfoTooltip, WarningTooltip, HelpTooltip } from '../components/Tooltip'
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { getApiUrl } from '../config.js';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import config from '../config';
 import { useWallet } from '../contexts/WalletContext';
 import { Helmet } from 'react-helmet-async';

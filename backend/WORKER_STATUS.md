@@ -9,13 +9,13 @@
    - Status: Active
    - Deployed via: `npm run deploy:prod` or `wrangler deploy --env production`
 
-### 📝 Staging Worker
+### ✅ Staging Worker
 
 2. **`boing-api-staging`** - Staging Worker
    - URL: https://boing-api-staging.nico-chikuji.workers.dev
-   - Status: **Not yet deployed** (this is expected)
-   - Will be created when you run: `npm run deploy:staging` or `wrangler deploy --env staging`
-   - Configuration is ready in `wrangler.toml`
+   - Status: **Active** (deployed on 2025-11-28)
+   - R2 Bucket: `boing-storage-preview` (created on 2025-11-28)
+   - Deployed via: `npm run deploy:staging` or `wrangler deploy --env staging`
 
 ## Deleted Workers
 
@@ -28,8 +28,12 @@
 
 ## Summary
 
-- **Total Active Workers**: 1 (boing-api-prod)
-- **Staging Worker**: Configured but not yet deployed (will be created on first staging deployment)
+- **Total Active Workers**: 2
+  - `boing-api-prod` (Production)
+  - `boing-api-staging` (Staging)
+- **R2 Buckets**: 2
+  - `boing-storage` (Production)
+  - `boing-storage-preview` (Staging - created 2025-11-28)
 - **Unused Workers**: 0 (all cleaned up)
 
 ## Next Steps

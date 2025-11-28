@@ -110,14 +110,44 @@ const dbMiddleware = async (c, next) => {
   await next();
 };
 
+// Caching middleware for GET requests
+const cacheMiddleware = async (c, next) => {
+  await next();
+  
+  // Only cache successful GET requests
+  if (c.req.method === 'GET' && c.res.status === 200) {
+    const path = c.req.path;
+    
+    // Different cache TTLs for different endpoints
+    let cacheTTL = 300; // Default 5 minutes
+    
+    if (path.includes('/tokens')) {
+      cacheTTL = 600; // 10 minutes for token lists
+    } else if (path.includes('/pools') || path.includes('/liquidity')) {
+      cacheTTL = 180; // 3 minutes for pool data (changes frequently)
+    } else if (path.includes('/analytics')) {
+      cacheTTL = 300; // 5 minutes for analytics
+    } else if (path.includes('/test')) {
+      cacheTTL = 0; // No cache for test endpoint
+    }
+    
+    if (cacheTTL > 0) {
+      c.header('Cache-Control', `public, max-age=${cacheTTL}, must-revalidate`);
+      c.header('CDN-Cache-Control', `public, max-age=${cacheTTL}`);
+    }
+  }
+};
+
 // Mount DEX routes at /api
 const dexRoutes = createDEXRoutes();
 dexRoutes.use('*', dbMiddleware);
+dexRoutes.use('*', cacheMiddleware);
 app.route('/api', dexRoutes);
 
 // Mount Analytics routes at /analytics
 const analyticsRoutes = createAnalyticsRoutes();
 analyticsRoutes.use('*', dbMiddleware);
+analyticsRoutes.use('*', cacheMiddleware);
 app.route('/analytics', analyticsRoutes);
 
 // Mount IPFS routes (including R2 upload) at /api

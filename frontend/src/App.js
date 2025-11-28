@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WalletProvider } from './contexts/WalletContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { useWalletConnection } from './hooks/useWalletConnection';
@@ -15,26 +15,30 @@ import TransactionHistoryModal from './components/TransactionHistoryModal';
 import ThemeToggle from './components/ThemeToggle';
 import Logo from './components/Logo';
 import ShootingStars from './components/ShootingStars';
-import Swap from './pages/Swap';
-import Liquidity from './pages/Liquidity';
-import Pools from './pages/Pools';
-import Analytics from './pages/Analytics';
-import Portfolio from './pages/Portfolio';
-import Bridge from './pages/Bridge';
-import DeployToken from './pages/DeployToken';
-import CreatePool from './pages/CreatePool';
-import Tokens from './pages/Tokens';
-import Status from './pages/Status';
-import Docs from './pages/Docs';
-import HelpCenter from './pages/HelpCenter';
-import HelpArticle from './pages/HelpArticle';
-import ContactUs from './pages/ContactUs';
-import BugReport from './pages/BugReport';
-import Privacy from './pages/Privacy';
-import Terms from './pages/Terms';
-import Whitepaper from './pages/Whitepaper';
-import ExecutiveSummary from './pages/ExecutiveSummary';
+import ErrorBoundary from './components/ErrorBoundary';
+import LoadingSpinner from './components/LoadingSpinner';
 import './styles/globals.css';
+
+// Lazy load all page components for code splitting
+const Swap = lazy(() => import('./pages/Swap'));
+const Liquidity = lazy(() => import('./pages/Liquidity'));
+const Pools = lazy(() => import('./pages/Pools'));
+const Analytics = lazy(() => import('./pages/Analytics'));
+const Portfolio = lazy(() => import('./pages/Portfolio'));
+const Bridge = lazy(() => import('./pages/Bridge'));
+const DeployToken = lazy(() => import('./pages/DeployToken'));
+const CreatePool = lazy(() => import('./pages/CreatePool'));
+const Tokens = lazy(() => import('./pages/Tokens'));
+const Status = lazy(() => import('./pages/Status'));
+const Docs = lazy(() => import('./pages/Docs'));
+const HelpCenter = lazy(() => import('./pages/HelpCenter'));
+const HelpArticle = lazy(() => import('./pages/HelpArticle'));
+const ContactUs = lazy(() => import('./pages/ContactUs'));
+const BugReport = lazy(() => import('./pages/BugReport'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+const Terms = lazy(() => import('./pages/Terms'));
+const Whitepaper = lazy(() => import('./pages/Whitepaper'));
+const ExecutiveSummary = lazy(() => import('./pages/ExecutiveSummary'));
 
 // Create a client
 const queryClient = new QueryClient({
@@ -485,31 +489,35 @@ function AppContent() {
       </nav>
       
       <main className="flex-1 relative">
-        {/* Page Content */}
-        <div className="relative z-10">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/swap" element={<Swap />} />
-            <Route path="/pools" element={<Pools />} />
-            <Route path="/liquidity" element={<Liquidity />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="/portfolio" element={<Portfolio />} />
-            <Route path="/bridge" element={<Bridge />} />
-            <Route path="/tokens" element={<Tokens />} />
-            <Route path="/docs" element={<Docs />} />
-            <Route path="/deploy-token" element={<DeployToken />} />
-            <Route path="/create-pool" element={<CreatePool />} />
-            <Route path="/whitepaper" element={<Whitepaper />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/help-center" element={<HelpCenter />} />
-            <Route path="/help-center/article/:articleId" element={<HelpArticle />} />
-            <Route path="/contact-us" element={<ContactUs />} />
-            <Route path="/status" element={<Status />} />
-            <Route path="/bug-report" element={<BugReport />} />
-            <Route path="/executive-summary" element={<ExecutiveSummary />} />
-          </Routes>
-        </div>
+        {/* Page Content with Error Boundary and Suspense */}
+        <ErrorBoundary>
+          <div className="relative z-10">
+            <Suspense fallback={<LoadingSpinner />}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/swap" element={<Swap />} />
+                <Route path="/pools" element={<Pools />} />
+                <Route path="/liquidity" element={<Liquidity />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/portfolio" element={<Portfolio />} />
+                <Route path="/bridge" element={<Bridge />} />
+                <Route path="/tokens" element={<Tokens />} />
+                <Route path="/docs" element={<Docs />} />
+                <Route path="/deploy-token" element={<DeployToken />} />
+                <Route path="/create-pool" element={<CreatePool />} />
+                <Route path="/whitepaper" element={<Whitepaper />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/help-center" element={<HelpCenter />} />
+                <Route path="/help-center/article/:articleId" element={<HelpArticle />} />
+                <Route path="/contact-us" element={<ContactUs />} />
+                <Route path="/status" element={<Status />} />
+                <Route path="/bug-report" element={<BugReport />} />
+                <Route path="/executive-summary" element={<ExecutiveSummary />} />
+              </Routes>
+            </Suspense>
+          </div>
+        </ErrorBoundary>
       </main>
       
       {/* Transaction History Modal */}
@@ -594,51 +602,53 @@ function AppContent() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <HelmetProvider>
-        <ThemeProvider>
-          <WalletProvider>
-            <BaseMiniAppWrapper>
-              <Router>
-                <Helmet>
-                  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-                  <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
-                  <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
-                  
-                  {/* Farcaster Mini App Embed Meta Tags */}
-                  <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://boing.finance/hero-image.png","button":{"title":"Open boing.finance","action":{"type":"launch_miniapp","url":"https://boing.finance"}}}' />
-                  
-                  {/* Open Graph Meta Tags for better sharing */}
-                  <meta property="og:title" content="boing.finance - DeFi Platform" />
-                  <meta property="og:description" content="Deploy tokens, create liquidity pools, and trade across multiple networks with ease." />
-                  <meta property="og:image" content="https://boing.finance/hero-image.png" />
-                  <meta property="og:url" content="https://boing.finance/" />
-                  <meta property="og:type" content="website" />
-                  
-                  {/* Twitter Card Meta Tags */}
-                  <meta name="twitter:card" content="summary_large_image" />
-                  <meta name="twitter:title" content="boing.finance - DeFi Platform" />
-                  <meta name="twitter:description" content="Deploy tokens, create liquidity pools, and trade across multiple networks with ease." />
-                  <meta name="twitter:image" content="https://boing.finance/hero-image.png" />
-                </Helmet>
-                <AppContent />
-                <Toaster
-                  position="top-right"
-                  toastOptions={{
-                    duration: 4000,
-                    style: {
-                      background: 'var(--bg-card)',
-                      color: 'var(--text-primary)',
-                      border: '1px solid var(--border-color)',
-                    },
-                  }}
-                />
-              </Router>
-            </BaseMiniAppWrapper>
-          </WalletProvider>
-        </ThemeProvider>
-      </HelmetProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <HelmetProvider>
+          <ThemeProvider>
+            <WalletProvider>
+              <BaseMiniAppWrapper>
+                <Router>
+                  <Helmet>
+                    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+                    <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
+                    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+                    
+                    {/* Farcaster Mini App Embed Meta Tags */}
+                    <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://boing.finance/hero-image.png","button":{"title":"Open boing.finance","action":{"type":"launch_miniapp","url":"https://boing.finance"}}}' />
+                    
+                    {/* Open Graph Meta Tags for better sharing */}
+                    <meta property="og:title" content="boing.finance - DeFi Platform" />
+                    <meta property="og:description" content="Deploy tokens, create liquidity pools, and trade across multiple networks with ease." />
+                    <meta property="og:image" content="https://boing.finance/hero-image.png" />
+                    <meta property="og:url" content="https://boing.finance/" />
+                    <meta property="og:type" content="website" />
+                    
+                    {/* Twitter Card Meta Tags */}
+                    <meta name="twitter:card" content="summary_large_image" />
+                    <meta name="twitter:title" content="boing.finance - DeFi Platform" />
+                    <meta name="twitter:description" content="Deploy tokens, create liquidity pools, and trade across multiple networks with ease." />
+                    <meta name="twitter:image" content="https://boing.finance/hero-image.png" />
+                  </Helmet>
+                  <AppContent />
+                  <Toaster
+                    position="top-right"
+                    toastOptions={{
+                      duration: 4000,
+                      style: {
+                        background: 'var(--bg-card)',
+                        color: 'var(--text-primary)',
+                        border: '1px solid var(--border-color)',
+                      },
+                    }}
+                  />
+                </Router>
+              </BaseMiniAppWrapper>
+            </WalletProvider>
+          </ThemeProvider>
+        </HelmetProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

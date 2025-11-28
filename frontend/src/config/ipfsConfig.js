@@ -35,15 +35,21 @@ export const IPFS_CONFIG = {
 export const getBestIPFSKey = () => {
   // Priority order: R2 > Pinata > Infura > Web3.Storage > Storacha
   if (IPFS_CONFIG.ENABLE_R2) {
-    console.log('Using Cloudflare R2 for file uploads (primary storage)');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Using Cloudflare R2 for file uploads (primary storage)');
+    }
     return { type: 'r2' };
   }
   if (IPFS_CONFIG.ENABLE_PINATA && IPFS_CONFIG.PINATA_API_KEY) {
-    console.log('Using Pinata API key for IPFS uploads (fallback)');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Using Pinata API key for IPFS uploads (fallback)');
+    }
     return { type: 'pinata', key: IPFS_CONFIG.PINATA_API_KEY };
   }
   if (IPFS_CONFIG.ENABLE_INFURA && IPFS_CONFIG.INFURA_PROJECT_ID && IPFS_CONFIG.INFURA_PROJECT_SECRET) {
-    console.log('Using Infura API key for IPFS uploads (fallback)');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Using Infura API key for IPFS uploads (fallback)');
+    }
     return { 
       type: 'infura', 
       projectId: IPFS_CONFIG.INFURA_PROJECT_ID,
@@ -51,27 +57,37 @@ export const getBestIPFSKey = () => {
     };
   }
   if (IPFS_CONFIG.ENABLE_WEB3_STORAGE && IPFS_CONFIG.WEB3_STORAGE_API_KEY) {
-    console.log('Using Web3.Storage API key for IPFS uploads (fallback)');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Using Web3.Storage API key for IPFS uploads (fallback)');
+    }
     return { type: 'web3storage', key: IPFS_CONFIG.WEB3_STORAGE_API_KEY };
   }
   if (IPFS_CONFIG.ENABLE_STORACHA && IPFS_CONFIG.STORACHA_API_KEY) {
-    console.log('Using Storacha Network API key for IPFS uploads (fallback)');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Using Storacha Network API key for IPFS uploads (fallback)');
+    }
     return { type: 'storacha', key: IPFS_CONFIG.STORACHA_API_KEY };
   }
-  console.log('No storage service available');
+  if (process.env.NODE_ENV === 'development') {
+    console.log('No storage service available');
+  }
   return null;
 };
 
 // Debug function to check environment variables
 export const debugIPFSConfig = () => {
-  console.log('=== IPFS Configuration Debug ===');
-  console.log('NODE_ENV:', process.env.NODE_ENV);
-  console.log('PINATA_API_KEY exists:', !!process.env.REACT_APP_PINATA_API_KEY);
-  console.log('INFURA_PROJECT_ID exists:', !!process.env.REACT_APP_INFURA_PROJECT_ID);
-  console.log('WEB3_STORAGE_API_KEY exists:', !!process.env.REACT_APP_WEB3_STORAGE_API_KEY);
-  console.log('STORACHA_API_KEY exists:', !!process.env.REACT_APP_STORACHA_API_KEY);
-  console.log('Best API key:', getBestIPFSKey());
-  console.log('================================');
+  // Only log in development - use logger utility
+  if (process.env.NODE_ENV === 'development') {
+    console.log('=== IPFS Configuration Debug ===');
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    // Don't log actual API keys, just whether they exist
+    console.log('PINATA_API_KEY exists:', !!process.env.REACT_APP_PINATA_API_KEY);
+    console.log('INFURA_PROJECT_ID exists:', !!process.env.REACT_APP_INFURA_PROJECT_ID);
+    console.log('WEB3_STORAGE_API_KEY exists:', !!process.env.REACT_APP_WEB3_STORAGE_API_KEY);
+    console.log('STORACHA_API_KEY exists:', !!process.env.REACT_APP_STORACHA_API_KEY);
+    console.log('Best API key:', getBestIPFSKey());
+    console.log('================================');
+  }
 };
 
 // Instructions for setting up IPFS API keys

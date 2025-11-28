@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useWallet } from '../contexts/WalletContext';
 import { Helmet } from 'react-helmet-async';
 import { ethers } from 'ethers';
