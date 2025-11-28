@@ -45,6 +45,7 @@ jobs:
         working-directory: backend
         run: npm run deploy:prod
         env:
+          # ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
       - name: Deploy to Staging
@@ -52,6 +53,7 @@ jobs:
         working-directory: backend
         run: npm run deploy:staging
         env:
+          # ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
       - name: Deployment Summary
