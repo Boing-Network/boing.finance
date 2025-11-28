@@ -6,12 +6,16 @@ import { ethers } from 'ethers';
 import { useBlockchainPools } from '../hooks/useBlockchainPools';
 import { getUserLiquidityPositions, getUserCreatedPools } from '../services/poolService';
 import externalDexService from '../services/externalDexService';
+import portfolioService from '../services/portfolioService';
+import { NETWORKS } from '../config/networks';
 
 // MochiAstronaut component
 
 export default function Portfolio() {
   const { account, chainId } = useWallet();
   const [selectedNetwork, setSelectedNetwork] = useState('all');
+  const [activeTab, setActiveTab] = useState('overview'); // overview, tokens, pools
+  const [trackedNetworks, setTrackedNetworks] = useState([chainId || 11155111]);
 
   // Blockchain pools hook
   const {
@@ -94,6 +98,20 @@ export default function Portfolio() {
     });
   }, [createdPools, selectedNetwork]);
 
+  // Fetch token balances across networks
+  const { data: tokenBalances, isLoading: balancesLoading } = useQuery(
+    ['token-balances', account, trackedNetworks],
+    async () => {
+      if (!account) return null;
+      return await portfolioService.getMultiNetworkPortfolio(account, trackedNetworks);
+    },
+    {
+      refetchInterval: 60000, // Refetch every minute
+      enabled: !!account,
+      retry: 2
+    }
+  );
+
   // Calculate portfolio summary from blockchain data
   const { data: portfolioSummary = {
     totalValue: 0,
@@ -143,11 +161,17 @@ export default function Portfolio() {
 
         const averageAPY = totalPools > 0 ? totalAPY / totalPools : 0;
 
+        // Add token balances value if available
+        let tokenValue = 0;
+        if (tokenBalances && tokenBalances.totalValue) {
+          tokenValue = tokenBalances.totalValue;
+        }
+
         return {
-          totalValue: totalValue.toFixed(2),
+          totalValue: (totalValue + tokenValue).toFixed(2),
           change24h: 0, // TODO: Calculate 24h change
           averageAPY: averageAPY,
-          totalTokens: uniqueTokens.size,
+          totalTokens: uniqueTokens.size + (tokenBalances?.balances?.length || 0),
           liquidityProvided: liquidityProvided.toFixed(2),
           totalPools: totalPools
         };
@@ -169,6 +193,13 @@ export default function Portfolio() {
       retry: 2
     }
   );
+
+  // Update tracked networks when chainId changes
+  useEffect(() => {
+    if (chainId && !trackedNetworks.includes(chainId)) {
+      setTrackedNetworks([...trackedNetworks, chainId]);
+    }
+  }, [chainId]);
 
   const networks = [
     { id: 'all', name: 'All Networks', color: 'bg-gray-500' },
@@ -309,73 +340,178 @@ export default function Portfolio() {
                   </div>
                 </div>
 
-                {/* Token Holdings */}
+                {/* Tab Content */}
+                {activeTab === 'overview' && (
+                  <>
+                {/* Overview Content - Summary Cards Already Shown Above */}
+                {/* Quick Stats */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                  <h2 className="text-2xl font-bold text-white mb-6">Token Holdings</h2>
-                  {filteredUserPools && filteredUserPools.length > 0 ? (
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-700">
-                        <thead className="bg-gray-700">
-                          <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                              Token
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                              Network
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                              Balance
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                              Value
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                              APY
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-gray-800 divide-y divide-gray-700">
-                          {filteredUserPools.slice(0, 10).map((pool, index) => (
-                            <tr key={index} className="hover:bg-gray-700 transition-colors">
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center">
-                                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mr-3">
-                                    <span className="text-white font-bold text-sm">
-                                      {pool.token0?.symbol?.charAt(0) || 'T'}
-                                    </span>
+                  <h2 className="text-2xl font-bold text-white mb-6">Quick Overview</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-3">Top Token Balances</h3>
+                      {tokenBalances && tokenBalances.balances && tokenBalances.balances.length > 0 ? (
+                        <div className="space-y-2">
+                          {tokenBalances.balances
+                            .filter(b => parseFloat(b.balance) > 0)
+                            .sort((a, b) => b.value - a.value)
+                            .slice(0, 5)
+                            .map((token, index) => (
+                              <div key={index} className="flex items-center justify-between p-2 bg-gray-700 rounded">
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                    <span className="text-white text-xs font-bold">{token.symbol?.charAt(0) || 'T'}</span>
                                   </div>
-                                  <div>
-                                    <span className="text-white font-medium">{pool.token0?.symbol}/{pool.token1?.symbol}</span>
-                                    <p className="text-sm text-gray-400">{pool.token0?.name}/{pool.token1?.name}</p>
-                                  </div>
+                                  <span className="text-white text-sm">{token.symbol}</span>
                                 </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-gray-300">
-                                {pool.source || 'Boing DEX'}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-white">
-                                {parseFloat(pool.token0?.formattedAmount || 0).toFixed(4)} {pool.token0?.symbol} / {parseFloat(pool.token1?.formattedAmount || 0).toFixed(4)} {pool.token1?.symbol}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-white">
-                                ${(parseFloat(pool.token0?.formattedAmount || 0) + parseFloat(pool.token1?.formattedAmount || 0)).toFixed(2)}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="text-green-400">
-                                  {pool.apy ? `${pool.apy.toFixed(2)}%` : '0.00%'}
+                                <span className="text-white font-semibold">
+                                  ${token.value ? token.value.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0.00'}
                                 </span>
+                              </div>
+                            ))}
+                        </div>
+                      ) : (
+                        <p className="text-gray-400 text-sm">No token balances detected</p>
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-3">Liquidity Positions</h3>
+                      {filteredUserPools && filteredUserPools.length > 0 ? (
+                        <div className="space-y-2">
+                          {filteredUserPools.slice(0, 5).map((pool, index) => (
+                            <div key={index} className="flex items-center justify-between p-2 bg-gray-700 rounded">
+                              <span className="text-white text-sm">
+                                {pool.token0?.symbol}/{pool.token1?.symbol}
+                              </span>
+                              <span className="text-green-400 text-sm font-semibold">
+                                {pool.apy ? `${pool.apy.toFixed(2)}%` : '0%'} APY
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-gray-400 text-sm">No liquidity positions</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                  </>
+                )}
+
+                {/* Tokens Tab */}
+                {activeTab === 'tokens' && (
+                  <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-2xl font-bold text-white">Token Balances</h2>
+                      <div className="flex items-center space-x-2">
+                        <select
+                          value={trackedNetworks[0] || chainId || 11155111}
+                          onChange={(e) => setTrackedNetworks([parseInt(e.target.value)])}
+                          className="px-3 py-2 rounded-lg bg-gray-700 text-white text-sm"
+                        >
+                          {Object.entries(NETWORKS).map(([id, network]) => (
+                            <option key={id} value={id}>{network.name}</option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={() => {
+                            const allNetworks = Object.keys(NETWORKS).map(Number);
+                            setTrackedNetworks(allNetworks);
+                          }}
+                          className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                        >
+                          Track All Networks
+                        </button>
+                      </div>
+                    </div>
+
+                    {balancesLoading ? (
+                      <div className="text-center py-12">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                        <p className="text-gray-300 mt-4">Loading token balances...</p>
+                      </div>
+                    ) : tokenBalances && tokenBalances.balances && tokenBalances.balances.length > 0 ? (
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-700">
+                          <thead className="bg-gray-700">
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Token</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Network</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Balance</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Price</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Value</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">24h Change</th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-gray-800 divide-y divide-gray-700">
+                            {tokenBalances.balances
+                              .filter(b => parseFloat(b.balance) > 0)
+                              .sort((a, b) => b.value - a.value)
+                              .map((token, index) => (
+                                <tr key={index} className="hover:bg-gray-700 transition-colors">
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="flex items-center">
+                                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mr-3">
+                                        <span className="text-white font-bold text-sm">
+                                          {token.symbol?.charAt(0) || 'T'}
+                                        </span>
+                                      </div>
+                                      <div>
+                                        <div className="text-white font-medium">{token.symbol}</div>
+                                        <div className="text-sm text-gray-400">{token.name}</div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-gray-300">
+                                    {NETWORKS[token.chainId]?.name || `Chain ${token.chainId}`}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-white">
+                                    {parseFloat(token.balance).toLocaleString(undefined, { maximumFractionDigits: 6 })} {token.symbol}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-white">
+                                    ${token.price ? token.price.toLocaleString(undefined, { maximumFractionDigits: 4 }) : '0.00'}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-white font-semibold">
+                                    ${token.value ? token.value.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0.00'}
+                                  </td>
+                                  <td className={`px-6 py-4 whitespace-nowrap ${token.priceChange24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                    {token.priceChange24h !== undefined ? (
+                                      <>
+                                        {token.priceChange24h >= 0 ? '+' : ''}
+                                        {token.priceChange24h.toFixed(2)}%
+                                      </>
+                                    ) : 'N/A'}
+                                  </td>
+                                </tr>
+                              ))}
+                          </tbody>
+                          <tfoot className="bg-gray-700">
+                            <tr>
+                              <td colSpan="4" className="px-6 py-4 text-right font-semibold text-white">
+                                Total Portfolio Value:
+                              </td>
+                              <td colSpan="2" className="px-6 py-4 text-left font-bold text-blue-400">
+                                ${tokenBalances.totalValue ? tokenBalances.totalValue.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0.00'}
                               </td>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-gray-300">No liquidity positions found.</p>
-                    </div>
-                  )}
-                </div>
+                          </tfoot>
+                        </table>
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <div className="text-4xl mb-4">💼</div>
+                        <p className="text-gray-300 mb-2">No token balances found</p>
+                        <p className="text-sm text-gray-400">
+                          Token balances will appear here once detected on the selected network(s).
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
 
+                {/* Pools Tab */}
+                {activeTab === 'pools' && (
+                  <>
                 {/* My Pools */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                   <div className="flex items-center justify-between mb-6">
@@ -570,15 +706,8 @@ export default function Portfolio() {
                     )}
                   </div>
                 </div>
-
-                {/* Transaction History */}
-                <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                  <h2 className="text-2xl font-bold text-white mb-6">Recent Transactions</h2>
-                  <div className="text-center py-8">
-                    <p className="text-gray-300 mb-3">Transaction history coming soon!</p>
-                    <p className="text-sm text-gray-400">We're working on adding detailed transaction tracking across all your DeFi activities.</p>
-                  </div>
-                </div>
+                  </>
+                )}
               </div>
             )}
           </div></div>
