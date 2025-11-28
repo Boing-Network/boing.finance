@@ -103,7 +103,7 @@ npm run deploy:sepolia
    - `CLOUDFLARE_API_TOKEN` - Get from [Cloudflare Dashboard](https://dash.cloudflare.com/profile/api-tokens)
    - `CLOUDFLARE_ACCOUNT_ID` - Found in Cloudflare Dashboard sidebar
 
-2. See [DEPLOYMENT_SETUP.md](./DEPLOYMENT_SETUP.md) for detailed setup instructions.
+2. See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed setup instructions.
 
 **Workflows:**
 - `.github/workflows/deploy-backend.yml` - Deploys Workers

@@ -1,12 +1,10 @@
-# Cloudflare Pages Project Setup
+# Cloudflare Pages Setup
 
-## Issue: Projects Don't Exist
+## Overview
 
-The GitHub Actions workflow is trying to deploy to Cloudflare Pages projects that don't exist yet:
-- `boing-finance-prod` (for production)
-- `boing-finance` (for staging)
+This guide covers setting up and managing Cloudflare Pages projects for boing.finance.
 
-## Solution: Auto-Create Projects (Recommended)
+## Auto-Creation (Recommended)
 
 ### ✅ Option 1: Let Wrangler Auto-Create (Recommended)
 
