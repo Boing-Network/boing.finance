@@ -10,21 +10,63 @@ import { createIPFSRoutes } from './routes/ipfsRoutes.js';
 // Create main app
 const app = new Hono();
 
-// Global middleware
-app.use('*', cors({
-  origin: ['http://localhost:3000', 'https://boing.finance'],
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
+// Global middleware - CORS configuration based on environment
+app.use('*', async (c, next) => {
+  const env = c.env.NODE_ENV || 'production';
+  const frontendUrl = c.env.FRONTEND_URL || 'https://boing.finance';
+  
+  // Determine allowed origins based on environment
+  const allowedOrigins = env === 'production' 
+    ? [frontendUrl, 'https://boing.finance']
+    : env === 'staging'
+    ? [frontendUrl, 'https://staging.boing.finance', 'http://localhost:3000']
+    : ['http://localhost:3000', frontendUrl];
+  
+  return cors({
+    origin: allowedOrigins,
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization', 'X-User-Address'],
+    credentials: true,
+    maxAge: 86400 // Cache preflight for 24 hours
+  })(c, next);
+});
 
-// Health check
+// Performance optimization middleware - add response headers
+app.use('*', async (c, next) => {
+  const startTime = Date.now();
+  await next();
+  const responseTime = Date.now() - startTime;
+  
+  // Add security and performance headers
+  c.header('X-Content-Type-Options', 'nosniff');
+  c.header('X-Frame-Options', 'DENY');
+  c.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+  
+  // Add cache headers for GET requests (if not already set)
+  if (c.req.method === 'GET' && !c.res.headers.get('Cache-Control')) {
+    // Default cache for API responses (5 minutes)
+    c.header('Cache-Control', 'public, max-age=300, must-revalidate');
+  }
+  
+  // Add timing header for performance monitoring
+  c.header('X-Response-Time', `${responseTime}ms`);
+});
+
+// Health check with enhanced information
 app.get('/', (c) => {
+  const env = c.env.NODE_ENV || 'production';
+  // No cache for health check endpoint
+  c.header('Cache-Control', 'no-cache, no-store, must-revalidate');
   return c.json({
     status: 'OK',
     message: 'DEX API is running on Cloudflare Workers',
     timestamp: new Date().toISOString(),
-    environment: c.env.NODE_ENV || 'production'
+    environment: env,
+    version: '1.0.0',
+    services: {
+      database: c.env.DB ? 'configured' : 'not configured',
+      storage: c.env.BOING_STORAGE ? 'configured' : 'not configured'
+    }
   });
 });
 
@@ -152,21 +194,47 @@ app.get('/api/webhook/health', (c) => {
   });
 });
 
-// Error handling
+// Error handling with better logging
 app.onError((err, c) => {
-  console.error('Worker Error:', err);
+  const env = c.env.NODE_ENV || 'production';
+  const errorId = Math.random().toString(36).substring(2, 15);
+  
+  console.error('Worker Error:', {
+    errorId,
+    message: err.message,
+    stack: env !== 'production' ? err.stack : undefined,
+    url: c.req.url,
+    method: c.req.method,
+    environment: env,
+    timestamp: new Date().toISOString()
+  });
+  
+  // Don't expose internal errors in production
+  const errorMessage = env === 'production' 
+    ? 'Internal server error'
+    : err.message;
+  
   return c.json({ 
     success: false, 
     error: 'Internal server error',
-    message: err.message 
+    message: errorMessage,
+    errorId: env !== 'production' ? errorId : undefined
   }, 500);
 });
 
-// 404 handler
+// 404 handler with helpful information
 app.notFound((c) => {
   return c.json({ 
     success: false, 
-    error: 'Route not found' 
+    error: 'Route not found',
+    path: c.req.path,
+    method: c.req.method,
+    availableEndpoints: [
+      'GET /',
+      'GET /api/test',
+      'POST /api/webhook',
+      'GET /api/webhook/health'
+    ]
   }, 404);
 });
 

@@ -2,10 +2,12 @@
 // Handles file uploads, metadata storage, and IPFS-like functionality
 
 export class R2UploadService {
-  constructor(r2Bucket) {
+  constructor(r2Bucket, options = {}) {
     this.bucket = r2Bucket;
     // Use the new public development URL for the R2 bucket
     this.baseUrl = 'https://pub-fdf80a26d0d54acd86aa835377381ea3.r2.dev';
+    // Worker URL for serving files through the API
+    this.workerUrl = options.workerUrl || null;
   }
 
   // Upload a file to R2 and return metadata
@@ -37,8 +39,16 @@ export class R2UploadService {
 
       // Return IPFS-like response with multiple URL options
       const fileUrl = `${this.baseUrl}/${fileName}`;
-      const workerUrl = `https://boing-api.nico-chikuji.workers.dev/api/r2/file/${fileName}`;
+      const workerUrl = this.workerUrl 
+        ? `${this.workerUrl}/api/r2/file/${fileName}`
+        : null;
       const ipfsHash = this.generateIPFSHash(fileName); // Generate a hash for compatibility
+
+      // Build gateway URLs array
+      const gatewayUrls = [fileUrl]; // Public R2 URL (primary)
+      if (workerUrl) {
+        gatewayUrls.push(workerUrl); // Worker URL (fallback)
+      }
 
       console.log('R2 upload successful:', {
         fileName,
@@ -49,12 +59,9 @@ export class R2UploadService {
 
       return {
         hash: ipfsHash,
-        url: fileUrl, // Use public dev URL as primary
+        url: fileUrl, // Use public R2 URL as primary
         ipfsUrl: `ipfs://${ipfsHash}`,
-        gatewayUrls: [
-          fileUrl,   // Public dev URL (primary)
-          workerUrl, // Worker URL (fallback)
-        ],
+        gatewayUrls,
         metadata: fileMetadata,
         fileName: fileName
       };
@@ -93,14 +100,21 @@ export class R2UploadService {
       });
 
       const metadataUrl = `${this.baseUrl}/${metadataFileName}`;
-      const workerUrl = `https://boing-api.nico-chikuji.workers.dev/api/r2/file/${metadataFileName}`;
+      const workerUrl = this.workerUrl 
+        ? `${this.workerUrl}/api/r2/file/${metadataFileName}`
+        : null;
       const ipfsHash = this.generateIPFSHash(metadataFileName);
+
+      // Build gateway URLs array - prefer worker URL if available, otherwise use R2 public URL
+      const gatewayUrls = workerUrl 
+        ? [workerUrl, metadataUrl]
+        : [metadataUrl];
 
       return {
         hash: ipfsHash,
-        url: workerUrl, // Use worker URL as primary
+        url: workerUrl || metadataUrl, // Use worker URL if available, otherwise R2 public URL
         ipfsUrl: `ipfs://${ipfsHash}`,
-        gatewayUrls: [workerUrl, metadataUrl],
+        gatewayUrls,
         metadata: enrichedMetadata,
         fileName: metadataFileName
       };

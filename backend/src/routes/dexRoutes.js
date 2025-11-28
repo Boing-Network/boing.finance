@@ -8,13 +8,8 @@ import { eq, desc } from 'drizzle-orm';
 export function createDEXRoutes() {
   const app = new Hono();
   
-  // Middleware
-  app.use('*', cors({
-    origin: ['http://localhost:3000', 'https://your-frontend-domain.com'],
-    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
-  }));
+  // Note: CORS is handled globally in worker.js
+  // No need for duplicate CORS middleware here
 
   // Health check
   app.get('/', (c) => {

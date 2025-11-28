@@ -22,7 +22,13 @@ export const createIPFSRoutes = () => {
         }, 500);
       }
 
-      const r2Service = new R2UploadService(c.env.BOING_STORAGE);
+      // Get worker URL from environment or request
+      const workerUrl = c.env.WORKER_URL || 
+        (c.req.url ? new URL(c.req.url).origin : null);
+      
+      const r2Service = new R2UploadService(c.env.BOING_STORAGE, {
+        workerUrl: workerUrl
+      });
       
       // Handle multipart form data
       const formData = await c.req.formData();
@@ -85,7 +91,13 @@ export const createIPFSRoutes = () => {
         }, 500);
       }
 
-      const r2Service = new R2UploadService(c.env.BOING_STORAGE);
+      // Get worker URL from environment or request
+      const workerUrl = c.env.WORKER_URL || 
+        (c.req.url ? new URL(c.req.url).origin : null);
+      
+      const r2Service = new R2UploadService(c.env.BOING_STORAGE, {
+        workerUrl: workerUrl
+      });
       const metadata = await c.req.json();
 
       if (!metadata) {
@@ -125,7 +137,13 @@ export const createIPFSRoutes = () => {
         }, 500);
       }
 
-      const r2Service = new R2UploadService(c.env.BOING_STORAGE);
+      // Get worker URL from environment or request
+      const workerUrl = c.env.WORKER_URL || 
+        (c.req.url ? new URL(c.req.url).origin : null);
+      
+      const r2Service = new R2UploadService(c.env.BOING_STORAGE, {
+        workerUrl: workerUrl
+      });
       const fileName = c.req.param('fileName');
 
       const file = await r2Service.getFile(fileName);
@@ -157,7 +175,13 @@ export const createIPFSRoutes = () => {
         }, 500);
       }
 
-      const r2Service = new R2UploadService(c.env.BOING_STORAGE);
+      // Get worker URL from environment or request
+      const workerUrl = c.env.WORKER_URL || 
+        (c.req.url ? new URL(c.req.url).origin : null);
+      
+      const r2Service = new R2UploadService(c.env.BOING_STORAGE, {
+        workerUrl: workerUrl
+      });
       const prefix = c.req.query('prefix');
       const limit = parseInt(c.req.query('limit') || '100');
       const cursor = c.req.query('cursor');

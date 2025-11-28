@@ -121,15 +121,25 @@ npm run deploy:sepolia
 
 6. **Deploy**
    ```bash
-   # Development
-   npm run worker:deploy
+   cd backend
    
    # Staging
-   npm run worker:deploy:staging
+   npm run deploy:staging
+   # or: wrangler deploy --env staging
+   # Deploys to: boing-api-staging
    
    # Production
-   npm run worker:deploy:prod
+   npm run deploy:prod
+   # or: wrangler deploy --env production
+   # Deploys to: boing-api-prod
+   
+   # Local Development (no deployment)
+   npm run dev
+   # Uses: wrangler dev (local only, uses base "boing-api" name)
    ```
+   
+   **Note**: The base `boing-api` worker is for local development only. 
+   Production deployments use environment-specific workers (`boing-api-prod` and `boing-api-staging`).
 
 ### Frontend Deployment
 

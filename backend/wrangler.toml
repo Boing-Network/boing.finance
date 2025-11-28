@@ -1,3 +1,12 @@
+# Cloudflare Workers Configuration for boing.finance API
+# 
+# IMPORTANT: The base worker name "boing-api" is kept for local development only.
+# Production deployments use environment-specific workers:
+# - Production: boing-api-prod (via --env production)
+# - Staging: boing-api-staging (via --env staging)
+#
+# The unused "boing-api" worker in Cloudflare dashboard can be safely deleted.
+
 name = "boing-api"
 main = "src/worker.js"
 compatibility_date = "2024-01-01"
@@ -7,6 +16,8 @@ compatibility_flags = ["nodejs_compat"]
 [vars]
 NODE_ENV = "development"
 FRONTEND_URL = "http://localhost:3000"
+# Worker URL for generating file URLs (auto-detected from request if not set)
+# WORKER_URL = "https://boing-api-staging.nico-chikuji.workers.dev"
 
 [env.production]
 name = "boing-api-prod"
@@ -14,6 +25,7 @@ name = "boing-api-prod"
 [env.production.vars]
 NODE_ENV = "production"
 FRONTEND_URL = "https://boing.finance"
+WORKER_URL = "https://boing-api-prod.nico-chikuji.workers.dev"
 
 [env.staging]
 name = "boing-api-staging"
@@ -21,6 +33,7 @@ name = "boing-api-staging"
 [env.staging.vars]
 NODE_ENV = "staging"
 FRONTEND_URL = "https://staging.boing.finance"
+WORKER_URL = "https://boing-api-staging.nico-chikuji.workers.dev"
 
 # D1 Database - Updated with actual database ID
 [[d1_databases]]

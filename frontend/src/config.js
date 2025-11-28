@@ -1,8 +1,9 @@
 // Environment configuration
 const config = {
   development: {
-    apiUrl: 'https://boing-api.nico-chikuji.workers.dev/api',
-    workerUrl: 'https://boing-api.nico-chikuji.workers.dev/api',
+    // Use staging API for development to avoid using the unused boing-api worker
+    apiUrl: 'https://boing-api-staging.nico-chikuji.workers.dev/api',
+    workerUrl: 'https://boing-api-staging.nico-chikuji.workers.dev/api',
     environment: 'development'
   },
   staging: {
