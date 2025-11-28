@@ -91,12 +91,10 @@ This document summarizes all the enhancements and optimizations implemented for 
 ### 8. Documentation Updates
 
 **Added**:
-- `DELETE_UNUSED_WORKER.md` - Step-by-step guide to delete the unused worker
 - Updated `README.md` with correct deployment commands
 - This optimization summary document
 
-**Files Created/Modified**:
-- `dex/backend/DELETE_UNUSED_WORKER.md` (new)
+**Files Modified**:
 - `dex/README.md`
 
 ## 🗑️ Unused Worker Removal
@@ -110,9 +108,9 @@ This document summarizes all the enhancements and optimizations implemented for 
 - **`boing-api-prod`** - Production worker
 - **`boing-api-staging`** - Staging worker
 
-### How to Delete
+### Status
 
-See `dex/backend/DELETE_UNUSED_WORKER.md` for detailed instructions.
+✅ **COMPLETED**: The unused `boing-api` worker has been successfully deleted.
 
 ## 📊 Performance Impact
 

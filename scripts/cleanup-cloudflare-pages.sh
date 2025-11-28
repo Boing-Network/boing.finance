@@ -1,12 +1,8 @@
 #!/bin/bash
 
-# Script to list and optionally remove unused Cloudflare Pages projects
-# Usage: ./cleanup-cloudflare-pages.sh [--dry-run] [--remove-unused]
-
-set -e
-
-DRY_RUN=${1:-"--dry-run"}
-REMOVE_UNUSED=${2:-""}
+# Script to list and check Cloudflare Pages projects
+# Helps identify unused projects for cleanup
+# Usage: ./cleanup-cloudflare-pages.sh
 
 # Colors for output
 RED='\033[0;31m'

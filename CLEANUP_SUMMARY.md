@@ -59,10 +59,9 @@ The following files were checked and confirmed to be in use:
 
 ### Documentation Files
 All documentation files serve distinct purposes:
-- `DELETE_UNUSED_WORKER.md` - Instructions for worker cleanup (completed)
+- `DEPLOYMENT.md` - Complete deployment guide
+- `OPTIMIZATIONS.md` - Optimization summary
 - `WORKER_STATUS.md` - Current worker status tracking
-- `OPTIMIZATIONS_SUMMARY.md` - Summary of optimizations
-- `DEPLOYMENT_ISSUES_RESOLVED.md` - Issue resolution log
 - `BASE_APP_INTEGRATION_SUMMARY.md` - Integration guide
 - `BASE_MINIAPP_INTEGRATION_GUIDE.md` - Mini app guide
 - `README.md` - Main project documentation

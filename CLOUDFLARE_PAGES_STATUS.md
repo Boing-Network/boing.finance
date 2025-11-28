@@ -1,9 +1,9 @@
-# Cloudflare Pages Project Status
+# Cloudflare Pages Status
 
 > **Last Updated**: 2025-01-28  
 > **Status**: Auto-creation configured and ready
 
-## Expected Projects
+## Active Projects
 
 After setup, you should have exactly **2** Cloudflare Pages projects:
 
