@@ -6,26 +6,37 @@ The GitHub Actions workflow is trying to deploy to Cloudflare Pages projects tha
 - `boing-finance-prod` (for production)
 - `boing-finance` (for staging)
 
-## Solution: Create Projects First
+## Solution: Auto-Create Projects (Recommended)
 
-You have two options:
+### ✅ Option 1: Let Wrangler Auto-Create (Recommended)
 
-### Option 1: Create Projects via Cloudflare Dashboard (Recommended)
+The GitHub Actions workflow is configured to **automatically create** projects when deploying:
 
+- ✅ Projects are created automatically by `wrangler pages deploy`
+- ✅ No manual setup required
+- ✅ First deployment will create the project if it doesn't exist
+
+**Requirements:**
+- Your `CLOUDFLARE_API_TOKEN` must have **Cloudflare Pages:Edit** permission
+- Token must have **Account** scope (not resource-specific)
+
+**How it works:**
+- Push to `main` branch → Creates/deploys to `boing-finance-prod`
+- Push to `staging` branch → Creates/deploys to `boing-finance`
+
+### Option 2: Create Projects Manually (If Auto-Creation Fails)
+
+If auto-creation doesn't work, create projects manually:
+
+#### Via Cloudflare Dashboard:
 1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com/)
 2. Navigate to **Workers & Pages** → **Pages**
 3. Click **Create a project**
-4. Choose **Upload assets** (we'll deploy via GitHub Actions)
-5. Set project name:
-   - For production: `boing-finance-prod`
-   - For staging: `boing-finance`
+4. Choose **Upload assets**
+5. Set project name: `boing-finance-prod` or `boing-finance`
 6. Click **Create project**
-7. The project will be created (you don't need to upload anything - GitHub Actions will handle deployments)
 
-### Option 2: Create Projects via Wrangler CLI
-
-Run these commands locally (requires `wrangler` installed and authenticated):
-
+#### Via Wrangler CLI:
 ```bash
 # Create production project
 wrangler pages project create boing-finance-prod
@@ -33,10 +44,6 @@ wrangler pages project create boing-finance-prod
 # Create staging project
 wrangler pages project create boing-finance
 ```
-
-### Option 3: Let Wrangler Auto-Create (May Not Work)
-
-The updated workflow uses `wrangler pages deploy` which *should* auto-create projects, but this depends on your API token permissions. If it fails, use Option 1 or 2 above.
 
 ## Verify Projects Exist
 
