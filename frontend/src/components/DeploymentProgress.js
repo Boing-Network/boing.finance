@@ -11,7 +11,7 @@ const DeploymentProgress = ({ steps, currentStep, error = null }) => {
     return 'pending';
   };
 
-  const getStepIcon = (status) => {
+  const getStepIcon = (status, stepIndex) => {
     switch (status) {
       case 'completed':
         return (
@@ -49,7 +49,7 @@ const DeploymentProgress = ({ steps, currentStep, error = null }) => {
           <div key={index} className="flex items-start space-x-4">
             {/* Step Icon */}
             <div className="flex-shrink-0">
-              {getStepIcon(status)}
+              {getStepIcon(status, index)}
             </div>
 
             {/* Step Content */}
