@@ -45,7 +45,7 @@
 2. ⚙️ **Optional Configuration** (via Cloudflare Dashboard)
    - Set environment variables (if needed)
    - Configure custom domain (if you have one)
-   - See `CLOUDFLARE_PAGES_CONFIG.md` for details
+   - See `PRODUCTION_CONFIGURATION.md` for details
 
 3. ✅ **Future Deployments**
    - Automatic via GitHub Actions on push to `main`

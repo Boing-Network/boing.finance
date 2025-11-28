@@ -18,7 +18,7 @@ REACT_APP_NFT_STORAGE_API_KEY=be2d6a2e.3fd4535a32d44b0188fd1b35ee48bd93
 REACT_APP_WEB3_STORAGE_API_KEY=<your-key-if-you-have-one>
 ```
 
-**Note**: These are already in your `wrangler.toml`, so they're baked into the build. Setting them as environment variables is optional.
+**Note**: IPFS services are disabled in the code (R2 is primary storage). These variables are not needed unless you plan to enable IPFS services.
 
 ### Infura RPC (Optional)
 Used for blockchain RPC connections:
