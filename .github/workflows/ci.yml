@@ -82,4 +82,3 @@ jobs:
           npm ci
           CI=false npm run build || echo "⚠️ Build completed with warnings (non-blocking)"
           echo "✅ Frontend build check passed"
-
