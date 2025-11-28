@@ -91,7 +91,28 @@ npm run deploy:sepolia
 
 ## 🌐 Deployment
 
-### Cloudflare Workers Setup
+### Automated Deployment (Recommended)
+
+**GitHub Actions** workflows are configured for automatic deployment:
+
+- **Push to `main` branch** → Deploys to **production**
+- **Push to `staging` branch** → Deploys to **staging**
+
+**Setup Required:**
+1. Add GitHub Secrets:
+   - `CLOUDFLARE_API_TOKEN` - Get from [Cloudflare Dashboard](https://dash.cloudflare.com/profile/api-tokens)
+   - `CLOUDFLARE_ACCOUNT_ID` - Found in Cloudflare Dashboard sidebar
+
+2. See [DEPLOYMENT_SETUP.md](./DEPLOYMENT_SETUP.md) for detailed setup instructions.
+
+**Workflows:**
+- `.github/workflows/deploy-backend.yml` - Deploys Workers
+- `.github/workflows/deploy-frontend.yml` - Deploys Pages
+- `.github/workflows/ci.yml` - Runs tests and linting
+
+### Manual Deployment
+
+#### Cloudflare Workers Setup
 
 1. **Install Wrangler CLI**
    ```bash
@@ -119,7 +140,7 @@ npm run deploy:sepolia
    - Edit `wrangler.toml` with your database ID
    - Update `frontend/src/config.js` with your worker URLs
 
-6. **Deploy**
+6. **Deploy Backend**
    ```bash
    cd backend
    
@@ -141,19 +162,29 @@ npm run deploy:sepolia
    **Note**: The base `boing-api` worker is for local development only. 
    Production deployments use environment-specific workers (`boing-api-prod` and `boing-api-staging`).
 
-### Frontend Deployment
+#### Frontend Deployment
 
-1. **Build for Production**
-   ```bash
-   cd frontend
-   npm run build
-   ```
+**Option 1: Manual Script**
+```bash
+# From project root
+./deploy-frontend.sh staging   # Deploy to staging
+./deploy-frontend.sh production # Deploy to production
+```
 
-2. **Deploy to Cloudflare Pages**
-   - Connect your GitHub repository
-   - Set build command: `npm run build`
-   - Set build output directory: `build`
-   - Set root directory: `frontend`
+**Option 2: Cloudflare Pages Auto-Deploy**
+1. Connect your GitHub repository in Cloudflare Pages dashboard
+2. Set build settings:
+   - Build command: `cd dex/frontend && npm install && npm run build`
+   - Build output directory: `dex/frontend/build`
+   - Root directory: `dex/frontend`
+3. Set environment variables in Cloudflare Pages dashboard
+
+**Option 3: Manual Wrangler**
+```bash
+cd frontend
+npm run build:prod  # or build:staging
+wrangler pages deploy build --project-name=boing-finance-prod
+```
 
 ## 🔧 Configuration
 

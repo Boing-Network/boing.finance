@@ -34,8 +34,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "npm run generate-manifest && react-scripts build",
-    "build:prod": "set REACT_APP_ENVIRONMENT=production && react-scripts build",
-    "build:staging": "set REACT_APP_ENVIRONMENT=staging && react-scripts build",
+    "build:prod": "cross-env REACT_APP_ENVIRONMENT=production react-scripts build",
+    "build:staging": "cross-env REACT_APP_ENVIRONMENT=staging react-scripts build",
     "test": "react-scripts test",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint src --ext .js,.jsx,.ts,.tsx --fix",
@@ -69,6 +69,7 @@
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "autoprefixer": "^10.4.14",
+    "cross-env": "^10.1.0",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",

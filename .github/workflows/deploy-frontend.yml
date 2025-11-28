@@ -1,0 +1,91 @@
+name: Deploy Frontend to Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy-frontend.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  deploy:
+    name: Deploy to Cloudflare Pages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build for Production
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event.inputs.environment == 'production')
+        working-directory: frontend
+        run: npm run build:prod
+        env:
+          REACT_APP_ENVIRONMENT: production
+          REACT_APP_BACKEND_URL: https://boing-api-prod.nico-chikuji.workers.dev
+
+      - name: Build for Staging
+        if: github.ref == 'refs/heads/staging' || github.event.inputs.environment == 'staging'
+        working-directory: frontend
+        run: npm run build:staging
+        env:
+          REACT_APP_ENVIRONMENT: staging
+          REACT_APP_BACKEND_URL: https://boing-api-staging.nico-chikuji.workers.dev
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: boing-finance-prod
+          directory: frontend/build
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          wranglerVersion: '3'
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event.inputs.environment == 'production')
+
+      - name: Deploy to Cloudflare Pages (Staging)
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: boing-finance
+          directory: frontend/build
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          wranglerVersion: '3'
+        if: github.ref == 'refs/heads/staging' || github.event.inputs.environment == 'staging'
+
+      - name: Deployment Summary
+        if: always()
+        run: |
+          echo "## 🚀 Frontend Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "✅ Deployed to **Production**: https://boing-finance-prod.pages.dev" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Deployed to **Staging**: https://boing-finance.pages.dev" >> $GITHUB_STEP_SUMMARY
+          fi
+
