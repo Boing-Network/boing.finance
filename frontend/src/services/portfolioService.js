@@ -104,7 +104,7 @@ class PortfolioService {
 
       const cgNetwork = networkMap[chainId] || 'ethereum';
       
-      // For native tokens, use different endpoint
+      // For native tokens, use coin ID endpoint
       if (token.isNative) {
         const nativeMap = {
           1: 'ethereum',
@@ -116,7 +116,7 @@ class PortfolioService {
           11155111: 'ethereum'
         };
         const coinId = nativeMap[chainId] || 'ethereum';
-        const priceData = await coingeckoService.getTokenPrice(coinId, 'coins');
+        const priceData = await coingeckoService.getCoinPrice(coinId);
         if (priceData) {
           this.cache.set(cacheKey, { data: priceData, timestamp: Date.now() });
           return priceData;

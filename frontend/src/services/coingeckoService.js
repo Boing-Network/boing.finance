@@ -14,13 +14,32 @@ class CoinGeckoService {
   getApiUrl(endpoint) {
     const url = `${COINGECKO_API_BASE}${endpoint}`;
     if (COINGECKO_API_KEY) {
-      return `${url}${endpoint.includes('?') ? '&' : '?'}x_cg_demo_api_key=${COINGECKO_API_KEY}`;
+      const separator = endpoint.includes('?') ? '&' : '?';
+      return `${url}${separator}x_cg_demo_api_key=${COINGECKO_API_KEY}`;
     }
     return url;
   }
 
-  // Get token price by contract address
+  // Get global market data
+  async getGlobalMarketData() {
+    try {
+      const response = await fetch(this.getApiUrl('/global'));
+      if (!response.ok) {
+        throw new Error(`CoinGecko API error: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching global market data:', error);
+      return null;
+    }
+  }
+
+  // Get token price by contract address or coin ID
   async getTokenPrice(contractAddress, network = 'ethereum') {
+    // Handle coin IDs (for native tokens)
+    if (network === 'coins') {
+      return this.getCoinPrice(contractAddress);
+    }
     const cacheKey = `price_${network}_${contractAddress}`;
     const cached = this.cache.get(cacheKey);
     
@@ -88,6 +107,39 @@ class CoinGeckoService {
       return await response.json();
     } catch (error) {
       console.error('Error fetching token info:', error);
+      return null;
+    }
+  }
+
+  // Get coin price by ID (for native tokens)
+  async getCoinPrice(coinId) {
+    const cacheKey = `coin_price_${coinId}`;
+    const cached = this.cache.get(cacheKey);
+    
+    if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+      return cached.data;
+    }
+
+    try {
+      const response = await fetch(
+        this.getApiUrl(`/simple/price?ids=${coinId}&vs_currencies=usd&include_24hr_change=true`)
+      );
+      
+      if (!response.ok) {
+        throw new Error(`CoinGecko API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const priceData = data[coinId];
+      
+      if (priceData) {
+        this.cache.set(cacheKey, { data: priceData, timestamp: Date.now() });
+        return priceData;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error fetching coin price:', error);
       return null;
     }
   }

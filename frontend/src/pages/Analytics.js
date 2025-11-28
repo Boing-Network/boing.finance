@@ -3,11 +3,13 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import config from '../config';
 import { Helmet } from 'react-helmet-async';
+import coingeckoService from '../services/coingeckoService';
 
 // BoingAstronaut component
 
 export default function Analytics() {
   const [timeRange, setTimeRange] = useState('24h');
+  const [activeSection, setActiveSection] = useState('overview'); // overview, market, trending
 
   const { data: analytics, isLoading, error } = useQuery(
     ['analytics', timeRange],
@@ -26,6 +28,34 @@ export default function Analytics() {
       return {};
     }
   };
+
+  // Fetch trending tokens from CoinGecko
+  const { data: trendingTokens, isLoading: trendingLoading } = useQuery(
+    ['trending-tokens'],
+    async () => {
+      const data = await coingeckoService.getTrendingTokens();
+      return data.coins || [];
+    },
+    {
+      refetchInterval: 300000, // Refetch every 5 minutes
+    }
+  );
+
+  // Fetch market data
+  const { data: marketData, isLoading: marketLoading } = useQuery(
+    ['market-data', timeRange],
+    async () => {
+      // Get top cryptocurrencies market data
+      const response = await fetch(
+        `https://api.coingecko.com/api/v3/global${process.env.REACT_APP_COINGECKO_API_KEY ? `?x_cg_demo_api_key=${process.env.REACT_APP_COINGECKO_API_KEY}` : ''}`
+      );
+      if (!response.ok) return null;
+      return await response.json();
+    },
+    {
+      refetchInterval: 60000, // Refetch every minute
+    }
+  );
 
   const timeRanges = [
     { id: '24h', name: '24 Hours' },
@@ -64,9 +94,26 @@ export default function Analytics() {
               </p>
             </div>
 
-            {/* Time Range Selector */}
+            {/* Time Range Selector and Sections */}
             <div className="bg-gray-800 rounded-2xl shadow-xl p-6 mb-8 border border-gray-700">
-              <h2 className="text-2xl font-bold text-white mb-6">Time Range</h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-white">Time Range</h2>
+                <div className="flex space-x-2">
+                  {['overview', 'market', 'trending'].map((section) => (
+                    <button
+                      key={section}
+                      onClick={() => setActiveSection(section)}
+                      className={`px-4 py-2 rounded-lg font-medium transition-colors capitalize ${
+                        activeSection === section
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      }`}
+                    >
+                      {section}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div className="flex flex-wrap gap-4">
                 {timeRanges.map((range) => (
                   <button
@@ -96,6 +143,9 @@ export default function Analytics() {
               </div>
             ) : (
               <div className="space-y-8">
+                {/* Overview Section */}
+                {activeSection === 'overview' && (
+                  <>
                 {/* Key Metrics */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
@@ -232,6 +282,149 @@ export default function Analytics() {
                     <p className="text-gray-400">Chart visualization coming soon...</p>
                   </div>
                 </div>
+                  </>
+                )}
+
+                {/* Market Data Section */}
+                {activeSection === 'market' && (
+                  <div className="space-y-6">
+                    {marketLoading ? (
+                      <div className="text-center py-12">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                        <p className="text-gray-300 mt-4">Loading market data...</p>
+                      </div>
+                    ) : marketData ? (
+                      <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                          <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                            <h3 className="text-lg font-semibold text-white mb-2">Total Market Cap</h3>
+                            <p className="text-3xl font-bold text-blue-400">
+                              ${marketData.data?.total_market_cap?.usd 
+                                ? (marketData.data.total_market_cap.usd / 1e12).toFixed(2) + 'T'
+                                : 'N/A'}
+                            </p>
+                          </div>
+                          <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                            <h3 className="text-lg font-semibold text-white mb-2">24h Volume</h3>
+                            <p className="text-3xl font-bold text-green-400">
+                              ${marketData.data?.total_volume?.usd 
+                                ? (marketData.data.total_volume.usd / 1e9).toFixed(2) + 'B'
+                                : 'N/A'}
+                            </p>
+                          </div>
+                          <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                            <h3 className="text-lg font-semibold text-white mb-2">BTC Dominance</h3>
+                            <p className="text-3xl font-bold text-yellow-400">
+                              {marketData.data?.market_cap_percentage?.btc 
+                                ? marketData.data.market_cap_percentage.btc.toFixed(2) + '%'
+                                : 'N/A'}
+                            </p>
+                          </div>
+                          <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                            <h3 className="text-lg font-semibold text-white mb-2">ETH Dominance</h3>
+                            <p className="text-3xl font-bold text-purple-400">
+                              {marketData.data?.market_cap_percentage?.eth 
+                                ? marketData.data.market_cap_percentage.eth.toFixed(2) + '%'
+                                : 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                          <h2 className="text-2xl font-bold text-white mb-6">Market Statistics</h2>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div>
+                              <p className="text-sm text-gray-400 mb-1">Active Cryptocurrencies</p>
+                              <p className="text-xl font-bold text-white">
+                                {marketData.data?.active_cryptocurrencies?.toLocaleString() || 'N/A'}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-400 mb-1">Markets</p>
+                              <p className="text-xl font-bold text-white">
+                                {marketData.data?.markets?.toLocaleString() || 'N/A'}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-400 mb-1">Market Cap Change 24h</p>
+                              <p className={`text-xl font-bold ${marketData.data?.market_cap_change_percentage_24h_usd >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                {marketData.data?.market_cap_change_percentage_24h_usd 
+                                  ? (marketData.data.market_cap_change_percentage_24h_usd >= 0 ? '+' : '') + marketData.data.market_cap_change_percentage_24h_usd.toFixed(2) + '%'
+                                  : 'N/A'}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-400 mb-1">Updated</p>
+                              <p className="text-sm text-white">
+                                {marketData.data?.updated_at 
+                                  ? new Date(marketData.data.updated_at).toLocaleString()
+                                  : 'N/A'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-center py-12">
+                        <p className="text-gray-300">Market data not available</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Trending Tokens Section */}
+                {activeSection === 'trending' && (
+                  <div className="space-y-6">
+                    <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                      <h2 className="text-2xl font-bold text-white mb-6">Trending Tokens (CoinGecko)</h2>
+                      {trendingLoading ? (
+                        <div className="text-center py-12">
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                          <p className="text-gray-300 mt-4">Loading trending tokens...</p>
+                        </div>
+                      ) : trendingTokens && trendingTokens.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {trendingTokens.slice(0, 12).map((coin, index) => (
+                            <div key={index} className="bg-gray-700 rounded-xl p-4 border border-gray-600 hover:border-blue-500 transition-colors">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center space-x-3">
+                                  {coin.item?.small && (
+                                    <img src={coin.item.small} alt={coin.item.name} className="w-10 h-10 rounded-full" />
+                                  )}
+                                  <div>
+                                    <h3 className="text-white font-semibold">{coin.item?.name || 'Unknown'}</h3>
+                                    <p className="text-sm text-gray-400">{coin.item?.symbol?.toUpperCase() || ''}</p>
+                                  </div>
+                                </div>
+                                <span className="text-yellow-400 font-bold">#{index + 1}</span>
+                              </div>
+                              {coin.item?.data?.price && (
+                                <div className="space-y-1 text-sm">
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-400">Price:</span>
+                                    <span className="text-white">${parseFloat(coin.item.data.price).toLocaleString(undefined, { maximumFractionDigits: 6 })}</span>
+                                  </div>
+                                  {coin.item.data.price_change_percentage_24h && (
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-400">24h Change:</span>
+                                      <span className={coin.item.data.price_change_percentage_24h.usd >= 0 ? 'text-green-400' : 'text-red-400'}>
+                                        {coin.item.data.price_change_percentage_24h.usd >= 0 ? '+' : ''}
+                                        {coin.item.data.price_change_percentage_24h.usd?.toFixed(2)}%
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-12">
+                          <p className="text-gray-300">No trending tokens available</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}</div>
         </div>
