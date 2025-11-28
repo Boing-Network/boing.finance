@@ -10,6 +10,10 @@ import TokenManagementModal from '../components/TokenManagementModal';
 import NetworkSelector from '../components/NetworkSelector';
 import { InfoTooltip, WarningTooltip, HelpTooltip } from '../components/Tooltip';
 import { Helmet } from 'react-helmet-async';
+import TokenDetailsModal from '../components/TokenDetailsModal';
+import TokenFilters from '../components/TokenFilters';
+import { tokenFavorites } from '../utils/tokenFavorites';
+import coingeckoService from '../services/coingeckoService';
 
 // Initialize token scanner
 const tokenScanner = new TokenScanner();
@@ -33,6 +37,15 @@ const Tokens = () => {
   const [searchAddress, setSearchAddress] = useState('');
   const [searching, setSearching] = useState(false);
   const [searchedToken, setSearchedToken] = useState(null);
+  const [selectedToken, setSelectedToken] = useState(null);
+  const [showTokenDetails, setShowTokenDetails] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    search: '',
+    network: 'all',
+    sortBy: 'trending',
+    favoritesOnly: false
+  });
 
   // Sync selectedChain with wallet chainId
   useEffect(() => {
@@ -162,6 +175,71 @@ const Tokens = () => {
     return NETWORKS[chainId]?.name || `Chain ${chainId}`;
   };
 
+  // Filter and sort tokens
+  const filteredTokens = React.useMemo(() => {
+    let filtered = [...tokens];
+
+    // Apply search filter
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filtered = filtered.filter(token =>
+        token.name?.toLowerCase().includes(searchLower) ||
+        token.symbol?.toLowerCase().includes(searchLower) ||
+        token.address?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Apply network filter
+    if (filters.network !== 'all') {
+      filtered = filtered.filter(token => 
+        (token.chainId || selectedChain) === parseInt(filters.network)
+      );
+    }
+
+    // Apply favorites filter
+    if (filters.favoritesOnly) {
+      filtered = filtered.filter(token =>
+        tokenFavorites.isFavorite(token.chainId || selectedChain, token.address)
+      );
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      switch (filters.sortBy) {
+        case 'name':
+          return (a.name || '').localeCompare(b.name || '');
+        case 'supply':
+          return parseFloat(ethers.formatUnits(b.totalSupply || '0', b.decimals || 18)) -
+                 parseFloat(ethers.formatUnits(a.totalSupply || '0', a.decimals || 18));
+        case 'recent':
+          return (b.timestamp || 0) - (a.timestamp || 0);
+        case 'trending':
+        default:
+          return (b.trendingScore || 0) - (a.trendingScore || 0);
+      }
+    });
+
+    return filtered;
+  }, [tokens, filters, selectedChain]);
+
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      search: '',
+      network: 'all',
+      sortBy: 'trending',
+      favoritesOnly: false
+    });
+  };
+
+  const openTokenDetails = (token) => {
+    setSelectedToken(token);
+    setShowTokenDetails(true);
+  };
+
   return (
     <>
       <Helmet>
@@ -245,17 +323,34 @@ const Tokens = () => {
             )}
           </div>
 
-          {/* Search Section */}
+          {/* Search and Filters Section */}
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 border border-gray-700">
-            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-white">Search Token</h2>
-            <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 sm:gap-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg sm:text-xl font-semibold text-white">Search & Filters</h2>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="px-3 py-1 rounded-lg transition-colors text-sm"
+                style={{
+                  backgroundColor: showFilters ? 'var(--bg-secondary)' : 'var(--bg-tertiary)',
+                  color: 'var(--text-primary)'
+                }}
+              >
+                {showFilters ? 'Hide' : 'Show'} Filters
+              </button>
+            </div>
+
+            {/* Quick Search */}
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 sm:gap-4 mb-4">
               <div className="flex-1 min-w-0 w-full sm:w-auto">
                 <input
                   type="text"
-                  value={searchAddress}
-                  onChange={(e) => setSearchAddress(e.target.value)}
+                  value={filters.search || searchAddress}
+                  onChange={(e) => {
+                    setSearchAddress(e.target.value);
+                    handleFilterChange('search', e.target.value);
+                  }}
                   onKeyPress={handleSearchKeyPress}
-                  placeholder="Enter token address (0x...)"
+                  placeholder="Search by name, symbol, or address..."
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 sm:px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
                 />
               </div>
@@ -272,7 +367,7 @@ const Tokens = () => {
                       Searching...
                     </>
                   ) : (
-                    'Search'
+                    'Search Address'
                   )}
                 </button>
                 
@@ -286,6 +381,17 @@ const Tokens = () => {
                 )}
               </div>
             </div>
+
+            {/* Advanced Filters */}
+            {showFilters && (
+              <div className="mt-4">
+                <TokenFilters
+                  filters={filters}
+                  onFilterChange={handleFilterChange}
+                  onClearFilters={clearFilters}
+                />
+              </div>
+            )}
 
             {/* Search Results */}
             {searchedToken && (
@@ -386,17 +492,31 @@ const Tokens = () => {
           )}
 
           {/* Tokens Grid */}
-          {!loading && tokens.length > 0 && (
+          {!loading && filteredTokens.length > 0 && (
+            <div className="mb-4">
+              <p className="text-sm text-gray-400">
+                Showing {filteredTokens.length} of {tokens.length} tokens
+              </p>
+            </div>
+          )}
+          {!loading && filteredTokens.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-              {tokens.map((token, index) => (
+              {filteredTokens.map((token, index) => {
+                const isFavorite = tokenFavorites.isFavorite(token.chainId || selectedChain, token.address);
+                return (
                 <div
                   key={index}
-                  className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700 hover:border-purple-500 transition-all duration-200 cursor-pointer group"
-                  onClick={() => {
-                    setSearchAddress(token.address);
-                    searchToken();
-                  }}
+                  className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700 hover:border-purple-500 transition-all duration-200 cursor-pointer group relative"
+                  onClick={() => openTokenDetails(token)}
                 >
+                  {/* Favorite Badge */}
+                  {isFavorite && (
+                    <div className="absolute top-2 right-2">
+                      <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                      </svg>
+                    </div>
+                  )}
                   <div className="flex items-start justify-between mb-3 sm:mb-4">
                     <div className="flex items-center space-x-3">
                       <div className="w-8 sm:w-10 h-8 sm:h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base">
@@ -449,12 +569,13 @@ const Tokens = () => {
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
           {/* No Tokens State */}
-          {!loading && tokens.length === 0 && !error && (
+          {!loading && filteredTokens.length === 0 && tokens.length === 0 && !error && (
             <div className="text-center py-8 sm:py-12">
               <div className="text-4xl sm:text-6xl mb-4">🔍</div>
               <h3 className="text-xl sm:text-2xl font-semibold text-white mb-2">No Tokens Found</h3>
@@ -469,7 +590,37 @@ const Tokens = () => {
               </button>
             </div>
           )}
+
+          {/* No Results After Filtering */}
+          {!loading && filteredTokens.length === 0 && tokens.length > 0 && (
+            <div className="text-center py-8 sm:py-12">
+              <div className="text-4xl sm:text-6xl mb-4">🔍</div>
+              <h3 className="text-xl sm:text-2xl font-semibold text-white mb-2">No Tokens Match Filters</h3>
+              <p className="text-gray-300 text-sm sm:text-base mb-4">
+                Try adjusting your filters or clearing them to see all tokens.
+              </p>
+              <button
+                onClick={clearFilters}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors text-sm sm:text-base"
+              >
+                Clear Filters
+              </button>
+            </div>
+          )}
         </div></div>
+
+        {/* Token Details Modal */}
+        {selectedToken && (
+          <TokenDetailsModal
+            token={selectedToken}
+            isOpen={showTokenDetails}
+            onClose={() => {
+              setShowTokenDetails(false);
+              setSelectedToken(null);
+            }}
+            network={NETWORKS[selectedToken.chainId || selectedChain]}
+          />
+        )}
     </>
   );
 };
