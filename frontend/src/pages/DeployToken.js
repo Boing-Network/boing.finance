@@ -14,6 +14,7 @@ import NetworkSelector from '../components/NetworkSelector';
 import SecurityBadges from '../components/SecurityBadges';
 import { InfoTooltip, WarningTooltip, HelpTooltip } from '../components/Tooltip';
 import { Helmet } from 'react-helmet-async';
+import { generateTokenSchema } from '../utils/structuredData';
 import { getContractAddress } from '../config/contracts';
 import LogoUpload from '../components/LogoUpload';
 import { uploadMetadataToIPFS, createTokenMetadata } from '../utils/ipfsUpload';

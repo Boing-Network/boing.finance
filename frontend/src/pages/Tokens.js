@@ -14,6 +14,7 @@ import TokenDetailsModal from '../components/TokenDetailsModal';
 import TokenFilters from '../components/TokenFilters';
 import { tokenFavorites } from '../utils/tokenFavorites';
 import coingeckoService from '../services/coingeckoService';
+import { debounce } from '../utils/debounce';
 
 // Initialize token scanner
 const tokenScanner = new TokenScanner();
