@@ -301,11 +301,11 @@ export default function Analytics() {
                   </div>
                 </div>
 
-                {/* User Activity Chart Placeholder */}
+                {/* User Activity Chart */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                   <h2 className="text-2xl font-bold text-white mb-6">User Activity</h2>
                   <div className="h-64 bg-gray-700 rounded-lg flex items-center justify-center">
-                    <p className="text-gray-400">Chart visualization coming soon...</p>
+                    <p className="text-gray-400">Activity data will be displayed here as it becomes available</p>
                   </div>
                 </div>
                   </>

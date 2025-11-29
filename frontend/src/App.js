@@ -66,18 +66,18 @@ const comingSoon = {
 const navigation = {
   home: { name: 'Home', href: '/', icon: '🏠' },
   trading: [
-    { name: 'Swap', href: '/swap', icon: '🔄', description: 'Trade tokens instantly', comingSoon: true },
+    { name: 'Swap', href: '/swap', icon: '🔄', description: 'Trade tokens instantly', testnetOnly: true },
     { name: 'Bridge', href: '/bridge', icon: '🌉', description: 'Cross-chain transfers', comingSoon: true },
-    { name: 'Pools', href: '/pools', icon: '🏊', description: 'Liquidity pools', comingSoon: true },
-    { name: 'Tokens', href: '/tokens', icon: '🪙', description: 'Token management', comingSoon: true }
+    { name: 'Pools', href: '/pools', icon: '🏊', description: 'Liquidity pools', testnetOnly: true },
+    { name: 'Tokens', href: '/tokens', icon: '🪙', description: 'Token management' }
   ],
   analytics: [
-    { name: 'Analytics', href: '/analytics', icon: '📊', description: 'Market insights', comingSoon: true },
-    { name: 'Portfolio', href: '/portfolio', icon: '💼', description: 'Your holdings', comingSoon: true }
+    { name: 'Analytics', href: '/analytics', icon: '📊', description: 'Market insights' },
+    { name: 'Portfolio', href: '/portfolio', icon: '💼', description: 'Your holdings' }
   ],
   deployment: [
     { name: 'Deploy Token', href: '/deploy-token', icon: '🚀', description: 'Create your own tokens' },
-    { name: 'Create Pool', href: '/create-pool', icon: '🏊', description: 'Create liquidity pools', comingSoon: true }
+    { name: 'Create Pool', href: '/create-pool', icon: '🏊', description: 'Create liquidity pools', testnetOnly: true }
   ]
 };
 
@@ -339,7 +339,7 @@ function AppContent() {
                         }
                       }}
                       disabled={item.comingSoon}
-                      title={item.comingSoon ? comingSoon.tooltip : ''}
+                      title={item.comingSoon ? comingSoon.tooltip : (item.testnetOnly ? 'Available on Sepolia testnet only' : '')}
                     >
                       <span className="text-lg">{item.icon}</span>
                       <div>
@@ -347,6 +347,9 @@ function AppContent() {
                           <span>{item.name}</span>
                           {item.comingSoon && (
                             <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>
+                          )}
+                          {item.testnetOnly && !item.comingSoon && (
+                            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-400/30">Testnet Only</span>
                           )}
                         </div>
                         {item.description && (
@@ -389,7 +392,7 @@ function AppContent() {
                         }
                       }}
                       disabled={item.comingSoon}
-                      title={item.comingSoon ? comingSoon.tooltip : ''}
+                      title={item.comingSoon ? comingSoon.tooltip : (item.testnetOnly ? 'Available on Sepolia testnet only' : '')}
                     >
                       <span className="text-lg">{item.icon}</span>
                       <div>
@@ -397,6 +400,9 @@ function AppContent() {
                           <span>{item.name}</span>
                           {item.comingSoon && (
                             <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>
+                          )}
+                          {item.testnetOnly && !item.comingSoon && (
+                            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-400/30">Testnet Only</span>
                           )}
                         </div>
                         {item.description && (
@@ -439,7 +445,7 @@ function AppContent() {
                         }
                       }}
                       disabled={item.comingSoon}
-                      title={item.comingSoon ? comingSoon.tooltip : ''}
+                      title={item.comingSoon ? comingSoon.tooltip : (item.testnetOnly ? 'Available on Sepolia testnet only' : '')}
                     >
                       <span className="text-lg">{item.icon}</span>
                       <div>
@@ -447,6 +453,9 @@ function AppContent() {
                           <span>{item.name}</span>
                           {item.comingSoon && (
                             <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>
+                          )}
+                          {item.testnetOnly && !item.comingSoon && (
+                            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-400/30">Testnet Only</span>
                           )}
                         </div>
                         {item.description && (
@@ -842,12 +851,22 @@ function Home() {
           <div className="mt-8 space-y-8 fade-in delay-500">
             {/* First row - 6 cards in 3 columns */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              <FeatureCard title="Swap" icon={<SwapIcon />} description="Instantly swap tokens across multiple blockchains with low fees and high speed." comingSoon />
-              <FeatureCard title="Liquidity Pools" icon={<LiquidityIcon />} description="Provide liquidity, earn rewards, and help power decentralized trading." comingSoon />
-              <FeatureCard title="Analytics" icon={<AnalyticsIcon />} description="Track your trading performance, pool stats, and market trends in real time." comingSoon />
-              <FeatureCard title="Portfolio" icon={<PortfolioIcon />} description="Monitor your assets, balances, and earnings across all supported chains." comingSoon />
+              <a href="/swap" className="block">
+                <FeatureCard title="Swap" icon={<SwapIcon />} description="Instantly swap tokens across multiple blockchains with low fees and high speed." />
+              </a>
+              <a href="/pools" className="block">
+                <FeatureCard title="Liquidity Pools" icon={<LiquidityIcon />} description="Provide liquidity, earn rewards, and help power decentralized trading." />
+              </a>
+              <a href="/analytics" className="block">
+                <FeatureCard title="Analytics" icon={<AnalyticsIcon />} description="Track your trading performance, pool stats, and market trends in real time." />
+              </a>
+              <a href="/portfolio" className="block">
+                <FeatureCard title="Portfolio" icon={<PortfolioIcon />} description="Monitor your assets, balances, and earnings across all supported chains." />
+              </a>
               <FeatureCard title="Bridge" icon={<BridgeIcon />} description="Seamlessly transfer tokens between different blockchains with our secure bridge." comingSoon />
-              <FeatureCard title="Tokens" icon={<TokensIcon />} description="Explore supported tokens, view details, and manage your favorites." comingSoon />
+              <a href="/tokens" className="block">
+                <FeatureCard title="Tokens" icon={<TokensIcon />} description="Explore supported tokens, view details, and manage your favorites." />
+              </a>
             </div>
             
             {/* Second row - Deploy Token card centered */}
@@ -1122,7 +1141,7 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
                   }
                 }}
                 disabled={item.comingSoon}
-                title={item.comingSoon ? comingSoon.tooltip : ''}
+                title={item.comingSoon ? comingSoon.tooltip : (item.testnetOnly ? 'Available on Sepolia testnet only' : '')}
               >
                 <span className="text-lg">{item.icon}</span>
                 <div>
@@ -1130,6 +1149,9 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
                     <span>{item.name}</span>
                     {item.comingSoon && (
                       <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>
+                    )}
+                    {item.testnetOnly && !item.comingSoon && (
+                      <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-400/30">Testnet Only</span>
                     )}
                   </div>
                   {item.description && (
