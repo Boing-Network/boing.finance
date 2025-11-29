@@ -11,6 +11,7 @@ import { getNetworkByChainId } from '../config/networks';
 import toast from 'react-hot-toast';
 import LoadingSpinner from './LoadingSpinner';
 import OptimizedImage from './OptimizedImage';
+import ShareTokenModal from './ShareTokenModal';
 
 const TokenDetailsModal = ({ token, isOpen, onClose, network }) => {
   const [isFavorite, setIsFavorite] = useState(false);
@@ -18,6 +19,7 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network }) => {
   const [holderCount, setHolderCount] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Get network name for CoinGecko
   const getCoinGeckoNetwork = (chainId) => {
@@ -286,6 +288,16 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network }) => {
 
             {/* Actions */}
             <div className="flex space-x-4 pt-4">
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="flex-1 px-4 py-2 rounded-lg text-center transition-colors"
+                style={{
+                  backgroundColor: 'var(--bg-secondary)',
+                  color: 'var(--text-primary)'
+                }}
+              >
+                Share Token
+              </button>
               <a
                 href={getExplorerUrl(token.address)}
                 target="_blank"
@@ -376,6 +388,17 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network }) => {
           </div>
         )}
       </div>
+      
+      {/* Share Token Modal */}
+      <ShareTokenModal
+        token={{
+          ...token,
+          network: getNetworkByChainId(token.chainId || network?.chainId)?.name || 'Unknown',
+          chainId: token.chainId || network?.chainId
+        }}
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+      />
     </div>
   );
 };
