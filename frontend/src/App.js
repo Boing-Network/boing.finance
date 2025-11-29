@@ -17,6 +17,7 @@ import Logo from './components/Logo';
 import ShootingStars from './components/ShootingStars';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
+import OnboardingTour from './components/OnboardingTour';
 import './styles/globals.css';
 
 // Lazy load all page components for code splitting
@@ -519,6 +520,9 @@ function AppContent() {
           </div>
         </ErrorBoundary>
       </main>
+      
+      {/* Onboarding Tour */}
+      <OnboardingTour />
       
       {/* Transaction History Modal */}
       <TransactionHistoryModal
