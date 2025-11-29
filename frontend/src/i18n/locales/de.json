@@ -1,0 +1,88 @@
+{
+  "common": {
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "close": "Schließen",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "sort": "Sortieren",
+    "view": "Ansehen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "previous": "Vorherige"
+  },
+  "nav": {
+    "home": "Startseite",
+    "swap": "Tauschen",
+    "bridge": "Brücke",
+    "pools": "Pools",
+    "tokens": "Tokens",
+    "analytics": "Analysen",
+    "portfolio": "Portfolio",
+    "deployToken": "Token Bereitstellen",
+    "createPool": "Pool Erstellen",
+    "developerTools": "Entwicklertools",
+    "docs": "Dokumentation",
+    "helpCenter": "Hilfezentrum"
+  },
+  "home": {
+    "title": "Boing Finance - Tokens Bereitstellen & Krypto Handeln",
+    "subtitle": "Die benutzerfreundlichste dezentrale Börse für Token-Bereitstellung und Cross-Chain-Handel",
+    "getStarted": "Loslegen",
+    "learnMore": "Mehr Erfahren"
+  },
+  "deployToken": {
+    "title": "Ihren Token Bereitstellen",
+    "description": "Erstellen Sie Ihren eigenen ERC20-Token mit erweiterten Sicherheitsfunktionen",
+    "tokenName": "Token-Name",
+    "tokenSymbol": "Token-Symbol",
+    "initialSupply": "Anfangsversorgung",
+    "decimals": "Dezimalstellen",
+    "deploy": "Token Bereitstellen",
+    "deploying": "Wird Bereitgestellt...",
+    "success": "Token erfolgreich bereitgestellt!"
+  },
+  "tokens": {
+    "title": "Token-Explorer",
+    "searchPlaceholder": "Tokens nach Name, Symbol oder Adresse suchen",
+    "noResults": "Keine Tokens gefunden",
+    "viewDetails": "Details Ansehen",
+    "addToWatchlist": "Zur Beobachtungsliste Hinzufügen",
+    "removeFromWatchlist": "Von Beobachtungsliste Entfernen"
+  },
+  "portfolio": {
+    "title": "Portfolio",
+    "totalValue": "Gesamtwert des Portfolios",
+    "tokens": "Tokens",
+    "pools": "Liquiditätspools",
+    "transactions": "Transaktionen"
+  },
+  "analytics": {
+    "title": "Analysedashboard",
+    "marketOverview": "Marktübersicht",
+    "tradingPairs": "Handelspaare",
+    "volume24h": "24h Volumen",
+    "priceChange": "Preisänderung"
+  },
+  "watchlist": {
+    "title": "Token-Beobachtungsliste",
+    "empty": "Keine Tokens in der Beobachtungsliste",
+    "addAlert": "Alarm Hinzufügen",
+    "priceAlert": "Preisalarm",
+    "volumeAlert": "Volumenalarm"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": "Sprache",
+    "theme": "Thema",
+    "notifications": "Benachrichtigungen",
+    "currency": "Währung"
+  }
+}
+

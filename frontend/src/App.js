@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import './i18n'; // Initialize i18n
 import { WalletProvider } from './contexts/WalletContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { useWalletConnection } from './hooks/useWalletConnection';
@@ -13,6 +14,7 @@ import WalletConnect from './components/WalletConnect';
 import NetworkSelector from './components/NetworkSelector';
 import TransactionHistoryModal from './components/TransactionHistoryModal';
 import ThemeToggle from './components/ThemeToggle';
+import LanguageSelector from './components/LanguageSelector';
 import Logo from './components/Logo';
 import ShootingStars from './components/ShootingStars';
 import ErrorBoundary from './components/ErrorBoundary';

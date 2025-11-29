@@ -155,6 +155,10 @@ app.route('/analytics', analyticsRoutes);
 const ipfsRoutes = createIPFSRoutes();
 app.route('/api', ipfsRoutes);
 
+// Mount Public API routes at /api
+const apiRoutes = createAPIRoutes();
+app.route('/api', apiRoutes);
+
 // Webhook routes
 app.post('/api/webhook', async (c) => {
   try {

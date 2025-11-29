@@ -1,0 +1,88 @@
+{
+  "common": {
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "close": "閉じる",
+    "search": "検索",
+    "filter": "フィルター",
+    "sort": "並び替え",
+    "view": "表示",
+    "back": "戻る",
+    "next": "次へ",
+    "previous": "前へ"
+  },
+  "nav": {
+    "home": "ホーム",
+    "swap": "スワップ",
+    "bridge": "ブリッジ",
+    "pools": "プール",
+    "tokens": "トークン",
+    "analytics": "分析",
+    "portfolio": "ポートフォリオ",
+    "deployToken": "トークンをデプロイ",
+    "createPool": "プールを作成",
+    "developerTools": "開発者ツール",
+    "docs": "ドキュメント",
+    "helpCenter": "ヘルプセンター"
+  },
+  "home": {
+    "title": "Boing Finance - トークンのデプロイと暗号通貨の取引",
+    "subtitle": "トークンデプロイとクロスチェーン取引のための最も使いやすい分散型取引所",
+    "getStarted": "始める",
+    "learnMore": "詳細を見る"
+  },
+  "deployToken": {
+    "title": "トークンをデプロイ",
+    "description": "高度なセキュリティ機能を備えた独自のERC20トークンを作成",
+    "tokenName": "トークン名",
+    "tokenSymbol": "トークンシンボル",
+    "initialSupply": "初期供給量",
+    "decimals": "小数点以下桁数",
+    "deploy": "トークンをデプロイ",
+    "deploying": "デプロイ中...",
+    "success": "トークンのデプロイに成功しました！"
+  },
+  "tokens": {
+    "title": "トークンエクスプローラー",
+    "searchPlaceholder": "名前、シンボル、またはアドレスでトークンを検索",
+    "noResults": "トークンが見つかりません",
+    "viewDetails": "詳細を表示",
+    "addToWatchlist": "ウォッチリストに追加",
+    "removeFromWatchlist": "ウォッチリストから削除"
+  },
+  "portfolio": {
+    "title": "ポートフォリオ",
+    "totalValue": "ポートフォリオ総額",
+    "tokens": "トークン",
+    "pools": "流動性プール",
+    "transactions": "取引"
+  },
+  "analytics": {
+    "title": "分析ダッシュボード",
+    "marketOverview": "市場概要",
+    "tradingPairs": "取引ペア",
+    "volume24h": "24時間ボリューム",
+    "priceChange": "価格変動"
+  },
+  "watchlist": {
+    "title": "トークンウォッチリスト",
+    "empty": "ウォッチリストにトークンがありません",
+    "addAlert": "アラートを追加",
+    "priceAlert": "価格アラート",
+    "volumeAlert": "ボリュームアラート"
+  },
+  "settings": {
+    "title": "設定",
+    "language": "言語",
+    "theme": "テーマ",
+    "notifications": "通知",
+    "currency": "通貨"
+  }
+}
+

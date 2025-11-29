@@ -1,0 +1,88 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "view": "View",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "nav": {
+    "home": "Home",
+    "swap": "Swap",
+    "bridge": "Bridge",
+    "pools": "Pools",
+    "tokens": "Tokens",
+    "analytics": "Analytics",
+    "portfolio": "Portfolio",
+    "deployToken": "Deploy Token",
+    "createPool": "Create Pool",
+    "developerTools": "Developer Tools",
+    "docs": "Documentation",
+    "helpCenter": "Help Center"
+  },
+  "home": {
+    "title": "Boing Finance - Deploy Tokens & Trade Crypto",
+    "subtitle": "The most user-friendly decentralized exchange for token deployment and cross-chain trading",
+    "getStarted": "Get Started",
+    "learnMore": "Learn More"
+  },
+  "deployToken": {
+    "title": "Deploy Your Token",
+    "description": "Create your own ERC20 token with advanced security features",
+    "tokenName": "Token Name",
+    "tokenSymbol": "Token Symbol",
+    "initialSupply": "Initial Supply",
+    "decimals": "Decimals",
+    "deploy": "Deploy Token",
+    "deploying": "Deploying...",
+    "success": "Token deployed successfully!"
+  },
+  "tokens": {
+    "title": "Token Explorer",
+    "searchPlaceholder": "Search tokens by name, symbol, or address",
+    "noResults": "No tokens found",
+    "viewDetails": "View Details",
+    "addToWatchlist": "Add to Watchlist",
+    "removeFromWatchlist": "Remove from Watchlist"
+  },
+  "portfolio": {
+    "title": "Portfolio",
+    "totalValue": "Total Portfolio Value",
+    "tokens": "Tokens",
+    "pools": "Liquidity Pools",
+    "transactions": "Transactions"
+  },
+  "analytics": {
+    "title": "Analytics Dashboard",
+    "marketOverview": "Market Overview",
+    "tradingPairs": "Trading Pairs",
+    "volume24h": "24h Volume",
+    "priceChange": "Price Change"
+  },
+  "watchlist": {
+    "title": "Token Watchlist",
+    "empty": "No tokens in watchlist",
+    "addAlert": "Add Alert",
+    "priceAlert": "Price Alert",
+    "volumeAlert": "Volume Alert"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "notifications": "Notifications",
+    "currency": "Currency"
+  }
+}
+

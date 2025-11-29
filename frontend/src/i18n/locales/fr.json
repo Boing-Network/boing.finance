@@ -1,0 +1,88 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "close": "Fermer",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "sort": "Trier",
+    "view": "Voir",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent"
+  },
+  "nav": {
+    "home": "Accueil",
+    "swap": "Échanger",
+    "bridge": "Pont",
+    "pools": "Pools",
+    "tokens": "Tokens",
+    "analytics": "Analyses",
+    "portfolio": "Portefeuille",
+    "deployToken": "Déployer un Token",
+    "createPool": "Créer un Pool",
+    "developerTools": "Outils de Développeur",
+    "docs": "Documentation",
+    "helpCenter": "Centre d'Aide"
+  },
+  "home": {
+    "title": "Boing Finance - Déployer des Tokens et Trader la Crypto",
+    "subtitle": "L'échange décentralisé le plus convivial pour le déploiement de tokens et le trading inter-chaînes",
+    "getStarted": "Commencer",
+    "learnMore": "En Savoir Plus"
+  },
+  "deployToken": {
+    "title": "Déployer Votre Token",
+    "description": "Créez votre propre token ERC20 avec des fonctionnalités de sécurité avancées",
+    "tokenName": "Nom du Token",
+    "tokenSymbol": "Symbole du Token",
+    "initialSupply": "Approvisionnement Initial",
+    "decimals": "Décimales",
+    "deploy": "Déployer le Token",
+    "deploying": "Déploiement...",
+    "success": "Token déployé avec succès !"
+  },
+  "tokens": {
+    "title": "Explorateur de Tokens",
+    "searchPlaceholder": "Rechercher des tokens par nom, symbole ou adresse",
+    "noResults": "Aucun token trouvé",
+    "viewDetails": "Voir les Détails",
+    "addToWatchlist": "Ajouter à la Liste de Suivi",
+    "removeFromWatchlist": "Retirer de la Liste de Suivi"
+  },
+  "portfolio": {
+    "title": "Portefeuille",
+    "totalValue": "Valeur Totale du Portefeuille",
+    "tokens": "Tokens",
+    "pools": "Pools de Liquidité",
+    "transactions": "Transactions"
+  },
+  "analytics": {
+    "title": "Tableau de Bord des Analyses",
+    "marketOverview": "Aperçu du Marché",
+    "tradingPairs": "Paires de Trading",
+    "volume24h": "Volume 24h",
+    "priceChange": "Changement de Prix"
+  },
+  "watchlist": {
+    "title": "Liste de Suivi des Tokens",
+    "empty": "Aucun token dans la liste de suivi",
+    "addAlert": "Ajouter une Alerte",
+    "priceAlert": "Alerte de Prix",
+    "volumeAlert": "Alerte de Volume"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": "Langue",
+    "theme": "Thème",
+    "notifications": "Notifications",
+    "currency": "Devise"
+  }
+}
+

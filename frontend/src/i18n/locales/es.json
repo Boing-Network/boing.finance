@@ -1,0 +1,88 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "view": "Ver",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior"
+  },
+  "nav": {
+    "home": "Inicio",
+    "swap": "Intercambiar",
+    "bridge": "Puente",
+    "pools": "Pools",
+    "tokens": "Tokens",
+    "analytics": "Análisis",
+    "portfolio": "Portafolio",
+    "deployToken": "Desplegar Token",
+    "createPool": "Crear Pool",
+    "developerTools": "Herramientas de Desarrollador",
+    "docs": "Documentación",
+    "helpCenter": "Centro de Ayuda"
+  },
+  "home": {
+    "title": "Boing Finance - Desplegar Tokens y Comerciar Cripto",
+    "subtitle": "El intercambio descentralizado más fácil de usar para el despliegue de tokens y el comercio entre cadenas",
+    "getStarted": "Comenzar",
+    "learnMore": "Aprender Más"
+  },
+  "deployToken": {
+    "title": "Desplegar Tu Token",
+    "description": "Crea tu propio token ERC20 con características de seguridad avanzadas",
+    "tokenName": "Nombre del Token",
+    "tokenSymbol": "Símbolo del Token",
+    "initialSupply": "Suministro Inicial",
+    "decimals": "Decimales",
+    "deploy": "Desplegar Token",
+    "deploying": "Desplegando...",
+    "success": "¡Token desplegado con éxito!"
+  },
+  "tokens": {
+    "title": "Explorador de Tokens",
+    "searchPlaceholder": "Buscar tokens por nombre, símbolo o dirección",
+    "noResults": "No se encontraron tokens",
+    "viewDetails": "Ver Detalles",
+    "addToWatchlist": "Agregar a Lista de Seguimiento",
+    "removeFromWatchlist": "Quitar de Lista de Seguimiento"
+  },
+  "portfolio": {
+    "title": "Portafolio",
+    "totalValue": "Valor Total del Portafolio",
+    "tokens": "Tokens",
+    "pools": "Pools de Liquidez",
+    "transactions": "Transacciones"
+  },
+  "analytics": {
+    "title": "Panel de Análisis",
+    "marketOverview": "Resumen del Mercado",
+    "tradingPairs": "Pares de Comercio",
+    "volume24h": "Volumen 24h",
+    "priceChange": "Cambio de Precio"
+  },
+  "watchlist": {
+    "title": "Lista de Seguimiento de Tokens",
+    "empty": "No hay tokens en la lista de seguimiento",
+    "addAlert": "Agregar Alerta",
+    "priceAlert": "Alerta de Precio",
+    "volumeAlert": "Alerta de Volumen"
+  },
+  "settings": {
+    "title": "Configuración",
+    "language": "Idioma",
+    "theme": "Tema",
+    "notifications": "Notificaciones",
+    "currency": "Moneda"
+  }
+}
+
