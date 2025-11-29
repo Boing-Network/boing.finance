@@ -1042,8 +1042,8 @@ export default function DeployToken() {
           toast.success(`Token deployed successfully! Address: ${deployedAddress}`);
           
           // Show browser notification if enabled
-          const notificationSettings = JSON.parse(localStorage.getItem('boing_notification_settings') || '{"deployments": true}');
-          if (notificationSettings.deployments) {
+          const deploymentNotificationSettings1 = JSON.parse(localStorage.getItem('boing_notification_settings') || '{"deployments": true}');
+          if (deploymentNotificationSettings1.deployments) {
             await notificationService.notifyDeploymentSuccess(name, deployedAddress);
           }
           
@@ -1135,8 +1135,8 @@ export default function DeployToken() {
           toast.success(`Token deployed successfully! Address: ${deployedAddress}`);
           
           // Show browser notification if enabled
-          const notificationSettings = JSON.parse(localStorage.getItem('boing_notification_settings') || '{"deployments": true}');
-          if (notificationSettings.deployments) {
+          const deploymentNotificationSettings2 = JSON.parse(localStorage.getItem('boing_notification_settings') || '{"deployments": true}');
+          if (deploymentNotificationSettings2.deployments) {
             await notificationService.notifyDeploymentSuccess(name, deployedAddress);
           }
           
@@ -1202,8 +1202,8 @@ export default function DeployToken() {
           toast.success(`Token deployed successfully! Address: ${deployedAddress}`);
           
           // Show browser notification if enabled
-          const notificationSettings = JSON.parse(localStorage.getItem('boing_notification_settings') || '{"deployments": true}');
-          if (notificationSettings.deployments) {
+          const deploymentNotificationSettings3 = JSON.parse(localStorage.getItem('boing_notification_settings') || '{"deployments": true}');
+          if (deploymentNotificationSettings3.deployments) {
             await notificationService.notifyDeploymentSuccess(name, deployedAddress);
           }
           
