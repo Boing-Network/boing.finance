@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { useWallet } from '../contexts/WalletContext';
 import toast from 'react-hot-toast';
@@ -375,6 +376,37 @@ async function manualDeployWithInterface({ signer, ERC20_ABI, ERC20_BYTECODE, co
 }
 
 export default function DeployToken() {
+  const location = useLocation();
+  
+  // Check for template data from navigation
+  useEffect(() => {
+    if (location.state?.template) {
+      const template = location.state.template;
+      // Apply template settings
+      if (template.securityFeatures) {
+        // Set security features based on template
+        template.securityFeatures.forEach(feature => {
+          // Apply feature settings
+        });
+      }
+      if (template.recommendedNetwork) {
+        // Set recommended network
+      }
+      toast.success(`Template "${template.templateName}" loaded`);
+    }
+    
+    // Also check sessionStorage
+    const storedTemplate = sessionStorage.getItem('selectedTemplate');
+    if (storedTemplate) {
+      try {
+        const template = JSON.parse(storedTemplate);
+        // Apply template settings
+        sessionStorage.removeItem('selectedTemplate'); // Clear after use
+      } catch (error) {
+        console.error('Error parsing template data:', error);
+      }
+    }
+  }, [location]);
   const { signer, isConnected, getCurrentNetwork } = useWallet();
   const [name, setName] = useState('');
   const [symbol, setSymbol] = useState('');

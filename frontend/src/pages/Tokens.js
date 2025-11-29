@@ -11,6 +11,7 @@ import NetworkSelector from '../components/NetworkSelector';
 import { InfoTooltip, WarningTooltip, HelpTooltip } from '../components/Tooltip';
 import { Helmet } from 'react-helmet-async';
 import TokenDetailsModal from '../components/TokenDetailsModal';
+import TokenComparison from '../components/TokenComparison';
 import TokenFilters from '../components/TokenFilters';
 import { tokenFavorites } from '../utils/tokenFavorites';
 import coingeckoService from '../services/coingeckoService';
