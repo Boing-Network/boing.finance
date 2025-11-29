@@ -84,6 +84,7 @@ function AppContent() {
   const [analyticsDropdownOpen, setAnalyticsDropdownOpen] = useState(false);
   const [deploymentDropdownOpen, setDeploymentDropdownOpen] = useState(false);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
+  const [showGlobalSearch, setShowGlobalSearch] = useState(false);
   const { account } = useWalletConnection();
 
   const closeMenu = () => {
