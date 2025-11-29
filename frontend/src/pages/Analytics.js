@@ -88,13 +88,36 @@ export default function Analytics() {
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold text-white mb-4">
-                Analytics Dashboard
-              </h1>
-              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-                Track trading performance, pool statistics, and market trends across all supported networks.
-              </p>
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex-1">
+                  <h1 className="text-4xl font-bold text-white mb-2">
+                    Analytics Dashboard
+                  </h1>
+                  <p className="text-xl text-gray-300 max-w-3xl">
+                    Track trading performance, pool statistics, and market trends across all supported networks.
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  {trendingTokens && trendingTokens.length > 0 && (
+                    <button
+                      onClick={() => {
+                        const analyticsData = {
+                          trendingTokens: trendingTokens || [],
+                          marketData: marketData || null,
+                          analytics: analytics || null,
+                          timestamp: new Date().toISOString()
+                        };
+                        exportAnalytics(analyticsData, 'json');
+                        toast.success('Analytics data exported as JSON!');
+                      }}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+                    >
+                      <span>📥</span> Export JSON
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Time Range Selector and Sections */}
