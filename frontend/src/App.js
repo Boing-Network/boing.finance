@@ -33,6 +33,7 @@ const CreatePool = lazy(() => import('./pages/CreatePool'));
 const Tokens = lazy(() => import('./pages/Tokens'));
 const Status = lazy(() => import('./pages/Status'));
 const Docs = lazy(() => import('./pages/Docs'));
+const DeveloperTools = lazy(() => import('./pages/DeveloperTools'));
 const HelpCenter = lazy(() => import('./pages/HelpCenter'));
 const HelpArticle = lazy(() => import('./pages/HelpArticle'));
 const ContactUs = lazy(() => import('./pages/ContactUs'));
@@ -506,7 +507,8 @@ function AppContent() {
                 <Route path="/portfolio" element={<Portfolio />} />
                 <Route path="/bridge" element={<Bridge />} />
                 <Route path="/tokens" element={<Tokens />} />
-                <Route path="/docs" element={<Docs />} />
+                  <Route path="/docs" element={<Docs />} />
+                  <Route path="/developer-tools" element={<DeveloperTools />} />
                 <Route path="/deploy-token" element={<DeployToken />} />
                 <Route path="/create-pool" element={<CreatePool />} />
                 <Route path="/whitepaper" element={<Whitepaper />} />
