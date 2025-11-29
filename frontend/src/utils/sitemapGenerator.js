@@ -1,32 +1,33 @@
 // Sitemap Generator Utility
-// Generates sitemap.xml for SEO
+// Generates dynamic sitemap.xml for SEO
 
-const routes = [
+const BASE_URL = 'https://boing.finance';
+
+const STATIC_ROUTES = [
   { path: '/', priority: '1.0', changefreq: 'daily' },
   { path: '/deploy-token', priority: '0.9', changefreq: 'weekly' },
-  { path: '/tokens', priority: '0.9', changefreq: 'daily' },
-  { path: '/portfolio', priority: '0.8', changefreq: 'daily' },
-  { path: '/analytics', priority: '0.8', changefreq: 'daily' },
-  { path: '/pools', priority: '0.8', changefreq: 'daily' },
-  { path: '/swap', priority: '0.7', changefreq: 'weekly' },
-  { path: '/liquidity', priority: '0.7', changefreq: 'weekly' },
-  { path: '/bridge', priority: '0.7', changefreq: 'weekly' },
-  { path: '/create-pool', priority: '0.7', changefreq: 'weekly' },
-  { path: '/docs', priority: '0.6', changefreq: 'monthly' },
-  { path: '/help-center', priority: '0.6', changefreq: 'monthly' },
-  { path: '/contact-us', priority: '0.5', changefreq: 'monthly' },
-  { path: '/privacy', priority: '0.4', changefreq: 'yearly' },
-  { path: '/terms', priority: '0.4', changefreq: 'yearly' },
-  { path: '/whitepaper', priority: '0.5', changefreq: 'monthly' },
+  { path: '/tokens', priority: '0.8', changefreq: 'daily' },
+  { path: '/portfolio', priority: '0.7', changefreq: 'weekly' },
+  { path: '/analytics', priority: '0.7', changefreq: 'daily' },
+  { path: '/developer-tools', priority: '0.6', changefreq: 'weekly' },
+  { path: '/docs', priority: '0.6', changefreq: 'weekly' },
+  { path: '/help-center', priority: '0.5', changefreq: 'monthly' },
+  { path: '/privacy', priority: '0.3', changefreq: 'yearly' },
+  { path: '/terms', priority: '0.3', changefreq: 'yearly' }
 ];
 
-const baseUrl = 'https://boing.finance';
+/**
+ * Generate sitemap XML
+ */
+export const generateSitemap = (additionalRoutes = []) => {
+  const routes = [...STATIC_ROUTES, ...additionalRoutes];
+  const lastmod = new Date().toISOString().split('T')[0];
 
-export const generateSitemap = () => {
-  const urls = routes.map((route) => {
+  const urls = routes.map(route => {
+    const lastmodDate = route.lastmod || lastmod;
     return `  <url>
-    <loc>${baseUrl}${route.path}</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <loc>${BASE_URL}${route.path}</loc>
+    <lastmod>${lastmodDate}</lastmod>
     <changefreq>${route.changefreq}</changefreq>
     <priority>${route.priority}</priority>
   </url>`;
@@ -38,10 +39,23 @@ ${urls}
 </urlset>`;
 };
 
-export const generateRobotsTxt = () => {
-  return `User-agent: *
-Allow: /
+/**
+ * Generate sitemap for token pages (if needed)
+ */
+export const generateTokenSitemap = (tokens = []) => {
+  const lastmod = new Date().toISOString().split('T')[0];
+  
+  const tokenUrls = tokens.map(token => {
+    return `  <url>
+    <loc>${BASE_URL}/tokens/${token.address}?network=${token.chainId}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>`;
+  }).join('\n');
 
-Sitemap: ${baseUrl}/sitemap.xml`;
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${tokenUrls}
+</urlset>`;
 };
-

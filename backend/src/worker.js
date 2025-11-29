@@ -6,6 +6,7 @@ import * as schema from './database/schema.js';
 import { createDEXRoutes } from './routes/dexRoutes.js';
 import { createAnalyticsRoutes } from './routes/analyticsRoutes.js';
 import { createIPFSRoutes } from './routes/ipfsRoutes.js';
+import { createAPIRoutes } from './routes/apiRoutes.js';
 
 // Create main app
 const app = new Hono();
