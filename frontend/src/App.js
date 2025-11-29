@@ -484,6 +484,16 @@ function AppContent() {
                   background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
                   borderColor: 'var(--border-color)'
                 }}>
+                  <span>Language</span>
+                  <div className="ml-auto">
+                    <LanguageSelector />
+                  </div>
+                </div>
+                <div className="w-full text-left px-3 py-3 rounded-lg text-base font-medium flex items-center space-x-3 border border-cyan-500/20" style={{
+                  color: 'var(--text-secondary)',
+                  background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
+                  borderColor: 'var(--border-color)'
+                }}>
                   <span>Theme</span>
                   <div className="ml-auto">
                     <ThemeToggle />
