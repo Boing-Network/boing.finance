@@ -180,6 +180,8 @@ function AppContent() {
 
             {/* Desktop Wallet Controls - Show on large screens and above */}
             <div className="hidden lg:flex items-center space-x-3 xl:space-x-4 flex-shrink-0">
+              {/* Language Selector */}
+              <LanguageSelector />
               {/* Theme Toggle */}
               <ThemeToggle />
               {/* History Button */}
@@ -245,6 +247,7 @@ function AppContent() {
               </nav>
               {/* Compact Wallet Controls */}
               <div className="flex items-center space-x-2">
+                <LanguageSelector />
                 <ThemeToggle />
                 <button
                   onClick={() => setHistoryModalOpen(true)}
