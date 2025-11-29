@@ -1,7 +1,7 @@
 // Notification Settings Component
 // Allows users to configure notification preferences
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { notificationService } from '../utils/notifications';
 import toast from 'react-hot-toast';
 

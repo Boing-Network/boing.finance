@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 // import coingeckoService from '../services/coingeckoService'; // Will be used for price data
-import { etherscanService } from '../services/etherscanService';
+import etherscanService from '../services/etherscanService';
 import { getNetworkByChainId } from '../config/networks';
 import OptimizedImage from './OptimizedImage';
 import LoadingSpinner from './LoadingSpinner';
@@ -29,8 +29,9 @@ const TokenComparison = ({ tokens = [], onClose }) => {
             // For now, we'll use basic data
             
             // Fetch from Etherscan
-            const tokenInfo = await etherscanService.getTokenInfo(token.address, token.chainId);
-            const transactions = await etherscanService.getAccountTransactions(token.address, token.chainId, 1, 10);
+            const networkName = getNetworkByChainId(token.chainId)?.name?.toLowerCase() || 'ethereum';
+            const tokenInfo = await etherscanService.getTokenInfo(token.address, networkName);
+            const transactions = await etherscanService.getTransactions(token.address, networkName, 0, 99999999);
             
             return {
               ...token,
