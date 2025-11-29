@@ -23,6 +23,7 @@ import TokenPreview from '../components/TokenPreview';
 import DeploymentProgress from '../components/DeploymentProgress';
 import DeploymentHistory from '../components/DeploymentHistory';
 import { deploymentHistory as deploymentHistoryUtil } from '../utils/deploymentHistory';
+import { notificationService, showToastWithNotification } from '../utils/notifications';
 
 // Import ABI and bytecode from the artifacts
 const ERC20_ABI = AdvancedERC20Artifact.abi;
@@ -1008,6 +1009,12 @@ export default function DeployToken() {
           
           toast.success(`Token deployed successfully! Address: ${deployedAddress}`);
           
+          // Show browser notification if enabled
+          const notificationSettings = JSON.parse(localStorage.getItem('boing_notification_settings') || '{"deployments": true}');
+          if (notificationSettings.deployments) {
+            await notificationService.notifyDeploymentSuccess(name, deployedAddress);
+          }
+          
           // Store deployment info
           const deploymentInfo = {
             tokenAddress: deployedAddress,
@@ -1095,6 +1102,12 @@ export default function DeployToken() {
           
           toast.success(`Token deployed successfully! Address: ${deployedAddress}`);
           
+          // Show browser notification if enabled
+          const notificationSettings = JSON.parse(localStorage.getItem('boing_notification_settings') || '{"deployments": true}');
+          if (notificationSettings.deployments) {
+            await notificationService.notifyDeploymentSuccess(name, deployedAddress);
+          }
+          
           // Handle post-deployment actions (only for allowed features)
           const postDeploymentActions = [];
           if (isFeatureAllowed('renounceMint') && renounceMint) {
@@ -1155,6 +1168,12 @@ export default function DeployToken() {
           localStorage.setItem('tokenDeployments', JSON.stringify(existingDeployments));
           
           toast.success(`Token deployed successfully! Address: ${deployedAddress}`);
+          
+          // Show browser notification if enabled
+          const notificationSettings = JSON.parse(localStorage.getItem('boing_notification_settings') || '{"deployments": true}');
+          if (notificationSettings.deployments) {
+            await notificationService.notifyDeploymentSuccess(name, deployedAddress);
+          }
           
           // Show success message with next steps
           const nextSteps = [

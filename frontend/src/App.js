@@ -18,6 +18,7 @@ import ShootingStars from './components/ShootingStars';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
 import OnboardingTour from './components/OnboardingTour';
+import NotificationSettings from './components/NotificationSettings';
 import './styles/globals.css';
 
 // Lazy load all page components for code splitting
@@ -82,6 +83,7 @@ function AppContent() {
   const [tradingDropdownOpen, setTradingDropdownOpen] = useState(false);
   const [analyticsDropdownOpen, setAnalyticsDropdownOpen] = useState(false);
   const [deploymentDropdownOpen, setDeploymentDropdownOpen] = useState(false);
+  const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const { account } = useWalletConnection();
 
   const closeMenu = () => {

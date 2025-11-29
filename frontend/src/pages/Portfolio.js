@@ -9,6 +9,7 @@ import externalDexService from '../services/externalDexService';
 import portfolioService from '../services/portfolioService';
 import { NETWORKS } from '../config/networks';
 import { exportPortfolio } from '../utils/exportData';
+import { notificationService } from '../utils/notifications';
 import toast from 'react-hot-toast';
 
 // MochiAstronaut component
@@ -212,6 +213,25 @@ export default function Portfolio() {
     { id: '10', name: 'Optimism', color: 'bg-red-500' },
     { id: '11155111', name: 'Sepolia', color: 'bg-gray-500' },
   ];
+
+  // Send portfolio update notifications
+  useEffect(() => {
+    if (!portfolioSummary || !account) return;
+    
+    const notificationSettings = JSON.parse(localStorage.getItem('boing_notification_settings') || '{"portfolioUpdates": false}');
+    if (!notificationSettings.portfolioUpdates) return;
+
+    // Only notify if there's a significant change (more than 5%)
+    const lastValue = parseFloat(localStorage.getItem('boing_last_portfolio_value') || '0');
+    const currentValue = parseFloat(portfolioSummary.totalValue || '0');
+    
+    if (lastValue > 0 && Math.abs(currentValue - lastValue) / lastValue > 0.05) {
+      const change24h = portfolioSummary.change24h || 0;
+      notificationService.notifyPortfolioUpdate(currentValue, change24h);
+    }
+    
+    localStorage.setItem('boing_last_portfolio_value', currentValue.toString());
+  }, [portfolioSummary, account]);
 
   if (!account) {
     return (
