@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 import LoadingSpinner from './LoadingSpinner';
 import OptimizedImage from './OptimizedImage';
 import ShareTokenModal from './ShareTokenModal';
+import SecurityScanner from './SecurityScanner';
 
 const TokenDetailsModal = ({ token, isOpen, onClose, network }) => {
   const [isFavorite, setIsFavorite] = useState(false);
