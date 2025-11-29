@@ -1,8 +1,11 @@
 // Service Worker for boing.finance
 // Provides offline support and caching
+// IMPORTANT: Update CACHE_VERSION on each deployment to force cache invalidation
+// This ensures users get the latest version after deployment
 
-const CACHE_NAME = 'boing-finance-v1';
-const RUNTIME_CACHE = 'boing-finance-runtime-v1';
+const CACHE_VERSION = 'v2'; // Update this version number on each deployment
+const CACHE_NAME = 'boing-finance-' + CACHE_VERSION;
+const RUNTIME_CACHE = 'boing-finance-runtime-' + CACHE_VERSION;
 
 // Assets to cache on install
 const STATIC_ASSETS = [
@@ -31,18 +34,25 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
+      // Delete all old caches that don't match current version
       return Promise.all(
         cacheNames
           .filter((cacheName) => {
-            return cacheName !== CACHE_NAME && cacheName !== RUNTIME_CACHE;
+            // Delete any cache that doesn't match current version
+            return !cacheName.includes(CACHE_VERSION);
           })
           .map((cacheName) => {
+            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           })
       );
+    }).then(() => {
+      // Force all clients to use the new service worker immediately
+      return self.clients.claim();
     })
   );
-  self.clients.claim();
+  // Skip waiting to activate immediately
+  self.skipWaiting();
 });
 
 // Fetch event - serve from cache, fallback to network

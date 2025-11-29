@@ -714,17 +714,18 @@ const Pools = () => {
   const [searchPage, setSearchPage] = useState(1); // Search pagination
   const [searchLimit, setSearchLimit] = useState(50); // Initial search limit - increased from 10
   
-  // Blockchain pools hook
+  // Blockchain pools hook - with safe destructuring
+  const blockchainPoolsHook = useBlockchainPools();
   const {
-    isInitialized: blockchainInitialized,
-    isLoading: blockchainLoading,
-    error: blockchainError,
-    getUserPositions: getBlockchainUserPositions,
-    getAllPools: getBlockchainAllPools,
-    getAllSepoliaPools: getBlockchainSepoliaPools,
-    getUserCreatedPools: getBlockchainCreatedPools,
-    getUserPositionInPool: getBlockchainUserPositionInPool
-  } = useBlockchainPools();
+    isInitialized: blockchainInitialized = false,
+    isLoading: blockchainLoading = false,
+    error: blockchainError = null,
+    getUserPositions: getBlockchainUserPositions = async () => [],
+    getAllPools: getBlockchainAllPools = async () => [],
+    getAllSepoliaPools: getBlockchainSepoliaPools = async () => [],
+    getUserCreatedPools: getBlockchainCreatedPools = async () => [],
+    getUserPositionInPool: getBlockchainUserPositionInPool = async () => null
+  } = blockchainPoolsHook || {};
 
   // Fetch user pools
   const { data: userPools, isLoading: userPoolsLoading, refetch: refetchUserPools } = useQuery(
@@ -732,17 +733,25 @@ const Pools = () => {
     async () => {
       if (!account) return [];
       
-      if (useBlockchainFallback) {
-        return await fetchUserPoolsFromBlockchain(account, chainId);
-      } else {
-        return await getUserLiquidityPositions(account, chainId);
+      try {
+        if (useBlockchainFallback) {
+          return await fetchUserPoolsFromBlockchain(account, chainId);
+        } else {
+          return await getUserLiquidityPositions(account, chainId);
+        }
+      } catch (error) {
+        console.error('Error fetching user pools:', error);
+        // Return empty array instead of throwing to prevent page crash
+        return [];
       }
     },
     { 
       enabled: !!account,
       refetchInterval: 30000,
-      retry: 2,
-      onError: () => {
+      retry: 1, // Reduce retries to prevent long loading
+      retryDelay: 1000,
+      onError: (error) => {
+        console.error('User pools query error:', error);
         setUseBlockchainFallback(true);
       }
     }
@@ -763,18 +772,29 @@ const Pools = () => {
   const { data: allPools, isLoading: allPoolsLoading } = useQuery(
     ['all-pools', chainId, blockchainInitialized],
     async () => {
-      if (chainId === 11155111 && blockchainInitialized) { // Sepolia
-        // Use blockchain service to get all Sepolia pools (limit to 30)
-        return await getBlockchainSepoliaPools(30);
-      } else {
-        // Fallback to API for other networks
-        return await getAllPools(chainId);
+      try {
+        if (chainId === 11155111 && blockchainInitialized) { // Sepolia
+          // Use blockchain service to get all Sepolia pools (limit to 30)
+          return await getBlockchainSepoliaPools(30);
+        } else {
+          // Fallback to API for other networks
+          return await getAllPools(chainId);
+        }
+      } catch (error) {
+        console.error('Error fetching all pools:', error);
+        // Return empty array instead of throwing to prevent page crash
+        return [];
       }
     },
     { 
       refetchInterval: 60000,
-      retry: 2,
-      enabled: chainId === 11155111 ? blockchainInitialized : true
+      retry: 1, // Reduce retries
+      retryDelay: 1000,
+      enabled: chainId === 11155111 ? blockchainInitialized : true,
+      onError: (error) => {
+        console.error('All pools query error:', error);
+        // Don't throw - let the component handle empty state
+      }
     }
   );
 

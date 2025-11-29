@@ -19,15 +19,29 @@ export default function Analytics() {
     () => fetchAnalytics(timeRange),
     {
       refetchInterval: 60000, // Refetch every minute
+      retry: 1, // Only retry once on failure
+      retryDelay: 2000, // Wait 2 seconds before retry
+      staleTime: 30000, // Consider data stale after 30 seconds
+      onError: (error) => {
+        console.error('Analytics query error:', error);
+        // Don't throw - let the component handle the error state gracefully
+      }
     }
   );
 
   const fetchAnalytics = async (range) => {
     try {
-      const response = await axios.get(`${config.apiUrl}/analytics?range=${range}`);
-      return response.data.data || {};
+      if (!config?.apiUrl) {
+        console.warn('API URL not configured, returning empty analytics data');
+        return {};
+      }
+      const response = await axios.get(`${config.apiUrl}/analytics?range=${range}`, {
+        timeout: 10000 // 10 second timeout
+      });
+      return response?.data?.data || {};
     } catch (error) {
       console.error('Failed to fetch analytics:', error);
+      // Return empty object instead of throwing to prevent page crash
       return {};
     }
   };

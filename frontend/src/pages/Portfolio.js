@@ -21,15 +21,16 @@ export default function Portfolio() {
   const [trackedNetworks, setTrackedNetworks] = useState([chainId || 11155111]);
 
   // Blockchain pools hook
+  const blockchainPoolsHook = useBlockchainPools();
   const {
-    isInitialized: blockchainInitialized,
-    isLoading: blockchainLoading,
-    error: blockchainError,
-    getUserPositions: getBlockchainUserPositions,
-    getUserCreatedPools: getBlockchainCreatedPools,
-    getUserPortfolioValue: getBlockchainPortfolioValue,
-    getAllSepoliaPools: getBlockchainSepoliaPools
-  } = useBlockchainPools();
+    isInitialized: blockchainInitialized = false,
+    isLoading: blockchainLoading = false,
+    error: blockchainError = null,
+    getUserPositions: getBlockchainUserPositions = async () => [],
+    getUserCreatedPools: getBlockchainCreatedPools = async () => [],
+    getUserPortfolioValue: getBlockchainPortfolioValue = async () => 0,
+    getAllSepoliaPools: getBlockchainSepoliaPools = async () => []
+  } = blockchainPoolsHook || {};
 
   // Fetch user's liquidity positions from blockchain
   const { data: userPools, isLoading: poolsLoading } = useQuery(
@@ -66,7 +67,12 @@ export default function Portfolio() {
     {
       refetchInterval: 30000,
       enabled: !!account && blockchainInitialized,
-      retry: 2
+      retry: 1, // Reduce retries
+      retryDelay: 1000,
+      onError: (error) => {
+        console.error('User pools portfolio query error:', error);
+        // Don't throw - let the component handle empty state
+      }
     }
   );
 
@@ -75,12 +81,21 @@ export default function Portfolio() {
     ['created-pools-portfolio', account, chainId, blockchainInitialized],
     async () => {
       if (!account || !blockchainInitialized) return [];
-      return await getBlockchainCreatedPools();
+      try {
+        return await getBlockchainCreatedPools();
+      } catch (error) {
+        console.error('Error fetching created pools:', error);
+        return [];
+      }
     },
     {
       refetchInterval: 30000,
       enabled: !!account && blockchainInitialized,
-      retry: 2
+      retry: 1,
+      retryDelay: 1000,
+      onError: (error) => {
+        console.error('Created pools query error:', error);
+      }
     }
   );
 

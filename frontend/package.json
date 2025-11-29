@@ -33,6 +33,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "prebuild": "node scripts/update-service-worker-version.js",
     "build": "npm run generate-manifest && react-scripts build",
     "build:prod": "cross-env REACT_APP_ENVIRONMENT=production react-scripts build",
     "build:staging": "cross-env REACT_APP_ENVIRONMENT=staging react-scripts build",

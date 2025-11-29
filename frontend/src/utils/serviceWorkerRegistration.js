@@ -14,15 +14,23 @@ export const registerServiceWorker = () => {
             const newWorker = registration.installing;
             if (newWorker) {
               newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // New service worker available
-                  if (window.confirm('A new version is available! Reload to update?')) {
-                    window.location.reload();
+                if (newWorker.state === 'installed') {
+                  if (navigator.serviceWorker.controller) {
+                    // New service worker available, prompt user to reload
+                    if (window.confirm('A new version is available! Reload to update?')) {
+                      window.location.reload(true); // Force reload from server
+                    }
+                  } else {
+                    // First time installation, no need to reload
+                    console.log('Service Worker installed for the first time');
                   }
                 }
               });
             }
           });
+
+          // Check for updates on page load
+          registration.update();
 
           // Periodic update check (every hour)
           setInterval(() => {

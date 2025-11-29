@@ -521,7 +521,7 @@ function AppContent() {
       <main className="flex-1 relative">
         {/* Page Content with Error Boundary and Suspense */}
         <ErrorBoundary>
-          <div className="relative z-10">
+          <div className="relative z-10" key={window.location.pathname}>
             <Suspense fallback={<LoadingSpinner />}>
               <Routes>
                 <Route path="/" element={<Home />} />
@@ -1155,7 +1155,7 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
                     )}
                   </div>
                   {item.description && (
-                    <div className="text-xs style={{ color: 'var(--text-tertiary)' }}">{item.description}</div>
+                    <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{item.description}</div>
                   )}
                 </div>
               </button>
