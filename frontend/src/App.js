@@ -44,6 +44,7 @@ const Privacy = lazy(() => import('./pages/Privacy'));
 const Terms = lazy(() => import('./pages/Terms'));
 const Whitepaper = lazy(() => import('./pages/Whitepaper'));
 const ExecutiveSummary = lazy(() => import('./pages/ExecutiveSummary'));
+const Blog = lazy(() => import('./pages/Blog'));
 
 // Create a client
 const queryClient = new QueryClient({
