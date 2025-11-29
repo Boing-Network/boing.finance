@@ -13,6 +13,7 @@ import LoadingSpinner from './LoadingSpinner';
 import OptimizedImage from './OptimizedImage';
 import ShareTokenModal from './ShareTokenModal';
 import SecurityScanner from './SecurityScanner';
+import { addToWatchlist, isInWatchlist, removeFromWatchlist } from '../utils/tokenWatchlist';
 
 const TokenDetailsModal = ({ token, isOpen, onClose, network }) => {
   const [isFavorite, setIsFavorite] = useState(false);
@@ -21,6 +22,7 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network }) => {
   const [transactions, setTransactions] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
   const [showShareModal, setShowShareModal] = useState(false);
+  const [inWatchlist, setInWatchlist] = useState(false);
 
   // Get network name for CoinGecko
   const getCoinGeckoNetwork = (chainId) => {
