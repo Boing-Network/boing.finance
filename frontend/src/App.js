@@ -511,6 +511,7 @@ function AppContent() {
                 <Route path="/tokens" element={<Tokens />} />
                   <Route path="/docs" element={<Docs />} />
                   <Route path="/developer-tools" element={<DeveloperTools />} />
+                  <Route path="/blog" element={<Blog />} />
                 <Route path="/deploy-token" element={<DeployToken />} />
                 <Route path="/create-pool" element={<CreatePool />} />
                 <Route path="/whitepaper" element={<Whitepaper />} />
