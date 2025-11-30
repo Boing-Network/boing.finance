@@ -20,17 +20,30 @@ export default function Portfolio() {
   const [activeTab, setActiveTab] = useState('overview'); // overview, tokens, pools
   const [trackedNetworks, setTrackedNetworks] = useState([chainId || 11155111]);
 
-  // Blockchain pools hook
-  const blockchainPoolsHook = useBlockchainPools();
-  const {
-    isInitialized: blockchainInitialized = false,
-    isLoading: blockchainLoading = false,
-    error: blockchainError = null,
-    getUserPositions: getBlockchainUserPositions = async () => [],
-    getUserCreatedPools: getBlockchainCreatedPools = async () => [],
-    getUserPortfolioValue: getBlockchainPortfolioValue = async () => 0,
-    getAllSepoliaPools: getBlockchainSepoliaPools = async () => []
-  } = blockchainPoolsHook || {};
+  // Blockchain pools hook - with safe error handling
+  let blockchainInitialized = false;
+  let blockchainLoading = false;
+  let blockchainError = null;
+  let getBlockchainUserPositions = async () => [];
+  let getBlockchainCreatedPools = async () => [];
+  let getBlockchainPortfolioValue = async () => 0;
+  let getBlockchainSepoliaPools = async () => [];
+
+  try {
+    const blockchainPoolsHook = useBlockchainPools();
+    if (blockchainPoolsHook) {
+      blockchainInitialized = blockchainPoolsHook.isInitialized || false;
+      blockchainLoading = blockchainPoolsHook.isLoading || false;
+      blockchainError = blockchainPoolsHook.error || null;
+      getBlockchainUserPositions = blockchainPoolsHook.getUserPositions || (async () => []);
+      getBlockchainCreatedPools = blockchainPoolsHook.getUserCreatedPools || (async () => []);
+      getBlockchainPortfolioValue = blockchainPoolsHook.getUserPortfolioValue || (async () => 0);
+      getBlockchainSepoliaPools = blockchainPoolsHook.getAllSepoliaPools || (async () => []);
+    }
+  } catch (error) {
+    console.error('Error initializing blockchain pools hook:', error);
+    // Use default values above
+  }
 
   // Fetch user's liquidity positions from blockchain
   const { data: userPools, isLoading: poolsLoading } = useQuery(

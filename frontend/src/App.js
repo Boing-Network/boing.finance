@@ -1,5 +1,5 @@
-import React, { useState, lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useState, lazy, Suspense, useMemo } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -82,14 +82,16 @@ const navigation = {
 };
 
 function AppContent() {
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [tradingDropdownOpen, setTradingDropdownOpen] = useState(false);
   const [analyticsDropdownOpen, setAnalyticsDropdownOpen] = useState(false);
   const [deploymentDropdownOpen, setDeploymentDropdownOpen] = useState(false);
-  const [showNotificationSettings, setShowNotificationSettings] = useState(false);
-  const [showGlobalSearch, setShowGlobalSearch] = useState(false);
   const { account } = useWalletConnection();
+  
+  // Memoize navigation to prevent re-creation on every render
+  const memoizedNavigation = useMemo(() => navigation, []);
 
   const closeMenu = () => {
     setIsMenuOpen(false);
@@ -124,7 +126,7 @@ function AppContent() {
               <nav className="flex items-center space-x-4 xl:space-x-6">
                 {/* Home - Solo */}
                 <button
-                  onClick={() => window.location.href = navigation.home.href}
+                  onClick={() => window.location.href = memoizedNavigation.home.href}
                   className="px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2"
                   style={{ 
                     color: 'var(--text-secondary)',
@@ -133,14 +135,14 @@ function AppContent() {
                   onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
                   onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
                 >
-                  <span className="text-lg">{navigation.home.icon}</span>
-                  <span>{navigation.home.name}</span>
+                  <span className="text-lg">{memoizedNavigation.home.icon}</span>
+                  <span>{memoizedNavigation.home.name}</span>
                 </button>
 
                 {/* Trading Dropdown */}
                 <DropdownMenu
                   label="Trading"
-                  items={navigation.trading}
+                  items={memoizedNavigation.trading}
                   isOpen={tradingDropdownOpen}
                   onToggle={() => {
                     setTradingDropdownOpen(!tradingDropdownOpen);
@@ -153,7 +155,7 @@ function AppContent() {
                 {/* Analytics Dropdown */}
                 <DropdownMenu
                   label="Analytics"
-                  items={navigation.analytics}
+                  items={memoizedNavigation.analytics}
                   isOpen={analyticsDropdownOpen}
                   onToggle={() => {
                     setAnalyticsDropdownOpen(!analyticsDropdownOpen);
@@ -166,7 +168,7 @@ function AppContent() {
                 {/* Deployment Dropdown */}
                 <DropdownMenu
                   label="Deployment"
-                  items={navigation.deployment}
+                  items={memoizedNavigation.deployment}
                   isOpen={deploymentDropdownOpen}
                   onToggle={() => {
                     setDeploymentDropdownOpen(!deploymentDropdownOpen);
@@ -206,14 +208,14 @@ function AppContent() {
               {/* Compact Navigation for Medium Screens */}
               <nav className="flex items-center space-x-2 mr-2">
                 <button
-                  onClick={() => window.location.href = navigation.home.href}
+                  onClick={() => window.location.href = memoizedNavigation.home.href}
                   className="text-theme-secondary hover:text-theme-primary px-2 py-2 rounded-md text-xs font-medium transition-colors"
                 >
-                  {navigation.home.icon}
+                  {memoizedNavigation.home.icon}
                 </button>
                 <DropdownMenu
                   label="Trade"
-                  items={navigation.trading}
+                  items={memoizedNavigation.trading}
                   isOpen={tradingDropdownOpen}
                   onToggle={() => {
                     setTradingDropdownOpen(!tradingDropdownOpen);
@@ -224,7 +226,7 @@ function AppContent() {
                 />
                 <DropdownMenu
                   label="Analytics"
-                  items={navigation.analytics}
+                  items={memoizedNavigation.analytics}
                   isOpen={analyticsDropdownOpen}
                   onToggle={() => {
                     setAnalyticsDropdownOpen(!analyticsDropdownOpen);
@@ -235,7 +237,7 @@ function AppContent() {
                 />
                 <DropdownMenu
                   label="Deployment"
-                  items={navigation.deployment}
+                  items={memoizedNavigation.deployment}
                   isOpen={deploymentDropdownOpen}
                   onToggle={() => {
                     setDeploymentDropdownOpen(!deploymentDropdownOpen);
@@ -304,8 +306,8 @@ function AppContent() {
                 onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
                 onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
               >
-                <span className="text-xl">{navigation.home.icon}</span>
-                <span>{navigation.home.name}</span>
+                <span className="text-xl">{memoizedNavigation.home.icon}</span>
+                <span>{memoizedNavigation.home.name}</span>
               </button>
 
               {/* Trading Section */}
@@ -315,7 +317,7 @@ function AppContent() {
               }}>
                 <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>Trading</h3>
                 <div className="space-y-1">
-                  {navigation.trading.map((item) => (
+                  {memoizedNavigation.trading.map((item) => (
                     <button
                       key={item.name}
                       onClick={() => {
@@ -368,7 +370,7 @@ function AppContent() {
               }}>
                 <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>Analytics</h3>
                 <div className="space-y-1">
-                  {navigation.analytics.map((item) => (
+                  {memoizedNavigation.analytics.map((item) => (
                     <button
                       key={item.name}
                       onClick={() => {
@@ -421,7 +423,7 @@ function AppContent() {
               }}>
                 <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>Deployment</h3>
                 <div className="space-y-1">
-                  {navigation.deployment.map((item) => (
+                  {memoizedNavigation.deployment.map((item) => (
                     <button
                       key={item.name}
                       onClick={() => {
@@ -521,7 +523,7 @@ function AppContent() {
       <main className="flex-1 relative">
         {/* Page Content with Error Boundary and Suspense */}
         <ErrorBoundary>
-          <div className="relative z-10" key={window.location.pathname}>
+          <div className="relative z-10">
             <Suspense fallback={<LoadingSpinner />}>
               <Routes>
                 <Route path="/" element={<Home />} />
