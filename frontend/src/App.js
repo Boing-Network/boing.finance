@@ -1279,6 +1279,19 @@ function FeatureCard({ title, icon, description, comingSoon }) {
 
 // Modified DropdownMenu to support coming soon
 function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
+  // Log dropdown menu state
+  React.useEffect(() => {
+    if (isOpen) {
+      console.log(`[DropdownMenu] ${label} opened with items:`, items.map(item => ({
+        name: item.name,
+        comingSoon: item.comingSoon,
+        isAvailable: item.isAvailable,
+        rawComingSoon: item.comingSoon,
+        rawIsAvailable: item.isAvailable
+      })));
+    }
+  }, [isOpen, label, items]);
+  
   return (
     <div className="relative">
       <button
