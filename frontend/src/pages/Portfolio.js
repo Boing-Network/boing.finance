@@ -15,6 +15,7 @@ import toast from 'react-hot-toast';
 // MochiAstronaut component
 
 export default function Portfolio() {
+  console.log('[Portfolio] Component rendering at:', new Date().toISOString());
   const { account, chainId } = useWallet();
   const [selectedNetwork, setSelectedNetwork] = useState('all');
   const [activeTab, setActiveTab] = useState('overview'); // overview, tokens, pools

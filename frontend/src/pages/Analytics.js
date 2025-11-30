@@ -47,17 +47,16 @@ export default function Analytics() {
     }
   };
 
-  // Fetch trending tokens from CoinGecko
-  const { data: trendingTokens, isLoading: trendingLoading } = useQuery(
-    ['trending-tokens'],
-    async () => {
+  // Fetch trending tokens from CoinGecko - React Query v5 API
+  const { data: trendingTokens, isLoading: trendingLoading } = useQuery({
+    queryKey: ['trending-tokens'],
+    queryFn: async () => {
+      console.log('[Analytics] Fetching trending tokens');
       const data = await coingeckoService.getTrendingTokens();
       return data.coins || [];
     },
-    {
-      refetchInterval: 300000, // Refetch every 5 minutes
-    }
-  );
+    refetchInterval: 300000, // Refetch every 5 minutes
+  });
 
   // Fetch market data - React Query v5 API
   const { data: marketData, isLoading: marketLoading } = useQuery({
