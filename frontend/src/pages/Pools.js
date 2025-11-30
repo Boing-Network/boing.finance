@@ -532,6 +532,7 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
 // Pool List Component
 // eslint-disable-next-line no-unused-vars
 const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveLiquidity }) => {
+  // eslint-disable-next-line no-unused-vars
   const [isLoading, setIsLoading] = useState(false);
 
   // eslint-disable-next-line no-unused-vars
@@ -736,6 +737,7 @@ const Pools = () => {
   const getUserPositionInPool = blockchainPoolsHook?.getUserPositionInPool || (async () => null);
 
   // Fetch user pools - React Query v5 API
+  // eslint-disable-next-line no-unused-vars
   const { data: userPools, isLoading: userPoolsLoading, refetch: refetchUserPools } = useQuery({
     queryKey: ['user-pools', account, chainId, useBlockchainFallback],
     queryFn: async () => {
@@ -843,6 +845,7 @@ const Pools = () => {
     setIsModalOpen(true);
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleAddLiquidity = async (poolAddress, token0Amount, token1Amount, chainId) => {
     // Implementation for adding liquidity
     console.log('Adding liquidity to pool:', poolAddress, 'Token0:', token0Amount, 'Token1:', token1Amount);
@@ -850,6 +853,7 @@ const Pools = () => {
     throw new Error('Add liquidity functionality not yet implemented');
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleCollectFees = async (poolAddress, chainId) => {
     // Implementation for collecting fees
     console.log('Collecting fees for pool:', poolAddress);
@@ -857,6 +861,7 @@ const Pools = () => {
     throw new Error('Collect fees functionality not yet implemented');
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleRemoveLiquidity = async (poolAddress, percentage, chainId) => {
     // Implementation for removing liquidity
     console.log('Removing liquidity from pool:', poolAddress, 'Percentage:', percentage);
