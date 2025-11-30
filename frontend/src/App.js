@@ -46,12 +46,13 @@ const Whitepaper = lazy(() => import('./pages/Whitepaper'));
 const ExecutiveSummary = lazy(() => import('./pages/ExecutiveSummary'));
 const Blog = lazy(() => import('./pages/Blog'));
 
-// Create a client
+// Create a client - React Query v5 compatible
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
     },
   },
 });
@@ -62,22 +63,22 @@ const comingSoon = {
   tooltip: 'This feature will be available after mainnet launch.'
 };
 
-// Navigation data with categories
+// Navigation data with categories - explicit boolean flags for state management
 const navigation = {
-  home: { name: 'Home', href: '/', icon: '🏠' },
+  home: { name: 'Home', href: '/', icon: '🏠', isAvailable: true, comingSoon: false, testnetOnly: false },
   trading: [
-    { name: 'Swap', href: '/swap', icon: '🔄', description: 'Trade tokens instantly', testnetOnly: true },
-    { name: 'Bridge', href: '/bridge', icon: '🌉', description: 'Cross-chain transfers', comingSoon: true },
-    { name: 'Pools', href: '/pools', icon: '🏊', description: 'Liquidity pools', testnetOnly: true },
-    { name: 'Tokens', href: '/tokens', icon: '🪙', description: 'Token management' }
+    { name: 'Swap', href: '/swap', icon: '🔄', description: 'Trade tokens instantly', isAvailable: true, comingSoon: false, testnetOnly: true },
+    { name: 'Bridge', href: '/bridge', icon: '🌉', description: 'Cross-chain transfers', isAvailable: false, comingSoon: true, testnetOnly: false },
+    { name: 'Pools', href: '/pools', icon: '🏊', description: 'Liquidity pools', isAvailable: true, comingSoon: false, testnetOnly: true },
+    { name: 'Tokens', href: '/tokens', icon: '🪙', description: 'Token management', isAvailable: true, comingSoon: false, testnetOnly: false }
   ],
   analytics: [
-    { name: 'Analytics', href: '/analytics', icon: '📊', description: 'Market insights' },
-    { name: 'Portfolio', href: '/portfolio', icon: '💼', description: 'Your holdings' }
+    { name: 'Analytics', href: '/analytics', icon: '📊', description: 'Market insights', isAvailable: true, comingSoon: false, testnetOnly: false },
+    { name: 'Portfolio', href: '/portfolio', icon: '💼', description: 'Your holdings', isAvailable: true, comingSoon: false, testnetOnly: false }
   ],
   deployment: [
-    { name: 'Deploy Token', href: '/deploy-token', icon: '🚀', description: 'Create your own tokens' },
-    { name: 'Create Pool', href: '/create-pool', icon: '🏊', description: 'Create liquidity pools', testnetOnly: true }
+    { name: 'Deploy Token', href: '/deploy-token', icon: '🚀', description: 'Create your own tokens', isAvailable: true, comingSoon: false, testnetOnly: false },
+    { name: 'Create Pool', href: '/create-pool', icon: '🏊', description: 'Create liquidity pools', isAvailable: true, comingSoon: false, testnetOnly: true }
   ]
 };
 
@@ -321,36 +322,36 @@ function AppContent() {
                     <button
                       key={item.name}
                       onClick={() => {
-                        if (!item.comingSoon) {
+                        if (item.isAvailable && !item.comingSoon) {
                           window.location.href = item.href;
                           closeMenu();
                         }
                       }}
-                      className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${item.comingSoon ? 'cursor-not-allowed opacity-60' : ''}`}
+                      className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${(item.comingSoon || !item.isAvailable) ? 'cursor-not-allowed opacity-60' : ''}`}
                       style={{
-                        color: item.comingSoon ? 'var(--text-tertiary)' : 'var(--text-secondary)'
+                        color: (item.comingSoon || !item.isAvailable) ? 'var(--text-tertiary)' : 'var(--text-secondary)'
                       }}
                       onMouseEnter={(e) => {
-                        if (!item.comingSoon) {
+                        if (item.isAvailable && !item.comingSoon) {
                           e.target.style.color = 'var(--text-primary)';
                         }
                       }}
                       onMouseLeave={(e) => {
-                        if (!item.comingSoon) {
+                        if (item.isAvailable && !item.comingSoon) {
                           e.target.style.color = 'var(--text-secondary)';
                         }
                       }}
-                      disabled={item.comingSoon}
+                      disabled={item.comingSoon || !item.isAvailable}
                       title={item.comingSoon ? comingSoon.tooltip : (item.testnetOnly ? 'Available on Sepolia testnet only' : '')}
                     >
                       <span className="text-lg">{item.icon}</span>
                       <div>
                         <div className="flex items-center space-x-2">
                           <span>{item.name}</span>
-                          {item.comingSoon && (
+                          {(item.comingSoon || !item.isAvailable) && (
                             <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>
                           )}
-                          {item.testnetOnly && !item.comingSoon && (
+                          {item.testnetOnly && item.isAvailable && !item.comingSoon && (
                             <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-400/30">Testnet Only</span>
                           )}
                         </div>
@@ -374,36 +375,36 @@ function AppContent() {
                     <button
                       key={item.name}
                       onClick={() => {
-                        if (!item.comingSoon) {
+                        if (item.isAvailable && !item.comingSoon) {
                           window.location.href = item.href;
                           closeMenu();
                         }
                       }}
-                      className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${item.comingSoon ? 'cursor-not-allowed opacity-60' : ''}`}
+                      className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${(item.comingSoon || !item.isAvailable) ? 'cursor-not-allowed opacity-60' : ''}`}
                       style={{
-                        color: item.comingSoon ? 'var(--text-tertiary)' : 'var(--text-secondary)'
+                        color: (item.comingSoon || !item.isAvailable) ? 'var(--text-tertiary)' : 'var(--text-secondary)'
                       }}
                       onMouseEnter={(e) => {
-                        if (!item.comingSoon) {
+                        if (item.isAvailable && !item.comingSoon) {
                           e.target.style.color = 'var(--text-primary)';
                         }
                       }}
                       onMouseLeave={(e) => {
-                        if (!item.comingSoon) {
+                        if (item.isAvailable && !item.comingSoon) {
                           e.target.style.color = 'var(--text-secondary)';
                         }
                       }}
-                      disabled={item.comingSoon}
+                      disabled={item.comingSoon || !item.isAvailable}
                       title={item.comingSoon ? comingSoon.tooltip : (item.testnetOnly ? 'Available on Sepolia testnet only' : '')}
                     >
                       <span className="text-lg">{item.icon}</span>
                       <div>
                         <div className="flex items-center space-x-2">
                           <span>{item.name}</span>
-                          {item.comingSoon && (
+                          {(item.comingSoon || !item.isAvailable) && (
                             <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>
                           )}
-                          {item.testnetOnly && !item.comingSoon && (
+                          {item.testnetOnly && item.isAvailable && !item.comingSoon && (
                             <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-400/30">Testnet Only</span>
                           )}
                         </div>
@@ -427,36 +428,36 @@ function AppContent() {
                     <button
                       key={item.name}
                       onClick={() => {
-                        if (!item.comingSoon) {
+                        if (item.isAvailable && !item.comingSoon) {
                           window.location.href = item.href;
                           closeMenu();
                         }
                       }}
-                      className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${item.comingSoon ? 'cursor-not-allowed opacity-60' : ''}`}
+                      className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${(item.comingSoon || !item.isAvailable) ? 'cursor-not-allowed opacity-60' : ''}`}
                       style={{
-                        color: item.comingSoon ? 'var(--text-tertiary)' : 'var(--text-secondary)'
+                        color: (item.comingSoon || !item.isAvailable) ? 'var(--text-tertiary)' : 'var(--text-secondary)'
                       }}
                       onMouseEnter={(e) => {
-                        if (!item.comingSoon) {
+                        if (item.isAvailable && !item.comingSoon) {
                           e.target.style.color = 'var(--text-primary)';
                         }
                       }}
                       onMouseLeave={(e) => {
-                        if (!item.comingSoon) {
+                        if (item.isAvailable && !item.comingSoon) {
                           e.target.style.color = 'var(--text-secondary)';
                         }
                       }}
-                      disabled={item.comingSoon}
+                      disabled={item.comingSoon || !item.isAvailable}
                       title={item.comingSoon ? comingSoon.tooltip : (item.testnetOnly ? 'Available on Sepolia testnet only' : '')}
                     >
                       <span className="text-lg">{item.icon}</span>
                       <div>
                         <div className="flex items-center space-x-2">
                           <span>{item.name}</span>
-                          {item.comingSoon && (
+                          {(item.comingSoon || !item.isAvailable) && (
                             <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>
                           )}
-                          {item.testnetOnly && !item.comingSoon && (
+                          {item.testnetOnly && item.isAvailable && !item.comingSoon && (
                             <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-400/30">Testnet Only</span>
                           )}
                         </div>
@@ -869,10 +870,10 @@ function Home() {
                     title={item.name} 
                     icon={getIcon()}
                     description={item.description || ''} 
-                    comingSoon={item.comingSoon || false}
+                    comingSoon={(item.comingSoon || !item.isAvailable)}
                   />
                 );
-                return item.comingSoon ? (
+                return (item.comingSoon || !item.isAvailable) ? (
                   <div key={item.name}>{CardContent}</div>
                 ) : (
                   <a key={item.name} href={item.href} className="block">{CardContent}</a>
@@ -890,7 +891,7 @@ function Home() {
                       title={item.name} 
                       icon={getIcon()}
                       description={item.description || ''} 
-                      comingSoon={item.comingSoon || false}
+                      comingSoon={(item.comingSoon || !item.isAvailable)}
                     />
                   </a>
                 );
@@ -1152,33 +1153,33 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
                     onClose();
                   }
                 }}
-                className={`w-full text-left px-4 py-2 text-sm flex items-center space-x-3 group transition-colors ${item.comingSoon ? 'cursor-not-allowed opacity-60' : ''}`}
+                className={`w-full text-left px-4 py-2 text-sm flex items-center space-x-3 group transition-colors ${(item.comingSoon || !item.isAvailable) ? 'cursor-not-allowed opacity-60' : ''}`}
                 style={{
-                  color: item.comingSoon ? 'var(--text-tertiary)' : 'var(--text-secondary)'
+                  color: (item.comingSoon || !item.isAvailable) ? 'var(--text-tertiary)' : 'var(--text-secondary)'
                 }}
                 onMouseEnter={(e) => {
-                  if (!item.comingSoon) {
+                  if (item.isAvailable && !item.comingSoon) {
                     e.target.style.color = 'var(--text-primary)';
                     e.target.style.backgroundColor = 'var(--bg-tertiary)';
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (!item.comingSoon) {
+                  if (item.isAvailable && !item.comingSoon) {
                     e.target.style.color = 'var(--text-secondary)';
                     e.target.style.backgroundColor = 'transparent';
                   }
                 }}
-                disabled={item.comingSoon}
-                title={item.comingSoon ? comingSoon.tooltip : (item.testnetOnly ? 'Available on Sepolia testnet only' : '')}
+                disabled={item.comingSoon || !item.isAvailable}
+                title={(item.comingSoon || !item.isAvailable) ? comingSoon.tooltip : (item.testnetOnly ? 'Available on Sepolia testnet only' : '')}
               >
                 <span className="text-lg">{item.icon}</span>
                 <div>
                   <div className="flex items-center space-x-2">
                     <span>{item.name}</span>
-                    {item.comingSoon && (
+                    {(item.comingSoon || !item.isAvailable) && (
                       <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>
                     )}
-                    {item.testnetOnly && !item.comingSoon && (
+                    {item.testnetOnly && item.isAvailable && !item.comingSoon && (
                       <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-400/30">Testnet Only</span>
                     )}
                   </div>
