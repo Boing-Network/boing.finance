@@ -294,7 +294,7 @@ function AppContent() {
               {/* Home */}
               <button
                 onClick={() => {
-                  window.location.href = navigation.home.href;
+                  window.location.href = memoizedNavigation.home.href;
                   closeMenu();
                 }}
                 className="w-full text-left px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 border border-cyan-500/20"
