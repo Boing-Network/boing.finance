@@ -55,23 +55,24 @@ const comingSoon = {
 };
 
 // Navigation data with categories - explicit boolean flags for state management
-const navigation = {
-  home: { name: 'Home', href: '/', icon: '🏠', isAvailable: true, comingSoon: false, testnetOnly: false },
-  trading: [
-    { name: 'Swap', href: '/swap', icon: '🔄', description: 'Trade tokens instantly', isAvailable: true, comingSoon: false, testnetOnly: true },
-    { name: 'Bridge', href: '/bridge', icon: '🌉', description: 'Cross-chain transfers', isAvailable: false, comingSoon: true, testnetOnly: false },
-    { name: 'Pools', href: '/pools', icon: '🏊', description: 'Liquidity pools', isAvailable: true, comingSoon: false, testnetOnly: true },
-    { name: 'Tokens', href: '/tokens', icon: '🪙', description: 'Token management', isAvailable: true, comingSoon: false, testnetOnly: false }
-  ],
-  analytics: [
-    { name: 'Analytics', href: '/analytics', icon: '📊', description: 'Market insights', isAvailable: true, comingSoon: false, testnetOnly: false },
-    { name: 'Portfolio', href: '/portfolio', icon: '💼', description: 'Your holdings', isAvailable: true, comingSoon: false, testnetOnly: false }
-  ],
-  deployment: [
-    { name: 'Deploy Token', href: '/deploy-token', icon: '🚀', description: 'Create your own tokens', isAvailable: true, comingSoon: false, testnetOnly: false },
-    { name: 'Create Pool', href: '/create-pool', icon: '🏊', description: 'Create liquidity pools', isAvailable: true, comingSoon: false, testnetOnly: true }
-  ]
-};
+// Using Object.freeze to prevent mutations and ensure state persistence
+const navigation = Object.freeze({
+  home: Object.freeze({ name: 'Home', href: '/', icon: '🏠', isAvailable: true, comingSoon: false, testnetOnly: false }),
+  trading: Object.freeze([
+    Object.freeze({ name: 'Swap', href: '/swap', icon: '🔄', description: 'Trade tokens instantly', isAvailable: true, comingSoon: false, testnetOnly: true }),
+    Object.freeze({ name: 'Bridge', href: '/bridge', icon: '🌉', description: 'Cross-chain transfers', isAvailable: false, comingSoon: true, testnetOnly: false }),
+    Object.freeze({ name: 'Pools', href: '/pools', icon: '🏊', description: 'Liquidity pools', isAvailable: true, comingSoon: false, testnetOnly: true }),
+    Object.freeze({ name: 'Tokens', href: '/tokens', icon: '🪙', description: 'Token management', isAvailable: true, comingSoon: false, testnetOnly: false })
+  ]),
+  analytics: Object.freeze([
+    Object.freeze({ name: 'Analytics', href: '/analytics', icon: '📊', description: 'Market insights', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Portfolio', href: '/portfolio', icon: '💼', description: 'Your holdings', isAvailable: true, comingSoon: false, testnetOnly: false })
+  ]),
+  deployment: Object.freeze([
+    Object.freeze({ name: 'Deploy Token', href: '/deploy-token', icon: '🚀', description: 'Create your own tokens', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Create Pool', href: '/create-pool', icon: '🏊', description: 'Create liquidity pools', isAvailable: true, comingSoon: false, testnetOnly: true })
+  ])
+});
 
 function AppContent() {
   const location = useLocation();
