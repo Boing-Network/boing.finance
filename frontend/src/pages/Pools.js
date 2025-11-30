@@ -789,7 +789,7 @@ const Pools = () => {
       try {
         if (chainId === 11155111 && blockchainInitialized) { // Sepolia
           // Use blockchain service to get all Sepolia pools (limit to 30)
-          return await getBlockchainSepoliaPools(30);
+          return await getAllSepoliaPools(30);
         } else {
           // Fallback to API for other networks
           return await getAllPools(chainId);
@@ -819,7 +819,7 @@ const Pools = () => {
       if (chainId === 11155111 && blockchainInitialized && searchTerm.trim()) { // Sepolia
         // Use blockchain service to get all Sepolia pools (limited for search)
         const totalLimit = Math.max(500, searchPage * searchLimit); // Get at least 500 pools to ensure comprehensive search
-        return await getBlockchainSepoliaPools(totalLimit); // Get pools up to the current page
+        return await getAllSepoliaPools(totalLimit); // Get pools up to the current page
       } else {
         // Fallback to API for other networks
         return await getAllPools(chainId);
@@ -841,7 +841,7 @@ const Pools = () => {
       return;
     }
     // Otherwise, fetch user position data for this pool
-    const userPosition = await getBlockchainUserPositionInPool(pool.address);
+    const userPosition = await getUserPositionInPool(pool.address);
     if (userPosition) {
       // Merge user position data into the pool object
       setSelectedPool({ ...pool, ...userPosition });
