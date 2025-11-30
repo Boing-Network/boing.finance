@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 // BoingAstronaut component
 
 export default function Analytics() {
+  console.log('[Analytics] Component rendering at:', new Date().toISOString());
   const [timeRange, setTimeRange] = useState('24h');
   const [activeSection, setActiveSection] = useState('overview'); // overview, market, trending
 
