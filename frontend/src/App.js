@@ -86,6 +86,30 @@ function AppContent() {
   // Navigation is already frozen and immutable, no need to memoize
   // Using navigation directly ensures consistency
   const memoizedNavigation = navigation;
+  
+  // Debug logging for navigation state
+  React.useEffect(() => {
+    console.log('[AppContent] Navigation state check:', {
+      location: location.pathname,
+      timestamp: new Date().toISOString(),
+      trading: memoizedNavigation.trading.map(item => ({ 
+        name: item.name, 
+        isAvailable: item.isAvailable, 
+        comingSoon: item.comingSoon,
+        testnetOnly: item.testnetOnly 
+      })),
+      analytics: memoizedNavigation.analytics.map(item => ({ 
+        name: item.name, 
+        isAvailable: item.isAvailable, 
+        comingSoon: item.comingSoon 
+      })),
+      deployment: memoizedNavigation.deployment.map(item => ({ 
+        name: item.name, 
+        isAvailable: item.isAvailable, 
+        comingSoon: item.comingSoon 
+      }))
+    });
+  }, [location.pathname, memoizedNavigation]);
 
   const closeMenu = () => {
     setIsMenuOpen(false);
@@ -633,15 +657,26 @@ function AppContent() {
 
 function App() {
   // Create QueryClient inside component to ensure proper initialization
-  const [queryClient] = React.useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: 1,
-        refetchOnWindowFocus: false,
-        staleTime: 5 * 60 * 1000, // 5 minutes
-      },
-    },
-  }));
+  const [queryClient] = React.useState(() => {
+    console.log('[App] Initializing QueryClient');
+    try {
+      const client = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: 1,
+            refetchOnWindowFocus: false,
+            staleTime: 5 * 60 * 1000, // 5 minutes
+          },
+        },
+      });
+      console.log('[App] QueryClient initialized successfully:', client);
+      return client;
+    } catch (error) {
+      console.error('[App] Error initializing QueryClient:', error);
+      // Return a basic QueryClient as fallback
+      return new QueryClient();
+    }
+  });
 
   return (
     <ErrorBoundary>
@@ -698,6 +733,29 @@ function App() {
 function Home() {
   // Navigation is immutable, use directly
   const memoizedNav = navigation;
+  
+  // Debug logging for Home component
+  React.useEffect(() => {
+    console.log('[Home] Component mounted/updated');
+    console.log('[Home] Navigation state:', {
+      trading: memoizedNav.trading.map(item => ({ 
+        name: item.name, 
+        isAvailable: item.isAvailable, 
+        comingSoon: item.comingSoon,
+        testnetOnly: item.testnetOnly
+      })),
+      analytics: memoizedNav.analytics.map(item => ({ 
+        name: item.name, 
+        isAvailable: item.isAvailable, 
+        comingSoon: item.comingSoon 
+      })),
+      deployment: memoizedNav.deployment.map(item => ({ 
+        name: item.name, 
+        isAvailable: item.isAvailable, 
+        comingSoon: item.comingSoon 
+      }))
+    });
+  }, [memoizedNav]);
   
   return (
     <>

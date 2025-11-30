@@ -699,8 +699,10 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
 };
 
 const Pools = () => {
+  console.log('[Pools] Component rendering');
   const { isConnected, account } = useWalletConnection();
   const { chainId } = useWallet();
+  console.log('[Pools] Wallet state:', { isConnected, account, chainId });
   const [activeTab, setActiveTab] = useState('all-pools');
   const [selectedPool, setSelectedPool] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -715,22 +717,29 @@ const Pools = () => {
   const [searchLimit, setSearchLimit] = useState(50); // Initial search limit - increased from 10
   
   // Blockchain pools hook - hooks must be called unconditionally
+  console.log('[Pools] Initializing blockchain pools hook');
   const blockchainPoolsHook = useBlockchainPools();
+  console.log('[Pools] Blockchain pools hook result:', {
+    isInitialized: blockchainPoolsHook?.isInitialized,
+    isLoading: blockchainPoolsHook?.isLoading,
+    hasError: !!blockchainPoolsHook?.error
+  });
   
   // Safely extract values with defaults
   const blockchainInitialized = blockchainPoolsHook?.isInitialized || false;
   const blockchainLoading = blockchainPoolsHook?.isLoading || false;
-  const blockchainError = blockchainPoolsHook?.error || null;
+  // const blockchainError = blockchainPoolsHook?.error || null; // Unused, commented out
   const getBlockchainUserPositions = blockchainPoolsHook?.getUserPositions || (async () => []);
   const getAllPools = blockchainPoolsHook?.getAllPools || (async () => []);
   const getAllSepoliaPools = blockchainPoolsHook?.getAllSepoliaPools || (async () => []);
   const getBlockchainCreatedPools = blockchainPoolsHook?.getUserCreatedPools || (async () => []);
   const getUserPositionInPool = blockchainPoolsHook?.getUserPositionInPool || (async () => null);
 
-  // Fetch user pools
-  const { data: userPools, isLoading: userPoolsLoading, refetch: refetchUserPools } = useQuery(
-    ['user-pools', account, chainId, useBlockchainFallback],
-    async () => {
+  // Fetch user pools - React Query v5 API
+  const { data: userPools, isLoading: userPoolsLoading, refetch: refetchUserPools } = useQuery({
+    queryKey: ['user-pools', account, chainId, useBlockchainFallback],
+    queryFn: async () => {
+      console.log('[Pools] Fetching user pools:', { account, chainId, useBlockchainFallback });
       if (!account) return [];
       
       try {
@@ -740,22 +749,20 @@ const Pools = () => {
           return await getUserLiquidityPositions(account, chainId);
         }
       } catch (error) {
-        console.error('Error fetching user pools:', error);
+        console.error('[Pools] Error fetching user pools:', error);
         // Return empty array instead of throwing to prevent page crash
         return [];
       }
     },
-    { 
-      enabled: !!account,
-      refetchInterval: 30000,
-      retry: 1, // Reduce retries to prevent long loading
-      retryDelay: 1000,
-      onError: (error) => {
-        console.error('User pools query error:', error);
-        setUseBlockchainFallback(true);
-      }
+    enabled: !!account,
+    refetchInterval: 30000,
+    retry: 1, // Reduce retries to prevent long loading
+    retryDelay: 1000,
+    onError: (error) => {
+      console.error('[Pools] User pools query error:', error);
+      setUseBlockchainFallback(true);
     }
-  );
+  });
 
   // Fetch created pools
   const { data: createdPools, isLoading: createdPoolsLoading } = useQuery(
@@ -768,10 +775,11 @@ const Pools = () => {
     }
   );
 
-  // Fetch all pools
-  const { data: allPools, isLoading: allPoolsLoading } = useQuery(
-    ['all-pools', chainId, blockchainInitialized],
-    async () => {
+  // Fetch all pools - React Query v5 API
+  const { data: allPools, isLoading: allPoolsLoading } = useQuery({
+    queryKey: ['all-pools', chainId, blockchainInitialized],
+    queryFn: async () => {
+      console.log('[Pools] Fetching all pools:', { chainId, blockchainInitialized });
       try {
         if (chainId === 11155111 && blockchainInitialized) { // Sepolia
           // Use blockchain service to get all Sepolia pools (limit to 30)
@@ -781,27 +789,26 @@ const Pools = () => {
           return await getAllPools(chainId);
         }
       } catch (error) {
-        console.error('Error fetching all pools:', error);
+        console.error('[Pools] Error fetching all pools:', error);
         // Return empty array instead of throwing to prevent page crash
         return [];
       }
     },
-    { 
-      refetchInterval: 60000,
-      retry: 1, // Reduce retries
-      retryDelay: 1000,
-      enabled: chainId === 11155111 ? blockchainInitialized : true,
-      onError: (error) => {
-        console.error('All pools query error:', error);
-        // Don't throw - let the component handle empty state
-      }
+    refetchInterval: 60000,
+    retry: 1, // Reduce retries
+    retryDelay: 1000,
+    enabled: chainId === 11155111 ? blockchainInitialized : true,
+    onError: (error) => {
+      console.error('[Pools] All pools query error:', error);
+      // Don't throw - let the component handle empty state
     }
-  );
+  });
 
-  // Fetch all pools for search (unlimited)
-  const { data: allPoolsForSearch, isLoading: searchPoolsLoading } = useQuery(
-    ['all-pools-search', chainId, blockchainInitialized, searchTerm, searchPage, searchLimit],
-    async () => {
+  // Fetch all pools for search (unlimited) - React Query v5 API
+  const { data: allPoolsForSearch, isLoading: searchPoolsLoading } = useQuery({
+    queryKey: ['all-pools-search', chainId, blockchainInitialized, searchTerm, searchPage, searchLimit],
+    queryFn: async () => {
+      console.log('[Pools] Fetching pools for search:', { chainId, blockchainInitialized, searchTerm, searchPage });
       if (chainId === 11155111 && blockchainInitialized && searchTerm.trim()) { // Sepolia
         // Use blockchain service to get all Sepolia pools (limited for search)
         const totalLimit = Math.max(500, searchPage * searchLimit); // Get at least 500 pools to ensure comprehensive search
@@ -811,13 +818,11 @@ const Pools = () => {
         return await getAllPools(chainId);
       }
     },
-    { 
-      refetchInterval: 60000,
-      retry: 2,
-      enabled: chainId === 11155111 ? blockchainInitialized && searchTerm.trim().length > 0 : true,
-      staleTime: 30000 // Cache for 30 seconds
-    }
-  );
+    refetchInterval: 60000,
+    retry: 2,
+    enabled: chainId === 11155111 ? blockchainInitialized && searchTerm.trim().length > 0 : true,
+    staleTime: 30000 // Cache for 30 seconds
+  });
 
   const handleViewDetails = async (pool) => {
     // If the pool already has user position data, just open the modal

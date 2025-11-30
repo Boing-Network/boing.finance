@@ -14,20 +14,21 @@ export default function Analytics() {
   const [timeRange, setTimeRange] = useState('24h');
   const [activeSection, setActiveSection] = useState('overview'); // overview, market, trending
 
-  const { data: analytics, isLoading, error } = useQuery(
-    ['analytics', timeRange],
-    () => fetchAnalytics(timeRange),
-    {
-      refetchInterval: 60000, // Refetch every minute
-      retry: 1, // Only retry once on failure
-      retryDelay: 2000, // Wait 2 seconds before retry
-      staleTime: 30000, // Consider data stale after 30 seconds
-      onError: (error) => {
-        console.error('Analytics query error:', error);
-        // Don't throw - let the component handle the error state gracefully
-      }
+  const { data: analytics, isLoading, error } = useQuery({
+    queryKey: ['analytics', timeRange],
+    queryFn: () => {
+      console.log('[Analytics] Fetching analytics:', { timeRange });
+      return fetchAnalytics(timeRange);
+    },
+    refetchInterval: 60000, // Refetch every minute
+    retry: 1, // Only retry once on failure
+    retryDelay: 2000, // Wait 2 seconds before retry
+    staleTime: 30000, // Consider data stale after 30 seconds
+    onError: (error) => {
+      console.error('[Analytics] Analytics query error:', error);
+      // Don't throw - let the component handle the error state gracefully
     }
-  );
+  });
 
   const fetchAnalytics = async (range) => {
     try {
@@ -58,10 +59,11 @@ export default function Analytics() {
     }
   );
 
-  // Fetch market data
-  const { data: marketData, isLoading: marketLoading } = useQuery(
-    ['market-data', timeRange],
-    async () => {
+  // Fetch market data - React Query v5 API
+  const { data: marketData, isLoading: marketLoading } = useQuery({
+    queryKey: ['market-data', timeRange],
+    queryFn: async () => {
+      console.log('[Analytics] Fetching market data:', { timeRange });
       // Get top cryptocurrencies market data
       const response = await fetch(
         `https://api.coingecko.com/api/v3/global${process.env.REACT_APP_COINGECKO_API_KEY ? `?x_cg_demo_api_key=${process.env.REACT_APP_COINGECKO_API_KEY}` : ''}`
@@ -69,10 +71,8 @@ export default function Analytics() {
       if (!response.ok) return null;
       return await response.json();
     },
-    {
-      refetchInterval: 60000, // Refetch every minute
-    }
-  );
+    refetchInterval: 60000, // Refetch every minute
+  });
 
   const timeRanges = [
     { id: '24h', name: '24 Hours' },

@@ -32,72 +32,76 @@ export default function Portfolio() {
   const getBlockchainPortfolioValue = blockchainPoolsHook?.getUserPortfolioValue || (async () => 0);
   const getBlockchainSepoliaPools = blockchainPoolsHook?.getAllSepoliaPools || (async () => []);
 
-  // Fetch user's liquidity positions from blockchain
-  const { data: userPools, isLoading: poolsLoading } = useQuery(
-    ['user-pools-portfolio', account, chainId, blockchainInitialized],
-    async () => {
+  // Fetch user's liquidity positions from blockchain - React Query v5 API
+  const { data: userPools, isLoading: poolsLoading } = useQuery({
+    queryKey: ['user-pools-portfolio', account, chainId, blockchainInitialized],
+    queryFn: async () => {
+      console.log('[Portfolio] Fetching user pools:', { account, chainId, blockchainInitialized });
       if (!account || !blockchainInitialized) return [];
       
-      // Get positions from your DEX
-      const yourDexPositions = await getBlockchainUserPositions();
-      
-      // For Sepolia, also get positions from other DEXs
-      let allPositions = [...yourDexPositions];
-      
-      if (chainId === 11155111) { // Sepolia
-        try {
-          // Initialize external DEX service
-          const provider = new ethers.BrowserProvider(window.ethereum);
-          await externalDexService.initialize(provider);
-          
-          // Get positions from external DEXs
-          const externalPositions = await externalDexService.getUserExternalPositions(account, chainId);
-          allPositions = [...allPositions, ...externalPositions];
-          
-          if (externalPositions.length > 0) {
-            console.log(`Found ${externalPositions.length} external DEX positions`);
+      try {
+        // Get positions from your DEX
+        const yourDexPositions = await getBlockchainUserPositions();
+        
+        // For Sepolia, also get positions from other DEXs
+        let allPositions = [...(yourDexPositions || [])];
+        
+        if (chainId === 11155111) { // Sepolia
+          try {
+            // Initialize external DEX service
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            await externalDexService.initialize(provider);
+            
+            // Get positions from external DEXs
+            const externalPositions = await externalDexService.getUserExternalPositions(account, chainId);
+            allPositions = [...allPositions, ...(externalPositions || [])];
+            
+            if (externalPositions && externalPositions.length > 0) {
+              console.log(`[Portfolio] Found ${externalPositions.length} external DEX positions`);
+            }
+          } catch (error) {
+            console.warn('[Portfolio] Failed to fetch external DEX positions:', error);
+            // Continue with just your DEX positions
           }
-        } catch (error) {
-          console.warn('Failed to fetch external DEX positions:', error);
         }
+        
+        return allPositions;
+      } catch (error) {
+        console.error('[Portfolio] Error fetching user pools:', error);
+        return [];
       }
-      
-      return allPositions;
     },
-    {
-      refetchInterval: 30000,
-      enabled: !!account && blockchainInitialized,
-      retry: 1, // Reduce retries
-      retryDelay: 1000,
-      onError: (error) => {
-        console.error('User pools portfolio query error:', error);
-        // Don't throw - let the component handle empty state
-      }
+    refetchInterval: 30000,
+    enabled: !!account && blockchainInitialized,
+    retry: 1, // Reduce retries
+    retryDelay: 1000,
+    onError: (error) => {
+      console.error('[Portfolio] User pools portfolio query error:', error);
+      // Don't throw - let the component handle empty state
     }
-  );
+  });
 
-  // Fetch user's created pools from blockchain
-  const { data: createdPools, isLoading: createdPoolsLoading } = useQuery(
-    ['created-pools-portfolio', account, chainId, blockchainInitialized],
-    async () => {
+  // Fetch user's created pools from blockchain - React Query v5 API
+  const { data: createdPools, isLoading: createdPoolsLoading } = useQuery({
+    queryKey: ['created-pools-portfolio', account, chainId, blockchainInitialized],
+    queryFn: async () => {
+      console.log('[Portfolio] Fetching created pools:', { account, chainId, blockchainInitialized });
       if (!account || !blockchainInitialized) return [];
       try {
         return await getBlockchainCreatedPools();
       } catch (error) {
-        console.error('Error fetching created pools:', error);
+        console.error('[Portfolio] Error fetching created pools:', error);
         return [];
       }
     },
-    {
-      refetchInterval: 30000,
-      enabled: !!account && blockchainInitialized,
-      retry: 1,
-      retryDelay: 1000,
-      onError: (error) => {
-        console.error('Created pools query error:', error);
-      }
+    refetchInterval: 30000,
+    enabled: !!account && blockchainInitialized,
+    retry: 1,
+    retryDelay: 1000,
+    onError: (error) => {
+      console.error('[Portfolio] Created pools query error:', error);
     }
-  );
+  });
 
   // Filter pools by selected network
   const filteredUserPools = useMemo(() => {
@@ -116,19 +120,18 @@ export default function Portfolio() {
     });
   }, [createdPools, selectedNetwork]);
 
-  // Fetch token balances across networks
-  const { data: tokenBalances, isLoading: balancesLoading } = useQuery(
-    ['token-balances', account, trackedNetworks],
-    async () => {
+  // Fetch token balances across networks - React Query v5 API
+  const { data: tokenBalances, isLoading: balancesLoading } = useQuery({
+    queryKey: ['token-balances', account, trackedNetworks],
+    queryFn: async () => {
+      console.log('[Portfolio] Fetching token balances:', { account, trackedNetworks });
       if (!account) return null;
       return await portfolioService.getMultiNetworkPortfolio(account, trackedNetworks);
     },
-    {
-      refetchInterval: 60000, // Refetch every minute
-      enabled: !!account,
-      retry: 2
-    }
-  );
+    refetchInterval: 60000, // Refetch every minute
+    enabled: !!account,
+    retry: 2
+  });
 
   // Calculate portfolio summary from blockchain data
   const { data: portfolioSummary = {
@@ -138,9 +141,10 @@ export default function Portfolio() {
     totalTokens: 0,
     liquidityProvided: 0,
     totalPools: 0
-  }, isLoading: portfolioLoading } = useQuery(
-    ['portfolio-summary', account, chainId, blockchainInitialized, filteredUserPools],
-    async () => {
+  }, isLoading: portfolioLoading } = useQuery({
+    queryKey: ['portfolio-summary', account, chainId, blockchainInitialized, filteredUserPools],
+    queryFn: async () => {
+      console.log('[Portfolio] Calculating portfolio summary:', { account, chainId, blockchainInitialized, poolsCount: filteredUserPools?.length });
       if (!account || !blockchainInitialized || !filteredUserPools) {
         return {
           totalValue: 0,
@@ -205,12 +209,10 @@ export default function Portfolio() {
         };
       }
     },
-    {
-      refetchInterval: 30000,
-      enabled: !!account && blockchainInitialized && !!filteredUserPools,
-      retry: 2
-    }
-  );
+    refetchInterval: 30000,
+    enabled: !!account && blockchainInitialized && !!filteredUserPools,
+    retry: 2
+  });
 
   // Update tracked networks when chainId changes
   useEffect(() => {
