@@ -45,19 +45,18 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network }) => {
     }
   }, [token, network]);
 
-  // Fetch price data
-  const { data: priceInfo, isLoading: priceLoading } = useQuery(
-    ['tokenPrice', token?.address, network?.chainId],
-    async () => {
+  // Fetch price data - React Query v5 API
+  const { data: priceInfo, isLoading: priceLoading } = useQuery({
+    queryKey: ['tokenPrice', token?.address, network?.chainId],
+    queryFn: async () => {
+      console.log('[TokenDetailsModal] Fetching token price:', { address: token?.address, chainId: network?.chainId });
       if (!token?.address || !network?.chainId) return null;
       const cgNetwork = getCoinGeckoNetwork(network.chainId);
       return await coingeckoService.getTokenPrice(token.address, cgNetwork);
     },
-    {
-      enabled: !!token && !!network,
-      refetchInterval: 60000, // Refetch every minute
-    }
-  );
+    enabled: !!token && !!network,
+    refetchInterval: 60000, // Refetch every minute
+  });
 
   // Fetch holder count
   useEffect(() => {

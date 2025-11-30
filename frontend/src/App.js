@@ -658,7 +658,7 @@ function AppContent() {
 function App() {
   // Create QueryClient inside component to ensure proper initialization
   const [queryClient] = React.useState(() => {
-    console.log('[App] Initializing QueryClient');
+    console.log('[App] Initializing QueryClient at:', new Date().toISOString());
     try {
       const client = new QueryClient({
         defaultOptions: {
@@ -669,13 +669,22 @@ function App() {
           },
         },
       });
-      console.log('[App] QueryClient initialized successfully:', client);
+      console.log('[App] QueryClient initialized successfully');
+      console.log('[App] QueryClient instance:', {
+        hasDefaultOptions: !!client.getDefaultOptions(),
+        hasQueries: !!client.getDefaultOptions().queries
+      });
       return client;
     } catch (error) {
       console.error('[App] Error initializing QueryClient:', error);
       // Return a basic QueryClient as fallback
       return new QueryClient();
     }
+  });
+  
+  // Log on every render to track remounts
+  React.useEffect(() => {
+    console.log('[App] App component rendered at:', new Date().toISOString());
   });
 
   return (

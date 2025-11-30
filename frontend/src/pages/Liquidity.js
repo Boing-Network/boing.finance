@@ -39,10 +39,11 @@ const Liquidity = () => {
     fetchPools();
   }, []);
 
-  // Fetch user's liquidity positions
-  const { data: liquidityData, isLoading: liquidityLoading } = useQuery(
-    ['user-liquidity', account],
-    async () => {
+  // Fetch user's liquidity positions - React Query v5 API
+  const { data: liquidityData, isLoading: liquidityLoading } = useQuery({
+    queryKey: ['user-liquidity', account],
+    queryFn: async () => {
+      console.log('[Liquidity] Fetching user liquidity positions:', { account });
       if (!account) {
         throw new Error('No wallet connected');
       }
@@ -63,12 +64,10 @@ const Liquidity = () => {
         positions
       };
     },
-    { 
-      refetchInterval: 30000,
-      enabled: !!account,
-      retry: false
-    }
-  );
+    refetchInterval: 30000,
+    enabled: !!account,
+    retry: false
+  });
 
   // Helper functions
   const formatNumber = (num) => {

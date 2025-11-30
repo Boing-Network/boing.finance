@@ -764,16 +764,17 @@ const Pools = () => {
     }
   });
 
-  // Fetch created pools
-  const { data: createdPools, isLoading: createdPoolsLoading } = useQuery(
-    ['created-pools', account, chainId],
-    () => getUserCreatedPools(account, chainId),
-    { 
-      enabled: !!account,
-      refetchInterval: 30000,
-      retry: 2
-    }
-  );
+  // Fetch created pools - React Query v5 API
+  const { data: createdPools, isLoading: createdPoolsLoading } = useQuery({
+    queryKey: ['created-pools', account, chainId],
+    queryFn: () => {
+      console.log('[Pools] Fetching created pools:', { account, chainId });
+      return getUserCreatedPools(account, chainId);
+    },
+    enabled: !!account,
+    refetchInterval: 30000,
+    retry: 2
+  });
 
   // Fetch all pools - React Query v5 API
   const { data: allPools, isLoading: allPoolsLoading } = useQuery({
