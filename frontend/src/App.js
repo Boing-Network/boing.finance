@@ -1318,51 +1318,71 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
           border: '1px solid var(--border-color)'
         }}>
           <div className="py-1">
-            {items.map((item) => (
-              <button
-                key={item.name}
-                onClick={() => {
-                  if (!item.comingSoon) {
-                    window.location.href = item.href;
-                    onClose();
-                  }
-                }}
-                className={`w-full text-left px-4 py-2 text-sm flex items-center space-x-3 group transition-colors ${(item.comingSoon || !item.isAvailable) ? 'cursor-not-allowed opacity-60' : ''}`}
-                style={{
-                  color: (item.comingSoon || !item.isAvailable) ? 'var(--text-tertiary)' : 'var(--text-secondary)'
-                }}
-                onMouseEnter={(e) => {
-                  if (item.isAvailable && !item.comingSoon) {
-                    e.target.style.color = 'var(--text-primary)';
-                    e.target.style.backgroundColor = 'var(--bg-tertiary)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (item.isAvailable && !item.comingSoon) {
-                    e.target.style.color = 'var(--text-secondary)';
-                    e.target.style.backgroundColor = 'transparent';
-                  }
-                }}
-                disabled={item.comingSoon || !item.isAvailable}
-                title={(item.comingSoon || !item.isAvailable) ? comingSoon.tooltip : (item.testnetOnly ? 'Available on Sepolia testnet only' : '')}
-              >
-                <span className="text-lg">{item.icon}</span>
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <span>{item.name}</span>
-                    {(item.comingSoon || !item.isAvailable) && (
-                      <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>
-                    )}
-                    {item.testnetOnly && item.isAvailable && !item.comingSoon && (
-                      <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-400/30">Testnet Only</span>
+            {items.map((item) => {
+              // Explicit boolean checks with logging
+              const isComingSoon = Boolean(item.comingSoon);
+              const isAvailable = Boolean(item.isAvailable);
+              const shouldDisable = isComingSoon || !isAvailable;
+              
+              console.log(`[DropdownMenu] ${label} - ${item.name}:`, {
+                name: item.name,
+                comingSoon: item.comingSoon,
+                isComingSoon,
+                isAvailable: item.isAvailable,
+                isAvailableBool: isAvailable,
+                shouldDisable,
+                rawValues: { comingSoon: item.comingSoon, isAvailable: item.isAvailable }
+              });
+              
+              return (
+                <button
+                  key={item.name}
+                  onClick={() => {
+                    if (!shouldDisable) {
+                      console.log(`[DropdownMenu] Navigating to ${item.href}`);
+                      window.location.href = item.href;
+                      onClose();
+                    } else {
+                      console.log(`[DropdownMenu] ${item.name} is disabled (comingSoon: ${isComingSoon}, !isAvailable: ${!isAvailable})`);
+                    }
+                  }}
+                  className={`w-full text-left px-4 py-2 text-sm flex items-center space-x-3 group transition-colors ${shouldDisable ? 'cursor-not-allowed opacity-60' : ''}`}
+                  style={{
+                    color: shouldDisable ? 'var(--text-tertiary)' : 'var(--text-secondary)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (isAvailable && !isComingSoon) {
+                      e.target.style.color = 'var(--text-primary)';
+                      e.target.style.backgroundColor = 'var(--bg-tertiary)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (isAvailable && !isComingSoon) {
+                      e.target.style.color = 'var(--text-secondary)';
+                      e.target.style.backgroundColor = 'transparent';
+                    }
+                  }}
+                  disabled={shouldDisable}
+                  title={shouldDisable ? comingSoon.tooltip : (item.testnetOnly ? 'Available on Sepolia testnet only' : '')}
+                >
+                  <span className="text-lg">{item.icon}</span>
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <span>{item.name}</span>
+                      {shouldDisable && (
+                        <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>
+                      )}
+                      {item.testnetOnly && isAvailable && !isComingSoon && (
+                        <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-400/30">Testnet Only</span>
+                      )}
+                    </div>
+                    {item.description && (
+                      <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{item.description}</div>
                     )}
                   </div>
-                  {item.description && (
-                    <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{item.description}</div>
-                  )}
-                </div>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
