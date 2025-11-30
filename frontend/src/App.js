@@ -740,31 +740,91 @@ function App() {
 
 // Home component with all original features
 function Home() {
-  // Navigation is immutable, use directly
-  const memoizedNav = navigation;
-  
-  // Debug logging for Home component
-  React.useEffect(() => {
-    console.log('[Home] Component mounted/updated');
-    console.log('[Home] Navigation state:', {
-      trading: memoizedNav.trading.map(item => ({ 
-        name: item.name, 
-        isAvailable: item.isAvailable, 
-        comingSoon: item.comingSoon,
-        testnetOnly: item.testnetOnly
-      })),
-      analytics: memoizedNav.analytics.map(item => ({ 
-        name: item.name, 
-        isAvailable: item.isAvailable, 
-        comingSoon: item.comingSoon 
-      })),
-      deployment: memoizedNav.deployment.map(item => ({ 
-        name: item.name, 
-        isAvailable: item.isAvailable, 
-        comingSoon: item.comingSoon 
-      }))
+  // Use useMemo to ensure stable reference and add comprehensive logging
+  const memoizedNav = React.useMemo(() => {
+    console.log('[Home] Creating memoized navigation reference at:', new Date().toISOString());
+    console.log('[Home] Navigation object identity:', navigation === navigation);
+    console.log('[Home] Navigation object frozen check:', Object.isFrozen(navigation));
+    
+    // Log actual values to catch any mutations
+    const tradingState = navigation.trading.map(item => ({
+      name: item.name,
+      isAvailable: item.isAvailable,
+      comingSoon: item.comingSoon,
+      testnetOnly: item.testnetOnly
+    }));
+    
+    const analyticsState = navigation.analytics.map(item => ({
+      name: item.name,
+      isAvailable: item.isAvailable,
+      comingSoon: item.comingSoon
+    }));
+    
+    const deploymentState = navigation.deployment.map(item => ({
+      name: item.name,
+      isAvailable: item.isAvailable,
+      comingSoon: item.comingSoon
+    }));
+    
+    console.log('[Home] Navigation values at memoization:', {
+      trading: tradingState,
+      analytics: analyticsState,
+      deployment: deploymentState
     });
-  }, [memoizedNav]);
+    
+    return navigation;
+  }, []); // Empty deps - navigation should never change
+  
+  // Debug logging for Home component on every render
+  React.useEffect(() => {
+    console.log('[Home] Component rendered at:', new Date().toISOString());
+    console.log('[Home] Navigation reference check:', memoizedNav === navigation);
+    
+    // Log actual values being used
+    const tradingValues = memoizedNav.trading.map(item => ({
+      name: item.name,
+      isAvailable: Boolean(item.isAvailable),
+      comingSoon: Boolean(item.comingSoon),
+      testnetOnly: Boolean(item.testnetOnly),
+      rawIsAvailable: item.isAvailable,
+      rawComingSoon: item.comingSoon
+    }));
+    
+    const analyticsValues = memoizedNav.analytics.map(item => ({
+      name: item.name,
+      isAvailable: Boolean(item.isAvailable),
+      comingSoon: Boolean(item.comingSoon),
+      rawIsAvailable: item.isAvailable,
+      rawComingSoon: item.comingSoon
+    }));
+    
+    const deploymentValues = memoizedNav.deployment.map(item => ({
+      name: item.name,
+      isAvailable: Boolean(item.isAvailable),
+      comingSoon: Boolean(item.comingSoon),
+      rawIsAvailable: item.isAvailable,
+      rawComingSoon: item.comingSoon
+    }));
+    
+    console.log('[Home] Navigation state being used:', {
+      trading: tradingValues,
+      analytics: analyticsValues,
+      deployment: deploymentValues
+    });
+    
+    // Check for any mutations
+    const hasMutations = tradingValues.some(item => item.rawIsAvailable !== true || item.rawComingSoon !== false) ||
+                        analyticsValues.some(item => item.rawIsAvailable !== true || item.rawComingSoon !== false) ||
+                        deploymentValues.some(item => item.rawIsAvailable !== true || item.rawComingSoon !== false);
+    
+    if (hasMutations) {
+      console.error('[Home] ⚠️ DETECTED MUTATION IN NAVIGATION STATE!', {
+        trading: tradingValues,
+        analytics: analyticsValues,
+        deployment: deploymentValues
+      });
+    }
+  });
   
   return (
     <>
@@ -929,6 +989,21 @@ function Home() {
             {/* First row - 6 cards in 3 columns - dynamically generated from navigation */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {memoizedNav.trading.map((item) => {
+                // Explicit boolean checks with logging
+                const isComingSoon = Boolean(item.comingSoon);
+                const isAvailable = Boolean(item.isAvailable);
+                const shouldShowComingSoon = isComingSoon || !isAvailable;
+                
+                console.log(`[Home] Rendering ${item.name}:`, {
+                  name: item.name,
+                  comingSoon: item.comingSoon,
+                  isComingSoon,
+                  isAvailable: item.isAvailable,
+                  isAvailableBool: isAvailable,
+                  shouldShowComingSoon,
+                  rawValues: { comingSoon: item.comingSoon, isAvailable: item.isAvailable }
+                });
+                
                 const getIcon = () => {
                   if (item.name === 'Swap') return <SwapIcon />;
                   if (item.name === 'Pools') return <LiquidityIcon />;
@@ -941,16 +1016,31 @@ function Home() {
                     title={item.name} 
                     icon={getIcon()}
                     description={item.description || ''} 
-                    comingSoon={(item.comingSoon || !item.isAvailable)}
+                    comingSoon={shouldShowComingSoon}
                   />
                 );
-                return (item.comingSoon || !item.isAvailable) ? (
+                return shouldShowComingSoon ? (
                   <div key={item.name}>{CardContent}</div>
                 ) : (
                   <a key={item.name} href={item.href} className="block">{CardContent}</a>
                 );
               })}
               {memoizedNav.analytics.map((item) => {
+                // Explicit boolean checks with logging
+                const isComingSoon = Boolean(item.comingSoon);
+                const isAvailable = Boolean(item.isAvailable);
+                const shouldShowComingSoon = isComingSoon || !isAvailable;
+                
+                console.log(`[Home] Rendering ${item.name}:`, {
+                  name: item.name,
+                  comingSoon: item.comingSoon,
+                  isComingSoon,
+                  isAvailable: item.isAvailable,
+                  isAvailableBool: isAvailable,
+                  shouldShowComingSoon,
+                  rawValues: { comingSoon: item.comingSoon, isAvailable: item.isAvailable }
+                });
+                
                 const getIcon = () => {
                   if (item.name === 'Analytics') return <AnalyticsIcon />;
                   if (item.name === 'Portfolio') return <PortfolioIcon />;
@@ -962,7 +1052,7 @@ function Home() {
                       title={item.name} 
                       icon={getIcon()}
                       description={item.description || ''} 
-                      comingSoon={(item.comingSoon || !item.isAvailable)}
+                      comingSoon={shouldShowComingSoon}
                     />
                   </a>
                 );
