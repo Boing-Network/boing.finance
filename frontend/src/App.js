@@ -46,16 +46,7 @@ const Whitepaper = lazy(() => import('./pages/Whitepaper'));
 const ExecutiveSummary = lazy(() => import('./pages/ExecutiveSummary'));
 const Blog = lazy(() => import('./pages/Blog'));
 
-// Create a client - React Query v5 compatible
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
-  },
-});
+// QueryClient will be created inside App component to avoid initialization issues
 
 // Helper for coming soon
 const comingSoon = {
@@ -91,8 +82,9 @@ function AppContent() {
   const [deploymentDropdownOpen, setDeploymentDropdownOpen] = useState(false);
   const { account } = useWalletConnection();
   
-  // Memoize navigation to prevent re-creation on every render
-  const memoizedNavigation = useMemo(() => navigation, []);
+  // Navigation is already frozen and immutable, no need to memoize
+  // Using navigation directly ensures consistency
+  const memoizedNavigation = navigation;
 
   const closeMenu = () => {
     setIsMenuOpen(false);
@@ -639,6 +631,17 @@ function AppContent() {
 }
 
 function App() {
+  // Create QueryClient inside component to ensure proper initialization
+  const [queryClient] = React.useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 1,
+        refetchOnWindowFocus: false,
+        staleTime: 5 * 60 * 1000, // 5 minutes
+      },
+    },
+  }));
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
@@ -692,8 +695,8 @@ function App() {
 
 // Home component with all original features
 function Home() {
-  // Use memoized navigation to determine feature status
-  const memoizedNav = useMemo(() => navigation, []);
+  // Navigation is immutable, use directly
+  const memoizedNav = navigation;
   
   return (
     <>
