@@ -714,32 +714,18 @@ const Pools = () => {
   const [searchPage, setSearchPage] = useState(1); // Search pagination
   const [searchLimit, setSearchLimit] = useState(50); // Initial search limit - increased from 10
   
-  // Blockchain pools hook - with safe destructuring and error handling
-  let blockchainInitialized = false;
-  let blockchainLoading = false;
-  let blockchainError = null;
-  let getBlockchainUserPositions = async () => [];
-  let getAllPools = async () => [];
-  let getAllSepoliaPools = async () => [];
-  let getBlockchainCreatedPools = async () => [];
-  let getUserPositionInPool = async () => null;
-
-  try {
-    const blockchainPoolsHook = useBlockchainPools();
-    if (blockchainPoolsHook) {
-      blockchainInitialized = blockchainPoolsHook.isInitialized || false;
-      blockchainLoading = blockchainPoolsHook.isLoading || false;
-      blockchainError = blockchainPoolsHook.error || null;
-      getBlockchainUserPositions = blockchainPoolsHook.getUserPositions || (async () => []);
-      getAllPools = blockchainPoolsHook.getAllPools || (async () => []);
-      getAllSepoliaPools = blockchainPoolsHook.getAllSepoliaPools || (async () => []);
-      getBlockchainCreatedPools = blockchainPoolsHook.getUserCreatedPools || (async () => []);
-      getUserPositionInPool = blockchainPoolsHook.getUserPositionInPool || (async () => null);
-    }
-  } catch (error) {
-    console.error('Error initializing blockchain pools hook:', error);
-    // Use default values above
-  }
+  // Blockchain pools hook - hooks must be called unconditionally
+  const blockchainPoolsHook = useBlockchainPools();
+  
+  // Safely extract values with defaults
+  const blockchainInitialized = blockchainPoolsHook?.isInitialized || false;
+  const blockchainLoading = blockchainPoolsHook?.isLoading || false;
+  const blockchainError = blockchainPoolsHook?.error || null;
+  const getBlockchainUserPositions = blockchainPoolsHook?.getUserPositions || (async () => []);
+  const getAllPools = blockchainPoolsHook?.getAllPools || (async () => []);
+  const getAllSepoliaPools = blockchainPoolsHook?.getAllSepoliaPools || (async () => []);
+  const getBlockchainCreatedPools = blockchainPoolsHook?.getUserCreatedPools || (async () => []);
+  const getUserPositionInPool = blockchainPoolsHook?.getUserPositionInPool || (async () => null);
 
   // Fetch user pools
   const { data: userPools, isLoading: userPoolsLoading, refetch: refetchUserPools } = useQuery(

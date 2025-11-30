@@ -691,6 +691,9 @@ function App() {
 
 // Home component with all original features
 function Home() {
+  // Use memoized navigation to determine feature status
+  const memoizedNav = useMemo(() => navigation, []);
+  
   return (
     <>
       <Helmet>
@@ -851,24 +854,47 @@ function Home() {
 
           {/* Features Section */}
           <div className="mt-8 space-y-8 fade-in delay-500">
-            {/* First row - 6 cards in 3 columns */}
+            {/* First row - 6 cards in 3 columns - dynamically generated from navigation */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              <a href="/swap" className="block">
-                <FeatureCard title="Swap" icon={<SwapIcon />} description="Instantly swap tokens across multiple blockchains with low fees and high speed." />
-              </a>
-              <a href="/pools" className="block">
-                <FeatureCard title="Liquidity Pools" icon={<LiquidityIcon />} description="Provide liquidity, earn rewards, and help power decentralized trading." />
-              </a>
-              <a href="/analytics" className="block">
-                <FeatureCard title="Analytics" icon={<AnalyticsIcon />} description="Track your trading performance, pool stats, and market trends in real time." />
-              </a>
-              <a href="/portfolio" className="block">
-                <FeatureCard title="Portfolio" icon={<PortfolioIcon />} description="Monitor your assets, balances, and earnings across all supported chains." />
-              </a>
-              <FeatureCard title="Bridge" icon={<BridgeIcon />} description="Seamlessly transfer tokens between different blockchains with our secure bridge." comingSoon />
-              <a href="/tokens" className="block">
-                <FeatureCard title="Tokens" icon={<TokensIcon />} description="Explore supported tokens, view details, and manage your favorites." />
-              </a>
+              {memoizedNav.trading.map((item) => {
+                const getIcon = () => {
+                  if (item.name === 'Swap') return <SwapIcon />;
+                  if (item.name === 'Pools') return <LiquidityIcon />;
+                  if (item.name === 'Tokens') return <TokensIcon />;
+                  if (item.name === 'Bridge') return <BridgeIcon />;
+                  return null;
+                };
+                const CardContent = (
+                  <FeatureCard 
+                    title={item.name} 
+                    icon={getIcon()}
+                    description={item.description || ''} 
+                    comingSoon={item.comingSoon || false}
+                  />
+                );
+                return item.comingSoon ? (
+                  <div key={item.name}>{CardContent}</div>
+                ) : (
+                  <a key={item.name} href={item.href} className="block">{CardContent}</a>
+                );
+              })}
+              {memoizedNav.analytics.map((item) => {
+                const getIcon = () => {
+                  if (item.name === 'Analytics') return <AnalyticsIcon />;
+                  if (item.name === 'Portfolio') return <PortfolioIcon />;
+                  return null;
+                };
+                return (
+                  <a key={item.name} href={item.href} className="block">
+                    <FeatureCard 
+                      title={item.name} 
+                      icon={getIcon()}
+                      description={item.description || ''} 
+                      comingSoon={item.comingSoon || false}
+                    />
+                  </a>
+                );
+              })}
             </div>
             
             {/* Second row - Deploy Token card centered */}
