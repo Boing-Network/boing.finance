@@ -20,30 +20,17 @@ export default function Portfolio() {
   const [activeTab, setActiveTab] = useState('overview'); // overview, tokens, pools
   const [trackedNetworks, setTrackedNetworks] = useState([chainId || 11155111]);
 
-  // Blockchain pools hook - with safe error handling
-  let blockchainInitialized = false;
-  let blockchainLoading = false;
-  let blockchainError = null;
-  let getBlockchainUserPositions = async () => [];
-  let getBlockchainCreatedPools = async () => [];
-  let getBlockchainPortfolioValue = async () => 0;
-  let getBlockchainSepoliaPools = async () => [];
-
-  try {
-    const blockchainPoolsHook = useBlockchainPools();
-    if (blockchainPoolsHook) {
-      blockchainInitialized = blockchainPoolsHook.isInitialized || false;
-      blockchainLoading = blockchainPoolsHook.isLoading || false;
-      blockchainError = blockchainPoolsHook.error || null;
-      getBlockchainUserPositions = blockchainPoolsHook.getUserPositions || (async () => []);
-      getBlockchainCreatedPools = blockchainPoolsHook.getUserCreatedPools || (async () => []);
-      getBlockchainPortfolioValue = blockchainPoolsHook.getUserPortfolioValue || (async () => 0);
-      getBlockchainSepoliaPools = blockchainPoolsHook.getAllSepoliaPools || (async () => []);
-    }
-  } catch (error) {
-    console.error('Error initializing blockchain pools hook:', error);
-    // Use default values above
-  }
+  // Blockchain pools hook - hooks must be called unconditionally
+  const blockchainPoolsHook = useBlockchainPools();
+  
+  // Safely extract values with defaults
+  const blockchainInitialized = blockchainPoolsHook?.isInitialized || false;
+  const blockchainLoading = blockchainPoolsHook?.isLoading || false;
+  const blockchainError = blockchainPoolsHook?.error || null;
+  const getBlockchainUserPositions = blockchainPoolsHook?.getUserPositions || (async () => []);
+  const getBlockchainCreatedPools = blockchainPoolsHook?.getUserCreatedPools || (async () => []);
+  const getBlockchainPortfolioValue = blockchainPoolsHook?.getUserPortfolioValue || (async () => 0);
+  const getBlockchainSepoliaPools = blockchainPoolsHook?.getAllSepoliaPools || (async () => []);
 
   // Fetch user's liquidity positions from blockchain
   const { data: userPools, isLoading: poolsLoading } = useQuery(
