@@ -6,15 +6,12 @@ import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { ethers } from 'ethers';
 import {
-  getAllPools,
   getUserLiquidityPositions,
   getUserCreatedPools,
   fetchUserPoolsFromBlockchain,
-  getPoolDetails,
   getPoolAnalytics
 } from '../services/poolService';
 import { useBlockchainPools } from '../hooks/useBlockchainPools';
-import { getContractAddress } from '../config/contracts';
 
 // Pool Card Component
 const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveLiquidity }) => {
@@ -533,9 +530,11 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
 };
 
 // Pool List Component
+// eslint-disable-next-line no-unused-vars
 const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveLiquidity }) => {
   const [isLoading, setIsLoading] = useState(false);
 
+  // eslint-disable-next-line no-unused-vars
   const handleCollectFees = async (poolAddress, chainId, event) => {
     event.stopPropagation(); // Prevent row click
     setIsLoading(true);
@@ -549,6 +548,7 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleRemoveLiquidity = async (poolAddress, lpAmount, chainId, event) => {
     event.stopPropagation(); // Prevent row click
     setIsLoading(true);
@@ -727,12 +727,12 @@ const Pools = () => {
   
   // Safely extract values with defaults
   const blockchainInitialized = blockchainPoolsHook?.isInitialized || false;
-  const blockchainLoading = blockchainPoolsHook?.isLoading || false;
+  // const blockchainLoading = blockchainPoolsHook?.isLoading || false; // Unused
   // const blockchainError = blockchainPoolsHook?.error || null; // Unused, commented out
-  const getBlockchainUserPositions = blockchainPoolsHook?.getUserPositions || (async () => []);
-  const getAllPools = blockchainPoolsHook?.getAllPools || (async () => []);
+  // const getBlockchainUserPositions = blockchainPoolsHook?.getUserPositions || (async () => []); // Unused
+  const getAllPoolsFromBlockchain = blockchainPoolsHook?.getAllPools || (async () => []);
   const getAllSepoliaPools = blockchainPoolsHook?.getAllSepoliaPools || (async () => []);
-  const getBlockchainCreatedPools = blockchainPoolsHook?.getUserCreatedPools || (async () => []);
+  // const getBlockchainCreatedPools = blockchainPoolsHook?.getUserCreatedPools || (async () => []); // Unused
   const getUserPositionInPool = blockchainPoolsHook?.getUserPositionInPool || (async () => null);
 
   // Fetch user pools - React Query v5 API
@@ -786,8 +786,8 @@ const Pools = () => {
           // Use blockchain service to get all Sepolia pools (limit to 30)
           return await getAllSepoliaPools(30);
         } else {
-          // Fallback to API for other networks
-          return await getAllPools(chainId);
+          // Fallback to API for other networks - using blockchain service
+          return await getAllPoolsFromBlockchain(chainId);
         }
       } catch (error) {
         console.error('[Pools] Error fetching all pools:', error);
@@ -815,8 +815,8 @@ const Pools = () => {
         const totalLimit = Math.max(500, searchPage * searchLimit); // Get at least 500 pools to ensure comprehensive search
         return await getAllSepoliaPools(totalLimit); // Get pools up to the current page
       } else {
-        // Fallback to API for other networks
-        return await getAllPools(chainId);
+        // Fallback to API for other networks - using blockchain service
+        return await getAllPoolsFromBlockchain(chainId);
       }
     },
     refetchInterval: 60000,

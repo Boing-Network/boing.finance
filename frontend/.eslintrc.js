@@ -20,12 +20,15 @@ module.exports = {
     'no-unused-vars': ['warn', { 
       argsIgnorePattern: '^_',
       varsIgnorePattern: '^_',
-      ignoreRestSiblings: true
+      ignoreRestSiblings: true,
+      // Allow unused vars in function parameters (for API compatibility)
+      args: 'after-used'
     }],
     'react-hooks/exhaustive-deps': 'warn',
     'react/jsx-no-duplicate-props': 'warn',
     'no-redeclare': 'warn',
-    'import/no-anonymous-default-export': 'warn'
+    'import/no-anonymous-default-export': 'warn',
+    'no-self-compare': 'warn'
   },
   overrides: [
     {

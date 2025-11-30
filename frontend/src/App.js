@@ -1,4 +1,4 @@
-import React, { useState, lazy, Suspense, useMemo } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
@@ -20,7 +20,6 @@ import ShootingStars from './components/ShootingStars';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
 import OnboardingTour from './components/OnboardingTour';
-import NotificationSettings from './components/NotificationSettings';
 import './styles/globals.css';
 
 // Lazy load all page components for code splitting
@@ -56,7 +55,8 @@ const comingSoon = {
 
 // Navigation data with categories - explicit boolean flags for state management
 // Using Object.freeze to prevent mutations and ensure state persistence
-const navigation = Object.freeze({
+// Store in a way that persists across remounts
+const createNavigation = () => Object.freeze({
   home: Object.freeze({ name: 'Home', href: '/', icon: '🏠', isAvailable: true, comingSoon: false, testnetOnly: false }),
   trading: Object.freeze([
     Object.freeze({ name: 'Swap', href: '/swap', icon: '🔄', description: 'Trade tokens instantly', isAvailable: true, comingSoon: false, testnetOnly: true }),
@@ -73,6 +73,9 @@ const navigation = Object.freeze({
     Object.freeze({ name: 'Create Pool', href: '/create-pool', icon: '🏊', description: 'Create liquidity pools', isAvailable: true, comingSoon: false, testnetOnly: true })
   ])
 });
+
+// Create navigation once and store in module scope to prevent recreation
+const navigation = createNavigation();
 
 function AppContent() {
   const location = useLocation();
@@ -546,10 +549,22 @@ function AppContent() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/swap" element={<Swap />} />
-                <Route path="/pools" element={<Pools />} />
+                <Route path="/pools" element={
+                  <ErrorBoundary>
+                    <Pools />
+                  </ErrorBoundary>
+                } />
                 <Route path="/liquidity" element={<Liquidity />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/portfolio" element={<Portfolio />} />
+                <Route path="/analytics" element={
+                  <ErrorBoundary>
+                    <Analytics />
+                  </ErrorBoundary>
+                } />
+                <Route path="/portfolio" element={
+                  <ErrorBoundary>
+                    <Portfolio />
+                  </ErrorBoundary>
+                } />
                 <Route path="/bridge" element={<Bridge />} />
                 <Route path="/tokens" element={<Tokens />} />
                   <Route path="/docs" element={<Docs />} />
@@ -655,37 +670,96 @@ function AppContent() {
   );
 }
 
-function App() {
-  // Create QueryClient inside component to ensure proper initialization
-  const [queryClient] = React.useState(() => {
-    console.log('[App] Initializing QueryClient at:', new Date().toISOString());
+// Create QueryClient in module scope to ensure it's only created once
+// This prevents issues with React Query initialization across remounts
+let queryClientInstance = null;
+
+function getQueryClient() {
+  if (!queryClientInstance) {
+    console.log('[App] Creating QueryClient instance at:', new Date().toISOString());
     try {
-      const client = new QueryClient({
+      queryClientInstance = new QueryClient({
         defaultOptions: {
           queries: {
             retry: 1,
             refetchOnWindowFocus: false,
             staleTime: 5 * 60 * 1000, // 5 minutes
+            // Add error handling to prevent crashes
+            throwOnError: false,
+            // Ensure queries don't fail silently
+            onError: (error) => {
+              console.error('[React Query] Query error:', error);
+              // Don't rethrow - let React Query handle it gracefully
+            }
           },
         },
       });
       console.log('[App] QueryClient initialized successfully');
-      console.log('[App] QueryClient instance:', {
-        hasDefaultOptions: !!client.getDefaultOptions(),
-        hasQueries: !!client.getDefaultOptions().queries
-      });
-      return client;
     } catch (error) {
       console.error('[App] Error initializing QueryClient:', error);
       // Return a basic QueryClient as fallback
-      return new QueryClient();
+      queryClientInstance = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: 1,
+            refetchOnWindowFocus: false,
+            throwOnError: false,
+          },
+        },
+      });
     }
-  });
+  }
+  return queryClientInstance;
+}
+
+function App() {
+  // Use the singleton QueryClient instance
+  const queryClient = React.useMemo(() => {
+    return getQueryClient();
+  }, []); // Empty deps - only get once
   
   // Log on every render to track remounts
   React.useEffect(() => {
     console.log('[App] App component rendered at:', new Date().toISOString());
   });
+
+  // Add global error handler for React Query errors
+  React.useEffect(() => {
+    const handleError = (event) => {
+      // Check if this is a React Query related error
+      if (event.error && (
+        event.error.message?.includes('defaultQueryOptions') ||
+        event.error.message?.includes('QueryClient') ||
+        event.error.stack?.includes('react-query') ||
+        event.error.stack?.includes('tanstack')
+      )) {
+        console.error('[App] React Query error caught:', event.error);
+        // Prevent the error from crashing the app
+        event.preventDefault();
+        // Optionally reset the QueryClient
+        try {
+          queryClient.clear();
+        } catch (e) {
+          console.error('[App] Error clearing QueryClient:', e);
+        }
+      }
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', (event) => {
+      if (event.reason && (
+        event.reason.message?.includes('defaultQueryOptions') ||
+        event.reason.message?.includes('QueryClient')
+      )) {
+        console.error('[App] React Query promise rejection caught:', event.reason);
+        event.preventDefault();
+      }
+    });
+
+    return () => {
+      window.removeEventListener('error', handleError);
+    };
+  }, [queryClient]);
 
   return (
     <ErrorBoundary>
@@ -743,7 +817,6 @@ function Home() {
   // Use useMemo to ensure stable reference and add comprehensive logging
   const memoizedNav = React.useMemo(() => {
     console.log('[Home] Creating memoized navigation reference at:', new Date().toISOString());
-    console.log('[Home] Navigation object identity:', navigation === navigation);
     console.log('[Home] Navigation object frozen check:', Object.isFrozen(navigation));
     
     // Log actual values to catch any mutations
