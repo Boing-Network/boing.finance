@@ -1,8 +1,25 @@
 // Service Worker Registration
 // Handles service worker registration and updates with aggressive cache invalidation
 
+// Flag to prevent multiple simultaneous reloads
+let isReloading = false;
+let lastVersionCheck = 0;
+const VERSION_CHECK_COOLDOWN = 2000; // 2 seconds cooldown between checks
+
 // Check for version updates and force reload if needed
-const checkVersionAndReload = async () => {
+const checkVersionAndReload = async (forceCheck = false) => {
+  // Prevent multiple simultaneous checks
+  const now = Date.now();
+  if (!forceCheck && (now - lastVersionCheck < VERSION_CHECK_COOLDOWN)) {
+    return false;
+  }
+  lastVersionCheck = now;
+
+  // Prevent reload if already reloading
+  if (isReloading) {
+    return false;
+  }
+
   try {
     const response = await fetch('/version.json?v=' + Date.now(), {
       cache: 'no-store',
@@ -11,49 +28,68 @@ const checkVersionAndReload = async () => {
         'Pragma': 'no-cache'
       }
     });
-    if (response.ok) {
-      const versionData = await response.json();
-      const storedVersion = localStorage.getItem('appVersion');
+    
+    if (!response.ok) {
+      // If version.json doesn't exist or fails, don't reload
+      return false;
+    }
+
+    const versionData = await response.json();
+    const storedVersion = localStorage.getItem('appVersion');
+    
+    // If no stored version, just store it and return (first time)
+    if (!storedVersion) {
+      localStorage.setItem('appVersion', versionData.version);
+      return false;
+    }
+    
+    // Only reload if versions are actually different
+    if (storedVersion !== versionData.version) {
+      console.log('[Version Check] New version detected:', versionData.version);
+      console.log('[Version Check] Old version:', storedVersion);
       
-      if (storedVersion && storedVersion !== versionData.version) {
-        console.log('[Version Check] New version detected:', versionData.version);
-        console.log('[Version Check] Old version:', storedVersion);
-        // Clear all caches
-        if ('caches' in window) {
-          const cacheNames = await caches.keys();
-          await Promise.all(cacheNames.map(name => caches.delete(name)));
-        }
-        // Clear localStorage except essential items
-        const essentialKeys = ['walletConnected', 'walletType', 'userDisconnected'];
-        const keysToKeep = {};
-        essentialKeys.forEach(key => {
-          const value = localStorage.getItem(key);
-          if (value) keysToKeep[key] = value;
-        });
-        localStorage.clear();
-        Object.entries(keysToKeep).forEach(([key, value]) => {
-          localStorage.setItem(key, value);
-        });
-        // Store new version
-        localStorage.setItem('appVersion', versionData.version);
-        // Force reload
-        window.location.reload();
-        return true;
-      } else if (!storedVersion) {
-        // First time, store version
-        localStorage.setItem('appVersion', versionData.version);
+      // Set reloading flag to prevent multiple reloads
+      isReloading = true;
+      
+      // Clear all caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
       }
+      
+      // Clear localStorage except essential items
+      const essentialKeys = ['walletConnected', 'walletType', 'userDisconnected'];
+      const keysToKeep = {};
+      essentialKeys.forEach(key => {
+        const value = localStorage.getItem(key);
+        if (value) keysToKeep[key] = value;
+      });
+      localStorage.clear();
+      Object.entries(keysToKeep).forEach(([key, value]) => {
+        localStorage.setItem(key, value);
+      });
+      
+      // Store new version BEFORE reload
+      localStorage.setItem('appVersion', versionData.version);
+      
+      // Small delay to ensure localStorage is written
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Force reload
+      window.location.reload();
+      return true;
     }
   } catch (error) {
     console.log('[Version Check] Error checking version:', error);
+    // Don't reload on error
   }
   return false;
 };
 
 export const registerServiceWorker = () => {
   if ('serviceWorker' in navigator) {
-    // Check version first
-    checkVersionAndReload();
+    // Don't check version immediately - wait for page to fully load
+    // This prevents race conditions with localStorage
     
     // Register immediately with cache-busting query parameter
     const serviceWorkerUrl = '/service-worker.js?v=' + Date.now();
@@ -142,15 +178,19 @@ export const registerServiceWorker = () => {
         navigator.serviceWorker.addEventListener('message', (event) => {
           if (event.data && event.data.type === 'SW_ACTIVATED') {
             console.log('[Service Worker] New version activated:', event.data.version);
-            // Check version and reload if needed
-            checkVersionAndReload();
+            // Check version and reload if needed (with delay to prevent loops)
+            setTimeout(() => {
+              checkVersionAndReload();
+            }, 1000);
           }
         });
         
-        // Periodic version check (every 60 seconds)
-        setInterval(() => {
-          checkVersionAndReload();
-        }, 60000);
+        // Periodic version check (every 60 seconds) - only after page is fully loaded
+        setTimeout(() => {
+          setInterval(() => {
+            checkVersionAndReload();
+          }, 60000);
+        }, 5000); // Wait 5 seconds before starting periodic checks
       })
       .catch((error) => {
         console.error('Service Worker registration failed:', error);
