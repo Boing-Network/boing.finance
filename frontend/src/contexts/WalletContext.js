@@ -244,13 +244,20 @@ export const WalletProvider = ({ children }) => {
     const providers = detectWalletProviders();
     let lastProvider = null;
 
+    // IMPORTANT: Always use the specific provider, never window.ethereum directly
+    // This prevents Phantom from intercepting the call and showing a popup
     if (lastWalletType === 'metamask' && providers.metamask) {
       lastProvider = providers.metamask;
     } else if (lastWalletType === 'coinbase' && providers.coinbase) {
       lastProvider = providers.coinbase;
-    } else if (typeof window !== 'undefined' && window.ethereum) {
-      // Fallback to window.ethereum
-      lastProvider = window.ethereum;
+    } else {
+      // If we don't have a specific provider match, don't try to reconnect
+      // This prevents Phantom from intercepting
+      console.log('[WalletContext] No matching wallet provider found for type:', lastWalletType);
+      // Clear invalid connection state
+      localStorage.removeItem('walletConnected');
+      localStorage.removeItem('walletType');
+      return;
     }
 
     if (!lastProvider) {
@@ -262,7 +269,8 @@ export const WalletProvider = ({ children }) => {
     }
 
     try {
-      // Use eth_accounts (silent, no prompt) - this should not trigger wallet popup
+      // Use eth_accounts (silent, no prompt) on the specific provider
+      // This avoids Phantom interception since we're using the direct provider reference
       const accounts = await lastProvider.request({ method: 'eth_accounts' });
       if (accounts.length > 0 && !userDisconnected) {
         const chainId = await lastProvider.request({ method: 'eth_chainId' });
@@ -329,28 +337,42 @@ export const WalletProvider = ({ children }) => {
   const detectWalletProviders = () => {
     const providers = {
       metamask: null,
-      coinbase: null
+      coinbase: null,
+      phantom: null
     };
+
+    // Check if Phantom is installed (Phantom can inject into window.ethereum)
+    const isPhantomInstalled = typeof window !== 'undefined' && (
+      window.phantom?.ethereum || 
+      (window.ethereum && window.ethereum.isPhantom)
+    );
 
     // Check for multiple providers first
     if (typeof window !== 'undefined' && window.ethereum && window.ethereum.providers) {
       window.ethereum.providers.forEach(provider => {
-        if (provider.isMetaMask && !provider.isCoinbaseWallet) {
+        if (provider.isMetaMask && !provider.isCoinbaseWallet && !provider.isPhantom) {
           providers.metamask = provider;
         }
         if (provider.isCoinbaseWallet) {
           providers.coinbase = provider;
         }
+        if (provider.isPhantom) {
+          providers.phantom = provider;
+        }
       });
     }
 
-    // Check for single provider
+    // Check for single provider (but avoid Phantom if we're looking for MetaMask/Coinbase)
     if (typeof window !== 'undefined' && window.ethereum) {
-      if (window.ethereum.isMetaMask && !window.ethereum.isCoinbaseWallet) {
+      // Only use window.ethereum directly if it's not Phantom
+      if (window.ethereum.isMetaMask && !window.ethereum.isCoinbaseWallet && !window.ethereum.isPhantom) {
         providers.metamask = window.ethereum;
       }
-      if (window.ethereum.isCoinbaseWallet) {
+      if (window.ethereum.isCoinbaseWallet && !window.ethereum.isPhantom) {
         providers.coinbase = window.ethereum;
+      }
+      if (window.ethereum.isPhantom) {
+        providers.phantom = window.ethereum;
       }
     }
 
