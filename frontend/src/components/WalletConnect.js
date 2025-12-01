@@ -9,13 +9,10 @@ const WalletConnect = () => {
     account,
     isConnected,
     isConnecting,
-    connectWallet,
     disconnectWallet,
-    forceFreshConnection,
     getCurrentNetwork,
     getAccountBalance,
-    walletType,
-    switchNetwork
+    walletType
   } = useWallet();
 
   const [showDropdown, setShowDropdown] = useState(false);

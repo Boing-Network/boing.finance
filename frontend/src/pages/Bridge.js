@@ -3,6 +3,9 @@ import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useNetwork } from '../hooks/useNetwork';
 import toast from 'react-hot-toast';
 import { Helmet } from 'react-helmet-async';
+import axios from 'axios';
+import { getApiUrl } from '../config';
+import TokenManagementModal from '../components/TokenManagementModal';
 
 // Add AnimatedBackground and BoingAstronaut components
 
