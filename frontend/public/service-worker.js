@@ -129,7 +129,29 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle static assets (JS, CSS, images) with stale-while-revalidate strategy
+  // Handle JavaScript files with network-first strategy (always get fresh JS)
+  if (url.pathname.endsWith('.js') && url.pathname.startsWith('/static/')) {
+    event.respondWith(
+      fetch(request, { cache: 'no-store' })
+        .then((response) => {
+          // Always use network response for JS files
+          return response;
+        })
+        .catch(() => {
+          // Network failed, try cache as fallback
+          return caches.match(request).then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            // Return error response
+            return new Response('Network error', { status: 503 });
+          });
+        })
+    );
+    return;
+  }
+
+  // Handle static assets (CSS, images) with stale-while-revalidate strategy
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
       // Always fetch in background to update cache
