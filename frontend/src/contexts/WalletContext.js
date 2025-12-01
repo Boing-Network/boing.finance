@@ -216,8 +216,8 @@ export const WalletProvider = ({ children }) => {
   }, [showErrorWithDebounce]);
 
   const checkWalletConnection = useCallback(async () => {
-    // Don't check if already connected and initialized
-    if (isConnected && account && isInitialized) {
+    // Don't check if already connected
+    if (isConnected && account) {
       console.log('[WalletContext] Already connected, skipping check');
       return;
     }
@@ -229,36 +229,50 @@ export const WalletProvider = ({ children }) => {
       return;
     }
 
+    // Check if wallet was previously connected
+    const wasConnected = localStorage.getItem('walletConnected') === 'true';
+    if (!wasConnected) {
+      console.log('[WalletContext] No previous connection found');
+      return;
+    }
+
     // Get the last used wallet provider
     const lastWalletType = localStorage.getItem('walletType');
-    const lastProvider = getWalletProvider(lastWalletType);
+    const providers = detectWalletProviders();
+    let lastProvider = null;
+
+    if (lastWalletType === 'metamask' && providers.metamask) {
+      lastProvider = providers.metamask;
+    } else if (lastWalletType === 'coinbase' && providers.coinbase) {
+      lastProvider = providers.coinbase;
+    } else if (typeof window !== 'undefined' && window.ethereum) {
+      // Fallback to window.ethereum
+      lastProvider = window.ethereum;
+    }
 
     if (!lastProvider) {
-      // Fallback to window.ethereum if no specific provider found
-      if (typeof window !== 'undefined' && window.ethereum) {
-        try {
-          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-          if (accounts.length > 0 && !userDisconnected) {
-            const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-            await connectWalletSilently(accounts[0], parseInt(chainId, 16), window.ethereum);
-          }
-        } catch (error) {
-          console.error('Error checking wallet connection:', error);
-        }
-      }
+      console.log('[WalletContext] No wallet provider available');
       return;
     }
 
     try {
+      // Use eth_accounts (silent, no prompt)
       const accounts = await lastProvider.request({ method: 'eth_accounts' });
       if (accounts.length > 0 && !userDisconnected) {
         const chainId = await lastProvider.request({ method: 'eth_chainId' });
+        console.log('[WalletContext] Reconnecting to wallet:', {
+          account: accounts[0],
+          chainId: parseInt(chainId, 16),
+          walletType: lastWalletType
+        });
         await connectWalletSilently(accounts[0], parseInt(chainId, 16), lastProvider);
+      } else {
+        console.log('[WalletContext] No accounts available');
       }
     } catch (error) {
-      console.error('Error checking wallet connection:', error);
+      console.error('[WalletContext] Error checking wallet connection:', error);
     }
-  }, [isConnected, account, userDisconnected, isInitialized]);
+  }, [isConnected, account, userDisconnected, connectWalletSilently]);
 
   // Update the useEffect to use the updated functions
   useEffect(() => {
