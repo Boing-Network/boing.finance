@@ -134,17 +134,19 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
 
   return (
     <div 
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50 p-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50 p-4 overflow-y-auto"
       onClick={handleOverlayClick}
-      style={{ zIndex: 9999 }}
+      style={{ zIndex: 9999, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
     >
       <div 
-        className="bg-theme-card rounded-lg shadow-xl max-w-md w-full border border-theme flex flex-col max-h-[90vh] relative"
-        onClick={(e) => e.stopPropagation()}
-        style={{ zIndex: 10000 }}
+        className="bg-theme-card rounded-lg shadow-xl max-w-md w-full border border-theme flex flex-col max-h-[90vh] my-auto relative"
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+        style={{ zIndex: 10000, margin: 'auto' }}
       >
         {/* Header - Fixed at top */}
-        <div className="flex items-center justify-between p-6 border-b border-theme flex-shrink-0 relative z-10 bg-theme-card rounded-t-lg">
+        <div className="flex items-center justify-between p-6 border-b border-theme flex-shrink-0 bg-theme-card rounded-t-lg sticky top-0 z-20">
           <h2 className="text-xl font-bold text-theme-primary">Select Wallet</h2>
           <button
             onClick={onClose}
