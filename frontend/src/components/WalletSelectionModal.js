@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useWallet } from '../contexts/WalletContext';
 import { XMarkIcon, CheckIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
@@ -130,23 +131,37 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
     };
   }, [isOpen, onClose]);
 
+  // Use portal to render modal at document body level
+  // This ensures it's above all other content and not affected by parent z-index
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div 
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50 p-4 overflow-y-auto"
+      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4"
       onClick={handleOverlayClick}
-      style={{ zIndex: 9999, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+      style={{ 
+        zIndex: 99999, 
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        right: 0, 
+        bottom: 0,
+        overflow: 'auto'
+      }}
     >
       <div 
-        className="bg-theme-card rounded-lg shadow-xl max-w-md w-full border border-theme flex flex-col max-h-[90vh] my-auto relative"
+        className="bg-theme-card rounded-lg shadow-xl max-w-md w-full border border-theme flex flex-col max-h-[90vh]"
         onClick={(e) => {
           e.stopPropagation();
         }}
-        style={{ zIndex: 10000, margin: 'auto' }}
+        style={{ 
+          zIndex: 100000,
+          position: 'relative',
+          margin: 'auto'
+        }}
       >
         {/* Header - Fixed at top */}
-        <div className="flex items-center justify-between p-6 border-b border-theme flex-shrink-0 bg-theme-card rounded-t-lg sticky top-0 z-20">
+        <div className="flex items-center justify-between p-6 border-b border-theme flex-shrink-0 bg-theme-card rounded-t-lg">
           <h2 className="text-xl font-bold text-theme-primary">Select Wallet</h2>
           <button
             onClick={onClose}
@@ -158,7 +173,7 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
         </div>
 
         {/* Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6 min-h-0">
           <div className="space-y-6">
             {/* Wallet Selection */}
             <div>
@@ -226,6 +241,9 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
       </div>
     </div>
   );
+
+  // Render modal using portal at document body level
+  return createPortal(modalContent, document.body);
 };
 
 export default WalletSelectionModal;
