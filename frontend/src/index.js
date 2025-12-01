@@ -11,61 +11,39 @@ if (process.env.NODE_ENV === 'production') {
   // Register service worker (version check happens inside with proper timing)
   registerServiceWorker();
   
-  // Only check version on initial page load, not on navigation
-  // Use a flag to track if this is the initial load
-  let isInitialLoad = true;
-  const initialLoadKey = 'appInitialLoad';
-  
-  // Check if this is truly the first load (not a navigation)
-  const wasInitialLoad = sessionStorage.getItem(initialLoadKey);
-  if (wasInitialLoad) {
-    isInitialLoad = false;
-  } else {
-    sessionStorage.setItem(initialLoadKey, 'true');
-  }
-  
-  // Only check version on initial load, not on navigation or manual refresh
-  if (isInitialLoad) {
-    window.addEventListener('load', () => {
-      // Wait longer to prevent unexpected reloads
-      setTimeout(async () => {
-        try {
-          const response = await fetch('/version.json?v=' + Date.now(), {
-            cache: 'no-store',
-            headers: {
-              'Cache-Control': 'no-cache, no-store, must-revalidate',
-              'Pragma': 'no-cache'
-            }
-          });
-          if (response.ok) {
-            const versionData = await response.json();
-            const storedVersion = localStorage.getItem('appVersion');
-            
-            // Only reload if versions are actually different AND this is truly a new deployment
-            // Don't reload on first visit or if versions match
-            if (storedVersion && storedVersion !== versionData.version) {
-              console.log('[App] New version detected, reloading...');
-              // Store new version before reload to prevent loop
-              localStorage.setItem('appVersion', versionData.version);
-              await new Promise(resolve => setTimeout(resolve, 100));
-              window.location.reload();
-            } else if (!storedVersion) {
-              // First time, just store version - don't reload
-              localStorage.setItem('appVersion', versionData.version);
-            }
+  // Only store version on initial load - don't auto-reload
+  // Auto-reload is disruptive to user experience
+  // Version checking for updates is handled by the service worker registration
+  window.addEventListener('load', () => {
+    setTimeout(async () => {
+      try {
+        const response = await fetch('/version.json?v=' + Date.now(), {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
           }
-        } catch (error) {
-          console.log('[App] Version check failed:', error);
-          // Don't reload on error
+        });
+        if (response.ok) {
+          const versionData = await response.json();
+          const storedVersion = localStorage.getItem('appVersion');
+          
+          // Only store version if not set - don't auto-reload
+          // Users can manually refresh if they want the latest version
+          if (!storedVersion) {
+            localStorage.setItem('appVersion', versionData.version);
+          } else if (storedVersion !== versionData.version) {
+            // Log that a new version is available but don't auto-reload
+            console.log('[App] New version available:', versionData.version, '(current:', storedVersion, ')');
+            // Optionally show a notification to user instead of auto-reloading
+            // The service worker will handle cache updates in the background
+          }
         }
-      }, 3000); // 3 second delay - only check on initial load after page is stable
-    });
-  }
-  
-  // Clear the initial load flag after a delay to allow for navigation
-  setTimeout(() => {
-    sessionStorage.removeItem(initialLoadKey);
-  }, 5000);
+      } catch (error) {
+        console.log('[App] Version check failed:', error);
+      }
+    }, 1000); // Short delay just to not block initial render
+  });
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
