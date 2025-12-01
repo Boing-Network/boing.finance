@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useWallet } from '../contexts/WalletContext';
-import { getSupportedNetworks } from '../config/networks';
 import { XMarkIcon, CheckIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
@@ -8,7 +7,6 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
   const { detectWalletProviders, connectWalletWithProvider } = useWallet();
   const [availableWallets, setAvailableWallets] = useState([]);
   const [selectedWallet, setSelectedWallet] = useState(null);
-  const [selectedNetwork, setSelectedNetwork] = useState(null);
   const [isConnecting, setIsConnecting] = useState(false);
 
   useEffect(() => {
@@ -78,23 +76,19 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
       return;
     }
 
-    if (!selectedNetwork) {
-      toast.error('Please select a network');
-      return;
-    }
-
     setIsConnecting(true);
     try {
+      // Connect with the selected wallet provider (no network selection - uses current network)
       const success = await connectWalletWithProvider(
         selectedWallet.provider,
         selectedWallet.id,
-        selectedNetwork.chainId
+        null // null means use current network
       );
 
       if (success) {
-        toast.success(`Connected to ${selectedNetwork.name} via ${selectedWallet.name}`);
+        toast.success(`Connected via ${selectedWallet.name}`);
         if (onWalletSelected) {
-          onWalletSelected(selectedWallet, selectedNetwork);
+          onWalletSelected(selectedWallet);
         }
         onClose();
       } else {
@@ -108,8 +102,6 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
     }
   };
 
-  const supportedNetworks = getSupportedNetworks();
-
   if (!isOpen) return null;
 
   return (
@@ -117,7 +109,7 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
       <div className="bg-theme-card rounded-lg shadow-xl max-w-md w-full mx-4 border border-theme">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-theme">
-          <h2 className="text-xl font-bold text-theme-primary">Select Wallet & Network</h2>
+          <h2 className="text-xl font-bold text-theme-primary">Select Wallet</h2>
           <button
             onClick={onClose}
             className="text-theme-tertiary hover:text-theme-primary transition-colors"
@@ -166,38 +158,8 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
             </div>
           </div>
 
-          {/* Network Selection */}
-          {selectedWallet && selectedWallet.available && (
-            <div>
-              <h3 className="text-sm font-semibold text-theme-secondary mb-3">Select Network</h3>
-              <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
-                {supportedNetworks.map((network) => (
-                  <button
-                    key={network.chainId}
-                    onClick={() => setSelectedNetwork(network)}
-                    className={`p-3 rounded-lg border-2 transition-all text-left ${
-                      selectedNetwork?.chainId === network.chainId
-                        ? 'border-blue-500 bg-blue-500/10'
-                        : 'border-theme hover:border-theme-primary'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium text-theme-primary text-sm">{network.name}</div>
-                        <div className="text-xs text-theme-tertiary">{network.symbol}</div>
-                      </div>
-                      {selectedNetwork?.chainId === network.chainId && (
-                        <CheckIcon className="w-4 h-4 text-blue-500" />
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Connect Button */}
-          {selectedWallet && selectedWallet.available && selectedNetwork && (
+          {selectedWallet && selectedWallet.available && (
             <button
               onClick={handleConnect}
               disabled={isConnecting}
@@ -209,7 +171,7 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
                   <span>Connecting...</span>
                 </>
               ) : (
-                <span>Connect to {selectedNetwork.name}</span>
+                <span>Connect with {selectedWallet.name}</span>
               )}
             </button>
           )}

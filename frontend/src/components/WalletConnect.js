@@ -126,16 +126,19 @@ const WalletConnect = () => {
                 </div>
               </div>
 
-              {/* Switch Wallet/Network Button */}
+              {/* Switch Wallet Button */}
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setShowDropdown(false);
-                  setShowWalletModal(true);
+                  setTimeout(() => {
+                    setShowWalletModal(true);
+                  }, 100);
                 }}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2 mb-2"
               >
                 <ArrowPathIcon className="w-4 h-4" />
-                <span>Switch Wallet/Network</span>
+                <span>Switch Wallet</span>
               </button>
 
               {/* Disconnect Button */}
@@ -173,9 +176,12 @@ const WalletConnect = () => {
       
       <WalletSelectionModal
         isOpen={showWalletModal}
-        onClose={() => setShowWalletModal(false)}
-        onWalletSelected={(wallet, network) => {
-          console.log('Wallet selected:', wallet, network);
+        onClose={() => {
+          setShowWalletModal(false);
+        }}
+        onWalletSelected={(wallet) => {
+          console.log('Wallet selected:', wallet);
+          setShowWalletModal(false);
         }}
       />
     </>

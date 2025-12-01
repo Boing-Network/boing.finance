@@ -274,19 +274,32 @@ export const WalletProvider = ({ children }) => {
     }
   }, [isConnected, account, userDisconnected, connectWalletSilently]);
 
-  // Update the useEffect to use the updated functions
+  // Initialize wallet connection on mount
   useEffect(() => {
     if (isInitialized) return;
+    
     const initWallet = async () => {
+      console.log('[WalletContext] Initializing wallet connection...');
       const wasDisconnected = localStorage.getItem('userDisconnected') === 'true';
       setUserDisconnected(wasDisconnected);
+      
+      // Setup event listeners first
+      setupEventListeners();
+      
+      // Then check for existing connection - only if not disconnected
       if (!wasDisconnected) {
+        // Wait longer to ensure all wallet providers are fully loaded
+        await new Promise(resolve => setTimeout(resolve, 500));
         await checkWalletConnection();
       }
-      setupEventListeners();
+      
       setIsInitialized(true);
+      console.log('[WalletContext] Wallet initialization complete');
     };
+    
+    // Only initialize once
     initWallet();
+    
     return () => {
       if (typeof window !== 'undefined' && window.ethereum) {
         window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
