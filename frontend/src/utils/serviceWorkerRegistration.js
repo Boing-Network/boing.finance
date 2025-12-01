@@ -133,55 +133,78 @@ export const registerServiceWorker = () => {
           checkForUpdates();
         }, 30000);
 
-        // Handle service worker updates
+        // Handle service worker updates - with reload prevention
+        let isUpdating = false;
         registration.addEventListener('updatefound', () => {
+          if (isUpdating) {
+            console.log('[Service Worker] Update already in progress, skipping...');
+            return;
+          }
+          
           const newWorker = registration.installing;
           if (newWorker) {
+            isUpdating = true;
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed') {
                 if (navigator.serviceWorker.controller) {
-                  // New service worker available - force reload immediately
-                  console.log('New service worker installed, reloading...');
-                  // Unregister old service worker and reload
-                  navigator.serviceWorker.getRegistrations().then((registrations) => {
-                    registrations.forEach((reg) => {
-                      if (reg !== registration) {
-                        reg.unregister();
-                      }
-                    });
-                    // Force reload with cache bypass
-                    window.location.reload();
-                  });
+                  // New service worker available - but don't reload immediately
+                  // Let the version check handle it to prevent loops
+                  console.log('[Service Worker] New service worker installed, waiting for version check...');
+                  // Don't reload here - let version check handle it
+                  isUpdating = false;
                 } else {
                   // First time installation
-                  console.log('Service Worker installed for the first time');
+                  console.log('[Service Worker] Installed for the first time');
                   // Activate immediately
                   newWorker.postMessage({ type: 'SKIP_WAITING' });
+                  isUpdating = false;
                 }
+              } else if (newWorker.state === 'activated') {
+                isUpdating = false;
               }
             });
           }
         });
 
-        // Listen for controller change (service worker updated)
+        // Listen for controller change (service worker updated) - with reload prevention
+        let controllerChangeHandled = false;
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          console.log('Service worker controller changed, reloading...');
-          // Check version before reloading
-          checkVersionAndReload().then((reloaded) => {
-            if (!reloaded) {
-              window.location.reload();
-            }
-          });
+          if (controllerChangeHandled || isReloading) {
+            return;
+          }
+          
+          console.log('[Service Worker] Controller changed');
+          controllerChangeHandled = true;
+          
+          // Wait a bit before checking version to prevent immediate loops
+          setTimeout(() => {
+            checkVersionAndReload().then((reloaded) => {
+              if (!reloaded) {
+                // Only reload if version check didn't already trigger a reload
+                // and we haven't reloaded recently
+                const lastReload = sessionStorage.getItem('lastReload');
+                const now = Date.now();
+                if (!lastReload || (now - parseInt(lastReload)) > 5000) {
+                  sessionStorage.setItem('lastReload', now.toString());
+                  window.location.reload();
+                }
+              }
+              controllerChangeHandled = false;
+            });
+          }, 2000); // 2 second delay
         });
         
-        // Listen for messages from service worker
+        // Listen for messages from service worker - with reload prevention
         navigator.serviceWorker.addEventListener('message', (event) => {
           if (event.data && event.data.type === 'SW_ACTIVATED') {
             console.log('[Service Worker] New version activated:', event.data.version);
-            // Check version and reload if needed (with delay to prevent loops)
+            // Don't immediately check version - wait longer to prevent loops
+            // The periodic check will handle it
             setTimeout(() => {
-              checkVersionAndReload();
-            }, 1000);
+              if (!isReloading) {
+                checkVersionAndReload();
+              }
+            }, 5000); // 5 second delay
           }
         });
         

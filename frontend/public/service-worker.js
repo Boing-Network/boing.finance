@@ -56,11 +56,11 @@ self.addEventListener('activate', (event) => {
       // Force all clients to use the new service worker immediately
       await self.clients.claim();
       
-      // Send message to all clients to reload if needed
+      // Only send message if this is actually a new version (not just activation)
+      // Check if we have a previous version stored
       const clients = await self.clients.matchAll({ includeUncontrolled: true });
-      clients.forEach(client => {
-        client.postMessage({ type: 'SW_ACTIVATED', version: CACHE_VERSION });
-      });
+      // Don't send message immediately - let the client check version first
+      // This prevents reload loops
       
       console.log('[Service Worker] Activated and claimed all clients');
     })()
