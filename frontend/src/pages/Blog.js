@@ -9,6 +9,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import OptimizedImage from '../components/OptimizedImage';
 
 const Blog = () => {
+  // eslint-disable-next-line no-unused-vars
   const { t } = useTranslation();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);

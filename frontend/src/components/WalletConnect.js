@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useWallet } from '../contexts/WalletContext';
-import { ChevronDownIcon, WalletIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon, WalletIcon, XMarkIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
+import WalletSelectionModal from './WalletSelectionModal';
 
 const WalletConnect = () => {
   const {
@@ -13,10 +14,12 @@ const WalletConnect = () => {
     forceFreshConnection,
     getCurrentNetwork,
     getAccountBalance,
-    walletType
+    walletType,
+    switchNetwork
   } = useWallet();
 
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showWalletModal, setShowWalletModal] = useState(false);
   const [balance, setBalance] = useState(null);
   const [balanceLoading, setBalanceLoading] = useState(false);
 
@@ -38,17 +41,9 @@ const WalletConnect = () => {
     return () => { isMounted = false; };
   }, [isConnected, account, getAccountBalance]);
 
-  const handleConnect = async () => {
-    // Check if user was previously disconnected
-    const wasDisconnected = localStorage.getItem('userDisconnected') === 'true';
-    
-    if (wasDisconnected) {
-      // Use force fresh connection to ensure approval dialog
-      await forceFreshConnection();
-    } else {
-      // Use normal connection
-      await connectWallet();
-    }
+  const handleConnect = () => {
+    // Show wallet selection modal
+    setShowWalletModal(true);
   };
 
   const handleDisconnect = () => {
@@ -134,6 +129,18 @@ const WalletConnect = () => {
                 </div>
               </div>
 
+              {/* Switch Wallet/Network Button */}
+              <button
+                onClick={() => {
+                  setShowDropdown(false);
+                  setShowWalletModal(true);
+                }}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2 mb-2"
+              >
+                <ArrowPathIcon className="w-4 h-4" />
+                <span>Switch Wallet/Network</span>
+              </button>
+
               {/* Disconnect Button */}
               <button
                 onClick={handleDisconnect}
@@ -158,13 +165,23 @@ const WalletConnect = () => {
   }
 
   return (
-    <button
-      onClick={handleConnect}
-      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
-    >
-      <WalletIcon className="w-4 h-4" />
-      <span>Connect Wallet</span>
-    </button>
+    <>
+      <button
+        onClick={handleConnect}
+        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+      >
+        <WalletIcon className="w-4 h-4" />
+        <span>Connect Wallet</span>
+      </button>
+      
+      <WalletSelectionModal
+        isOpen={showWalletModal}
+        onClose={() => setShowWalletModal(false)}
+        onWalletSelected={(wallet, network) => {
+          console.log('Wallet selected:', wallet, network);
+        }}
+      />
+    </>
   );
 };
 

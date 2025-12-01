@@ -19,6 +19,7 @@ const ExternalDEXQuotes = ({
     if (isVisible && tokenIn && tokenOut && amountIn && chainId) {
       fetchQuotes();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVisible, tokenIn, tokenOut, amountIn, chainId]);
 
   const fetchQuotes = async () => {

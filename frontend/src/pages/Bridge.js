@@ -1,14 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useNetwork } from '../hooks/useNetwork';
-import TokenManagementModal from '../components/TokenManagementModal';
-import { InfoTooltip, WarningTooltip, HelpTooltip } from '../components/Tooltip';
 import toast from 'react-hot-toast';
-import axios from 'axios';
-import { getApiUrl } from '../config.js';
-import { useQuery } from '@tanstack/react-query';
-import config from '../config';
-import { useWallet } from '../contexts/WalletContext';
 import { Helmet } from 'react-helmet-async';
 
 // Add AnimatedBackground and BoingAstronaut components
@@ -252,6 +245,7 @@ export default function Bridge() {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const getStatusIcon = (status) => {
     switch (status) {
       case 'completed':

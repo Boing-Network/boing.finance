@@ -3,29 +3,13 @@ import { ethers } from 'ethers';
 import { useWallet } from '../contexts/WalletContext';
 import { NETWORKS } from '../config/networks';
 import TokenScanner from '../services/tokenScanner';
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import config from '../config';
-import TokenManagementModal from '../components/TokenManagementModal';
-import NetworkSelector from '../components/NetworkSelector';
-import { InfoTooltip, WarningTooltip, HelpTooltip } from '../components/Tooltip';
 import { Helmet } from 'react-helmet-async';
 import TokenDetailsModal from '../components/TokenDetailsModal';
-import TokenComparison from '../components/TokenComparison';
 import TokenFilters from '../components/TokenFilters';
 import { tokenFavorites } from '../utils/tokenFavorites';
-import coingeckoService from '../services/coingeckoService';
-import { debounce } from '../utils/debounce';
 
 // Initialize token scanner
 const tokenScanner = new TokenScanner();
-
-// Helper function to get provider for a specific chain
-const getProvider = (chainId) => {
-  const network = NETWORKS[chainId];
-  if (!network) return null;
-  return new ethers.JsonRpcProvider(network.rpcUrl);
-};
 
 const Tokens = () => {
   const { chainId, switchNetwork } = useWallet();

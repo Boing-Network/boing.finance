@@ -3,7 +3,6 @@ import { Helmet } from 'react-helmet-async';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useWallet } from '../contexts/WalletContext';
 import toast from 'react-hot-toast';
-import config from '../config';
 import { ethers } from 'ethers';
 import DEXFactoryABI from '../artifacts/DEXFactory.json';
 import { getContractAddress, CONTRACTS } from '../config/contracts';

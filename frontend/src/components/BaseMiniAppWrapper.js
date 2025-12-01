@@ -187,6 +187,7 @@ const BaseMiniAppWrapper = ({ children }) => {
 
 // Hook to access Farcaster MiniApp instance
 export const useFarcasterMiniApp = () => {
+  // eslint-disable-next-line no-unused-vars
   const [sdk, setSdk] = useState(null);
   const [isFarcasterApp, setIsFarcasterApp] = useState(false);
 

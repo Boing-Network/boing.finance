@@ -6,6 +6,7 @@ import { notificationService } from '../utils/notifications';
 import toast from 'react-hot-toast';
 
 const NotificationSettings = ({ onClose }) => {
+  // eslint-disable-next-line no-unused-vars
   const modalRef = useRef(null);
   const [permission, setPermission] = useState('default');
   const [settings, setSettings] = useState({

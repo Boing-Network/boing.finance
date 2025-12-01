@@ -22,7 +22,9 @@ const TokenComparison = ({ tokens = [], onClose }) => {
         selectedTokens.map(async (token) => {
           try {
             // Fetch price data from CoinGecko if available
+            // eslint-disable-next-line no-unused-vars
             let priceData = null;
+            // eslint-disable-next-line no-unused-vars
             let marketData = null;
             
             // Try to find token on CoinGecko (this would need token mapping)
@@ -62,6 +64,7 @@ const TokenComparison = ({ tokens = [], onClose }) => {
     }
   }, [tokenDetails]);
 
+  // eslint-disable-next-line no-unused-vars
   const addToken = (token) => {
     if (selectedTokens.length >= 3) {
       toast.error('Maximum 3 tokens can be compared at once');

@@ -4,7 +4,6 @@
 import React, { useState, useEffect } from 'react';
 import { deploymentHistory } from '../utils/deploymentHistory';
 import { getNetworkByChainId } from '../config/networks';
-import { ethers } from 'ethers';
 
 const DeploymentHistory = ({ onSelectDeployment, onClose }) => {
   const [history, setHistory] = useState([]);

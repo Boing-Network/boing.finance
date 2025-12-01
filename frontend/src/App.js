@@ -1334,8 +1334,8 @@ function FeatureCard({ title, icon, description, comingSoon }) {
       title={comingSoon ? 'This feature will be available after mainnet launch.' : ''}
     >
       <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-      <div className="relative z-10">
-        <div className="flex items-center mb-4">
+      <div className="relative z-10 text-center">
+        <div className="flex items-center justify-center mb-4">
           <span className="text-2xl mr-3 text-cyan-400 group-hover:text-cyan-300 transition-colors duration-300 animate-pulse">{icon}</span>
           <h3 className="text-lg font-semibold transition-colors duration-300 flex items-center" style={{ color: 'var(--text-primary)' }}>
             {title}

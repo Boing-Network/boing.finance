@@ -4,7 +4,7 @@ import { useWallet } from '../contexts/WalletContext';
 import { Helmet } from 'react-helmet-async';
 import { ethers } from 'ethers';
 import { useBlockchainPools } from '../hooks/useBlockchainPools';
-import { getUserLiquidityPositions, getUserCreatedPools } from '../services/poolService';
+// getUserLiquidityPositions and getUserCreatedPools are not used - using blockchain hooks instead
 import externalDexService from '../services/externalDexService';
 import portfolioService from '../services/portfolioService';
 import { NETWORKS } from '../config/networks';
@@ -18,6 +18,7 @@ export default function Portfolio() {
   console.log('[Portfolio] Component rendering at:', new Date().toISOString());
   const { account, chainId } = useWallet();
   const [selectedNetwork, setSelectedNetwork] = useState('all');
+  // eslint-disable-next-line no-unused-vars
   const [activeTab, setActiveTab] = useState('overview'); // overview, tokens, pools
   const [trackedNetworks, setTrackedNetworks] = useState([chainId || 11155111]);
 
@@ -30,7 +31,9 @@ export default function Portfolio() {
   const blockchainError = blockchainPoolsHook?.error || null;
   const getBlockchainUserPositions = blockchainPoolsHook?.getUserPositions || (async () => []);
   const getBlockchainCreatedPools = blockchainPoolsHook?.getUserCreatedPools || (async () => []);
+  // eslint-disable-next-line no-unused-vars
   const getBlockchainPortfolioValue = blockchainPoolsHook?.getUserPortfolioValue || (async () => 0);
+  // eslint-disable-next-line no-unused-vars
   const getBlockchainSepoliaPools = blockchainPoolsHook?.getAllSepoliaPools || (async () => []);
 
   // Fetch user's liquidity positions from blockchain - React Query v5 API

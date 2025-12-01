@@ -14,6 +14,7 @@ const OptimizedImage = ({
 }) => {
   const [imageSrc, setImageSrc] = useState(placeholder || src);
   const [isLoaded, setIsLoaded] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [hasError, setHasError] = useState(false);
   const imgRef = useRef(null);
 

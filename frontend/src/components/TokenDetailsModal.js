@@ -10,18 +10,17 @@ import { tokenFavorites } from '../utils/tokenFavorites';
 import { getNetworkByChainId } from '../config/networks';
 import toast from 'react-hot-toast';
 import LoadingSpinner from './LoadingSpinner';
-import OptimizedImage from './OptimizedImage';
 import ShareTokenModal from './ShareTokenModal';
-import SecurityScanner from './SecurityScanner';
-import { addToWatchlist, isInWatchlist, removeFromWatchlist } from '../utils/tokenWatchlist';
 
 const TokenDetailsModal = ({ token, isOpen, onClose, network }) => {
   const [isFavorite, setIsFavorite] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [priceData, setPriceData] = useState(null);
   const [holderCount, setHolderCount] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
   const [showShareModal, setShowShareModal] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [inWatchlist, setInWatchlist] = useState(false);
 
   // Get network name for CoinGecko

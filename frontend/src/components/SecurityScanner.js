@@ -1,9 +1,8 @@
 // Advanced Security Scanner Component
 // Automated security audit and vulnerability detection for tokens
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ethers } from 'ethers';
-import { useQuery } from '@tanstack/react-query';
 import { getNetworkByChainId } from '../config/networks';
 import LoadingSpinner from './LoadingSpinner';
 import toast from 'react-hot-toast';
