@@ -236,6 +236,9 @@ export const WalletProvider = ({ children }) => {
       return;
     }
 
+    // Wait a bit more to ensure wallet providers are fully initialized
+    await new Promise(resolve => setTimeout(resolve, 300));
+
     // Get the last used wallet provider
     const lastWalletType = localStorage.getItem('walletType');
     const providers = detectWalletProviders();
@@ -252,25 +255,34 @@ export const WalletProvider = ({ children }) => {
 
     if (!lastProvider) {
       console.log('[WalletContext] No wallet provider available');
+      // Clear invalid connection state
+      localStorage.removeItem('walletConnected');
+      localStorage.removeItem('walletType');
       return;
     }
 
     try {
-      // Use eth_accounts (silent, no prompt)
+      // Use eth_accounts (silent, no prompt) - this should not trigger wallet popup
       const accounts = await lastProvider.request({ method: 'eth_accounts' });
       if (accounts.length > 0 && !userDisconnected) {
         const chainId = await lastProvider.request({ method: 'eth_chainId' });
-        console.log('[WalletContext] Reconnecting to wallet:', {
+        console.log('[WalletContext] Reconnecting to wallet silently:', {
           account: accounts[0],
           chainId: parseInt(chainId, 16),
           walletType: lastWalletType
         });
         await connectWalletSilently(accounts[0], parseInt(chainId, 16), lastProvider);
       } else {
-        console.log('[WalletContext] No accounts available');
+        console.log('[WalletContext] No accounts available - clearing connection state');
+        // Clear connection state if no accounts
+        localStorage.removeItem('walletConnected');
+        localStorage.removeItem('walletType');
       }
     } catch (error) {
       console.error('[WalletContext] Error checking wallet connection:', error);
+      // Clear connection state on error
+      localStorage.removeItem('walletConnected');
+      localStorage.removeItem('walletType');
     }
   }, [isConnected, account, userDisconnected, connectWalletSilently]);
 
@@ -289,12 +301,17 @@ export const WalletProvider = ({ children }) => {
       // Then check for existing connection - only if not disconnected
       if (!wasDisconnected) {
         // Wait longer to ensure all wallet providers are fully loaded
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // This prevents the wallet selection prompt from appearing
+        await new Promise(resolve => setTimeout(resolve, 800));
         await checkWalletConnection();
       }
       
       setIsInitialized(true);
-      console.log('[WalletContext] Wallet initialization complete');
+      console.log('[WalletContext] Wallet initialization complete', {
+        isConnected,
+        account,
+        wasDisconnected
+      });
     };
     
     // Only initialize once

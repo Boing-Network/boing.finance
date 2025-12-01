@@ -55,7 +55,14 @@ self.addEventListener('activate', (event) => {
   self.skipWaiting();
 });
 
-// Fetch event - serve from cache, fallback to network
+// Listen for skip waiting message
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+// Fetch event - network-first strategy for HTML, cache-first for static assets
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -65,10 +72,32 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Handle HTML files with network-first strategy (always get fresh HTML)
+  if (request.headers.get('accept')?.includes('text/html') || url.pathname === '/' || url.pathname.endsWith('.html')) {
+    event.respondWith(
+      fetch(request, { cache: 'no-store' })
+        .then((response) => {
+          // Always use network response for HTML
+          return response;
+        })
+        .catch(() => {
+          // Network failed, try cache as fallback
+          return caches.match(request).then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            // Return index.html as last resort
+            return caches.match('/index.html');
+          });
+        })
+    );
+    return;
+  }
+
   // Handle API requests with network-first strategy
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
-      fetch(request)
+      fetch(request, { cache: 'no-store' })
         .then((response) => {
           // Clone the response
           const responseToCache = response.clone();
@@ -100,13 +129,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle static assets with cache-first strategy
+  // Handle static assets (JS, CSS, images) with stale-while-revalidate strategy
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(request).then((response) => {
+      // Always fetch in background to update cache
+      const fetchPromise = fetch(request, { cache: 'no-cache' }).then((response) => {
         // Don't cache non-GET requests or non-successful responses
         if (request.method !== 'GET' || !response || response.status !== 200) {
           return response;
@@ -117,7 +144,13 @@ self.addEventListener('fetch', (event) => {
           cache.put(request, responseToCache);
         });
         return response;
+      }).catch(() => {
+        // Network failed, return cached if available
+        return cachedResponse;
       });
+
+      // Return cached immediately if available, otherwise wait for network
+      return cachedResponse || fetchPromise;
     })
   );
 });
