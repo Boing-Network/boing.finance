@@ -8,13 +8,14 @@ import App from './App';
 import { registerServiceWorker } from './utils/serviceWorkerRegistration';
 
 if (process.env.NODE_ENV === 'production') {
-  // Register service worker (version check happens inside with proper timing)
+  // Register service worker - NO AUTO RELOAD
+  // Service worker will update caches in background
   registerServiceWorker();
   
-  // Only store version on initial load - don't auto-reload
-  // Auto-reload is disruptive to user experience
-  // Version checking for updates is handled by the service worker registration
+  // Store version on load - NO AUTO RELOAD
+  // This is just for tracking, not for triggering reloads
   window.addEventListener('load', () => {
+    // Use a longer delay to ensure page is fully loaded
     setTimeout(async () => {
       try {
         const response = await fetch('/version.json?v=' + Date.now(), {
@@ -28,21 +29,20 @@ if (process.env.NODE_ENV === 'production') {
           const versionData = await response.json();
           const storedVersion = localStorage.getItem('appVersion');
           
-          // Only store version if not set - don't auto-reload
-          // Users can manually refresh if they want the latest version
+          // Store version if not set
           if (!storedVersion) {
             localStorage.setItem('appVersion', versionData.version);
           } else if (storedVersion !== versionData.version) {
-            // Log that a new version is available but don't auto-reload
-            console.log('[App] New version available:', versionData.version, '(current:', storedVersion, ')');
-            // Optionally show a notification to user instead of auto-reloading
-            // The service worker will handle cache updates in the background
+            // Update stored version - NO AUTO RELOAD
+            localStorage.setItem('appVersion', versionData.version);
+            console.log('[App] Version updated in localStorage:', versionData.version);
+            // Service worker handles cache updates in background
           }
         }
       } catch (error) {
         console.log('[App] Version check failed:', error);
       }
-    }, 1000); // Short delay just to not block initial render
+    }, 2000); // 2 second delay to ensure page is stable
   });
 }
 

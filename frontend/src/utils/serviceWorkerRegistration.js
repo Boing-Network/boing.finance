@@ -6,19 +6,15 @@ let isReloading = false;
 let lastVersionCheck = 0;
 const VERSION_CHECK_COOLDOWN = 2000; // 2 seconds cooldown between checks
 
-// Check for version updates and force reload if needed
-const checkVersionAndReload = async (forceCheck = false) => {
+// Check for version updates - NO AUTO RELOAD
+// Only logs when new version is available - user can manually refresh
+const checkVersion = async (forceCheck = false) => {
   // Prevent multiple simultaneous checks
   const now = Date.now();
   if (!forceCheck && (now - lastVersionCheck < VERSION_CHECK_COOLDOWN)) {
     return false;
   }
   lastVersionCheck = now;
-
-  // Prevent reload if already reloading
-  if (isReloading) {
-    return false;
-  }
 
   try {
     const response = await fetch('/version.json?v=' + Date.now(), {
@@ -30,58 +26,29 @@ const checkVersionAndReload = async (forceCheck = false) => {
     });
     
     if (!response.ok) {
-      // If version.json doesn't exist or fails, don't reload
       return false;
     }
 
     const versionData = await response.json();
     const storedVersion = localStorage.getItem('appVersion');
     
-    // If no stored version, just store it and return (first time)
+    // If no stored version, just store it (first time)
     if (!storedVersion) {
       localStorage.setItem('appVersion', versionData.version);
       return false;
     }
     
-    // Only reload if versions are actually different
+    // If versions differ, just log it - NO AUTO RELOAD
     if (storedVersion !== versionData.version) {
-      console.log('[Version Check] New version detected:', versionData.version);
-      console.log('[Version Check] Old version:', storedVersion);
-      
-      // Set reloading flag to prevent multiple reloads
-      isReloading = true;
-      
-      // Clear all caches
-      if ('caches' in window) {
-        const cacheNames = await caches.keys();
-        await Promise.all(cacheNames.map(name => caches.delete(name)));
-      }
-      
-      // Clear localStorage except essential items
-      const essentialKeys = ['walletConnected', 'walletType', 'userDisconnected'];
-      const keysToKeep = {};
-      essentialKeys.forEach(key => {
-        const value = localStorage.getItem(key);
-        if (value) keysToKeep[key] = value;
-      });
-      localStorage.clear();
-      Object.entries(keysToKeep).forEach(([key, value]) => {
-        localStorage.setItem(key, value);
-      });
-      
-      // Store new version BEFORE reload
+      console.log('[Version Check] New version available:', versionData.version, '(current:', storedVersion, ')');
+      console.log('[Version Check] User can manually refresh to get the latest version');
+      // Update stored version so we don't keep logging
       localStorage.setItem('appVersion', versionData.version);
-      
-      // Small delay to ensure localStorage is written
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // Force reload
-      window.location.reload();
+      // Service worker will handle cache updates in background
       return true;
     }
   } catch (error) {
     console.log('[Version Check] Error checking version:', error);
-    // Don't reload on error
   }
   return false;
 };
@@ -166,54 +133,41 @@ export const registerServiceWorker = () => {
           }
         });
 
-        // Listen for controller change (service worker updated) - with reload prevention
+        // Listen for controller change (service worker updated) - NO AUTO RELOAD
         let controllerChangeHandled = false;
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (controllerChangeHandled || isReloading) {
+          if (controllerChangeHandled) {
             return;
           }
           
-          console.log('[Service Worker] Controller changed');
+          console.log('[Service Worker] Controller changed - new service worker active');
           controllerChangeHandled = true;
           
-          // Wait a bit before checking version to prevent immediate loops
+          // Just log - don't reload
+          // Service worker updates happen in background, no need to reload
           setTimeout(() => {
-            checkVersionAndReload().then((reloaded) => {
-              if (!reloaded) {
-                // Only reload if version check didn't already trigger a reload
-                // and we haven't reloaded recently
-                const lastReload = sessionStorage.getItem('lastReload');
-                const now = Date.now();
-                if (!lastReload || (now - parseInt(lastReload)) > 5000) {
-                  sessionStorage.setItem('lastReload', now.toString());
-                  window.location.reload();
-                }
-              }
-              controllerChangeHandled = false;
-            });
-          }, 2000); // 2 second delay
+            controllerChangeHandled = false;
+          }, 1000);
         });
         
-        // Listen for messages from service worker - with reload prevention
+        // Listen for messages from service worker - NO AUTO RELOAD
         navigator.serviceWorker.addEventListener('message', (event) => {
           if (event.data && event.data.type === 'SW_ACTIVATED') {
             console.log('[Service Worker] New version activated:', event.data.version);
-            // Don't immediately check version - wait longer to prevent loops
-            // The periodic check will handle it
+            // Just check version (logs only) - no reload
             setTimeout(() => {
-              if (!isReloading) {
-                checkVersionAndReload();
-              }
-            }, 5000); // 5 second delay
+              checkVersion();
+            }, 2000); // 2 second delay
           }
         });
         
-        // Periodic version check (every 60 seconds) - only after page is fully loaded
+        // Periodic version check (every 60 seconds) - NO AUTO RELOAD
+        // Only logs when new version is available
         setTimeout(() => {
           setInterval(() => {
-            checkVersionAndReload();
+            checkVersion();
           }, 60000);
-        }, 5000); // Wait 5 seconds before starting periodic checks
+        }, 10000); // Wait 10 seconds before starting periodic checks
       })
       .catch((error) => {
         console.error('Service Worker registration failed:', error);
