@@ -144,14 +144,13 @@ function AppContent() {
 
             {/* Desktop Navigation - Show on large screens and above */}
             <div className="hidden lg:flex items-center justify-center flex-1">
-              <nav className="flex items-center space-x-4 xl:space-x-6">
+              <nav className="flex items-center space-x-1 xl:space-x-2">
                 {/* Home - Solo */}
                 <button
                   onClick={() => window.location.href = memoizedNavigation.home.href}
-                  className="px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2"
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 hover:bg-cyan-500/10"
                   style={{ 
                     color: 'var(--text-secondary)',
-                    ':hover': { color: 'var(--text-primary)' }
                   }}
                   onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
                   onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
@@ -202,26 +201,31 @@ function AppContent() {
             </div>
 
             {/* Desktop Wallet Controls - Show on large screens and above */}
-            <div className="hidden lg:flex items-center space-x-3 xl:space-x-4 flex-shrink-0">
-              {/* Language Selector */}
-              <LanguageSelector />
-              {/* Theme Toggle */}
-              <ThemeToggle />
-              {/* History Button */}
-              <button
-                onClick={() => setHistoryModalOpen(true)}
-                className="p-2 rounded-md transition-colors"
-                style={{ color: 'var(--text-secondary)' }}
-                onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
-                onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-                aria-label="View transaction history"
-              >
-                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </button>
-              <NetworkSelector />
-              <WalletConnect />
+            <div className="hidden lg:flex items-center flex-shrink-0">
+              {/* Settings Group */}
+              <div className="flex items-center space-x-1 mr-4 pl-4 border-l" style={{ borderColor: 'var(--border-color)' }}>
+                <LanguageSelector />
+                <ThemeToggle />
+                <button
+                  onClick={() => setHistoryModalOpen(true)}
+                  className="p-2 rounded-md transition-all duration-200 hover:bg-cyan-500/10"
+                  style={{ color: 'var(--text-secondary)' }}
+                  onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+                  onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+                  aria-label="View transaction history"
+                  title="Transaction History"
+                >
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </button>
+              </div>
+              
+              {/* Wallet Group */}
+              <div className="flex items-center space-x-2">
+                <NetworkSelector />
+                <WalletConnect />
+              </div>
             </div>
 
             {/* Medium Screen Navigation - Show on medium screens only (md to lg) */}
@@ -269,20 +273,28 @@ function AppContent() {
                 />
               </nav>
               {/* Compact Wallet Controls */}
-              <div className="flex items-center space-x-2">
-                <LanguageSelector />
-                <ThemeToggle />
-                <button
-                  onClick={() => setHistoryModalOpen(true)}
-                  className="text-theme-secondary hover:text-theme-primary p-1.5 rounded-md transition-colors"
-                  aria-label="View transaction history"
-                >
-                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </button>
-                <NetworkSelector />
-                <WalletConnect />
+              <div className="flex items-center space-x-1.5">
+                <div className="flex items-center space-x-1 pr-2 border-r" style={{ borderColor: 'var(--border-color)' }}>
+                  <LanguageSelector />
+                  <ThemeToggle />
+                  <button
+                    onClick={() => setHistoryModalOpen(true)}
+                    className="p-1.5 rounded-md transition-all duration-200 hover:bg-cyan-500/10"
+                    style={{ color: 'var(--text-secondary)' }}
+                    onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+                    onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+                    aria-label="View transaction history"
+                    title="Transaction History"
+                  >
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </button>
+                </div>
+                <div className="flex items-center space-x-1.5">
+                  <NetworkSelector />
+                  <WalletConnect />
+                </div>
               </div>
             </div>
 
@@ -1370,7 +1382,7 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
       <button
         onClick={onToggle}
         onBlur={() => setTimeout(onClose, 150)}
-        className="px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1 group"
+        className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-1.5 group hover:bg-cyan-500/10"
         style={{ color: 'var(--text-secondary)' }}
         onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
         onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
@@ -1386,11 +1398,12 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
         </svg>
       </button>
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-48 backdrop-blur-sm rounded-lg shadow-xl z-50 animate-in slide-in-from-top-2 duration-200" style={{
+        <div className="absolute top-full left-0 mt-2 w-52 backdrop-blur-sm rounded-xl shadow-xl z-50 animate-in slide-in-from-top-2 duration-200" style={{
           backgroundColor: 'var(--bg-card)',
-          border: '1px solid var(--border-color)'
+          border: '1px solid var(--border-color)',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
         }}>
-          <div className="py-1">
+          <div className="py-1.5">
             {items.map((item) => {
               // Explicit boolean checks with logging
               const isComingSoon = Boolean(item.comingSoon);
@@ -1419,20 +1432,18 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
                       console.log(`[DropdownMenu] ${item.name} is disabled (comingSoon: ${isComingSoon}, !isAvailable: ${!isAvailable})`);
                     }
                   }}
-                  className={`w-full text-left px-4 py-2 text-sm flex items-center space-x-3 group transition-colors ${shouldDisable ? 'cursor-not-allowed opacity-60' : ''}`}
+                  className={`w-full text-left px-4 py-2.5 text-sm flex items-center space-x-3 group transition-all duration-200 rounded-lg mx-1 ${shouldDisable ? 'cursor-not-allowed opacity-60' : 'hover:bg-cyan-500/10'}`}
                   style={{
                     color: shouldDisable ? 'var(--text-tertiary)' : 'var(--text-secondary)'
                   }}
                   onMouseEnter={(e) => {
                     if (isAvailable && !isComingSoon) {
                       e.target.style.color = 'var(--text-primary)';
-                      e.target.style.backgroundColor = 'var(--bg-tertiary)';
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (isAvailable && !isComingSoon) {
                       e.target.style.color = 'var(--text-secondary)';
-                      e.target.style.backgroundColor = 'transparent';
                     }
                   }}
                   disabled={shouldDisable}
