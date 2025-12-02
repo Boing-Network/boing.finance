@@ -11,7 +11,9 @@ import theGraphService from '../services/theGraphService';
 import { NETWORKS } from '../config/networks';
 import { exportPortfolio } from '../utils/exportData';
 import { notificationService } from '../utils/notifications';
-import { PortfolioSummarySkeleton, TokenBalanceSkeleton, PoolCardSkeleton } from '../components/SkeletonLoader';
+import { PortfolioSummarySkeleton, TokenBalanceSkeleton, PoolCardSkeleton, ChartSkeleton } from '../components/SkeletonLoader';
+import { savePortfolioSnapshot, getPortfolioHistoryForChart } from '../utils/portfolioHistory';
+import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import toast from 'react-hot-toast';
 
 // MochiAstronaut component
@@ -253,6 +255,20 @@ export default function Portfolio() {
     }
   }, [chainId]);
 
+  // Save portfolio snapshot periodically
+  useEffect(() => {
+    if (portfolioSummary && portfolioSummary.totalValue && account) {
+      const value = parseFloat(portfolioSummary.totalValue);
+      if (value > 0) {
+        savePortfolioSnapshot(value);
+      }
+    }
+  }, [portfolioSummary, account]);
+
+  // Get portfolio history for charts
+  const portfolioHistory7d = useMemo(() => getPortfolioHistoryForChart(7), [portfolioSummary]);
+  const portfolioHistory30d = useMemo(() => getPortfolioHistoryForChart(30), [portfolioSummary]);
+
   const networks = [
     { id: 'all', name: 'All Networks', color: 'bg-gray-500' },
     { id: '1', name: 'Ethereum', color: 'bg-blue-500' },
@@ -469,6 +485,42 @@ export default function Portfolio() {
                     </p>
                     <p className="text-sm text-gray-400 mt-2">In pools</p>
                   </div>
+                </div>
+
+                {/* Portfolio Value Chart */}
+                <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-white">Portfolio Value History</h2>
+                  </div>
+                  {portfolioHistory7d.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <AreaChart data={portfolioHistory7d}>
+                        <defs>
+                          <linearGradient id="portfolioGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis dataKey="date" stroke="#9CA3AF" />
+                        <YAxis stroke="#9CA3AF" />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
+                          labelStyle={{ color: '#F3F4F6' }}
+                          formatter={(value) => [`$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 'Portfolio Value']}
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="value" 
+                          stroke="#3B82F6" 
+                          fill="url(#portfolioGradient)" 
+                          name="Portfolio Value"
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <ChartSkeleton height="300px" />
+                  )}
                 </div>
 
                 {/* Tab Content */}
