@@ -9,10 +9,11 @@ import externalDexService from '../services/externalDexService';
 import portfolioService from '../services/portfolioService';
 import theGraphService from '../services/theGraphService';
 import { NETWORKS } from '../config/networks';
-import { exportPortfolio } from '../utils/exportData';
+import { exportPortfolio, exportPortfolioPDF } from '../utils/exportData';
 import { notificationService } from '../utils/notifications';
 import { PortfolioSummarySkeleton, TokenBalanceSkeleton, PoolCardSkeleton, ChartSkeleton } from '../components/SkeletonLoader';
 import { savePortfolioSnapshot, getPortfolioHistoryForChart } from '../utils/portfolioHistory';
+import SharePortfolioModal from '../components/SharePortfolioModal';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import toast from 'react-hot-toast';
 
@@ -25,6 +26,7 @@ export default function Portfolio() {
   // eslint-disable-next-line no-unused-vars
   const [activeTab, setActiveTab] = useState('overview'); // overview, tokens, pools
   const [trackedNetworks, setTrackedNetworks] = useState([chainId || 11155111]);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Blockchain pools hook - hooks must be called unconditionally
   const blockchainPoolsHook = useBlockchainPools();

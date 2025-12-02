@@ -299,6 +299,21 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network, onSetPriceAlert })
               >
                 Share Token
               </button>
+              {onSetPriceAlert && (
+                <button
+                  onClick={() => {
+                    onClose();
+                    onSetPriceAlert();
+                  }}
+                  className="flex-1 px-4 py-2 rounded-lg text-center transition-colors"
+                  style={{
+                    backgroundColor: '#10B981',
+                    color: 'white'
+                  }}
+                >
+                  Set Price Alert
+                </button>
+              )}
               <a
                 href={getExplorerUrl(token.address)}
                 target="_blank"
