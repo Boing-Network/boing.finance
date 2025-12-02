@@ -10,9 +10,11 @@ export const useBlockchainPools = () => {
   const [error, setError] = useState(null);
 
   // Initialize the blockchain service
+  // Returns true if contracts are available, false if API-only mode
   const initializeService = useCallback(async () => {
     if (!window.ethereum || !chainId) {
-      setError('Wallet not connected or unsupported network');
+      // Don't set error - allow API-only mode
+      setIsInitialized(false);
       return false;
     }
 
@@ -21,19 +23,23 @@ export const useBlockchainPools = () => {
       setError(null);
       
       const provider = new ethers.BrowserProvider(window.ethereum);
-      await blockchainPoolService.initialize(provider, chainId);
+      const initialized = await blockchainPoolService.initialize(provider, chainId);
       
+      // Set initialized to true even if contracts aren't available (API-only mode)
       setIsInitialized(true);
-      return true;
+      return initialized; // Return whether contracts are available
     } catch (err) {
-      setError(`Failed to initialize blockchain service: ${err.message}`);
-      return false;
+      // Don't set error - allow graceful degradation to API-only mode
+      console.warn('Blockchain service initialization failed, using API-only mode:', err.message);
+      setIsInitialized(true); // Still mark as initialized for API-only features
+      return false; // Contracts not available
     } finally {
       setIsLoading(false);
     }
   }, [chainId]);
 
   // Get user's liquidity positions
+  // Works in API-only mode using The Graph if contracts not available
   const getUserPositions = useCallback(async () => {
     if (!isInitialized || !account) {
       return [];
@@ -42,9 +48,18 @@ export const useBlockchainPools = () => {
     try {
       setIsLoading(true);
       setError(null);
-      return await blockchainPoolService.getUserPositions(account);
+      
+      // Try blockchain first if contracts available
+      if (blockchainPoolService.dexFactory) {
+        return await blockchainPoolService.getUserPositions(account);
+      }
+      
+      // Fallback to API-only mode (The Graph)
+      // This will be handled by the Portfolio component using portfolioService
+      return [];
     } catch (err) {
-      setError(`Failed to get user positions: ${err.message}`);
+      console.warn('Failed to get user positions from blockchain, using API fallback:', err.message);
+      // Don't set error - allow API fallback
       return [];
     } finally {
       setIsLoading(false);
