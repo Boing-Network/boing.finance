@@ -236,33 +236,41 @@ export default function Analytics() {
                   <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                     <h3 className="text-lg font-semibold text-white mb-2">Total Volume</h3>
                     <p className="text-3xl font-bold text-blue-400">
-                      ${analytics.totalVolume ? parseFloat(analytics.totalVolume).toLocaleString() : '0'}
+                      ${analytics.totalVolume ? parseFloat(analytics.totalVolume).toLocaleString() : 
+                        (dexStats?.uniswapFactories?.[0]?.totalVolumeUSD ? 
+                          parseFloat(dexStats.uniswapFactories[0].totalVolumeUSD).toLocaleString() : '0')}
                     </p>
                     <p className="text-sm text-gray-400 mt-2">Across all networks</p>
                   </div>
                   
                   <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-semibold text-white mb-2">Active Users</h3>
+                    <h3 className="text-lg font-semibold text-white mb-2">Total Liquidity</h3>
                     <p className="text-3xl font-bold text-green-400">
-                      {analytics.activeUsers ? analytics.activeUsers.toLocaleString() : '0'}
+                      ${dexStats?.uniswapFactories?.[0]?.totalLiquidityUSD ? 
+                        parseFloat(dexStats.uniswapFactories[0].totalLiquidityUSD).toLocaleString() : 
+                        (analytics.totalLiquidity ? parseFloat(analytics.totalLiquidity).toLocaleString() : '0')}
                     </p>
-                    <p className="text-sm text-gray-400 mt-2">In the last {timeRange}</p>
+                    <p className="text-sm text-gray-400 mt-2">Locked in pools</p>
                   </div>
                   
                   <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                     <h3 className="text-lg font-semibold text-white mb-2">Total Pools</h3>
                     <p className="text-3xl font-bold text-purple-400">
-                      {analytics.totalPools ? analytics.totalPools.toLocaleString() : '0'}
+                      {dexStats?.uniswapFactories?.[0]?.pairCount ? 
+                        dexStats.uniswapFactories[0].pairCount.toLocaleString() : 
+                        (analytics.totalPools ? analytics.totalPools.toLocaleString() : '0')}
                     </p>
                     <p className="text-sm text-gray-400 mt-2">Across all networks</p>
                   </div>
                   
                   <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-semibold text-white mb-2">Avg APY</h3>
+                    <h3 className="text-lg font-semibold text-white mb-2">Total Transactions</h3>
                     <p className="text-3xl font-bold text-yellow-400">
-                      {analytics.avgApy ? `${parseFloat(analytics.avgApy).toFixed(2)}%` : '0%'}
+                      {dexStats?.uniswapFactories?.[0]?.txCount ? 
+                        dexStats.uniswapFactories[0].txCount.toLocaleString() : 
+                        (analytics.totalTransactions ? analytics.totalTransactions.toLocaleString() : '0')}
                     </p>
-                    <p className="text-sm text-gray-400 mt-2">Across all pools</p>
+                    <p className="text-sm text-gray-400 mt-2">All-time</p>
                   </div>
                 </div>
 

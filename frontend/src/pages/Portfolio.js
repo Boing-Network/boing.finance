@@ -7,6 +7,7 @@ import { useBlockchainPools } from '../hooks/useBlockchainPools';
 // getUserLiquidityPositions and getUserCreatedPools are not used - using blockchain hooks instead
 import externalDexService from '../services/externalDexService';
 import portfolioService from '../services/portfolioService';
+import theGraphService from '../services/theGraphService';
 import { NETWORKS } from '../config/networks';
 import { exportPortfolio } from '../utils/exportData';
 import { notificationService } from '../utils/notifications';
@@ -36,36 +37,63 @@ export default function Portfolio() {
   // eslint-disable-next-line no-unused-vars
   const getBlockchainSepoliaPools = blockchainPoolsHook?.getAllSepoliaPools || (async () => []);
 
-  // Fetch user's liquidity positions from blockchain - React Query v5 API
+  // Fetch user's liquidity positions - Works in API-only mode
   const { data: userPools, isLoading: poolsLoading } = useQuery({
     queryKey: ['user-pools-portfolio', account, chainId, blockchainInitialized],
     queryFn: async () => {
       console.log('[Portfolio] Fetching user pools:', { account, chainId, blockchainInitialized });
-      if (!account || !blockchainInitialized) return [];
+      if (!account) return [];
       
       try {
-        // Get positions from your DEX
-        const yourDexPositions = await getBlockchainUserPositions();
+        let allPositions = [];
+        
+        // Try blockchain positions if contracts are available
+        if (blockchainInitialized) {
+          try {
+            const yourDexPositions = await getBlockchainUserPositions();
+            allPositions = [...(yourDexPositions || [])];
+          } catch (error) {
+            console.warn('[Portfolio] Blockchain positions failed, using API fallback:', error.message);
+          }
+        }
+        
+        // Always try API-based positions (The Graph) for better coverage
+        try {
+          const networkMap = {
+            1: 'ethereum',
+            137: 'polygon',
+            56: 'binance-smart-chain',
+            42161: 'arbitrum',
+            10: 'optimism',
+            8453: 'base',
+            11155111: 'ethereum'
+          };
+          const network = networkMap[chainId] || 'ethereum';
+          const graphPositions = await theGraphService.getUserPositions(account, network);
+          if (graphPositions && graphPositions.positions) {
+            const formattedPositions = graphPositions.positions.map(pos => ({
+              address: pos.pool?.id,
+              token0: { symbol: pos.pool?.token0?.symbol, name: pos.pool?.token0?.name },
+              token1: { symbol: pos.pool?.token1?.symbol, name: pos.pool?.token1?.name },
+              liquidity: pos.liquidity,
+              chainId,
+              source: 'thegraph'
+            }));
+            allPositions = [...allPositions, ...formattedPositions];
+          }
+        } catch (error) {
+          console.warn('[Portfolio] The Graph positions failed:', error.message);
+        }
         
         // For Sepolia, also get positions from other DEXs
-        let allPositions = [...(yourDexPositions || [])];
-        
-        if (chainId === 11155111) { // Sepolia
+        if (chainId === 11155111) {
           try {
-            // Initialize external DEX service
             const provider = new ethers.BrowserProvider(window.ethereum);
             await externalDexService.initialize(provider);
-            
-            // Get positions from external DEXs
             const externalPositions = await externalDexService.getUserExternalPositions(account, chainId);
             allPositions = [...allPositions, ...(externalPositions || [])];
-            
-            if (externalPositions && externalPositions.length > 0) {
-              console.log(`[Portfolio] Found ${externalPositions.length} external DEX positions`);
-            }
           } catch (error) {
-            console.warn('[Portfolio] Failed to fetch external DEX positions:', error);
-            // Continue with just your DEX positions
+            console.warn('[Portfolio] External DEX positions failed:', error.message);
           }
         }
         
@@ -76,12 +104,11 @@ export default function Portfolio() {
       }
     },
     refetchInterval: 30000,
-    enabled: !!account && blockchainInitialized,
-    retry: 1, // Reduce retries
+    enabled: !!account, // Enable even without blockchain initialization
+    retry: 1,
     retryDelay: 1000,
     onError: (error) => {
       console.error('[Portfolio] User pools portfolio query error:', error);
-      // Don't throw - let the component handle empty state
     }
   });
 
@@ -137,7 +164,7 @@ export default function Portfolio() {
     retry: 2
   });
 
-  // Calculate portfolio summary from blockchain data
+  // Calculate portfolio summary - Works in API-only mode
   const { data: portfolioSummary = {
     totalValue: 0,
     change24h: 0,
@@ -146,10 +173,10 @@ export default function Portfolio() {
     liquidityProvided: 0,
     totalPools: 0
   }, isLoading: portfolioLoading } = useQuery({
-    queryKey: ['portfolio-summary', account, chainId, blockchainInitialized, filteredUserPools],
+    queryKey: ['portfolio-summary', account, chainId, filteredUserPools, tokenBalances],
     queryFn: async () => {
-      console.log('[Portfolio] Calculating portfolio summary:', { account, chainId, blockchainInitialized, poolsCount: filteredUserPools?.length });
-      if (!account || !blockchainInitialized || !filteredUserPools) {
+      console.log('[Portfolio] Calculating portfolio summary:', { account, chainId, poolsCount: filteredUserPools?.length });
+      if (!account) {
         return {
           totalValue: 0,
           change24h: 0,
@@ -214,7 +241,7 @@ export default function Portfolio() {
       }
     },
     refetchInterval: 30000,
-    enabled: !!account && blockchainInitialized && !!filteredUserPools,
+    enabled: !!account, // Enable even without blockchain initialization
     retry: 2
   });
 
@@ -354,6 +381,22 @@ export default function Portfolio() {
               </p>
             </div>
 
+            {/* Info Banner - Show when blockchain services not available */}
+            {blockchainError && !blockchainInitialized && (
+              <div className="bg-yellow-900/30 border border-yellow-500/50 rounded-xl p-4 mb-6">
+                <div className="flex items-start space-x-3">
+                  <span className="text-2xl">ℹ️</span>
+                  <div className="flex-1">
+                    <p className="text-yellow-200 font-medium mb-1">API-Only Mode</p>
+                    <p className="text-yellow-300/80 text-sm">
+                      DEX contracts not available on this network. Portfolio is showing data from APIs (Alchemy, The Graph, CoinGecko).
+                      For full DEX features, switch to Sepolia testnet.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Network Filter */}
             <div className="bg-gray-800 rounded-2xl shadow-xl p-6 mb-8 border border-gray-700">
               <h2 className="text-2xl font-bold text-white mb-6">Filter by Network</h2>
@@ -375,15 +418,10 @@ export default function Portfolio() {
             </div>
 
             {/* Portfolio Content */}
-            {portfolioLoading || blockchainLoading ? (
+            {portfolioLoading || (balancesLoading && !tokenBalances) ? (
               <div className="text-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
                 <p className="text-gray-300 mt-4">Loading portfolio...</p>
-              </div>
-            ) : blockchainError ? (
-              <div className="text-center py-12">
-                <p className="text-red-400">Failed to load portfolio. Please try again.</p>
-                <p className="text-gray-400 mt-2">{blockchainError}</p>
               </div>
             ) : (
               <div className="space-y-8">

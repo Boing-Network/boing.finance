@@ -192,6 +192,7 @@ class BlockchainPoolService {
   }
 
   // Initialize the service with provider and chain ID
+  // Returns true if initialized successfully, false if contracts not available (graceful degradation)
   async initialize(provider, chainId) {
     this.provider = provider;
     this.chainId = chainId;
@@ -207,26 +208,47 @@ class BlockchainPoolService {
       });
     }
     
-    if (!factoryAddress) {
-      throw new Error(`DEXFactory not found for chainId: ${chainId}`);
-    }
-    
-    this.dexFactory = new ethers.Contract(factoryAddress, DEX_FACTORY_ABI, provider);
-    
-    if (lockerAddress) {
-      this.liquidityLocker = new ethers.Contract(lockerAddress, LIQUIDITY_LOCKER_ABI, provider);
-    }
-
-    // Test factory connection
-    try {
-      const totalPairs = await this.dexFactory.allPairsLength();
+    // Check if DEXFactory is deployed (not zero address)
+    if (!factoryAddress || factoryAddress === '0x0000000000000000000000000000000000000000') {
       if (this.debug) {
-        console.log('✅ DEXFactory connected successfully. Total pairs:', totalPairs.toString());
-        console.log('🏭 Using DEXFactoryV2 at:', factoryAddress);
+        console.log('⚠️ DEXFactory not deployed on this network. Service will work in API-only mode.');
+      }
+      // Don't throw error - allow service to work in API-only mode
+      this.dexFactory = null;
+      this.liquidityLocker = null;
+      return false; // Return false to indicate contracts not available
+    }
+    
+    try {
+      this.dexFactory = new ethers.Contract(factoryAddress, DEX_FACTORY_ABI, provider);
+      
+      if (lockerAddress && lockerAddress !== '0x0000000000000000000000000000000000000000') {
+        this.liquidityLocker = new ethers.Contract(lockerAddress, LIQUIDITY_LOCKER_ABI, provider);
+      }
+
+      // Test factory connection with timeout
+      try {
+        const totalPairs = await Promise.race([
+          this.dexFactory.allPairsLength(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+        ]);
+        if (this.debug) {
+          console.log('✅ DEXFactory connected successfully. Total pairs:', totalPairs.toString());
+          console.log('🏭 Using DEXFactoryV2 at:', factoryAddress);
+        }
+        return true; // Successfully initialized
+      } catch (error) {
+        console.warn('⚠️ Failed to connect to DEXFactory (contract may not be deployed):', error.message);
+        // Don't throw - allow graceful degradation
+        this.dexFactory = null;
+        this.liquidityLocker = null;
+        return false; // Contracts not available
       }
     } catch (error) {
-      console.error('❌ Failed to connect to DEXFactory:', error);
-      throw error;
+      console.warn('⚠️ Error setting up contracts:', error.message);
+      this.dexFactory = null;
+      this.liquidityLocker = null;
+      return false; // Contracts not available
     }
   }
 
