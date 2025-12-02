@@ -3,6 +3,8 @@ import { ethers } from 'ethers';
 import { useWallet } from '../contexts/WalletContext';
 import { NETWORKS } from '../config/networks';
 import TokenScanner from '../services/tokenScanner';
+import alchemyService from '../services/alchemyService';
+import theGraphService from '../services/theGraphService';
 import { Helmet } from 'react-helmet-async';
 import TokenDetailsModal from '../components/TokenDetailsModal';
 import TokenFilters from '../components/TokenFilters';
@@ -109,10 +111,54 @@ const Tokens = () => {
       setError(null);
       setSearchedToken(null);
       
-      console.log(`Searching for token: ${searchAddress}`);
-      const token = await tokenScanner.searchToken(searchAddress.trim(), selectedChain);
+      const address = searchAddress.trim();
+      console.log(`Searching for token: ${address}`);
+      
+      // Try Alchemy API first for better metadata
+      let token = null;
+      try {
+        const metadata = await alchemyService.getTokenMetadata(selectedChain, address);
+        if (metadata) {
+          // Get balance info from standard scanner
+          const balanceInfo = await tokenScanner.searchToken(address, selectedChain);
+          token = {
+            address,
+            name: metadata.name || 'Unknown Token',
+            symbol: metadata.symbol || 'UNKNOWN',
+            decimals: metadata.decimals || 18,
+            ...balanceInfo
+          };
+        }
+      } catch (alchemyError) {
+        console.warn('Alchemy metadata failed, using standard scanner:', alchemyError);
+      }
+      
+      // Fallback to standard scanner if Alchemy fails
+      if (!token) {
+        token = await tokenScanner.searchToken(address, selectedChain);
+      }
       
       if (token) {
+        // Try to get pool data from The Graph if available
+        try {
+          const networkMap = {
+            1: 'ethereum',
+            137: 'polygon',
+            56: 'binance-smart-chain',
+            42161: 'arbitrum',
+            10: 'optimism',
+            8453: 'base',
+            11155111: 'ethereum'
+          };
+          const network = networkMap[selectedChain] || 'ethereum';
+          const poolData = await theGraphService.getTokenPrice(address, network);
+          if (poolData && poolData.token) {
+            token.poolData = poolData.token;
+          }
+        } catch (graphError) {
+          console.warn('The Graph pool data failed:', graphError);
+        }
+        
         setSearchedToken(token);
         console.log('Token found:', token.name);
       } else {

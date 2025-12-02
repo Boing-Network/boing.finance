@@ -1,10 +1,13 @@
 // Portfolio Service
 // Tracks wallet balances across multiple networks with CoinGecko price integration
+// Enhanced with The Graph and Alchemy APIs for better performance
 
 import { ethers } from 'ethers';
 import { NETWORKS } from '../config/networks';
 import coingeckoService from './coingeckoService';
 import etherscanService from './etherscanService';
+import theGraphService from './theGraphService';
+import alchemyService from './alchemyService';
 
 class PortfolioService {
   constructor() {
@@ -82,7 +85,7 @@ class PortfolioService {
     }
   }
 
-  // Get token price from CoinGecko
+  // Get token price from CoinGecko (with The Graph fallback for DEX tokens)
   async getTokenPrice(token, chainId) {
     const cacheKey = `price_${chainId}_${token.address}`;
     const cached = this.cache.get(cacheKey);
@@ -122,11 +125,31 @@ class PortfolioService {
           return priceData;
         }
       } else {
-        // For ERC20 tokens
+        // Try CoinGecko first
         const priceData = await coingeckoService.getTokenPrice(token.address, cgNetwork);
         if (priceData) {
           this.cache.set(cacheKey, { data: priceData, timestamp: Date.now() });
           return priceData;
+        }
+
+        // Fallback to The Graph for DEX tokens (if available)
+        try {
+          const graphData = await theGraphService.getTokenPrice(token.address, cgNetwork);
+          if (graphData && graphData.token) {
+            // Convert derivedETH to USD (approximate, would need ETH price)
+            const ethPrice = await coingeckoService.getCoinPrice('ethereum');
+            if (ethPrice && graphData.token.derivedETH) {
+              const usdPrice = parseFloat(graphData.token.derivedETH) * (ethPrice.usd || 0);
+              const priceData = {
+                usd: usdPrice,
+                usd_24h_change: 0 // The Graph doesn't provide 24h change directly
+              };
+              this.cache.set(cacheKey, { data: priceData, timestamp: Date.now() });
+              return priceData;
+            }
+          }
+        } catch (graphError) {
+          console.warn('The Graph price lookup failed:', graphError);
         }
       }
 
@@ -138,27 +161,89 @@ class PortfolioService {
   }
 
   // Get all token balances for an address on a network
+  // Enhanced with Alchemy API for better performance
   async getNetworkBalances(address, chainId, tokenAddresses = []) {
     try {
       const balances = [];
 
-      // Get native balance
+      // Get native balance (try Alchemy first, fallback to standard RPC)
       const nativeBalance = await this.getNativeBalance(address, chainId);
       if (nativeBalance) {
         balances.push(nativeBalance);
       }
 
-      // Get ERC20 token balances
-      for (const tokenAddress of tokenAddresses) {
-        const tokenBalance = await this.getTokenBalance(address, tokenAddress, chainId);
-        if (tokenBalance && parseFloat(tokenBalance.balance) > 0) {
-          balances.push(tokenBalance);
+      // Try Alchemy API for token balances (faster and more reliable)
+      try {
+        const alchemyBalances = await alchemyService.getTokenBalances(chainId, address);
+        if (alchemyBalances && alchemyBalances.tokenBalances) {
+          for (const tokenBalance of alchemyBalances.tokenBalances) {
+            if (tokenBalance.contractAddress && tokenBalance.tokenBalance !== '0x0') {
+              // Get token metadata from Alchemy
+              const metadata = await alchemyService.getTokenMetadata(chainId, tokenBalance.contractAddress);
+              if (metadata) {
+                const balance = BigInt(tokenBalance.tokenBalance);
+                balances.push({
+                  address: tokenBalance.contractAddress,
+                  symbol: metadata.symbol || 'UNKNOWN',
+                  name: metadata.name || 'Unknown Token',
+                  balance: ethers.formatUnits(balance, metadata.decimals || 18),
+                  balanceRaw: balance.toString(),
+                  decimals: metadata.decimals || 18,
+                  chainId,
+                  isNative: false
+                });
+              }
+            }
+          }
+        }
+      } catch (alchemyError) {
+        console.warn('Alchemy API failed, falling back to standard RPC:', alchemyError);
+        // Fallback to standard method
+        for (const tokenAddress of tokenAddresses) {
+          const tokenBalance = await this.getTokenBalance(address, tokenAddress, chainId);
+          if (tokenBalance && parseFloat(tokenBalance.balance) > 0) {
+            balances.push(tokenBalance);
+          }
         }
       }
 
       return balances;
     } catch (error) {
       console.error(`Error fetching network balances:`, error);
+      return [];
+    }
+  }
+
+  // Get liquidity positions from The Graph (for DEX pools)
+  async getLiquidityPositions(address, chainId) {
+    try {
+      const networkMap = {
+        1: 'ethereum',
+        137: 'polygon',
+        56: 'binance-smart-chain',
+        42161: 'arbitrum',
+        10: 'optimism',
+        8453: 'base',
+        11155111: 'ethereum'
+      };
+
+      const network = networkMap[chainId] || 'ethereum';
+      const positions = await theGraphService.getUserPositions(address, network);
+      
+      if (positions && positions.positions) {
+        return positions.positions.map(pos => ({
+          id: pos.id,
+          pool: pos.pool,
+          liquidity: pos.liquidity,
+          token0: pos.depositedToken0,
+          token1: pos.depositedToken1,
+          chainId
+        }));
+      }
+
+      return [];
+    } catch (error) {
+      console.error('Error fetching liquidity positions:', error);
       return [];
     }
   }
