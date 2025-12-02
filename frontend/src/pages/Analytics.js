@@ -4,6 +4,7 @@ import axios from 'axios';
 import config from '../config';
 import { Helmet } from 'react-helmet-async';
 import coingeckoService from '../services/coingeckoService';
+import theGraphService from '../services/theGraphService';
 import { exportAnalytics } from '../utils/exportData';
 import toast from 'react-hot-toast';
 
@@ -47,15 +48,60 @@ export default function Analytics() {
     }
   };
 
-  // Fetch trending tokens from CoinGecko - React Query v5 API
+  // Fetch trending tokens - Combined CoinGecko + The Graph
   const { data: trendingTokens, isLoading: trendingLoading } = useQuery({
     queryKey: ['trending-tokens'],
     queryFn: async () => {
       console.log('[Analytics] Fetching trending tokens');
-      const data = await coingeckoService.getTrendingTokens();
-      return data.coins || [];
+      try {
+        // Try CoinGecko first
+        const cgData = await coingeckoService.getTrendingTokens();
+        if (cgData && cgData.coins) {
+          return cgData.coins;
+        }
+      } catch (error) {
+        console.warn('CoinGecko trending tokens failed, trying The Graph:', error);
+      }
+
+      // Fallback to The Graph for DEX tokens
+      try {
+        const graphData = await theGraphService.getTrendingTokens('ethereum', 20);
+        if (graphData && graphData.tokens) {
+          return graphData.tokens.map(token => ({
+            item: {
+              id: token.id,
+              name: token.name,
+              symbol: token.symbol,
+              price_btc: 0,
+              price_usd: token.priceUSD || 0,
+              market_cap_rank: null,
+              score: 0
+            }
+          }));
+        }
+      } catch (error) {
+        console.error('The Graph trending tokens failed:', error);
+      }
+
+      return [];
     },
     refetchInterval: 300000, // Refetch every 5 minutes
+  });
+
+  // Fetch DEX network statistics from The Graph
+  const { data: dexStats, isLoading: dexStatsLoading } = useQuery({
+    queryKey: ['dex-stats'],
+    queryFn: async () => {
+      console.log('[Analytics] Fetching DEX statistics');
+      try {
+        const stats = await theGraphService.getNetworkStats('ethereum');
+        return stats;
+      } catch (error) {
+        console.error('Failed to fetch DEX stats:', error);
+        return null;
+      }
+    },
+    refetchInterval: 60000, // Refetch every minute
   });
 
   // Fetch market data - React Query v5 API
