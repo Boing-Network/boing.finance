@@ -9,6 +9,9 @@ import { Helmet } from 'react-helmet-async';
 import TokenDetailsModal from '../components/TokenDetailsModal';
 import TokenFilters from '../components/TokenFilters';
 import { tokenFavorites } from '../utils/tokenFavorites';
+import { addToWatchlist, removeFromWatchlist, isInWatchlist } from '../utils/tokenWatchlist';
+import toast from 'react-hot-toast';
+import { addToWatchlist, removeFromWatchlist, isInWatchlist } from '../utils/tokenWatchlist';
 
 // Initialize token scanner
 const tokenScanner = new TokenScanner();
@@ -535,20 +538,52 @@ const Tokens = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {filteredTokens.map((token, index) => {
                 const isFavorite = tokenFavorites.isFavorite(token.chainId || selectedChain, token.address);
+                const isWatched = isInWatchlist(token.address, token.chainId || selectedChain);
+                
+                const handleWatchlistToggle = (e) => {
+                  e.stopPropagation();
+                  if (isWatched) {
+                    removeFromWatchlist(token.address, token.chainId || selectedChain);
+                    toast.success(`${token.symbol} removed from watchlist`);
+                  } else {
+                    addToWatchlist({
+                      address: token.address,
+                      symbol: token.symbol,
+                      name: token.name,
+                      chainId: token.chainId || selectedChain,
+                      logo: token.logo,
+                      price: token.price
+                    });
+                    toast.success(`${token.symbol} added to watchlist`);
+                  }
+                };
+                
                 return (
                 <div
                   key={index}
                   className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700 hover:border-purple-500 transition-all duration-200 cursor-pointer group relative"
                   onClick={() => openTokenDetails(token)}
                 >
-                  {/* Favorite Badge */}
-                  {isFavorite && (
-                    <div className="absolute top-2 right-2">
-                      <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                  {/* Favorite & Watchlist Badges */}
+                  <div className="absolute top-2 right-2 flex space-x-2">
+                    {isFavorite && (
+                      <div className="p-1">
+                        <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                        </svg>
+                      </div>
+                    )}
+                    <button
+                      onClick={handleWatchlistToggle}
+                      className={`p-1 rounded transition-colors ${isWatched ? 'bg-blue-500/20' : 'hover:bg-gray-700'}`}
+                      title={isWatched ? 'Remove from watchlist' : 'Add to watchlist'}
+                    >
+                      <svg className={`w-5 h-5 ${isWatched ? 'text-blue-400 fill-current' : 'text-gray-400'}`} fill={isWatched ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
-                    </div>
-                  )}
+                    </button>
+                  </div>
                   <div className="flex items-start justify-between mb-3 sm:mb-4">
                     <div className="flex items-center space-x-3">
                       <div className="w-8 sm:w-10 h-8 sm:h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base">

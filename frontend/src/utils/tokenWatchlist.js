@@ -1,18 +1,17 @@
 // Token Watchlist Utility
-// Manages user's token watchlist and alerts
+// Manages user's favorite/watched tokens
 
-const WATCHLIST_STORAGE_KEY = 'tokenWatchlist';
-const ALERTS_STORAGE_KEY = 'tokenAlerts';
+const WATCHLIST_KEY = 'boing_token_watchlist';
 
 /**
- * Get all tokens in watchlist
+ * Get all watched tokens
  */
 export const getWatchlist = () => {
   try {
-    const watchlist = localStorage.getItem(WATCHLIST_STORAGE_KEY);
+    const watchlist = localStorage.getItem(WATCHLIST_KEY);
     return watchlist ? JSON.parse(watchlist) : [];
   } catch (error) {
-    console.error('Error reading watchlist from localStorage:', error);
+    console.error('Error getting watchlist:', error);
     return [];
   }
 };
@@ -23,21 +22,29 @@ export const getWatchlist = () => {
 export const addToWatchlist = (token) => {
   try {
     const watchlist = getWatchlist();
-    const exists = watchlist.some(
-      item => item.address === token.address && item.chainId === token.chainId
+    const exists = watchlist.some(t => 
+      t.address?.toLowerCase() === token.address?.toLowerCase() && 
+      t.chainId === token.chainId
     );
     
     if (!exists) {
-      watchlist.push({
-        ...token,
-        addedAt: new Date().toISOString()
-      });
-      localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(watchlist));
+      const newToken = {
+        address: token.address,
+        symbol: token.symbol,
+        name: token.name,
+        chainId: token.chainId || 1,
+        addedAt: new Date().toISOString(),
+        logo: token.logo,
+        price: token.price || 0
+      };
+      watchlist.push(newToken);
+      localStorage.setItem(WATCHLIST_KEY, JSON.stringify(watchlist));
+      return true;
     }
-    return watchlist;
+    return false;
   } catch (error) {
-    console.error('Error adding token to watchlist:', error);
-    return getWatchlist();
+    console.error('Error adding to watchlist:', error);
+    return false;
   }
 };
 
@@ -46,19 +53,15 @@ export const addToWatchlist = (token) => {
  */
 export const removeFromWatchlist = (address, chainId) => {
   try {
-    let watchlist = getWatchlist();
-    watchlist = watchlist.filter(
-      item => !(item.address === address && item.chainId === chainId)
+    const watchlist = getWatchlist();
+    const filtered = watchlist.filter(t => 
+      !(t.address?.toLowerCase() === address?.toLowerCase() && t.chainId === chainId)
     );
-    localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(watchlist));
-    
-    // Also remove any alerts for this token
-    removeAlertsForToken(address, chainId);
-    
-    return watchlist;
+    localStorage.setItem(WATCHLIST_KEY, JSON.stringify(filtered));
+    return true;
   } catch (error) {
-    console.error('Error removing token from watchlist:', error);
-    return getWatchlist();
+    console.error('Error removing from watchlist:', error);
+    return false;
   }
 };
 
@@ -66,120 +69,64 @@ export const removeFromWatchlist = (address, chainId) => {
  * Check if token is in watchlist
  */
 export const isInWatchlist = (address, chainId) => {
-  const watchlist = getWatchlist();
-  return watchlist.some(
-    item => item.address === address && item.chainId === chainId
-  );
-};
-
-/**
- * Get all alerts
- */
-export const getAlerts = () => {
   try {
-    const alerts = localStorage.getItem(ALERTS_STORAGE_KEY);
-    return alerts ? JSON.parse(alerts) : [];
-  } catch (error) {
-    console.error('Error reading alerts from localStorage:', error);
-    return [];
-  }
-};
-
-/**
- * Add alert for a token
- */
-export const addAlert = (alert) => {
-  try {
-    const alerts = getAlerts();
-    const alertId = `${alert.address}-${alert.chainId}-${alert.type}-${Date.now()}`;
-    const newAlert = {
-      ...alert,
-      id: alertId,
-      createdAt: new Date().toISOString(),
-      triggered: false
-    };
-    alerts.push(newAlert);
-    localStorage.setItem(ALERTS_STORAGE_KEY, JSON.stringify(alerts));
-    return alerts;
-  } catch (error) {
-    console.error('Error adding alert:', error);
-    return getAlerts();
-  }
-};
-
-/**
- * Remove alert
- */
-export const removeAlert = (alertId) => {
-  try {
-    let alerts = getAlerts();
-    alerts = alerts.filter(alert => alert.id !== alertId);
-    localStorage.setItem(ALERTS_STORAGE_KEY, JSON.stringify(alerts));
-    return alerts;
-  } catch (error) {
-    console.error('Error removing alert:', error);
-    return getAlerts();
-  }
-};
-
-/**
- * Remove all alerts for a token
- */
-export const removeAlertsForToken = (address, chainId) => {
-  try {
-    let alerts = getAlerts();
-    alerts = alerts.filter(
-      alert => !(alert.address === address && alert.chainId === chainId)
+    const watchlist = getWatchlist();
+    return watchlist.some(t => 
+      t.address?.toLowerCase() === address?.toLowerCase() && 
+      t.chainId === chainId
     );
-    localStorage.setItem(ALERTS_STORAGE_KEY, JSON.stringify(alerts));
-    return alerts;
   } catch (error) {
-    console.error('Error removing alerts for token:', error);
-    return getAlerts();
+    console.error('Error checking watchlist:', error);
+    return false;
   }
 };
 
 /**
- * Get alerts for a specific token
+ * Update token price in watchlist
  */
-export const getAlertsForToken = (address, chainId) => {
-  const alerts = getAlerts();
-  return alerts.filter(
-    alert => alert.address === address && alert.chainId === chainId
-  );
-};
-
-/**
- * Mark alert as triggered
- */
-export const markAlertTriggered = (alertId) => {
+export const updateWatchlistPrice = (address, chainId, price) => {
   try {
-    const alerts = getAlerts();
-    const alert = alerts.find(a => a.id === alertId);
-    if (alert) {
-      alert.triggered = true;
-      alert.triggeredAt = new Date().toISOString();
-      localStorage.setItem(ALERTS_STORAGE_KEY, JSON.stringify(alerts));
-    }
-    return alerts;
+    const watchlist = getWatchlist();
+    const updated = watchlist.map(t => {
+      if (t.address?.toLowerCase() === address?.toLowerCase() && t.chainId === chainId) {
+        return { ...t, price, lastUpdated: new Date().toISOString() };
+      }
+      return t;
+    });
+    localStorage.setItem(WATCHLIST_KEY, JSON.stringify(updated));
+    return true;
   } catch (error) {
-    console.error('Error marking alert as triggered:', error);
-    return getAlerts();
+    console.error('Error updating watchlist price:', error);
+    return false;
   }
 };
 
 /**
- * Clear all triggered alerts
+ * Clear entire watchlist
  */
-export const clearTriggeredAlerts = () => {
+export const clearWatchlist = () => {
   try {
-    let alerts = getAlerts();
-    alerts = alerts.filter(alert => !alert.triggered);
-    localStorage.setItem(ALERTS_STORAGE_KEY, JSON.stringify(alerts));
-    return alerts;
+    localStorage.removeItem(WATCHLIST_KEY);
+    return true;
   } catch (error) {
-    console.error('Error clearing triggered alerts:', error);
-    return getAlerts();
+    console.error('Error clearing watchlist:', error);
+    return false;
   }
 };
 
+/**
+ * Get watchlist count
+ */
+export const getWatchlistCount = () => {
+  return getWatchlist().length;
+};
+
+export default {
+  getWatchlist,
+  addToWatchlist,
+  removeFromWatchlist,
+  isInWatchlist,
+  updateWatchlistPrice,
+  clearWatchlist,
+  getWatchlistCount
+};
