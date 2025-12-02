@@ -3,10 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import config from '../config';
 import { Helmet } from 'react-helmet-async';
-import { LineChart, Line, BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import coingeckoService from '../services/coingeckoService';
 import theGraphService from '../services/theGraphService';
 import { exportAnalytics } from '../utils/exportData';
+import { getPricePrediction } from '../utils/predictiveAnalytics';
 import { ChartSkeleton, AnalyticsCardSkeleton } from '../components/SkeletonLoader';
 import toast from 'react-hot-toast';
 
@@ -370,6 +371,38 @@ export default function Analytics() {
                     </div>
                   )}
                 </div>
+
+                {/* Network Distribution Pie Chart */}
+                {analytics.networkStats && Object.keys(analytics.networkStats).length > 0 && (
+                  <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                    <h2 className="text-2xl font-bold text-white mb-6">Network Distribution</h2>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={Object.entries(analytics.networkStats).map(([network, stats]) => ({
+                            name: network,
+                            value: parseFloat(stats.volume || 0)
+                          }))}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {Object.keys(analytics.networkStats).map((_, index) => (
+                            <Cell key={`cell-${index}`} fill={['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'][index % 6]} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
+                          labelStyle={{ color: '#F3F4F6' }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
 
                 {/* Top Trading Pairs */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">

@@ -391,6 +391,26 @@ export default function Portfolio() {
                       >
                         <span>📥</span> Export JSON
                       </button>
+                      <button
+                        onClick={() => {
+                          exportPortfolioPDF({
+                            totalValue: portfolioSummary?.totalValue || '0',
+                            totalTokens: portfolioSummary?.totalTokens || 0,
+                            totalPools: portfolioSummary?.totalPools || 0,
+                            balances: tokenBalances?.balances || []
+                          });
+                          toast.success('Portfolio exported as PDF!');
+                        }}
+                        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+                      >
+                        <span>📄</span> Export PDF
+                      </button>
+                      <button
+                        onClick={() => setShowShareModal(true)}
+                        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+                      >
+                        <span>🔗</span> Share
+                      </button>
                     </div>
                   )}
                 </div>
@@ -895,8 +915,20 @@ export default function Portfolio() {
                 )}
               </div>
             )}
-          </div></div>
+          </div>        </div>
       </div>
+      
+      {/* Share Portfolio Modal */}
+      <SharePortfolioModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        portfolioData={{
+          totalValue: portfolioSummary?.totalValue || '0',
+          totalTokens: portfolioSummary?.totalTokens || 0,
+          totalPools: portfolioSummary?.totalPools || 0,
+          balances: tokenBalances?.balances || []
+        }}
+      />
     </>
   );
-} 
+}
