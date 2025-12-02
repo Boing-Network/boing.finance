@@ -32,6 +32,7 @@ const Bridge = lazy(() => import('./pages/Bridge'));
 const DeployToken = lazy(() => import('./pages/DeployToken'));
 const CreatePool = lazy(() => import('./pages/CreatePool'));
 const Tokens = lazy(() => import('./pages/Tokens'));
+const Watchlist = lazy(() => import('./pages/Watchlist'));
 const Status = lazy(() => import('./pages/Status'));
 const Docs = lazy(() => import('./pages/Docs'));
 const DeveloperTools = lazy(() => import('./pages/DeveloperTools'));
@@ -579,6 +580,7 @@ function AppContent() {
                 } />
                 <Route path="/bridge" element={<Bridge />} />
                 <Route path="/tokens" element={<Tokens />} />
+                <Route path="/watchlist" element={<Watchlist />} />
                   <Route path="/docs" element={<Docs />} />
                   <Route path="/developer-tools" element={<DeveloperTools />} />
                   <Route path="/blog" element={<Blog />} />

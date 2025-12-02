@@ -11,6 +11,7 @@ import theGraphService from '../services/theGraphService';
 import { NETWORKS } from '../config/networks';
 import { exportPortfolio } from '../utils/exportData';
 import { notificationService } from '../utils/notifications';
+import { PortfolioSummarySkeleton, TokenBalanceSkeleton, PoolCardSkeleton } from '../components/SkeletonLoader';
 import toast from 'react-hot-toast';
 
 // MochiAstronaut component
@@ -419,9 +420,11 @@ export default function Portfolio() {
 
             {/* Portfolio Content */}
             {portfolioLoading || (balancesLoading && !tokenBalances) ? (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-                <p className="text-gray-300 mt-4">Loading portfolio...</p>
+              <div className="space-y-8">
+                <PortfolioSummarySkeleton />
+                <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                  <TokenBalanceSkeleton count={5} />
+                </div>
               </div>
             ) : (
               <div className="space-y-8">
