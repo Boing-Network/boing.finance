@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 import LoadingSpinner from './LoadingSpinner';
 import ShareTokenModal from './ShareTokenModal';
 
-const TokenDetailsModal = ({ token, isOpen, onClose, network }) => {
+const TokenDetailsModal = ({ token, isOpen, onClose, network, onSetPriceAlert }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [priceData, setPriceData] = useState(null);
