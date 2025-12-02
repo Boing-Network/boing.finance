@@ -8,8 +8,10 @@ import theGraphService from '../services/theGraphService';
 import { Helmet } from 'react-helmet-async';
 import TokenDetailsModal from '../components/TokenDetailsModal';
 import TokenFilters from '../components/TokenFilters';
+import PriceAlertModal from '../components/PriceAlertModal';
 import { tokenFavorites } from '../utils/tokenFavorites';
 import { addToWatchlist, removeFromWatchlist, isInWatchlist } from '../utils/tokenWatchlist';
+import { checkPriceAlerts } from '../utils/priceAlerts';
 import toast from 'react-hot-toast';
 import { addToWatchlist, removeFromWatchlist, isInWatchlist } from '../utils/tokenWatchlist';
 
@@ -30,6 +32,7 @@ const Tokens = () => {
   const [searchedToken, setSearchedToken] = useState(null);
   const [selectedToken, setSelectedToken] = useState(null);
   const [showTokenDetails, setShowTokenDetails] = useState(false);
+  const [showPriceAlert, setShowPriceAlert] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     search: '',

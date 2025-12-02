@@ -20,6 +20,7 @@ import ShootingStars from './components/ShootingStars';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
 import OnboardingTour from './components/OnboardingTour';
+import priceAlertService from './services/priceAlertService';
 import './styles/globals.css';
 
 // Lazy load all page components for code splitting
@@ -91,6 +92,21 @@ function AppContent() {
   // Using navigation directly ensures consistency
   const memoizedNavigation = navigation;
   
+  // Start price alert service
+  React.useEffect(() => {
+    // Request notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+    
+    // Start price alert monitoring
+    priceAlertService.start();
+    
+    return () => {
+      priceAlertService.stop();
+    };
+  }, []);
+
   // Debug logging for navigation state
   React.useEffect(() => {
     console.log('[AppContent] Navigation state check:', {
