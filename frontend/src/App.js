@@ -843,10 +843,6 @@ function Home() {
     }));
     
     // Navigation values at memoization
-      trading: tradingState,
-      analytics: analyticsState,
-      deployment: deploymentState
-    });
     
     return navigation;
   }, []); // Empty deps - navigation should never change
@@ -1382,16 +1378,6 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
               const isComingSoon = Boolean(item.comingSoon);
               const isAvailable = Boolean(item.isAvailable);
               const shouldDisable = isComingSoon || !isAvailable;
-              
-              // Dropdown menu item
-                name: item.name,
-                comingSoon: item.comingSoon,
-                isComingSoon,
-                isAvailable: item.isAvailable,
-                isAvailableBool: isAvailable,
-                shouldDisable,
-                rawValues: { comingSoon: item.comingSoon, isAvailable: item.isAvailable }
-              });
               
               return (
                 <button

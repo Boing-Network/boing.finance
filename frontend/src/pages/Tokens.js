@@ -13,7 +13,6 @@ import { tokenFavorites } from '../utils/tokenFavorites';
 import { addToWatchlist, removeFromWatchlist, isInWatchlist } from '../utils/tokenWatchlist';
 import { checkPriceAlerts } from '../utils/priceAlerts';
 import toast from 'react-hot-toast';
-import { addToWatchlist, removeFromWatchlist, isInWatchlist } from '../utils/tokenWatchlist';
 
 // Initialize token scanner
 const tokenScanner = new TokenScanner();
