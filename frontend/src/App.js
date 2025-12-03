@@ -726,7 +726,6 @@ function getQueryClient() {
       });
       // QueryClient initialized
     } catch (error) {
-      console.error('[App] Error initializing QueryClient:', error);
       // Return a basic QueryClient as fallback
       queryClientInstance = new QueryClient({
         defaultOptions: {

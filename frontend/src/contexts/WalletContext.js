@@ -274,11 +274,7 @@ export const WalletProvider = ({ children }) => {
       const accounts = await lastProvider.request({ method: 'eth_accounts' });
       if (accounts.length > 0 && !userDisconnected) {
         const chainId = await lastProvider.request({ method: 'eth_chainId' });
-        console.log('[WalletContext] Reconnecting to wallet silently:', {
-          account: accounts[0],
-          chainId: parseInt(chainId, 16),
-          walletType: lastWalletType
-        });
+        // Reconnecting to wallet silently
         await connectWalletSilently(accounts[0], parseInt(chainId, 16), lastProvider);
       } else {
         // No accounts available - clearing connection state
@@ -315,11 +311,7 @@ export const WalletProvider = ({ children }) => {
       }
       
       setIsInitialized(true);
-      console.log('[WalletContext] Wallet initialization complete', {
-        isConnected,
-        account,
-        wasDisconnected
-      });
+      // Wallet initialization complete
     };
     
     // Only initialize once
