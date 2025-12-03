@@ -703,7 +703,7 @@ const Pools = () => {
   // Component rendering
   const { isConnected, account } = useWalletConnection();
   const { chainId } = useWallet();
-  console.log('[Pools] Wallet state:', { isConnected, account, chainId });
+  // Wallet state initialized
   const [activeTab, setActiveTab] = useState('all-pools');
   const [selectedPool, setSelectedPool] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -720,7 +720,7 @@ const Pools = () => {
   // Blockchain pools hook - hooks must be called unconditionally
   console.log('[Pools] Initializing blockchain pools hook');
   const blockchainPoolsHook = useBlockchainPools();
-  console.log('[Pools] Blockchain pools hook result:', {
+  // Blockchain pools hook initialized
     isInitialized: blockchainPoolsHook?.isInitialized,
     isLoading: blockchainPoolsHook?.isLoading,
     hasError: !!blockchainPoolsHook?.error
@@ -761,7 +761,7 @@ const Pools = () => {
     retry: 1, // Reduce retries to prevent long loading
     retryDelay: 1000,
     onError: (error) => {
-      console.error('[Pools] User pools query error:', error);
+      // User pools query error
       setUseBlockchainFallback(true);
     }
   });

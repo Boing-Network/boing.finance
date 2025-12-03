@@ -45,35 +45,26 @@ const BaseMiniAppWrapper = ({ children }) => {
         setIsFarcasterApp(isInFarcaster);
 
         if (isInFarcaster) {
-          console.log('🔍 Detected Farcaster environment');
-          console.log('User Agent:', window.navigator.userAgent);
-          console.log('Referrer:', document.referrer);
-          console.log('URL:', window.location.href);
-          console.log('Is Mobile:', isMobile);
-          
           try {
             // Dynamically import Farcaster MiniApp SDK
-            console.log('📦 Loading Farcaster MiniApp SDK...');
             const { sdk: farcasterSdk } = await import('@farcaster/miniapp-sdk');
             
-            console.log('✅ Farcaster MiniApp SDK loaded successfully');
             setSdk(farcasterSdk);
 
             // Set up event listeners
-            farcasterSdk.on('walletConnected', (wallet) => {
-              console.log('Wallet connected via Farcaster:', wallet);
+            farcasterSdk.on('walletConnected', () => {
+              // Wallet connected via Farcaster
             });
 
-            farcasterSdk.on('networkChanged', (network) => {
-              console.log('Network changed via Farcaster:', network);
+            farcasterSdk.on('networkChanged', () => {
+              // Network changed via Farcaster
             });
 
-            farcasterSdk.on('transactionCompleted', (tx) => {
-              console.log('Transaction completed via Farcaster:', tx);
+            farcasterSdk.on('transactionCompleted', () => {
+              // Transaction completed via Farcaster
             });
 
             // Signal that the app is ready - THIS IS CRITICAL!
-            console.log('🚀 Calling farcasterSdk.actions.ready()...');
             
             // Add timeout for mobile devices
             const readyPromise = farcasterSdk.actions.ready();

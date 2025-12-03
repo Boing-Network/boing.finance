@@ -86,7 +86,7 @@ export default function Portfolio() {
             allPositions = [...allPositions, ...formattedPositions];
           }
         } catch (error) {
-          console.warn('[Portfolio] The Graph positions failed:', error.message);
+          // The Graph positions failed
         }
         
         // For Sepolia, also get positions from other DEXs
@@ -97,7 +97,7 @@ export default function Portfolio() {
             const externalPositions = await externalDexService.getUserExternalPositions(account, chainId);
             allPositions = [...allPositions, ...(externalPositions || [])];
           } catch (error) {
-            console.warn('[Portfolio] External DEX positions failed:', error.message);
+            // External DEX positions failed
           }
         }
         

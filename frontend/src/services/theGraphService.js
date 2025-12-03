@@ -78,8 +78,8 @@ class TheGraphService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiToken}`,
-          'X-API-Key': this.apiKey
+          ...(this.apiToken && { 'Authorization': `Bearer ${this.apiToken}` }),
+          ...(this.apiKey && { 'X-API-Key': this.apiKey })
         },
         body: JSON.stringify({
           query,
@@ -88,34 +88,19 @@ class TheGraphService {
       });
 
       if (!response.ok) {
-        // Don't log CSP errors - they're expected if CSP is strict
-        if (error.message && error.message.includes('Content Security Policy')) {
-          return null;
-        }
         return null;
       }
 
       const data = await response.json();
       
       if (data.errors) {
-        // Only log actual GraphQL errors, not CSP violations
-        if (!data.errors.some(e => e.message?.includes('CSP') || e.message?.includes('Content Security'))) {
-          // Silently fail for CSP issues
-        }
         return null;
       }
 
       this.cache.set(cacheKey, { data: data.data, timestamp: Date.now() });
       return data.data;
     } catch (error) {
-      // Silently handle CSP violations - they're expected
-      if (error.message && (error.message.includes('Content Security Policy') || error.message.includes('CSP') || error.message.includes('violates'))) {
-        return null;
-      }
-      // Only log unexpected errors
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('The Graph query failed:', error.message);
-      }
+      // Silently handle CSP violations and network errors
       return null;
     }
   }

@@ -225,14 +225,14 @@ export const WalletProvider = ({ children }) => {
     // Check if user was previously disconnected
     const wasDisconnected = localStorage.getItem('userDisconnected') === 'true';
     if (wasDisconnected) {
-      console.log('[WalletContext] User was disconnected, skipping auto-connect');
+      // User was disconnected, skipping auto-connect
       return;
     }
 
     // Check if wallet was previously connected
     const wasConnected = localStorage.getItem('walletConnected') === 'true';
     if (!wasConnected) {
-      console.log('[WalletContext] No previous connection found');
+      // No previous connection found
       return;
     }
 
@@ -253,7 +253,7 @@ export const WalletProvider = ({ children }) => {
     } else {
       // If we don't have a specific provider match, don't try to reconnect
       // This prevents Phantom from intercepting
-      console.log('[WalletContext] No matching wallet provider found for type:', lastWalletType);
+      // No matching wallet provider found
       // Clear invalid connection state
       localStorage.removeItem('walletConnected');
       localStorage.removeItem('walletType');
@@ -261,7 +261,7 @@ export const WalletProvider = ({ children }) => {
     }
 
     if (!lastProvider) {
-      console.log('[WalletContext] No wallet provider available');
+      // No wallet provider available
       // Clear invalid connection state
       localStorage.removeItem('walletConnected');
       localStorage.removeItem('walletType');
@@ -281,7 +281,7 @@ export const WalletProvider = ({ children }) => {
         });
         await connectWalletSilently(accounts[0], parseInt(chainId, 16), lastProvider);
       } else {
-        console.log('[WalletContext] No accounts available - clearing connection state');
+        // No accounts available - clearing connection state
         // Clear connection state if no accounts
         localStorage.removeItem('walletConnected');
         localStorage.removeItem('walletType');
