@@ -56,16 +56,23 @@ export default function Analytics() {
       
       const data = await response.json();
       if (data?.success && data?.data) {
-        // Debug: Log when we get data
-        if (Object.keys(data.data).length > 0) {
-          console.log('Analytics data received:', {
-            hasTotalVolume: !!data.data.totalVolume,
-            hasNetworkStats: !!data.data.networkStats,
-            hasTopPairs: !!data.data.topPairs,
-            source: data.data.source
-          });
-        }
-        return data.data;
+        // Debug: Log when we get data with detailed info
+        const analyticsData = data.data;
+        const networkStatsKeys = analyticsData.networkStats ? Object.keys(analyticsData.networkStats) : [];
+        const topPairsCount = analyticsData.topPairs ? analyticsData.topPairs.length : 0;
+        
+        console.log('Analytics data received:', {
+          hasTotalVolume: !!analyticsData.totalVolume && parseFloat(analyticsData.totalVolume) > 0,
+          hasNetworkStats: networkStatsKeys.length > 0,
+          networkStatsKeys: networkStatsKeys,
+          networkStatsData: analyticsData.networkStats,
+          hasTopPairs: topPairsCount > 0,
+          topPairsCount: topPairsCount,
+          topPairsData: analyticsData.topPairs?.slice(0, 2), // First 2 for debugging
+          source: analyticsData.source
+        });
+        
+        return analyticsData;
       }
       return {};
     } catch (error) {
@@ -515,7 +522,7 @@ export default function Analytics() {
                 {/* Network Performance */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                   <h2 className="text-2xl font-bold text-white mb-6">Network Performance</h2>
-                  {analytics.networkStats && Object.keys(analytics.networkStats).length > 0 ? (
+                  {analytics?.networkStats && typeof analytics.networkStats === 'object' && Object.keys(analytics.networkStats).length > 0 ? (
                     <>
                       <div className="mb-6">
                         <ResponsiveContainer width="100%" height={300}>
@@ -612,7 +619,7 @@ export default function Analytics() {
                 {/* Top Trading Pairs */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                   <h2 className="text-2xl font-bold text-white mb-6">Top Trading Pairs</h2>
-                  {analytics.topPairs && analytics.topPairs.length > 0 ? (
+                  {analytics?.topPairs && Array.isArray(analytics.topPairs) && analytics.topPairs.length > 0 ? (
                     <div className="overflow-x-auto">
                       <table className="min-w-full divide-y divide-gray-700">
                         <thead className="bg-gray-700">
@@ -686,17 +693,84 @@ export default function Analytics() {
                 {/* User Activity Chart */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                   <h2 className="text-2xl font-bold text-white mb-6">User Activity</h2>
-                  <div className="text-center py-12">
-                    <div className="bg-gray-700/50 rounded-lg p-6 max-w-md mx-auto">
-                      <p className="text-gray-300 mb-2">User Activity Data Unavailable</p>
+                  {analytics?.userActivity && analytics.userActivity.totalActions > 0 ? (
+                    <>
+                      <div className="mb-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                          <div className="bg-gray-700 rounded-xl p-4">
+                            <p className="text-sm text-gray-400 mb-1">Total Actions</p>
+                            <p className="text-3xl font-bold text-white">
+                              {analytics.userActivity.totalActions.toLocaleString()}
+                            </p>
+                          </div>
+                          <div className="bg-gray-700 rounded-xl p-4">
+                            <p className="text-sm text-gray-400 mb-1">Unique Users</p>
+                            <p className="text-3xl font-bold text-white">
+                              {analytics.userActivity.uniqueUsers.toLocaleString()}
+                            </p>
+                          </div>
+                          <div className="bg-gray-700 rounded-xl p-4">
+                            <p className="text-sm text-gray-400 mb-1">Activity Types</p>
+                            <p className="text-3xl font-bold text-white">
+                              {Object.keys(analytics.userActivity.byType || {}).length}
+                            </p>
+                          </div>
+                        </div>
+                        {analytics.userActivity.byType && Object.keys(analytics.userActivity.byType).length > 0 && (
+                          <ResponsiveContainer width="100%" height={300}>
+                            <BarChart data={Object.entries(analytics.userActivity.byType).map(([action, count]) => ({
+                              action: action.replace('_', ' ').toUpperCase(),
+                              count: Array.isArray(count) ? count.length : count
+                            }))}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                              <XAxis dataKey="action" stroke="#9CA3AF" />
+                              <YAxis stroke="#9CA3AF" />
+                              <Tooltip 
+                                contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
+                                labelStyle={{ color: '#F3F4F6' }}
+                              />
+                              <Legend />
+                              <Bar dataKey="count" fill="#8B5CF6" name="Actions" />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        )}
+                      </div>
+                      {analytics.userActivity.recentActivity && analytics.userActivity.recentActivity.length > 0 && (
+                        <div className="mt-6">
+                          <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
+                          <div className="space-y-2">
+                            {analytics.userActivity.recentActivity.slice(0, 10).map((activity, index) => (
+                              <div key={index} className="bg-gray-700 rounded-lg p-3 flex items-center justify-between">
+                                <div>
+                                  <span className="text-white font-medium capitalize">{activity.action?.replace('_', ' ') || 'Unknown'}</span>
+                                  {activity.chainId && (
+                                    <span className="text-gray-400 text-sm ml-2">Chain: {activity.chainId}</span>
+                                  )}
+                                </div>
+                                <span className="text-gray-400 text-sm">
+                                  {activity.timestamp ? new Date(activity.timestamp).toLocaleString() : 'N/A'}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="bg-gray-700/50 rounded-lg p-6 max-w-md mx-auto">
+                        <p className="text-gray-300 mb-2">User Activity Data Unavailable</p>
                         <p className="text-sm text-gray-400 mb-4">
-                          User activity metrics require backend API integration with user tracking. This feature requires additional implementation to track user interactions.
+                          {analytics && Object.keys(analytics).length > 0
+                            ? 'No user activity has been tracked yet. Activity will appear once users perform actions (swaps, liquidity operations, etc.).'
+                            : 'User activity metrics require backend API integration. The system tracks user interactions and on-chain transactions.'}
                         </p>
                         <p className="text-xs text-gray-500">
-                          Data source: Backend analytics API with user activity tracking (requires additional implementation)
+                          Data source: Backend analytics API (tracks user interactions and on-chain transactions)
                         </p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
                   </>
                 )}

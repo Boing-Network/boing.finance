@@ -399,6 +399,77 @@ export const createAPIRoutes = () => {
         }
       }
 
+      // Add user activity aggregation if analytics data exists
+      if (analyticsData) {
+        try {
+          // Calculate time window for user activity
+          const now = new Date();
+          let timeWindow = 0;
+          switch (range) {
+            case '24h':
+              timeWindow = 24 * 60 * 60 * 1000;
+              break;
+            case '7d':
+              timeWindow = 7 * 24 * 60 * 60 * 1000;
+              break;
+            case '30d':
+              timeWindow = 30 * 24 * 60 * 60 * 1000;
+              break;
+            case '1y':
+              timeWindow = 365 * 24 * 60 * 60 * 1000;
+              break;
+          }
+          
+          const startTime = new Date(now.getTime() - timeWindow);
+          
+          // Query user interactions from database
+          const userActivity = await db.select()
+            .from(schema.userInteractions)
+            .where(
+              sql`datetime(timestamp) >= datetime(${startTime.toISOString()})`
+            )
+            .orderBy(sql`timestamp DESC`);
+          
+          // Aggregate by action type
+          const activityByType = {};
+          let totalActions = 0;
+          
+          userActivity.forEach(activity => {
+            const action = activity.action;
+            if (!activityByType[action]) {
+              activityByType[action] = 0;
+            }
+            activityByType[action]++;
+            totalActions++;
+          });
+          
+          // Get unique users
+          const uniqueUsers = new Set(userActivity.map(a => a.userId)).size;
+          
+          // Add user activity to analytics data
+          analyticsData.userActivity = {
+            totalActions,
+            uniqueUsers,
+            byType: activityByType,
+            recentActivity: userActivity.slice(0, 10).map(a => ({
+              action: a.action,
+              timestamp: a.timestamp,
+              chainId: a.chainId,
+              tokenAddress: a.tokenAddress
+            }))
+          };
+        } catch (activityError) {
+          console.warn('Error aggregating user activity:', activityError);
+          // Don't fail the whole request if user activity fails
+          analyticsData.userActivity = {
+            totalActions: 0,
+            uniqueUsers: 0,
+            byType: {},
+            recentActivity: []
+          };
+        }
+      }
+
       return c.json({
         success: true,
         data: analyticsData

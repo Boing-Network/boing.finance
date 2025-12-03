@@ -7,6 +7,7 @@ import { createDEXRoutes } from './routes/dexRoutes.js';
 import { createAnalyticsRoutes } from './routes/analyticsRoutes.js';
 import { createIPFSRoutes } from './routes/ipfsRoutes.js';
 import { createAPIRoutes } from './routes/apiRoutes.js';
+import { createWalletActivityRoutes } from './routes/walletActivityRoutes.js';
 import collectAnalytics from './scheduled/collectAnalytics.js';
 
 // Create main app
@@ -161,6 +162,12 @@ const apiRoutes = createAPIRoutes();
 apiRoutes.use('*', dbMiddleware);
 apiRoutes.use('*', cacheMiddleware);
 app.route('/api', apiRoutes);
+
+// Mount Wallet Activity routes at /api/analytics
+const walletActivityRoutes = createWalletActivityRoutes();
+walletActivityRoutes.use('*', dbMiddleware);
+walletActivityRoutes.use('*', cacheMiddleware);
+app.route('/api/analytics', walletActivityRoutes);
 
 // Webhook routes
 app.post('/api/webhook', async (c) => {
