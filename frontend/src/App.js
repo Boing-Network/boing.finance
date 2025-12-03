@@ -904,24 +904,7 @@ function Home() {
       rawComingSoon: item.comingSoon
     }));
     
-    console.log('[Home] Navigation state being used:', {
-      trading: tradingValues,
-      analytics: analyticsValues,
-      deployment: deploymentValues
-    });
-    
-    // Check for any mutations
-    const hasMutations = tradingValues.some(item => item.rawIsAvailable !== true || item.rawComingSoon !== false) ||
-                        analyticsValues.some(item => item.rawIsAvailable !== true || item.rawComingSoon !== false) ||
-                        deploymentValues.some(item => item.rawIsAvailable !== true || item.rawComingSoon !== false);
-    
-    if (hasMutations) {
-      console.error('[Home] ⚠️ DETECTED MUTATION IN NAVIGATION STATE!', {
-        trading: tradingValues,
-        analytics: analyticsValues,
-        deployment: deploymentValues
-      });
-    }
+    // Navigation state check (console.log removed for production)
   });
   
   return (
