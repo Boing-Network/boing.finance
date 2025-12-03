@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
 import config from '../config';
 import { Helmet } from 'react-helmet-async';
 import { LineChart, Line, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
@@ -37,13 +36,29 @@ export default function Analytics() {
       if (!config?.apiUrl) {
         return {};
       }
-      const response = await axios.get(`${config.apiUrl}/analytics?range=${range}`, {
-        timeout: 10000, // 10 second timeout
-        validateStatus: (status) => status < 500 // Don't throw on 404
+      // Use fetch instead of axios to avoid automatic error logging
+      const response = await fetch(`${config.apiUrl}/analytics?range=${range}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        signal: AbortSignal.timeout(10000), // 10 second timeout
       });
-      return response?.data?.data || {};
+      
+      // Handle 404 gracefully (expected - endpoint doesn't exist yet)
+      if (response.status === 404) {
+        return {};
+      }
+      
+      if (!response.ok) {
+        return {};
+      }
+      
+      const data = await response.json();
+      return data?.data || {};
     } catch (error) {
-      // Silently handle 404 and other errors - return empty data
+      // Silently handle all errors - return empty data
+      // 404s and network errors are expected when backend API is unavailable
       return {};
     }
   };
@@ -128,23 +143,33 @@ export default function Analytics() {
         const stats = await theGraphService.getNetworkStats('ethereum');
         return stats;
       } catch (error) {
-        // Silently return null on error
+        // Silently return null on error (CORS issues expected)
         return null;
       }
     },
     refetchInterval: 60000, // Refetch every minute
+    retry: false, // Don't retry on CORS errors
+    onError: () => {
+      // Suppress CORS errors - they're expected when The Graph API blocks browser requests
+    }
   });
 
   // Fetch market data - React Query v5 API
+  // Note: CoinGecko global endpoint doesn't support time ranges - it always returns current data
   const { data: marketData, isLoading: marketLoading } = useQuery({
-    queryKey: ['market-data', timeRange],
+    queryKey: ['market-data'], // Remove timeRange - CoinGecko doesn't support it
     queryFn: async () => {
-      // Get top cryptocurrencies market data
-      const response = await fetch(
-        `https://api.coingecko.com/api/v3/global${process.env.REACT_APP_COINGECKO_API_KEY ? `?x_cg_demo_api_key=${process.env.REACT_APP_COINGECKO_API_KEY}` : ''}`
-      );
-      if (!response.ok) return null;
-      return await response.json();
+      try {
+        // Get top cryptocurrencies market data
+        const response = await fetch(
+          `https://api.coingecko.com/api/v3/global${process.env.REACT_APP_COINGECKO_API_KEY ? `?x_cg_demo_api_key=${process.env.REACT_APP_COINGECKO_API_KEY}` : ''}`
+        );
+        if (!response.ok) return null;
+        return await response.json();
+      } catch (error) {
+        // Silently handle errors
+        return null;
+      }
     },
     refetchInterval: 60000, // Refetch every minute
   });
@@ -273,7 +298,7 @@ export default function Analytics() {
 
             {/* Time Range Selector and Sections */}
             <div className="bg-gray-800 rounded-2xl shadow-xl p-6 mb-8 border border-gray-700">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold text-white">Time Range</h2>
                 <div className="flex space-x-2">
                   {['overview', 'market', 'trending'].map((section) => (
@@ -290,6 +315,13 @@ export default function Analytics() {
                     </button>
                   ))}
                 </div>
+              </div>
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mb-4">
+                <p className="text-sm text-blue-300">
+                  <span className="font-semibold">Note:</span> Time range selection affects chart visualizations in the Overview tab. 
+                  Market statistics and trending data show current/real-time information and are not time-range specific. 
+                  Historical data requires backend API integration (currently unavailable).
+                </p>
               </div>
               <div className="flex flex-wrap gap-4">
                 {timeRanges.map((range) => (
@@ -407,12 +439,17 @@ export default function Analytics() {
 
                 {/* Volume Chart */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-white">Volume Over Time ({timeRanges.find(r => r.id === timeRange)?.name})</h2>
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h2 className="text-2xl font-bold text-white">Volume Over Time ({timeRanges.find(r => r.id === timeRange)?.name})</h2>
+                    </div>
                     {generateTimeSeriesData.length > 0 && (
-                      <span className="text-xs text-gray-400 bg-gray-700 px-3 py-1 rounded-full">
-                        Estimated projection based on current volume
-                      </span>
+                      <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-4">
+                        <p className="text-sm text-yellow-300">
+                          <span className="font-semibold">⚠️ Estimated Data:</span> This chart shows estimated volume projections based on current 24h volume from CoinGecko. 
+                          Historical data is not available without backend API integration. The chart visualizes projected trends, not actual historical data.
+                        </p>
+                      </div>
                     )}
                   </div>
                   {marketLoading ? (
@@ -509,8 +546,16 @@ export default function Analytics() {
                       </div>
                     </>
                   ) : (
-                    <div className="text-center py-8">
-                      <p className="text-gray-300">No network statistics available.</p>
+                    <div className="text-center py-12">
+                      <div className="bg-gray-700/50 rounded-lg p-6 max-w-md mx-auto">
+                        <p className="text-gray-300 mb-2">Network Performance Data Unavailable</p>
+                        <p className="text-sm text-gray-400 mb-4">
+                          Network-specific statistics require backend API integration. This feature will be available once the analytics API endpoint is implemented.
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Current data sources: CoinGecko (global market data) • The Graph (DEX data - CORS limited)
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -550,72 +595,88 @@ export default function Analytics() {
                 {/* Top Trading Pairs */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                   <h2 className="text-2xl font-bold text-white mb-6">Top Trading Pairs</h2>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-700">
-                      <thead className="bg-gray-700">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                            Pair
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                            Network
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                            Volume
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                            Liquidity
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                            APY
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-gray-800 divide-y divide-gray-700">
-                        {analytics.topPairs ? analytics.topPairs.map((pair, index) => (
-                          <tr key={index} className="hover:bg-gray-700 transition-colors">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mr-3">
-                                  <span className="text-white font-bold text-sm">
-                                    {pair.token0Symbol?.charAt(0) || 'T'}{pair.token1Symbol?.charAt(0) || 'T'}
+                  {analytics.topPairs && analytics.topPairs.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-700">
+                        <thead className="bg-gray-700">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                              Pair
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                              Network
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                              Volume
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                              Liquidity
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                              APY
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-gray-800 divide-y divide-gray-700">
+                          {analytics.topPairs.map((pair, index) => (
+                            <tr key={index} className="hover:bg-gray-700 transition-colors">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mr-3">
+                                    <span className="text-white font-bold text-sm">
+                                      {pair.token0Symbol?.charAt(0) || 'T'}{pair.token1Symbol?.charAt(0) || 'T'}
+                                    </span>
+                                  </div>
+                                  <span className="text-white font-medium">
+                                    {pair.token0Symbol}/{pair.token1Symbol}
                                   </span>
                                 </div>
-                                <span className="text-white font-medium">
-                                  {pair.token0Symbol}/{pair.token1Symbol}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-gray-300">
-                              {pair.network}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-white">
-                              ${parseFloat(pair.volume || 0).toLocaleString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-white">
-                              ${parseFloat(pair.liquidity || 0).toLocaleString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-green-400">
-                              {pair.apy ? `${parseFloat(pair.apy).toFixed(2)}%` : '0%'}
-                            </td>
-                          </tr>
-                        )) : (
-                          <tr>
-                            <td colSpan="5" className="px-6 py-8 text-center">
-                              <p className="text-gray-300">No trading pairs data available.</p>
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-gray-300">
+                                {pair.network}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-white">
+                                ${parseFloat(pair.volume || 0).toLocaleString()}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-white">
+                                ${parseFloat(pair.liquidity || 0).toLocaleString()}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-green-400">
+                                {pair.apy ? `${parseFloat(pair.apy).toFixed(2)}%` : '0%'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="bg-gray-700/50 rounded-lg p-6 max-w-md mx-auto">
+                        <p className="text-gray-300 mb-2">Trading Pairs Data Unavailable</p>
+                        <p className="text-sm text-gray-400 mb-4">
+                          Top trading pairs data requires backend API integration. This feature will display once the analytics API endpoint is implemented.
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Data source: Backend analytics API (not yet available)
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* User Activity Chart */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                   <h2 className="text-2xl font-bold text-white mb-6">User Activity</h2>
-                  <div className="h-64 bg-gray-700 rounded-lg flex items-center justify-center">
-                    <p className="text-gray-400">Activity data will be displayed here as it becomes available</p>
+                  <div className="text-center py-12">
+                    <div className="bg-gray-700/50 rounded-lg p-6 max-w-md mx-auto">
+                      <p className="text-gray-300 mb-2">User Activity Data Unavailable</p>
+                      <p className="text-sm text-gray-400 mb-4">
+                        User activity metrics require backend API integration with user tracking. This feature will be available once the analytics API endpoint is implemented.
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Data source: Backend analytics API with user activity tracking (not yet available)
+                      </p>
+                    </div>
                   </div>
                 </div>
                   </>
