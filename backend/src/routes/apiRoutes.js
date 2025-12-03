@@ -5,7 +5,7 @@ import { Hono } from 'hono';
 import { drizzle } from 'drizzle-orm/d1';
 import { sql } from 'drizzle-orm';
 import * as schema from '../database/schema.js';
-import coingeckoService from '../../frontend/src/services/coingeckoService.js';
+import AnalyticsService from '../services/analyticsService.js';
 
 export const createAPIRoutes = () => {
   const api = new Hono();
@@ -281,6 +281,47 @@ export const createAPIRoutes = () => {
         }
       }
     });
+  });
+
+  // Analytics endpoint - aggregates data from multiple sources
+  api.get('/analytics', async (c) => {
+    try {
+      const range = c.req.query('range') || '24h';
+      const networksParam = c.req.query('networks') || '1'; // Default to Ethereum
+      
+      // Parse networks (comma-separated chain IDs)
+      const networks = networksParam.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+      if (networks.length === 0) {
+        networks.push(1); // Default to Ethereum
+      }
+
+      // Validate range
+      const validRanges = ['24h', '7d', '30d', '1y'];
+      if (!validRanges.includes(range)) {
+        return c.json({ 
+          success: false, 
+          error: `Invalid range. Must be one of: ${validRanges.join(', ')}` 
+        }, 400);
+      }
+
+      // Create analytics service instance
+      const analyticsService = new AnalyticsService(c.env);
+      
+      // Fetch aggregated analytics data
+      const analyticsData = await analyticsService.getAnalyticsData(range, networks);
+
+      return c.json({
+        success: true,
+        data: analyticsData
+      });
+    } catch (error) {
+      console.error('Analytics endpoint error:', error);
+      return c.json({ 
+        success: false, 
+        error: 'Failed to fetch analytics data',
+        message: error.message 
+      }, 500);
+    }
   });
 
   return api;

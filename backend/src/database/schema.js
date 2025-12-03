@@ -194,6 +194,27 @@ export const bridgeTransactions = sqliteTable('bridge_transactions', {
   timestampIdx: index('bridge_timestamp_idx').on(table.timestamp)
 }));
 
+// Historical analytics snapshots - stores time-series data for analytics
+export const analyticsSnapshots = sqliteTable('analytics_snapshots', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  range: text('range').notNull(), // '24h', '7d', '30d', '1y'
+  network: integer('network').notNull(), // Chain ID
+  totalVolume: text('total_volume').notNull(),
+  totalLiquidity: text('total_liquidity').notNull(),
+  totalPools: integer('total_pools').default(0),
+  totalTransactions: integer('total_transactions').default(0),
+  marketCap: text('market_cap'),
+  activeCryptocurrencies: integer('active_cryptocurrencies'),
+  markets: integer('markets'),
+  snapshotData: text('snapshot_data'), // JSON string for additional data
+  timestamp: text('timestamp').default(sql`CURRENT_TIMESTAMP`)
+}, (table) => ({
+  rangeIdx: index('analytics_snapshots_range_idx').on(table.range),
+  networkIdx: index('analytics_snapshots_network_idx').on(table.network),
+  timestampIdx: index('analytics_snapshots_timestamp_idx').on(table.timestamp),
+  rangeNetworkTimestampIdx: index('analytics_snapshots_range_network_timestamp_idx').on(table.range, table.network, table.timestamp)
+}));
+
 export const schema = {
   // New D1-optimized tables
   knownTokens,
@@ -203,6 +224,7 @@ export const schema = {
   analyticsEvents,
   cache,
   errorLogs,
+  analyticsSnapshots,
   
   // Legacy tables for backward compatibility
   tokens,
