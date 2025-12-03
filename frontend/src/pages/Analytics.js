@@ -99,32 +99,48 @@ export default function Analytics() {
         }
       }
 
-      // For specific networks, try The Graph
+      // For specific networks, use backend analytics endpoint
       try {
-        const network = getNetworkName(selectedNetwork);
-        const graphData = await theGraphService.getTrendingTokens(network, 20);
-        if (graphData && graphData.tokens) {
-          return graphData.tokens.map(token => ({
-            item: {
-              id: token.id,
-              name: token.name,
-              symbol: token.symbol,
-              price_btc: 0,
-              price_usd: token.priceUSD || 0,
-              market_cap_rank: null,
-              score: 0,
-              network: network,
-              data: {
-                price: token.priceUSD || 0,
-                price_change_percentage_24h: {
-                  usd: token.priceChange24h || 0
-                }
-              }
+        // Convert network name to chain ID for backend
+        const networkChainIdMap = {
+          'ethereum': 1,
+          'polygon': 137,
+          'binance-smart-chain': 56,
+          'arbitrum': 42161,
+          'optimism': 10,
+          'base': 8453
+        };
+        const chainId = networkChainIdMap[selectedNetwork] || 1;
+        
+        // Use backend analytics endpoint instead of direct The Graph call
+        try {
+          const response = await fetch(`${config.apiUrl}/analytics?range=24h&networks=${chainId}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            if (data?.data?.topPairs && data.data.topPairs.length > 0) {
+              // Convert topPairs to trending tokens format
+              return data.data.topPairs.slice(0, 20).map(pair => ({
+                id: `${pair.token0Symbol}-${pair.token1Symbol}`,
+                symbol: pair.token0Symbol,
+                name: `${pair.token0Symbol}/${pair.token1Symbol}`,
+                network: pair.network,
+                volume: pair.volume,
+                liquidity: pair.liquidity
+              }));
             }
-          }));
+          }
+        } catch (error) {
+          console.warn('Backend trending data not available');
         }
+        
+        // No fallback to direct The Graph call - it causes CORS errors
+        // Return empty array if backend doesn't have data
+        return [];
       } catch (error) {
-        console.error(`Error fetching The Graph trending for ${selectedNetwork}:`, error);
+        console.error(`Error fetching trending for ${selectedNetwork}:`, error);
         // Return empty array for network-specific queries that fail
         return [];
       }
@@ -135,24 +151,8 @@ export default function Analytics() {
     enabled: true, // Always enabled
   });
 
-  // Fetch DEX network statistics from The Graph
-  const { data: dexStats, isLoading: dexStatsLoading } = useQuery({
-    queryKey: ['dex-stats'],
-    queryFn: async () => {
-      try {
-        const stats = await theGraphService.getNetworkStats('ethereum');
-        return stats;
-      } catch (error) {
-        // Silently return null on error (CORS issues expected)
-        return null;
-      }
-    },
-    refetchInterval: 60000, // Refetch every minute
-    retry: false, // Don't retry on CORS errors
-    onError: () => {
-      // Suppress CORS errors - they're expected when The Graph API blocks browser requests
-    }
-  });
+  // DEX stats are now included in the analytics response from backend
+  // No need for separate query - using analytics.networkStats instead
 
   // Fetch market data - React Query v5 API
   // Note: CoinGecko global endpoint doesn't support time ranges - it always returns current data
@@ -341,7 +341,7 @@ export default function Analytics() {
             </div>
 
             {/* Analytics Content */}
-            {isLoading || trendingLoading || dexStatsLoading || marketLoading ? (
+            {isLoading || trendingLoading || marketLoading ? (
               <div className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {[1, 2, 3, 4].map((i) => (
@@ -368,13 +368,11 @@ export default function Analytics() {
                     <h3 className="text-lg font-semibold text-white mb-2">24h Volume</h3>
                     <p className="text-3xl font-bold text-blue-400">
                       {(() => {
-                        const volume = analytics.totalVolume 
+                        const volume = analytics?.totalVolume 
                           ? parseFloat(analytics.totalVolume)
-                          : (dexStats?.uniswapFactories?.[0]?.totalVolumeUSD 
-                            ? parseFloat(dexStats.uniswapFactories[0].totalVolumeUSD)
-                            : (marketData?.data?.total_volume?.usd 
-                              ? marketData.data.total_volume.usd 
-                              : 0));
+                          : (marketData?.data?.total_volume?.usd 
+                            ? marketData.data.total_volume.usd 
+                            : 0);
                         if (volume === 0) return 'N/A';
                         if (volume >= 1e12) return `$${(volume / 1e12).toFixed(2)}T`;
                         if (volume >= 1e9) return `$${(volume / 1e9).toFixed(2)}B`;
@@ -393,9 +391,9 @@ export default function Analytics() {
                       {(() => {
                         const marketCap = marketData?.data?.total_market_cap?.usd 
                           ? marketData.data.total_market_cap.usd
-                          : (dexStats?.uniswapFactories?.[0]?.totalLiquidityUSD 
-                            ? parseFloat(dexStats.uniswapFactories[0].totalLiquidityUSD) * 2 // Estimate
-                            : (analytics.totalLiquidity ? parseFloat(analytics.totalLiquidity) * 2 : 0));
+                          : (analytics?.marketCap 
+                            ? parseFloat(analytics.marketCap)
+                            : (analytics?.totalLiquidity ? parseFloat(analytics.totalLiquidity) * 2 : 0));
                         if (marketCap === 0) return 'N/A';
                         if (marketCap >= 1e12) return `$${(marketCap / 1e12).toFixed(2)}T`;
                         if (marketCap >= 1e9) return `$${(marketCap / 1e9).toFixed(2)}B`;
@@ -413,12 +411,12 @@ export default function Analytics() {
                     <p className="text-3xl font-bold text-purple-400">
                       {marketData?.data?.active_cryptocurrencies 
                         ? marketData.data.active_cryptocurrencies.toLocaleString()
-                        : (dexStats?.uniswapFactories?.[0]?.pairCount 
-                          ? dexStats.uniswapFactories[0].pairCount.toLocaleString()
-                          : (analytics.totalPools ? analytics.totalPools.toLocaleString() : 'N/A'))}
+                        : (analytics?.activeCryptocurrencies 
+                          ? analytics.activeCryptocurrencies.toLocaleString()
+                          : (analytics?.totalPools ? analytics.totalPools.toLocaleString() : 'N/A'))}
                     </p>
                     <p className="text-sm text-gray-400 mt-2">
-                      {marketData?.data?.active_cryptocurrencies ? 'Tracked on CoinGecko' : 'Total pools'}
+                      {marketData?.data?.active_cryptocurrencies ? 'Tracked on CoinGecko' : (analytics?.activeCryptocurrencies ? 'From backend API' : 'Total pools')}
                     </p>
                   </div>
                   
@@ -427,12 +425,12 @@ export default function Analytics() {
                     <p className="text-3xl font-bold text-yellow-400">
                       {marketData?.data?.markets 
                         ? marketData.data.markets.toLocaleString()
-                        : (dexStats?.uniswapFactories?.[0]?.txCount 
-                          ? dexStats.uniswapFactories[0].txCount.toLocaleString()
-                          : (analytics.totalTransactions ? analytics.totalTransactions.toLocaleString() : 'N/A'))}
+                        : (analytics?.markets 
+                          ? analytics.markets.toLocaleString()
+                          : (analytics?.totalTransactions ? analytics.totalTransactions.toLocaleString() : 'N/A'))}
                     </p>
                     <p className="text-sm text-gray-400 mt-2">
-                      {marketData?.data?.markets ? 'Active trading pairs' : 'Total transactions'}
+                      {marketData?.data?.markets ? 'Active trading pairs (CoinGecko)' : (analytics?.markets ? 'Markets (backend API)' : 'Total transactions')}
                     </p>
                   </div>
                 </div>
@@ -550,10 +548,12 @@ export default function Analytics() {
                       <div className="bg-gray-700/50 rounded-lg p-6 max-w-md mx-auto">
                         <p className="text-gray-300 mb-2">Network Performance Data Unavailable</p>
                         <p className="text-sm text-gray-400 mb-4">
-                          Network-specific statistics require backend API integration. This feature will be available once the analytics API endpoint is implemented.
+                          {analytics && Object.keys(analytics).length > 0 
+                            ? 'Network statistics are being fetched from the backend. If this persists, the backend may not have collected data yet.'
+                            : 'Network-specific statistics require backend API integration. The backend endpoint is available but may need time to collect initial data.'}
                         </p>
                         <p className="text-xs text-gray-500">
-                          Current data sources: CoinGecko (global market data) • The Graph (DEX data - CORS limited)
+                          Data source: Backend analytics API (collects data hourly from The Graph and CoinGecko)
                         </p>
                       </div>
                     </div>
@@ -654,10 +654,12 @@ export default function Analytics() {
                       <div className="bg-gray-700/50 rounded-lg p-6 max-w-md mx-auto">
                         <p className="text-gray-300 mb-2">Trading Pairs Data Unavailable</p>
                         <p className="text-sm text-gray-400 mb-4">
-                          Top trading pairs data requires backend API integration. This feature will display once the analytics API endpoint is implemented.
+                          {analytics && Object.keys(analytics).length > 0 
+                            ? 'Top trading pairs are being fetched from the backend. If this persists, the backend may not have collected data yet or The Graph API may be rate-limited.'
+                            : 'Top trading pairs data requires backend API integration. The backend endpoint is available but may need time to collect initial data.'}
                         </p>
                         <p className="text-xs text-gray-500">
-                          Data source: Backend analytics API (not yet available)
+                          Data source: Backend analytics API (collects data hourly from The Graph)
                         </p>
                       </div>
                     </div>
@@ -670,12 +672,12 @@ export default function Analytics() {
                   <div className="text-center py-12">
                     <div className="bg-gray-700/50 rounded-lg p-6 max-w-md mx-auto">
                       <p className="text-gray-300 mb-2">User Activity Data Unavailable</p>
-                      <p className="text-sm text-gray-400 mb-4">
-                        User activity metrics require backend API integration with user tracking. This feature will be available once the analytics API endpoint is implemented.
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Data source: Backend analytics API with user activity tracking (not yet available)
-                      </p>
+                        <p className="text-sm text-gray-400 mb-4">
+                          User activity metrics require backend API integration with user tracking. This feature requires additional implementation to track user interactions.
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Data source: Backend analytics API with user activity tracking (requires additional implementation)
+                        </p>
                     </div>
                   </div>
                 </div>
