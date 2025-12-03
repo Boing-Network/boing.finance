@@ -107,29 +107,7 @@ function AppContent() {
     };
   }, []);
 
-  // Debug logging for navigation state
-  React.useEffect(() => {
-    console.log('[AppContent] Navigation state check:', {
-      location: location.pathname,
-      timestamp: new Date().toISOString(),
-      trading: memoizedNavigation.trading.map(item => ({ 
-        name: item.name, 
-        isAvailable: item.isAvailable, 
-        comingSoon: item.comingSoon,
-        testnetOnly: item.testnetOnly 
-      })),
-      analytics: memoizedNavigation.analytics.map(item => ({ 
-        name: item.name, 
-        isAvailable: item.isAvailable, 
-        comingSoon: item.comingSoon 
-      })),
-      deployment: memoizedNavigation.deployment.map(item => ({ 
-        name: item.name, 
-        isAvailable: item.isAvailable, 
-        comingSoon: item.comingSoon 
-      }))
-    });
-  }, [location.pathname, memoizedNavigation]);
+  // Navigation state check (console.log removed for production)
 
   const closeMenu = () => {
     setIsMenuOpen(false);
