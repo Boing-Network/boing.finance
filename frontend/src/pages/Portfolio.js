@@ -20,7 +20,6 @@ import toast from 'react-hot-toast';
 // MochiAstronaut component
 
 export default function Portfolio() {
-  console.log('[Portfolio] Component rendering at:', new Date().toISOString());
   const { account, chainId } = useWallet();
   const [selectedNetwork, setSelectedNetwork] = useState('all');
   // eslint-disable-next-line no-unused-vars
@@ -46,7 +45,7 @@ export default function Portfolio() {
   const { data: userPools, isLoading: poolsLoading } = useQuery({
     queryKey: ['user-pools-portfolio', account, chainId, blockchainInitialized],
     queryFn: async () => {
-      console.log('[Portfolio] Fetching user pools:', { account, chainId, blockchainInitialized });
+      // Fetching user pools
       if (!account) return [];
       
       try {
@@ -104,7 +103,6 @@ export default function Portfolio() {
         
         return allPositions;
       } catch (error) {
-        console.error('[Portfolio] Error fetching user pools:', error);
         return [];
       }
     },
@@ -112,8 +110,8 @@ export default function Portfolio() {
     enabled: !!account, // Enable even without blockchain initialization
     retry: 1,
     retryDelay: 1000,
-    onError: (error) => {
-      console.error('[Portfolio] User pools portfolio query error:', error);
+    onError: () => {
+      // Silently handle errors
     }
   });
 
@@ -121,12 +119,11 @@ export default function Portfolio() {
   const { data: createdPools, isLoading: createdPoolsLoading } = useQuery({
     queryKey: ['created-pools-portfolio', account, chainId, blockchainInitialized],
     queryFn: async () => {
-      console.log('[Portfolio] Fetching created pools:', { account, chainId, blockchainInitialized });
+      // Fetching created pools
       if (!account || !blockchainInitialized) return [];
       try {
         return await getBlockchainCreatedPools();
       } catch (error) {
-        console.error('[Portfolio] Error fetching created pools:', error);
         return [];
       }
     },
@@ -134,8 +131,8 @@ export default function Portfolio() {
     enabled: !!account && blockchainInitialized,
     retry: 1,
     retryDelay: 1000,
-    onError: (error) => {
-      console.error('[Portfolio] Created pools query error:', error);
+    onError: () => {
+      // Silently handle errors
     }
   });
 
@@ -160,7 +157,7 @@ export default function Portfolio() {
   const { data: tokenBalances, isLoading: balancesLoading } = useQuery({
     queryKey: ['token-balances', account, trackedNetworks],
     queryFn: async () => {
-      console.log('[Portfolio] Fetching token balances:', { account, trackedNetworks });
+      // Fetching token balances
       if (!account) return null;
       return await portfolioService.getMultiNetworkPortfolio(account, trackedNetworks);
     },
@@ -180,7 +177,7 @@ export default function Portfolio() {
   }, isLoading: portfolioLoading } = useQuery({
     queryKey: ['portfolio-summary', account, chainId, filteredUserPools, tokenBalances],
     queryFn: async () => {
-      console.log('[Portfolio] Calculating portfolio summary:', { account, chainId, poolsCount: filteredUserPools?.length });
+      // Calculating portfolio summary
       if (!account) {
         return {
           totalValue: 0,
@@ -234,7 +231,6 @@ export default function Portfolio() {
           totalPools: totalPools
         };
       } catch (error) {
-        console.error('Failed to calculate portfolio summary:', error);
         return {
           totalValue: 0,
           change24h: 0,

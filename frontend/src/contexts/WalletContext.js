@@ -299,7 +299,7 @@ export const WalletProvider = ({ children }) => {
     if (isInitialized) return;
     
     const initWallet = async () => {
-      console.log('[WalletContext] Initializing wallet connection...');
+      // Initializing wallet connection
       const wasDisconnected = localStorage.getItem('userDisconnected') === 'true';
       setUserDisconnected(wasDisconnected);
       

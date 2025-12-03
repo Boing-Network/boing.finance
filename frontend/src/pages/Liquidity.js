@@ -43,7 +43,7 @@ const Liquidity = () => {
   const { data: liquidityData, isLoading: liquidityLoading } = useQuery({
     queryKey: ['user-liquidity', account],
     queryFn: async () => {
-      console.log('[Liquidity] Fetching user liquidity positions:', { account });
+      // Fetching user liquidity positions
       if (!account) {
         throw new Error('No wallet connected');
       }

@@ -14,39 +14,35 @@ import toast from 'react-hot-toast';
 // BoingAstronaut component
 
 export default function Analytics() {
-  console.log('[Analytics] Component rendering at:', new Date().toISOString());
   const [timeRange, setTimeRange] = useState('24h');
   const [activeSection, setActiveSection] = useState('overview'); // overview, market, trending
 
   const { data: analytics, isLoading, error } = useQuery({
     queryKey: ['analytics', timeRange],
     queryFn: () => {
-      console.log('[Analytics] Fetching analytics:', { timeRange });
       return fetchAnalytics(timeRange);
     },
     refetchInterval: 60000, // Refetch every minute
     retry: 1, // Only retry once on failure
     retryDelay: 2000, // Wait 2 seconds before retry
     staleTime: 30000, // Consider data stale after 30 seconds
-    onError: (error) => {
-      console.error('[Analytics] Analytics query error:', error);
-      // Don't throw - let the component handle the error state gracefully
+    onError: () => {
+      // Silently handle errors - component will show empty state
     }
   });
 
   const fetchAnalytics = async (range) => {
     try {
       if (!config?.apiUrl) {
-        console.warn('API URL not configured, returning empty analytics data');
         return {};
       }
       const response = await axios.get(`${config.apiUrl}/analytics?range=${range}`, {
-        timeout: 10000 // 10 second timeout
+        timeout: 10000, // 10 second timeout
+        validateStatus: (status) => status < 500 // Don't throw on 404
       });
       return response?.data?.data || {};
     } catch (error) {
-      console.error('Failed to fetch analytics:', error);
-      // Return empty object instead of throwing to prevent page crash
+      // Silently handle 404 and other errors - return empty data
       return {};
     }
   };
@@ -55,7 +51,6 @@ export default function Analytics() {
   const { data: trendingTokens, isLoading: trendingLoading } = useQuery({
     queryKey: ['trending-tokens'],
     queryFn: async () => {
-      console.log('[Analytics] Fetching trending tokens');
       try {
         // Try CoinGecko first
         const cgData = await coingeckoService.getTrendingTokens();
@@ -63,7 +58,7 @@ export default function Analytics() {
           return cgData.coins;
         }
       } catch (error) {
-        console.warn('CoinGecko trending tokens failed, trying The Graph:', error);
+        // Silently fallback to The Graph
       }
 
       // Fallback to The Graph for DEX tokens
@@ -83,7 +78,7 @@ export default function Analytics() {
           }));
         }
       } catch (error) {
-        console.error('The Graph trending tokens failed:', error);
+        // Silently return empty array
       }
 
       return [];
@@ -95,12 +90,11 @@ export default function Analytics() {
   const { data: dexStats, isLoading: dexStatsLoading } = useQuery({
     queryKey: ['dex-stats'],
     queryFn: async () => {
-      console.log('[Analytics] Fetching DEX statistics');
       try {
         const stats = await theGraphService.getNetworkStats('ethereum');
         return stats;
       } catch (error) {
-        console.error('Failed to fetch DEX stats:', error);
+        // Silently return null on error
         return null;
       }
     },
@@ -111,7 +105,6 @@ export default function Analytics() {
   const { data: marketData, isLoading: marketLoading } = useQuery({
     queryKey: ['market-data', timeRange],
     queryFn: async () => {
-      console.log('[Analytics] Fetching market data:', { timeRange });
       // Get top cryptocurrencies market data
       const response = await fetch(
         `https://api.coingecko.com/api/v3/global${process.env.REACT_APP_COINGECKO_API_KEY ? `?x_cg_demo_api_key=${process.env.REACT_APP_COINGECKO_API_KEY}` : ''}`

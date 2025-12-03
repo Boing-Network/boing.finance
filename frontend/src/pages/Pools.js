@@ -700,7 +700,7 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
 };
 
 const Pools = () => {
-  console.log('[Pools] Component rendering');
+  // Component rendering
   const { isConnected, account } = useWalletConnection();
   const { chainId } = useWallet();
   console.log('[Pools] Wallet state:', { isConnected, account, chainId });
@@ -741,7 +741,7 @@ const Pools = () => {
   const { data: userPools, isLoading: userPoolsLoading, refetch: refetchUserPools } = useQuery({
     queryKey: ['user-pools', account, chainId, useBlockchainFallback],
     queryFn: async () => {
-      console.log('[Pools] Fetching user pools:', { account, chainId, useBlockchainFallback });
+      // Fetching user pools
       if (!account) return [];
       
       try {
@@ -770,7 +770,7 @@ const Pools = () => {
   const { data: createdPools, isLoading: createdPoolsLoading } = useQuery({
     queryKey: ['created-pools', account, chainId],
     queryFn: () => {
-      console.log('[Pools] Fetching created pools:', { account, chainId });
+      // Fetching created pools
       return getUserCreatedPools(account, chainId);
     },
     enabled: !!account,
@@ -782,7 +782,7 @@ const Pools = () => {
   const { data: allPools, isLoading: allPoolsLoading } = useQuery({
     queryKey: ['all-pools', chainId, blockchainInitialized],
     queryFn: async () => {
-      console.log('[Pools] Fetching all pools:', { chainId, blockchainInitialized });
+      // Fetching all pools
       try {
         if (chainId === 11155111 && blockchainInitialized) { // Sepolia
           // Use blockchain service to get all Sepolia pools (limit to 30)
@@ -811,7 +811,7 @@ const Pools = () => {
   const { data: allPoolsForSearch, isLoading: searchPoolsLoading } = useQuery({
     queryKey: ['all-pools-search', chainId, blockchainInitialized, searchTerm, searchPage, searchLimit],
     queryFn: async () => {
-      console.log('[Pools] Fetching pools for search:', { chainId, blockchainInitialized, searchTerm, searchPage });
+      // Fetching pools for search
       if (chainId === 11155111 && blockchainInitialized && searchTerm.trim()) { // Sepolia
         // Use blockchain service to get all Sepolia pools (limited for search)
         const totalLimit = Math.max(500, searchPage * searchLimit); // Get at least 500 pools to ensure comprehensive search

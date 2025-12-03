@@ -724,7 +724,7 @@ function getQueryClient() {
           },
         },
       });
-      console.log('[App] QueryClient initialized successfully');
+      // QueryClient initialized
     } catch (error) {
       console.error('[App] Error initializing QueryClient:', error);
       // Return a basic QueryClient as fallback
@@ -748,10 +748,7 @@ function App() {
     return getQueryClient();
   }, []); // Empty deps - only get once
   
-  // Log on every render to track remounts
-  React.useEffect(() => {
-    console.log('[App] App component rendered at:', new Date().toISOString());
-  });
+  // Removed console.log for production
 
   // Add global error handler for React Query errors
   React.useEffect(() => {

@@ -35,12 +35,12 @@ if (process.env.NODE_ENV === 'production') {
           } else if (storedVersion !== versionData.version) {
             // Update stored version - NO AUTO RELOAD
             localStorage.setItem('appVersion', versionData.version);
-            console.log('[App] Version updated in localStorage:', versionData.version);
+            // Version updated
             // Service worker handles cache updates in background
           }
         }
       } catch (error) {
-        console.log('[App] Version check failed:', error);
+        // Version check failed
       }
     }, 2000); // 2 second delay to ensure page is stable
   });
