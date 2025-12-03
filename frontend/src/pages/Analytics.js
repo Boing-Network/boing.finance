@@ -55,10 +55,22 @@ export default function Analytics() {
       }
       
       const data = await response.json();
-      return data?.data || {};
+      if (data?.success && data?.data) {
+        // Debug: Log when we get data
+        if (Object.keys(data.data).length > 0) {
+          console.log('Analytics data received:', {
+            hasTotalVolume: !!data.data.totalVolume,
+            hasNetworkStats: !!data.data.networkStats,
+            hasTopPairs: !!data.data.topPairs,
+            source: data.data.source
+          });
+        }
+        return data.data;
+      }
+      return {};
     } catch (error) {
-      // Silently handle all errors - return empty data
-      // 404s and network errors are expected when backend API is unavailable
+      // Log errors for debugging
+      console.warn('Analytics fetch error:', error.message);
       return {};
     }
   };
@@ -100,47 +112,44 @@ export default function Analytics() {
       }
 
       // For specific networks, use backend analytics endpoint
+      // selectedNetwork is already a chain ID (1, 137, etc.) from the dropdown
       try {
-        // Convert network name to chain ID for backend
-        const networkChainIdMap = {
-          'ethereum': 1,
-          'polygon': 137,
-          'binance-smart-chain': 56,
-          'arbitrum': 42161,
-          'optimism': 10,
-          'base': 8453
-        };
-        const chainId = networkChainIdMap[selectedNetwork] || 1;
+        const chainId = selectedNetwork === 'all' ? 1 : parseInt(selectedNetwork) || 1;
         
         // Use backend analytics endpoint instead of direct The Graph call
-        try {
-          const response = await fetch(`${config.apiUrl}/analytics?range=24h&networks=${chainId}`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-          });
-          if (response.ok) {
-            const data = await response.json();
-            if (data?.data?.topPairs && data.data.topPairs.length > 0) {
-              // Convert topPairs to trending tokens format
-              return data.data.topPairs.slice(0, 20).map(pair => ({
+        const response = await fetch(`${config.apiUrl}/analytics?range=24h&networks=${chainId}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data?.success && data?.data?.topPairs && data.data.topPairs.length > 0) {
+            // Convert topPairs to trending tokens format
+            return data.data.topPairs.slice(0, 20).map(pair => ({
+              id: `${pair.token0Symbol}-${pair.token1Symbol}`,
+              symbol: pair.token0Symbol,
+              name: `${pair.token0Symbol}/${pair.token1Symbol}`,
+              network: pair.network || getNetworkName(chainId.toString()),
+              volume: pair.volume,
+              liquidity: pair.liquidity,
+              item: {
                 id: `${pair.token0Symbol}-${pair.token1Symbol}`,
-                symbol: pair.token0Symbol,
                 name: `${pair.token0Symbol}/${pair.token1Symbol}`,
-                network: pair.network,
-                volume: pair.volume,
-                liquidity: pair.liquidity
-              }));
-            }
+                symbol: pair.token0Symbol,
+                price_usd: 0,
+                market_cap_rank: null,
+                score: parseFloat(pair.volume) || 0,
+                network: pair.network || getNetworkName(chainId.toString())
+              }
+            }));
           }
-        } catch (error) {
-          console.warn('Backend trending data not available');
         }
         
-        // No fallback to direct The Graph call - it causes CORS errors
         // Return empty array if backend doesn't have data
         return [];
       } catch (error) {
-        console.error(`Error fetching trending for ${selectedNetwork}:`, error);
+        console.error(`Error fetching trending for network ${selectedNetwork}:`, error);
         // Return empty array for network-specific queries that fail
         return [];
       }
@@ -368,12 +377,15 @@ export default function Analytics() {
                     <h3 className="text-lg font-semibold text-white mb-2">24h Volume</h3>
                     <p className="text-3xl font-bold text-blue-400">
                       {(() => {
-                        const volume = analytics?.totalVolume 
-                          ? parseFloat(analytics.totalVolume)
-                          : (marketData?.data?.total_volume?.usd 
-                            ? marketData.data.total_volume.usd 
-                            : 0);
-                        if (volume === 0) return 'N/A';
+                        // Try backend analytics first, then CoinGecko market data
+                        let volume = 0;
+                        if (analytics?.totalVolume && parseFloat(analytics.totalVolume) > 0) {
+                          volume = parseFloat(analytics.totalVolume);
+                        } else if (marketData?.data?.total_volume?.usd) {
+                          volume = marketData.data.total_volume.usd;
+                        }
+                        
+                        if (volume === 0 || isNaN(volume)) return 'N/A';
                         if (volume >= 1e12) return `$${(volume / 1e12).toFixed(2)}T`;
                         if (volume >= 1e9) return `$${(volume / 1e9).toFixed(2)}B`;
                         if (volume >= 1e6) return `$${(volume / 1e6).toFixed(2)}M`;
@@ -381,7 +393,9 @@ export default function Analytics() {
                       })()}
                     </p>
                     <p className="text-sm text-gray-400 mt-2">
-                      {marketData?.data?.total_volume?.usd ? 'Global crypto market' : 'Across all networks'}
+                      {analytics?.totalVolume && parseFloat(analytics.totalVolume) > 0 
+                        ? 'DEX volume (backend API)' 
+                        : (marketData?.data?.total_volume?.usd ? 'Global crypto market (CoinGecko)' : 'Loading...')}
                     </p>
                   </div>
                   
@@ -442,10 +456,13 @@ export default function Analytics() {
                       <h2 className="text-2xl font-bold text-white">Volume Over Time ({timeRanges.find(r => r.id === timeRange)?.name})</h2>
                     </div>
                     {generateTimeSeriesData.length > 0 && (
-                      <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-4">
-                        <p className="text-sm text-yellow-300">
-                          <span className="font-semibold">⚠️ Estimated Data:</span> This chart shows estimated volume projections based on current 24h volume from CoinGecko. 
-                          Historical data is not available without backend API integration. The chart visualizes projected trends, not actual historical data.
+                      <div className={`${analytics?.source === 'historical' ? 'bg-green-500/10 border-green-500/30' : 'bg-yellow-500/10 border-yellow-500/30'} rounded-lg p-3 mb-4`}>
+                        <p className={`text-sm ${analytics?.source === 'historical' ? 'text-green-300' : 'text-yellow-300'}`}>
+                          <span className="font-semibold">{analytics?.source === 'historical' ? '✅ Historical Data:' : '⚠️ Estimated Data:'}</span> {
+                            analytics?.source === 'historical' 
+                              ? 'This chart shows actual historical volume data from the backend API.' 
+                              : 'This chart shows estimated volume projections based on current 24h volume from CoinGecko. Historical data will be available once the backend collects snapshots.'
+                          }
                         </p>
                       </div>
                     )}
@@ -812,8 +829,10 @@ export default function Analytics() {
                       <div className="flex items-center justify-between mb-6">
                         <h2 className="text-2xl font-bold text-white">Trending Tokens</h2>
                         <div className="flex items-center gap-3">
-                          <label className="text-sm text-gray-300">Network:</label>
+                          <label htmlFor="network-selector" className="text-sm text-gray-300">Network:</label>
                           <select
+                            id="network-selector"
+                            name="network-selector"
                             value={selectedNetwork}
                             onChange={(e) => setSelectedNetwork(e.target.value)}
                             className="px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500"
@@ -833,7 +852,7 @@ export default function Analytics() {
                           <span className="font-semibold">Note:</span> Trending tokens show current popularity based on search volume and social activity. 
                           {selectedNetwork === 'all' 
                             ? ' Data from CoinGecko (all cryptocurrencies).' 
-                            : ` Data from The Graph for ${getNetworkName(selectedNetwork)} network.`}
+                            : ` Data from backend API for ${getNetworkName(selectedNetwork)} network.`}
                           {' '}Time range selection does not affect trending data as it reflects current market sentiment.
                         </p>
                       </div>
