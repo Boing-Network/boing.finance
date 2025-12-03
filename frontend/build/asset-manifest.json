@@ -1,11 +1,11 @@
 {
   "files": {
-    "main.css": "/static/css/main.190efe7a.css",
-    "main.js": "/static/js/main.778b36aa.js",
+    "main.css": "/static/css/main.24d0082b.css",
+    "main.js": "/static/js/main.8770bf7a.js",
     "static/js/389.280c7c7b.chunk.js": "/static/js/389.280c7c7b.chunk.js",
     "static/js/270.6e620e74.chunk.js": "/static/js/270.6e620e74.chunk.js",
     "static/js/148.8644a82a.chunk.js": "/static/js/148.8644a82a.chunk.js",
-    "static/js/859.d08151dd.chunk.js": "/static/js/859.d08151dd.chunk.js",
+    "static/js/859.ce19ff31.chunk.js": "/static/js/859.ce19ff31.chunk.js",
     "static/js/483.18f139f2.chunk.js": "/static/js/483.18f139f2.chunk.js",
     "static/js/93.caaa9dc0.chunk.js": "/static/js/93.caaa9dc0.chunk.js",
     "static/js/243.75afd055.chunk.js": "/static/js/243.75afd055.chunk.js",
@@ -37,7 +37,7 @@
     "static/media/goober.cjs": "/static/media/goober.c3746e527158129086ad.cjs"
   },
   "entrypoints": [
-    "static/css/main.190efe7a.css",
-    "static/js/main.778b36aa.js"
+    "static/css/main.24d0082b.css",
+    "static/js/main.8770bf7a.js"
   ]
 }
