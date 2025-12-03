@@ -11,6 +11,7 @@ name = "boing-api"
 main = "src/worker.js"
 compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
+account_id = "10374f367672f4d19db430601db0926b"
 
 # Environment variables
 [vars]
