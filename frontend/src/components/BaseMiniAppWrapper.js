@@ -73,34 +73,22 @@ const BaseMiniAppWrapper = ({ children }) => {
             );
             
             await Promise.race([readyPromise, timeoutPromise]);
-            console.log('✅ Farcaster MiniApp ready() called successfully');
           } catch (error) {
-            console.error('❌ Farcaster MiniApp SDK failed to initialize:', error);
-            console.error('Error details:', error.message, error.stack);
-            
             // For mobile devices, try a fallback approach
             if (isMobile) {
-              console.log('🔄 Attempting mobile fallback...');
               try {
                 // Try to call ready() without waiting
                 if (window.farcaster && window.farcaster.actions) {
                   window.farcaster.actions.ready();
-                  console.log('✅ Mobile fallback successful');
                 }
               } catch (fallbackError) {
-                console.error('❌ Mobile fallback failed:', fallbackError);
+                // Mobile fallback failed
               }
             }
             // Continue without Farcaster features
           }
         } else {
           // Not in Farcaster, but check if we should try anyway on mobile
-          console.log('ℹ️ Not running in Farcaster environment');
-          console.log('User Agent:', window.navigator.userAgent);
-          console.log('Referrer:', document.referrer);
-          console.log('URL:', window.location.href);
-          console.log('Is Mobile:', isMobile);
-          
           // For mobile devices, try to initialize SDK anyway as a fallback
           if (isMobile) {
             try {
@@ -117,8 +105,7 @@ const BaseMiniAppWrapper = ({ children }) => {
           }
         }
       } catch (error) {
-        console.warn('MiniApp initialization failed:', error);
-        // Continue without MiniApp features
+        // MiniApp initialization failed - continue without MiniApp features
       } finally {
         clearTimeout(initTimeout);
         setIsLoading(false);

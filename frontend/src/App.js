@@ -765,7 +765,7 @@ function App() {
         try {
           queryClient.clear();
         } catch (e) {
-          console.error('[App] Error clearing QueryClient:', e);
+          // Error clearing QueryClient
         }
       }
     };
@@ -776,7 +776,7 @@ function App() {
         event.reason.message?.includes('defaultQueryOptions') ||
         event.reason.message?.includes('QueryClient')
       )) {
-        console.error('[App] React Query promise rejection caught:', event.reason);
+        // React Query promise rejection caught
         event.preventDefault();
       }
     });
@@ -864,7 +864,7 @@ function Home() {
       comingSoon: item.comingSoon
     }));
     
-    console.log('[Home] Navigation values at memoization:', {
+    // Navigation values at memoization
       trading: tradingState,
       analytics: analyticsState,
       deployment: deploymentState
@@ -875,8 +875,7 @@ function Home() {
   
   // Debug logging for Home component on every render
   React.useEffect(() => {
-    console.log('[Home] Component rendered at:', new Date().toISOString());
-    console.log('[Home] Navigation reference check:', memoizedNav === navigation);
+    // Component rendered
     
     // Log actual values being used
     const tradingValues = memoizedNav.trading.map(item => ({
@@ -1406,7 +1405,7 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
               const isAvailable = Boolean(item.isAvailable);
               const shouldDisable = isComingSoon || !isAvailable;
               
-              console.log(`[DropdownMenu] ${label} - ${item.name}:`, {
+              // Dropdown menu item
                 name: item.name,
                 comingSoon: item.comingSoon,
                 isComingSoon,
@@ -1421,11 +1420,11 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
                   key={item.name}
                   onClick={() => {
                     if (!shouldDisable) {
-                      console.log(`[DropdownMenu] Navigating to ${item.href}`);
+                      // Navigating to item
                       window.location.href = item.href;
                       onClose();
                     } else {
-                      console.log(`[DropdownMenu] ${item.name} is disabled (comingSoon: ${isComingSoon}, !isAvailable: ${!isAvailable})`);
+                      // Item is disabled
                     }
                   }}
                   className={`w-full text-left px-4 py-2.5 text-sm flex items-center space-x-3 group transition-all duration-200 rounded-lg mx-1 ${shouldDisable ? 'cursor-not-allowed opacity-60' : 'hover:bg-cyan-500/10'}`}
