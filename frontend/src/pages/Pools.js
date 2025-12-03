@@ -718,13 +718,7 @@ const Pools = () => {
   const [searchLimit, setSearchLimit] = useState(50); // Initial search limit - increased from 10
   
   // Blockchain pools hook - hooks must be called unconditionally
-  console.log('[Pools] Initializing blockchain pools hook');
   const blockchainPoolsHook = useBlockchainPools();
-  // Blockchain pools hook initialized
-    isInitialized: blockchainPoolsHook?.isInitialized,
-    isLoading: blockchainPoolsHook?.isLoading,
-    hasError: !!blockchainPoolsHook?.error
-  });
   
   // Safely extract values with defaults
   const blockchainInitialized = blockchainPoolsHook?.isInitialized || false;

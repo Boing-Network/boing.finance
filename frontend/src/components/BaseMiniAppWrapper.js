@@ -103,20 +103,16 @@ const BaseMiniAppWrapper = ({ children }) => {
           
           // For mobile devices, try to initialize SDK anyway as a fallback
           if (isMobile) {
-            console.log('🔄 Mobile fallback: Attempting SDK initialization anyway...');
             try {
               const { sdk: farcasterSdk } = await import('@farcaster/miniapp-sdk');
-              console.log('✅ Mobile fallback SDK loaded');
               setSdk(farcasterSdk);
               
               // Try to call ready() without waiting
-              farcasterSdk.actions.ready().catch(err => {
-                console.log('ℹ️ Mobile fallback ready() failed (expected):', err.message);
+              farcasterSdk.actions.ready().catch(() => {
+                // Mobile fallback ready() failed (expected)
               });
-              
-              console.log('✅ Mobile fallback initialization complete');
             } catch (fallbackError) {
-              console.log('ℹ️ Mobile fallback failed (expected):', fallbackError.message);
+              // Mobile fallback failed (expected)
             }
           }
         }

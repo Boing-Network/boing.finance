@@ -717,9 +717,8 @@ function getQueryClient() {
             // Add error handling to prevent crashes
             throwOnError: false,
             // Ensure queries don't fail silently
-            onError: (error) => {
-              console.error('[React Query] Query error:', error);
-              // Don't rethrow - let React Query handle it gracefully
+            onError: () => {
+              // Silently handle errors
             }
           },
         },
