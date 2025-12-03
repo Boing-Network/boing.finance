@@ -64,21 +64,29 @@ export default function Analytics() {
 
   // Fetch trending tokens - Combined CoinGecko + The Graph
   const { data: trendingTokens, isLoading: trendingLoading } = useQuery({
-    queryKey: ['trending-tokens', timeRange, selectedNetwork],
+    queryKey: ['trending-tokens', selectedNetwork],
     queryFn: async () => {
-      try {
-        // Try CoinGecko first
-        const cgData = await coingeckoService.getTrendingTokens();
-        if (cgData && cgData.coins) {
-          return cgData.coins;
+      // If "All Networks" is selected, use CoinGecko (global trending)
+      if (selectedNetwork === 'all') {
+        try {
+          const cgData = await coingeckoService.getTrendingTokens();
+          if (cgData && cgData.coins) {
+            return cgData.coins.map(coin => ({
+              ...coin,
+              item: {
+                ...coin.item,
+                network: 'all'
+              }
+            }));
+          }
+        } catch (error) {
+          console.error('Error fetching CoinGecko trending:', error);
         }
-      } catch (error) {
-        // Silently fallback to The Graph
       }
 
-      // Fallback to The Graph for DEX tokens
+      // For specific networks, try The Graph
       try {
-        const network = selectedNetwork === 'all' ? 'ethereum' : getNetworkName(selectedNetwork);
+        const network = getNetworkName(selectedNetwork);
         const graphData = await theGraphService.getTrendingTokens(network, 20);
         if (graphData && graphData.tokens) {
           return graphData.tokens.map(token => ({
@@ -90,17 +98,26 @@ export default function Analytics() {
               price_usd: token.priceUSD || 0,
               market_cap_rank: null,
               score: 0,
-              network: network
+              network: network,
+              data: {
+                price: token.priceUSD || 0,
+                price_change_percentage_24h: {
+                  usd: token.priceChange24h || 0
+                }
+              }
             }
           }));
         }
       } catch (error) {
-        // Silently return empty array
+        console.error(`Error fetching The Graph trending for ${selectedNetwork}:`, error);
+        // Return empty array for network-specific queries that fail
+        return [];
       }
 
       return [];
     },
     refetchInterval: 300000, // Refetch every 5 minutes
+    enabled: true, // Always enabled
   });
 
   // Fetch DEX network statistics from The Graph
@@ -200,18 +217,6 @@ export default function Analytics() {
 
     return dataPoints;
   }, [marketData, timeRange]);
-
-  // Filter trending tokens by network
-  const filteredTrendingTokens = useMemo(() => {
-    if (!trendingTokens || trendingTokens.length === 0) return [];
-    if (selectedNetwork === 'all') return trendingTokens;
-    
-    return trendingTokens.filter(token => {
-      const tokenNetwork = token.item?.network || 'ethereum';
-      const networkName = getNetworkName(selectedNetwork);
-      return tokenNetwork === networkName;
-    });
-  }, [trendingTokens, selectedNetwork]);
 
   return (
     <>
@@ -328,49 +333,88 @@ export default function Analytics() {
                 {/* Key Metrics */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-semibold text-white mb-2">Total Volume</h3>
+                    <h3 className="text-lg font-semibold text-white mb-2">24h Volume</h3>
                     <p className="text-3xl font-bold text-blue-400">
-                      ${analytics.totalVolume ? parseFloat(analytics.totalVolume).toLocaleString() : 
-                        (dexStats?.uniswapFactories?.[0]?.totalVolumeUSD ? 
-                          parseFloat(dexStats.uniswapFactories[0].totalVolumeUSD).toLocaleString() : '0')}
+                      {(() => {
+                        const volume = analytics.totalVolume 
+                          ? parseFloat(analytics.totalVolume)
+                          : (dexStats?.uniswapFactories?.[0]?.totalVolumeUSD 
+                            ? parseFloat(dexStats.uniswapFactories[0].totalVolumeUSD)
+                            : (marketData?.data?.total_volume?.usd 
+                              ? marketData.data.total_volume.usd 
+                              : 0));
+                        if (volume === 0) return 'N/A';
+                        if (volume >= 1e12) return `$${(volume / 1e12).toFixed(2)}T`;
+                        if (volume >= 1e9) return `$${(volume / 1e9).toFixed(2)}B`;
+                        if (volume >= 1e6) return `$${(volume / 1e6).toFixed(2)}M`;
+                        return `$${volume.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+                      })()}
                     </p>
-                    <p className="text-sm text-gray-400 mt-2">Across all networks</p>
+                    <p className="text-sm text-gray-400 mt-2">
+                      {marketData?.data?.total_volume?.usd ? 'Global crypto market' : 'Across all networks'}
+                    </p>
                   </div>
                   
                   <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-semibold text-white mb-2">Total Liquidity</h3>
+                    <h3 className="text-lg font-semibold text-white mb-2">Market Cap</h3>
                     <p className="text-3xl font-bold text-green-400">
-                      ${dexStats?.uniswapFactories?.[0]?.totalLiquidityUSD ? 
-                        parseFloat(dexStats.uniswapFactories[0].totalLiquidityUSD).toLocaleString() : 
-                        (analytics.totalLiquidity ? parseFloat(analytics.totalLiquidity).toLocaleString() : '0')}
+                      {(() => {
+                        const marketCap = marketData?.data?.total_market_cap?.usd 
+                          ? marketData.data.total_market_cap.usd
+                          : (dexStats?.uniswapFactories?.[0]?.totalLiquidityUSD 
+                            ? parseFloat(dexStats.uniswapFactories[0].totalLiquidityUSD) * 2 // Estimate
+                            : (analytics.totalLiquidity ? parseFloat(analytics.totalLiquidity) * 2 : 0));
+                        if (marketCap === 0) return 'N/A';
+                        if (marketCap >= 1e12) return `$${(marketCap / 1e12).toFixed(2)}T`;
+                        if (marketCap >= 1e9) return `$${(marketCap / 1e9).toFixed(2)}B`;
+                        if (marketCap >= 1e6) return `$${(marketCap / 1e6).toFixed(2)}M`;
+                        return `$${marketCap.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+                      })()}
                     </p>
-                    <p className="text-sm text-gray-400 mt-2">Locked in pools</p>
+                    <p className="text-sm text-gray-400 mt-2">
+                      {marketData?.data?.total_market_cap?.usd ? 'Total crypto market' : 'Estimated'}
+                    </p>
                   </div>
                   
                   <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-semibold text-white mb-2">Total Pools</h3>
+                    <h3 className="text-lg font-semibold text-white mb-2">Active Cryptocurrencies</h3>
                     <p className="text-3xl font-bold text-purple-400">
-                      {dexStats?.uniswapFactories?.[0]?.pairCount ? 
-                        dexStats.uniswapFactories[0].pairCount.toLocaleString() : 
-                        (analytics.totalPools ? analytics.totalPools.toLocaleString() : '0')}
+                      {marketData?.data?.active_cryptocurrencies 
+                        ? marketData.data.active_cryptocurrencies.toLocaleString()
+                        : (dexStats?.uniswapFactories?.[0]?.pairCount 
+                          ? dexStats.uniswapFactories[0].pairCount.toLocaleString()
+                          : (analytics.totalPools ? analytics.totalPools.toLocaleString() : 'N/A'))}
                     </p>
-                    <p className="text-sm text-gray-400 mt-2">Across all networks</p>
+                    <p className="text-sm text-gray-400 mt-2">
+                      {marketData?.data?.active_cryptocurrencies ? 'Tracked on CoinGecko' : 'Total pools'}
+                    </p>
                   </div>
                   
                   <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-semibold text-white mb-2">Total Transactions</h3>
+                    <h3 className="text-lg font-semibold text-white mb-2">Markets</h3>
                     <p className="text-3xl font-bold text-yellow-400">
-                      {dexStats?.uniswapFactories?.[0]?.txCount ? 
-                        dexStats.uniswapFactories[0].txCount.toLocaleString() : 
-                        (analytics.totalTransactions ? analytics.totalTransactions.toLocaleString() : '0')}
+                      {marketData?.data?.markets 
+                        ? marketData.data.markets.toLocaleString()
+                        : (dexStats?.uniswapFactories?.[0]?.txCount 
+                          ? dexStats.uniswapFactories[0].txCount.toLocaleString()
+                          : (analytics.totalTransactions ? analytics.totalTransactions.toLocaleString() : 'N/A'))}
                     </p>
-                    <p className="text-sm text-gray-400 mt-2">All-time</p>
+                    <p className="text-sm text-gray-400 mt-2">
+                      {marketData?.data?.markets ? 'Active trading pairs' : 'Total transactions'}
+                    </p>
                   </div>
                 </div>
 
                 {/* Volume Chart */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                  <h2 className="text-2xl font-bold text-white mb-6">Volume Over Time ({timeRanges.find(r => r.id === timeRange)?.name})</h2>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-white">Volume Over Time ({timeRanges.find(r => r.id === timeRange)?.name})</h2>
+                    {generateTimeSeriesData.length > 0 && (
+                      <span className="text-xs text-gray-400 bg-gray-700 px-3 py-1 rounded-full">
+                        Estimated projection based on current volume
+                      </span>
+                    )}
+                  </div>
                   {marketLoading ? (
                     <ChartSkeleton height="300px" />
                   ) : generateTimeSeriesData.length > 0 ? (
@@ -587,20 +631,37 @@ export default function Analytics() {
                       </div>
                     ) : marketData ? (
                       <>
+                        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-6">
+                          <p className="text-sm text-blue-300">
+                            <span className="font-semibold">Note:</span> Market data shows current global cryptocurrency statistics. 
+                            Time range selection affects the Overview chart visualization but market statistics reflect real-time data from CoinGecko.
+                          </p>
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                           <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                             <h3 className="text-lg font-semibold text-white mb-2">Total Market Cap</h3>
                             <p className="text-3xl font-bold text-blue-400">
-                              ${marketData.data?.total_market_cap?.usd 
-                                ? (marketData.data.total_market_cap.usd / 1e12).toFixed(2) + 'T'
+                              {marketData.data?.total_market_cap?.usd 
+                                ? (() => {
+                                    const value = marketData.data.total_market_cap.usd;
+                                    if (value >= 1e12) return `$${(value / 1e12).toFixed(2)}T`;
+                                    if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
+                                    return `$${(value / 1e6).toFixed(2)}M`;
+                                  })()
                                 : 'N/A'}
                             </p>
                           </div>
                           <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                             <h3 className="text-lg font-semibold text-white mb-2">24h Volume</h3>
                             <p className="text-3xl font-bold text-green-400">
-                              ${marketData.data?.total_volume?.usd 
-                                ? (marketData.data.total_volume.usd / 1e9).toFixed(2) + 'B'
+                              {marketData.data?.total_volume?.usd 
+                                ? (() => {
+                                    const value = marketData.data.total_volume.usd;
+                                    if (value >= 1e12) return `$${(value / 1e12).toFixed(2)}T`;
+                                    if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
+                                    if (value >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
+                                    return `$${(value / 1e3).toFixed(2)}K`;
+                                  })()
                                 : 'N/A'}
                             </p>
                           </div>
@@ -675,7 +736,7 @@ export default function Analytics() {
                       </>
                     ) : (
                       <div className="text-center py-12">
-                        <p className="text-gray-300">Market data not available</p>
+                        <p className="text-gray-300">Market data not available. Please check your connection and try again.</p>
                       </div>
                     )}
                   </div>
@@ -694,7 +755,7 @@ export default function Analytics() {
                             onChange={(e) => setSelectedNetwork(e.target.value)}
                             className="px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500"
                           >
-                            <option value="all">All Networks</option>
+                            <option value="all">All Networks (CoinGecko)</option>
                             <option value="1">Ethereum</option>
                             <option value="137">Polygon</option>
                             <option value="56">BSC</option>
@@ -702,19 +763,25 @@ export default function Analytics() {
                             <option value="10">Optimism</option>
                             <option value="8453">Base</option>
                           </select>
-                          <span className="text-xs text-gray-400">
-                            ({timeRanges.find(r => r.id === timeRange)?.name})
-                          </span>
                         </div>
+                      </div>
+                      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mb-6">
+                        <p className="text-sm text-blue-300">
+                          <span className="font-semibold">Note:</span> Trending tokens show current popularity based on search volume and social activity. 
+                          {selectedNetwork === 'all' 
+                            ? ' Data from CoinGecko (all cryptocurrencies).' 
+                            : ` Data from The Graph for ${getNetworkName(selectedNetwork)} network.`}
+                          {' '}Time range selection does not affect trending data as it reflects current market sentiment.
+                        </p>
                       </div>
                       {trendingLoading ? (
                         <div className="text-center py-12">
                           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
                           <p className="text-gray-300 mt-4">Loading trending tokens...</p>
                         </div>
-                      ) : filteredTrendingTokens && filteredTrendingTokens.length > 0 ? (
+                      ) : trendingTokens && trendingTokens.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {filteredTrendingTokens.slice(0, 12).map((coin, index) => (
+                          {trendingTokens.slice(0, 12).map((coin, index) => (
                             <div key={index} className="bg-gray-700 rounded-xl p-4 border border-gray-600 hover:border-blue-500 transition-colors">
                               <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center space-x-3">
@@ -750,18 +817,23 @@ export default function Analytics() {
                         </div>
                       ) : (
                         <div className="text-center py-12">
-                          <p className="text-gray-300">
+                          <p className="text-gray-300 mb-2">
                             {selectedNetwork !== 'all' 
-                              ? `No trending tokens available for the selected network.` 
+                              ? `No trending tokens available for ${getNetworkName(selectedNetwork)} network.` 
                               : 'No trending tokens available'}
                           </p>
                           {selectedNetwork !== 'all' && (
-                            <button
-                              onClick={() => setSelectedNetwork('all')}
-                              className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm"
-                            >
-                              Show All Networks
-                            </button>
+                            <>
+                              <p className="text-sm text-gray-400 mb-4">
+                                This may be due to API limitations or network-specific data unavailability.
+                              </p>
+                              <button
+                                onClick={() => setSelectedNetwork('all')}
+                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm"
+                              >
+                                Show All Networks (CoinGecko)
+                              </button>
+                            </>
                           )}
                         </div>
                       )}
