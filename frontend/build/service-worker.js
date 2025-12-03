@@ -7,6 +7,22 @@ const CACHE_VERSION = 'v1764514921072'; // Update this version number on each de
 const CACHE_NAME = 'boing-finance-' + CACHE_VERSION;
 const RUNTIME_CACHE = 'boing-finance-runtime-' + CACHE_VERSION;
 
+// Aggressively delete ALL old caches on activation
+const deleteAllOldCaches = async () => {
+  const cacheNames = await caches.keys();
+  const deletePromises = cacheNames
+    .filter(cacheName => {
+      // Delete any cache that doesn't match current version OR is from a different app
+      return !cacheName.includes(CACHE_VERSION);
+    })
+    .map(cacheName => {
+      console.log('[Service Worker] Deleting old cache:', cacheName);
+      return caches.delete(cacheName);
+    });
+  await Promise.all(deletePromises);
+  console.log('[Service Worker] All old caches deleted');
+};
+
 // Assets to cache on install
 const STATIC_ASSETS = [
   '/',
@@ -30,32 +46,37 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Activate event - clean up old caches
+// Activate event - aggressively clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      // Delete all old caches that don't match current version
-      return Promise.all(
-        cacheNames
-          .filter((cacheName) => {
-            // Delete any cache that doesn't match current version
-            return !cacheName.includes(CACHE_VERSION);
-          })
-          .map((cacheName) => {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          })
-      );
-    }).then(() => {
+    (async () => {
+      // Delete ALL old caches first
+      await deleteAllOldCaches();
+      
       // Force all clients to use the new service worker immediately
-      return self.clients.claim();
-    })
+      await self.clients.claim();
+      
+      // Only send message if this is actually a new version (not just activation)
+      // Check if we have a previous version stored
+      const clients = await self.clients.matchAll({ includeUncontrolled: true });
+      // Don't send message immediately - let the client check version first
+      // This prevents reload loops
+      
+      console.log('[Service Worker] Activated and claimed all clients');
+    })()
   );
   // Skip waiting to activate immediately
   self.skipWaiting();
 });
 
-// Fetch event - serve from cache, fallback to network
+// Listen for skip waiting message
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+// Fetch event - network-first strategy for HTML, cache-first for static assets
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -65,10 +86,32 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Handle HTML files with network-first strategy (always get fresh HTML)
+  if (request.headers.get('accept')?.includes('text/html') || url.pathname === '/' || url.pathname.endsWith('.html')) {
+    event.respondWith(
+      fetch(request, { cache: 'no-store' })
+        .then((response) => {
+          // Always use network response for HTML
+          return response;
+        })
+        .catch(() => {
+          // Network failed, try cache as fallback
+          return caches.match(request).then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            // Return index.html as last resort
+            return caches.match('/index.html');
+          });
+        })
+    );
+    return;
+  }
+
   // Handle API requests with network-first strategy
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
-      fetch(request)
+      fetch(request, { cache: 'no-store' })
         .then((response) => {
           // Clone the response
           const responseToCache = response.clone();
@@ -100,13 +143,68 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle static assets with cache-first strategy
+  // Handle JavaScript files with network-first strategy (always get fresh JS)
+  // Add cache-busting query parameter to ensure fresh fetch
+  if (url.pathname.endsWith('.js') && url.pathname.startsWith('/static/')) {
+    // Add cache-busting query parameter
+    const cacheBustUrl = new URL(request.url);
+    cacheBustUrl.searchParams.set('v', CACHE_VERSION);
+    
+    event.respondWith(
+      fetch(cacheBustUrl.toString(), { 
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      })
+        .then((response) => {
+          // Always use network response for JS files
+          return response;
+        })
+        .catch(() => {
+          // Network failed, try cache as fallback (but with cache-busting)
+          return caches.match(request).then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            // Return error response
+            return new Response('Network error', { status: 503 });
+          });
+        })
+    );
+    return;
+  }
+  
+  // Handle version.json with no-cache (always check for new version)
+  if (url.pathname === '/version.json' || url.pathname === '/version.txt') {
+    event.respondWith(
+      fetch(request, { 
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      })
+        .then((response) => {
+          return response;
+        })
+        .catch(() => {
+          return new Response(JSON.stringify({ version: CACHE_VERSION }), {
+            headers: { 'Content-Type': 'application/json' }
+          });
+        })
+    );
+    return;
+  }
+
+  // Handle static assets (CSS, images) with stale-while-revalidate strategy
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(request).then((response) => {
+      // Always fetch in background to update cache
+      const fetchPromise = fetch(request, { cache: 'no-cache' }).then((response) => {
         // Don't cache non-GET requests or non-successful responses
         if (request.method !== 'GET' || !response || response.status !== 200) {
           return response;
@@ -117,7 +215,13 @@ self.addEventListener('fetch', (event) => {
           cache.put(request, responseToCache);
         });
         return response;
+      }).catch(() => {
+        // Network failed, return cached if available
+        return cachedResponse;
       });
+
+      // Return cached immediately if available, otherwise wait for network
+      return cachedResponse || fetchPromise;
     })
   );
 });

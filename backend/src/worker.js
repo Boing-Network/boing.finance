@@ -7,6 +7,7 @@ import { createDEXRoutes } from './routes/dexRoutes.js';
 import { createAnalyticsRoutes } from './routes/analyticsRoutes.js';
 import { createIPFSRoutes } from './routes/ipfsRoutes.js';
 import { createAPIRoutes } from './routes/apiRoutes.js';
+import collectAnalytics from './scheduled/collectAnalytics.js';
 
 // Create main app
 const app = new Hono();
@@ -157,6 +158,8 @@ app.route('/api', ipfsRoutes);
 
 // Mount Public API routes at /api
 const apiRoutes = createAPIRoutes();
+apiRoutes.use('*', dbMiddleware);
+apiRoutes.use('*', cacheMiddleware);
 app.route('/api', apiRoutes);
 
 // Webhook routes
@@ -273,4 +276,8 @@ app.notFound((c) => {
   }, 404);
 });
 
-export default app; 
+// Export the main app for HTTP requests
+export default app;
+
+// Export scheduled handlers for Cron Triggers
+export { collectAnalytics }; 

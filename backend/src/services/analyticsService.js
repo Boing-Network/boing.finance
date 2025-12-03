@@ -19,6 +19,7 @@ class AnalyticsService {
     this.env = env;
     this.coingeckoApiKey = env.COINGECKO_API_KEY;
     this.theGraphApiKey = env.THE_GRAPH_API_KEY;
+    this.theGraphApiToken = env.THE_GRAPH_API_TOKEN;
   }
 
   // Get CoinGecko API URL with optional API key
@@ -60,17 +61,27 @@ class AnalyticsService {
   }
 
   // Execute GraphQL query to The Graph
-  async queryTheGraph(query, variables = {}, network = 'ethereum') {
-    const subgraph = SUBGRAPH_MAP[network] || SUBGRAPH_MAP[1];
+  async queryTheGraph(query, variables = {}, network = 1) {
+    // Convert chainId to network name if needed
+    const chainId = typeof network === 'number' ? network : 1;
+    const subgraph = SUBGRAPH_MAP[chainId] || SUBGRAPH_MAP[1];
     const endpoint = `${THE_GRAPH_API_BASE}/${subgraph}`;
 
     try {
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      // Use API token if available (preferred), otherwise use API key
+      if (this.theGraphApiToken) {
+        headers['Authorization'] = `Bearer ${this.theGraphApiToken}`;
+      } else if (this.theGraphApiKey) {
+        headers['X-API-Key'] = this.theGraphApiKey;
+      }
+
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(this.theGraphApiKey && { 'Authorization': `Bearer ${this.theGraphApiKey}` })
-        },
+        headers,
         body: JSON.stringify({ query, variables })
       });
 

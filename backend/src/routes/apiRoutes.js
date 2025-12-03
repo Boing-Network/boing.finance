@@ -3,7 +3,7 @@
 
 import { Hono } from 'hono';
 import { drizzle } from 'drizzle-orm/d1';
-import { sql } from 'drizzle-orm';
+import { sql, inArray } from 'drizzle-orm';
 import * as schema from '../database/schema.js';
 import AnalyticsService from '../services/analyticsService.js';
 
@@ -304,11 +304,100 @@ export const createAPIRoutes = () => {
         }, 400);
       }
 
-      // Create analytics service instance
+      const db = c.get('db');
       const analyticsService = new AnalyticsService(c.env);
       
-      // Fetch aggregated analytics data
-      const analyticsData = await analyticsService.getAnalyticsData(range, networks);
+      // Try to get historical data from database first
+      let analyticsData = null;
+      let useHistorical = false;
+      
+      try {
+        // Calculate time window for historical data
+        const now = new Date();
+        let timeWindow = 0;
+        switch (range) {
+          case '24h':
+            timeWindow = 24 * 60 * 60 * 1000; // 24 hours
+            break;
+          case '7d':
+            timeWindow = 7 * 24 * 60 * 60 * 1000; // 7 days
+            break;
+          case '30d':
+            timeWindow = 30 * 24 * 60 * 60 * 1000; // 30 days
+            break;
+          case '1y':
+            timeWindow = 365 * 24 * 60 * 60 * 1000; // 1 year
+            break;
+        }
+        
+        const startTime = new Date(now.getTime() - timeWindow);
+        
+        // Query for most recent snapshots within the time window
+        const allSnapshots = await db.select()
+          .from(schema.analyticsSnapshots)
+          .where(
+            sql`range = ${range} AND network IN (${sql.join(networks.map(n => sql`${n}`), sql`, `)}) AND datetime(timestamp) >= datetime(${startTime.toISOString()})`
+          )
+          .orderBy(sql`timestamp DESC`);
+        
+        if (allSnapshots.length > 0) {
+          
+          // Aggregate data from snapshots
+          let totalVolume = 0;
+          let totalLiquidity = 0;
+          let totalPools = 0;
+          let totalTransactions = 0;
+          const networkStats = {};
+          const allTopPairs = [];
+          
+          for (const snapshot of allSnapshots) {
+            const networkName = analyticsService.getNetworkName(snapshot.network);
+            const snapshotData = snapshot.snapshotData ? JSON.parse(snapshot.snapshotData) : {};
+            
+            totalVolume += parseFloat(snapshot.totalVolume || 0);
+            totalLiquidity += parseFloat(snapshot.totalLiquidity || 0);
+            totalPools += snapshot.totalPools || 0;
+            totalTransactions += snapshot.totalTransactions || 0;
+            
+            if (snapshotData.networkStats) {
+              networkStats[networkName] = snapshotData.networkStats;
+            }
+            
+            if (snapshotData.topPairs) {
+              allTopPairs.push(...snapshotData.topPairs);
+            }
+          }
+          
+          // Get most recent market data
+          const latestSnapshot = allSnapshots[0];
+          const latestData = latestSnapshot.snapshotData ? JSON.parse(latestSnapshot.snapshotData) : {};
+          
+          analyticsData = {
+            totalVolume: totalVolume.toString(),
+            totalLiquidity: totalLiquidity.toString(),
+            totalPools,
+            totalTransactions,
+            networkStats,
+            topPairs: allTopPairs.slice(0, 10), // Top 10 pairs
+            marketData: latestData.marketData || null,
+            timestamp: latestSnapshot.timestamp,
+            range,
+            source: 'historical'
+          };
+          
+          useHistorical = true;
+        }
+      } catch (dbError) {
+        console.warn('Error querying historical data, falling back to real-time:', dbError);
+      }
+      
+      // Fallback to real-time data if no historical data available
+      if (!useHistorical) {
+        analyticsData = await analyticsService.getAnalyticsData(range, networks);
+        if (analyticsData) {
+          analyticsData.source = 'realtime';
+        }
+      }
 
       return c.json({
         success: true,
