@@ -9,5 +9,5 @@ module.exports = defineConfig({
   },
   verbose: true,
   strict: true,
-  schemaFilter: ['tokens', 'pairs', 'swaps', 'liquidity_events', 'bridge_transactions']
+  // schemaFilter removed to include all tables including new analytics tables
 }); 
