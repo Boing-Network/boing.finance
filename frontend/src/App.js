@@ -21,6 +21,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
 import OnboardingTour from './components/OnboardingTour';
 import priceAlertService from './services/priceAlertService';
+import ComingSoon from './components/ComingSoon';
 import './styles/globals.css';
 
 // Lazy load all page components for code splitting
@@ -52,7 +53,7 @@ const Blog = lazy(() => import('./pages/Blog'));
 // Helper for coming soon
 const comingSoon = {
   label: 'Coming Soon',
-  tooltip: 'This feature will be available after mainnet launch.'
+  tooltip: 'This feature is currently under development and will be available soon.'
 };
 
 // Navigation data with categories - explicit boolean flags for state management
@@ -61,18 +62,18 @@ const comingSoon = {
 const createNavigation = () => Object.freeze({
   home: Object.freeze({ name: 'Home', href: '/', icon: '🏠', isAvailable: true, comingSoon: false, testnetOnly: false }),
   trading: Object.freeze([
-    Object.freeze({ name: 'Swap', href: '/swap', icon: '🔄', description: 'Trade tokens instantly', isAvailable: true, comingSoon: false, testnetOnly: true }),
+    Object.freeze({ name: 'Swap', href: '/swap', icon: '🔄', description: 'Trade tokens instantly', isAvailable: false, comingSoon: true, testnetOnly: false }),
     Object.freeze({ name: 'Bridge', href: '/bridge', icon: '🌉', description: 'Cross-chain transfers', isAvailable: false, comingSoon: true, testnetOnly: false }),
-    Object.freeze({ name: 'Pools', href: '/pools', icon: '🏊', description: 'Liquidity pools', isAvailable: true, comingSoon: false, testnetOnly: true }),
-    Object.freeze({ name: 'Tokens', href: '/tokens', icon: '🪙', description: 'Token management', isAvailable: true, comingSoon: false, testnetOnly: false })
+    Object.freeze({ name: 'Pools', href: '/pools', icon: '🏊', description: 'Liquidity pools', isAvailable: false, comingSoon: true, testnetOnly: false }),
+    Object.freeze({ name: 'Tokens', href: '/tokens', icon: '🪙', description: 'Token management', isAvailable: false, comingSoon: true, testnetOnly: false })
   ]),
   analytics: Object.freeze([
-    Object.freeze({ name: 'Analytics', href: '/analytics', icon: '📊', description: 'Market insights', isAvailable: true, comingSoon: false, testnetOnly: false }),
-    Object.freeze({ name: 'Portfolio', href: '/portfolio', icon: '💼', description: 'Your holdings', isAvailable: true, comingSoon: false, testnetOnly: false })
+    Object.freeze({ name: 'Analytics', href: '/analytics', icon: '📊', description: 'Market insights', isAvailable: false, comingSoon: true, testnetOnly: false }),
+    Object.freeze({ name: 'Portfolio', href: '/portfolio', icon: '💼', description: 'Your holdings', isAvailable: false, comingSoon: true, testnetOnly: false })
   ]),
   deployment: Object.freeze([
     Object.freeze({ name: 'Deploy Token', href: '/deploy-token', icon: '🚀', description: 'Create your own tokens', isAvailable: true, comingSoon: false, testnetOnly: false }),
-    Object.freeze({ name: 'Create Pool', href: '/create-pool', icon: '🏊', description: 'Create liquidity pools', isAvailable: true, comingSoon: false, testnetOnly: true })
+    Object.freeze({ name: 'Create Pool', href: '/create-pool', icon: '🏊', description: 'Create liquidity pools', isAvailable: false, comingSoon: true, testnetOnly: false })
   ])
 });
 
@@ -555,31 +556,19 @@ function AppContent() {
             <Suspense fallback={<LoadingSpinner />}>
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/swap" element={<Swap />} />
-                <Route path="/pools" element={
-                  <ErrorBoundary>
-                    <Pools />
-                  </ErrorBoundary>
-                } />
-                <Route path="/liquidity" element={<Liquidity />} />
-                <Route path="/analytics" element={
-                  <ErrorBoundary>
-                    <Analytics />
-                  </ErrorBoundary>
-                } />
-                <Route path="/portfolio" element={
-                  <ErrorBoundary>
-                    <Portfolio />
-                  </ErrorBoundary>
-                } />
-                <Route path="/bridge" element={<Bridge />} />
-                <Route path="/tokens" element={<Tokens />} />
-                <Route path="/watchlist" element={<Watchlist />} />
+                <Route path="/swap" element={<ComingSoon featureName="Swap" />} />
+                <Route path="/pools" element={<ComingSoon featureName="Pools" />} />
+                <Route path="/liquidity" element={<ComingSoon featureName="Liquidity" />} />
+                <Route path="/analytics" element={<ComingSoon featureName="Analytics" />} />
+                <Route path="/portfolio" element={<ComingSoon featureName="Portfolio" />} />
+                <Route path="/bridge" element={<ComingSoon featureName="Bridge" />} />
+                <Route path="/tokens" element={<ComingSoon featureName="Tokens" />} />
+                <Route path="/watchlist" element={<ComingSoon featureName="Watchlist" />} />
                   <Route path="/docs" element={<Docs />} />
                   <Route path="/developer-tools" element={<DeveloperTools />} />
                   <Route path="/blog" element={<Blog />} />
                 <Route path="/deploy-token" element={<DeployToken />} />
-                <Route path="/create-pool" element={<CreatePool />} />
+                <Route path="/create-pool" element={<ComingSoon featureName="Create Pool" />} />
                 <Route path="/whitepaper" element={<Whitepaper />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />
@@ -817,68 +806,10 @@ function App() {
 
 // Home component with all original features
 function Home() {
-  // Use useMemo to ensure stable reference and add comprehensive logging
+  // Use useMemo to ensure stable reference
   const memoizedNav = React.useMemo(() => {
-    console.log('[Home] Creating memoized navigation reference at:', new Date().toISOString());
-    console.log('[Home] Navigation object frozen check:', Object.isFrozen(navigation));
-    
-    // Log actual values to catch any mutations
-    const tradingState = navigation.trading.map(item => ({
-      name: item.name,
-      isAvailable: item.isAvailable,
-      comingSoon: item.comingSoon,
-      testnetOnly: item.testnetOnly
-    }));
-    
-    const analyticsState = navigation.analytics.map(item => ({
-      name: item.name,
-      isAvailable: item.isAvailable,
-      comingSoon: item.comingSoon
-    }));
-    
-    const deploymentState = navigation.deployment.map(item => ({
-      name: item.name,
-      isAvailable: item.isAvailable,
-      comingSoon: item.comingSoon
-    }));
-    
-    // Navigation values at memoization
-    
     return navigation;
   }, []); // Empty deps - navigation should never change
-  
-  // Debug logging for Home component on every render
-  React.useEffect(() => {
-    // Component rendered
-    
-    // Log actual values being used
-    const tradingValues = memoizedNav.trading.map(item => ({
-      name: item.name,
-      isAvailable: Boolean(item.isAvailable),
-      comingSoon: Boolean(item.comingSoon),
-      testnetOnly: Boolean(item.testnetOnly),
-      rawIsAvailable: item.isAvailable,
-      rawComingSoon: item.comingSoon
-    }));
-    
-    const analyticsValues = memoizedNav.analytics.map(item => ({
-      name: item.name,
-      isAvailable: Boolean(item.isAvailable),
-      comingSoon: Boolean(item.comingSoon),
-      rawIsAvailable: item.isAvailable,
-      rawComingSoon: item.comingSoon
-    }));
-    
-    const deploymentValues = memoizedNav.deployment.map(item => ({
-      name: item.name,
-      isAvailable: Boolean(item.isAvailable),
-      comingSoon: Boolean(item.comingSoon),
-      rawIsAvailable: item.isAvailable,
-      rawComingSoon: item.comingSoon
-    }));
-    
-    // Navigation state check (console.log removed for production)
-  });
   
   return (
     <>
@@ -1048,16 +979,6 @@ function Home() {
                 const isAvailable = Boolean(item.isAvailable);
                 const shouldShowComingSoon = isComingSoon || !isAvailable;
                 
-                console.log(`[Home] Rendering ${item.name}:`, {
-                  name: item.name,
-                  comingSoon: item.comingSoon,
-                  isComingSoon,
-                  isAvailable: item.isAvailable,
-                  isAvailableBool: isAvailable,
-                  shouldShowComingSoon,
-                  rawValues: { comingSoon: item.comingSoon, isAvailable: item.isAvailable }
-                });
-                
                 const getIcon = () => {
                   if (item.name === 'Swap') return <SwapIcon />;
                   if (item.name === 'Pools') return <LiquidityIcon />;
@@ -1085,30 +1006,23 @@ function Home() {
                 const isAvailable = Boolean(item.isAvailable);
                 const shouldShowComingSoon = isComingSoon || !isAvailable;
                 
-                console.log(`[Home] Rendering ${item.name}:`, {
-                  name: item.name,
-                  comingSoon: item.comingSoon,
-                  isComingSoon,
-                  isAvailable: item.isAvailable,
-                  isAvailableBool: isAvailable,
-                  shouldShowComingSoon,
-                  rawValues: { comingSoon: item.comingSoon, isAvailable: item.isAvailable }
-                });
-                
                 const getIcon = () => {
                   if (item.name === 'Analytics') return <AnalyticsIcon />;
                   if (item.name === 'Portfolio') return <PortfolioIcon />;
                   return null;
                 };
-                return (
-                  <a key={item.name} href={item.href} className="block">
-                    <FeatureCard 
-                      title={item.name} 
-                      icon={getIcon()}
-                      description={item.description || ''} 
-                      comingSoon={shouldShowComingSoon}
-                    />
-                  </a>
+                const CardContent = (
+                  <FeatureCard 
+                    title={item.name} 
+                    icon={getIcon()}
+                    description={item.description || ''} 
+                    comingSoon={shouldShowComingSoon}
+                  />
+                );
+                return shouldShowComingSoon ? (
+                  <div key={item.name}>{CardContent}</div>
+                ) : (
+                  <a key={item.name} href={item.href} className="block">{CardContent}</a>
                 );
               })}
             </div>
@@ -1333,19 +1247,6 @@ function FeatureCard({ title, icon, description, comingSoon }) {
 
 // Modified DropdownMenu to support coming soon
 function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
-  // Log dropdown menu state
-  React.useEffect(() => {
-    if (isOpen) {
-      console.log(`[DropdownMenu] ${label} opened with items:`, items.map(item => ({
-        name: item.name,
-        comingSoon: item.comingSoon,
-        isAvailable: item.isAvailable,
-        rawComingSoon: item.comingSoon,
-        rawIsAvailable: item.isAvailable
-      })));
-    }
-  }, [isOpen, label, items]);
-  
   return (
     <div className="relative">
       <button

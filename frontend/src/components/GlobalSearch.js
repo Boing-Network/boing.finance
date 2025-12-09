@@ -86,13 +86,13 @@ const GlobalSearch = ({ isOpen, onClose }) => {
 
         // Add route matches
         const routes = [
-          { name: 'Deploy Token', path: '/deploy-token', icon: '🚀' },
-          { name: 'Portfolio', path: '/portfolio', icon: '💼' },
-          { name: 'Analytics', path: '/analytics', icon: '📊' },
-          { name: 'Tokens', path: '/tokens', icon: '🪙' },
-          { name: 'Pools', path: '/pools', icon: '🏊' },
-          { name: 'Swap', path: '/swap', icon: '🔄' },
-          { name: 'Bridge', path: '/bridge', icon: '🌉' }
+          { name: 'Deploy Token', path: '/deploy-token', icon: '🚀', comingSoon: false },
+          { name: 'Portfolio', path: '/portfolio', icon: '💼', comingSoon: true },
+          { name: 'Analytics', path: '/analytics', icon: '📊', comingSoon: true },
+          { name: 'Tokens', path: '/tokens', icon: '🪙', comingSoon: true },
+          { name: 'Pools', path: '/pools', icon: '🏊', comingSoon: true },
+          { name: 'Swap', path: '/swap', icon: '🔄', comingSoon: true },
+          { name: 'Bridge', path: '/bridge', icon: '🌉', comingSoon: true }
         ];
 
         routes.forEach(route => {
@@ -157,8 +157,15 @@ const GlobalSearch = ({ isOpen, onClose }) => {
     localStorage.setItem('boing_search_history', JSON.stringify(newHistory));
 
     if (result.type === 'route') {
-      navigate(result.data.path);
-      onClose();
+      // Check if route is coming soon
+      if (result.data.comingSoon) {
+        // Still navigate to show coming soon page
+        navigate(result.data.path);
+        onClose();
+      } else {
+        navigate(result.data.path);
+        onClose();
+      }
     } else if (result.type === 'token') {
       navigate(`/tokens?address=${result.data.address}&network=${result.chainId}`);
       onClose();
@@ -261,8 +268,15 @@ const GlobalSearch = ({ isOpen, onClose }) => {
                   <div className="flex items-center space-x-3">
                     <span className="text-2xl">{result.type === 'route' ? result.data.icon : '🪙'}</span>
                     <div className="flex-1">
-                      <div className="text-white font-medium">
-                        {result.type === 'route' ? result.data.name : result.data.name || result.data.symbol}
+                      <div className="flex items-center space-x-2">
+                        <span className="text-white font-medium">
+                          {result.type === 'route' ? result.data.name : result.data.name || result.data.symbol}
+                        </span>
+                        {result.type === 'route' && result.data.comingSoon && (
+                          <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30">
+                            Coming Soon
+                          </span>
+                        )}
                       </div>
                       <div className="text-sm text-gray-400">
                         {result.type === 'route' 
