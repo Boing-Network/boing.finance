@@ -267,6 +267,52 @@ class AlchemyService {
     return await this.rpcCall(chainId, 'eth_gasPrice', []);
   }
 
+  /**
+   * Get NFTs owned by an address (Alchemy NFT API v3)
+   * @param {number} chainId - Chain ID (1, 137, 42161, 10, 8453, 11155111)
+   * @param {string} ownerAddress - Wallet address
+   * @param {object} options - { pageSize, pageKey, withMetadata }
+   * @returns {Promise<{ownedNfts: Array, pageKey?: string, totalCount?: number}>}
+   */
+  async getNFTsForOwner(chainId, ownerAddress, options = {}) {
+    const network = this.networkMap[chainId];
+    if (!network || chainId === 56) {
+      return { ownedNfts: [], totalCount: 0 }; // BSC not supported
+    }
+
+    const cacheKey = `nfts_${chainId}_${ownerAddress}_${options.pageKey || '0'}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.cacheTimeout * 2) {
+      return cached.data;
+    }
+
+    const baseUrl = `https://${network}.g.alchemy.com/nft/v3/${this.apiKey}/getNFTsForOwner`;
+    const params = new URLSearchParams({
+      owner: ownerAddress,
+      'withMetadata': options.withMetadata !== false ? 'true' : 'false',
+      'pageSize': String(options.pageSize || 50),
+      ...(options.pageKey && { pageKey: options.pageKey })
+    });
+
+    try {
+      const response = await fetch(`${baseUrl}?${params}`);
+      if (!response.ok) {
+        throw new Error(`Alchemy NFT API error: ${response.status}`);
+      }
+      const data = await response.json();
+      const result = {
+        ownedNfts: data.ownedNfts || [],
+        pageKey: data.pageKey,
+        totalCount: data.totalCount
+      };
+      this.cache.set(cacheKey, { data: result, timestamp: Date.now() });
+      return result;
+    } catch (error) {
+      console.error('Error fetching NFTs:', error);
+      return { ownedNfts: [], totalCount: 0 };
+    }
+  }
+
   // Clear cache
   clearCache() {
     this.cache.clear();

@@ -7,6 +7,7 @@ import { getWatchlist, removeFromWatchlist, updateWatchlistPrice } from '../util
 import coingeckoService from '../services/coingeckoService';
 import { NETWORKS } from '../config/networks';
 import toast from 'react-hot-toast';
+import OptimizedImage from './OptimizedImage';
 
 export default function TokenWatchlist() {
   const [watchlist, setWatchlist] = useState([]);
@@ -104,7 +105,7 @@ export default function TokenWatchlist() {
             >
               <div className="flex items-center space-x-4 flex-1">
                 {token.logo ? (
-                  <img src={token.logo} alt={token.symbol} className="w-10 h-10 rounded-full" />
+                  <OptimizedImage src={token.logo} alt={token.symbol} className="w-10 h-10 rounded-full object-cover" />
                 ) : (
                   <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                     <span className="text-white font-bold text-sm">{token.symbol?.charAt(0) || 'T'}</span>

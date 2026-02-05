@@ -21,6 +21,7 @@ import ShootingStars from './components/ShootingStars';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
 import OnboardingTour from './components/OnboardingTour';
+import OnboardingChecklist from './components/OnboardingChecklist';
 import priceAlertService from './services/priceAlertService';
 import ComingSoon from './components/ComingSoon';
 import './styles/globals.css';
@@ -31,6 +32,7 @@ const Liquidity = lazy(() => import('./pages/Liquidity'));
 const Pools = lazy(() => import('./pages/Pools'));
 const Analytics = lazy(() => import('./pages/Analytics'));
 const Portfolio = lazy(() => import('./pages/Portfolio'));
+const Activity = lazy(() => import('./pages/Activity'));
 const Bridge = lazy(() => import('./pages/Bridge'));
 const DeployToken = lazy(() => import('./pages/DeployToken'));
 const CreatePool = lazy(() => import('./pages/CreatePool'));
@@ -69,16 +71,53 @@ const createNavigation = () => Object.freeze({
   ]),
   analytics: Object.freeze([
     Object.freeze({ name: 'Analytics', href: '/analytics', icon: '📊', description: 'Market insights', isAvailable: true, comingSoon: false, testnetOnly: false }),
-    Object.freeze({ name: 'Portfolio', href: '/portfolio', icon: '💼', description: 'Your holdings', isAvailable: true, comingSoon: false, testnetOnly: false })
+    Object.freeze({ name: 'Portfolio', href: '/portfolio', icon: '💼', description: 'Your holdings', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Activity', href: '/activity', icon: '📋', description: 'Swaps, liquidity & bridge', isAvailable: true, comingSoon: false, testnetOnly: false })
   ]),
   deployment: Object.freeze([
     Object.freeze({ name: 'Deploy Token', href: '/deploy-token', icon: '🚀', description: 'Create your own tokens', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Create NFT', href: '/create-nft', icon: '🖼️', description: 'Mint NFTs', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Create Pool', href: '/create-pool', icon: '🏊', description: 'Create liquidity pools', isAvailable: true, comingSoon: false, testnetOnly: false })
   ])
 });
 
 // Create navigation once and store in module scope to prevent recreation
 const navigation = createNavigation();
+
+function PageTransitionRoutes() {
+  const location = useLocation();
+  return (
+    <div key={location.pathname} className="page-transition-enter">
+      <Routes location={location}>
+        <Route path="/" element={<Home />} />
+        <Route path="/swap" element={<ComingSoon featureName="Swap" />} />
+        <Route path="/pools" element={<ComingSoon featureName="Pools" />} />
+        <Route path="/liquidity" element={<ComingSoon featureName="Liquidity" />} />
+        <Route path="/analytics" element={<Analytics />} />
+        <Route path="/portfolio" element={<Portfolio />} />
+        <Route path="/activity" element={<Activity />} />
+        <Route path="/bridge" element={<ComingSoon featureName="Bridge" />} />
+        <Route path="/tokens" element={<ComingSoon featureName="Tokens" />} />
+        <Route path="/watchlist" element={<ComingSoon featureName="Watchlist" />} />
+        <Route path="/docs" element={<Docs />} />
+        <Route path="/developer-tools" element={<DeveloperTools />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/deploy-token" element={<DeployToken />} />
+        <Route path="/create-nft" element={<CreateNFT />} />
+        <Route path="/create-pool" element={<ComingSoon featureName="Create Pool" />} />
+        <Route path="/whitepaper" element={<Whitepaper />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/help-center" element={<HelpCenter />} />
+        <Route path="/help-center/article/:articleId" element={<HelpArticle />} />
+        <Route path="/contact-us" element={<ContactUs />} />
+        <Route path="/status" element={<Status />} />
+        <Route path="/bug-report" element={<BugReport />} />
+        <Route path="/executive-summary" element={<ExecutiveSummary />} />
+      </Routes>
+    </div>
+  );
+}
 
 function AppContent() {
   const location = useLocation();
@@ -114,6 +153,22 @@ function AppContent() {
   const closeMenu = () => {
     setIsMenuOpen(false);
   };
+
+  // Keyboard shortcuts: Esc closes modals
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsMenuOpen(false);
+        setHistoryModalOpen(false);
+        setAiChatOpen(false);
+        setTradingDropdownOpen(false);
+        setAnalyticsDropdownOpen(false);
+        setDeploymentDropdownOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <div className="relative min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
@@ -598,31 +653,7 @@ function AppContent() {
         <ErrorBoundary>
           <div className="relative z-10">
             <Suspense fallback={<LoadingSpinner />}>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/swap" element={<ComingSoon featureName="Swap" />} />
-                <Route path="/pools" element={<ComingSoon featureName="Pools" />} />
-                <Route path="/liquidity" element={<ComingSoon featureName="Liquidity" />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/portfolio" element={<Portfolio />} />
-                <Route path="/bridge" element={<ComingSoon featureName="Bridge" />} />
-                <Route path="/tokens" element={<ComingSoon featureName="Tokens" />} />
-                <Route path="/watchlist" element={<ComingSoon featureName="Watchlist" />} />
-                  <Route path="/docs" element={<Docs />} />
-                  <Route path="/developer-tools" element={<DeveloperTools />} />
-                  <Route path="/blog" element={<Blog />} />
-                <Route path="/deploy-token" element={<DeployToken />} />
-                <Route path="/create-pool" element={<ComingSoon featureName="Create Pool" />} />
-                <Route path="/whitepaper" element={<Whitepaper />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/help-center" element={<HelpCenter />} />
-                <Route path="/help-center/article/:articleId" element={<HelpArticle />} />
-                <Route path="/contact-us" element={<ContactUs />} />
-                <Route path="/status" element={<Status />} />
-                <Route path="/bug-report" element={<BugReport />} />
-                <Route path="/executive-summary" element={<ExecutiveSummary />} />
-              </Routes>
+              <PageTransitionRoutes />
             </Suspense>
           </div>
         </ErrorBoundary>
@@ -980,7 +1011,7 @@ function Home() {
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center relative z-10">
-            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 bg-clip-text text-transparent mb-6 leading-tight pb-2 drop-shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+            <h1 className="hero-title text-4xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 bg-clip-text text-transparent mb-6 leading-tight pb-2 drop-shadow-[0_0_20px_rgba(6,182,212,0.4)]">
               boing.finance
             </h1>
             <p className="text-lg leading-relaxed mb-12" style={{ color: 'var(--text-secondary)' }}>
@@ -1014,6 +1045,11 @@ function Home() {
               <animateTransform attributeName="transform" from="0 100 100" to="360 100 100" dur="18s" repeatCount="indefinite" />
             </svg>
             <p className="text-xl text-center max-w-2xl mb-2" style={{ color: 'var(--text-secondary)' }}>Fast, secure, and user-friendly DeFi for everyone.</p>
+          </div>
+
+          {/* Onboarding Checklist */}
+          <div className="mt-6 mb-8 max-w-sm mx-auto fade-in delay-450">
+            <OnboardingChecklist />
           </div>
 
           {/* Features Section */}

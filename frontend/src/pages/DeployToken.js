@@ -23,6 +23,8 @@ import EnhancedAnimatedBackground from '../components/EnhancedAnimatedBackground
 import TokenPreview from '../components/TokenPreview';
 import DeploymentProgress from '../components/DeploymentProgress';
 import DeploymentHistory from '../components/DeploymentHistory';
+import LaunchWizard from '../components/LaunchWizard';
+import FairLaunchChecklist from '../components/FairLaunchChecklist';
 import { deploymentHistory as deploymentHistoryUtil } from '../utils/deploymentHistory';
 import { notificationService, showToastWithNotification } from '../utils/notifications';
 
@@ -448,12 +450,17 @@ export default function DeployToken() {
   const [showRenounceModal, setShowRenounceModal] = useState(false);
   const [pendingRenounceContract, setPendingRenounceContract] = useState(null);
   const [showOwnershipRenounceModal, setShowOwnershipRenounceModal] = useState(false);
+  const [ownershipRenounced, setOwnershipRenounced] = useState(false);
 
   // Logo and metadata state
   const [logoUrl, setLogoUrl] = useState('');
   const [logoUploadResult, setLogoUploadResult] = useState(null);
   const [metadataUrl, setMetadataUrl] = useState('');
   const [uploadingMetadata, setUploadingMetadata] = useState(false);
+
+  // Launch Wizard (step-by-step mode)
+  const [useWizardMode, setUseWizardMode] = useState(true);
+  const [wizardStep, setWizardStep] = useState(1);
 
   // Enhanced deployment features
   const [showPreview, setShowPreview] = useState(false);
@@ -1248,6 +1255,7 @@ export default function DeployToken() {
       try {
         toast('Sending second transaction to renounce ownership...');
         await pendingRenounceContract.renounceOwnership();
+        setOwnershipRenounced(true);
         toast.success('Ownership renounced successfully!');
       } catch (err) {
         toast.error('Failed to renounce ownership: ' + err.message);
@@ -1319,7 +1327,18 @@ export default function DeployToken() {
               </p>
               
               {/* Quick Actions */}
-              <div className="flex items-center justify-center space-x-4 mt-4">
+              <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
+                <button
+                  onClick={() => setUseWizardMode(!useWizardMode)}
+                  className="px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+                  style={{
+                    backgroundColor: useWizardMode ? 'var(--bg-secondary)' : 'var(--bg-tertiary)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--border-color)'
+                  }}
+                >
+                  {useWizardMode ? '🎯 Wizard Mode' : '📋 Classic'}
+                </button>
                 <button
                   onClick={() => setShowPreview(!showPreview)}
                   className="px-4 py-2 rounded-lg transition-colors text-sm font-medium"
@@ -1401,7 +1420,12 @@ export default function DeployToken() {
               </div>
             )}
 
-            {/* Service Plan Selection */}
+            {/* Launch Wizard / Form */}
+            <LaunchWizard
+              currentStep={useWizardMode ? wizardStep : 4}
+              onStepChange={useWizardMode ? setWizardStep : undefined}
+            >
+            {(!useWizardMode || wizardStep === 2) && (
             <div className="rounded-2xl shadow-xl p-6 mb-8 border" style={{
               backgroundColor: 'var(--bg-card)',
               borderColor: 'var(--border-color)'
@@ -1499,7 +1523,19 @@ export default function DeployToken() {
                   </div>
                 ))}
               </div>
+              {/* Wizard step 2 nav */}
+              {useWizardMode && wizardStep === 2 && (
+                <div className="flex justify-between mt-6 pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
+                  <button type="button" onClick={() => setWizardStep(1)} className="interactive-button px-6 py-2 bg-gray-600 hover:bg-gray-500 text-white font-medium rounded-lg">
+                    ← Back
+                  </button>
+                  <button type="button" onClick={() => setWizardStep(3)} className="interactive-button px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg">
+                    Next: Security & Info →
+                  </button>
+                </div>
+              )}
             </div>
+            )}
 
             {/* Main Form */}
             <div className="rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 border" style={{
@@ -1507,8 +1543,8 @@ export default function DeployToken() {
               borderColor: 'var(--border-color)'
             }}>
               <form onSubmit={handleDeploy} className="space-y-6 sm:space-y-8">
-                {/* Basic Information */}
-                <div>
+                {/* Step 1: Basic Information + Logo */}
+                <div style={{ display: !useWizardMode || wizardStep === 1 ? 'block' : 'none' }}>
                   <h3 className="text-xl sm:text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4 sm:mb-6">Basic Token Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <div>
@@ -1598,6 +1634,17 @@ export default function DeployToken() {
                   </div>
                 </div>
 
+                {/* Wizard step 1 nav */}
+                {useWizardMode && wizardStep === 1 && (
+                  <div className="flex justify-end mt-6">
+                    <button type="button" onClick={() => setWizardStep(2)} className="interactive-button px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg">
+                      Next: Network & Plan →
+                    </button>
+                  </div>
+                )}
+
+                {/* Step 3: Project Information + Security + Social */}
+                <div style={{ display: !useWizardMode || wizardStep === 3 ? 'block' : 'none' }}>
                 {/* Project Information */}
                 <div>
                   <h3 className="text-xl sm:text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4 sm:mb-6">Project Information</h3>
@@ -1890,6 +1937,21 @@ export default function DeployToken() {
                   </div>
                 </div>
 
+                {/* Wizard step 3 nav */}
+                {useWizardMode && wizardStep === 3 && (
+                  <div className="flex justify-between mt-6">
+                    <button type="button" onClick={() => setWizardStep(2)} className="interactive-button px-6 py-2 bg-gray-600 hover:bg-gray-500 text-white font-medium rounded-lg">
+                      ← Back
+                    </button>
+                    <button type="button" onClick={() => setWizardStep(4)} className="interactive-button px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg">
+                      Next: Review & Deploy →
+                    </button>
+                  </div>
+                )}
+                </div>
+
+                {/* Step 4: Deploy Button */}
+                <div style={{ display: !useWizardMode || wizardStep === 4 ? 'block' : 'none' }}>
                 {/* Deploy Button */}
                 <div className="text-center pt-4 sm:pt-6">
                   <button
@@ -1907,8 +1969,19 @@ export default function DeployToken() {
                     )}
                   </button>
                 </div>
+
+                {/* Wizard step 4 nav (Back only) */}
+                {useWizardMode && wizardStep === 4 && (
+                  <div className="flex justify-start mt-6 pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
+                    <button type="button" onClick={() => setWizardStep(3)} className="interactive-button px-6 py-2 bg-gray-600 hover:bg-gray-500 text-white font-medium rounded-lg">
+                      ← Back
+                    </button>
+                  </div>
+                )}
+                </div>
               </form>
             </div>
+            </LaunchWizard>
 
             {/* Deployment Status */}
             {(txHash || tokenAddress) && (
@@ -1957,6 +2030,27 @@ export default function DeployToken() {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Fair Launch Checklist - shown after deployment */}
+            {tokenAddress && (
+              <div className="mt-6 sm:mt-8">
+                <FairLaunchChecklist
+                  tokenAddress={tokenAddress}
+                  txHash={txHash}
+                  chainId={network?.chainId}
+                  onRenounce={() => {
+                  if (signer && tokenAddress) {
+                    const contract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
+                    setPendingRenounceContract(contract);
+                    setShowRenounceModal(true);
+                  } else {
+                    toast.error('Connect wallet to renounce ownership');
+                  }
+                }}
+                  isRenounced={ownershipRenounced}
+                />
               </div>
             )}
 

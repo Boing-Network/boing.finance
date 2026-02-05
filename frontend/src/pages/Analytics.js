@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import config from '../config';
 import { Helmet } from 'react-helmet-async';
 import { LineChart, Line, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
@@ -8,16 +8,19 @@ import theGraphService from '../services/theGraphService';
 import { exportAnalytics } from '../utils/exportData';
 import { getPricePrediction } from '../utils/predictiveAnalytics';
 import { ChartSkeleton, AnalyticsCardSkeleton } from '../components/SkeletonLoader';
+import MetricTooltip from '../components/Tooltip';
+import { downloadCSV } from '../utils/exportData';
 import toast from 'react-hot-toast';
 
 // BoingAstronaut component
 
 export default function Analytics() {
+  const queryClient = useQueryClient();
   const [timeRange, setTimeRange] = useState('24h');
   const [activeSection, setActiveSection] = useState('overview'); // overview, market, trending
   const [selectedNetwork, setSelectedNetwork] = useState('all'); // For trending tokens filter
 
-  const { data: analytics, isLoading, error, refetch: refetchAnalytics, dataUpdatedAt } = useQuery({
+  const { data: analytics, isLoading, error, refetch: refetchAnalytics, isFetching: analyticsFetching, dataUpdatedAt } = useQuery({
     queryKey: ['analytics', timeRange],
     queryFn: () => {
       return fetchAnalytics(timeRange);
@@ -79,6 +82,14 @@ export default function Analytics() {
     };
     return networkMap[chainId] || 'ethereum';
   };
+
+  // Fetch trending NFT collections (CoinGecko - optional, may require Pro)
+  const { data: trendingNfts = [] } = useQuery({
+    queryKey: ['trending-nfts'],
+    queryFn: () => coingeckoService.getNftMarkets(8),
+    staleTime: 300000,
+    retry: 1
+  });
 
   // Fetch trending tokens - Combined CoinGecko + The Graph
   const { data: trendingTokens, isLoading: trendingLoading } = useQuery({
@@ -332,12 +343,25 @@ export default function Analytics() {
                 </div>
                 <div className="flex flex-wrap gap-2 items-center">
                   <button
-                    onClick={() => refetchAnalytics()}
-                    disabled={isLoading}
+                    onClick={async () => {
+                      try {
+                        await Promise.all([
+                          queryClient.invalidateQueries({ queryKey: ['analytics'] }),
+                          queryClient.invalidateQueries({ queryKey: ['trending-tokens'] }),
+                          queryClient.invalidateQueries({ queryKey: ['historical-volume'] }),
+                          queryClient.invalidateQueries({ queryKey: ['market-data'] }),
+                          queryClient.invalidateQueries({ queryKey: ['price-insights'] })
+                        ]);
+                        toast.success('Analytics data refreshed');
+                      } catch (e) {
+                        toast.error('Refresh failed');
+                      }
+                    }}
+                    disabled={analyticsFetching || isLoading}
                     className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
-                    title="Refresh data"
+                    title="Refresh all analytics data"
                   >
-                    <svg className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`w-4 h-4 ${(analyticsFetching || isLoading) ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
                     Refresh
@@ -385,8 +409,8 @@ export default function Analytics() {
               </div>
               <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mb-4">
                 <p className="text-sm text-blue-300">
-                  <span className="font-semibold">Note:</span> Time range affects the volume chart in Overview. 
-                  Market and trending data show real-time info. Historical volume uses CoinGecko (Bitcoin as proxy).
+                  <span className="font-semibold">Note:</span> Time range affects the <strong>Volume chart</strong> (CoinGecko historical data) and <strong>User Activity</strong> (when tracked).
+                  Key metrics (24h Volume, Market Cap, etc.) and Network Performance show real-time or 24h data from APIs.
                 </p>
               </div>
               <div className="flex flex-wrap gap-4">
@@ -431,7 +455,12 @@ export default function Analytics() {
                 {/* Key Metrics */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-semibold text-white mb-2">24h Volume</h3>
+                    <MetricTooltip content="Total 24h trading volume across all cryptocurrencies. Source: DefiLlama (DEX) or CoinGecko (global market).">
+                      <h3 className="text-lg font-semibold text-white mb-2 inline-flex items-center gap-1.5">
+                        24h Volume
+                        <span className="text-gray-500 cursor-help">ⓘ</span>
+                      </h3>
+                    </MetricTooltip>
                     <p className="text-3xl font-bold text-blue-400">
                       {(() => {
                         // Try backend analytics first, then CoinGecko market data
@@ -457,7 +486,12 @@ export default function Analytics() {
                   </div>
                   
                   <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-semibold text-white mb-2">Market Cap</h3>
+                    <MetricTooltip content="Total market capitalization of all tracked cryptocurrencies. Source: CoinGecko.">
+                      <h3 className="text-lg font-semibold text-white mb-2 inline-flex items-center gap-1.5">
+                        Market Cap
+                        <span className="text-gray-500 cursor-help">ⓘ</span>
+                      </h3>
+                    </MetricTooltip>
                     <p className="text-3xl font-bold text-green-400">
                       {(() => {
                         const marketCap = marketData?.data?.total_market_cap?.usd 
@@ -478,7 +512,12 @@ export default function Analytics() {
                   </div>
                   
                   <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-semibold text-white mb-2">Active Cryptocurrencies</h3>
+                    <MetricTooltip content="Number of cryptocurrencies tracked by CoinGecko or total pools from backend.">
+                      <h3 className="text-lg font-semibold text-white mb-2 inline-flex items-center gap-1.5">
+                        Active Cryptocurrencies
+                        <span className="text-gray-500 cursor-help">ⓘ</span>
+                      </h3>
+                    </MetricTooltip>
                     <p className="text-3xl font-bold text-purple-400">
                       {marketData?.data?.active_cryptocurrencies 
                         ? marketData.data.active_cryptocurrencies.toLocaleString()
@@ -492,7 +531,12 @@ export default function Analytics() {
                   </div>
                   
                   <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-semibold text-white mb-2">Markets</h3>
+                    <MetricTooltip content="Number of active trading pairs (CoinGecko) or total transactions (backend).">
+                      <h3 className="text-lg font-semibold text-white mb-2 inline-flex items-center gap-1.5">
+                        Markets
+                        <span className="text-gray-500 cursor-help">ⓘ</span>
+                      </h3>
+                    </MetricTooltip>
                     <p className="text-3xl font-bold text-yellow-400">
                       {marketData?.data?.markets 
                         ? marketData.data.markets.toLocaleString()
@@ -503,6 +547,28 @@ export default function Analytics() {
                     <p className="text-sm text-gray-400 mt-2">
                       {marketData?.data?.markets ? 'Active trading pairs (CoinGecko)' : (analytics?.markets ? 'Markets (backend API)' : 'Total transactions')}
                     </p>
+                  </div>
+                </div>
+
+                {/* NFT-gated Pro Analytics Placeholder */}
+                <div className="interactive-card bg-gradient-to-r from-purple-900/40 to-blue-900/40 rounded-2xl p-6 border border-purple-500/30">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-2xl">✨</span>
+                        <h2 className="text-xl font-bold text-white">Pro Analytics</h2>
+                        <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-purple-500/30 text-purple-300">NFT Holders</span>
+                      </div>
+                      <p className="text-sm text-gray-300 mb-2">
+                        Unlock advanced analytics, exclusive insights, and priority support when you hold Boing NFTs.
+                      </p>
+                      <a
+                        href="/create-nft"
+                        className="inline-block interactive-button px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium"
+                      >
+                        Learn more →
+                      </a>
+                    </div>
                   </div>
                 </div>
 
@@ -570,7 +636,7 @@ export default function Analytics() {
                     <ChartSkeleton height="300px" />
                   ) : generateTimeSeriesData.length > 0 ? (
                     <ResponsiveContainer width="100%" height={300}>
-                      <AreaChart data={generateTimeSeriesData}>
+                      <AreaChart data={generateTimeSeriesData} isAnimationActive animationDuration={800} animationEasing="ease-out">
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                         <XAxis 
                           dataKey="time" 
@@ -608,7 +674,11 @@ export default function Analytics() {
                     <div className="h-[300px] flex flex-col items-center justify-center gap-3 text-center px-4">
                       <p className="text-gray-400">Volume data not available for this time range</p>
                       <button
-                        onClick={() => refetchAnalytics()}
+                        onClick={async () => {
+                          await queryClient.invalidateQueries({ queryKey: ['analytics'] });
+                          await queryClient.invalidateQueries({ queryKey: ['historical-volume'] });
+                          toast.success('Refreshing...');
+                        }}
                         className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
                       >
                         Try refreshing
@@ -619,7 +689,26 @@ export default function Analytics() {
 
                 {/* Network Performance */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                  <h2 className="text-2xl font-bold text-white mb-6">Network Performance</h2>
+                  <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <h2 className="text-2xl font-bold text-white">Network Performance</h2>
+                    {analytics?.networkStats && Object.keys(analytics.networkStats).length > 0 && (
+                      <button
+                        onClick={() => {
+                          const rows = Object.entries(analytics.networkStats).map(([network, stats]) => ({
+                            Network: network,
+                            'Volume (USD)': parseFloat(stats.volume || 0).toLocaleString(),
+                            Users: stats.users || 0,
+                            Pools: stats.pools || 0
+                          }));
+                          downloadCSV(rows, `network-performance-${new Date().toISOString().split('T')[0]}`);
+                          toast.success('Network Performance exported as CSV!');
+                        }}
+                        className="px-3 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 text-white rounded-lg"
+                      >
+                        Export CSV
+                      </button>
+                    )}
+                  </div>
                   {analytics?.networkStats && typeof analytics.networkStats === 'object' && Object.keys(analytics.networkStats).length > 0 ? (
                     <>
                       <div className="mb-6">
@@ -629,7 +718,7 @@ export default function Analytics() {
                             volume: parseFloat(stats.volume || 0),
                             users: stats.users || 0,
                             pools: stats.pools || 0
-                          }))}>
+                          }))} isAnimationActive animationDuration={600} animationEasing="ease-out">
                             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                             <XAxis dataKey="network" stroke="#9CA3AF" />
                             <YAxis stroke="#9CA3AF" />
@@ -687,7 +776,7 @@ export default function Analytics() {
                   <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                     <h2 className="text-2xl font-bold text-white mb-6">Network Distribution</h2>
                     <ResponsiveContainer width="100%" height={300}>
-                      <PieChart>
+                      <PieChart isAnimationActive animationDuration={600} animationEasing="ease-out">
                         <Pie
                           data={Object.entries(analytics.networkStats).map(([network, stats]) => ({
                             name: network,
@@ -716,7 +805,27 @@ export default function Analytics() {
 
                 {/* Top Trading Pairs */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                  <h2 className="text-2xl font-bold text-white mb-6">Top Trading Pairs</h2>
+                  <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <h2 className="text-2xl font-bold text-white">Top Trading Pairs</h2>
+                    {analytics?.topPairs?.length > 0 && (
+                      <button
+                        onClick={() => {
+                          const rows = analytics.topPairs.map(p => ({
+                            Pair: `${p.token0Symbol}/${p.token1Symbol}`,
+                            Network: p.network,
+                            'Volume (USD)': parseFloat(p.volume || 0).toLocaleString(),
+                            'Liquidity (USD)': parseFloat(p.liquidity || 0).toLocaleString(),
+                            APY: p.apy ? `${parseFloat(p.apy).toFixed(2)}%` : '0%'
+                          }));
+                          downloadCSV(rows, `top-pairs-${new Date().toISOString().split('T')[0]}`);
+                          toast.success('Top Pairs exported as CSV!');
+                        }}
+                        className="px-3 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 text-white rounded-lg"
+                      >
+                        Export CSV
+                      </button>
+                    )}
+                  </div>
                   {analytics?.topPairs && Array.isArray(analytics.topPairs) && analytics.topPairs.length > 0 ? (
                     <div className="overflow-x-auto">
                       <table className="min-w-full divide-y divide-gray-700">
@@ -819,7 +928,7 @@ export default function Analytics() {
                             <BarChart data={Object.entries(analytics.userActivity.byType).map(([action, count]) => ({
                               action: action.replace('_', ' ').toUpperCase(),
                               count: Array.isArray(count) ? count.length : count
-                            }))}>
+                            }))} isAnimationActive animationDuration={600} animationEasing="ease-out">
                               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                               <XAxis dataKey="action" stroke="#9CA3AF" />
                               <YAxis stroke="#9CA3AF" />
@@ -1036,7 +1145,7 @@ export default function Analytics() {
                       ) : trendingTokens && trendingTokens.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {trendingTokens.slice(0, 12).map((coin, index) => (
-                            <div key={index} className="bg-gray-700 rounded-xl p-4 border border-gray-600 hover:border-blue-500 transition-colors">
+                            <div key={index} className="interactive-card bg-gray-700 rounded-xl p-4 border border-gray-600 hover:border-blue-500">
                               <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center space-x-3">
                                   {coin.item?.small && (
@@ -1092,6 +1201,33 @@ export default function Analytics() {
                         </div>
                       )}
                     </div>
+
+                    {/* Trending NFTs Section */}
+                    {trendingNfts.length > 0 && (
+                      <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                        <h2 className="text-2xl font-bold text-white mb-4">Trending NFT Collections</h2>
+                        <p className="text-sm text-gray-400 mb-6">Top collections by 24h volume. Source: CoinGecko.</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                          {trendingNfts.map((nft, index) => (
+                            <a
+                              key={nft.id || index}
+                              href={`https://www.coingecko.com/en/nft/${nft.id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="interactive-card bg-gray-700 rounded-xl p-4 border border-gray-600 hover:border-purple-500 flex flex-col items-center text-center"
+                            >
+                              {nft.image?.small && (
+                                <img src={nft.image.small} alt={nft.name} className="w-16 h-16 rounded-lg mb-2 object-cover" />
+                              )}
+                              <h3 className="text-white font-semibold text-sm truncate w-full">{nft.name || 'Unknown'}</h3>
+                              {nft.floor_price?.usd && (
+                                <p className="text-gray-400 text-xs mt-1">Floor: ${parseFloat(nft.floor_price.usd).toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+                              )}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

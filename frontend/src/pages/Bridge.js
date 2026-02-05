@@ -6,6 +6,7 @@ import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 import { getApiUrl } from '../config';
 import TokenManagementModal from '../components/TokenManagementModal';
+import EmptyState from '../components/EmptyState';
 
 // Add AnimatedBackground and BoingAstronaut components
 
@@ -302,7 +303,7 @@ export default function Bridge() {
           </div>
 
           {/* Bridge Interface */}
-          <div className="bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg mb-4 sm:mb-6">
+          <div id="bridge-form" className="bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg mb-4 sm:mb-6">
             <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">Bridge Tokens</h2>
 
             {/* Network Selection */}
@@ -495,9 +496,13 @@ export default function Bridge() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-6 sm:py-8">
-                <p className="text-gray-300 text-sm sm:text-base">No bridge transactions yet</p>
-              </div>
+              <EmptyState
+                variant="bridge"
+                title="No bridge transactions yet"
+                description="Bridge tokens across networks to see your transaction history here."
+                actionLabel="Bridge tokens"
+                actionHref="#bridge-form"
+              />
             )}
           </div>
 

@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useWallet } from '../contexts/WalletContext';
 import { Helmet } from 'react-helmet-async';
@@ -8,23 +9,48 @@ import { useBlockchainPools } from '../hooks/useBlockchainPools';
 import externalDexService from '../services/externalDexService';
 import portfolioService from '../services/portfolioService';
 import theGraphService from '../services/theGraphService';
+import alchemyService from '../services/alchemyService';
 import { NETWORKS } from '../config/networks';
 import { exportPortfolio, exportPortfolioPDF } from '../utils/exportData';
 import { notificationService } from '../utils/notifications';
 import { PortfolioSummarySkeleton, TokenBalanceSkeleton, PoolCardSkeleton, ChartSkeleton } from '../components/SkeletonLoader';
 import { savePortfolioSnapshot, getPortfolioHistoryForChart } from '../utils/portfolioHistory';
+import { saveSnapshot, getSnapshots } from '../services/portfolioSnapshotService';
 import SharePortfolioModal from '../components/SharePortfolioModal';
+import NFTDetailModal from '../components/NFTDetailModal';
+import EmptyState from '../components/EmptyState';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import toast from 'react-hot-toast';
 
 // MochiAstronaut component
 
 export default function Portfolio() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { account, chainId, connectWallet } = useWallet();
   const [selectedNetwork, setSelectedNetwork] = useState('all');
-  const [activeTab, setActiveTab] = useState('overview'); // overview, tokens, pools
+  const tabFromUrl = searchParams.get('tab');
+  const collectionFromUrl = searchParams.get('collection');
+  const [activeTab, setActiveTab] = useState(() => {
+    if (searchParams.get('collection')) return 'nfts';
+    const t = searchParams.get('tab');
+    return t && ['overview','tokens','pools','nfts'].includes(t) ? t : 'overview';
+  });
+  // Sync activeTab when URL query changes (e.g. deep link to /portfolio?tab=nfts&collection=0x...)
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    const coll = searchParams.get('collection');
+    if (coll) setActiveTab('nfts');
+    else if (tab && ['overview','tokens','pools','nfts'].includes(tab)) setActiveTab(tab);
+  }, [searchParams]);
   const [trackedNetworks, setTrackedNetworks] = useState([chainId || 11155111]);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [selectedNft, setSelectedNft] = useState(null);
+  const [hideZeroBalances, setHideZeroBalances] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('boing_hide_zero_balances') ?? 'true'); } catch { return true; }
+  });
+  const [groupByNetwork, setGroupByNetwork] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('boing_group_by_network') ?? 'false'); } catch { return false; }
+  });
 
   // Blockchain pools hook - hooks must be called unconditionally
   const blockchainPoolsHook = useBlockchainPools();
@@ -152,6 +178,33 @@ export default function Portfolio() {
     });
   }, [createdPools, selectedNetwork]);
 
+  // Networks that support Alchemy NFT API (excludes BSC)
+  const nftSupportedChainIds = [1, 137, 42161, 10, 8453, 11155111];
+
+  // Fetch NFTs for connected wallet - React Query v5 API
+  const { data: nftData, isLoading: nftsLoading, refetch: refetchNfts } = useQuery({
+    queryKey: ['user-nfts', account, chainId, trackedNetworks],
+    queryFn: async () => {
+      if (!account) return { ownedNfts: [], totalCount: 0 };
+      let chainsToFetch = trackedNetworks.filter(id => nftSupportedChainIds.includes(Number(id)));
+      if (chainsToFetch.length === 0) chainsToFetch = [chainId && nftSupportedChainIds.includes(Number(chainId)) ? chainId : 1];
+      const allNfts = [];
+      for (const cid of chainsToFetch) {
+        try {
+          const res = await alchemyService.getNFTsForOwner(cid, account, { pageSize: 100 });
+          const withChain = (res.ownedNfts || []).map(n => ({ ...n, chainId: cid }));
+          allNfts.push(...withChain);
+        } catch (e) {
+          console.warn('[Portfolio] NFT fetch failed for chain', cid, e);
+        }
+      }
+      return { ownedNfts: allNfts, totalCount: allNfts.length };
+    },
+    refetchInterval: 60000,
+    enabled: !!account && activeTab === 'nfts',
+    retry: 1
+  });
+
   // Fetch token balances across networks - React Query v5 API
   const { data: tokenBalances, isLoading: balancesLoading, refetch: refetchBalances } = useQuery({
     queryKey: ['token-balances', account, trackedNetworks],
@@ -245,6 +298,13 @@ export default function Portfolio() {
     retry: 2
   });
 
+  // Sync URL tab param to activeTab
+  useEffect(() => {
+    if (tabFromUrl && ['overview','tokens','pools','nfts'].includes(tabFromUrl)) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [tabFromUrl]);
+
   // Update tracked networks when chainId changes
   useEffect(() => {
     if (chainId && !trackedNetworks.includes(chainId)) {
@@ -252,19 +312,54 @@ export default function Portfolio() {
     }
   }, [chainId]);
 
-  // Save portfolio snapshot periodically
+  // Save portfolio snapshot periodically (localStorage + D1 API)
   useEffect(() => {
     if (portfolioSummary && portfolioSummary.totalValue && account) {
       const value = parseFloat(portfolioSummary.totalValue);
       if (value > 0) {
         savePortfolioSnapshot(value);
+        saveSnapshot(account, value, chainId).catch(() => {});
       }
     }
-  }, [portfolioSummary, account]);
+  }, [portfolioSummary, account, chainId]);
 
-  // Get portfolio history for charts
-  const portfolioHistory7d = useMemo(() => getPortfolioHistoryForChart(7), [portfolioSummary]);
-  const portfolioHistory30d = useMemo(() => getPortfolioHistoryForChart(30), [portfolioSummary]);
+  // Fetch portfolio history from D1 (Cloudflare) for PnL chart
+  const { data: apiHistory } = useQuery({
+    queryKey: ['portfolio-history-d1', account],
+    queryFn: async () => {
+      if (!account) return null;
+      const data = await getSnapshots(account, 30);
+      return data;
+    },
+    enabled: !!account,
+    staleTime: 60000
+  });
+
+  // Get portfolio history for charts (D1 API preferred, localStorage fallback)
+  const portfolioHistory7d = useMemo(() => {
+    if (apiHistory && apiHistory.length > 0) {
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 7);
+      const filtered = apiHistory
+        .filter((h) => new Date(h.timestamp) >= cutoff)
+        .map((h) => ({ date: h.date || new Date(h.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), value: h.value, timestamp: h.timestamp }))
+        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      return filtered.length > 0 ? filtered : getPortfolioHistoryForChart(7);
+    }
+    return getPortfolioHistoryForChart(7);
+  }, [apiHistory, portfolioSummary]);
+  const portfolioHistory30d = useMemo(() => {
+    if (apiHistory && apiHistory.length > 0) {
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 30);
+      const filtered = apiHistory
+        .filter((h) => new Date(h.timestamp) >= cutoff)
+        .map((h) => ({ date: h.date || new Date(h.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), value: h.value, timestamp: h.timestamp }))
+        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      return filtered.length > 0 ? filtered : getPortfolioHistoryForChart(30);
+    }
+    return getPortfolioHistoryForChart(30);
+  }, [apiHistory, portfolioSummary]);
 
   const networks = [
     { id: 'all', name: 'All Networks', color: 'bg-gray-500' },
@@ -275,6 +370,14 @@ export default function Portfolio() {
     { id: '10', name: 'Optimism', color: 'bg-red-500' },
     { id: '11155111', name: 'Sepolia', color: 'bg-gray-500' },
   ];
+
+  // Persist view preferences
+  useEffect(() => {
+    localStorage.setItem('boing_hide_zero_balances', JSON.stringify(hideZeroBalances));
+  }, [hideZeroBalances]);
+  useEffect(() => {
+    localStorage.setItem('boing_group_by_network', JSON.stringify(groupByNetwork));
+  }, [groupByNetwork]);
 
   // Send portfolio update notifications
   useEffect(() => {
@@ -356,13 +459,14 @@ export default function Portfolio() {
                     onClick={() => {
                       refetchPools();
                       refetchBalances();
+                      refetchNfts();
                       toast.success('Portfolio data refreshed');
                     }}
-                    disabled={balancesLoading || poolsLoading}
+                    disabled={balancesLoading || poolsLoading || nftsLoading}
                     className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
                     title="Refresh portfolio data"
                   >
-                    <svg className={`w-4 h-4 ${(balancesLoading || poolsLoading) ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`w-4 h-4 ${(balancesLoading || poolsLoading || nftsLoading) ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
                     Refresh
@@ -462,11 +566,12 @@ export default function Portfolio() {
               {[
                 { id: 'overview', label: 'Overview', icon: '📊' },
                 { id: 'tokens', label: 'Token Balances', icon: '🪙' },
-                { id: 'pools', label: 'Liquidity Pools', icon: '🏊' }
+                { id: 'pools', label: 'Liquidity Pools', icon: '🏊' },
+                { id: 'nfts', label: 'Collectibles', icon: '🖼️' }
               ].map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => { setActiveTab(tab.id); setSearchParams(tab.id === 'overview' ? {} : { tab: tab.id }); }}
                   className={`px-6 py-3 font-medium transition-colors border-b-2 -mb-px ${
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-400'
@@ -559,7 +664,7 @@ export default function Portfolio() {
                   </div>
                   {portfolioHistory7d.length > 0 ? (
                     <ResponsiveContainer width="100%" height={300}>
-                      <AreaChart data={portfolioHistory7d}>
+                      <AreaChart data={portfolioHistory7d} isAnimationActive animationDuration={800} animationEasing="ease-out">
                         <defs>
                           <linearGradient id="portfolioGradient" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
@@ -649,9 +754,27 @@ export default function Portfolio() {
                 {/* Tokens Tab */}
                 {activeTab === 'tokens' && (
                   <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                       <h2 className="text-2xl font-bold text-white">Token Balances</h2>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-300">
+                          <input
+                            type="checkbox"
+                            checked={hideZeroBalances}
+                            onChange={(e) => setHideZeroBalances(e.target.checked)}
+                            className="rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500"
+                          />
+                          Hide zero balances
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-300">
+                          <input
+                            type="checkbox"
+                            checked={groupByNetwork}
+                            onChange={(e) => setGroupByNetwork(e.target.checked)}
+                            className="rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500"
+                          />
+                          Group by network
+                        </label>
                         <select
                           value={trackedNetworks[0] || chainId || 11155111}
                           onChange={(e) => setTrackedNetworks([parseInt(e.target.value)])}
@@ -679,6 +802,19 @@ export default function Portfolio() {
                         <p className="text-gray-300 mt-4">Loading token balances...</p>
                       </div>
                     ) : tokenBalances && tokenBalances.balances && tokenBalances.balances.length > 0 ? (
+                      (() => {
+                        const filtered = tokenBalances.balances
+                          .filter(b => !hideZeroBalances || parseFloat(b.balance) > 0)
+                          .sort((a, b) => (b.value || 0) - (a.value || 0));
+                        const grouped = groupByNetwork
+                          ? filtered.reduce((acc, t) => {
+                              const net = NETWORKS[t.chainId]?.name || t.network || `Chain ${t.chainId}`;
+                              if (!acc[net]) acc[net] = [];
+                              acc[net].push(t);
+                              return acc;
+                            }, {})
+                          : null;
+                        return (
                       <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-700">
                           <thead className="bg-gray-700">
@@ -692,10 +828,48 @@ export default function Portfolio() {
                             </tr>
                           </thead>
                           <tbody className="bg-gray-800 divide-y divide-gray-700">
-                            {tokenBalances.balances
-                              .filter(b => parseFloat(b.balance) > 0)
-                              .sort((a, b) => b.value - a.value)
-                              .map((token, index) => (
+                            {grouped ? Object.entries(grouped).flatMap(([network, tokens]) => [
+                              <tr key={`header-${network}`} className="bg-gray-700/50">
+                                <td colSpan={6} className="px-6 py-2 text-sm font-semibold text-cyan-400">{network}</td>
+                              </tr>,
+                              ...tokens.map((token, index) => (
+                                <tr key={`${network}-${token.symbol}-${token.chainId}-${index}`} className="hover:bg-gray-700 transition-colors">
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="flex items-center">
+                                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mr-3">
+                                        <span className="text-white font-bold text-sm">
+                                          {token.symbol?.charAt(0) || 'T'}
+                                        </span>
+                                      </div>
+                                      <div>
+                                        <div className="text-white font-medium">{token.symbol}</div>
+                                        <div className="text-sm text-gray-400">{token.name}</div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-gray-300">
+                                    {NETWORKS[token.chainId]?.name || `Chain ${token.chainId}`}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-white">
+                                    {parseFloat(token.balance).toLocaleString(undefined, { maximumFractionDigits: 6 })} {token.symbol}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-white">
+                                    ${token.price ? token.price.toLocaleString(undefined, { maximumFractionDigits: 4 }) : '0.00'}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-white font-semibold">
+                                    ${token.value ? token.value.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0.00'}
+                                  </td>
+                                  <td className={`px-6 py-4 whitespace-nowrap ${token.priceChange24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                    {token.priceChange24h !== undefined ? (
+                                      <>
+                                        {token.priceChange24h >= 0 ? '+' : ''}
+                                        {token.priceChange24h.toFixed(2)}%
+                                      </>
+                                    ) : 'N/A'}
+                                  </td>
+                                </tr>
+                              ))
+                            ]) : filtered.map((token, index) => (
                                 <tr key={index} className="hover:bg-gray-700 transition-colors">
                                   <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="flex items-center">
@@ -745,14 +919,16 @@ export default function Portfolio() {
                           </tfoot>
                         </table>
                       </div>
+                        );
+                      })()
                     ) : (
-                      <div className="text-center py-12">
-                        <div className="text-4xl mb-4">💼</div>
-                        <p className="text-gray-300 mb-2">No token balances found</p>
-                        <p className="text-sm text-gray-400">
-                          Token balances will appear here once detected on the selected network(s).
-                        </p>
-                      </div>
+                      <EmptyState
+                        variant="tokens"
+                        title="No token balances found"
+                        description="Token balances will appear here once detected on the selected network(s). Try swapping or bridging tokens."
+                        actionLabel="Go to Swap"
+                        actionHref="/swap"
+                      />
                     )}
                   </div>
                 )}
@@ -861,15 +1037,13 @@ export default function Portfolio() {
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-6 bg-gray-700 rounded-lg">
-                        <p className="text-gray-300 mb-3">No liquidity positions found.</p>
-                        <button 
-                          onClick={() => window.location.href = '/create-pool'}
-                          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm"
-                        >
-                          Add Liquidity
-                        </button>
-                      </div>
+                      <EmptyState
+                        variant="pools"
+                        title="No liquidity positions found"
+                        description="Add liquidity to a pool to earn trading fees."
+                        actionLabel="Add Liquidity"
+                        actionHref="/create-pool"
+                      />
                     )}
                   </div>
 
@@ -942,26 +1116,127 @@ export default function Portfolio() {
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-6 bg-gray-700 rounded-lg">
-                        <p className="text-gray-300 mb-3">You haven't created any pools yet.</p>
-                        <button 
-                          onClick={() => window.location.href = '/create-pool'}
-                          className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm"
-                        >
-                          Create Your First Pool
-                        </button>
-                      </div>
+                      <EmptyState
+                        variant="pools"
+                        title="You haven't created any pools yet"
+                        description="Create a new liquidity pool to provide trading pairs."
+                        actionLabel="Create Your First Pool"
+                        actionHref="/create-pool"
+                      />
                     )}
                   </div>
                 </div>
                   </>
                 )}
+
+                {/* NFTs Tab */}
+                {activeTab === 'nfts' && (
+                  <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                    <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                      <h2 className="text-2xl font-bold text-white">Collectibles</h2>
+                      <p className="text-sm text-gray-400">
+                        NFTs from Ethereum, Polygon, Arbitrum, Optimism, Base & Sepolia (via Alchemy)
+                      </p>
+                    </div>
+                    {collectionFromUrl && (
+                      <div className="mb-4 rounded-lg p-3 bg-blue-900/20 border border-blue-500/30 flex items-center justify-between flex-wrap gap-2">
+                        <span className="text-sm text-blue-200">
+                          Deep link: showing collection <code className="px-1.5 py-0.5 rounded bg-gray-700 text-blue-300">{collectionFromUrl.slice(0, 10)}...{collectionFromUrl.slice(-8)}</code>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setSearchParams({ tab: 'nfts' })}
+                          className="text-xs text-blue-300 hover:text-blue-200"
+                        >
+                          Show all
+                        </button>
+                      </div>
+                    )}
+                    {nftsLoading ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {[...Array(10)].map((_, i) => (
+                          <div key={i} className="bg-gray-700 rounded-xl h-48 animate-pulse" />
+                        ))}
+                      </div>
+                    ) : nftData?.ownedNfts?.length > 0 ? (
+                      (() => {
+                        const nftsList = collectionFromUrl
+                          ? nftData.ownedNfts.filter((nft) => (nft?.contract?.address || '').toLowerCase() === collectionFromUrl.toLowerCase())
+                          : nftData.ownedNfts;
+                        if (collectionFromUrl && nftsList.length === 0) {
+                          return (
+                            <EmptyState
+                              variant="nfts"
+                              title="No NFTs from this collection"
+                              description={`You don't own any NFTs from collection ${collectionFromUrl.slice(0, 10)}... in your wallet.`}
+                              actionLabel="Show all NFTs"
+                              actionHref="/portfolio?tab=nfts"
+                            />
+                          );
+                        }
+                        return (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {nftsList.map((nft, idx) => {
+                          const img = nft?.media?.[0]?.gateway || nft?.media?.[0]?.raw || nft?.image?.cachedUrl || nft?.image?.originalUrl || nft?.contract?.openSea?.imageUrl;
+                          const name = nft?.title || nft?.contract?.name || `#${nft?.tokenId}`;
+                          const collection = nft?.contract?.name || 'Unknown';
+                          const explorer = NETWORKS[nft?.chainId]?.explorer || 'https://etherscan.io';
+                          const nftWithExplorer = { ...nft, explorer };
+                          return (
+                            <button
+                              key={`${nft.contract?.address}-${nft.tokenId}-${idx}`}
+                              type="button"
+                              onClick={() => setSelectedNft(nftWithExplorer)}
+                              className="interactive-card group bg-gray-700 rounded-xl overflow-hidden border border-gray-600 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10 text-left w-full"
+                            >
+                              <div className="aspect-square bg-gray-600 relative overflow-hidden">
+                                {img ? (
+                                  <img
+                                    src={img}
+                                    alt={name}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    loading="lazy"
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23374151" width="100" height="100"/><text x="50" y="55" font-size="12" fill="%239ca3af" text-anchor="middle">NFT</text></svg>';
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-gray-400 text-2xl">🖼️</div>
+                                )}
+                              </div>
+                              <div className="p-3">
+                                <p className="text-white font-medium truncate" title={name}>{name}</p>
+                                <p className="text-gray-400 text-sm truncate" title={collection}>{collection}</p>
+                                <p className="text-gray-500 text-xs mt-1">{NETWORKS[nft?.chainId]?.name || `Chain ${nft?.chainId}`}</p>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                        );
+                      })()
+                    ) : (
+                      <EmptyState
+                        variant="nfts"
+                        title="No collectibles found"
+                        description="NFTs on supported networks (Ethereum, Polygon, Arbitrum, Optimism, Base, Sepolia) will appear here."
+                        secondaryLabel="View Bridge"
+                        secondaryHref="/bridge"
+                      />
+                    )}
+                  </div>
+                )}
+
               </div>
             )}
           </div>        </div>
       </div>
       
       {/* Share Portfolio Modal */}
+      {selectedNft && (
+        <NFTDetailModal nft={selectedNft} onClose={() => setSelectedNft(null)} />
+      )}
       <SharePortfolioModal
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}

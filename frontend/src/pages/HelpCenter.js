@@ -85,6 +85,19 @@ const HelpCenter = () => {
       ]
     },
     {
+      id: 'keyboard-shortcuts',
+      title: 'Keyboard Shortcuts',
+      icon: '⌨️',
+      articles: [
+        {
+          id: 'shortcuts',
+          title: 'Keyboard Shortcuts',
+          content: 'Press Escape (Esc) to close any open modal, dropdown, or menu. Use Tab to navigate between interactive elements.',
+          tags: ['keyboard', 'shortcuts', 'accessibility']
+        }
+      ]
+    },
+    {
       id: 'troubleshooting',
       title: 'Troubleshooting',
       icon: '🔧',

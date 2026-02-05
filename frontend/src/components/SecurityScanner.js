@@ -78,6 +78,13 @@ const SECURITY_CHECKS = [
     description: 'Check if contract uses proxy pattern (upgradeable)',
     severity: 'medium',
     category: 'architecture'
+  },
+  {
+    id: 'rug-pull',
+    name: 'Rug Pull / Honeypot Risk',
+    description: 'Check for honeypot, sell restrictions, or rug-pull indicators',
+    severity: 'high',
+    category: 'risk'
   }
 ];
 
@@ -253,16 +260,79 @@ const SecurityScanner = ({ tokenAddress, chainId, tokenSymbol, onScanComplete })
               break;
 
             case 'verified-contract':
-              // This would require explorer API integration
-              result.status = 'info';
-              result.details = 'Check contract verification on block explorer';
-              recs.push('Verify contract source code on block explorer for transparency');
+              try {
+                const apiBase = config?.apiUrl || config?.workerUrl || `${window.location.origin}/api`;
+                const base = apiBase.replace(/\/$/, '');
+                const res = await fetch(`${base}/contract-verification?address=${encodeURIComponent(tokenAddress)}&chainId=${chainId}`, {
+                  signal: AbortSignal.timeout(12000)
+                });
+                const data = await res.json();
+                if (data.success) {
+                  result.passed = data.verified === true;
+                  result.status = data.verified ? 'passed' : 'warning';
+                  result.details = data.contractName
+                    ? `${data.message} (${data.contractName})`
+                    : data.message;
+                  if (data.explorerUrl) {
+                    result.explorerUrl = data.explorerUrl;
+                  }
+                  if (!result.passed) {
+                    recs.push('Verify contract source code on block explorer for transparency');
+                  }
+                } else {
+                  result.status = 'info';
+                  result.details = data.message || 'Could not check verification. Check contract on block explorer.';
+                  recs.push('Verify contract source code on block explorer for transparency');
+                }
+              } catch (e) {
+                result.status = 'info';
+                result.details = 'Verification check unavailable. Verify on block explorer.';
+                recs.push('Verify contract source code on block explorer for transparency');
+              }
               break;
 
             case 'proxy-pattern':
               // Check for proxy pattern (would need more complex analysis)
               result.status = 'info';
               result.details = 'Proxy pattern detection requires deeper analysis';
+              break;
+
+            case 'rug-pull':
+              // Rug pull / honeypot check - placeholder for Token Sniffer, GoPlus, or similar API
+              try {
+                if (config?.apiUrl) {
+                  const res = await fetch(`${config.apiUrl}/token-safety?address=${tokenAddress}&chainId=${chainId}`, { signal: AbortSignal.timeout(5000) });
+                  if (res.ok) {
+                    const data = await res.json();
+                    if (data?.honeypot === true || data?.isRug === true) {
+                      result.status = 'warning';
+                      result.passed = false;
+                      result.details = data?.reason || 'Potential honeypot or rug-pull risk detected';
+                      recs.push('Consider checking on GoPlus or Token Sniffer before trading');
+                    } else if (data?.honeypot === false && data?.isRug === false) {
+                      result.status = 'passed';
+                      result.passed = true;
+                      result.details = 'No rug-pull or honeypot indicators from safety API';
+                    } else {
+                      result.status = 'info';
+                      result.details = 'Rug-pull check not available from API. Verify on block explorer or GoPlus.';
+                      recs.push('Check token on gopluslabs.io or similar for honeypot/rug-pull analysis');
+                    }
+                  } else {
+                    result.status = 'info';
+                    result.details = 'Rug-pull check requires safety API. Verify on GoPlus or Token Sniffer.';
+                    recs.push('Check token on gopluslabs.io or tokensniffer.com for risk analysis');
+                  }
+                } else {
+                  result.status = 'info';
+                  result.details = 'Verify rug-pull risk on gopluslabs.io or tokensniffer.com';
+                  recs.push('Check token on gopluslabs.io or tokensniffer.com for honeypot/rug-pull analysis');
+                }
+              } catch (e) {
+                result.status = 'info';
+                result.details = 'Rug-pull check not available. Verify on gopluslabs.io or tokensniffer.com.';
+                recs.push('Check token on gopluslabs.io or tokensniffer.com for risk analysis');
+              }
               break;
 
             default:
@@ -432,6 +502,17 @@ const SecurityScanner = ({ tokenAddress, chainId, tokenSymbol, onScanComplete })
                 </div>
               </div>
               <p className="text-xs mt-2 opacity-70">{result.details}</p>
+              {result.explorerUrl && (
+                <a
+                  href={result.explorerUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs mt-2 inline-block opacity-90 hover:underline"
+                  style={{ color: 'var(--color-primary)' }}
+                >
+                  View on block explorer →
+                </a>
+              )}
             </div>
           ))}
         </div>

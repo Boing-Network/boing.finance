@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import SecurityBadges from './SecurityBadges';
+import EmptyState from './EmptyState';
 import walletTokenService from '../services/walletTokenService';
 
 export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, currentNetwork, account, provider, chainId }) {
@@ -269,18 +270,18 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8">
-                  <div className="text-4xl mb-4">🔍</div>
-                  <h4 className="text-lg font-semibold text-white mb-2">No Tokens Found</h4>
-                  <p className="text-gray-400">
-                    {activeTab === 'my-tokens' 
+                <EmptyState
+                  variant="tokens"
+                  icon="🔍"
+                  title="No tokens found"
+                  description={
+                    activeTab === 'my-tokens'
                       ? 'No tokens found in your wallet on this network.'
-                      : activeTab === 'popular' 
-                      ? 'No popular tokens match your search.'
-                      : 'No custom tokens added yet.'
-                    }
-                  </p>
-                </div>
+                      : activeTab === 'popular'
+                      ? 'No popular tokens match your search. Try a different search term.'
+                      : 'Add custom token addresses to track tokens not in our list.'
+                  }
+                />
               )}
             </div>
           )}

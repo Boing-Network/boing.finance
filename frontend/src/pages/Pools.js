@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useWallet } from '../contexts/WalletContext';
+import EmptyState from '../components/EmptyState';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { ethers } from 'ethers';
@@ -1393,20 +1394,18 @@ const Pools = () => {
                       </div>
                     )
                   ) : (
-                    <div className="text-center py-12">
-                      <div className="text-6xl mb-4">
-                        {isSearching && searchTerm.trim() ? '🔍' : '🏊'}
-                      </div>
-                      <h3 className="text-xl font-semibold text-white mb-2">
-                        {isSearching && searchTerm.trim() ? 'No Pools Found' : 'No Pools Available'}
-                      </h3>
-                      <p className="text-gray-400">
-                        {isSearching && searchTerm.trim()
+                    <EmptyState
+                      variant="pools"
+                      icon={isSearching && searchTerm.trim() ? '🔍' : '🏊'}
+                      title={isSearching && searchTerm.trim() ? 'No pools found' : 'No pools available'}
+                      description={
+                        isSearching && searchTerm.trim()
                           ? `No pools found matching "${searchTerm}" on this network.`
-                          : 'No pools are available on this network.'
-                        }
-                      </p>
-                    </div>
+                          : 'No pools are available on this network. Create a pool to get started.'
+                      }
+                      actionLabel="Create pool"
+                      actionHref="/create-pool"
+                    />
                   )}
 
                   {/* Load More Button for Search Results */}

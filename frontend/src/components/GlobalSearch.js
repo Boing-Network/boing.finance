@@ -19,11 +19,22 @@ const GlobalSearch = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const tokenScanner = new TokenScanner();
 
-  // Load search history
+  // Load search history (support legacy string[] and new { query, type?, chainId?, networkName? }[])
   useEffect(() => {
-    const history = localStorage.getItem('boing_search_history');
-    if (history) {
-      setSearchHistory(JSON.parse(history));
+    const raw = localStorage.getItem('boing_search_history');
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw);
+      const normalized = Array.isArray(parsed)
+        ? parsed.map((item) =>
+            typeof item === 'string'
+              ? { query: item, type: item.startsWith('0x') ? 'address' : undefined }
+              : { query: item.query || item, type: item.type, chainId: item.chainId, networkName: item.networkName }
+          )
+        : [];
+      setSearchHistory(normalized);
+    } catch (e) {
+      setSearchHistory([]);
     }
   }, []);
 
@@ -65,11 +76,11 @@ const GlobalSearch = ({ isOpen, onClose }) => {
             }
           }
         } else {
-          // Name/symbol search: use CoinGecko API
+          // Name/symbol search: use CoinGecko API (coins + NFTs)
           try {
             const cgResults = await coingeckoService.searchTokens(searchQuery);
             if (cgResults?.coins?.length > 0) {
-              cgResults.coins.slice(0, 5).forEach((coin) => {
+              cgResults.coins.slice(0, 4).forEach((coin) => {
                 searchResults.push({
                   type: 'coin',
                   data: {
@@ -78,6 +89,20 @@ const GlobalSearch = ({ isOpen, onClose }) => {
                     symbol: (coin.symbol || '').toUpperCase(),
                     thumb: coin.thumb,
                     marketCapRank: coin.market_cap_rank
+                  }
+                });
+              });
+            }
+            if (cgResults?.nfts?.length > 0) {
+              cgResults.nfts.slice(0, 3).forEach((nft) => {
+                searchResults.push({
+                  type: 'nft',
+                  data: {
+                    id: nft.id,
+                    name: nft.name,
+                    symbol: nft.symbol || '',
+                    thumb: nft.thumb,
+                    nftContractId: nft.nft_contract_id
                   }
                 });
               });
@@ -91,6 +116,7 @@ const GlobalSearch = ({ isOpen, onClose }) => {
         const routes = [
           { name: 'Deploy Token', path: '/deploy-token', icon: '🚀', comingSoon: false },
           { name: 'Portfolio', path: '/portfolio', icon: '💼', comingSoon: false },
+          { name: 'Activity', path: '/activity', icon: '📋', comingSoon: false },
           { name: 'Analytics', path: '/analytics', icon: '📊', comingSoon: false },
           { name: 'Tokens', path: '/tokens', icon: '🪙', comingSoon: false },
           { name: 'Pools', path: '/pools', icon: '🏊', comingSoon: false },
@@ -98,9 +124,16 @@ const GlobalSearch = ({ isOpen, onClose }) => {
           { name: 'Bridge', path: '/bridge', icon: '🌉', comingSoon: false }
         ];
 
+        // Match routes: exact substring or fuzzy (each word in query appears in name/path)
+        const qLower = searchQuery.toLowerCase().trim();
+        const qWords = qLower.split(/\s+/).filter(Boolean);
         routes.forEach(route => {
-          if (route.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              route.path.toLowerCase().includes(searchQuery.toLowerCase())) {
+          const nameLower = route.name.toLowerCase();
+          const pathLower = route.path.toLowerCase();
+          const fullLower = `${nameLower} ${pathLower}`;
+          const exactMatch = nameLower.includes(qLower) || pathLower.includes(qLower);
+          const fuzzyMatch = qWords.length > 0 && qWords.every(word => fullLower.includes(word));
+          if (exactMatch || fuzzyMatch) {
             searchResults.push({
               type: 'route',
               data: route
@@ -151,11 +184,20 @@ const GlobalSearch = ({ isOpen, onClose }) => {
 
   // Handle result selection
   const handleSelectResult = (result) => {
-    // Save to search history
-    const newHistory = [
-      query,
-      ...searchHistory.filter(h => h !== query)
-    ].slice(0, 10);
+    const entry =
+      result.type === 'token' && result.chainId != null
+        ? { query, type: 'address', chainId: result.chainId, networkName: result.network }
+        : result.type === 'route'
+          ? { query, type: 'route' }
+          : result.type === 'coin'
+            ? { query, type: 'coin' }
+            : result.type === 'nft'
+              ? { query, type: 'nft' }
+              : { query, type: undefined };
+    const isSame = (h) =>
+      h.query === entry.query &&
+      (entry.type !== 'address' || (h.chainId === entry.chainId && h.networkName === entry.networkName));
+    const newHistory = [entry, ...searchHistory.filter(h => !isSame(h))].slice(0, 10);
     setSearchHistory(newHistory);
     localStorage.setItem('boing_search_history', JSON.stringify(newHistory));
 
@@ -174,6 +216,9 @@ const GlobalSearch = ({ isOpen, onClose }) => {
       onClose();
     } else if (result.type === 'coin') {
       navigate(`/tokens?coinId=${encodeURIComponent(result.data.id)}`);
+      onClose();
+    } else if (result.type === 'nft') {
+      navigate('/portfolio?tab=nfts');
       onClose();
     }
   };
@@ -222,7 +267,7 @@ const GlobalSearch = ({ isOpen, onClose }) => {
               value={query}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              placeholder="Search tokens, addresses, or pages... (Press / to focus)"
+              placeholder="Search tokens, NFTs, addresses, or pages... (Press / to focus)"
               className="flex-1 bg-transparent text-white placeholder-gray-400 outline-none text-lg"
               aria-label="Global search"
               aria-autocomplete="list"
@@ -272,10 +317,12 @@ const GlobalSearch = ({ isOpen, onClose }) => {
                   onClick={() => handleSelectResult(result)}
                 >
                   <div className="flex items-center space-x-3">
-                    {result.type === 'coin' && result.data.thumb ? (
-                      <img src={result.data.thumb} alt="" className="w-8 h-8 rounded-full" />
+                    {((result.type === 'coin' || result.type === 'nft') && result.data.thumb) ? (
+                      <img src={result.data.thumb} alt="" className="w-8 h-8 rounded-full object-cover" />
                     ) : (
-                      <span className="text-2xl">{result.type === 'route' ? result.data.icon : '🪙'}</span>
+                      <span className="text-2xl">
+                        {result.type === 'route' ? result.data.icon : result.type === 'nft' ? '🖼️' : '🪙'}
+                      </span>
                     )}
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
@@ -296,7 +343,9 @@ const GlobalSearch = ({ isOpen, onClose }) => {
                           ? result.data.path
                           : result.type === 'coin'
                             ? `${result.data.symbol} • CoinGecko`
-                            : `${result.data.symbol} • ${result.network}`
+                            : result.type === 'nft'
+                              ? 'NFT Collection • View in Portfolio'
+                              : `${result.data.symbol} • ${result.network}`
                         }
                       </div>
                     </div>
@@ -314,25 +363,51 @@ const GlobalSearch = ({ isOpen, onClose }) => {
             </div>
           ) : searchHistory.length > 0 ? (
             <div className="p-4">
-              <h3 className="text-sm font-semibold text-gray-400 mb-2">Recent Searches</h3>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-semibold text-gray-400">Recent Searches</h3>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchHistory([]);
+                    localStorage.removeItem('boing_search_history');
+                  }}
+                  className="text-xs text-cyan-400 hover:text-cyan-300"
+                >
+                  Clear
+                </button>
+              </div>
               <ul>
-                {searchHistory.slice(0, 5).map((item, index) => (
-                  <li
-                    key={index}
-                    className="p-2 hover:bg-gray-700 rounded cursor-pointer"
-                    onClick={() => {
-                      setQuery(item);
-                      performSearch(item);
-                    }}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span className="text-gray-300">{item}</span>
-                    </div>
-                  </li>
-                ))}
+                {searchHistory.slice(0, 8).map((item, index) => {
+                  const q = typeof item === 'string' ? item : item.query;
+                  const label =
+                    typeof item === 'object' && item.networkName && (item.type === 'address' || item.query?.startsWith?.('0x'))
+                      ? `Address · ${item.networkName}`
+                      : q?.startsWith?.('0x')
+                        ? 'Address'
+                        : item.type === 'route'
+                          ? 'Page'
+                          : item.type === 'coin' || item.type === 'nft'
+                            ? item.type
+                            : 'Search';
+                  return (
+                    <li
+                      key={`${q}-${item.chainId ?? ''}-${index}`}
+                      className="p-2 hover:bg-gray-700 rounded cursor-pointer flex items-center justify-between group"
+                      onClick={() => {
+                        setQuery(q);
+                        performSearch(q);
+                      }}
+                    >
+                      <div className="flex items-center space-x-2 min-w-0">
+                        <svg className="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-gray-300 truncate">{q}</span>
+                      </div>
+                      <span className="text-xs text-gray-500 flex-shrink-0 ml-2">{label}</span>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ) : (
@@ -340,6 +415,7 @@ const GlobalSearch = ({ isOpen, onClose }) => {
               <p className="text-gray-400 mb-4">Start typing to search...</p>
               <div className="text-sm text-gray-500 space-y-1">
                 <p>• Search for token addresses (0x...)</p>
+                <p>• Search for token names, NFT collections</p>
                 <p>• Search for page names (Deploy, Portfolio, etc.)</p>
                 <p>• Press <kbd className="px-2 py-1 bg-gray-700 rounded">/</kbd> to open search</p>
               </div>

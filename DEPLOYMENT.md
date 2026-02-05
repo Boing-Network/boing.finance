@@ -74,6 +74,29 @@ wrangler pages project create boing-finance
 - `boing-storage` (production)
 - `boing-storage-preview` (staging)
 
+### 3. D1 Database Migrations
+
+After deploying, run the portfolio snapshots migration for PnL tracking:
+
+```bash
+cd backend
+wrangler d1 execute boing-database --remote --file=./d1-portfolio-snapshots.sql
+```
+
+For production, use the production database name from wrangler.toml.
+
+### 4. KV Caching (Optional)
+
+KV caching is now enabled. If you need to recreate it:
+
+```bash
+cd backend
+npx wrangler kv namespace create BOING_CACHE
+npx wrangler kv namespace create BOING_CACHE --preview
+```
+
+Add the returned IDs to `wrangler.toml` under `[[kv_namespaces]]`, then redeploy.
+
 ## 🧹 Cleanup
 
 ### Remove Unused Projects
@@ -82,6 +105,22 @@ wrangler pages project create boing-finance
 2. Review all Pages projects
 3. Delete any projects NOT listed above
 4. See `CLOUDFLARE_CLEANUP_GUIDE.md` for details
+
+## ⚡ Performance
+
+- **Response compression**: Cloudflare Workers automatically compress responses (gzip/Brotli) when clients send `Accept-Encoding`. No extra backend configuration is required.
+
+### Backend secrets (optional)
+
+For **contract verification** (Security Scanner), the API can use block-explorer API keys to avoid rate limits. Set via `wrangler secret put` per environment:
+
+- `ETHERSCAN_API_KEY` – Ethereum, Sepolia, Optimistic Etherscan
+- `BSCSCAN_API_KEY` – BNB Smart Chain (mainnet + testnet)
+- `POLYGONSCAN_API_KEY` – Polygon (mainnet + testnet)
+- `ARBISCAN_API_KEY` – Arbitrum
+- `BASESCAN_API_KEY` – Base
+
+If not set, verification still works with public rate limits.
 
 ## 🔧 Troubleshooting
 
