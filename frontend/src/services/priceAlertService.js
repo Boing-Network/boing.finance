@@ -85,18 +85,13 @@ class PriceAlertService {
           };
           const network = networkMap[parseInt(chainId)] || 'ethereum';
           
-          const currentPrice = await coingeckoService.getTokenPrice(address, network);
-          
-          if (currentPrice) {
-            // Check each alert for this token
-            tokenAlerts.forEach(alert => {
-              const triggered = checkPriceAlerts(address, parseInt(chainId), currentPrice);
-              
-              if (triggered.length > 0) {
-                triggered.forEach(triggeredAlert => {
-                  this.triggerAlert(triggeredAlert, currentPrice);
-                });
-              }
+          const priceData = await coingeckoService.getTokenPrice(address, network);
+          const currentPrice = priceData?.usd != null ? parseFloat(priceData.usd) : null;
+
+          if (currentPrice != null && !isNaN(currentPrice)) {
+            const triggered = checkPriceAlerts(address, parseInt(chainId), currentPrice);
+            triggered.forEach(triggeredAlert => {
+              this.triggerAlert(triggeredAlert, currentPrice);
             });
           }
         } catch (error) {

@@ -8,6 +8,7 @@ import { createAnalyticsRoutes } from './routes/analyticsRoutes.js';
 import { createIPFSRoutes } from './routes/ipfsRoutes.js';
 import { createAPIRoutes } from './routes/apiRoutes.js';
 import { createWalletActivityRoutes } from './routes/walletActivityRoutes.js';
+import { createAIRoutes } from './routes/aiRoutes.js';
 import collectAnalytics from './scheduled/collectAnalytics.js';
 
 // Create main app
@@ -168,6 +169,10 @@ const walletActivityRoutes = createWalletActivityRoutes();
 walletActivityRoutes.use('*', dbMiddleware);
 walletActivityRoutes.use('*', cacheMiddleware);
 app.route('/api/analytics', walletActivityRoutes);
+
+// Mount AI Assistant routes at /api/ai (no DB required)
+const aiRoutes = createAIRoutes();
+app.route('/api/ai', aiRoutes);
 
 // Webhook routes
 app.post('/api/webhook', async (c) => {

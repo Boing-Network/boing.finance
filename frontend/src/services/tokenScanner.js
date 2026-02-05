@@ -39,6 +39,7 @@ export class TokenScanner {
   constructor(provider, network) {
     this.provider = provider;
     this.network = network;
+    this.providers = new Map();
     this.isScanning = false;
     this.scanInterval = null;
     this.lastScannedBlock = 0;

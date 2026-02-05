@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { useWallet } from '../contexts/WalletContext';
 import { NETWORKS } from '../config/networks';
 import TokenScanner from '../services/tokenScanner';
 import alchemyService from '../services/alchemyService';
 import theGraphService from '../services/theGraphService';
+import coingeckoService from '../services/coingeckoService';
 import { Helmet } from 'react-helmet-async';
 import TokenDetailsModal from '../components/TokenDetailsModal';
 import TokenFilters from '../components/TokenFilters';
@@ -17,8 +19,15 @@ import toast from 'react-hot-toast';
 // Initialize token scanner
 const tokenScanner = new TokenScanner();
 
+const COINGECKO_TO_CHAIN = {
+  ethereum: 1, 'polygon-pos': 137, 'binance-smart-chain': 56,
+  arbitrum: 42161, 'optimistic-ethereum': 10, base: 8453
+};
+
 const Tokens = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { chainId, switchNetwork } = useWallet();
+  const coinIdProcessed = useRef(false);
   const [selectedChain, setSelectedChain] = useState(chainId || 11155111); // Default to Sepolia
   const [tokens, setTokens] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -46,6 +55,85 @@ const Tokens = () => {
       setSelectedChain(chainId);
     }
   }, [chainId]);
+
+  // Handle coinId from URL (from GlobalSearch CoinGecko results)
+  useEffect(() => {
+    const coinId = searchParams.get('coinId');
+    if (!coinId || coinIdProcessed.current) return;
+    coinIdProcessed.current = true;
+
+    const fetchCoinAndSearch = async () => {
+      setSearching(true);
+      setError(null);
+      try {
+        const coin = await coingeckoService.getCoinById(coinId);
+        if (!coin?.platforms) {
+          setError('Coin not found or has no contract addresses');
+          return;
+        }
+        const platforms = coin.platforms;
+        const preferredOrder = ['ethereum', 'base', 'arbitrum', 'polygon-pos', 'optimistic-ethereum', 'binance-smart-chain'];
+        let contractAddress = null;
+        let platformKey = null;
+        for (const p of preferredOrder) {
+          if (platforms[p] && platforms[p].trim()) {
+            contractAddress = platforms[p].trim();
+            platformKey = p;
+            break;
+          }
+        }
+        if (!contractAddress && Object.keys(platforms).length > 0) {
+          platformKey = Object.keys(platforms)[0];
+          contractAddress = platforms[platformKey]?.trim();
+        }
+        if (!contractAddress) {
+          setError(`${coin.name} is a native asset - view on Analytics for market data`);
+          return;
+        }
+        const targetChain = COINGECKO_TO_CHAIN[platformKey] || 1;
+        setSelectedChain(targetChain);
+        setSearchAddress(contractAddress);
+        if (targetChain !== chainId) {
+          await switchNetwork(targetChain);
+        }
+        // Trigger search after state updates
+        setTimeout(() => {
+          const address = contractAddress;
+          const searchTokenByAddress = async () => {
+            try {
+              let token = null;
+              try {
+                const metadata = await alchemyService.getTokenMetadata(targetChain, address);
+                if (metadata) {
+                  const balanceInfo = await tokenScanner.searchToken(address, targetChain);
+                  token = { address, name: metadata.name || coin.name, symbol: metadata.symbol || coin.symbol?.toUpperCase(), decimals: metadata.decimals || 18, ...balanceInfo };
+                }
+              } catch (_) {}
+              if (!token) token = await tokenScanner.searchToken(address, targetChain);
+              if (token) {
+                try {
+                  const networkMap = { 1: 'ethereum', 137: 'polygon', 56: 'binance-smart-chain', 42161: 'arbitrum', 10: 'optimism', 8453: 'base', 11155111: 'ethereum' };
+                  const poolData = await theGraphService.getTokenPrice(address, networkMap[targetChain] || 'ethereum');
+                  if (poolData?.token) token.poolData = poolData.token;
+                } catch (_) {}
+                setSearchedToken(token);
+                setSearchParams({}); // Clear coinId from URL
+              }
+            } catch (err) {
+              setError(err.message || 'Failed to load token');
+            } finally {
+              setSearching(false);
+            }
+          };
+          searchTokenByAddress();
+        }, 100);
+      } catch (err) {
+        setError(err.message || 'Failed to load coin');
+        setSearching(false);
+      }
+    };
+    fetchCoinAndSearch();
+  }, [searchParams, chainId, switchNetwork]);
 
   const handleNetworkChange = async (newChainId) => {
     try {
@@ -687,9 +775,21 @@ const Tokens = () => {
               setShowTokenDetails(false);
               setSelectedToken(null);
             }}
+            onSetPriceAlert={(tokenWithPrice) => {
+              setSelectedToken(tokenWithPrice || selectedToken);
+              setShowTokenDetails(false);
+              setShowPriceAlert(true);
+            }}
             network={NETWORKS[selectedToken.chainId || selectedChain]}
           />
         )}
+
+        {/* Price Alert Modal */}
+        <PriceAlertModal
+          isOpen={showPriceAlert}
+          onClose={() => setShowPriceAlert(false)}
+          token={selectedToken || searchedToken}
+        />
     </>
   );
 };

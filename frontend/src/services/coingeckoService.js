@@ -144,6 +144,48 @@ class CoinGeckoService {
     }
   }
 
+  // Get market chart (prices + volumes) by coin ID - for historical charts
+  async getMarketChartByCoinId(coinId, days = 7) {
+    const cacheKey = `market_chart_${coinId}_${days}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.cacheTimeout * 5) {
+      return cached.data;
+    }
+    try {
+      const response = await fetch(
+        this.getApiUrl(`/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`)
+      );
+      if (!response.ok) return null;
+      const data = await response.json();
+      this.cache.set(cacheKey, { data, timestamp: Date.now() });
+      return data;
+    } catch (error) {
+      console.error('Error fetching market chart:', error);
+      return null;
+    }
+  }
+
+  // Get price history by coin ID (for trending/native tokens like bitcoin, ethereum)
+  async getPriceHistoryByCoinId(coinId, days = 7) {
+    const cacheKey = `history_coin_${coinId}_${days}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.cacheTimeout * 5) {
+      return cached.data;
+    }
+    try {
+      const response = await fetch(
+        this.getApiUrl(`/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`)
+      );
+      if (!response.ok) return null;
+      const data = await response.json();
+      this.cache.set(cacheKey, { data, timestamp: Date.now() });
+      return data;
+    } catch (error) {
+      console.error('Error fetching price history by coin ID:', error);
+      return null;
+    }
+  }
+
   // Get price history for charting
   async getPriceHistory(contractAddress, days = 7, network = 'ethereum') {
     const cacheKey = `history_${network}_${contractAddress}_${days}`;
@@ -167,6 +209,27 @@ class CoinGeckoService {
       return data;
     } catch (error) {
       console.error('Error fetching price history:', error);
+      return null;
+    }
+  }
+
+  // Get coin by ID (includes platforms with contract addresses per chain)
+  async getCoinById(coinId) {
+    const cacheKey = `coin_${coinId}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.cacheTimeout * 2) {
+      return cached.data;
+    }
+    try {
+      const response = await fetch(
+        this.getApiUrl(`/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false`)
+      );
+      if (!response.ok) return null;
+      const data = await response.json();
+      this.cache.set(cacheKey, { data, timestamp: Date.now() });
+      return data;
+    } catch (error) {
+      console.error('Error fetching coin by ID:', error);
       return null;
     }
   }

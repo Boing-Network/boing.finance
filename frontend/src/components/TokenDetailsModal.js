@@ -8,6 +8,7 @@ import coingeckoService from '../services/coingeckoService';
 import etherscanService from '../services/etherscanService';
 import { tokenFavorites } from '../utils/tokenFavorites';
 import { getNetworkByChainId } from '../config/networks';
+import { getPricePrediction } from '../utils/predictiveAnalytics';
 import toast from 'react-hot-toast';
 import LoadingSpinner from './LoadingSpinner';
 import ShareTokenModal from './ShareTokenModal';
@@ -43,6 +44,21 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network, onSetPriceAlert })
       setIsFavorite(tokenFavorites.isFavorite(token.chainId || network?.chainId, token.address));
     }
   }, [token, network]);
+
+  // Fetch price history for predictive analytics
+  const { data: priceInsight } = useQuery({
+    queryKey: ['tokenPriceHistory', token?.address, network?.chainId],
+    queryFn: async () => {
+      if (!token?.address || !network?.chainId) return null;
+      const cgNetwork = getCoinGeckoNetwork(network.chainId);
+      const history = await coingeckoService.getPriceHistory(token.address, 7, cgNetwork);
+      if (!history?.prices?.length || history.prices.length < 7) return null;
+      const prices = history.prices.map(([, p]) => p).filter(Boolean);
+      return getPricePrediction(prices, 7);
+    },
+    enabled: !!token && !!network,
+    refetchInterval: 300000, // 5 min
+  });
 
   // Fetch price data - React Query v5 API
   const { data: priceInfo, isLoading: priceLoading } = useQuery({
@@ -302,8 +318,12 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network, onSetPriceAlert })
               {onSetPriceAlert && (
                 <button
                   onClick={() => {
+                    onSetPriceAlert({
+                      ...token,
+                      chainId: token.chainId || network?.chainId,
+                      price: priceInfo?.usd
+                    });
                     onClose();
-                    onSetPriceAlert();
                   }}
                   className="flex-1 px-4 py-2 rounded-lg text-center transition-colors"
                   style={{
@@ -392,6 +412,30 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network, onSetPriceAlert })
                     </p>
                   )}
                 </div>
+                {/* 7-Day Price Insight (Predictive Analytics) */}
+                {priceInsight && priceInsight.predictedPrice != null && (
+                  <div className="p-4 rounded-lg border" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                    <p className="text-sm mb-2 font-medium" style={{ color: 'var(--text-tertiary)' }}>7-Day Forecast (Trend-Based)</p>
+                    <div className="flex items-center justify-between mb-2">
+                      <span style={{ color: 'var(--text-secondary)' }}>Est. price in 7 days:</span>
+                      <span className="font-bold" style={{ color: 'var(--text-primary)' }}>
+                        ${priceInsight.predictedPrice.toLocaleString(undefined, { maximumFractionDigits: 4 })}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <span className={`px-2 py-0.5 rounded ${priceInsight.trend === 'up' ? 'bg-green-500/20 text-green-400' : priceInsight.trend === 'down' ? 'bg-red-500/20 text-red-400' : 'bg-gray-500/20'}`}>
+                        {priceInsight.trend?.toUpperCase() || 'NEUTRAL'}
+                      </span>
+                      <span style={{ color: 'var(--text-tertiary)' }}>Confidence: {priceInsight.confidence || 0}%</span>
+                      {priceInsight.volatility != null && (
+                        <span style={{ color: 'var(--text-tertiary)' }}>Volatility: {priceInsight.volatility}%</span>
+                      )}
+                    </div>
+                    <p className="text-xs mt-2" style={{ color: 'var(--text-tertiary)' }}>
+                      Not financial advice. Based on historical trend analysis.
+                    </p>
+                  </div>
+                )}
                 <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
                   Price data provided by CoinGecko
                 </p>
