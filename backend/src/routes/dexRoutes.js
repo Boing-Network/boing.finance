@@ -1,9 +1,10 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { eq, desc } from 'drizzle-orm';
+import * as schema from '../database/schema.js';
 import { TokenRepository } from '../database/repositories/tokenRepository.js';
 import { SwapService } from '../services/swapService.js';
 import { LiquidityService } from '../services/liquidityService.js';
-import { eq, desc } from 'drizzle-orm';
 
 export function createDEXRoutes() {
   const app = new Hono();
@@ -368,13 +369,13 @@ export function createDEXRoutes() {
       // Get all tokens
       const db = c.get('db');
       const tokenRepo = new TokenRepository(db);
-      const tokensList = await db.select().from(c.env.schema.tokens);
+      const tokensList = await db.select().from(schema.tokens);
       // Get all user liquidity events
-      const liquidityEvents = await db.select().from(c.env.schema.liquidityEvents)
-        .where(eq(c.env.schema.liquidityEvents.provider, address));
+      const liquidityEvents = await db.select().from(schema.liquidityEvents)
+        .where(eq(schema.liquidityEvents.provider, address));
       // Get all user swaps
-      const swaps = await db.select().from(c.env.schema.swaps)
-        .where(eq(c.env.schema.swaps.sender, address));
+      const swaps = await db.select().from(schema.swaps)
+        .where(eq(schema.swaps.sender, address));
 
       // Aggregate token balances from liquidity events and swaps
       const tokenBalances = {};
@@ -391,8 +392,8 @@ export function createDEXRoutes() {
       let totalValue = 0;
       let tokens = [];
       for (const pairAddress in tokenBalances) {
-        const pair = await db.select().from(c.env.schema.pairs)
-          .where(eq(c.env.schema.pairs.address, pairAddress));
+        const pair = await db.select().from(schema.pairs)
+          .where(eq(schema.pairs.address, pairAddress));
         if (!pair[0]) continue;
         const token0 = tokensList.find(t => t.address === pair[0].token0Address);
         const token1 = tokensList.find(t => t.address === pair[0].token1Address);
@@ -441,8 +442,8 @@ export function createDEXRoutes() {
       // Check for recent successful transactions (last 24h)
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const db = c.get('db');
-      const recent = await db.select().from(c.env.schema.bridgeTransactions)
-        .where(c.env.schema.bridgeTransactions.status === 'completed' && c.env.schema.bridgeTransactions.timestamp > since);
+      const recent = await db.select().from(schema.bridgeTransactions)
+        .where(schema.bridgeTransactions.status === 'completed' && schema.bridgeTransactions.timestamp > since);
       const status = recent.length > 0 ? 'operational' : 'degraded';
       return c.json({
         success: true,
@@ -460,12 +461,13 @@ export function createDEXRoutes() {
   // Bridge transactions endpoint (dynamic)
   app.get('/bridge/transactions', async (c) => {
     try {
+      const db = c.get('db');
       const address = c.req.query('address');
-      let query = c.get('db').select().from(c.env.schema.bridgeTransactions);
+      let query = db.select().from(schema.bridgeTransactions);
       if (address) {
-        query = query.where(c.env.schema.bridgeTransactions.userAddress === address);
+        query = query.where(eq(schema.bridgeTransactions.userAddress, address));
       }
-      const txs = await query.orderBy(c.env.schema.bridgeTransactions.timestamp, 'desc').limit(50);
+      const txs = await query.orderBy(desc(schema.bridgeTransactions.timestamp)).limit(50);
       return c.json({
         success: true,
         data: txs
@@ -483,21 +485,21 @@ export function createDEXRoutes() {
       const db = c.get('db');
       
       // Get swaps for the user
-      const swaps = await db.select().from(c.env.schema.swaps)
-        .where(eq(c.env.schema.swaps.sender, address))
-        .orderBy(desc(c.env.schema.swaps.timestamp))
+      const swaps = await db.select().from(schema.swaps)
+        .where(eq(schema.swaps.sender, address))
+        .orderBy(desc(schema.swaps.timestamp))
         .limit(50);
       
       // Get liquidity events for the user
-      const liquidityEvents = await db.select().from(c.env.schema.liquidityEvents)
-        .where(eq(c.env.schema.liquidityEvents.provider, address))
-        .orderBy(desc(c.env.schema.liquidityEvents.timestamp))
+      const liquidityEvents = await db.select().from(schema.liquidityEvents)
+        .where(eq(schema.liquidityEvents.provider, address))
+        .orderBy(desc(schema.liquidityEvents.timestamp))
         .limit(50);
       
       // Get bridge transactions for the user
-      const bridgeTransactions = await db.select().from(c.env.schema.bridgeTransactions)
-        .where(eq(c.env.schema.bridgeTransactions.userAddress, address))
-        .orderBy(desc(c.env.schema.bridgeTransactions.timestamp))
+      const bridgeTransactions = await db.select().from(schema.bridgeTransactions)
+        .where(eq(schema.bridgeTransactions.userAddress, address))
+        .orderBy(desc(schema.bridgeTransactions.timestamp))
         .limit(50);
       
       // Combine and format all transactions
@@ -572,7 +574,7 @@ export function createDEXRoutes() {
       
       switch (transactionData.type) {
         case 'swap':
-          result = await db.insert(c.env.schema.swaps).values({
+          result = await db.insert(schema.swaps).values({
             txHash: transactionData.txHash,
             pairAddress: transactionData.pairAddress || '',
             sender: transactionData.sender,
@@ -587,7 +589,7 @@ export function createDEXRoutes() {
           break;
           
         case 'liquidity':
-          result = await db.insert(c.env.schema.liquidityEvents).values({
+          result = await db.insert(schema.liquidityEvents).values({
             txHash: transactionData.txHash,
             pairAddress: transactionData.pairAddress,
             provider: transactionData.provider,
@@ -601,7 +603,7 @@ export function createDEXRoutes() {
           break;
           
         case 'bridge':
-          result = await db.insert(c.env.schema.bridgeTransactions).values({
+          result = await db.insert(schema.bridgeTransactions).values({
             txHash: transactionData.txHash,
             fromChain: transactionData.fromChain,
             toChain: transactionData.toChain,

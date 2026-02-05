@@ -4,6 +4,7 @@ import { getApiUrl } from '../config.js';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { transactionTrackingService } from '../services/transactionTrackingService.js';
 import toast from 'react-hot-toast';
+import EmptyState from './EmptyState';
 
 export default function TransactionHistoryModal({ isOpen, onClose }) {
   const { account } = useWalletConnection();
@@ -338,19 +339,13 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <div className="text-4xl mb-4">📋</div>
-              <h4 className="text-lg font-semibold text-theme-primary mb-2">No Transactions Yet</h4>
-              <p className="text-theme-secondary mb-4">
-                Transaction history will appear here once you start using the platform features.
-              </p>
-              <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 max-w-md mx-auto">
-                <p className="text-blue-200 text-sm">
-                  <strong>Note:</strong> Most trading features are currently in development. 
-                  Only token deployment is available at this time.
-                </p>
-              </div>
-            </div>
+            <EmptyState
+              variant="transactions"
+              title="No transactions yet"
+              description="Transaction history will appear here once you start using the platform features. Most trading features are in development — token deployment is available now."
+              actionLabel="Deploy token"
+              actionHref="/deploy-token"
+            />
           )}
         </div>
 

@@ -37,7 +37,7 @@ const AccessibleButton = ({
       aria-describedby={ariaDescribedBy}
       aria-expanded={ariaExpanded}
       aria-controls={ariaControls}
-      className={className}
+      className={`interactive-button ${className}`.trim()}
       {...props}
     >
       {children}

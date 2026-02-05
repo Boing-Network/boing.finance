@@ -44,7 +44,7 @@ export const exportToCSV = (data, headers = null) => {
  * @param {string} filename - Name of the file (without extension)
  * @param {Array} headers - Optional array of header names
  */
-export const downloadCSV = (data, filename = 'export', headers = null) => {
+export function downloadCSV(data, filename = 'export', headers = null) {
   const csv = exportToCSV(data, headers);
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
@@ -59,7 +59,7 @@ export const downloadCSV = (data, filename = 'export', headers = null) => {
   document.body.removeChild(link);
   
   URL.revokeObjectURL(url);
-};
+}
 
 /**
  * Downloads data as JSON file

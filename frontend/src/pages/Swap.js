@@ -4,6 +4,7 @@ import { ethers } from 'ethers';
 import { useWallet } from '../contexts/WalletContext';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { getContractAddress, getContractAddresses } from '../config/contracts';
+import { getNetworkByChainId } from '../config/networks';
 import SettingsModal from '../components/SettingsModal';
 import toast from 'react-hot-toast';
 import { InfoTooltip, WarningTooltip } from '../components/Tooltip';
@@ -43,6 +44,10 @@ const Swap = () => {
   const [selectedExternalQuote, setSelectedExternalQuote] = useState(null);
   const [showExternalQuotes, setShowExternalQuotes] = useState(false);
   const [isExternalDEXAvailable, setIsExternalDEXAvailable] = useState(false);
+
+  // EIP-1559 gas estimate for display (no signer required)
+  const [estimatedGasCost, setEstimatedGasCost] = useState(null);
+  const [estimatedGasCostLoading, setEstimatedGasCostLoading] = useState(false);
 
   // Scan for all tokens in user's wallet by checking transfer events
   const getAllUserTokens = useCallback(async (provider, userAddress) => {
@@ -666,33 +671,75 @@ const Swap = () => {
       const deadline = Math.floor(Date.now() / 1000) + (settings.deadline * 60);
       console.log('handleSwap: Transaction deadline:', deadline, 'seconds from now');
 
-      // Prepare transaction
-      let tx;
-      const gasPrice = ethers.parseUnits('20', 'gwei');
-      const gasLimit = 300000;
-      
-      console.log('handleSwap: Transaction parameters:', {
-        gasPrice: gasPrice.toString(),
-        gasLimit,
-        deadline
-      });
+      // EIP-1559 gas: get fee data and apply priority multiplier
+      const feeData = await provider.getFeeData();
+      const mult = getGasFeeMultiplier();
+      const applyMult = (v) => (v && v > 0n ? (v * BigInt(Math.round(mult * 100)) / 100n) : v);
+      const maxFeePerGas = applyMult(feeData.maxFeePerGas);
+      const maxPriorityFeePerGas = applyMult(feeData.maxPriorityFeePerGas);
+      const gasPriceLegacy = applyMult(feeData.gasPrice);
 
+      // Estimate gas (with 15% buffer); fallback to 300000 if estimation fails
+      let gasLimit = 300000n;
+      try {
+        if (tokenIn === 'ETH') {
+          gasLimit = await routerContract.swapExactETHForTokens.estimateGas(
+            minAmountOut, path, account, deadline, { value: amountInWei }
+          );
+        } else if (tokenOut === 'ETH') {
+          gasLimit = await routerContract.swapExactTokensForETH.estimateGas(
+            amountInWei, minAmountOut, path, account, deadline
+          );
+        } else {
+          gasLimit = await routerContract.swapExactTokensForTokens.estimateGas(
+            amountInWei, minAmountOut, path, account, deadline
+          );
+        }
+        gasLimit = (gasLimit * 115n) / 100n;
+      } catch (estErr) {
+        console.warn('handleSwap: Gas estimation failed, using default:', estErr?.message);
+      }
+
+      const txOverrides = {
+        gasLimit,
+        ...(maxFeePerGas && maxPriorityFeePerGas
+          ? { maxFeePerGas, maxPriorityFeePerGas }
+          : { gasPrice: gasPriceLegacy || ethers.parseUnits('20', 'gwei') })
+      };
+
+      // Simulate transaction before sending (catch reverts early)
+      try {
+        if (tokenIn === 'ETH') {
+          await routerContract.swapExactETHForTokens.staticCall(
+            minAmountOut, path, account, deadline, { value: amountInWei, ...txOverrides }
+          );
+        } else if (tokenOut === 'ETH') {
+          await routerContract.swapExactTokensForETH.staticCall(
+            amountInWei, minAmountOut, path, account, deadline, txOverrides
+          );
+        } else {
+          await routerContract.swapExactTokensForTokens.staticCall(
+            amountInWei, minAmountOut, path, account, deadline, txOverrides
+          );
+        }
+      } catch (simErr) {
+        const msg = simErr?.reason || simErr?.shortMessage || simErr?.message || 'Transaction would fail';
+        setSwapError(msg);
+        toast.error(msg);
+        return;
+      }
+
+      let tx;
       if (tokenIn === 'ETH') {
-        // Swap ETH for tokens
         console.log('handleSwap: Executing swapExactETHForTokens...');
         tx = await routerContract.swapExactETHForTokens(
           minAmountOut,
           path,
           account,
           deadline,
-          {
-            value: amountInWei,
-            gasLimit: gasLimit,
-            gasPrice: gasPrice
-          }
+          { value: amountInWei, ...txOverrides }
         );
       } else if (tokenOut === 'ETH') {
-        // Swap tokens for ETH
         console.log('handleSwap: Executing swapExactTokensForETH...');
         tx = await routerContract.swapExactTokensForETH(
           amountInWei,
@@ -700,13 +747,9 @@ const Swap = () => {
           path,
           account,
           deadline,
-          {
-            gasLimit: gasLimit,
-            gasPrice: gasPrice
-          }
+          txOverrides
         );
       } else {
-        // Swap tokens for tokens
         console.log('handleSwap: Executing swapExactTokensForTokens...');
         tx = await routerContract.swapExactTokensForTokens(
           amountInWei,
@@ -714,10 +757,7 @@ const Swap = () => {
           path,
           account,
           deadline,
-          {
-            gasLimit: gasLimit,
-            gasPrice: gasPrice
-          }
+          txOverrides
         );
       }
 
@@ -1446,6 +1486,44 @@ const Swap = () => {
     }
   }, [chainId, userTokens]);
 
+  // EIP-1559 gas cost estimate for display (fee data only, no signer)
+  const DEFAULT_SWAP_GAS_LIMIT = 250000n;
+  useEffect(() => {
+    if (!chainId || !window.ethereum) {
+      setEstimatedGasCost(null);
+      return;
+    }
+    let cancelled = false;
+    setEstimatedGasCostLoading(true);
+    const run = async () => {
+      try {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const feeData = await provider.getFeeData();
+        const mult = getGasFeeMultiplier();
+        const gasLimit = DEFAULT_SWAP_GAS_LIMIT;
+        let costWei;
+        if (feeData.maxFeePerGas && feeData.maxFeePerGas > 0n) {
+          costWei = (gasLimit * feeData.maxFeePerGas * BigInt(Math.round(mult * 100))) / 100n;
+        } else if (feeData.gasPrice && feeData.gasPrice > 0n) {
+          costWei = (gasLimit * feeData.gasPrice * BigInt(Math.round(mult * 100))) / 100n;
+        } else {
+          setEstimatedGasCost(null);
+          return;
+        }
+        if (cancelled) return;
+        const network = getNetworkByChainId(chainId);
+        const symbol = network?.nativeCurrency?.symbol || 'ETH';
+        setEstimatedGasCost(`${ethers.formatEther(costWei)} ${symbol}`);
+      } catch (e) {
+        if (!cancelled) setEstimatedGasCost(null);
+      } finally {
+        if (!cancelled) setEstimatedGasCostLoading(false);
+      }
+    };
+    run();
+    return () => { cancelled = true; };
+  }, [chainId, settings.gasPriority]);
+
   // Initialize external DEX service
   useEffect(() => {
     if (isConnected && chainId) {
@@ -2058,16 +2136,20 @@ const Swap = () => {
                 </span>
               </div>
 
-              {/* Gas Fee Estimation */}
+              {/* Gas Fee Estimation (EIP-1559 when supported) */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <span className="text-gray-400 text-sm">Estimated Gas Fee</span>
-                  <InfoTooltip content={`Estimated gas fee for this transaction. Current priority: ${getGasPriorityLabel()} (${getGasFeeMultiplier()}x multiplier)`} />
+                  <InfoTooltip content={`Estimated gas fee for this transaction. Current priority: ${getGasPriorityLabel()} (${getGasFeeMultiplier()}x). Simulated before sending.`} />
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="text-white text-sm sm:text-base">
-                    ~{getGasFeeMultiplier() * 0.005} ETH
-                  </span>
+                  {estimatedGasCostLoading ? (
+                    <span className="text-gray-400 text-sm">...</span>
+                  ) : (
+                    <span className="text-white text-sm sm:text-base">
+                      ~{estimatedGasCost ?? '—'}
+                    </span>
+                  )}
                   <div className={`w-2 h-2 rounded-full ${
                     settings.gasPriority === 'high' ? 'bg-red-400' : 
                     settings.gasPriority === 'medium' ? 'bg-yellow-400' : 'bg-green-400'

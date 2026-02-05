@@ -8,6 +8,7 @@ import { createAnalyticsRoutes } from './routes/analyticsRoutes.js';
 import { createIPFSRoutes } from './routes/ipfsRoutes.js';
 import { createAPIRoutes } from './routes/apiRoutes.js';
 import { createWalletActivityRoutes } from './routes/walletActivityRoutes.js';
+import { createPortfolioRoutes } from './routes/portfolioRoutes.js';
 import { createAIRoutes } from './routes/aiRoutes.js';
 import collectAnalytics from './scheduled/collectAnalytics.js';
 
@@ -169,6 +170,11 @@ const walletActivityRoutes = createWalletActivityRoutes();
 walletActivityRoutes.use('*', dbMiddleware);
 walletActivityRoutes.use('*', cacheMiddleware);
 app.route('/api/analytics', walletActivityRoutes);
+
+// Mount Portfolio routes (D1 snapshots for PnL)
+const portfolioRoutes = createPortfolioRoutes();
+portfolioRoutes.use('*', dbMiddleware);
+app.route('/api/portfolio', portfolioRoutes);
 
 // Mount AI Assistant routes at /api/ai (no DB required)
 const aiRoutes = createAIRoutes();

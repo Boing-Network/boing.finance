@@ -126,8 +126,13 @@ const ExternalDEXQuotes = ({
 
   return (
     <div className="mt-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-white">External DEX Quotes</h3>
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-white">External DEX Quotes</h3>
+          <span className="px-2 py-0.5 bg-green-600/80 text-white text-xs font-medium rounded-full" title="Best route by output amount">
+            Best Route
+          </span>
+        </div>
         <span className="text-sm text-gray-400">
           {quotes.length} quote{quotes.length !== 1 ? 's' : ''} found
         </span>

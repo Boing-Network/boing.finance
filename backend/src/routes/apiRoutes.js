@@ -7,6 +7,32 @@ import { sql, inArray } from 'drizzle-orm';
 import * as schema from '../database/schema.js';
 import AnalyticsService from '../services/analyticsService.js';
 
+// ChainId -> Etherscan-compatible API base and explorer URL for contract verification
+const EXPLORER_APIS = {
+  1: { apiBase: 'https://api.etherscan.io', explorerUrl: 'https://etherscan.io', keyEnv: 'ETHERSCAN_API_KEY' },
+  11155111: { apiBase: 'https://api-sepolia.etherscan.io', explorerUrl: 'https://sepolia.etherscan.io', keyEnv: 'ETHERSCAN_API_KEY' },
+  56: { apiBase: 'https://api.bscscan.com', explorerUrl: 'https://bscscan.com', keyEnv: 'BSCSCAN_API_KEY' },
+  97: { apiBase: 'https://api-testnet.bscscan.com', explorerUrl: 'https://testnet.bscscan.com', keyEnv: 'BSCSCAN_API_KEY' },
+  137: { apiBase: 'https://api.polygonscan.com', explorerUrl: 'https://polygonscan.com', keyEnv: 'POLYGONSCAN_API_KEY' },
+  80001: { apiBase: 'https://api-testnet.polygonscan.com', explorerUrl: 'https://amoy.polygonscan.com', keyEnv: 'POLYGONSCAN_API_KEY' },
+  42161: { apiBase: 'https://api.arbiscan.io', explorerUrl: 'https://arbiscan.io', keyEnv: 'ARBISCAN_API_KEY' },
+  10: { apiBase: 'https://api-optimistic.etherscan.io', explorerUrl: 'https://optimistic.etherscan.io', keyEnv: 'ETHERSCAN_API_KEY' },
+  8453: { apiBase: 'https://api.basescan.org', explorerUrl: 'https://basescan.org', keyEnv: 'BASESCAN_API_KEY' }
+};
+
+function getExplorerConfig(chainId) {
+  return EXPLORER_APIS[chainId] || null;
+}
+
+function getExplorerApiKey(env, keyEnv) {
+  if (!env || !keyEnv) return null;
+  return env[keyEnv] || env.EXPLORER_API_KEY || null;
+}
+
+function isEthAddress(address) {
+  return typeof address === 'string' && /^0x[a-fA-F0-9]{40}$/.test(address);
+}
+
 export const createAPIRoutes = () => {
   const api = new Hono();
 
@@ -73,6 +99,15 @@ export const createAPIRoutes = () => {
         '/rate-limits': {
           method: 'GET',
           description: 'Get current rate limit status'
+        },
+        '/contract-verification': {
+          method: 'GET',
+          description: 'Check if a contract is verified on block explorer (Etherscan/BscScan/PolygonScan etc.)',
+          parameters: {
+            address: 'Contract address',
+            chainId: 'Chain ID (e.g. 1, 56, 137, 11155111)'
+          },
+          example: '/api/contract-verification?address=0x...&chainId=1'
         }
       },
       rateLimits: {
@@ -259,6 +294,66 @@ export const createAPIRoutes = () => {
     }
   });
 
+  // Contract verification status (Etherscan/BscScan/PolygonScan etc.)
+  api.get('/contract-verification', async (c) => {
+    try {
+      const address = c.req.query('address');
+      const chainId = parseInt(c.req.query('chainId'), 10);
+      if (!address || !isEthAddress(address)) {
+        return c.json({ success: false, error: 'Valid address is required' }, 400);
+      }
+      if (!chainId || isNaN(chainId)) {
+        return c.json({ success: false, error: 'Valid chainId is required' }, 400);
+      }
+
+      const explorerConfig = getExplorerConfig(chainId);
+      if (!explorerConfig) {
+        return c.json({
+          success: true,
+          verified: false,
+          explorerUrl: null,
+          message: 'Block explorer not configured for this network',
+          contractName: null
+        });
+      }
+
+      const apiKey = getExplorerApiKey(c.env, explorerConfig.keyEnv);
+      const url = `${explorerConfig.apiBase}/api?module=contract&action=getsourcecode&address=${address}${apiKey ? `&apikey=${apiKey}` : ''}`;
+      const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+      const data = await res.json();
+
+      if (data.status !== '1' || !Array.isArray(data.result) || data.result.length === 0) {
+        return c.json({
+          success: true,
+          verified: false,
+          explorerUrl: explorerConfig.explorerUrl ? `${explorerConfig.explorerUrl}/address/${address}` : null,
+          message: data.message || 'Could not fetch verification status',
+          contractName: null
+        });
+      }
+
+      const first = data.result[0];
+      const sourceCode = first.SourceCode;
+      const hasSource = typeof sourceCode === 'string' && sourceCode.trim().length > 0;
+      const contractName = first.ContractName || null;
+
+      return c.json({
+        success: true,
+        verified: hasSource,
+        explorerUrl: explorerConfig.explorerUrl ? `${explorerConfig.explorerUrl}/address/${address}` : null,
+        message: hasSource ? 'Contract source code is verified on block explorer' : 'Contract is not verified',
+        contractName
+      });
+    } catch (error) {
+      console.error('Contract verification check error:', error);
+      return c.json({
+        success: false,
+        error: 'Verification check failed',
+        message: error.message
+      }, 500);
+    }
+  });
+
   // Rate limits info
   api.get('/rate-limits', (c) => {
     return c.json({
@@ -286,6 +381,22 @@ export const createAPIRoutes = () => {
   // Analytics endpoint - aggregates data from multiple sources
   api.get('/analytics', async (c) => {
     try {
+      // Rate limit: 60 requests per minute per IP (uses KV when available)
+      const ip = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+      const rateLimitKey = `ratelimit:analytics:${ip}`;
+      if (c.env.CACHE) {
+        try {
+          const current = await c.env.CACHE.get(rateLimitKey);
+          const count = current ? parseInt(current, 10) : 0;
+          if (count >= 60) {
+            return c.json({ success: false, error: 'Too many requests. Please try again in a minute.' }, 429);
+          }
+          await c.env.CACHE.put(rateLimitKey, String(count + 1), { expirationTtl: 60 });
+        } catch (e) {
+          console.warn('Rate limit check failed:', e.message);
+        }
+      }
+
       const range = c.req.query('range') || '24h';
       const networksParam = c.req.query('networks') || '1'; // Default to Ethereum
       
@@ -302,6 +413,19 @@ export const createAPIRoutes = () => {
           success: false, 
           error: `Invalid range. Must be one of: ${validRanges.join(', ')}` 
         }, 400);
+      }
+
+      // KV cache check (Cloudflare Workers KV) - 5 min TTL
+      const cacheKey = `analytics:${range}:${[...networks].sort().join(',')}`;
+      if (c.env.CACHE) {
+        try {
+          const cached = await c.env.CACHE.get(cacheKey);
+          if (cached) {
+            return c.json(JSON.parse(cached));
+          }
+        } catch (e) {
+          console.warn('KV cache get failed:', e.message);
+        }
       }
 
       const db = c.get('db');
@@ -470,10 +594,15 @@ export const createAPIRoutes = () => {
         }
       }
 
-      return c.json({
-        success: true,
-        data: analyticsData
-      });
+      const response = { success: true, data: analyticsData };
+      if (c.env.CACHE && analyticsData) {
+        try {
+          await c.env.CACHE.put(cacheKey, JSON.stringify(response), { expirationTtl: 300 });
+        } catch (e) {
+          console.warn('KV cache put failed:', e.message);
+        }
+      }
+      return c.json(response);
     } catch (error) {
       console.error('Analytics endpoint error:', error);
       return c.json({ 

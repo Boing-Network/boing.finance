@@ -215,9 +215,24 @@ export const analyticsSnapshots = sqliteTable('analytics_snapshots', {
   rangeNetworkTimestampIdx: index('analytics_snapshots_range_network_timestamp_idx').on(table.range, table.network, table.timestamp)
 }));
 
+// Portfolio snapshots for PnL tracking (D1)
+export const portfolioSnapshots = sqliteTable('portfolio_snapshots', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userAddress: text('user_address').notNull(),
+  totalValueUsd: real('total_value_usd').notNull(),
+  chainId: integer('chain_id'),
+  snapshotData: text('snapshot_data'),
+  timestamp: text('timestamp').default(sql`CURRENT_TIMESTAMP`)
+}, (table) => ({
+  userIdx: index('portfolio_snapshots_user_idx').on(table.userAddress),
+  timestampIdx: index('portfolio_snapshots_timestamp_idx').on(table.timestamp),
+  userTimestampIdx: index('portfolio_snapshots_user_timestamp_idx').on(table.userAddress, table.timestamp)
+}));
+
 export const schema = {
   // New D1-optimized tables
   knownTokens,
+  portfolioSnapshots,
   userInteractions,
   searchAnalytics,
   userPreferences,

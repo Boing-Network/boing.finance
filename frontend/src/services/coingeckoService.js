@@ -252,6 +252,21 @@ class CoinGeckoService {
     }
   }
 
+  // Get trending NFT collections (CoinGecko - may require Pro for full access)
+  async getNftMarkets(limit = 10) {
+    try {
+      const response = await fetch(
+        this.getApiUrl(`/nfts/markets?order=volume_24h_native_desc&per_page=${limit}`)
+      );
+      if (!response.ok) return [];
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.warn('Error fetching NFT markets:', error);
+      return [];
+    }
+  }
+
   // Get trending tokens
   async getTrendingTokens() {
     try {
