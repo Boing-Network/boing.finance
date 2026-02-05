@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import config from '../config';
 import { Helmet } from 'react-helmet-async';
@@ -14,11 +14,32 @@ import toast from 'react-hot-toast';
 
 // BoingAstronaut component
 
+const STORAGE_KEYS = { timeRange: 'boing_analytics_timeRange', section: 'boing_analytics_section' };
+function getStored(key, fallback) {
+  try {
+    const v = localStorage.getItem(key);
+    return v || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export default function Analytics() {
   const queryClient = useQueryClient();
-  const [timeRange, setTimeRange] = useState('24h');
-  const [activeSection, setActiveSection] = useState('overview'); // overview, market, trending
-  const [selectedNetwork, setSelectedNetwork] = useState('all'); // For trending tokens filter
+  const [timeRange, setTimeRange] = useState(() => getStored(STORAGE_KEYS.timeRange, '24h'));
+  const [activeSection, setActiveSection] = useState(() => getStored(STORAGE_KEYS.section, 'overview'));
+  const [selectedNetwork, setSelectedNetwork] = useState('all');
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.timeRange, timeRange);
+    } catch (_) {}
+  }, [timeRange]);
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.section, activeSection);
+    } catch (_) {}
+  }, [activeSection]);
 
   const { data: analytics, isLoading, error, refetch: refetchAnalytics, isFetching: analyticsFetching, dataUpdatedAt } = useQuery({
     queryKey: ['analytics', timeRange],
@@ -224,6 +245,36 @@ export default function Analytics() {
     refetchInterval: 60000, // Refetch every minute
   });
 
+  // Platform activity (backend analytics dashboard - same worker, /analytics path)
+  const analyticsBase = config?.apiUrl ? new URL(config.apiUrl).origin : '';
+  const { data: dashboardStats } = useQuery({
+    queryKey: ['analytics-dashboard', timeRange],
+    queryFn: async () => {
+      if (!analyticsBase) return null;
+      const res = await fetch(`${analyticsBase}/analytics/dashboard?timeRange=${timeRange}`, {
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json?.success && json?.data ? json.data : null;
+    },
+    staleTime: 60000,
+    retry: 0,
+  });
+
+  const sections = ['overview', 'market', 'trending'];
+  const handleSectionKeyDown = (e) => {
+    const i = sections.indexOf(activeSection);
+    if (e.key === 'ArrowRight' && i < sections.length - 1) {
+      e.preventDefault();
+      setActiveSection(sections[i + 1]);
+    } else if (e.key === 'ArrowLeft' && i > 0) {
+      e.preventDefault();
+      setActiveSection(sections[i - 1]);
+    }
+  };
+
   const timeRanges = [
     { id: '24h', name: '24 Hours' },
     { id: '7d', name: '7 Days' },
@@ -391,10 +442,16 @@ export default function Analytics() {
             <div className="bg-gray-800 rounded-2xl shadow-xl p-6 mb-8 border border-gray-700">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold text-white">Time Range</h2>
-                <div className="flex space-x-2">
-                  {['overview', 'market', 'trending'].map((section) => (
+                <div className="flex space-x-2" role="tablist" aria-label="Analytics sections" onKeyDown={handleSectionKeyDown}>
+                  {sections.map((section) => (
                     <button
                       key={section}
+                      type="button"
+                      role="tab"
+                      aria-selected={activeSection === section}
+                      aria-controls={`analytics-panel-${section}`}
+                      id={`tab-${section}`}
+                      tabIndex={activeSection === section ? 0 : -1}
                       onClick={() => setActiveSection(section)}
                       className={`px-4 py-2 rounded-lg font-medium transition-colors capitalize ${
                         activeSection === section
@@ -430,20 +487,8 @@ export default function Analytics() {
               </div>
             </div>
 
-            {/* Analytics Content */}
-            {isLoading || trendingLoading || marketLoading ? (
-              <div className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700 animate-pulse">
-                      <div className="h-5 bg-gray-700 rounded w-24 mb-3"></div>
-                      <div className="h-10 bg-gray-700 rounded w-32 mb-2"></div>
-                      <div className="h-4 bg-gray-700 rounded w-20"></div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : error ? (
+            {/* Analytics Content - section-level loading; no full-page block */}
+            {error ? (
               <div className="text-center py-12">
                 <p className="text-red-400">Failed to load analytics. Please try again.</p>
               </div>
@@ -451,9 +496,20 @@ export default function Analytics() {
               <div className="space-y-8">
                 {/* Overview Section */}
                 {activeSection === 'overview' && (
+                  <div id="analytics-panel-overview" role="tabpanel" aria-labelledby="tab-overview" className="space-y-8">
                   <>
-                {/* Key Metrics */}
+                {/* Key Metrics - section-level skeleton when analytics loading and no market fallback */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {isLoading && !marketData?.data ? (
+                    [1, 2, 3, 4].map((i) => (
+                      <div key={i} className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700 animate-pulse">
+                        <div className="h-5 bg-gray-700 rounded w-24 mb-3"></div>
+                        <div className="h-10 bg-gray-700 rounded w-32 mb-2"></div>
+                        <div className="h-4 bg-gray-700 rounded w-20"></div>
+                      </div>
+                    ))
+                  ) : (
+                  <>
                   <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                     <MetricTooltip content="Total 24h trading volume across all cryptocurrencies. Source: DefiLlama (DEX) or CoinGecko (global market).">
                       <h3 className="text-lg font-semibold text-white mb-2 inline-flex items-center gap-1.5">
@@ -548,7 +604,47 @@ export default function Analytics() {
                       {marketData?.data?.markets ? 'Active trading pairs (CoinGecko)' : (analytics?.markets ? 'Markets (backend API)' : 'Total transactions')}
                     </p>
                   </div>
+                </>
+                  )}
                 </div>
+
+                {!isLoading && activeSection === 'overview' && !marketData?.data && (!analytics || Object.keys(analytics).length === 0) && (
+                  <div className="bg-gray-800/80 border border-gray-600 rounded-xl p-4 text-center">
+                    <p className="text-gray-400 text-sm">
+                      Live metrics will appear when market data is available. Use <strong>Refresh</strong> or switch to <strong>Market</strong> for global stats.
+                    </p>
+                  </div>
+                )}
+
+                {/* Platform activity (backend dashboard stats) */}
+                {activeSection === 'overview' && dashboardStats && (
+                  <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                    <h2 className="text-xl font-bold text-white mb-4">Platform Activity</h2>
+                    <p className="text-sm text-gray-400 mb-4">User interactions and engagement for the selected time range.</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                      <div className="bg-gray-700/50 rounded-xl p-4 border border-gray-600">
+                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Interactions</p>
+                        <p className="text-2xl font-bold text-white">{Number(dashboardStats.total_interactions ?? 0).toLocaleString()}</p>
+                      </div>
+                      <div className="bg-gray-700/50 rounded-xl p-4 border border-gray-600">
+                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Unique users</p>
+                        <p className="text-2xl font-bold text-white">{Number(dashboardStats.unique_users ?? 0).toLocaleString()}</p>
+                      </div>
+                      <div className="bg-gray-700/50 rounded-xl p-4 border border-gray-600">
+                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Searches</p>
+                        <p className="text-2xl font-bold text-white">{Number(dashboardStats.total_searches ?? 0).toLocaleString()}</p>
+                      </div>
+                      <div className="bg-gray-700/50 rounded-xl p-4 border border-gray-600">
+                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Page views</p>
+                        <p className="text-2xl font-bold text-white">{Number(dashboardStats.page_views ?? 0).toLocaleString()}</p>
+                      </div>
+                      <div className="bg-gray-700/50 rounded-xl p-4 border border-gray-600">
+                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Errors logged</p>
+                        <p className="text-2xl font-bold text-white">{Number(dashboardStats.total_errors ?? 0).toLocaleString()}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* NFT-gated Pro Analytics Placeholder */}
                 <div className="interactive-card bg-gradient-to-r from-purple-900/40 to-blue-900/40 rounded-2xl p-6 border border-purple-500/30">
@@ -615,8 +711,25 @@ export default function Analytics() {
                 {/* Volume Chart */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                   <div className="mb-4">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                       <h2 className="text-2xl font-bold text-white">Volume Over Time ({timeRanges.find(r => r.id === timeRange)?.name})</h2>
+                      {generateTimeSeriesData.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const rows = generateTimeSeriesData.map(({ time, volume, timestamp }) => ({
+                              Time: time,
+                              'Volume (USD)': Math.round(volume),
+                              Timestamp: timestamp ? new Date(timestamp).toISOString() : '',
+                            }));
+                            downloadCSV(rows, `volume-chart-${timeRange}-${new Date().toISOString().split('T')[0]}`);
+                            toast.success('Volume chart exported as CSV');
+                          }}
+                          className="px-3 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 text-white rounded-lg"
+                        >
+                          Export CSV
+                        </button>
+                      )}
                     </div>
                     {generateTimeSeriesData.length > 0 && (
                       <div className={`${(analytics?.source === 'historical' || historicalVolumeData?.length) ? 'bg-green-500/10 border-green-500/30' : 'bg-yellow-500/10 border-yellow-500/30'} rounded-lg p-3 mb-4`}>
@@ -672,7 +785,8 @@ export default function Analytics() {
                     </ResponsiveContainer>
                   ) : (
                     <div className="h-[300px] flex flex-col items-center justify-center gap-3 text-center px-4">
-                      <p className="text-gray-400">Volume data not available for this time range</p>
+                      <p className="text-gray-400">Volume data not available for this time range.</p>
+                      <p className="text-gray-500 text-sm">Historical data comes from CoinGecko; try another range or refresh.</p>
                       <button
                         onClick={async () => {
                           await queryClient.invalidateQueries({ queryKey: ['analytics'] });
@@ -980,11 +1094,12 @@ export default function Analytics() {
                   )}
                 </div>
                   </>
+                  </div>
                 )}
 
                 {/* Market Data Section */}
                 {activeSection === 'market' && (
-                  <div className="space-y-6">
+                  <div id="analytics-panel-market" role="tabpanel" aria-labelledby="tab-market" className="space-y-6">
                     {marketLoading ? (
                       <div className="text-center py-12">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
@@ -1105,7 +1220,7 @@ export default function Analytics() {
 
                 {/* Trending Tokens Section */}
                 {activeSection === 'trending' && (
-                  <div className="space-y-6">
+                  <div id="analytics-panel-trending" role="tabpanel" aria-labelledby="tab-trending" className="space-y-6">
                     <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                       <div className="flex items-center justify-between mb-6">
                         <h2 className="text-2xl font-bold text-white">Trending Tokens</h2>
@@ -1144,39 +1259,71 @@ export default function Analytics() {
                         </div>
                       ) : trendingTokens && trendingTokens.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {trendingTokens.slice(0, 12).map((coin, index) => (
-                            <div key={index} className="interactive-card bg-gray-700 rounded-xl p-4 border border-gray-600 hover:border-blue-500">
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center space-x-3">
-                                  {coin.item?.small && (
-                                    <img src={coin.item.small} alt={coin.item.name} className="w-10 h-10 rounded-full" />
-                                  )}
-                                  <div>
-                                    <h3 className="text-white font-semibold">{coin.item?.name || 'Unknown'}</h3>
-                                    <p className="text-sm text-gray-400">{coin.item?.symbol?.toUpperCase() || ''}</p>
-                                  </div>
-                                </div>
-                                <span className="text-yellow-400 font-bold">#{index + 1}</span>
-                              </div>
-                              {coin.item?.data?.price && (
-                                <div className="space-y-1 text-sm">
-                                  <div className="flex justify-between">
-                                    <span className="text-gray-400">Price:</span>
-                                    <span className="text-white">${parseFloat(coin.item.data.price).toLocaleString(undefined, { maximumFractionDigits: 6 })}</span>
-                                  </div>
-                                  {coin.item.data.price_change_percentage_24h && (
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-400">24h Change:</span>
-                                      <span className={coin.item.data.price_change_percentage_24h.usd >= 0 ? 'text-green-400' : 'text-red-400'}>
-                                        {coin.item.data.price_change_percentage_24h.usd >= 0 ? '+' : ''}
-                                        {coin.item.data.price_change_percentage_24h.usd?.toFixed(2)}%
-                                      </span>
+                          {trendingTokens.slice(0, 12).map((coin, index) => {
+                            const isBackendSource = selectedNetwork !== 'all' && (coin.volume != null || coin.liquidity != null);
+                            const price = coin.item?.data?.price;
+                            const change24h = coin.item?.data?.price_change_percentage_24h != null
+                              ? (typeof coin.item.data.price_change_percentage_24h === 'object' && coin.item.data.price_change_percentage_24h?.usd != null
+                                ? coin.item.data.price_change_percentage_24h.usd
+                                : Number(coin.item.data.price_change_percentage_24h))
+                              : null;
+                            return (
+                              <div key={coin.item?.id ?? coin.id ?? index} className="interactive-card bg-gray-700 rounded-xl p-4 border border-gray-600 hover:border-blue-500">
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center space-x-3">
+                                    {coin.item?.small && (
+                                      <img src={coin.item.small} alt={coin.item.name} className="w-10 h-10 rounded-full" />
+                                    )}
+                                    {!coin.item?.small && isBackendSource && (
+                                      <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-lg font-bold text-blue-400">
+                                        {(coin.item?.symbol || coin.symbol || '?').slice(0, 1)}
+                                      </div>
+                                    )}
+                                    <div>
+                                      <h3 className="text-white font-semibold">{coin.item?.name || coin.name || 'Unknown'}</h3>
+                                      <p className="text-sm text-gray-400">{(coin.item?.symbol || coin.symbol || '').toUpperCase()}</p>
                                     </div>
-                                  )}
+                                  </div>
+                                  <span className="text-yellow-400 font-bold">#{index + 1}</span>
                                 </div>
-                              )}
-                            </div>
-                          ))}
+                                {isBackendSource ? (
+                                  <div className="space-y-1 text-sm">
+                                    {coin.volume != null && (
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-400">24h Volume:</span>
+                                        <span className="text-white">
+                                          {coin.volume >= 1e6 ? `$${(coin.volume / 1e6).toFixed(2)}M` : coin.volume >= 1e3 ? `$${(coin.volume / 1e3).toFixed(2)}K` : `$${Number(coin.volume).toLocaleString()}`}
+                                        </span>
+                                      </div>
+                                    )}
+                                    {coin.liquidity != null && (
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-400">Liquidity:</span>
+                                        <span className="text-white">
+                                          {coin.liquidity >= 1e6 ? `$${(coin.liquidity / 1e6).toFixed(2)}M` : coin.liquidity >= 1e3 ? `$${(coin.liquidity / 1e3).toFixed(2)}K` : `$${Number(coin.liquidity).toLocaleString()}`}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : price != null && price !== '' && (
+                                  <div className="space-y-1 text-sm">
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-400">Price:</span>
+                                      <span className="text-white">${parseFloat(price).toLocaleString(undefined, { maximumFractionDigits: 6 })}</span>
+                                    </div>
+                                    {change24h != null && !Number.isNaN(change24h) && (
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-400">24h Change:</span>
+                                        <span className={change24h >= 0 ? 'text-green-400' : 'text-red-400'}>
+                                          {change24h >= 0 ? '+' : ''}{Number(change24h).toFixed(2)}%
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       ) : (
                         <div className="text-center py-12">
