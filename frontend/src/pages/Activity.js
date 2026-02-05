@@ -9,6 +9,7 @@ import config from '../config';
 import { NETWORKS } from '../config/networks';
 import { fetchWalletActivity } from '../services/analyticsService';
 import toast from 'react-hot-toast';
+import EmptyState from '../components/EmptyState';
 
 const EXPLORERS = {
   1: 'https://etherscan.io/tx/',
