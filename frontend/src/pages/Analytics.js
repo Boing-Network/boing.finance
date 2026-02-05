@@ -808,7 +808,7 @@ export default function Analytics() {
                     {analytics?.networkStats && Object.keys(analytics.networkStats).length > 0 && (
                       <button
                         onClick={() => {
-                          const rows = Object.entries(analytics.networkStats).map(([network, stats]) => ({
+                          const rows = Object.entries(analytics?.networkStats || {}).map(([network, stats]) => ({
                             Network: network,
                             'Volume (USD)': parseFloat(stats.volume || 0).toLocaleString(),
                             Users: stats.users || 0,
@@ -827,7 +827,7 @@ export default function Analytics() {
                     <>
                       <div className="mb-6">
                         <ResponsiveContainer width="100%" height={300}>
-                          <BarChart data={Object.entries(analytics.networkStats).map(([network, stats]) => ({
+                          <BarChart data={Object.entries(analytics?.networkStats || {}).map(([network, stats]) => ({
                             network,
                             volume: parseFloat(stats.volume || 0),
                             users: stats.users || 0,
@@ -847,7 +847,7 @@ export default function Analytics() {
                         </ResponsiveContainer>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {Object.entries(analytics.networkStats).map(([network, stats]) => (
+                        {Object.entries(analytics?.networkStats || {}).map(([network, stats]) => (
                           <div key={network} className="bg-gray-700 rounded-xl p-4">
                             <h3 className="text-lg font-semibold text-white mb-3">{network}</h3>
                             <div className="space-y-2">
@@ -886,13 +886,13 @@ export default function Analytics() {
                 </div>
 
                 {/* Network Distribution Pie Chart */}
-                {analytics.networkStats && Object.keys(analytics.networkStats).length > 0 && (
+                {analytics?.networkStats && Object.keys(analytics.networkStats).length > 0 && (
                   <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                     <h2 className="text-2xl font-bold text-white mb-6">Network Distribution</h2>
                     <ResponsiveContainer width="100%" height={300}>
                       <PieChart isAnimationActive animationDuration={600} animationEasing="ease-out">
                         <Pie
-                          data={Object.entries(analytics.networkStats).map(([network, stats]) => ({
+                          data={Object.entries(analytics?.networkStats || {}).map(([network, stats]) => ({
                             name: network,
                             value: parseFloat(stats.volume || 0)
                           }))}
@@ -904,7 +904,7 @@ export default function Analytics() {
                           fill="#8884d8"
                           dataKey="value"
                         >
-                          {Object.keys(analytics.networkStats).map((_, index) => (
+                          {Object.keys(analytics?.networkStats || {}).map((_, index) => (
                             <Cell key={`cell-${index}`} fill={['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'][index % 6]} />
                           ))}
                         </Pie>
@@ -924,7 +924,7 @@ export default function Analytics() {
                     {analytics?.topPairs?.length > 0 && (
                       <button
                         onClick={() => {
-                          const rows = analytics.topPairs.map(p => ({
+                          const rows = (analytics?.topPairs || []).map(p => ({
                             Pair: `${p.token0Symbol}/${p.token1Symbol}`,
                             Network: p.network,
                             'Volume (USD)': parseFloat(p.volume || 0).toLocaleString(),
@@ -963,7 +963,7 @@ export default function Analytics() {
                           </tr>
                         </thead>
                         <tbody className="bg-gray-800 divide-y divide-gray-700">
-                          {analytics.topPairs.map((pair, index) => (
+                          {(analytics?.topPairs || []).map((pair, index) => (
                             <tr key={index} className="hover:bg-gray-700 transition-colors">
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="flex items-center">
@@ -1014,32 +1014,32 @@ export default function Analytics() {
                 {/* User Activity Chart */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                   <h2 className="text-2xl font-bold text-white mb-6">User Activity</h2>
-                  {analytics?.userActivity && analytics.userActivity.totalActions > 0 ? (
+                  {analytics?.userActivity && (analytics.userActivity?.totalActions ?? 0) > 0 ? (
                     <>
                       <div className="mb-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                           <div className="bg-gray-700 rounded-xl p-4">
                             <p className="text-sm text-gray-400 mb-1">Total Actions</p>
                             <p className="text-3xl font-bold text-white">
-                              {analytics.userActivity.totalActions.toLocaleString()}
+                              {(analytics?.userActivity?.totalActions ?? 0).toLocaleString()}
                             </p>
                           </div>
                           <div className="bg-gray-700 rounded-xl p-4">
                             <p className="text-sm text-gray-400 mb-1">Unique Users</p>
                             <p className="text-3xl font-bold text-white">
-                              {analytics.userActivity.uniqueUsers.toLocaleString()}
+                              {(analytics?.userActivity?.uniqueUsers ?? 0).toLocaleString()}
                             </p>
                           </div>
                           <div className="bg-gray-700 rounded-xl p-4">
                             <p className="text-sm text-gray-400 mb-1">Activity Types</p>
                             <p className="text-3xl font-bold text-white">
-                              {Object.keys(analytics.userActivity.byType || {}).length}
+                              {Object.keys(analytics?.userActivity?.byType || {}).length}
                             </p>
                           </div>
                         </div>
-                        {analytics.userActivity.byType && Object.keys(analytics.userActivity.byType).length > 0 && (
+                        {analytics?.userActivity?.byType && Object.keys(analytics?.userActivity?.byType || {}).length > 0 && (
                           <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={Object.entries(analytics.userActivity.byType).map(([action, count]) => ({
+                            <BarChart data={Object.entries(analytics?.userActivity?.byType || {}).map(([action, count]) => ({
                               action: action.replace('_', ' ').toUpperCase(),
                               count: Array.isArray(count) ? count.length : count
                             }))} isAnimationActive animationDuration={600} animationEasing="ease-out">
@@ -1056,11 +1056,11 @@ export default function Analytics() {
                           </ResponsiveContainer>
                         )}
                       </div>
-                      {analytics.userActivity.recentActivity && analytics.userActivity.recentActivity.length > 0 && (
+                      {analytics?.userActivity?.recentActivity?.length > 0 && (
                         <div className="mt-6">
                           <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
                           <div className="space-y-2">
-                            {analytics.userActivity.recentActivity.slice(0, 10).map((activity, index) => (
+                            {(analytics?.userActivity?.recentActivity || []).slice(0, 10).map((activity, index) => (
                               <div key={index} className="bg-gray-700 rounded-lg p-3 flex items-center justify-between">
                                 <div>
                                   <span className="text-white font-medium capitalize">{activity.action?.replace('_', ' ') || 'Unknown'}</span>
