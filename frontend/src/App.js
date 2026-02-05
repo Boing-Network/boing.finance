@@ -35,6 +35,7 @@ const Portfolio = lazy(() => import('./pages/Portfolio'));
 const Activity = lazy(() => import('./pages/Activity'));
 const Bridge = lazy(() => import('./pages/Bridge'));
 const DeployToken = lazy(() => import('./pages/DeployToken'));
+const CreateNFT = lazy(() => import('./pages/CreateNFT'));
 const CreatePool = lazy(() => import('./pages/CreatePool'));
 const Tokens = lazy(() => import('./pages/Tokens'));
 const Watchlist = lazy(() => import('./pages/Watchlist'));
