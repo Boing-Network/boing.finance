@@ -20,9 +20,8 @@ import toast from 'react-hot-toast';
 // MochiAstronaut component
 
 export default function Portfolio() {
-  const { account, chainId } = useWallet();
+  const { account, chainId, connectWallet } = useWallet();
   const [selectedNetwork, setSelectedNetwork] = useState('all');
-  // eslint-disable-next-line no-unused-vars
   const [activeTab, setActiveTab] = useState('overview'); // overview, tokens, pools
   const [trackedNetworks, setTrackedNetworks] = useState([chainId || 11155111]);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -42,7 +41,7 @@ export default function Portfolio() {
   const getBlockchainSepoliaPools = blockchainPoolsHook?.getAllSepoliaPools || (async () => []);
 
   // Fetch user's liquidity positions - Works in API-only mode
-  const { data: userPools, isLoading: poolsLoading } = useQuery({
+  const { data: userPools, isLoading: poolsLoading, refetch: refetchPools } = useQuery({
     queryKey: ['user-pools-portfolio', account, chainId, blockchainInitialized],
     queryFn: async () => {
       // Fetching user pools
@@ -154,7 +153,7 @@ export default function Portfolio() {
   }, [createdPools, selectedNetwork]);
 
   // Fetch token balances across networks - React Query v5 API
-  const { data: tokenBalances, isLoading: balancesLoading } = useQuery({
+  const { data: tokenBalances, isLoading: balancesLoading, refetch: refetchBalances } = useQuery({
     queryKey: ['token-balances', account, trackedNetworks],
     queryFn: async () => {
       // Fetching token balances
@@ -308,10 +307,14 @@ export default function Portfolio() {
               Connect your wallet to view your portfolio and track your assets across all networks.
             </p>
             <div className="bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-700 max-w-md mx-auto">
-              <p className="text-gray-400 mb-4">Please connect your wallet to continue</p>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+              <p className="text-gray-400 mb-4">Connect your wallet to view balances, liquidity positions, and performance.</p>
+              <button
+                onClick={() => connectWallet()}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors w-full"
+              >
                 Connect Wallet
               </button>
+              <p className="text-gray-500 text-sm mt-4">Or use the Connect Wallet button in the navigation bar</p>
             </div>
           </div>
         </div>
@@ -341,16 +344,33 @@ export default function Portfolio() {
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex-1"></div>
-                <div className="flex-1">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                <div className="flex-1 order-2 sm:order-1"></div>
+                <div className="flex-1 order-1 sm:order-2">
                   <h1 className="text-4xl font-bold text-white">
                     Portfolio
                   </h1>
                 </div>
-                <div className="flex-1 flex justify-end">
-                  {tokenBalances && tokenBalances.balances && tokenBalances.balances.length > 0 && (
-                    <div className="flex gap-2">
+                <div className="flex-1 flex flex-wrap justify-center sm:justify-end gap-2 order-3">
+                  <button
+                    onClick={() => {
+                      refetchPools();
+                      refetchBalances();
+                      toast.success('Portfolio data refreshed');
+                    }}
+                    disabled={balancesLoading || poolsLoading}
+                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+                    title="Refresh portfolio data"
+                  >
+                    <svg className={`w-4 h-4 ${(balancesLoading || poolsLoading) ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Refresh
+                  </button>
+                  {(tokenBalances?.balances?.length > 0 || filteredUserPools?.length > 0) && (
+                    <div className="flex flex-wrap gap-2">
+                      {tokenBalances?.balances?.length > 0 && (
+                        <>
                       <button
                         onClick={() => {
                           const portfolioData = tokenBalances.balances.map(token => ({
@@ -387,6 +407,8 @@ export default function Portfolio() {
                       >
                         <span>📥</span> Export JSON
                       </button>
+                        </>
+                      )}
                       <button
                         onClick={() => {
                           exportPortfolioPDF({
@@ -408,6 +430,9 @@ export default function Portfolio() {
                         <span>🔗</span> Share
                       </button>
                     </div>
+                  )}
+                  {(!tokenBalances?.balances?.length && !filteredUserPools?.length) && (
+                    <span className="text-gray-500 text-sm self-center">Connect wallet & add assets to export</span>
                   )}
                 </div>
               </div>
@@ -431,6 +456,28 @@ export default function Portfolio() {
                 </div>
               </div>
             )}
+
+            {/* Tab Navigation */}
+            <div className="flex border-b border-gray-700 mb-6">
+              {[
+                { id: 'overview', label: 'Overview', icon: '📊' },
+                { id: 'tokens', label: 'Token Balances', icon: '🪙' },
+                { id: 'pools', label: 'Liquidity Pools', icon: '🏊' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-6 py-3 font-medium transition-colors border-b-2 -mb-px ${
+                    activeTab === tab.id
+                      ? 'border-blue-500 text-blue-400'
+                      : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600'
+                  }`}
+                >
+                  <span className="mr-2">{tab.icon}</span>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
 
             {/* Network Filter */}
             <div className="bg-gray-800 rounded-2xl shadow-xl p-6 mb-8 border border-gray-700">

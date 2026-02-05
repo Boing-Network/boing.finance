@@ -603,8 +603,8 @@ function AppContent() {
                 <Route path="/swap" element={<ComingSoon featureName="Swap" />} />
                 <Route path="/pools" element={<ComingSoon featureName="Pools" />} />
                 <Route path="/liquidity" element={<ComingSoon featureName="Liquidity" />} />
-                <Route path="/analytics" element={<ComingSoon featureName="Analytics" />} />
-                <Route path="/portfolio" element={<ComingSoon featureName="Portfolio" />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/portfolio" element={<Portfolio />} />
                 <Route path="/bridge" element={<ComingSoon featureName="Bridge" />} />
                 <Route path="/tokens" element={<ComingSoon featureName="Tokens" />} />
                 <Route path="/watchlist" element={<ComingSoon featureName="Watchlist" />} />

@@ -17,7 +17,7 @@ export default function Analytics() {
   const [activeSection, setActiveSection] = useState('overview'); // overview, market, trending
   const [selectedNetwork, setSelectedNetwork] = useState('all'); // For trending tokens filter
 
-  const { data: analytics, isLoading, error } = useQuery({
+  const { data: analytics, isLoading, error, refetch: refetchAnalytics, dataUpdatedAt } = useQuery({
     queryKey: ['analytics', timeRange],
     queryFn: () => {
       return fetchAnalytics(timeRange);
@@ -55,24 +55,8 @@ export default function Analytics() {
       }
       
       const data = await response.json();
-      if (data?.success && data?.data) {
-        // Debug: Log when we get data with detailed info
-        const analyticsData = data.data;
-        const networkStatsKeys = analyticsData.networkStats ? Object.keys(analyticsData.networkStats) : [];
-        const topPairsCount = analyticsData.topPairs ? analyticsData.topPairs.length : 0;
-        
-        console.log('Analytics data received:', {
-          hasTotalVolume: !!analyticsData.totalVolume && parseFloat(analyticsData.totalVolume) > 0,
-          hasNetworkStats: networkStatsKeys.length > 0,
-          networkStatsKeys: networkStatsKeys,
-          networkStatsData: analyticsData.networkStats,
-          hasTopPairs: topPairsCount > 0,
-          topPairsCount: topPairsCount,
-          topPairsData: analyticsData.topPairs?.slice(0, 2), // First 2 for debugging
-          source: analyticsData.source
-        });
-        
-        return analyticsData;
+        if (data?.success && data?.data) {
+        return data.data;
       }
       return {};
     } catch (error) {
@@ -332,7 +316,7 @@ export default function Analytics() {
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
                 <div className="flex-1">
                   <h1 className="text-4xl font-bold text-white mb-2">
                     Analytics Dashboard
@@ -340,9 +324,25 @@ export default function Analytics() {
                   <p className="text-xl text-gray-300 max-w-3xl">
                     Track trading performance, pool statistics, and market trends across all supported networks.
                   </p>
+                  {dataUpdatedAt > 0 && (
+                    <p className="text-sm text-gray-500 mt-2">
+                      Last updated: {new Date(dataUpdatedAt).toLocaleTimeString()}
+                    </p>
+                  )}
                 </div>
-                <div className="flex gap-2">
-                  {trendingTokens && trendingTokens.length > 0 && (
+                <div className="flex flex-wrap gap-2 items-center">
+                  <button
+                    onClick={() => refetchAnalytics()}
+                    disabled={isLoading}
+                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+                    title="Refresh data"
+                  >
+                    <svg className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Refresh
+                  </button>
+                  {(trendingTokens?.length > 0 || analytics || marketData) && (
                     <button
                       onClick={() => {
                         const analyticsData = {
@@ -385,9 +385,8 @@ export default function Analytics() {
               </div>
               <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mb-4">
                 <p className="text-sm text-blue-300">
-                  <span className="font-semibold">Note:</span> Time range selection affects chart visualizations in the Overview tab. 
-                  Market statistics and trending data show current/real-time information and are not time-range specific. 
-                  Historical data requires backend API integration (currently unavailable).
+                  <span className="font-semibold">Note:</span> Time range affects the volume chart in Overview. 
+                  Market and trending data show real-time info. Historical volume uses CoinGecko (Bitcoin as proxy).
                 </p>
               </div>
               <div className="flex flex-wrap gap-4">
@@ -606,8 +605,14 @@ export default function Analytics() {
                       </AreaChart>
                     </ResponsiveContainer>
                   ) : (
-                    <div className="h-[300px] flex items-center justify-center">
+                    <div className="h-[300px] flex flex-col items-center justify-center gap-3 text-center px-4">
                       <p className="text-gray-400">Volume data not available for this time range</p>
+                      <button
+                        onClick={() => refetchAnalytics()}
+                        className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                      >
+                        Try refreshing
+                      </button>
                     </div>
                   )}
                 </div>
