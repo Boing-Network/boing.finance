@@ -1085,23 +1085,17 @@ function Home() {
                 );
               })}
               {memoizedNav.analytics.map((item) => {
-                // Explicit boolean checks with logging
                 const isComingSoon = Boolean(item.comingSoon);
                 const isAvailable = Boolean(item.isAvailable);
                 const shouldShowComingSoon = isComingSoon || !isAvailable;
-                
                 const getIcon = () => {
                   if (item.name === 'Analytics') return <AnalyticsIcon />;
                   if (item.name === 'Portfolio') return <PortfolioIcon />;
+                  if (item.name === 'Activity') return <ActivityIcon />;
                   return null;
                 };
                 const CardContent = (
-                  <FeatureCard 
-                    title={item.name} 
-                    icon={getIcon()}
-                    description={item.description || ''} 
-                    comingSoon={shouldShowComingSoon}
-                  />
+                  <FeatureCard title={item.name} icon={getIcon()} description={item.description || ''} comingSoon={shouldShowComingSoon} />
                 );
                 return shouldShowComingSoon ? (
                   <div key={item.name}>{CardContent}</div>
@@ -1109,15 +1103,11 @@ function Home() {
                   <a key={item.name} href={item.href} className="block">{CardContent}</a>
                 );
               })}
-            </div>
-            
-            {/* Second row - Deploy Token card centered */}
-            <div className="flex justify-center">
-              <div className="w-full max-w-md">
-                <a href="/deploy-token" className="block">
-                  <FeatureCard title="Deploy Token" icon={<DeployTokenIcon />} description="Create and deploy your own ERC20 tokens with just a few clicks." />
+              {memoizedNav.deployment.filter((item) => item.name === 'Deploy Token').map((item) => (
+                <a key={item.name} href={item.href} className="block">
+                  <FeatureCard title={item.name} icon={<DeployTokenIcon />} description={item.description || ''} />
                 </a>
-              </div>
+              ))}
             </div>
           </div>
 
@@ -1252,6 +1242,21 @@ function PortfolioIcon() {
         </linearGradient>
       </defs>
       <path fill="url(#portfolioGradient)" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke="url(#portfolioGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ActivityIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
+      <defs>
+        <linearGradient id="activityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#00E0FF" />
+          <stop offset="50%" stopColor="#00FFB2" />
+          <stop offset="100%" stopColor="#7B61FF" />
+        </linearGradient>
+      </defs>
+      <path fill="url(#activityGradient)" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" stroke="url(#activityGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
