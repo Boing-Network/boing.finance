@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { debounce } from '../utils/debounce';
 import TokenScanner from '../services/tokenScanner';
-import { getNetworkByChainId } from '../config/networks';
+import coingeckoService from '../services/coingeckoService';
 import { NETWORKS } from '../config/networks';
 import toast from 'react-hot-toast';
 
@@ -46,53 +46,56 @@ const GlobalSearch = ({ isOpen, onClose }) => {
       try {
         const searchResults = [];
 
-        // Search tokens across all networks
-        for (const [chainId, network] of Object.entries(NETWORKS)) {
-          try {
-            // Check if query looks like an address
-            if (searchQuery.startsWith('0x') && searchQuery.length >= 10) {
-              const token = await tokenScannerRef.current.searchToken(searchQuery, parseInt(chainId));
+        // Address-based search: use TokenScanner
+        if (searchQuery.startsWith('0x') && searchQuery.length >= 10) {
+          for (const [chainId, network] of Object.entries(NETWORKS)) {
+            try {
+              const token = await tokenScanner.searchToken(searchQuery, parseInt(chainId));
               if (token) {
                 searchResults.push({
                   type: 'token',
-                  data: token,
+                  data: { ...token, address: token.address },
                   network: network.name,
                   chainId: parseInt(chainId)
                 });
+                break; // Found on one network
               }
-            } else {
-              // Search by name or symbol (simplified - in production, use API)
-              // For now, just check if it matches common tokens
-              const commonTokens = ['ETH', 'BTC', 'USDC', 'USDT', 'DAI', 'MATIC', 'BNB'];
-              if (commonTokens.some(t => t.toLowerCase() === searchQuery.toLowerCase())) {
-                searchResults.push({
-                  type: 'token',
-                  data: {
-                    symbol: searchQuery.toUpperCase(),
-                    name: searchQuery,
-                    address: '0x...',
-                    network: network.name
-                  },
-                  network: network.name,
-                  chainId: parseInt(chainId)
-                });
-              }
+            } catch (error) {
+              console.warn(`Search failed for ${network.name}:`, error);
             }
-          } catch (error) {
-            // Continue searching other networks
-            console.warn(`Search failed for ${network.name}:`, error);
+          }
+        } else {
+          // Name/symbol search: use CoinGecko API
+          try {
+            const cgResults = await coingeckoService.searchTokens(searchQuery);
+            if (cgResults?.coins?.length > 0) {
+              cgResults.coins.slice(0, 5).forEach((coin) => {
+                searchResults.push({
+                  type: 'coin',
+                  data: {
+                    id: coin.id,
+                    name: coin.name,
+                    symbol: (coin.symbol || '').toUpperCase(),
+                    thumb: coin.thumb,
+                    marketCapRank: coin.market_cap_rank
+                  }
+                });
+              });
+            }
+          } catch (cgError) {
+            console.warn('CoinGecko search failed:', cgError);
           }
         }
 
-        // Add route matches
+        // Add route matches (all pages are live)
         const routes = [
           { name: 'Deploy Token', path: '/deploy-token', icon: '🚀', comingSoon: false },
-          { name: 'Portfolio', path: '/portfolio', icon: '💼', comingSoon: true },
-          { name: 'Analytics', path: '/analytics', icon: '📊', comingSoon: true },
-          { name: 'Tokens', path: '/tokens', icon: '🪙', comingSoon: true },
-          { name: 'Pools', path: '/pools', icon: '🏊', comingSoon: true },
-          { name: 'Swap', path: '/swap', icon: '🔄', comingSoon: true },
-          { name: 'Bridge', path: '/bridge', icon: '🌉', comingSoon: true }
+          { name: 'Portfolio', path: '/portfolio', icon: '💼', comingSoon: false },
+          { name: 'Analytics', path: '/analytics', icon: '📊', comingSoon: false },
+          { name: 'Tokens', path: '/tokens', icon: '🪙', comingSoon: false },
+          { name: 'Pools', path: '/pools', icon: '🏊', comingSoon: false },
+          { name: 'Swap', path: '/swap', icon: '🔄', comingSoon: false },
+          { name: 'Bridge', path: '/bridge', icon: '🌉', comingSoon: false }
         ];
 
         routes.forEach(route => {
@@ -168,6 +171,9 @@ const GlobalSearch = ({ isOpen, onClose }) => {
       }
     } else if (result.type === 'token') {
       navigate(`/tokens?address=${result.data.address}&network=${result.chainId}`);
+      onClose();
+    } else if (result.type === 'coin') {
+      navigate(`/tokens?coinId=${encodeURIComponent(result.data.id)}`);
       onClose();
     }
   };
@@ -266,12 +272,19 @@ const GlobalSearch = ({ isOpen, onClose }) => {
                   onClick={() => handleSelectResult(result)}
                 >
                   <div className="flex items-center space-x-3">
-                    <span className="text-2xl">{result.type === 'route' ? result.data.icon : '🪙'}</span>
+                    {result.type === 'coin' && result.data.thumb ? (
+                      <img src={result.data.thumb} alt="" className="w-8 h-8 rounded-full" />
+                    ) : (
+                      <span className="text-2xl">{result.type === 'route' ? result.data.icon : '🪙'}</span>
+                    )}
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
                         <span className="text-white font-medium">
                           {result.type === 'route' ? result.data.name : result.data.name || result.data.symbol}
                         </span>
+                        {result.type === 'coin' && result.data.marketCapRank && (
+                          <span className="text-xs text-gray-500">#{result.data.marketCapRank}</span>
+                        )}
                         {result.type === 'route' && result.data.comingSoon && (
                           <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30">
                             Coming Soon
@@ -281,7 +294,9 @@ const GlobalSearch = ({ isOpen, onClose }) => {
                       <div className="text-sm text-gray-400">
                         {result.type === 'route' 
                           ? result.data.path
-                          : `${result.data.symbol} • ${result.network}`
+                          : result.type === 'coin'
+                            ? `${result.data.symbol} • CoinGecko`
+                            : `${result.data.symbol} • ${result.network}`
                         }
                       </div>
                     </div>

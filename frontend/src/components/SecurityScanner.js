@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import { ethers } from 'ethers';
 import { getNetworkByChainId } from '../config/networks';
+import config from '../config';
 import LoadingSpinner from './LoadingSpinner';
 import toast from 'react-hot-toast';
 
@@ -80,11 +81,13 @@ const SECURITY_CHECKS = [
   }
 ];
 
-const SecurityScanner = ({ tokenAddress, chainId, onScanComplete }) => {
+const SecurityScanner = ({ tokenAddress, chainId, tokenSymbol, onScanComplete }) => {
   const [scanResults, setScanResults] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
   const [securityScore, setSecurityScore] = useState(0);
   const [recommendations, setRecommendations] = useState([]);
+  const [aiSummary, setAiSummary] = useState(null);
+  const [aiSummaryLoading, setAiSummaryLoading] = useState(false);
 
   const network = getNetworkByChainId(chainId);
 
@@ -98,6 +101,7 @@ const SecurityScanner = ({ tokenAddress, chainId, onScanComplete }) => {
     setIsScanning(true);
     setScanResults([]);
     setRecommendations([]);
+    setAiSummary(null);
 
     try {
       const provider = new ethers.JsonRpcProvider(network?.rpcUrl);
@@ -430,6 +434,66 @@ const SecurityScanner = ({ tokenAddress, chainId, onScanComplete }) => {
               <p className="text-xs mt-2 opacity-70">{result.details}</p>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* AI Risk Summary */}
+      {scanResults.length > 0 && securityScore > 0 && (
+        <div className="mt-6 p-4 rounded-lg border" style={{
+          backgroundColor: 'var(--bg-secondary)',
+          borderColor: 'var(--border-color)'
+        }}>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+              AI Risk Summary
+            </h3>
+            {!aiSummary && !aiSummaryLoading && (
+              <button
+                onClick={async () => {
+                  setAiSummaryLoading(true);
+                  try {
+                    const apiBase = config.apiUrl || config.workerUrl || `${window.location.origin}/api`;
+                    const res = await fetch(`${apiBase.replace(/\/$/, '')}/ai/security-summary`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        results: scanResults,
+                        score: securityScore,
+                        recommendations,
+                        tokenSymbol: tokenSymbol || 'Unknown'
+                      })
+                    });
+                    const data = await res.json();
+                    if (data.success && data.summary) {
+                      setAiSummary(data.summary);
+                      toast.success('AI summary generated');
+                    } else {
+                      toast.error(data.error || 'Failed to generate summary');
+                    }
+                  } catch (err) {
+                    toast.error(err.message || 'AI summary unavailable');
+                  } finally {
+                    setAiSummaryLoading(false);
+                  }
+                }}
+                disabled={aiSummaryLoading}
+                className="px-3 py-1.5 rounded-lg text-sm font-medium bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 disabled:opacity-50 transition-colors"
+              >
+                {aiSummaryLoading ? 'Generating...' : 'Generate AI Summary'}
+              </button>
+            )}
+          </div>
+          {aiSummaryLoading && (
+            <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
+              <LoadingSpinner size="sm" />
+              <span>Analyzing scan results...</span>
+            </div>
+          )}
+          {aiSummary && (
+            <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--text-secondary)' }}>
+              {aiSummary}
+            </p>
+          )}
         </div>
       )}
 

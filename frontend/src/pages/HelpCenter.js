@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
+import AIChatModal from '../components/AIChatModal';
 
 const HelpCenter = () => {
   const [activeCategory, setActiveCategory] = useState('getting-started');
   const [searchQuery, setSearchQuery] = useState('');
+  const [aiChatOpen, setAiChatOpen] = useState(false);
 
   const helpCategories = [
     {
@@ -200,7 +202,16 @@ const HelpCenter = () => {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <button
+                onClick={() => setAiChatOpen(true)}
+                className="p-4 rounded-lg transition-colors text-center border bg-cyan-600/20 hover:bg-cyan-600/30 border-cyan-500/50"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                <div className="text-2xl mb-2">🤖</div>
+                <div className="font-semibold">Ask AI Assistant</div>
+                <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Get help with swaps, liquidity, bridge</div>
+              </button>
               <a
                 href="mailto:support@boing.finance"
                 className="hover:bg-gray-600 p-4 rounded-lg transition-colors text-center border" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
@@ -226,6 +237,18 @@ const HelpCenter = () => {
                 <div className="text-sm text-blue-200">General inquiries</div>
               </a>
             </div>
+
+            <AIChatModal
+              isOpen={aiChatOpen}
+              onClose={() => setAiChatOpen(false)}
+              context={{
+                page: 'help-center',
+                helpCategories: helpCategories.map(c => ({
+                  title: c.title,
+                  articles: c.articles.map(a => ({ title: a.title, content: a.content, tags: a.tags }))
+                }))
+              }}
+            />
 
             {/* Search Results or Category Content */}
             {searchQuery ? (

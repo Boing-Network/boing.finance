@@ -13,6 +13,7 @@ import EnhancedAnimatedBackground from './components/EnhancedAnimatedBackground'
 import WalletConnect from './components/WalletConnect';
 import NetworkSelector from './components/NetworkSelector';
 import TransactionHistoryModal from './components/TransactionHistoryModal';
+import AIChatModal from './components/AIChatModal';
 import ThemeToggle from './components/ThemeToggle';
 import LanguageSelector from './components/LanguageSelector';
 import Logo from './components/Logo';
@@ -84,6 +85,7 @@ function AppContent() {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const [aiChatOpen, setAiChatOpen] = useState(false);
   const [tradingDropdownOpen, setTradingDropdownOpen] = useState(false);
   const [analyticsDropdownOpen, setAnalyticsDropdownOpen] = useState(false);
   const [deploymentDropdownOpen, setDeploymentDropdownOpen] = useState(false);
@@ -203,6 +205,19 @@ function AppContent() {
                 <LanguageSelector />
                 <ThemeToggle />
                 <button
+                  onClick={() => setAiChatOpen(true)}
+                  className="p-2 rounded-md transition-all duration-200 hover:bg-cyan-500/10"
+                  style={{ color: 'var(--text-secondary)' }}
+                  onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+                  onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+                  aria-label="AI DeFi Assistant"
+                  title="AI Assistant"
+                >
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                  </svg>
+                </button>
+                <button
                   onClick={() => setHistoryModalOpen(true)}
                   className="p-2 rounded-md transition-all duration-200 hover:bg-cyan-500/10"
                   style={{ color: 'var(--text-secondary)' }}
@@ -273,6 +288,17 @@ function AppContent() {
                 <div className="flex items-center space-x-1 pr-2 border-r" style={{ borderColor: 'var(--border-color)' }}>
                   <LanguageSelector />
                   <ThemeToggle />
+                  <button
+                    onClick={() => setAiChatOpen(true)}
+                    className="p-1.5 rounded-md transition-all duration-200 hover:bg-cyan-500/10"
+                    style={{ color: 'var(--text-secondary)' }}
+                    aria-label="AI Assistant"
+                    title="AI Assistant"
+                  >
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                    </svg>
+                  </button>
                   <button
                     onClick={() => setHistoryModalOpen(true)}
                     className="p-1.5 rounded-md transition-all duration-200 hover:bg-cyan-500/10"
@@ -502,6 +528,25 @@ function AppContent() {
               <div className="space-y-3 pt-3 border-t border-cyan-500/20" style={{ borderColor: 'var(--border-color)' }}>
                 <button
                   onClick={() => {
+                    setAiChatOpen(true);
+                    closeMenu();
+                  }}
+                  className="w-full text-left px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 border border-cyan-500/20"
+                  style={{
+                    color: 'var(--text-secondary)',
+                    background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
+                    borderColor: 'var(--border-color)'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+                  onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+                >
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                  </svg>
+                  <span>AI DeFi Assistant</span>
+                </button>
+                <button
+                  onClick={() => {
                     setHistoryModalOpen(true);
                     closeMenu();
                   }}
@@ -593,6 +638,9 @@ function AppContent() {
         onClose={() => setHistoryModalOpen(false)}
         account={account}
       />
+
+      {/* AI DeFi Assistant Modal */}
+      <AIChatModal isOpen={aiChatOpen} onClose={() => setAiChatOpen(false)} />
       
       <footer className="w-full border-t border-cyan-500/30 shadow-lg shadow-cyan-500/20 relative z-20" style={{
         backgroundColor: 'var(--bg-primary)',

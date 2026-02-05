@@ -170,6 +170,45 @@ export default function Analytics() {
   // DEX stats are now included in the analytics response from backend
   // No need for separate query - using analytics.networkStats instead
 
+  // Fetch price insights (predictions for BTC & ETH using existing predictive analytics)
+  const { data: priceInsights, isLoading: priceInsightsLoading } = useQuery({
+    queryKey: ['price-insights'],
+    queryFn: async () => {
+      const insights = [];
+      const coins = [
+        { id: 'bitcoin', symbol: 'BTC' },
+        { id: 'ethereum', symbol: 'ETH' }
+      ];
+      for (const coin of coins) {
+        try {
+          const history = await coingeckoService.getPriceHistoryByCoinId(coin.id, 7);
+          if (history?.prices?.length >= 7) {
+            const prices = history.prices.map(([_, p]) => p).filter(Boolean);
+            const prediction = getPricePrediction(prices, 7);
+            insights.push({ symbol: coin.symbol, ...prediction });
+          }
+        } catch (err) {
+          console.warn(`Price insights failed for ${coin.symbol}:`, err);
+        }
+      }
+      return insights;
+    },
+    refetchInterval: 300000, // 5 min
+  });
+
+  // Fetch historical volume from CoinGecko (Bitcoin as proxy for market)
+  const { data: historicalVolumeData } = useQuery({
+    queryKey: ['historical-volume', timeRange],
+    queryFn: async () => {
+      const daysMap = { '24h': 1, '7d': 7, '30d': 30, '1y': 365 };
+      const days = daysMap[timeRange] || 7;
+      const chart = await coingeckoService.getMarketChartByCoinId('bitcoin', days);
+      if (!chart?.total_volumes?.length) return null;
+      return chart.total_volumes.map(([ts, vol]) => ({ timestamp: ts, volume: vol }));
+    },
+    refetchInterval: 300000,
+  });
+
   // Fetch market data - React Query v5 API
   // Note: CoinGecko global endpoint doesn't support time ranges - it always returns current data
   const { data: marketData, isLoading: marketLoading } = useQuery({
@@ -197,11 +236,23 @@ export default function Analytics() {
     { id: '1y', name: '1 Year' },
   ];
 
-  // Generate time-series data based on time range
+  // Generate time-series data - use historical from CoinGecko when available
   const generateTimeSeriesData = useMemo(() => {
-    if (!marketData?.data?.total_volume?.usd) {
-      return [];
+    if (historicalVolumeData?.length > 0) {
+      const step = Math.max(1, Math.floor(historicalVolumeData.length / (timeRange === '24h' ? 24 : timeRange === '1y' ? 12 : 7)));
+      return historicalVolumeData
+        .filter((_, i) => i % step === 0 || i === historicalVolumeData.length - 1)
+        .map(({ timestamp, volume }) => {
+          const date = new Date(timestamp);
+          let label = timeRange === '24h'
+            ? date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
+            : (timeRange === '7d' || timeRange === '30d')
+              ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+              : date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+          return { time: label, volume, timestamp };
+        });
     }
+    if (!marketData?.data?.total_volume?.usd) return [];
 
     const baseVolume = marketData.data.total_volume.usd;
     const now = Date.now();
@@ -257,7 +308,7 @@ export default function Analytics() {
     }
 
     return dataPoints;
-  }, [marketData, timeRange]);
+  }, [marketData, timeRange, historicalVolumeData]);
 
   return (
     <>
@@ -456,6 +507,46 @@ export default function Analytics() {
                   </div>
                 </div>
 
+                {/* Price Insights - 7-Day Forecast (Predictive Analytics) */}
+                {priceInsights && priceInsights.length > 0 && (
+                  <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                    <h2 className="text-2xl font-bold text-white mb-4">Price Insights (7-Day Forecast)</h2>
+                    <p className="text-sm text-gray-400 mb-4">
+                      Trend-based predictions from historical data. Not financial advice — use with caution.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {priceInsights.map((insight) => (
+                        <div key={insight.symbol} className="bg-gray-700 rounded-xl p-4 border border-gray-600">
+                          <div className="flex justify-between items-start mb-2">
+                            <span className="text-white font-semibold">{insight.symbol}</span>
+                            <span className={`text-xs px-2 py-1 rounded ${
+                              insight.trend === 'up' ? 'bg-green-500/20 text-green-400' :
+                              insight.trend === 'down' ? 'bg-red-500/20 text-red-400' :
+                              'bg-gray-500/20 text-gray-400'
+                            }`}>
+                              {insight.trend?.toUpperCase() || 'NEUTRAL'}
+                            </span>
+                          </div>
+                          {insight.predictedPrice != null && insight.currentPrice && (
+                            <>
+                              <div className="text-sm text-gray-300">
+                                Current: ${insight.currentPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                              </div>
+                              <div className="text-sm text-blue-300 mt-1">
+                                Est. 7d: ${insight.predictedPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                              </div>
+                            </>
+                          )}
+                          <div className="flex justify-between mt-2 text-xs text-gray-400">
+                            <span>Confidence: {insight.confidence || 0}%</span>
+                            {insight.volatility != null && <span>Volatility: {insight.volatility}%</span>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Volume Chart */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                   <div className="mb-4">
@@ -463,12 +554,14 @@ export default function Analytics() {
                       <h2 className="text-2xl font-bold text-white">Volume Over Time ({timeRanges.find(r => r.id === timeRange)?.name})</h2>
                     </div>
                     {generateTimeSeriesData.length > 0 && (
-                      <div className={`${analytics?.source === 'historical' ? 'bg-green-500/10 border-green-500/30' : 'bg-yellow-500/10 border-yellow-500/30'} rounded-lg p-3 mb-4`}>
-                        <p className={`text-sm ${analytics?.source === 'historical' ? 'text-green-300' : 'text-yellow-300'}`}>
-                          <span className="font-semibold">{analytics?.source === 'historical' ? '✅ Historical Data:' : '⚠️ Estimated Data:'}</span> {
-                            analytics?.source === 'historical' 
-                              ? 'This chart shows actual historical volume data from the backend API.' 
-                              : 'This chart shows estimated volume projections based on current 24h volume from CoinGecko. Historical data will be available once the backend collects snapshots.'
+                      <div className={`${(analytics?.source === 'historical' || historicalVolumeData?.length) ? 'bg-green-500/10 border-green-500/30' : 'bg-yellow-500/10 border-yellow-500/30'} rounded-lg p-3 mb-4`}>
+                        <p className={`text-sm ${(analytics?.source === 'historical' || historicalVolumeData?.length) ? 'text-green-300' : 'text-yellow-300'}`}>
+                          <span className="font-semibold">{(analytics?.source === 'historical' || historicalVolumeData?.length) ? '✅ Historical Data:' : '⚠️ Estimated Data:'}</span> {
+                            analytics?.source === 'historical'
+                              ? 'This chart shows actual historical volume data from the backend API.'
+                              : historicalVolumeData?.length
+                                ? 'This chart shows Bitcoin trading volume from CoinGecko (proxy for market volume).'
+                                : 'This chart shows estimated volume projections based on current 24h volume from CoinGecko.'
                           }
                         </p>
                       </div>
