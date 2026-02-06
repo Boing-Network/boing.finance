@@ -5,6 +5,9 @@ import { Helmet } from 'react-helmet-async';
 import { LineChart, Line, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import coingeckoService from '../services/coingeckoService';
 import theGraphService from '../services/theGraphService';
+import { getDexVolumeChart } from '../services/defillamaService';
+import { getDexVolume24h } from '../services/geckoterminalService';
+import { getCryptoNews } from '../services/newsService';
 import { exportAnalytics } from '../utils/exportData';
 import { getPricePrediction } from '../utils/predictiveAnalytics';
 import { ChartSkeleton, AnalyticsCardSkeleton } from '../components/SkeletonLoader';
@@ -104,12 +107,14 @@ export default function Analytics() {
     return networkMap[chainId] || 'ethereum';
   };
 
-  // Fetch trending NFT collections (CoinGecko - optional, may require Pro)
+  // Fetch trending NFT collections (CoinGecko - requires Pro API for /nfts/markets; 401 on free tier)
+  const hasCoinGeckoPro = !!process.env.REACT_APP_COINGECKO_API_KEY;
   const { data: trendingNfts = [] } = useQuery({
     queryKey: ['trending-nfts'],
     queryFn: () => coingeckoService.getNftMarkets(8),
     staleTime: 300000,
-    retry: 1
+    retry: 0,
+    enabled: hasCoinGeckoPro,
   });
 
   // Fetch trending tokens - Combined CoinGecko + The Graph
@@ -212,7 +217,27 @@ export default function Analytics() {
     refetchInterval: 300000, // 5 min
   });
 
-  // Fetch historical volume from CoinGecko (Bitcoin as proxy for market)
+  // DefiLlama: reliable DEX volume (primary source, with retry + cache in service)
+  const { data: defiLlamaVolumeData, isFetched: defiLlamaFetched } = useQuery({
+    queryKey: ['defillama-dex-volume', timeRange],
+    queryFn: () => getDexVolumeChart(timeRange),
+    refetchInterval: 300000, // 5 min
+    staleTime: 120000,
+    retry: 2,
+    retryDelay: 1500,
+  });
+
+  // Second DEX source: GeckoTerminal 24h volume (for fallback + cross-check)
+  const { data: geckoTerminalVolume } = useQuery({
+    queryKey: ['geckoterminal-dex-volume24h'],
+    queryFn: getDexVolume24h,
+    refetchInterval: 300000,
+    staleTime: 120000,
+    retry: 2,
+    retryDelay: 1500,
+  });
+
+  // Fallback: CoinGecko Bitcoin volume - ONLY when DefiLlama unavailable (reduces 429 rate limits)
   const { data: historicalVolumeData } = useQuery({
     queryKey: ['historical-volume', timeRange],
     queryFn: async () => {
@@ -223,6 +248,9 @@ export default function Analytics() {
       return chart.total_volumes.map(([ts, vol]) => ({ timestamp: ts, volume: vol }));
     },
     refetchInterval: 300000,
+    retry: 1,
+    retryDelay: 5000, // Longer delay on retry to avoid 429
+    enabled: defiLlamaFetched && (!defiLlamaVolumeData || defiLlamaVolumeData.length === 0),
   });
 
   // Fetch market data - React Query v5 API
@@ -245,19 +273,34 @@ export default function Analytics() {
     refetchInterval: 60000, // Refetch every minute
   });
 
+  // Crypto/DeFi news (NewsAPI.org - only when REACT_APP_NEWSAPI_KEY is set)
+  const hasNewsApiKey = !!process.env.REACT_APP_NEWSAPI_KEY;
+  const { data: cryptoNews } = useQuery({
+    queryKey: ['crypto-news'],
+    queryFn: () => getCryptoNews({ pageSize: 8, sortBy: 'publishedAt' }),
+    staleTime: 10 * 60 * 1000, // 10 min
+    refetchInterval: 10 * 60 * 1000,
+    retry: 1,
+    enabled: hasNewsApiKey,
+  });
+
   // Platform activity (backend analytics dashboard - same worker, /analytics path)
   const analyticsBase = config?.apiUrl ? new URL(config.apiUrl).origin : '';
   const { data: dashboardStats } = useQuery({
     queryKey: ['analytics-dashboard', timeRange],
     queryFn: async () => {
       if (!analyticsBase) return null;
-      const res = await fetch(`${analyticsBase}/analytics/dashboard?timeRange=${timeRange}`, {
-        headers: { 'Content-Type': 'application/json' },
-        signal: AbortSignal.timeout(8000),
-      });
-      if (!res.ok) return null;
-      const json = await res.json();
-      return json?.success && json?.data ? json.data : null;
+      try {
+        const res = await fetch(`${analyticsBase}/analytics/dashboard?timeRange=${timeRange}`, {
+          headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!res.ok) return null;
+        const json = await res.json().catch(() => null);
+        return json?.success && json?.data ? json.data : null;
+      } catch {
+        return null;
+      }
     },
     staleTime: 60000,
     retry: 0,
@@ -282,8 +325,11 @@ export default function Analytics() {
     { id: '1y', name: '1 Year' },
   ];
 
-  // Generate time-series data - use historical from CoinGecko when available
+  // Generate time-series data: DefiLlama (real DEX volume) first, then CoinGecko fallback. No synthetic data.
   const generateTimeSeriesData = useMemo(() => {
+    if (defiLlamaVolumeData?.length > 0) {
+      return defiLlamaVolumeData;
+    }
     if (historicalVolumeData?.length > 0) {
       const step = Math.max(1, Math.floor(historicalVolumeData.length / (timeRange === '24h' ? 24 : timeRange === '1y' ? 12 : 7)));
       return historicalVolumeData
@@ -298,63 +344,10 @@ export default function Analytics() {
           return { time: label, volume, timestamp };
         });
     }
-    if (!marketData?.data?.total_volume?.usd) return [];
+    return [];
+  }, [timeRange, defiLlamaVolumeData, historicalVolumeData]);
 
-    const baseVolume = marketData.data.total_volume.usd;
-    const now = Date.now();
-    let dataPoints = [];
-    let intervals = 0;
-    let intervalMs = 0;
-
-    switch (timeRange) {
-      case '24h':
-        intervals = 24;
-        intervalMs = 60 * 60 * 1000; // 1 hour
-        break;
-      case '7d':
-        intervals = 7;
-        intervalMs = 24 * 60 * 60 * 1000; // 1 day
-        break;
-      case '30d':
-        intervals = 30;
-        intervalMs = 24 * 60 * 60 * 1000; // 1 day
-        break;
-      case '1y':
-        intervals = 12;
-        intervalMs = 30 * 24 * 60 * 60 * 1000; // 1 month
-        break;
-      default:
-        intervals = 7;
-        intervalMs = 24 * 60 * 60 * 1000;
-    }
-
-    // Generate data points with realistic variation
-    for (let i = intervals; i >= 0; i--) {
-      const timestamp = now - (i * intervalMs);
-      const date = new Date(timestamp);
-      
-      // Create realistic volume variation (70% to 100% of current volume)
-      const variation = 0.7 + (Math.random() * 0.3);
-      const volume = baseVolume * variation * (1 - (i / intervals) * 0.2); // Gradual increase over time
-      
-      let label = '';
-      if (timeRange === '24h') {
-        label = date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
-      } else if (timeRange === '7d' || timeRange === '30d') {
-        label = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      } else {
-        label = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-      }
-
-      dataPoints.push({
-        time: label,
-        volume: volume,
-        timestamp: timestamp
-      });
-    }
-
-    return dataPoints;
-  }, [marketData, timeRange, historicalVolumeData]);
+  const volumeChartSource = defiLlamaVolumeData?.length ? 'defillama' : historicalVolumeData?.length ? 'coingecko' : null;
 
   return (
     <>
@@ -511,7 +504,7 @@ export default function Analytics() {
                   ) : (
                   <>
                   <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                    <MetricTooltip content="Total 24h trading volume across all cryptocurrencies. Source: DefiLlama (DEX) or CoinGecko (global market).">
+                    <MetricTooltip content="Total 24h trading volume. Sources: DefiLlama (DEX), GeckoTerminal (DEX sample), or CoinGecko (global). Data is cached and retried for reliability.">
                       <h3 className="text-lg font-semibold text-white mb-2 inline-flex items-center gap-1.5">
                         24h Volume
                         <span className="text-gray-500 cursor-help">ⓘ</span>
@@ -519,14 +512,17 @@ export default function Analytics() {
                     </MetricTooltip>
                     <p className="text-3xl font-bold text-blue-400">
                       {(() => {
-                        // Try backend analytics first, then CoinGecko market data
                         let volume = 0;
                         if (analytics?.totalVolume && parseFloat(analytics.totalVolume) > 0) {
                           volume = parseFloat(analytics.totalVolume);
+                        } else if (defiLlamaVolumeData?.length) {
+                          const last = defiLlamaVolumeData[defiLlamaVolumeData.length - 1];
+                          volume = last?.volume ?? 0;
+                        } else if (geckoTerminalVolume?.volume24h) {
+                          volume = geckoTerminalVolume.volume24h;
                         } else if (marketData?.data?.total_volume?.usd) {
                           volume = marketData.data.total_volume.usd;
                         }
-                        
                         if (volume === 0 || isNaN(volume)) return 'N/A';
                         if (volume >= 1e12) return `$${(volume / 1e12).toFixed(2)}T`;
                         if (volume >= 1e9) return `$${(volume / 1e9).toFixed(2)}B`;
@@ -537,7 +533,11 @@ export default function Analytics() {
                     <p className="text-sm text-gray-400 mt-2">
                       {analytics?.totalVolume && parseFloat(analytics.totalVolume) > 0 
                         ? 'DEX volume (backend API)' 
-                        : (marketData?.data?.total_volume?.usd ? 'Global crypto market (CoinGecko)' : 'Loading...')}
+                        : defiLlamaVolumeData?.length 
+                          ? (geckoTerminalVolume?.volume24h ? 'DEX volume (DefiLlama, cross-checked with GeckoTerminal)' : 'DEX volume (DefiLlama)')
+                          : geckoTerminalVolume?.volume24h 
+                            ? 'DEX volume sample (GeckoTerminal)' 
+                            : (marketData?.data?.total_volume?.usd ? 'Global crypto market (CoinGecko)' : 'Loading...')}
                     </p>
                   </div>
                   
@@ -613,6 +613,33 @@ export default function Analytics() {
                     <p className="text-gray-400 text-sm">
                       Live metrics will appear when market data is available. Use <strong>Refresh</strong> or switch to <strong>Market</strong> for global stats.
                     </p>
+                  </div>
+                )}
+
+                {/* Crypto News (NewsAPI.org) */}
+                {activeSection === 'overview' && cryptoNews?.articles?.length > 0 && (
+                  <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                    <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                      <span>📰</span> Crypto & DeFi News
+                    </h2>
+                    <p className="text-sm text-gray-400 mb-4">Latest headlines from NewsAPI.org. Updates every 10 minutes.</p>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {cryptoNews.articles.slice(0, 6).map((article, idx) => (
+                        <a
+                          key={idx}
+                          href={article.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block p-4 rounded-xl bg-gray-700/50 border border-gray-600 hover:border-blue-500/50 hover:bg-gray-700/70 transition-colors"
+                        >
+                          <p className="font-medium text-white line-clamp-2 mb-1">{article.title}</p>
+                          <p className="text-xs text-gray-400">
+                            {article.source} · {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : ''}
+                          </p>
+                        </a>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-3">Powered by NewsAPI.org</p>
                   </div>
                 )}
 
@@ -731,16 +758,16 @@ export default function Analytics() {
                         </button>
                       )}
                     </div>
-                    {generateTimeSeriesData.length > 0 && (
-                      <div className={`${(analytics?.source === 'historical' || historicalVolumeData?.length) ? 'bg-green-500/10 border-green-500/30' : 'bg-yellow-500/10 border-yellow-500/30'} rounded-lg p-3 mb-4`}>
-                        <p className={`text-sm ${(analytics?.source === 'historical' || historicalVolumeData?.length) ? 'text-green-300' : 'text-yellow-300'}`}>
-                          <span className="font-semibold">{(analytics?.source === 'historical' || historicalVolumeData?.length) ? '✅ Historical Data:' : '⚠️ Estimated Data:'}</span> {
-                            analytics?.source === 'historical'
-                              ? 'This chart shows actual historical volume data from the backend API.'
-                              : historicalVolumeData?.length
-                                ? 'This chart shows Bitcoin trading volume from CoinGecko (proxy for market volume).'
-                                : 'This chart shows estimated volume projections based on current 24h volume from CoinGecko.'
-                          }
+                    {generateTimeSeriesData.length > 0 && volumeChartSource && (
+                      <div className={`${volumeChartSource === 'defillama' ? 'bg-green-500/10 border-green-500/30' : 'bg-blue-500/10 border-blue-500/30'} rounded-lg p-3 mb-4`}>
+                        <p className={`text-sm ${volumeChartSource === 'defillama' ? 'text-green-300' : 'text-blue-300'}`}>
+                          <span className="font-semibold">{volumeChartSource === 'defillama' ? '✅ DefiLlama (DEX volume):' : '📊 CoinGecko (Bitcoin volume):'}</span>{' '}
+                          {volumeChartSource === 'defillama'
+                            ? 'Real aggregated DEX trading volume across chains. Source: api.llama.fi. Cached with retries for reliability.'
+                            : 'Fallback: Bitcoin trading volume from CoinGecko as market proxy.'}
+                          {volumeChartSource === 'defillama' && geckoTerminalVolume?.volume24h && (
+                            <span className="block mt-1 text-green-200/90">24h volume cross-checked with GeckoTerminal (second DEX source).</span>
+                          )}
                         </p>
                       </div>
                     )}
@@ -786,7 +813,7 @@ export default function Analytics() {
                   ) : (
                     <div className="h-[300px] flex flex-col items-center justify-center gap-3 text-center px-4">
                       <p className="text-gray-400">Volume data not available for this time range.</p>
-                      <p className="text-gray-500 text-sm">Historical data comes from CoinGecko; try another range or refresh.</p>
+                      <p className="text-gray-500 text-sm">We use DefiLlama (DEX volume) and CoinGecko as fallback. Try another range or refresh.</p>
                       <button
                         onClick={async () => {
                           await queryClient.invalidateQueries({ queryKey: ['analytics'] });

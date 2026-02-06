@@ -117,6 +117,128 @@ export const NETWORKS = {
     gasLimit: 30000000,
     isTestnet: true,
     priority: 9
+  },
+
+  // Additional networks (e.g. for Bridge) – add any new chain here for a single source of truth
+  804: {
+    name: 'PulseChain',
+    symbol: 'PLS',
+    rpcUrl: 'https://rpc.pulsechain.com',
+    explorer: 'https://scan.pulsechain.com',
+    chainId: 804,
+    nativeCurrency: { name: 'Pulse', symbol: 'PLS', decimals: 18 },
+    blockTime: 10,
+    gasLimit: 30000000,
+    isTestnet: false,
+    priority: 10
+  },
+  100: {
+    name: 'Gnosis Chain',
+    symbol: 'XDAI',
+    rpcUrl: 'https://rpc.gnosischain.com',
+    explorer: 'https://gnosisscan.io',
+    chainId: 100,
+    nativeCurrency: { name: 'xDAI', symbol: 'XDAI', decimals: 18 },
+    blockTime: 5,
+    gasLimit: 30000000,
+    isTestnet: false,
+    priority: 11
+  },
+  250: {
+    name: 'Fantom',
+    symbol: 'FTM',
+    rpcUrl: 'https://rpc.ftm.tools',
+    explorer: 'https://ftmscan.com',
+    chainId: 250,
+    nativeCurrency: { name: 'Fantom', symbol: 'FTM', decimals: 18 },
+    blockTime: 1,
+    gasLimit: 30000000,
+    isTestnet: false,
+    priority: 12
+  },
+  43114: {
+    name: 'Avalanche C-Chain',
+    symbol: 'AVAX',
+    rpcUrl: 'https://api.avax.network/ext/bc/C/rpc',
+    explorer: 'https://snowtrace.io',
+    chainId: 43114,
+    nativeCurrency: { name: 'Avalanche', symbol: 'AVAX', decimals: 18 },
+    blockTime: 2,
+    gasLimit: 30000000,
+    isTestnet: false,
+    priority: 13
+  },
+  59144: {
+    name: 'Linea',
+    symbol: 'ETH',
+    rpcUrl: 'https://rpc.linea.build',
+    explorer: 'https://lineascan.build',
+    chainId: 59144,
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    blockTime: 2,
+    gasLimit: 30000000,
+    isTestnet: false,
+    priority: 14
+  },
+  1101: {
+    name: 'Polygon zkEVM',
+    symbol: 'ETH',
+    rpcUrl: 'https://zkevm-rpc.com',
+    explorer: 'https://zkevm.polygonscan.com',
+    chainId: 1101,
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    blockTime: 2,
+    gasLimit: 30000000,
+    isTestnet: false,
+    priority: 15
+  },
+  324: {
+    name: 'zkSync Era',
+    symbol: 'ETH',
+    rpcUrl: 'https://mainnet.era.zksync.io',
+    explorer: 'https://explorer.zksync.io',
+    chainId: 324,
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    blockTime: 1,
+    gasLimit: 30000000,
+    isTestnet: false,
+    priority: 16
+  },
+  534352: {
+    name: 'Scroll',
+    symbol: 'ETH',
+    rpcUrl: 'https://rpc.scroll.io',
+    explorer: 'https://scrollscan.com',
+    chainId: 534352,
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    blockTime: 2,
+    gasLimit: 30000000,
+    isTestnet: false,
+    priority: 17
+  },
+  1284: {
+    name: 'Moonbeam',
+    symbol: 'GLMR',
+    rpcUrl: 'https://rpc.api.moonbeam.network',
+    explorer: 'https://moonbeam.moonscan.io',
+    chainId: 1284,
+    nativeCurrency: { name: 'Glimmer', symbol: 'GLMR', decimals: 18 },
+    blockTime: 12,
+    gasLimit: 30000000,
+    isTestnet: false,
+    priority: 18
+  },
+  1285: {
+    name: 'Moonriver',
+    symbol: 'MOVR',
+    rpcUrl: 'https://rpc.api.moonriver.moonbeam.network',
+    explorer: 'https://moonriver.moonscan.io',
+    chainId: 1285,
+    nativeCurrency: { name: 'Moonriver', symbol: 'MOVR', decimals: 18 },
+    blockTime: 12,
+    gasLimit: 30000000,
+    isTestnet: false,
+    priority: 19
   }
 };
 
@@ -157,8 +279,24 @@ export const getNetworkFeatures = (chainId) => {
 // Network categories for UI
 export const NETWORK_CATEGORIES = {
   major: [1, 137, 56], // Ethereum, Polygon, BSC
-  layer2: [8453], // Base
+  layer2: [42161, 10, 8453], // Arbitrum, Optimism, Base
   testnets: [11155111, 80001, 97] // All testnets
+};
+
+/**
+ * Returns params for wallet_addEthereumChain (add network to wallet).
+ * Use this as the single source when prompting users to add a new chain.
+ */
+export const getWalletAddChainParams = (chainId) => {
+  const net = getNetworkByChainId(chainId);
+  if (!net || !net.rpcUrl) return null;
+  return {
+    chainId: `0x${Number(chainId).toString(16)}`,
+    chainName: net.name,
+    nativeCurrency: net.nativeCurrency || { name: net.symbol || 'ETH', symbol: net.symbol || 'ETH', decimals: 18 },
+    rpcUrls: [net.rpcUrl],
+    blockExplorerUrls: net.explorer ? [net.explorer] : []
+  };
 };
 
 // Validation function to check if all networks are properly configured

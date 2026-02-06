@@ -273,6 +273,8 @@ export class AnalyticsRepository {
         return `AND timestamp > datetime('now', '-7 days')`;
       case '30d':
         return `AND timestamp > datetime('now', '-30 days')`;
+      case '1y':
+        return `AND timestamp > datetime('now', '-365 days')`;
       default:
         return `AND timestamp > datetime('now', '-1 day')`;
     }

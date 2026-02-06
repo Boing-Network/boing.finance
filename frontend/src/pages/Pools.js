@@ -13,6 +13,7 @@ import {
   getPoolAnalytics
 } from '../services/poolService';
 import { useBlockchainPools } from '../hooks/useBlockchainPools';
+import { getNetworkByChainId } from '../config/networks';
 
 // Pool Card Component
 const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveLiquidity }) => {
@@ -71,15 +72,8 @@ const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveL
   };
 
   const getChainColor = (chainId) => {
-    switch (chainId) {
-      case 1: return 'bg-blue-500';
-      case 137: return 'bg-purple-500';
-      case 56: return 'bg-yellow-500';
-      case 42161: return 'bg-blue-600';
-      case 10: return 'bg-red-500';
-      case 11155111: return 'bg-gray-500';
-      default: return 'bg-gray-500';
-    }
+    const colors = { 1: 'bg-blue-500', 137: 'bg-purple-500', 56: 'bg-yellow-500', 42161: 'bg-blue-600', 10: 'bg-red-500', 8453: 'bg-indigo-500', 11155111: 'bg-gray-500' };
+    return colors[chainId] || 'bg-gray-500';
   };
 
   return (
@@ -568,28 +562,10 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
     onViewDetails(pool);
   };
 
-  const getChainName = (chainId) => {
-    switch (chainId) {
-      case 1: return 'Ethereum';
-      case 137: return 'Polygon';
-      case 56: return 'BSC';
-      case 42161: return 'Arbitrum';
-      case 10: return 'Optimism';
-      case 11155111: return 'Sepolia';
-      default: return `Chain ${chainId}`;
-    }
-  };
-
-  const getChainColor = (chainId) => {
-    switch (chainId) {
-      case 1: return 'bg-blue-500';
-      case 137: return 'bg-purple-500';
-      case 56: return 'bg-yellow-500';
-      case 42161: return 'bg-blue-600';
-      case 10: return 'bg-red-500';
-      case 11155111: return 'bg-gray-500';
-      default: return 'bg-gray-500';
-    }
+  const getChainNameForTable = (chainId) => getNetworkByChainId(chainId)?.name || `Chain ${chainId}`;
+  const getChainColorForTable = (chainId) => {
+    const colors = { 1: 'bg-blue-500', 137: 'bg-purple-500', 56: 'bg-yellow-500', 42161: 'bg-blue-600', 10: 'bg-red-500', 8453: 'bg-indigo-500', 11155111: 'bg-gray-500' };
+    return colors[chainId] || 'bg-gray-500';
   };
 
   if (!pools || pools.length === 0) {
@@ -648,8 +624,8 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
                       </span>
                     </div>
                     <div className="flex items-center space-x-2 mt-1">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getChainColor(pool.chainId)} text-white group-hover:shadow-md transition-shadow duration-200`}>
-                        {getChainName(pool.chainId)}
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getChainColorForTable(pool.chainId)} text-white group-hover:shadow-md transition-shadow duration-200`}>
+                        {getChainNameForTable(pool.chainId)}
                       </span>
                       {pool.source && (
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${

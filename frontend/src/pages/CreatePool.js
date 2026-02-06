@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { ethers } from 'ethers';
 import DEXFactoryABI from '../artifacts/DEXFactory.json';
 import { getContractAddress, CONTRACTS } from '../config/contracts';
+import { DexFeatureBanner } from '../components/NetworkSupportBanner';
 
 
 
@@ -52,7 +53,7 @@ function ToggleButton({ enabled, onToggle, disabled, size = "md" }) {
 
 function CreatePool() {
   const { isConnected, account, connectWallet } = useWalletConnection();
-  const { chainId } = useWallet();
+  const { chainId, switchNetwork } = useWallet();
   
   // Add CSS for range slider
   useEffect(() => {
@@ -1265,6 +1266,7 @@ function CreatePool() {
       <div className="relative min-h-screen">
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">
+            <DexFeatureBanner featureLabel="Create Pool" currentChainId={chainId} onSwitchNetwork={switchNetwork} />
             {/* Header */}
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold text-white mb-4">Create Liquidity Pool</h1>
