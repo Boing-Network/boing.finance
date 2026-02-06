@@ -103,7 +103,7 @@ npm run deploy:sepolia
    - `CLOUDFLARE_API_TOKEN` - Get from [Cloudflare Dashboard](https://dash.cloudflare.com/profile/api-tokens)
    - `CLOUDFLARE_ACCOUNT_ID` - Found in Cloudflare Dashboard sidebar
 
-2. See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed setup instructions.
+2. See [docs/deployment.md](./docs/deployment.md) for detailed setup instructions.
 
 **Workflows:**
 - `.github/workflows/deploy-backend.yml` - Deploys Workers
@@ -185,6 +185,20 @@ cd frontend
 npm run build:prod  # or build:staging
 wrangler pages deploy build --project-name=boing-finance-prod
 ```
+
+## 📚 Documentation
+
+All project documentation lives in the **[docs](./docs)** folder:
+
+| Document | Description |
+|----------|-------------|
+| [deployment.md](./docs/deployment.md) | Cloudflare Workers/Pages deploy, production config, troubleshooting |
+| [configuration.md](./docs/configuration.md) | Environment variables, API keys (NewsAPI, etc.) |
+| [contracts.md](./docs/contracts.md) | Smart contract deployment requirements |
+| [contract-registry.md](./docs/contract-registry.md) | Deployed contract addresses and verification links per network |
+| [product-roadmap.md](./docs/product-roadmap.md) | Roadmap, UX ideas, NFT plans, AI integration |
+| [boing-tokenomics.md](./docs/boing-tokenomics.md) | BOING token economics and distribution |
+| [adding-a-network.md](./docs/adding-a-network.md) | How to add a new blockchain network (single-point config) |
 
 ## 🔧 Configuration
 

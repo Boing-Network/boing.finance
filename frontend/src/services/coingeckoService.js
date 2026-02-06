@@ -1,5 +1,8 @@
 // CoinGecko API Service
 // Free tier: 50 calls/minute, no API key needed for basic usage
+// Uses shared apiClient for market chart (retry + cache) when available for reliability.
+
+import { cachedFetch } from '../utils/apiClient';
 
 const COINGECKO_API_BASE = 'https://api.coingecko.com/api/v3';
 const COINGECKO_API_KEY = process.env.REACT_APP_COINGECKO_API_KEY;
@@ -144,7 +147,7 @@ class CoinGeckoService {
     }
   }
 
-  // Get market chart (prices + volumes) by coin ID - for historical charts
+  // Get market chart (prices + volumes) by coin ID - for historical charts (with retry + cache)
   async getMarketChartByCoinId(coinId, days = 7) {
     const cacheKey = `market_chart_${coinId}_${days}`;
     const cached = this.cache.get(cacheKey);
@@ -152,13 +155,10 @@ class CoinGeckoService {
       return cached.data;
     }
     try {
-      const response = await fetch(
-        this.getApiUrl(`/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`)
-      );
-      if (!response.ok) return null;
-      const data = await response.json();
-      this.cache.set(cacheKey, { data, timestamp: Date.now() });
-      return data;
+      const url = this.getApiUrl(`/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`);
+      const data = await cachedFetch(url, {}, { ttlMs: 5 * 60 * 1000, retries: 2 });
+      if (data) this.cache.set(cacheKey, { data, timestamp: Date.now() });
+      return data ?? null;
     } catch (error) {
       console.error('Error fetching market chart:', error);
       return null;

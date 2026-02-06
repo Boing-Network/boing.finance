@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 import { getApiUrl } from '../config';
+import { getSupportedNetworks } from '../config/networks';
 import TokenManagementModal from '../components/TokenManagementModal';
 import EmptyState from '../components/EmptyState';
 
@@ -29,25 +30,17 @@ export default function Bridge() {
   const [estimatedTime, setEstimatedTime] = useState('5-10 minutes');
   const [bridgeRoute, setBridgeRoute] = useState(null);
 
-  // Supported networks for bridging
-  const supportedNetworks = useMemo(() => [
-    { id: 1, name: 'Ethereum', symbol: 'ETH', icon: '🔵', rpcUrl: 'https://mainnet.infura.io/v3/your-key' },
-    { id: 137, name: 'Polygon', symbol: 'MATIC', icon: '🟣', rpcUrl: 'https://polygon-rpc.com' },
-    { id: 56, name: 'BSC', symbol: 'BNB', icon: '🟡', rpcUrl: 'https://bsc-dataseed.binance.org' },
-    { id: 42161, name: 'Arbitrum', symbol: 'ARB', icon: '🔴', rpcUrl: 'https://arb1.arbitrum.io/rpc' },
-    { id: 10, name: 'Optimism', symbol: 'OP', icon: '🟠', rpcUrl: 'https://mainnet.optimism.io' },
-    { id: 8453, name: 'Base', symbol: 'ETH', icon: '🔵', rpcUrl: 'https://mainnet.base.org' },
-    { id: 804, name: 'PulseChain', symbol: 'PLS', icon: '💜', rpcUrl: 'https://rpc.pulsechain.com' },
-    { id: 100, name: 'Gnosis Chain', symbol: 'XDAI', icon: '🟢', rpcUrl: 'https://rpc.gnosischain.com' },
-    { id: 250, name: 'Fantom', symbol: 'FTM', icon: '🔵', rpcUrl: 'https://rpc.ftm.tools' },
-    { id: 43114, name: 'Avalanche', symbol: 'AVAX', icon: '🔴', rpcUrl: 'https://api.avax.network/ext/bc/C/rpc' },
-    { id: 59144, name: 'Linea', symbol: 'ETH', icon: '🟣', rpcUrl: 'https://rpc.linea.build' },
-    { id: 1101, name: 'Polygon zkEVM', symbol: 'ETH', icon: '🟣', rpcUrl: 'https://zkevm-rpc.com' },
-    { id: 324, name: 'zkSync Era', symbol: 'ETH', icon: '🔵', rpcUrl: 'https://mainnet.era.zksync.io' },
-    { id: 534352, name: 'Scroll', symbol: 'ETH', icon: '🟢', rpcUrl: 'https://rpc.scroll.io' },
-    { id: 1284, name: 'Moonbeam', symbol: 'GLMR', icon: '🌙', rpcUrl: 'https://rpc.api.moonbeam.network' },
-    { id: 1285, name: 'Moonriver', symbol: 'MOVR', icon: '🌙', rpcUrl: 'https://rpc.api.moonriver.moonbeam.network' }
-  ], []);
+  // Supported networks from central config (config/networks.js) – add new chains there
+  const supportedNetworks = useMemo(() =>
+    getSupportedNetworks().map((n) => ({
+      id: n.chainId,
+      name: n.name,
+      symbol: n.symbol,
+      icon: '🔗',
+      rpcUrl: n.rpcUrl
+    })),
+    []
+  );
 
   // Load tokens from API
   useEffect(() => {

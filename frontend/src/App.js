@@ -91,21 +91,21 @@ function PageTransitionRoutes() {
     <div key={location.pathname} className="page-transition-enter">
       <Routes location={location}>
         <Route path="/" element={<Home />} />
-        <Route path="/swap" element={<ComingSoon featureName="Swap" />} />
-        <Route path="/pools" element={<ComingSoon featureName="Pools" />} />
-        <Route path="/liquidity" element={<ComingSoon featureName="Liquidity" />} />
+        <Route path="/swap" element={<Swap />} />
+        <Route path="/pools" element={<Pools />} />
+        <Route path="/liquidity" element={<Liquidity />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/activity" element={<Activity />} />
-        <Route path="/bridge" element={<ComingSoon featureName="Bridge" />} />
-        <Route path="/tokens" element={<ComingSoon featureName="Tokens" />} />
-        <Route path="/watchlist" element={<ComingSoon featureName="Watchlist" />} />
+        <Route path="/bridge" element={<Bridge />} />
+        <Route path="/tokens" element={<Tokens />} />
+        <Route path="/watchlist" element={<Watchlist />} />
         <Route path="/docs" element={<Docs />} />
         <Route path="/developer-tools" element={<DeveloperTools />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/deploy-token" element={<DeployToken />} />
         <Route path="/create-nft" element={<CreateNFT />} />
-        <Route path="/create-pool" element={<ComingSoon featureName="Create Pool" />} />
+        <Route path="/create-pool" element={<CreatePool />} />
         <Route path="/whitepaper" element={<Whitepaper />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />

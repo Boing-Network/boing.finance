@@ -7,6 +7,8 @@ import config from '../config';
 import SettingsModal from '../components/SettingsModal';
 import { useWallet } from '../contexts/WalletContext';
 import { Helmet } from 'react-helmet-async';
+import { getNetworkByChainId } from '../config/networks';
+import { DexFeatureBanner } from '../components/NetworkSupportBanner';
 
 // Helper function to get API URL
 const getApiUrl = () => {
@@ -15,6 +17,7 @@ const getApiUrl = () => {
 
 const Liquidity = () => {
   const { isConnected, account } = useWalletConnection();
+  const { chainId, switchNetwork } = useWallet();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settings, setSettings] = useState(() => {
     const saved = localStorage.getItem('swapSettings');
@@ -78,14 +81,7 @@ const Liquidity = () => {
     return num.toFixed(2);
   };
 
-  const getChainName = (chainId) => {
-    switch (chainId) {
-      case '1': return 'Ethereum';
-      case '137': return 'Polygon';
-      case '56': return 'BSC';
-      default: return 'Unknown';
-    }
-  };
+  const getChainName = (id) => getNetworkByChainId(id)?.name || (typeof id === 'string' ? id : `Chain ${id}`);
 
   const handleCollectFees = (positionId) => {
     toast.success('Fees collected successfully!');
@@ -155,6 +151,7 @@ const Liquidity = () => {
       </Helmet>
       <div className="relative min-h-screen">{/* Main Content Container */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <DexFeatureBanner featureLabel="Liquidity" currentChainId={chainId} onSwitchNetwork={switchNetwork} />
           {/* Header */}
           <div className="text-center mb-6 sm:mb-8">
             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 sm:mb-4">
