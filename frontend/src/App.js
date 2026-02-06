@@ -25,6 +25,10 @@ import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
 import OnboardingTour from './components/OnboardingTour';
 import OnboardingChecklist from './components/OnboardingChecklist';
+import ForYouSection from './components/ForYouSection';
+import ProactiveTipsBanner from './components/ProactiveTipsBanner';
+import DeFi101Modal from './components/DeFi101Modal';
+import BoingMascot from './components/BoingMascot';
 import priceAlertService from './services/priceAlertService';
 import './styles/globals.css';
 
@@ -127,6 +131,7 @@ function AppContent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [aiChatOpen, setAiChatOpen] = useState(false);
+  const [defi101Open, setDefi101Open] = useState(false);
   const [tradingDropdownOpen, setTradingDropdownOpen] = useState(false);
   const [analyticsDropdownOpen, setAnalyticsDropdownOpen] = useState(false);
   const [deploymentDropdownOpen, setDeploymentDropdownOpen] = useState(false);
@@ -164,6 +169,7 @@ function AppContent() {
         setIsMenuOpen(false);
         setHistoryModalOpen(false);
         setAiChatOpen(false);
+        setDefi101Open(false);
         setTradingDropdownOpen(false);
         setAnalyticsDropdownOpen(false);
         setDeploymentDropdownOpen(false);
@@ -287,6 +293,19 @@ function AppContent() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </button>
+                <button
+                  onClick={() => setDefi101Open(true)}
+                  className="p-2 rounded-md transition-all duration-200 hover:bg-cyan-500/10"
+                  style={{ color: 'var(--text-secondary)' }}
+                  onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+                  onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+                  aria-label="DeFi 101"
+                  title="DeFi 101"
+                >
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </button>
               </div>
               
               {/* Wallet Group */}
@@ -367,6 +386,19 @@ function AppContent() {
                   >
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setDefi101Open(true)}
+                    className="p-1.5 rounded-md transition-all duration-200 hover:bg-cyan-500/10"
+                    style={{ color: 'var(--text-secondary)' }}
+                    onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+                    onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+                    aria-label="DeFi 101"
+                    title="DeFi 101"
+                  >
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
                   </button>
                 </div>
@@ -677,6 +709,7 @@ function AppContent() {
 
       {/* AI DeFi Assistant Modal */}
       <AIChatModal isOpen={aiChatOpen} onClose={() => setAiChatOpen(false)} />
+      <DeFi101Modal isOpen={defi101Open} onClose={() => setDefi101Open(false)} />
       
       <footer className="w-full border-t border-cyan-500/30 shadow-lg shadow-cyan-500/20 relative z-20" style={{
         backgroundColor: 'var(--bg-primary)',
@@ -1028,9 +1061,9 @@ function Home() {
             </p>
           </div>
 
-          {/* Floating Boing Astronaut Mascot */}
+          {/* Floating Boing Mascot (easter egg: click to bounce) */}
           <div className="absolute top-20 right-10 hidden lg:block">
-            <BoingAstronaut />
+            <BoingMascot />
           </div>
 
           {/* Feature Highlights Strip */}
@@ -1056,9 +1089,19 @@ function Home() {
             <p className="text-xl text-center max-w-2xl mb-2" style={{ color: 'var(--text-secondary)' }}>Fast, secure, and user-friendly DeFi for everyone.</p>
           </div>
 
-          {/* Onboarding Checklist */}
-          <div className="mt-6 mb-8 max-w-sm mx-auto fade-in delay-450">
-            <OnboardingChecklist />
+          {/* Onboarding Checklist + For You */}
+          <div className="mt-6 mb-8 flex flex-col sm:flex-row gap-6 justify-center items-start max-w-2xl mx-auto fade-in delay-450">
+            <div className="w-full sm:w-auto">
+              <OnboardingChecklist />
+            </div>
+            <div className="w-full sm:w-64 shrink-0">
+              <ForYouSection />
+            </div>
+          </div>
+
+          {/* Proactive Tips (when connected) */}
+          <div className="mb-6 max-w-2xl mx-auto fade-in delay-450">
+            <ProactiveTipsBanner />
           </div>
 
           {/* Features Section */}

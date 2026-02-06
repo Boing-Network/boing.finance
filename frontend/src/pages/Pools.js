@@ -15,6 +15,7 @@ import {
 import { useBlockchainPools } from '../hooks/useBlockchainPools';
 import { getNetworkByChainId } from '../config/networks';
 import { useAchievements } from '../contexts/AchievementContext';
+import ShareCardModal from '../components/ShareCardModal';
 
 // Pool Card Component
 const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveLiquidity }) => {
@@ -696,6 +697,8 @@ const Pools = () => {
   const [isSearching, setIsSearching] = useState(false); // Track if search is active
   const [searchPage, setSearchPage] = useState(1); // Search pagination
   const [searchLimit, setSearchLimit] = useState(50); // Initial search limit - increased from 10
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareData, setShareData] = useState(null);
   
   // Blockchain pools hook - hooks must be called unconditionally
   const blockchainPoolsHook = useBlockchainPools();
@@ -1449,7 +1452,21 @@ const Pools = () => {
         onAddLiquidity={handleAddLiquidity}
         onRemoveLiquidity={handleRemoveLiquidity}
         onCollectFees={handleCollectFees}
-        onLiquiditySuccess={() => recordAchievement?.(account, 'liquidity_add', 'first_liquidity')}
+        onLiquiditySuccess={() => {
+          recordAchievement?.(account, 'liquidity_add', 'first_liquidity');
+          if (selectedPool) {
+            const pair = `${selectedPool.token0?.symbol || ''}/${selectedPool.token1?.symbol || ''}`;
+            const chainName = getNetworkByChainId(selectedPool.chainId)?.name;
+            setShareData({ pair, chainName });
+            setShareModalOpen(true);
+          }
+        }}
+      />
+      <ShareCardModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        type="pool"
+        data={shareData}
       />
     </>
   );

@@ -117,9 +117,42 @@ export const shareViaNative = async (tokenData, customMessage = null) => {
  * Generates QR code data URL for token address
  */
 export const generateQRCode = async (text) => {
-  // Simple QR code generation using a library or API
-  // For now, return a URL to a QR code service
   const qrServiceUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(text)}`;
   return qrServiceUrl;
 };
 
+export const shareSwapOnTwitter = (data) => {
+  const { tokenIn, tokenOut, amountIn, amountOut } = data;
+  const text = `Just swapped ${amountIn} ${tokenIn} for ${amountOut} ${tokenOut} on @boing_finance 🔄\n\nTrade on boing.finance → https://boing.finance/swap`;
+  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank', 'width=550,height=420');
+};
+
+export const sharePoolOnTwitter = (data) => {
+  const { pair, chainName } = data;
+  const text = `Just added liquidity to ${pair} on @boing_finance 🏊\n\n${chainName || ''} → https://boing.finance/pools`;
+  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank', 'width=550,height=420');
+};
+
+export const shareDeployOnTwitter = (data) => {
+  const { name, symbol, address } = data;
+  const text = `Just deployed ${name} (${symbol}) on @boing_finance 🚀\n\n${address}\n\nhttps://boing.finance/tokens?address=${address}`;
+  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank', 'width=550,height=420');
+};
+
+export const copySwapShareText = async (data) => {
+  const { tokenIn, tokenOut, amountIn, amountOut } = data;
+  const text = `Just swapped ${amountIn} ${tokenIn} for ${amountOut} ${tokenOut} on boing.finance! https://boing.finance/swap`;
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch { return false; }
+};
+
+export const copyPoolShareText = async (data) => {
+  const { pair, chainName } = data;
+  const text = `Added liquidity to ${pair} on boing.finance ${chainName ? `(${chainName})` : ''}! https://boing.finance/pools`;
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch { return false; }
+};

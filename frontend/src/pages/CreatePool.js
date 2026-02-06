@@ -6,8 +6,10 @@ import toast from 'react-hot-toast';
 import { ethers } from 'ethers';
 import DEXFactoryABI from '../artifacts/DEXFactory.json';
 import { getContractAddress, CONTRACTS } from '../config/contracts';
+import { getNetworkByChainId } from '../config/networks';
 import { DexFeatureBanner } from '../components/NetworkSupportBanner';
 import { useAchievements } from '../contexts/AchievementContext';
+import ShareCardModal from '../components/ShareCardModal';
 
 
 
@@ -116,6 +118,8 @@ function CreatePool() {
   const [transactionHash, setTransactionHash] = useState('');
   const [transactionStatus, setTransactionStatus] = useState(''); // 'pending', 'success', 'error'
   const [transactionError, setTransactionError] = useState('');
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareData, setShareData] = useState(null);
 
 
   
@@ -878,7 +882,11 @@ function CreatePool() {
         // Show success message
         toast.success('Pool created successfully using fallback method!');
         setTransactionStatus('success');
-        
+        const fallbackPair = `${getToken0Symbol()}/${getToken1Symbol()}`;
+        const fallbackChainName = getNetworkByChainId(chainId)?.name;
+        setShareData({ pair: fallbackPair, chainName: fallbackChainName });
+        setShareModalOpen(true);
+
         // Reset form and return early
         setToken0('');
         setToken1('');
@@ -982,6 +990,11 @@ function CreatePool() {
       
       // Update transaction status
       setTransactionStatus('success');
+
+      const pair = `${getToken0Symbol()}/${getToken1Symbol()}`;
+      const chainName = getNetworkByChainId(chainId)?.name;
+      setShareData({ pair, chainName });
+      setShareModalOpen(true);
       
       // Show detailed success message with transaction hash
       toast.success(`Pool created successfully! Transaction: ${receipt.hash}`, {
@@ -1826,6 +1839,14 @@ function CreatePool() {
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
                       <span>Pool created successfully!</span>
+                      <button
+                        type="button"
+                        onClick={() => shareData && setShareModalOpen(true)}
+                        className="ml-3 px-3 py-1 rounded text-sm font-medium border"
+                        style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                      >
+                        Share
+                      </button>
                     </div>
                     {transactionHash && (
                       <div className="bg-gray-700 rounded p-3">
@@ -1870,6 +1891,12 @@ function CreatePool() {
           </div>
         </div>
       </div>
+      <ShareCardModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        type="pool"
+        data={shareData}
+      />
     </>
   );
 }
