@@ -28,6 +28,7 @@ import LaunchWizard from '../components/LaunchWizard';
 import FairLaunchChecklist from '../components/FairLaunchChecklist';
 import { deploymentHistory as deploymentHistoryUtil } from '../utils/deploymentHistory';
 import { notificationService, showToastWithNotification } from '../utils/notifications';
+import ShareCardModal from '../components/ShareCardModal';
 
 // Import ABI and bytecode from the artifacts
 const ERC20_ABI = AdvancedERC20Artifact.abi;
@@ -470,6 +471,8 @@ export default function DeployToken() {
   const [deploymentSteps, setDeploymentSteps] = useState([]);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [deploymentError, setDeploymentError] = useState(null);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareData, setShareData] = useState(null);
 
   // Get current network
   const network = getCurrentNetwork();
@@ -1144,6 +1147,8 @@ export default function DeployToken() {
           
           toast.success(`Token deployed successfully! Address: ${deployedAddress}`);
           recordAchievement?.(account, 'token_deploy', 'first_deploy');
+          setShareData({ name, symbol, address: deployedAddress });
+          setShareModalOpen(true);
 
           // Show browser notification if enabled
           const deploymentNotificationSettings2 = JSON.parse(localStorage.getItem('boing_notification_settings') || '{"deployments": true}');
@@ -1212,6 +1217,8 @@ export default function DeployToken() {
           
           toast.success(`Token deployed successfully! Address: ${deployedAddress}`);
           recordAchievement?.(account, 'token_deploy', 'first_deploy');
+          setShareData({ name, symbol, address: deployedAddress });
+          setShareModalOpen(true);
 
           // Show browser notification if enabled
           const deploymentNotificationSettings3 = JSON.parse(localStorage.getItem('boing_notification_settings') || '{"deployments": true}');
@@ -2244,6 +2251,12 @@ export default function DeployToken() {
           </div>
         </div>
       </div>
+      <ShareCardModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        type="deploy"
+        data={shareData}
+      />
     </>
   );
 }

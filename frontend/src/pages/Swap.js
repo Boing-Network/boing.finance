@@ -12,6 +12,9 @@ import { InfoTooltip, WarningTooltip } from '../components/Tooltip';
 import { transactionTrackingService } from '../services/transactionTrackingService.js';
 import externalSwapService from '../services/externalSwapService';
 import ExternalDEXQuotes from '../components/ExternalDEXQuotes';
+import ShareCardModal from '../components/ShareCardModal';
+import ProactiveTipsBanner from '../components/ProactiveTipsBanner';
+import TrendingPairs from '../components/TrendingPairs';
 
 
 const Swap = () => {
@@ -40,6 +43,8 @@ const Swap = () => {
   const [isSwapping, setIsSwapping] = useState(false);
   const [swapError, setSwapError] = useState('');
   const [swapSuccess, setSwapSuccess] = useState('');
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareData, setShareData] = useState(null);
 
   // External DEX state
   const [externalQuotes, setExternalQuotes] = useState([]);
@@ -772,6 +777,8 @@ const Swap = () => {
       setSwapSuccess(`Swap successful! Transaction hash: ${receipt.hash}`);
       toast.success('Swap completed successfully!');
       recordAchievement?.(account, 'swap', 'first_swap');
+      setShareData({ tokenIn, tokenOut, amountIn, amountOut });
+      setShareModalOpen(true);
 
       // Track the transaction in history
       try {
@@ -1696,6 +1703,8 @@ const Swap = () => {
       toast.success(`Swap executed on ${selectedExternalQuote.dexName}!`);
       setSwapSuccess(`Swap successful on ${selectedExternalQuote.dexName}! Transaction: ${result.txHash}`);
       recordAchievement?.(account, 'swap', 'first_swap');
+      setShareData({ tokenIn, tokenOut, amountIn, amountOut });
+      setShareModalOpen(true);
 
       // Clear form
       setAmountIn('');
@@ -1774,9 +1783,9 @@ const Swap = () => {
         />
         
         {/* Main Content Container */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           {/* Header */}
-          <div className="text-center mb-6 sm:mb-8">
+          <div className="text-center mb-4 sm:mb-6">
             <h1 className="text-3xl sm:text-4xl font-bold text-theme-primary mb-2 sm:mb-4">
               Swap Tokens
             </h1>
@@ -1784,6 +1793,14 @@ const Swap = () => {
               Trade tokens instantly with the best rates across multiple networks
             </p>
           </div>
+
+          <div className="mb-4">
+            <ProactiveTipsBanner />
+          </div>
+
+          {/* Swap Interface + Sidebar */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
 
           {/* Swap Interface */}
           <div className="rounded-xl p-4 sm:p-6 shadow-lg mb-4 sm:mb-6" style={{
@@ -2205,12 +2222,33 @@ const Swap = () => {
               {swapSuccess && (
                 <div className="mt-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg text-green-400 text-sm text-center">
                   {swapSuccess}
+                  <button
+                    type="button"
+                    onClick={() => shareData && setShareModalOpen(true)}
+                    className="block mt-2 mx-auto px-4 py-2 rounded-lg text-sm font-medium border transition-colors"
+                    style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                  >
+                    Share
+                  </button>
                 </div>
               )}
             </div>
           </div>
+          </div>
+
+          {/* Sidebar - Trending Pairs */}
+          <div className="hidden lg:block">
+            <TrendingPairs />
+          </div>
+          </div>
         </div>
       </div>
+      <ShareCardModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        type="swap"
+        data={shareData}
+      />
     </>
   );
 };
