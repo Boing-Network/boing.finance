@@ -6,6 +6,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './i18n'; // Initialize i18n
 import { WalletProvider } from './contexts/WalletContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { AchievementProvider } from './contexts/AchievementContext';
+import AchievementOverlay from './components/AchievementOverlay';
+import AchievementPanel from './components/AchievementPanel';
 import { useWalletConnection } from './hooks/useWalletConnection';
 import BaseMiniAppWrapper from './components/BaseMiniAppWrapper';
 import BaseNetworkOptimizer from './components/BaseNetworkOptimizer';
@@ -23,7 +26,6 @@ import LoadingSpinner from './components/LoadingSpinner';
 import OnboardingTour from './components/OnboardingTour';
 import OnboardingChecklist from './components/OnboardingChecklist';
 import priceAlertService from './services/priceAlertService';
-import ComingSoon from './components/ComingSoon';
 import './styles/globals.css';
 
 // Lazy load all page components for code splitting
@@ -367,6 +369,9 @@ function AppContent() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </button>
+                </div>
+                <div className="hidden lg:flex items-center gap-2">
+                  <AchievementPanel compact />
                 </div>
                 <div className="flex items-center space-x-1.5">
                   <NetworkSelector />
@@ -838,6 +843,8 @@ function App() {
         <HelmetProvider>
           <ThemeProvider>
             <WalletProvider>
+              <AchievementProvider>
+                <AchievementOverlay />
               <BaseMiniAppWrapper>
                 <Router>
                   <Helmet>
@@ -875,6 +882,7 @@ function App() {
                   />
                 </Router>
               </BaseMiniAppWrapper>
+              </AchievementProvider>
             </WalletProvider>
           </ThemeProvider>
         </HelmetProvider>

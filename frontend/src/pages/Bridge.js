@@ -8,13 +8,15 @@ import { getApiUrl } from '../config';
 import { getSupportedNetworks } from '../config/networks';
 import TokenManagementModal from '../components/TokenManagementModal';
 import EmptyState from '../components/EmptyState';
+import { useAchievements } from '../contexts/AchievementContext';
 
 // Add AnimatedBackground and BoingAstronaut components
 
 export default function Bridge() {
   const { account } = useWalletConnection();
   const { network } = useNetwork();
-  
+  const { record: recordAchievement } = useAchievements() || {};
+
   // Bridge state
   const [amount, setAmount] = useState('');
   const [fromToken, setFromToken] = useState('ETH');
@@ -190,6 +192,7 @@ export default function Bridge() {
       setBridgeTransactions(prev => [newTransaction, ...prev]);
       
       toast.success('Bridge transaction initiated! Check your transaction history for updates.');
+      recordAchievement?.(account, 'bridge', 'first_bridge');
       setAmount('');
       
     } catch (error) {

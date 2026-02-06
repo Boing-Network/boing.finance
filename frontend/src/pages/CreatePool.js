@@ -7,6 +7,7 @@ import { ethers } from 'ethers';
 import DEXFactoryABI from '../artifacts/DEXFactory.json';
 import { getContractAddress, CONTRACTS } from '../config/contracts';
 import { DexFeatureBanner } from '../components/NetworkSupportBanner';
+import { useAchievements } from '../contexts/AchievementContext';
 
 
 
@@ -54,6 +55,7 @@ function ToggleButton({ enabled, onToggle, disabled, size = "md" }) {
 function CreatePool() {
   const { isConnected, account, connectWallet } = useWalletConnection();
   const { chainId, switchNetwork } = useWallet();
+  const { record: recordAchievement } = useAchievements() || {};
   
   // Add CSS for range slider
   useEffect(() => {
@@ -985,6 +987,7 @@ function CreatePool() {
       toast.success(`Pool created successfully! Transaction: ${receipt.hash}`, {
         duration: 10000
       });
+      recordAchievement?.(account, 'pool_create', 'first_pool');
       
       // If we don't have full receipt details, show a note
       if (!receipt.blockNumber || !receipt.gasUsed) {

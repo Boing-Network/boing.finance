@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { useWallet } from '../contexts/WalletContext';
+import { useAchievements } from '../contexts/AchievementContext';
 import toast from 'react-hot-toast';
 import { getNetworkByChainId } from '../config/networks';
 import AdvancedERC20Artifact from '../artifacts/AdvancedERC20.json';
@@ -409,7 +410,8 @@ export default function DeployToken() {
       }
     }
   }, [location]);
-  const { signer, isConnected, getCurrentNetwork } = useWallet();
+  const { signer, account, isConnected, getCurrentNetwork } = useWallet();
+  const { record: recordAchievement } = useAchievements() || {};
   const [name, setName] = useState('');
   const [symbol, setSymbol] = useState('');
   const [decimals, setDecimals] = useState(18);
@@ -1047,7 +1049,8 @@ export default function DeployToken() {
           });
           
           toast.success(`Token deployed successfully! Address: ${deployedAddress}`);
-          
+          recordAchievement?.(account, 'token_deploy', 'first_deploy');
+
           // Show browser notification if enabled
           const deploymentNotificationSettings1 = JSON.parse(localStorage.getItem('boing_notification_settings') || '{"deployments": true}');
           if (deploymentNotificationSettings1.deployments) {
@@ -1140,7 +1143,8 @@ export default function DeployToken() {
           const deployedContract = new ethers.Contract(deployedAddress, ERC20_ABI, signer);
           
           toast.success(`Token deployed successfully! Address: ${deployedAddress}`);
-          
+          recordAchievement?.(account, 'token_deploy', 'first_deploy');
+
           // Show browser notification if enabled
           const deploymentNotificationSettings2 = JSON.parse(localStorage.getItem('boing_notification_settings') || '{"deployments": true}');
           if (deploymentNotificationSettings2.deployments) {
@@ -1207,7 +1211,8 @@ export default function DeployToken() {
           localStorage.setItem('tokenDeployments', JSON.stringify(existingDeployments));
           
           toast.success(`Token deployed successfully! Address: ${deployedAddress}`);
-          
+          recordAchievement?.(account, 'token_deploy', 'first_deploy');
+
           // Show browser notification if enabled
           const deploymentNotificationSettings3 = JSON.parse(localStorage.getItem('boing_notification_settings') || '{"deployments": true}');
           if (deploymentNotificationSettings3.deployments) {

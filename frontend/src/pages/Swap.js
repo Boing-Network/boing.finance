@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { ethers } from 'ethers';
 import { useWallet } from '../contexts/WalletContext';
 import { useWalletConnection } from '../hooks/useWalletConnection';
+import { useAchievements } from '../contexts/AchievementContext';
 import { getContractAddress, getContractAddresses } from '../config/contracts';
 import { getNetworkByChainId } from '../config/networks';
 import SettingsModal from '../components/SettingsModal';
@@ -16,6 +17,7 @@ import ExternalDEXQuotes from '../components/ExternalDEXQuotes';
 const Swap = () => {
   const { isConnected, account } = useWalletConnection();
   const { chainId } = useWallet();
+  const { record: recordAchievement } = useAchievements() || {};
   
   // Swap state
   const [amountIn, setAmountIn] = useState('');
@@ -769,7 +771,8 @@ const Swap = () => {
       
       setSwapSuccess(`Swap successful! Transaction hash: ${receipt.hash}`);
       toast.success('Swap completed successfully!');
-      
+      recordAchievement?.(account, 'swap', 'first_swap');
+
       // Track the transaction in history
       try {
         await transactionTrackingService.trackSwapTransaction(
@@ -1692,6 +1695,7 @@ const Swap = () => {
 
       toast.success(`Swap executed on ${selectedExternalQuote.dexName}!`);
       setSwapSuccess(`Swap successful on ${selectedExternalQuote.dexName}! Transaction: ${result.txHash}`);
+      recordAchievement?.(account, 'swap', 'first_swap');
 
       // Clear form
       setAmountIn('');

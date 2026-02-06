@@ -14,6 +14,7 @@ import {
 } from '../services/poolService';
 import { useBlockchainPools } from '../hooks/useBlockchainPools';
 import { getNetworkByChainId } from '../config/networks';
+import { useAchievements } from '../contexts/AchievementContext';
 
 // Pool Card Component
 const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveLiquidity }) => {
@@ -208,7 +209,7 @@ const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveL
 };
 
 // Pool Details Modal
-const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiquidity, onCollectFees }) => {
+const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiquidity, onCollectFees, onLiquiditySuccess }) => {
   const [activeTab, setActiveTab] = useState('details'); // 'details', 'add', 'remove'
   const [token0Amount, setToken0Amount] = useState('');
   const [token1Amount, setToken1Amount] = useState('');
@@ -227,6 +228,7 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
     try {
       await onAddLiquidity(pool.address, token0Amount, token1Amount, pool.chainId);
       toast.success('Liquidity added successfully!');
+      onLiquiditySuccess?.();
       setToken0Amount('');
       setToken1Amount('');
       setActiveTab('details');
@@ -680,6 +682,7 @@ const Pools = () => {
   // Component rendering
   const { isConnected, account } = useWalletConnection();
   const { chainId } = useWallet();
+  const { record: recordAchievement } = useAchievements() || {};
   // Wallet state initialized
   const [activeTab, setActiveTab] = useState('all-pools');
   const [selectedPool, setSelectedPool] = useState(null);
@@ -1446,6 +1449,7 @@ const Pools = () => {
         onAddLiquidity={handleAddLiquidity}
         onRemoveLiquidity={handleRemoveLiquidity}
         onCollectFees={handleCollectFees}
+        onLiquiditySuccess={() => recordAchievement?.(account, 'liquidity_add', 'first_liquidity')}
       />
     </>
   );

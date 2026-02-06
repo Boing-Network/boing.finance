@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
 import { getPriceAlerts } from '../utils/priceAlerts';
+import { getUnlockedAchievements } from '../utils/achievements';
 
 const STORAGE_KEYS = {
   visitedPortfolio: 'boing_visited_portfolio',
@@ -19,13 +20,15 @@ const OnboardingChecklist = ({ compact = false }) => {
   });
   const [visitedPortfolio, setVisitedPortfolio] = useState(false);
   const [hasPriceAlert, setHasPriceAlert] = useState(false);
+  const [unlocked, setUnlocked] = useState([]);
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
     setVisitedPortfolio(localStorage.getItem(STORAGE_KEYS.visitedPortfolio) === 'true');
     setHasPriceAlert((getPriceAlerts() || []).length > 0);
-  }, [location.pathname, account]); // Recheck when route or account changes
+    setUnlocked(getUnlockedAchievements(account) || []);
+  }, [location.pathname, account]);
 
   useEffect(() => {
     if (location.pathname === '/portfolio') {
@@ -41,30 +44,35 @@ const OnboardingChecklist = ({ compact = false }) => {
   const step1Done = !!account;
   const step2Done = visitedPortfolio;
   const step3Done = hasPriceAlert;
-  const allDone = step1Done && step2Done && step3Done;
+  const stepSwapDone = unlocked.includes('first_swap');
+  const stepLiquidityDone = unlocked.includes('first_liquidity');
+  const stepDeployDone = unlocked.includes('first_deploy');
+  const coreDone = step1Done && step2Done && step3Done;
+  const allDone = coreDone && stepSwapDone && stepLiquidityDone && stepDeployDone;
 
   const handleDismiss = () => {
     localStorage.setItem(STORAGE_KEYS.checklistDismissed, 'true');
     setDismissed(true);
   };
 
-  const handleReset = () => {
-    localStorage.removeItem(STORAGE_KEYS.checklistDismissed);
-    setDismissed(false);
-  };
 
-  if (dismissed && allDone) return null;
+  if (dismissed && coreDone && !compact) return null;
 
   const steps = [
     { id: 1, label: 'Connect wallet', done: step1Done, action: () => connectWallet && connectWallet() },
     { id: 2, label: 'View portfolio', done: step2Done, action: () => navigate('/portfolio') },
-    { id: 3, label: 'Set price alert', done: step3Done, action: () => navigate('/tokens') }
+    { id: 3, label: 'Set price alert', done: step3Done, action: () => navigate('/tokens') },
+    { id: 4, label: 'First swap', done: stepSwapDone, action: () => navigate('/swap') },
+    { id: 5, label: 'Add liquidity', done: stepLiquidityDone, action: () => navigate('/pools') },
+    { id: 6, label: 'Deploy token', done: stepDeployDone, action: () => navigate('/deploy-token') }
   ];
+
+  const doneCount = steps.filter(s => s.done).length;
 
   if (compact) {
     return (
-      <div className="flex items-center gap-2 text-sm text-gray-400">
-        {steps.map(s => (
+      <div className="flex flex-wrap items-center gap-2 text-sm" style={{ color: 'var(--text-tertiary)' }}>
+        {steps.slice(0, 4).map(s => (
           <span key={s.id} className={s.done ? 'text-green-500' : ''} title={s.label}>
             {s.done ? '✓' : '○'} {s.label}
           </span>
@@ -81,7 +89,7 @@ const OnboardingChecklist = ({ compact = false }) => {
           className="text-white font-semibold flex items-center gap-2"
         >
           <span className="text-cyan-400">Getting Started</span>
-          <span className="text-gray-500 text-sm">{step1Done + step2Done + step3Done}/3</span>
+          <span className="text-gray-500 text-sm">{doneCount}/{steps.length}</span>
           <svg className={`w-4 h-4 transition-transform ${isCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
@@ -109,8 +117,10 @@ const OnboardingChecklist = ({ compact = false }) => {
               {s.done && <span className="text-green-500 text-xs">Done</span>}
             </div>
           ))}
-          {allDone && (
-            <p className="text-xs text-green-400 mt-2">All set! You can dismiss this checklist.</p>
+          {(coreDone || doneCount >= 4) && (
+            <p className="text-xs text-green-400 mt-2">
+              {allDone ? 'All set! You can dismiss this checklist.' : `${doneCount}/${steps.length} complete. Keep going!`}
+            </p>
           )}
         </div>
       )}
