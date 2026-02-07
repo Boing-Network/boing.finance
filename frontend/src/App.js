@@ -57,6 +57,7 @@ const Terms = lazy(() => import('./pages/Terms'));
 const Whitepaper = lazy(() => import('./pages/Whitepaper'));
 const ExecutiveSummary = lazy(() => import('./pages/ExecutiveSummary'));
 const Blog = lazy(() => import('./pages/Blog'));
+const ComingSoon = lazy(() => import('./components/ComingSoon'));
 
 // QueryClient will be created inside App component to avoid initialization issues
 
@@ -67,9 +68,7 @@ const comingSoon = {
 };
 
 // Navigation data with categories - explicit boolean flags for state management
-// TEMPORARILY ENABLED for testing (all nav links active except mainnet-only features)
 const createNavigation = () => Object.freeze({
-  home: Object.freeze({ name: 'Home', href: '/', icon: '🏠', isAvailable: true, comingSoon: false, testnetOnly: false }),
   trading: Object.freeze([
     Object.freeze({ name: 'Swap', href: '/swap', icon: '🔄', description: 'Trade tokens instantly', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Bridge', href: '/bridge', icon: '🌉', description: 'Cross-chain transfers', isAvailable: true, comingSoon: false, testnetOnly: false }),
@@ -85,6 +84,20 @@ const createNavigation = () => Object.freeze({
     Object.freeze({ name: 'Deploy Token', href: '/deploy-token', icon: '🚀', description: 'Create your own tokens', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Create NFT', href: '/create-nft', icon: '🖼️', description: 'Mint NFTs', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Create Pool', href: '/create-pool', icon: '🏊', description: 'Create liquidity pools', isAvailable: true, comingSoon: false, testnetOnly: false })
+  ]),
+  governance: Object.freeze([
+    Object.freeze({ name: 'Proposals', href: '/governance/proposals', icon: '📜', description: 'View and vote on proposals', isAvailable: true, comingSoon: true, testnetOnly: false }),
+    Object.freeze({ name: 'Vote', href: '/governance/vote', icon: '🗳️', description: 'Participate in governance', isAvailable: true, comingSoon: true, testnetOnly: false }),
+    Object.freeze({ name: 'Treasury', href: '/governance/treasury', icon: '🏦', description: 'DAO treasury overview', isAvailable: true, comingSoon: true, testnetOnly: false }),
+    Object.freeze({ name: 'Roadmap', href: '/governance/roadmap', icon: '🗺️', description: 'Governance roadmap', isAvailable: true, comingSoon: true, testnetOnly: false }),
+    Object.freeze({ name: 'Community', href: '/governance/community', icon: '👥', description: 'Forum & social links', isAvailable: true, comingSoon: true, testnetOnly: false }),
+    Object.freeze({ name: 'How it works', href: '/governance/learn', icon: '📖', description: 'Governance guide', isAvailable: true, comingSoon: true, testnetOnly: false })
+  ]),
+  boing: Object.freeze([
+    Object.freeze({ name: 'NFT Staking', href: '/boing/staking', icon: '🎴', description: 'Stake Boing NFTs for rewards', isAvailable: true, comingSoon: true, testnetOnly: false }),
+    Object.freeze({ name: 'Points', href: '/boing/points', icon: '⭐', description: 'Boing points & rewards', isAvailable: true, comingSoon: true, testnetOnly: false }),
+    Object.freeze({ name: 'Roadmap', href: '/boing/roadmap', icon: '🚀', description: 'Boing community roadmap', isAvailable: true, comingSoon: true, testnetOnly: false }),
+    Object.freeze({ name: 'Activities', href: '/boing/activities', icon: '🎯', description: 'Community activities & events', isAvailable: true, comingSoon: true, testnetOnly: false })
   ])
 });
 
@@ -121,6 +134,18 @@ function PageTransitionRoutes() {
         <Route path="/status" element={<Status />} />
         <Route path="/bug-report" element={<BugReport />} />
         <Route path="/executive-summary" element={<ExecutiveSummary />} />
+        {/* Governance */}
+        <Route path="/governance/proposals" element={<ComingSoon featureName="Governance Proposals" />} />
+        <Route path="/governance/vote" element={<ComingSoon featureName="Governance Vote" />} />
+        <Route path="/governance/treasury" element={<ComingSoon featureName="DAO Treasury" />} />
+        <Route path="/governance/roadmap" element={<ComingSoon featureName="Governance Roadmap" />} />
+        <Route path="/governance/community" element={<ComingSoon featureName="Governance Community" />} />
+        <Route path="/governance/learn" element={<ComingSoon featureName="How Governance Works" />} />
+        {/* BOING */}
+        <Route path="/boing/staking" element={<ComingSoon featureName="NFT Staking" />} />
+        <Route path="/boing/points" element={<ComingSoon featureName="Boing Points" />} />
+        <Route path="/boing/roadmap" element={<ComingSoon featureName="Boing Roadmap" />} />
+        <Route path="/boing/activities" element={<ComingSoon featureName="Community Activities" />} />
       </Routes>
     </div>
   );
@@ -135,7 +160,19 @@ function AppContent() {
   const [tradingDropdownOpen, setTradingDropdownOpen] = useState(false);
   const [analyticsDropdownOpen, setAnalyticsDropdownOpen] = useState(false);
   const [deploymentDropdownOpen, setDeploymentDropdownOpen] = useState(false);
+  const [governanceDropdownOpen, setGovernanceDropdownOpen] = useState(false);
+  const [boingDropdownOpen, setBoingDropdownOpen] = useState(false);
+  const [toolsDropdownOpen, setToolsDropdownOpen] = useState(false);
   const { account } = useWalletConnection();
+
+  const closeAllDropdowns = () => {
+    setTradingDropdownOpen(false);
+    setAnalyticsDropdownOpen(false);
+    setDeploymentDropdownOpen(false);
+    setGovernanceDropdownOpen(false);
+    setBoingDropdownOpen(false);
+    setToolsDropdownOpen(false);
+  };
   
   // Navigation is already frozen and immutable, no need to memoize
   // Using navigation directly ensures consistency
@@ -162,7 +199,7 @@ function AppContent() {
     setIsMenuOpen(false);
   };
 
-  // Keyboard shortcuts: Esc closes modals
+  // Keyboard shortcuts: Esc closes modals and dropdowns
   React.useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
@@ -170,9 +207,7 @@ function AppContent() {
         setHistoryModalOpen(false);
         setAiChatOpen(false);
         setDefi101Open(false);
-        setTradingDropdownOpen(false);
-        setAnalyticsDropdownOpen(false);
-        setDeploymentDropdownOpen(false);
+        closeAllDropdowns();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -204,211 +239,79 @@ function AppContent() {
             </div>
 
             {/* Desktop Navigation - Show on large screens and above */}
-            <div className="hidden lg:flex items-center justify-center flex-1">
-              <nav className="flex items-center space-x-1 xl:space-x-2">
-                {/* Home - Solo */}
-                <button
-                  onClick={() => window.location.href = memoizedNavigation.home.href}
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 hover:bg-cyan-500/10"
-                  style={{ 
-                    color: 'var(--text-secondary)',
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
-                  onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-                >
-                  <span className="text-lg">{memoizedNavigation.home.icon}</span>
-                  <span>{memoizedNavigation.home.name}</span>
-                </button>
-
-                {/* Trading Dropdown */}
-                <DropdownMenu
-                  label="Trading"
-                  items={memoizedNavigation.trading}
-                  isOpen={tradingDropdownOpen}
-                  onToggle={() => {
-                    setTradingDropdownOpen(!tradingDropdownOpen);
-                    setAnalyticsDropdownOpen(false);
-                    setDeploymentDropdownOpen(false);
-                  }}
+            <div className="hidden lg:flex items-center justify-center flex-1 min-w-0">
+              <nav className="flex items-center gap-0.5 xl:gap-1 flex-wrap justify-center">
+                <DropdownMenu label="Trading" items={memoizedNavigation.trading} isOpen={tradingDropdownOpen}
+                  onToggle={() => { const next = !tradingDropdownOpen; setAnalyticsDropdownOpen(false); setDeploymentDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setTradingDropdownOpen(next); }}
                   onClose={() => setTradingDropdownOpen(false)}
                 />
-
-                {/* Analytics Dropdown */}
-                <DropdownMenu
-                  label="Analytics"
-                  items={memoizedNavigation.analytics}
-                  isOpen={analyticsDropdownOpen}
-                  onToggle={() => {
-                    setAnalyticsDropdownOpen(!analyticsDropdownOpen);
-                    setTradingDropdownOpen(false);
-                    setDeploymentDropdownOpen(false);
-                  }}
+                <DropdownMenu label="Analytics" items={memoizedNavigation.analytics} isOpen={analyticsDropdownOpen}
+                  onToggle={() => { const next = !analyticsDropdownOpen; setTradingDropdownOpen(false); setDeploymentDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setAnalyticsDropdownOpen(next); }}
                   onClose={() => setAnalyticsDropdownOpen(false)}
                 />
-
-                {/* Deployment Dropdown */}
-                <DropdownMenu
-                  label="Deployment"
-                  items={memoizedNavigation.deployment}
-                  isOpen={deploymentDropdownOpen}
-                  onToggle={() => {
-                    setDeploymentDropdownOpen(!deploymentDropdownOpen);
-                    setTradingDropdownOpen(false);
-                    setAnalyticsDropdownOpen(false);
-                  }}
+                <DropdownMenu label="Deployment" items={memoizedNavigation.deployment} isOpen={deploymentDropdownOpen}
+                  onToggle={() => { const next = !deploymentDropdownOpen; setTradingDropdownOpen(false); setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setDeploymentDropdownOpen(next); }}
                   onClose={() => setDeploymentDropdownOpen(false)}
+                />
+                <DropdownMenu label="Governance" items={memoizedNavigation.governance} isOpen={governanceDropdownOpen}
+                  onToggle={() => { const next = !governanceDropdownOpen; setTradingDropdownOpen(false); setAnalyticsDropdownOpen(false); setDeploymentDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setGovernanceDropdownOpen(next); }}
+                  onClose={() => setGovernanceDropdownOpen(false)}
+                />
+                <DropdownMenu label="BOING" items={memoizedNavigation.boing} isOpen={boingDropdownOpen}
+                  onToggle={() => { const next = !boingDropdownOpen; setTradingDropdownOpen(false); setAnalyticsDropdownOpen(false); setDeploymentDropdownOpen(false); setGovernanceDropdownOpen(false); setToolsDropdownOpen(false); setBoingDropdownOpen(next); }}
+                  onClose={() => setBoingDropdownOpen(false)}
                 />
               </nav>
             </div>
 
-            {/* Desktop Wallet Controls - Show on large screens and above */}
-            <div className="hidden lg:flex items-center flex-shrink-0">
-              {/* Settings Group */}
-              <div className="flex items-center space-x-1 mr-4 pl-4 border-l" style={{ borderColor: 'var(--border-color)' }}>
-                <LanguageSelector />
-                <ThemeToggle />
-                <button
-                  onClick={() => setAiChatOpen(true)}
-                  className="p-2 rounded-md transition-all duration-200 hover:bg-cyan-500/10"
-                  style={{ color: 'var(--text-secondary)' }}
-                  onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
-                  onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-                  aria-label="AI DeFi Assistant"
-                  title="AI Assistant"
-                >
-                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => setHistoryModalOpen(true)}
-                  className="p-2 rounded-md transition-all duration-200 hover:bg-cyan-500/10"
-                  style={{ color: 'var(--text-secondary)' }}
-                  onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
-                  onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-                  aria-label="View transaction history"
-                  title="Transaction History"
-                >
-                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => setDefi101Open(true)}
-                  className="p-2 rounded-md transition-all duration-200 hover:bg-cyan-500/10"
-                  style={{ color: 'var(--text-secondary)' }}
-                  onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
-                  onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-                  aria-label="DeFi 101"
-                  title="DeFi 101"
-                >
-                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                </button>
-              </div>
-              
-              {/* Wallet Group */}
-              <div className="flex items-center space-x-2">
+            {/* Desktop Right: Tools dropdown + Wallet + Network */}
+            <div className="hidden lg:flex items-center flex-shrink-0 gap-2 pl-2">
+              <ToolsDropdown
+                isOpen={toolsDropdownOpen}
+                onToggle={() => { const next = !toolsDropdownOpen; setTradingDropdownOpen(false); setAnalyticsDropdownOpen(false); setDeploymentDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(next); }}
+                onClose={() => setToolsDropdownOpen(false)}
+                onOpenHistory={() => { setHistoryModalOpen(true); setToolsDropdownOpen(false); }}
+                onOpenAiChat={() => { setAiChatOpen(true); setToolsDropdownOpen(false); }}
+                onOpenDefi101={() => { setDefi101Open(true); setToolsDropdownOpen(false); }}
+              />
+              <div className="flex items-center gap-2 border-l pl-2" style={{ borderColor: 'var(--border-color)' }}>
                 <NetworkSelector />
                 <WalletConnect />
               </div>
             </div>
 
             {/* Medium Screen Navigation - Show on medium screens only (md to lg) */}
-            <div className="hidden md:flex lg:hidden items-center space-x-2 flex-shrink-0">
-              {/* Compact Navigation for Medium Screens */}
-              <nav className="flex items-center space-x-2 mr-2">
-                <button
-                  onClick={() => window.location.href = memoizedNavigation.home.href}
-                  className="text-theme-secondary hover:text-theme-primary px-2 py-2 rounded-md text-xs font-medium transition-colors"
-                >
-                  {memoizedNavigation.home.icon}
-                </button>
-                <DropdownMenu
-                  label="Trade"
-                  items={memoizedNavigation.trading}
-                  isOpen={tradingDropdownOpen}
-                  onToggle={() => {
-                    setTradingDropdownOpen(!tradingDropdownOpen);
-                    setAnalyticsDropdownOpen(false);
-                    setDeploymentDropdownOpen(false);
-                  }}
+            <div className="hidden md:flex lg:hidden items-center gap-1 flex-shrink-0">
+              <nav className="flex items-center gap-1 mr-1">
+                <DropdownMenu label="Trade" items={memoizedNavigation.trading} isOpen={tradingDropdownOpen}
+                  onToggle={() => { const next = !tradingDropdownOpen; setAnalyticsDropdownOpen(false); setDeploymentDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setTradingDropdownOpen(next); }}
                   onClose={() => setTradingDropdownOpen(false)}
                 />
-                <DropdownMenu
-                  label="Analytics"
-                  items={memoizedNavigation.analytics}
-                  isOpen={analyticsDropdownOpen}
-                  onToggle={() => {
-                    setAnalyticsDropdownOpen(!analyticsDropdownOpen);
-                    setTradingDropdownOpen(false);
-                    setDeploymentDropdownOpen(false);
-                  }}
+                <DropdownMenu label="Analytics" items={memoizedNavigation.analytics} isOpen={analyticsDropdownOpen}
+                  onToggle={() => { const next = !analyticsDropdownOpen; setTradingDropdownOpen(false); setDeploymentDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setAnalyticsDropdownOpen(next); }}
                   onClose={() => setAnalyticsDropdownOpen(false)}
                 />
-                <DropdownMenu
-                  label="Deployment"
-                  items={memoizedNavigation.deployment}
-                  isOpen={deploymentDropdownOpen}
-                  onToggle={() => {
-                    setDeploymentDropdownOpen(!deploymentDropdownOpen);
-                    setTradingDropdownOpen(false);
-                    setAnalyticsDropdownOpen(false);
-                  }}
+                <DropdownMenu label="Deploy" items={memoizedNavigation.deployment} isOpen={deploymentDropdownOpen}
+                  onToggle={() => { const next = !deploymentDropdownOpen; setTradingDropdownOpen(false); setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setDeploymentDropdownOpen(next); }}
                   onClose={() => setDeploymentDropdownOpen(false)}
                 />
+                <DropdownMenu label="Governance" items={memoizedNavigation.governance} isOpen={governanceDropdownOpen}
+                  onToggle={() => { const next = !governanceDropdownOpen; setTradingDropdownOpen(false); setAnalyticsDropdownOpen(false); setDeploymentDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setGovernanceDropdownOpen(next); }}
+                  onClose={() => setGovernanceDropdownOpen(false)}
+                />
+                <DropdownMenu label="BOING" items={memoizedNavigation.boing} isOpen={boingDropdownOpen}
+                  onToggle={() => { const next = !boingDropdownOpen; setTradingDropdownOpen(false); setAnalyticsDropdownOpen(false); setDeploymentDropdownOpen(false); setGovernanceDropdownOpen(false); setToolsDropdownOpen(false); setBoingDropdownOpen(next); }}
+                  onClose={() => setBoingDropdownOpen(false)}
+                />
               </nav>
-              {/* Compact Wallet Controls */}
-              <div className="flex items-center space-x-1.5">
-                <div className="flex items-center space-x-1 pr-2 border-r" style={{ borderColor: 'var(--border-color)' }}>
-                  <LanguageSelector />
-                  <ThemeToggle />
-                  <button
-                    onClick={() => setAiChatOpen(true)}
-                    className="p-1.5 rounded-md transition-all duration-200 hover:bg-cyan-500/10"
-                    style={{ color: 'var(--text-secondary)' }}
-                    aria-label="AI Assistant"
-                    title="AI Assistant"
-                  >
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => setHistoryModalOpen(true)}
-                    className="p-1.5 rounded-md transition-all duration-200 hover:bg-cyan-500/10"
-                    style={{ color: 'var(--text-secondary)' }}
-                    onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
-                    onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-                    aria-label="View transaction history"
-                    title="Transaction History"
-                  >
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => setDefi101Open(true)}
-                    className="p-1.5 rounded-md transition-all duration-200 hover:bg-cyan-500/10"
-                    style={{ color: 'var(--text-secondary)' }}
-                    onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
-                    onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-                    aria-label="DeFi 101"
-                    title="DeFi 101"
-                  >
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                  </button>
-                </div>
-                <div className="hidden lg:flex items-center gap-2">
-                  <AchievementPanel compact />
-                </div>
-                <div className="flex items-center space-x-1.5">
-                  <NetworkSelector />
-                  <WalletConnect />
-                </div>
+              <div className="flex items-center gap-1 pl-1 border-l" style={{ borderColor: 'var(--border-color)' }}>
+                <ToolsDropdown isOpen={toolsDropdownOpen} onToggle={() => { const next = !toolsDropdownOpen; setTradingDropdownOpen(false); setAnalyticsDropdownOpen(false); setDeploymentDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(next); }} onClose={() => setToolsDropdownOpen(false)}
+                  onOpenHistory={() => { setHistoryModalOpen(true); setToolsDropdownOpen(false); }}
+                  onOpenAiChat={() => { setAiChatOpen(true); setToolsDropdownOpen(false); }}
+                  onOpenDefi101={() => { setDefi101Open(true); setToolsDropdownOpen(false); }}
+                />
+                <NetworkSelector />
+                <WalletConnect />
               </div>
             </div>
 
@@ -438,25 +341,6 @@ function AppContent() {
             borderColor: 'var(--border-color)'
           }}>
             <div className="px-4 py-3 space-y-3">
-              {/* Home */}
-              <button
-                onClick={() => {
-                  window.location.href = memoizedNavigation.home.href;
-                  closeMenu();
-                }}
-                className="w-full text-left px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 border border-cyan-500/20"
-                style={{
-                  color: 'var(--text-secondary)',
-                  background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
-                  borderColor: 'var(--border-color)'
-                }}
-                onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
-                onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-              >
-                <span className="text-xl">{memoizedNavigation.home.icon}</span>
-                <span>{memoizedNavigation.home.name}</span>
-              </button>
-
               {/* Trading Section */}
               <div className="rounded-lg p-3 border border-cyan-500/20" style={{
                 background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
@@ -610,6 +494,56 @@ function AppContent() {
                         {item.description && (
                           <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{item.description}</div>
                         )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Governance Section */}
+              <div className="rounded-lg p-3 border border-cyan-500/20" style={{
+                background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
+                borderColor: 'var(--border-color)'
+              }}>
+                <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>Governance</h3>
+                <div className="space-y-1">
+                  {memoizedNavigation.governance.map((item) => (
+                    <button key={item.name} onClick={() => { if (item.isAvailable && !item.comingSoon) { window.location.href = item.href; closeMenu(); } }}
+                      className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${(item.comingSoon || !item.isAvailable) ? 'cursor-not-allowed opacity-60' : ''}`}
+                      style={{ color: (item.comingSoon || !item.isAvailable) ? 'var(--text-tertiary)' : 'var(--text-secondary)' }}
+                      disabled={item.comingSoon || !item.isAvailable} title={item.comingSoon ? comingSoon.tooltip : ''}>
+                      <span className="text-lg">{item.icon}</span>
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <span>{item.name}</span>
+                          {(item.comingSoon || !item.isAvailable) && <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>}
+                        </div>
+                        {item.description && <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{item.description}</div>}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* BOING Section */}
+              <div className="rounded-lg p-3 border border-cyan-500/20" style={{
+                background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
+                borderColor: 'var(--border-color)'
+              }}>
+                <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>BOING</h3>
+                <div className="space-y-1">
+                  {memoizedNavigation.boing.map((item) => (
+                    <button key={item.name} onClick={() => { if (item.isAvailable && !item.comingSoon) { window.location.href = item.href; closeMenu(); } }}
+                      className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${(item.comingSoon || !item.isAvailable) ? 'cursor-not-allowed opacity-60' : ''}`}
+                      style={{ color: (item.comingSoon || !item.isAvailable) ? 'var(--text-tertiary)' : 'var(--text-secondary)' }}
+                      disabled={item.comingSoon || !item.isAvailable} title={item.comingSoon ? comingSoon.tooltip : ''}>
+                      <span className="text-lg">{item.icon}</span>
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <span>{item.name}</span>
+                          {(item.comingSoon || !item.isAvailable) && <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>}
+                        </div>
+                        {item.description && <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{item.description}</div>}
                       </div>
                     </button>
                   ))}
@@ -1381,6 +1315,58 @@ function FeatureCard({ title, icon, description, comingSoon }) {
         </div>
         <p className="text-sm leading-relaxed transition-colors duration-300" style={{ color: 'var(--text-secondary)' }}>{description}</p>
       </div>
+    </div>
+  );
+}
+
+// Tools dropdown: Language, Theme, AI Chat, Transaction History, DeFi 101
+function ToolsDropdown({ isOpen, onToggle, onClose, onOpenHistory, onOpenAiChat, onOpenDefi101 }) {
+  return (
+    <div className="relative">
+      <button
+        onClick={onToggle}
+        onBlur={() => setTimeout(onClose, 150)}
+        className="p-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center hover:bg-cyan-500/10"
+        style={{ color: 'var(--text-secondary)' }}
+        onMouseEnter={(e) => { e.target.style.color = 'var(--text-primary)'; }}
+        onMouseLeave={(e) => { e.target.style.color = 'var(--text-secondary)'; }}
+        aria-label="Tools and preferences"
+        title="Tools"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <svg className={`w-4 h-4 ml-1 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {isOpen && (
+        <div className="absolute right-0 top-full mt-2 w-52 backdrop-blur-sm rounded-xl shadow-xl z-50" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+          <div className="py-2 px-2">
+            <div className="flex items-center justify-between px-3 py-2 border-b mb-2" style={{ borderColor: 'var(--border-color)' }}>
+              <span className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>Language</span>
+              <LanguageSelector />
+            </div>
+            <div className="flex items-center justify-between px-3 py-2 border-b mb-2" style={{ borderColor: 'var(--border-color)' }}>
+              <span className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>Theme</span>
+              <ThemeToggle />
+            </div>
+            <button onClick={onOpenAiChat} className="w-full text-left px-3 py-2.5 text-sm flex items-center gap-3 hover:bg-cyan-500/10 rounded-lg transition-colors" style={{ color: 'var(--text-secondary)' }}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+              AI Assistant
+            </button>
+            <button onClick={onOpenHistory} className="w-full text-left px-3 py-2.5 text-sm flex items-center gap-3 hover:bg-cyan-500/10 rounded-lg transition-colors" style={{ color: 'var(--text-secondary)' }}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              Transaction History
+            </button>
+            <button onClick={onOpenDefi101} className="w-full text-left px-3 py-2.5 text-sm flex items-center gap-3 hover:bg-cyan-500/10 rounded-lg transition-colors" style={{ color: 'var(--text-secondary)' }}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+              DeFi 101
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useWallet } from '../contexts/WalletContext';
 import { getMainnetNetworks, getTestnetNetworks } from '../config/networks';
-import { ChevronDownIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 const NetworkSelector = () => {
   const { isConnected, chainId, switchNetwork, getCurrentNetwork } = useWallet();
@@ -39,12 +39,7 @@ const NetworkSelector = () => {
   };
 
   if (!isConnected || !currentNetwork) {
-    return (
-      <div className="flex items-center space-x-2 text-gray-400">
-        <GlobeAltIcon className="w-4 h-4" />
-        <span className="text-sm">Connect wallet to switch networks</span>
-      </div>
-    );
+    return null;
   }
 
   return (
