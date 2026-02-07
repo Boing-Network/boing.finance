@@ -372,19 +372,19 @@ export default function Analytics() {
       >
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="mb-8">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
-                <div className="flex-1">
-                  <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+            {/* Header - Compact */}
+            <div className="mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
                     Analytics
                   </h1>
-                  <p className="text-xl max-w-3xl" style={{ color: 'var(--text-secondary)' }}>
-                    Track trading performance, pool statistics, and market trends across all supported networks.
+                  <p className="text-sm sm:text-base mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                    Market trends and trading insights
                   </p>
                   {dataUpdatedAt > 0 && (
-                    <p className="text-sm text-gray-500 mt-2">
-                      Last updated: {new Date(dataUpdatedAt).toLocaleTimeString()}
+                    <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
+                      Updated {new Date(dataUpdatedAt).toLocaleTimeString()}
                     </p>
                   )}
                 </div>
@@ -434,17 +434,16 @@ export default function Analytics() {
               </div>
             </div>
 
-            {/* Time Range Selector and Sections */}
+            {/* Unified Toolbar - Sections + Time Range */}
             <div
-              className="rounded-2xl shadow-xl p-6 mb-8"
+              className="rounded-2xl shadow-xl p-4 sm:p-5 mb-6"
               style={{
                 backgroundColor: 'var(--bg-card)',
                 border: '1px solid var(--border-color)',
               }}
             >
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Time range</h2>
-                <div className="flex space-x-2" role="tablist" aria-label="Analytics sections" onKeyDown={handleSectionKeyDown}>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex flex-wrap gap-2" role="tablist" aria-label="Analytics sections" onKeyDown={handleSectionKeyDown}>
                   {sections.map((section) => (
                     <button
                       key={section}
@@ -455,7 +454,7 @@ export default function Analytics() {
                       id={`tab-${section}`}
                       tabIndex={activeSection === section ? 0 : -1}
                       onClick={() => setActiveSection(section)}
-                      className={`px-4 py-2 rounded-lg font-medium transition-colors capitalize ${
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${
                         activeSection === section
                           ? 'bg-blue-500 text-white'
                           : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -465,27 +464,24 @@ export default function Analytics() {
                     </button>
                   ))}
                 </div>
-              </div>
-              <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mb-4">
-                <p className="text-sm text-blue-300">
-                  <span className="font-semibold">Note:</span> Time range affects the <strong>Volume chart</strong> (CoinGecko historical data) and <strong>User Activity</strong> (when tracked).
-                  Key metrics (24h Volume, Market Cap, etc.) and Network Performance show real-time or 24h data from APIs.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-4">
-                {timeRanges.map((range) => (
-                  <button
-                    key={range.id}
-                    onClick={() => setTimeRange(range.id)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      timeRange === range.id
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    }`}
-                  >
-                    {range.name}
-                  </button>
-                ))}
+                <div className="flex flex-wrap gap-2 items-center">
+                  {timeRanges.map((range) => (
+                    <button
+                      key={range.id}
+                      onClick={() => setTimeRange(range.id)}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                        timeRange === range.id
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      }`}
+                    >
+                      {range.id === '24h' ? '24h' : range.id === '7d' ? '7d' : range.id === '30d' ? '30d' : '1y'}
+                    </button>
+                  ))}
+                  <MetricTooltip content="Time range affects Volume chart and User Activity. Key metrics use real-time or 24h data.">
+                    <span className="text-gray-500 cursor-help ml-1 text-sm">ⓘ</span>
+                  </MetricTooltip>
+                </div>
               </div>
             </div>
 
@@ -500,32 +496,31 @@ export default function Analytics() {
                 {activeSection === 'overview' && (
                   <div id="analytics-panel-overview" role="tabpanel" aria-labelledby="tab-overview" className="space-y-8">
                   <>
-                {/* Key Metrics - section-level skeleton when analytics loading and no market fallback */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Key Metrics - Compact */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   {isLoading && !marketData?.data ? (
                     [1, 2, 3, 4].map((i) => (
-                      <div key={i} className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700 animate-pulse">
-                        <div className="h-5 bg-gray-700 rounded w-24 mb-3"></div>
-                        <div className="h-10 bg-gray-700 rounded w-32 mb-2"></div>
-                        <div className="h-4 bg-gray-700 rounded w-20"></div>
+                      <div key={i} className="rounded-xl p-4 border animate-pulse" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+                        <div className="h-4 rounded w-16 mb-2" style={{ backgroundColor: 'var(--bg-tertiary)' }}></div>
+                        <div className="h-8 rounded w-24 mb-1" style={{ backgroundColor: 'var(--bg-tertiary)' }}></div>
                       </div>
                     ))
                   ) : (
                   <>
                   <div
-                    className="rounded-2xl shadow-xl p-6"
+                    className="rounded-xl p-4"
                     style={{
                       backgroundColor: 'var(--bg-card)',
                       border: '1px solid var(--border-color)',
                     }}
                   >
-                    <MetricTooltip content="Total 24h trading volume. Sources: DefiLlama (DEX), GeckoTerminal (DEX sample), or CoinGecko (global). Data is cached and retried for reliability.">
-                      <h3 className="text-lg font-semibold text-white mb-2 inline-flex items-center gap-1.5">
+                    <MetricTooltip content="Total 24h trading volume. Sources: DefiLlama (DEX), GeckoTerminal (DEX sample), or CoinGecko (global).">
+                      <h3 className="text-sm font-medium mb-1 inline-flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
                         24h Volume
-                        <span className="text-gray-500 cursor-help">ⓘ</span>
+                        <span className="text-gray-500 cursor-help text-xs">ⓘ</span>
                       </h3>
                     </MetricTooltip>
-                    <p className="text-3xl font-bold text-blue-400">
+                    <p className="text-xl sm:text-2xl font-bold text-blue-400">
                       {(() => {
                         let volume = 0;
                         if (analytics?.totalVolume && parseFloat(analytics.totalVolume) > 0) {
@@ -545,7 +540,7 @@ export default function Analytics() {
                         return `$${volume.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
                       })()}
                     </p>
-                    <p className="text-sm text-gray-400 mt-2">
+                    <p className="text-xs text-gray-500 mt-1">
                       {analytics?.totalVolume && parseFloat(analytics.totalVolume) > 0 
                         ? 'DEX volume (backend API)' 
                         : defiLlamaVolumeData?.length 
@@ -557,19 +552,19 @@ export default function Analytics() {
                   </div>
                   
                   <div
-                    className="rounded-2xl shadow-xl p-6"
+                    className="rounded-xl p-4"
                     style={{
                       backgroundColor: 'var(--bg-card)',
                       border: '1px solid var(--border-color)',
                     }}
                   >
-                    <MetricTooltip content="Total market capitalization of all tracked cryptocurrencies. Source: CoinGecko.">
-                      <h3 className="text-lg font-semibold text-white mb-2 inline-flex items-center gap-1.5">
+                    <MetricTooltip content="Total market capitalization. Source: CoinGecko.">
+                      <h3 className="text-sm font-medium mb-1 inline-flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
                         Market Cap
-                        <span className="text-gray-500 cursor-help">ⓘ</span>
+                        <span className="text-gray-500 cursor-help text-xs">ⓘ</span>
                       </h3>
                     </MetricTooltip>
-                    <p className="text-3xl font-bold text-green-400">
+                    <p className="text-xl sm:text-2xl font-bold text-green-400">
                       {(() => {
                         const marketCap = marketData?.data?.total_market_cap?.usd 
                           ? marketData.data.total_market_cap.usd
@@ -583,58 +578,58 @@ export default function Analytics() {
                         return `$${marketCap.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
                       })()}
                     </p>
-                    <p className="text-sm text-gray-400 mt-2">
+                    <p className="text-xs text-gray-500 mt-1">
                       {marketData?.data?.total_market_cap?.usd ? 'Total crypto market' : 'Estimated'}
                     </p>
                   </div>
                   
                   <div
-                    className="rounded-2xl shadow-xl p-6"
+                    className="rounded-xl p-4"
                     style={{
                       backgroundColor: 'var(--bg-card)',
                       border: '1px solid var(--border-color)',
                     }}
                   >
-                    <MetricTooltip content="Number of cryptocurrencies tracked by CoinGecko or total pools from backend.">
-                      <h3 className="text-lg font-semibold text-white mb-2 inline-flex items-center gap-1.5">
-                        Active Cryptocurrencies
-                        <span className="text-gray-500 cursor-help">ⓘ</span>
+                    <MetricTooltip content="Cryptocurrencies tracked or total pools from backend.">
+                      <h3 className="text-sm font-medium mb-1 inline-flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
+                        Active
+                        <span className="text-gray-500 cursor-help text-xs">ⓘ</span>
                       </h3>
                     </MetricTooltip>
-                    <p className="text-3xl font-bold text-purple-400">
+                    <p className="text-xl sm:text-2xl font-bold text-purple-400">
                       {marketData?.data?.active_cryptocurrencies 
                         ? marketData.data.active_cryptocurrencies.toLocaleString()
                         : (analytics?.activeCryptocurrencies 
                           ? analytics.activeCryptocurrencies.toLocaleString()
                           : (analytics?.totalPools ? analytics.totalPools.toLocaleString() : 'N/A'))}
                     </p>
-                    <p className="text-sm text-gray-400 mt-2">
-                      {marketData?.data?.active_cryptocurrencies ? 'Tracked on CoinGecko' : (analytics?.activeCryptocurrencies ? 'From backend API' : 'Total pools')}
+                    <p className="text-xs text-gray-500 mt-1">
+                      {marketData?.data?.active_cryptocurrencies ? 'CoinGecko' : (analytics?.activeCryptocurrencies ? 'Backend' : 'Pools')}
                     </p>
                   </div>
                   
                   <div
-                    className="rounded-2xl shadow-xl p-6"
+                    className="rounded-xl p-4"
                     style={{
                       backgroundColor: 'var(--bg-card)',
                       border: '1px solid var(--border-color)',
                     }}
                   >
-                    <MetricTooltip content="Number of active trading pairs (CoinGecko) or total transactions (backend).">
-                      <h3 className="text-lg font-semibold text-white mb-2 inline-flex items-center gap-1.5">
+                    <MetricTooltip content="Active trading pairs (CoinGecko) or total transactions (backend).">
+                      <h3 className="text-sm font-medium mb-1 inline-flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
                         Markets
-                        <span className="text-gray-500 cursor-help">ⓘ</span>
+                        <span className="text-gray-500 cursor-help text-xs">ⓘ</span>
                       </h3>
                     </MetricTooltip>
-                    <p className="text-3xl font-bold text-yellow-400">
+                    <p className="text-xl sm:text-2xl font-bold text-yellow-400">
                       {marketData?.data?.markets 
                         ? marketData.data.markets.toLocaleString()
                         : (analytics?.markets 
                           ? analytics.markets.toLocaleString()
                           : (analytics?.totalTransactions ? analytics.totalTransactions.toLocaleString() : 'N/A'))}
                     </p>
-                    <p className="text-sm text-gray-400 mt-2">
-                      {marketData?.data?.markets ? 'Active trading pairs (CoinGecko)' : (analytics?.markets ? 'Markets (backend API)' : 'Total transactions')}
+                    <p className="text-xs text-gray-500 mt-1">
+                      {marketData?.data?.markets ? 'CoinGecko' : (analytics?.markets ? 'Backend' : 'Transactions')}
                     </p>
                   </div>
                 </>

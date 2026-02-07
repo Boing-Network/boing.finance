@@ -2,10 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/png" href="%PUBLIC_URL%/favicon.ico/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.ico/favicon.svg" />
-    <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/favicon.ico/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="%PUBLIC_URL%/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/png" href="%PUBLIC_URL%/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg" />
+    <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/apple-touch-icon.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
@@ -49,7 +50,10 @@
     <meta property="og:description" content="Deploy your own tokens, create liquidity pools, and trade across multiple blockchains. The most user-friendly decentralized exchange for token deployment and cross-chain trading." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://boing.finance" />
-    <meta property="og:image" content="%PUBLIC_URL%/og-image.png" />
+    <meta property="og:image" content="https://boing.finance/preview-image.png" />
+    <meta property="og:image:secure_url" content="https://boing.finance/preview-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="Boing Finance - Deploy tokens, create pools, trade cross-chain" />
     <meta property="og:site_name" content="Boing Finance" />
     <meta property="og:locale" content="en_US" />
     
@@ -57,15 +61,15 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Boing Finance - Deploy Tokens & Trade Crypto" />
     <meta name="twitter:description" content="Deploy your own tokens, create liquidity pools, and trade across multiple blockchains. The most user-friendly DEX for token deployment." />
-    <meta name="twitter:image" content="%PUBLIC_URL%/og-image.png" />
+    <meta name="twitter:image" content="https://boing.finance/preview-image.png" />
+    <meta name="twitter:image:alt" content="Boing Finance - DeFi platform for token deployment and cross-chain trading" />
     <meta name="twitter:site" content="@boingfinance" />
     
     <!-- Additional SEO meta tags -->
     <meta name="application-name" content="Boing Finance" />
     <meta name="msapplication-TileColor" content="#000000" />
     <meta name="msapplication-config" content="%PUBLIC_URL%/browserconfig.xml" />
-    <!-- Google-specific meta tags for better search results -->
-    <meta name="google-site-verification" content="your-verification-code" />
+    <!-- Google-specific meta tags - Add your verification code in Google Search Console -->
     <meta name="google" content="notranslate" />
     <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
@@ -77,13 +81,20 @@
     {
       "@context": "https://schema.org",
       "@type": "Organization",
+      "@id": "#organization",
       "name": "Boing Finance",
       "url": "https://boing.finance",
       "logo": "https://boing.finance/logo.svg",
       "description": "Deploy tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance - the most user-friendly decentralized exchange (DEX) for token deployment and cross-chain trading.",
       "sameAs": [
-        "https://twitter.com/boingfinance"
-      ]
+        "https://twitter.com/boingfinance",
+        "https://github.com/boingfinance"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "url": "https://boing.finance/contact-us",
+        "contactType": "customer support"
+      }
     }
     </script>
     
@@ -93,13 +104,30 @@
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": "Boing Finance",
+      "alternateName": "boing.finance",
       "url": "https://boing.finance",
       "description": "Deploy tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance - the most user-friendly decentralized exchange (DEX) for token deployment and cross-chain trading.",
+      "inLanguage": "en-US",
+      "publisher": { "@id": "#organization" },
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "https://boing.finance/search?q={search_term_string}",
+        "target": "https://boing.finance/tokens?q={search_term_string}",
         "query-input": "required name=search_term_string"
       }
+    }
+    </script>
+    <!-- Structured Data for WebApplication (DeFi) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Boing Finance",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web",
+      "url": "https://boing.finance",
+      "description": "Decentralized exchange for token deployment, liquidity pools, swaps, and cross-chain bridging. Deploy your own tokens, create pools, and trade across Ethereum, Polygon, Arbitrum, and more.",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "featureList": ["Token deployment", "Liquidity pools", "Token swap", "Cross-chain bridge", "Portfolio analytics", "NFT minting"]
     }
     </script>
   </head>

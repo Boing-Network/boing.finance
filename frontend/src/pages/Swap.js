@@ -1784,23 +1784,22 @@ const Swap = () => {
         
         {/* Main Content Container */}
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          {/* Header */}
-          <div className="text-center mb-6 sm:mb-8">
-            <h1
-              className="text-3xl sm:text-4xl font-bold mb-2 sm:mb-4"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              Swap
-            </h1>
-            <p
-              className="text-lg sm:text-xl max-w-2xl mx-auto"
-              style={{ color: 'var(--text-secondary)' }}
-            >
-              Trade tokens instantly with the best rates across multiple networks
-            </p>
-          </div>
-
-          <div className="mb-4">
+          {/* Header - Compact */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+              <h1
+                className="text-2xl sm:text-3xl font-bold"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                Swap
+              </h1>
+              <p
+                className="text-sm sm:text-base mt-0.5"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                Trade tokens instantly
+              </p>
+            </div>
             <ProactiveTipsBanner />
           </div>
 
@@ -1808,7 +1807,7 @@ const Swap = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
 
-          {/* Swap Interface */}
+          {/* Swap Interface - Unified flow */}
           <div
             className="rounded-2xl p-4 sm:p-6 shadow-xl mb-4 sm:mb-6"
             style={{
@@ -1817,39 +1816,17 @@ const Swap = () => {
               boxShadow: '0 4px 24px var(--shadow)',
             }}
           >
-            {/* Network Status Indicator */}
-            <div
-              className="mb-4 p-3 rounded-xl border"
-              style={{ borderColor: 'var(--border-color)' }}
-            >
+            {/* Network Status - Subtle inline badge */}
+            <div className="flex justify-end mb-4">
               {(() => {
-                const status = getNetworkStatusMessage();
-                const statusColors = {
-                  success: 'bg-green-900/20 border-green-500/30 text-green-400',
-                  warning: 'bg-yellow-900/20 border-yellow-500/30 text-yellow-400',
-                  error: 'bg-red-900/20 border-red-500/30 text-red-400'
-                };
-                
+                const s = getNetworkStatusMessage();
+                const map = { success: 'bg-green-500/15 text-green-400', warning: 'bg-yellow-500/15 text-yellow-400', error: 'bg-red-500/15 text-red-400' };
                 return (
-                  <div className={`${statusColors[status.type]} rounded-lg p-3 text-sm text-center`}>
-                    <div className="flex items-center justify-center space-x-2">
-                      {status.type === 'success' && (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                      )}
-                      {status.type === 'warning' && (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                        </svg>
-                      )}
-                      {status.type === 'error' && (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      )}
-                      <span>{status.message}</span>
-                    </div>
+                  <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${map[s.type] || 'bg-gray-500/15 text-gray-400'}`}>
+                    {s.type === 'success' && <span className="w-1.5 h-1.5 rounded-full bg-green-400" />}
+                    {s.type === 'warning' && <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />}
+                    {s.type === 'error' && <span className="w-1.5 h-1.5 rounded-full bg-red-400" />}
+                    <span>{s.message}</span>
                   </div>
                 );
               })()}

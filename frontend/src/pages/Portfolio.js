@@ -454,13 +454,16 @@ export default function Portfolio() {
       >
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="mb-8">
+            {/* Header - Compact */}
+            <div className="mb-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                <div className="flex-1">
-                  <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
                     Portfolio
                   </h1>
+                  <p className="text-sm sm:text-base mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                    Assets and performance
+                  </p>
                 </div>
                 <div className="flex-1 flex flex-wrap justify-center sm:justify-end gap-2">
                   <button
@@ -548,9 +551,6 @@ export default function Portfolio() {
                   )}
                 </div>
               </div>
-              <p className="text-xl max-w-3xl" style={{ color: 'var(--text-secondary)' }}>
-                Track your assets, balances, and earnings across all supported blockchains.
-              </p>
             </div>
 
             {/* Info Banner - Show when blockchain services not available */}
@@ -569,61 +569,76 @@ export default function Portfolio() {
               </div>
             )}
 
-            {/* Tab Navigation */}
+            {/* Hero Summary - Total Value + 24h Change */}
             <div
-              className="flex gap-1 p-1 rounded-xl mb-6 overflow-x-auto"
+              className="rounded-2xl p-6 sm:p-8 mb-6"
               style={{
                 backgroundColor: 'var(--bg-card)',
                 border: '1px solid var(--border-color)',
               }}
             >
-              {[
-                { id: 'overview', label: 'Overview', icon: '📊' },
-                { id: 'tokens', label: 'Tokens', icon: '🪙' },
-                { id: 'pools', label: 'Pools', icon: '🏊' },
-                { id: 'nfts', label: 'Collectibles', icon: '🖼️' }
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => { setActiveTab(tab.id); setSearchParams(tab.id === 'overview' ? {} : { tab: tab.id }); }}
-                  className={`px-4 sm:px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap ${
-                    activeTab === tab.id
-                      ? 'shadow-md'
-                      : 'hover:opacity-80'
-                  }`}
-                  style={
-                    activeTab === tab.id
-                      ? { backgroundColor: 'var(--primary-color)', color: '#fff' }
-                      : { color: 'var(--text-secondary)' }
-                  }
-                >
-                  <span className="mr-2">{tab.icon}</span>
-                  {tab.label}
-                </button>
-              ))}
+              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+                <div>
+                  <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Total Value</p>
+                  <p className="text-3xl sm:text-4xl font-bold text-blue-400">
+                    ${portfolioSummary?.totalValue ? parseFloat(portfolioSummary.totalValue).toLocaleString() : '0'}
+                  </p>
+                </div>
+                <div className="flex items-baseline gap-4">
+                  <div>
+                    <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-tertiary)' }}>24h</p>
+                    <p className={`text-xl sm:text-2xl font-bold ${portfolioSummary?.change24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {portfolioSummary?.change24h >= 0 ? '+' : ''}{portfolioSummary?.change24h ? parseFloat(portfolioSummary.change24h).toFixed(2) : '0'}%
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Network Filter */}
+            {/* Tabs + Network Filter - Inline */}
             <div
-              className="rounded-2xl shadow-xl p-6 mb-8"
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-xl mb-6"
               style={{
                 backgroundColor: 'var(--bg-card)',
                 border: '1px solid var(--border-color)',
               }}
             >
-              <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Filter by network</h2>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex gap-1 overflow-x-auto">
+                {[
+                  { id: 'overview', label: 'Overview', icon: '📊' },
+                  { id: 'tokens', label: 'Tokens', icon: '🪙' },
+                  { id: 'pools', label: 'Pools', icon: '🏊' },
+                  { id: 'nfts', label: 'Collectibles', icon: '🖼️' }
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => { setActiveTab(tab.id); setSearchParams(tab.id === 'overview' ? {} : { tab: tab.id }); }}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                      activeTab === tab.id ? 'shadow-md' : 'hover:opacity-80'
+                    }`}
+                    style={
+                      activeTab === tab.id
+                        ? { backgroundColor: 'var(--primary-color)', color: '#fff' }
+                        : { color: 'var(--text-secondary)' }
+                    }
+                  >
+                    <span className="mr-1.5">{tab.icon}</span>
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-2 shrink-0">
                 {networks.map((network) => (
                   <button
                     key={network.id}
                     onClick={() => setSelectedNetwork(network.id)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                       selectedNetwork === network.id
                         ? `${network.color} text-white`
                         : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                     }`}
                   >
-                    {network.name}
+                    {network.id === 'all' ? 'All' : network.name}
                   </button>
                 ))}
               </div>
@@ -639,46 +654,34 @@ export default function Portfolio() {
               </div>
             ) : (
               <div className="space-y-8">
-                {/* Portfolio Summary */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                  <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-semibold text-white mb-2">Total Value</h3>
-                    <p className="text-3xl font-bold text-blue-400">
-                      ${portfolioSummary?.totalValue ? parseFloat(portfolioSummary.totalValue).toLocaleString() : '0'}
-                    </p>
-                    <p className="text-sm text-gray-400 mt-2">Across all networks</p>
-                  </div>
-                  
-                  <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-semibold text-white mb-2">24h Change</h3>
-                    <p className={`text-3xl font-bold ${portfolioSummary?.change24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {portfolioSummary?.change24h >= 0 ? '+' : ''}{portfolioSummary?.change24h ? parseFloat(portfolioSummary.change24h).toFixed(2) : '0'}%
-                    </p>
-                    <p className="text-sm text-gray-400 mt-2">In the last 24 hours</p>
-                  </div>
-                  
-                  <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-semibold text-white mb-2">Average APY</h3>
-                    <p className="text-3xl font-bold text-green-400">
+                {/* Secondary Stats - Compact (Total Value + 24h in hero above) */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div
+                    className="rounded-xl p-4"
+                    style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
+                  >
+                    <h3 className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>APY</h3>
+                    <p className="text-xl font-bold text-green-400">
                       {portfolioSummary?.averageAPY ? `${portfolioSummary.averageAPY.toFixed(2)}%` : '0.00%'}
                     </p>
-                    <p className="text-sm text-gray-400 mt-2">From liquidity positions</p>
                   </div>
-                  
-                  <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-semibold text-white mb-2">Total Tokens</h3>
-                    <p className="text-3xl font-bold text-purple-400">
+                  <div
+                    className="rounded-xl p-4"
+                    style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
+                  >
+                    <h3 className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Tokens</h3>
+                    <p className="text-xl font-bold text-purple-400">
                       {portfolioSummary?.totalTokens ? portfolioSummary.totalTokens.toLocaleString() : '0'}
                     </p>
-                    <p className="text-sm text-gray-400 mt-2">Unique tokens held</p>
                   </div>
-                  
-                  <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-semibold text-white mb-2">Liquidity Provided</h3>
-                    <p className="text-3xl font-bold text-yellow-400">
+                  <div
+                    className="rounded-xl p-4"
+                    style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
+                  >
+                    <h3 className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Liquidity</h3>
+                    <p className="text-xl font-bold text-yellow-400">
                       ${portfolioSummary?.liquidityProvided ? parseFloat(portfolioSummary.liquidityProvided).toLocaleString() : '0'}
                     </p>
-                    <p className="text-sm text-gray-400 mt-2">In pools</p>
                   </div>
                 </div>
 

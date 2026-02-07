@@ -962,7 +962,7 @@ function Home() {
           "description": "Deploy tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance - the most user-friendly decentralized exchange (DEX) for token deployment and cross-chain trading.",
           "potentialAction": {
             "@type": "SearchAction",
-            "target": "https://boing.finance/search?q={search_term_string}",
+            "target": "https://boing.finance/tokens?q={search_term_string}",
             "query-input": "required name=search_term_string"
           }
         })}

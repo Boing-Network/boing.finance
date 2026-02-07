@@ -31,6 +31,8 @@ export default function Bridge() {
   const [estimatedFee, setEstimatedFee] = useState(0);
   const [estimatedTime, setEstimatedTime] = useState('5-10 minutes');
   const [bridgeRoute, setBridgeRoute] = useState(null);
+  const [recentBridgesExpanded, setRecentBridgesExpanded] = useState(true);
+  const [howItWorksExpanded, setHowItWorksExpanded] = useState(false);
 
   // Supported networks from central config (config/networks.js) – add new chains there
   const supportedNetworks = useMemo(() =>
@@ -291,19 +293,19 @@ export default function Bridge() {
         style={{ backgroundColor: 'var(--bg-primary)' }}
       >
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          {/* Header */}
-          <div className="text-center mb-8">
+          {/* Header - Compact */}
+          <div className="mb-6">
             <h1
-              className="text-3xl sm:text-4xl font-bold mb-2 sm:mb-4"
+              className="text-2xl sm:text-3xl font-bold"
               style={{ color: 'var(--text-primary)' }}
             >
               Bridge
             </h1>
             <p
-              className="text-lg sm:text-xl max-w-2xl mx-auto"
+              className="text-sm sm:text-base mt-0.5"
               style={{ color: 'var(--text-secondary)' }}
             >
-              Transfer tokens seamlessly between blockchains
+              Transfer tokens across blockchains
             </p>
           </div>
 
@@ -456,29 +458,21 @@ export default function Bridge() {
               </div>
             </div>
 
-            {/* Bridge Details */}
-            <div
-              className="rounded-xl p-4 space-y-3 mb-6"
-              style={{
-                backgroundColor: 'var(--bg-secondary)',
-                border: '1px solid var(--border-color)',
-              }}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-gray-400 text-sm sm:text-base">Estimated Fee</span>
-                <span className="text-white text-sm sm:text-base">{estimatedFee.toFixed(4)} ETH</span>
+            {/* Bridge Details - Compact single row */}
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 py-3 mb-6 text-sm" style={{ borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)' }}>
+              <div className="flex items-center gap-2">
+                <span style={{ color: 'var(--text-tertiary)' }}>Fee:</span>
+                <span style={{ color: 'var(--text-primary)' }}>{estimatedFee.toFixed(4)} ETH</span>
               </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-gray-400 text-sm sm:text-base">Estimated Time</span>
-                <span className="text-white text-sm sm:text-base">{estimatedTime}</span>
+              <div className="flex items-center gap-2">
+                <span style={{ color: 'var(--text-tertiary)' }}>Time:</span>
+                <span style={{ color: 'var(--text-primary)' }}>{estimatedTime}</span>
               </div>
-              
               {bridgeRoute && (
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400 text-sm sm:text-base">Route</span>
-                  <span className="text-white text-sm sm:text-base">
-                    {bridgeRoute.from.icon} {bridgeRoute.from.name} → {bridgeRoute.to.icon} {bridgeRoute.to.name}
+                <div className="flex items-center gap-2">
+                  <span style={{ color: 'var(--text-tertiary)' }}>Route:</span>
+                  <span style={{ color: 'var(--text-primary)' }}>
+                    {bridgeRoute.from.name} → {bridgeRoute.to.name}
                   </span>
                 </div>
               )}
@@ -507,16 +501,29 @@ export default function Bridge() {
             </div>
           </div>
 
-          {/* Bridge Status */}
+          {/* Recent Bridges - Collapsible */}
           <div
-            className="rounded-2xl p-4 sm:p-6 shadow-lg mb-6"
+            className="rounded-2xl shadow-lg mb-6 overflow-hidden"
             style={{
               backgroundColor: 'var(--bg-card)',
               border: '1px solid var(--border-color)',
             }}
           >
-            <h3 className="text-lg font-bold mb-4 sm:mb-6" style={{ color: 'var(--text-primary)' }}>Recent bridges</h3>
-            
+            <button
+              onClick={() => setRecentBridgesExpanded(!recentBridgesExpanded)}
+              className="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:opacity-90 transition-opacity"
+            >
+              <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Recent bridges</h3>
+              <svg
+                className={`w-5 h-5 transition-transform ${recentBridgesExpanded ? 'rotate-180' : ''}`}
+                style={{ color: 'var(--text-secondary)' }}
+                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {recentBridgesExpanded && (
+            <div className="px-4 sm:px-6 pb-4 sm:pb-6">
             {bridgeTransactions.length > 0 ? (
               <div className="space-y-3 sm:space-y-4">
                 {bridgeTransactions.map((tx) => (
@@ -573,17 +580,33 @@ export default function Bridge() {
                 actionHref="#bridge-form"
               />
             )}
+            </div>
+            )}
           </div>
 
-          {/* Bridge Information */}
+          {/* How it works - Collapsible */}
           <div
-            className="rounded-2xl p-4 sm:p-6 shadow-lg"
+            className="rounded-2xl shadow-lg overflow-hidden"
             style={{
               backgroundColor: 'var(--bg-card)',
               border: '1px solid var(--border-color)',
             }}
           >
-            <h3 className="text-lg font-bold mb-4 sm:mb-6" style={{ color: 'var(--text-primary)' }}>How it works</h3>
+            <button
+              onClick={() => setHowItWorksExpanded(!howItWorksExpanded)}
+              className="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:opacity-90 transition-opacity"
+            >
+              <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>How it works</h3>
+              <svg
+                className={`w-5 h-5 transition-transform ${howItWorksExpanded ? 'rotate-180' : ''}`}
+                style={{ color: 'var(--text-secondary)' }}
+                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {howItWorksExpanded && (
+            <div className="px-4 sm:px-6 pb-4 sm:pb-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center">
                 <div
@@ -616,6 +639,8 @@ export default function Bridge() {
                 <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>Confirm transaction and wait for completion</p>
               </div>
             </div>
+            </div>
+            )}
           </div>
         </div>
 
