@@ -2,41 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Comfortaa font family - local from /public/fonts */
+/* Comfortaa font family - bundled from src/assets/fonts (webpack-resolvable paths) */
 @font-face {
   font-family: 'Comfortaa';
   font-style: normal;
   font-weight: 300;
   font-display: swap;
-  src: url('/fonts/Comfortaa-Light.ttf') format('truetype');
+  src: url('../assets/fonts/Comfortaa-Light.ttf') format('truetype');
 }
 @font-face {
   font-family: 'Comfortaa';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/Comfortaa-Regular.ttf') format('truetype');
+  src: url('../assets/fonts/Comfortaa-Regular.ttf') format('truetype');
 }
 @font-face {
   font-family: 'Comfortaa';
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('/fonts/Comfortaa-Medium.ttf') format('truetype');
+  src: url('../assets/fonts/Comfortaa-Medium.ttf') format('truetype');
 }
 @font-face {
   font-family: 'Comfortaa';
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('/fonts/Comfortaa-SemiBold.ttf') format('truetype');
+  src: url('../assets/fonts/Comfortaa-SemiBold.ttf') format('truetype');
 }
 @font-face {
   font-family: 'Comfortaa';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('/fonts/Comfortaa-Bold.ttf') format('truetype');
+  src: url('../assets/fonts/Comfortaa-Bold.ttf') format('truetype');
 }
 
 /* Accessibility Utilities */
