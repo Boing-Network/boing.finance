@@ -878,7 +878,7 @@ export default function Analytics() {
                             : 'Network-specific statistics require backend API integration. The backend endpoint is available but may need time to collect initial data.'}
                         </p>
                         <p className="text-xs text-gray-500">
-                          Data source: Backend analytics API (collects data hourly from The Graph and CoinGecko)
+                          Data source: GeckoTerminal, DefiLlama, CoinGecko
                         </p>
                       </div>
                     </div>
@@ -1013,7 +1013,7 @@ export default function Analytics() {
                             : 'Top trading pairs data requires backend API integration. The backend endpoint is available but may need time to collect initial data.'}
                         </p>
                         <p className="text-xs text-gray-500">
-                          Data source: Backend analytics API (collects data hourly from The Graph)
+                          Data source: GeckoTerminal, DefiLlama
                         </p>
                       </div>
                     </div>
