@@ -57,7 +57,16 @@ const Terms = lazy(() => import('./pages/Terms'));
 const Whitepaper = lazy(() => import('./pages/Whitepaper'));
 const ExecutiveSummary = lazy(() => import('./pages/ExecutiveSummary'));
 const Blog = lazy(() => import('./pages/Blog'));
-const ComingSoon = lazy(() => import('./components/ComingSoon'));
+const GovernanceProposals = lazy(() => import('./pages/governance/GovernanceProposals'));
+const GovernanceVote = lazy(() => import('./pages/governance/GovernanceVote'));
+const GovernanceTreasury = lazy(() => import('./pages/governance/GovernanceTreasury'));
+const GovernanceRoadmap = lazy(() => import('./pages/governance/GovernanceRoadmap'));
+const GovernanceCommunity = lazy(() => import('./pages/governance/GovernanceCommunity'));
+const GovernanceLearn = lazy(() => import('./pages/governance/GovernanceLearn'));
+const BoingStaking = lazy(() => import('./pages/boing/BoingStaking'));
+const BoingPoints = lazy(() => import('./pages/boing/BoingPoints'));
+const BoingRoadmap = lazy(() => import('./pages/boing/BoingRoadmap'));
+const BoingActivities = lazy(() => import('./pages/boing/BoingActivities'));
 
 // QueryClient will be created inside App component to avoid initialization issues
 
@@ -86,18 +95,18 @@ const createNavigation = () => Object.freeze({
     Object.freeze({ name: 'Create Pool', href: '/create-pool', icon: '🏊', description: 'Create liquidity pools', isAvailable: true, comingSoon: false, testnetOnly: false })
   ]),
   governance: Object.freeze([
-    Object.freeze({ name: 'Proposals', href: '/governance/proposals', icon: '📜', description: 'View and vote on proposals', isAvailable: true, comingSoon: true, testnetOnly: false }),
-    Object.freeze({ name: 'Vote', href: '/governance/vote', icon: '🗳️', description: 'Participate in governance', isAvailable: true, comingSoon: true, testnetOnly: false }),
-    Object.freeze({ name: 'Treasury', href: '/governance/treasury', icon: '🏦', description: 'DAO treasury overview', isAvailable: true, comingSoon: true, testnetOnly: false }),
-    Object.freeze({ name: 'Roadmap', href: '/governance/roadmap', icon: '🗺️', description: 'Governance roadmap', isAvailable: true, comingSoon: true, testnetOnly: false }),
-    Object.freeze({ name: 'Community', href: '/governance/community', icon: '👥', description: 'Forum & social links', isAvailable: true, comingSoon: true, testnetOnly: false }),
-    Object.freeze({ name: 'How it works', href: '/governance/learn', icon: '📖', description: 'Governance guide', isAvailable: true, comingSoon: true, testnetOnly: false })
+    Object.freeze({ name: 'Proposals', href: '/governance/proposals', icon: '📜', description: 'View and vote on proposals', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Vote', href: '/governance/vote', icon: '🗳️', description: 'Participate in governance', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Treasury', href: '/governance/treasury', icon: '🏦', description: 'DAO treasury overview', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Roadmap', href: '/governance/roadmap', icon: '🗺️', description: 'Governance roadmap', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Community', href: '/governance/community', icon: '👥', description: 'Forum & social links', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'How it works', href: '/governance/learn', icon: '📖', description: 'Governance guide', isAvailable: true, comingSoon: false, testnetOnly: false })
   ]),
   boing: Object.freeze([
-    Object.freeze({ name: 'NFT Staking', href: '/boing/staking', icon: '🎴', description: 'Stake Boing NFTs for rewards', isAvailable: true, comingSoon: true, testnetOnly: false }),
-    Object.freeze({ name: 'Points', href: '/boing/points', icon: '⭐', description: 'Boing points & rewards', isAvailable: true, comingSoon: true, testnetOnly: false }),
-    Object.freeze({ name: 'Roadmap', href: '/boing/roadmap', icon: '🚀', description: 'Boing community roadmap', isAvailable: true, comingSoon: true, testnetOnly: false }),
-    Object.freeze({ name: 'Activities', href: '/boing/activities', icon: '🎯', description: 'Community activities & events', isAvailable: true, comingSoon: true, testnetOnly: false })
+    Object.freeze({ name: 'NFT Staking', href: '/boing/staking', icon: '🎴', description: 'Stake Boing NFTs for rewards', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Points', href: '/boing/points', icon: '⭐', description: 'Boing points & rewards', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Roadmap', href: '/boing/roadmap', icon: '🚀', description: 'Boing community roadmap', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Activities', href: '/boing/activities', icon: '🎯', description: 'Community activities & events', isAvailable: true, comingSoon: false, testnetOnly: false })
   ])
 });
 
@@ -135,17 +144,17 @@ function PageTransitionRoutes() {
         <Route path="/bug-report" element={<BugReport />} />
         <Route path="/executive-summary" element={<ExecutiveSummary />} />
         {/* Governance */}
-        <Route path="/governance/proposals" element={<ComingSoon featureName="Governance Proposals" />} />
-        <Route path="/governance/vote" element={<ComingSoon featureName="Governance Vote" />} />
-        <Route path="/governance/treasury" element={<ComingSoon featureName="DAO Treasury" />} />
-        <Route path="/governance/roadmap" element={<ComingSoon featureName="Governance Roadmap" />} />
-        <Route path="/governance/community" element={<ComingSoon featureName="Governance Community" />} />
-        <Route path="/governance/learn" element={<ComingSoon featureName="How Governance Works" />} />
+        <Route path="/governance/proposals" element={<GovernanceProposals />} />
+        <Route path="/governance/vote" element={<GovernanceVote />} />
+        <Route path="/governance/treasury" element={<GovernanceTreasury />} />
+        <Route path="/governance/roadmap" element={<GovernanceRoadmap />} />
+        <Route path="/governance/community" element={<GovernanceCommunity />} />
+        <Route path="/governance/learn" element={<GovernanceLearn />} />
         {/* BOING */}
-        <Route path="/boing/staking" element={<ComingSoon featureName="NFT Staking" />} />
-        <Route path="/boing/points" element={<ComingSoon featureName="Boing Points" />} />
-        <Route path="/boing/roadmap" element={<ComingSoon featureName="Boing Roadmap" />} />
-        <Route path="/boing/activities" element={<ComingSoon featureName="Community Activities" />} />
+        <Route path="/boing/staking" element={<BoingStaking />} />
+        <Route path="/boing/points" element={<BoingPoints />} />
+        <Route path="/boing/roadmap" element={<BoingRoadmap />} />
+        <Route path="/boing/activities" element={<BoingActivities />} />
       </Routes>
     </div>
   );
