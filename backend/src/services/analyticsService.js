@@ -1,17 +1,17 @@
 // Analytics Service
-// Fetches data from external APIs (The Graph, CoinGecko) and aggregates analytics
+// Fetches data from GeckoTerminal, DefiLlama, CoinGecko (The Graph hosted service deprecated/removed)
 
 const COINGECKO_API_BASE = 'https://api.coingecko.com/api/v3';
-const THE_GRAPH_API_BASE = 'https://api.thegraph.com/subgraphs/name';
+const GEECKO_TERMINAL_BASE = 'https://api.geckoterminal.com/api/v2';
 
-// Network to subgraph mapping (The Graph - many hosted endpoints deprecated)
-const SUBGRAPH_MAP = {
-  1: 'uniswap/uniswap-v3', // Ethereum
-  137: 'uniswap/uniswap-v3-polygon', // Polygon
-  56: 'pancakeswap/exchange-v2-bsc', // BSC
-  42161: 'uniswap/uniswap-v3-arbitrum', // Arbitrum
-  10: 'uniswap/uniswap-v3-optimism', // Optimism
-  8453: 'uniswap/uniswap-v3-base', // Base
+// GeckoTerminal network id -> chainId
+const GEECKO_TO_CHAIN = {
+  eth: 1,
+  bsc: 56,
+  polygon_pos: 137,
+  arbitrum: 42161,
+  optimism: 10,
+  base: 8453,
 };
 
 // DefiLlama chain id to our chainId
@@ -30,8 +30,74 @@ class AnalyticsService {
   constructor(env) {
     this.env = env;
     this.coingeckoApiKey = env.COINGECKO_API_KEY;
-    this.theGraphApiKey = env.THE_GRAPH_API_KEY;
-    this.theGraphApiToken = env.THE_GRAPH_API_TOKEN;
+  }
+
+  // Fetch top pools from GeckoTerminal for a network (rate limited ~10/min)
+  async getGeckoTerminalPools(networkId = 'eth', page = 1) {
+    try {
+      const url = `${GEECKO_TERMINAL_BASE}/networks/${networkId}/pools?page=${page}`;
+      const response = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data?.data || [];
+    } catch (e) {
+      console.warn(`GeckoTerminal pools (${networkId}):`, e?.message);
+      return null;
+    }
+  }
+
+  // Build networkStats and topPairs from GeckoTerminal pool data (real token pairs)
+  buildFromGeckoTerminal(poolsByNetwork) {
+    const networkStats = {};
+    const allPairs = [];
+
+    for (const [networkId, pools] of Object.entries(poolsByNetwork)) {
+      if (!Array.isArray(pools) || pools.length === 0) continue;
+      const chainId = GEECKO_TO_CHAIN[networkId];
+      const networkName = chainId ? this.getNetworkName(chainId) : networkId;
+
+      let networkVol = 0;
+      for (const pool of pools) {
+        const attrs = pool?.attributes || {};
+        const name = attrs.name || 'Unknown / Unknown';
+        const volUsd = attrs.volume_usd;
+        const vol24h = typeof volUsd === 'object' && volUsd?.h24 != null
+          ? parseFloat(volUsd.h24) || 0
+          : 0;
+        const reserve = parseFloat(attrs.reserve_in_usd) || 0;
+        networkVol += vol24h;
+
+        // Parse token symbols from name (e.g. "WETH / USDC 0.05%" -> WETH, USDC)
+        const parts = name.split(/\s*\/\s*/).map((s) => s.replace(/\s+[\d.]+%$/, '').trim());
+        const token0 = parts[0] || 'Unknown';
+        const token1 = parts[1] || 'Unknown';
+
+        allPairs.push({
+          token0Symbol: token0,
+          token1Symbol: token1,
+          network: networkName,
+          volume: Math.round(vol24h).toString(),
+          liquidity: Math.round(reserve).toString(),
+          apy: null
+        });
+      }
+
+      if (networkVol > 0) {
+        networkStats[networkName] = {
+          volume: Math.round(networkVol).toString(),
+          liquidity: '0',
+          pools: pools.length,
+          users: 0,
+          transactions: 0
+        };
+      }
+    }
+
+    const topPairs = allPairs
+      .sort((a, b) => parseFloat(b.volume) - parseFloat(a.volume))
+      .slice(0, 15);
+
+    return { networkStats, topPairs };
   }
 
   // Get CoinGecko API URL with optional API key
@@ -72,96 +138,7 @@ class AnalyticsService {
     }
   }
 
-  // Execute GraphQL query to The Graph
-  async queryTheGraph(query, variables = {}, network = 1) {
-    // Convert chainId to network name if needed
-    const chainId = typeof network === 'number' ? network : 1;
-    const subgraph = SUBGRAPH_MAP[chainId] || SUBGRAPH_MAP[1];
-    const endpoint = `${THE_GRAPH_API_BASE}/${subgraph}`;
-
-    try {
-      const headers = {
-        'Content-Type': 'application/json',
-      };
-      
-      // Use API token if available (preferred), otherwise use API key
-      if (this.theGraphApiToken) {
-        headers['Authorization'] = `Bearer ${this.theGraphApiToken}`;
-      } else if (this.theGraphApiKey) {
-        headers['X-API-Key'] = this.theGraphApiKey;
-      }
-
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ query, variables })
-      });
-
-      if (!response.ok) {
-        throw new Error(`The Graph API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data.errors) {
-        throw new Error(`The Graph query error: ${JSON.stringify(data.errors)}`);
-      }
-
-      return data.data;
-    } catch (error) {
-      console.error(`Error querying The Graph (${network}):`, error);
-      return null;
-    }
-  }
-
-  // Get network statistics from The Graph
-  async getNetworkStats(network = 1) {
-    const query = `
-      query GetNetworkStats {
-        uniswapFactories(first: 1) {
-          totalVolumeUSD
-          totalLiquidityUSD
-          txCount
-          pairCount
-        }
-      }
-    `;
-
-    const data = await this.queryTheGraph(query, {}, network);
-    return data?.uniswapFactories?.[0] || null;
-  }
-
-  // Get top trading pairs from The Graph
-  async getTopTradingPairs(network = 1, limit = 10) {
-    const query = `
-      query GetTopPairs($limit: Int!) {
-        pairs(
-          first: $limit
-          orderBy: volumeUSD
-          orderDirection: desc
-        ) {
-          id
-          token0 {
-            id
-            symbol
-            name
-          }
-          token1 {
-            id
-            symbol
-            name
-          }
-          volumeUSD
-          reserveUSD
-          totalSupply
-        }
-      }
-    `;
-
-    const data = await this.queryTheGraph(query, { limit }, network);
-    return data?.pairs || [];
-  }
-
-  // Fetch DEX overview from DefiLlama (reliable fallback when The Graph fails)
+  // Fetch DEX overview from DefiLlama (primary for network-level stats)
   async getDefiLlamaDexData() {
     try {
       const response = await fetch(
@@ -177,14 +154,16 @@ class AnalyticsService {
   }
 
   // Build network stats and top pairs from DefiLlama breakdown
-  buildFromDefiLlama(llamaData, networks) {
+  // Uses breakdown24h for 24h range, breakdown30d for 7d/30d
+  buildFromDefiLlama(llamaData, networks, range = '24h') {
     const networkStats = {};
-    const pairVolumeMap = {}; // "ETH/USDC|Ethereum" -> volume
+    const pairVolumeMap = {}; // "DEX|Ethereum" -> volume
 
     if (!llamaData?.protocols?.length) return { networkStats: {}, topPairs: [] };
 
+    const use24h = range === '24h';
     for (const proto of llamaData.protocols) {
-      const breakdown = proto.breakdown24h || proto.breakdown30d;
+      const breakdown = use24h ? proto.breakdown24h : proto.breakdown30d;
       if (!breakdown || typeof breakdown !== 'object') continue;
 
       for (const [chainKey, pairs] of Object.entries(breakdown)) {
@@ -228,105 +207,65 @@ class AnalyticsService {
     return { networkStats, topPairs };
   }
 
-  // Get trending tokens from The Graph
-  async getTrendingTokensFromGraph(network = 1, limit = 20) {
-    const query = `
-      query GetTrendingTokens($limit: Int!) {
-        tokens(
-          orderBy: volumeUSD
-          orderDirection: desc
-          first: $limit
-        ) {
-          id
-          symbol
-          name
-          volumeUSD
-          totalValueLocked
-          priceUSD
-          priceChange24h
-        }
-      }
-    `;
-
-    const data = await this.queryTheGraph(query, { limit }, network);
-    return data?.tokens || [];
-  }
-
   // Aggregate analytics data for a time range
-  async getAnalyticsData(range = '24h', networks = [1]) {
+  // Uses GeckoTerminal for real token pairs; DefiLlama for network-level stats
+  async getAnalyticsData(range = '24h', networks = []) {
     try {
       const defaultNetworks = [1, 137, 56, 42161, 10, 8453];
       const targetNetworks = networks.length > 0 ? networks : defaultNetworks;
 
-      // Fetch CoinGecko + DefiLlama in parallel (DefiLlama is reliable fallback)
-      const [globalMarketData, graphStats, llamaData] = await Promise.all([
+      // GeckoTerminal network ids for supported chains
+      const geckoNetworks = ['eth', 'arbitrum', 'base', 'polygon_pos', 'bsc', 'optimism'];
+
+      // Fetch CoinGecko, GeckoTerminal pools, and DefiLlama in parallel
+      const [globalMarketData, geckoPools, llamaData] = await Promise.all([
         this.getGlobalMarketData(),
-        Promise.all([
-          Promise.all(targetNetworks.map(n => this.getNetworkStats(n))),
-          Promise.all(targetNetworks.map(n => this.getTopTradingPairs(n, 10)))
-        ]).then(([networkStatsArray, topPairsArray]) => ({ networkStatsArray, topPairsArray })),
+        Promise.all(geckoNetworks.map((id) => this.getGeckoTerminalPools(id))).then((results) =>
+          Object.fromEntries(geckoNetworks.map((id, i) => [id, results[i] || []]))
+        ),
         this.getDefiLlamaDexData()
       ]);
 
-      const [networkStatsArray, topPairsArray] = [graphStats.networkStatsArray, graphStats.topPairsArray];
       let networkStats = {};
+      let topPairs = [];
       let totalVolume = 0;
       let totalLiquidity = 0;
       let totalPools = 0;
       let totalTransactions = 0;
-      let topPairs = [];
 
-      // Try The Graph first
-      targetNetworks.forEach((network, index) => {
-        const stats = networkStatsArray[index];
-        if (stats) {
-          const networkName = this.getNetworkName(network);
-          networkStats[networkName] = {
-            volume: stats.totalVolumeUSD || '0',
-            liquidity: stats.totalLiquidityUSD || '0',
-            pools: stats.pairCount || 0,
-            users: 0,
-            transactions: stats.txCount || 0
-          };
-          totalVolume += parseFloat(stats.totalVolumeUSD || 0);
-          totalLiquidity += parseFloat(stats.totalLiquidityUSD || 0);
-          totalPools += stats.pairCount || 0;
-          totalTransactions += stats.txCount || 0;
-        }
-      });
+      // Primary: GeckoTerminal (real token pairs like WETH/USDC)
+      const geckoBuilt = this.buildFromGeckoTerminal(geckoPools);
+      if (Object.keys(geckoBuilt.networkStats).length > 0 || geckoBuilt.topPairs.length > 0) {
+        networkStats = geckoBuilt.networkStats;
+        topPairs = geckoBuilt.topPairs;
+        totalVolume = Object.values(networkStats).reduce((s, n) => s + (parseFloat(n.volume) || 0), 0);
+      }
 
-      targetNetworks.forEach((network, index) => {
-        const pairs = topPairsArray[index] || [];
-        pairs.forEach(pair => {
-          topPairs.push({
-            token0Symbol: pair.token0?.symbol || 'UNKNOWN',
-            token1Symbol: pair.token1?.symbol || 'UNKNOWN',
-            network: this.getNetworkName(network),
-            volume: pair.volumeUSD || '0',
-            liquidity: pair.reserveUSD || '0',
-            apy: null
-          });
-        });
-      });
-
-      // Fallback: use DefiLlama when The Graph returns no network stats or no top pairs
-      const hasGraphData = Object.keys(networkStats).length > 0 && topPairs.length > 0;
-      if (!hasGraphData && llamaData) {
-        const built = this.buildFromDefiLlama(llamaData, targetNetworks);
-        if (Object.keys(built.networkStats).length > 0) {
-          networkStats = built.networkStats;
+      // DefiLlama: supplement/fallback for network stats (time-range-aware)
+      if (llamaData) {
+        const llamaBuilt = this.buildFromDefiLlama(llamaData, targetNetworks, range);
+        if (Object.keys(networkStats).length === 0 && Object.keys(llamaBuilt.networkStats).length > 0) {
+          networkStats = llamaBuilt.networkStats;
+          totalVolume = Object.values(networkStats).reduce((s, n) => s + (parseFloat(n.volume) || 0), 0);
+        } else if (Object.keys(llamaBuilt.networkStats).length > 0) {
+          // Merge DefiLlama volumes into networkStats for more complete data
+          for (const [net, stats] of Object.entries(llamaBuilt.networkStats)) {
+            const vol = parseFloat(stats?.volume || 0) || 0;
+            if (!networkStats[net]) networkStats[net] = { volume: '0', liquidity: '0', pools: 0, users: 0, transactions: 0 };
+            const prev = parseFloat(networkStats[net].volume) || 0;
+            if (vol > prev) networkStats[net].volume = stats.volume;
+          }
           totalVolume = Object.values(networkStats).reduce((s, n) => s + (parseFloat(n.volume) || 0), 0);
         }
-        if (built.topPairs.length > 0) {
-          topPairs = built.topPairs;
+        if (topPairs.length === 0 && llamaBuilt.topPairs.length > 0) {
+          topPairs = llamaBuilt.topPairs;
         }
-        // Use DefiLlama total24h if we have no volume
-        if (totalVolume === 0 && llamaData.total24h) {
-          totalVolume = llamaData.total24h;
+        if (totalVolume === 0 && (range === '24h' ? llamaData.total24h : llamaData.total30d)) {
+          totalVolume = range === '24h' ? llamaData.total24h : llamaData.total30d;
         }
       }
 
-      // Final fallback: CoinGecko total volume for display
+      // Final fallback: CoinGecko total volume
       if (totalVolume === 0 && globalMarketData?.data?.total_volume?.usd) {
         totalVolume = globalMarketData.data.total_volume.usd;
       }
