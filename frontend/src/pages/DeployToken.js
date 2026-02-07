@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { useWallet } from '../contexts/WalletContext';
@@ -1413,10 +1414,10 @@ export default function DeployToken() {
               </div>
             )}
 
-            {/* Deployment History Modal */}
-            {showHistory && (
+            {/* Deployment History Modal - rendered via portal for viewport-centered display */}
+            {showHistory && createPortal(
               <div
-                className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4"
+                className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-60 p-4"
                 onClick={() => setShowHistory(false)}
                 role="presentation"
                 aria-modal="true"
@@ -1432,13 +1433,13 @@ export default function DeployToken() {
                 >
                   <DeploymentHistory
                     onSelectDeployment={(deployment) => {
-                      // Load deployment details
                       setShowHistory(false);
                     }}
                     onClose={() => setShowHistory(false)}
                   />
                 </div>
-              </div>
+              </div>,
+              document.body
             )}
 
             {/* Launch Wizard / Form */}
