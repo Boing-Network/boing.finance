@@ -94,6 +94,16 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
     }
   }, [isOpen, account]);
 
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isOpen, onClose]);
+
   // Start polling for real-time updates when modal is open
   useEffect(() => {
     if (isOpen && account) {
@@ -221,8 +231,17 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-theme-card rounded-lg shadow-lg p-6 w-full max-w-4xl max-h-[80vh] relative border border-theme">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+      onClick={onClose}
+      role="presentation"
+      aria-modal="true"
+      aria-label="Transaction history modal"
+    >
+      <div
+        className="bg-theme-card rounded-lg shadow-lg p-6 w-full max-w-4xl max-h-[80vh] relative border border-theme"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           className="absolute top-4 right-4 text-theme-tertiary hover:text-theme-primary"
           onClick={onClose}

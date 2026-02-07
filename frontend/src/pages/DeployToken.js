@@ -461,8 +461,8 @@ export default function DeployToken() {
   const [metadataUrl, setMetadataUrl] = useState('');
   const [uploadingMetadata, setUploadingMetadata] = useState(false);
 
-  // Launch Wizard (step-by-step mode)
-  const [useWizardMode, setUseWizardMode] = useState(true);
+  // Launch Wizard (step-by-step mode) - classic removed, wizard only
+  const [useWizardMode] = useState(true);
   const [wizardStep, setWizardStep] = useState(1);
 
   // Enhanced deployment features
@@ -596,6 +596,16 @@ export default function DeployToken() {
       setMaxWalletPercentage('2'); // Default to 2%
     }
   }, [maxWalletEnabled, maxWalletPercentage, selectedPlan]);
+
+  // Close Deployment History modal on Escape key
+  useEffect(() => {
+    if (!showHistory) return;
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') setShowHistory(false);
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [showHistory]);
 
   useEffect(() => {
     // Set default timelock delay when enabled
@@ -1341,17 +1351,6 @@ export default function DeployToken() {
               {/* Quick Actions */}
               <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
                 <button
-                  onClick={() => setUseWizardMode(!useWizardMode)}
-                  className="px-4 py-2 rounded-lg transition-colors text-sm font-medium"
-                  style={{
-                    backgroundColor: useWizardMode ? 'var(--bg-secondary)' : 'var(--bg-tertiary)',
-                    color: 'var(--text-primary)',
-                    border: '1px solid var(--border-color)'
-                  }}
-                >
-                  {useWizardMode ? '🎯 Wizard Mode' : '📋 Classic'}
-                </button>
-                <button
                   onClick={() => setShowPreview(!showPreview)}
                   className="px-4 py-2 rounded-lg transition-colors text-sm font-medium"
                   style={{
@@ -1416,11 +1415,21 @@ export default function DeployToken() {
 
             {/* Deployment History Modal */}
             {showHistory && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
-                <div className="rounded-xl p-6 shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" style={{
-                  backgroundColor: 'var(--bg-card)',
-                  border: '1px solid var(--border-color)'
-                }}>
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4"
+                onClick={() => setShowHistory(false)}
+                role="presentation"
+                aria-modal="true"
+                aria-label="Deployment history modal"
+              >
+                <div
+                  className="rounded-xl p-6 shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    backgroundColor: 'var(--bg-card)',
+                    border: '1px solid var(--border-color)'
+                  }}
+                >
                   <DeploymentHistory
                     onSelectDeployment={(deployment) => {
                       // Load deployment details
