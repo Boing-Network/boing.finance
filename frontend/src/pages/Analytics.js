@@ -366,17 +366,20 @@ export default function Analytics() {
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
       </Helmet>
-      <div className="relative min-h-screen">
+      <div
+        className="relative min-h-screen"
+        style={{ backgroundColor: 'var(--bg-primary)' }}
+      >
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className="mb-8">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
                 <div className="flex-1">
-                  <h1 className="text-4xl font-bold text-white mb-2">
-                    Analytics Dashboard
+                  <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+                    Analytics
                   </h1>
-                  <p className="text-xl text-gray-300 max-w-3xl">
+                  <p className="text-xl max-w-3xl" style={{ color: 'var(--text-secondary)' }}>
                     Track trading performance, pool statistics, and market trends across all supported networks.
                   </p>
                   {dataUpdatedAt > 0 && (
@@ -432,9 +435,15 @@ export default function Analytics() {
             </div>
 
             {/* Time Range Selector and Sections */}
-            <div className="bg-gray-800 rounded-2xl shadow-xl p-6 mb-8 border border-gray-700">
+            <div
+              className="rounded-2xl shadow-xl p-6 mb-8"
+              style={{
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+              }}
+            >
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-white">Time Range</h2>
+                <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Time range</h2>
                 <div className="flex space-x-2" role="tablist" aria-label="Analytics sections" onKeyDown={handleSectionKeyDown}>
                   {sections.map((section) => (
                     <button
@@ -503,7 +512,13 @@ export default function Analytics() {
                     ))
                   ) : (
                   <>
-                  <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                  <div
+                    className="rounded-2xl shadow-xl p-6"
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      border: '1px solid var(--border-color)',
+                    }}
+                  >
                     <MetricTooltip content="Total 24h trading volume. Sources: DefiLlama (DEX), GeckoTerminal (DEX sample), or CoinGecko (global). Data is cached and retried for reliability.">
                       <h3 className="text-lg font-semibold text-white mb-2 inline-flex items-center gap-1.5">
                         24h Volume
@@ -541,7 +556,13 @@ export default function Analytics() {
                     </p>
                   </div>
                   
-                  <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                  <div
+                    className="rounded-2xl shadow-xl p-6"
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      border: '1px solid var(--border-color)',
+                    }}
+                  >
                     <MetricTooltip content="Total market capitalization of all tracked cryptocurrencies. Source: CoinGecko.">
                       <h3 className="text-lg font-semibold text-white mb-2 inline-flex items-center gap-1.5">
                         Market Cap
@@ -567,7 +588,13 @@ export default function Analytics() {
                     </p>
                   </div>
                   
-                  <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                  <div
+                    className="rounded-2xl shadow-xl p-6"
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      border: '1px solid var(--border-color)',
+                    }}
+                  >
                     <MetricTooltip content="Number of cryptocurrencies tracked by CoinGecko or total pools from backend.">
                       <h3 className="text-lg font-semibold text-white mb-2 inline-flex items-center gap-1.5">
                         Active Cryptocurrencies
@@ -586,7 +613,13 @@ export default function Analytics() {
                     </p>
                   </div>
                   
-                  <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                  <div
+                    className="rounded-2xl shadow-xl p-6"
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      border: '1px solid var(--border-color)',
+                    }}
+                  >
                     <MetricTooltip content="Number of active trading pairs (CoinGecko) or total transactions (backend).">
                       <h3 className="text-lg font-semibold text-white mb-2 inline-flex items-center gap-1.5">
                         Markets
@@ -618,7 +651,13 @@ export default function Analytics() {
 
                 {/* Crypto News (NewsAPI.org) */}
                 {activeSection === 'overview' && cryptoNews?.articles?.length > 0 && (
-                  <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                  <div
+                    className="rounded-2xl shadow-xl p-6"
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      border: '1px solid var(--border-color)',
+                    }}
+                  >
                     <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                       <span>📰</span> Crypto & DeFi News
                     </h2>
@@ -645,7 +684,13 @@ export default function Analytics() {
 
                 {/* Platform activity (backend dashboard stats) */}
                 {activeSection === 'overview' && dashboardStats && (
-                  <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                  <div
+                    className="rounded-2xl shadow-xl p-6"
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      border: '1px solid var(--border-color)',
+                    }}
+                  >
                     <h2 className="text-xl font-bold text-white mb-4">Platform Activity</h2>
                     <p className="text-sm text-gray-400 mb-4">User interactions and engagement for the selected time range.</p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -697,7 +742,13 @@ export default function Analytics() {
 
                 {/* Price Insights - 7-Day Forecast (Predictive Analytics) */}
                 {priceInsights && priceInsights.length > 0 && (
-                  <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                  <div
+                    className="rounded-2xl shadow-xl p-6"
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      border: '1px solid var(--border-color)',
+                    }}
+                  >
                     <h2 className="text-2xl font-bold text-white mb-4">Price Insights (7-Day Forecast)</h2>
                     <p className="text-sm text-gray-400 mb-4">
                       Trend-based predictions from historical data. Not financial advice — use with caution.
@@ -914,7 +965,13 @@ export default function Analytics() {
 
                 {/* Network Distribution Pie Chart */}
                 {analytics?.networkStats && Object.keys(analytics.networkStats).length > 0 && (
-                  <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                  <div
+                    className="rounded-2xl shadow-xl p-6"
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      border: '1px solid var(--border-color)',
+                    }}
+                  >
                     <h2 className="text-2xl font-bold text-white mb-6">Network Distribution</h2>
                     <ResponsiveContainer width="100%" height={300}>
                       <PieChart isAnimationActive animationDuration={600} animationEasing="ease-out">
@@ -1141,7 +1198,13 @@ export default function Analytics() {
                           </p>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                          <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                          <div
+                    className="rounded-2xl shadow-xl p-6"
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      border: '1px solid var(--border-color)',
+                    }}
+                  >
                             <h3 className="text-lg font-semibold text-white mb-2">Total Market Cap</h3>
                             <p className="text-3xl font-bold text-blue-400">
                               {marketData.data?.total_market_cap?.usd 
@@ -1154,7 +1217,13 @@ export default function Analytics() {
                                 : 'N/A'}
                             </p>
                           </div>
-                          <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                          <div
+                    className="rounded-2xl shadow-xl p-6"
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      border: '1px solid var(--border-color)',
+                    }}
+                  >
                             <h3 className="text-lg font-semibold text-white mb-2">24h Volume</h3>
                             <p className="text-3xl font-bold text-green-400">
                               {marketData.data?.total_volume?.usd 
@@ -1168,7 +1237,13 @@ export default function Analytics() {
                                 : 'N/A'}
                             </p>
                           </div>
-                          <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                          <div
+                    className="rounded-2xl shadow-xl p-6"
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      border: '1px solid var(--border-color)',
+                    }}
+                  >
                             <h3 className="text-lg font-semibold text-white mb-2">BTC Dominance</h3>
                             <p className="text-3xl font-bold text-yellow-400">
                               {marketData.data?.market_cap_percentage?.btc 
@@ -1176,7 +1251,13 @@ export default function Analytics() {
                                 : 'N/A'}
                             </p>
                           </div>
-                          <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                          <div
+                    className="rounded-2xl shadow-xl p-6"
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      border: '1px solid var(--border-color)',
+                    }}
+                  >
                             <h3 className="text-lg font-semibold text-white mb-2">ETH Dominance</h3>
                             <p className="text-3xl font-bold text-purple-400">
                               {marketData.data?.market_cap_percentage?.eth 
@@ -1185,7 +1266,13 @@ export default function Analytics() {
                             </p>
                           </div>
                         </div>
-                        <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                        <div
+                    className="rounded-2xl shadow-xl p-6"
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      border: '1px solid var(--border-color)',
+                    }}
+                  >
                           <h2 className="text-2xl font-bold text-white mb-6">Market Statistics</h2>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div>
@@ -1248,7 +1335,13 @@ export default function Analytics() {
                 {/* Trending Tokens Section */}
                 {activeSection === 'trending' && (
                   <div id="analytics-panel-trending" role="tabpanel" aria-labelledby="tab-trending" className="space-y-6">
-                    <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                    <div
+                    className="rounded-2xl shadow-xl p-6"
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      border: '1px solid var(--border-color)',
+                    }}
+                  >
                       <div className="flex items-center justify-between mb-6">
                         <h2 className="text-2xl font-bold text-white">Trending Tokens</h2>
                         <div className="flex items-center gap-3">
@@ -1378,7 +1471,13 @@ export default function Analytics() {
 
                     {/* Trending NFTs Section */}
                     {trendingNfts.length > 0 && (
-                      <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                      <div
+                    className="rounded-2xl shadow-xl p-6"
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      border: '1px solid var(--border-color)',
+                    }}
+                  >
                         <h2 className="text-2xl font-bold text-white mb-4">Trending NFT Collections</h2>
                         <p className="text-sm text-gray-400 mb-6">Top collections by 24h volume. Source: CoinGecko.</p>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

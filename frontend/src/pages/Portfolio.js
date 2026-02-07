@@ -400,16 +400,22 @@ export default function Portfolio() {
 
   if (!account) {
     return (
-      <div className="relative z-10 container mx-auto px-4 py-8">
+      <div className="relative z-10 container mx-auto px-4 py-8" style={{ backgroundColor: 'var(--bg-primary)' }}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center py-12">
-            <h1 className="text-4xl font-bold text-white mb-4">
+            <h1 className="text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
               Portfolio
             </h1>
-            <p className="text-xl text-gray-300 mb-8">
+            <p className="text-xl mb-8" style={{ color: 'var(--text-secondary)' }}>
               Connect your wallet to view your portfolio and track your assets across all networks.
             </p>
-            <div className="bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-700 max-w-md mx-auto">
+            <div
+              className="rounded-2xl shadow-xl p-8 max-w-md mx-auto"
+              style={{
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+              }}
+            >
               <p className="text-gray-400 mb-4">Connect your wallet to view balances, liquidity positions, and performance.</p>
               <button
                 onClick={() => connectWallet()}
@@ -442,19 +448,21 @@ export default function Portfolio() {
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
       </Helmet>
-      <div className="relative min-h-screen">
+      <div
+        className="relative min-h-screen"
+        style={{ backgroundColor: 'var(--bg-primary)' }}
+      >
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
-            <div className="text-center mb-8">
+            <div className="mb-8">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                <div className="flex-1 order-2 sm:order-1"></div>
-                <div className="flex-1 order-1 sm:order-2">
-                  <h1 className="text-4xl font-bold text-white">
+                <div className="flex-1">
+                  <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
                     Portfolio
                   </h1>
                 </div>
-                <div className="flex-1 flex flex-wrap justify-center sm:justify-end gap-2 order-3">
+                <div className="flex-1 flex flex-wrap justify-center sm:justify-end gap-2">
                   <button
                     onClick={() => {
                       refetchPools();
@@ -540,7 +548,7 @@ export default function Portfolio() {
                   )}
                 </div>
               </div>
-              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              <p className="text-xl max-w-3xl" style={{ color: 'var(--text-secondary)' }}>
                 Track your assets, balances, and earnings across all supported blockchains.
               </p>
             </div>
@@ -562,21 +570,32 @@ export default function Portfolio() {
             )}
 
             {/* Tab Navigation */}
-            <div className="flex border-b border-gray-700 mb-6">
+            <div
+              className="flex gap-1 p-1 rounded-xl mb-6 overflow-x-auto"
+              style={{
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+              }}
+            >
               {[
                 { id: 'overview', label: 'Overview', icon: '📊' },
-                { id: 'tokens', label: 'Token Balances', icon: '🪙' },
-                { id: 'pools', label: 'Liquidity Pools', icon: '🏊' },
+                { id: 'tokens', label: 'Tokens', icon: '🪙' },
+                { id: 'pools', label: 'Pools', icon: '🏊' },
                 { id: 'nfts', label: 'Collectibles', icon: '🖼️' }
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => { setActiveTab(tab.id); setSearchParams(tab.id === 'overview' ? {} : { tab: tab.id }); }}
-                  className={`px-6 py-3 font-medium transition-colors border-b-2 -mb-px ${
+                  className={`px-4 sm:px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap ${
                     activeTab === tab.id
-                      ? 'border-blue-500 text-blue-400'
-                      : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600'
+                      ? 'shadow-md'
+                      : 'hover:opacity-80'
                   }`}
+                  style={
+                    activeTab === tab.id
+                      ? { backgroundColor: 'var(--primary-color)', color: '#fff' }
+                      : { color: 'var(--text-secondary)' }
+                  }
                 >
                   <span className="mr-2">{tab.icon}</span>
                   {tab.label}
@@ -585,8 +604,14 @@ export default function Portfolio() {
             </div>
 
             {/* Network Filter */}
-            <div className="bg-gray-800 rounded-2xl shadow-xl p-6 mb-8 border border-gray-700">
-              <h2 className="text-2xl font-bold text-white mb-6">Filter by Network</h2>
+            <div
+              className="rounded-2xl shadow-xl p-6 mb-8"
+              style={{
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+              }}
+            >
+              <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Filter by network</h2>
               <div className="flex flex-wrap gap-4">
                 {networks.map((network) => (
                   <button

@@ -286,111 +286,161 @@ export default function Bridge() {
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
       </Helmet>
-      <div className="relative min-h-screen">{/* Main Content Container */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div
+        className="relative min-h-screen"
+        style={{ backgroundColor: 'var(--bg-primary)' }}
+      >
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           {/* Header */}
-          <div className="text-center mb-6 sm:mb-8">
-            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 sm:mb-4">
-              Cross-Chain Bridge
+          <div className="text-center mb-8">
+            <h1
+              className="text-3xl sm:text-4xl font-bold mb-2 sm:mb-4"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              Bridge
             </h1>
-            <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto">
-              Transfer tokens seamlessly between different blockchains
+            <p
+              className="text-lg sm:text-xl max-w-2xl mx-auto"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              Transfer tokens seamlessly between blockchains
             </p>
           </div>
 
           {/* Bridge Interface */}
-          <div id="bridge-form" className="bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg mb-4 sm:mb-6">
-            <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">Bridge Tokens</h2>
-
+          <div
+            id="bridge-form"
+            className="rounded-2xl p-4 sm:p-6 shadow-xl mb-6"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
+              boxShadow: '0 4px 24px var(--shadow)',
+            }}
+          >
             {/* Network Selection */}
-            <div className="space-y-4 sm:space-y-6 mb-4 sm:mb-6">
+            <div className="space-y-4 mb-6">
               {/* From Network */}
-              <div className="bg-gray-750 rounded-xl p-4">
+              <div
+                className="rounded-xl p-4"
+                style={{
+                  backgroundColor: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-color)',
+                }}
+              >
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-gray-400 text-sm sm:text-base">From Network</span>
-                  <span className="text-xs sm:text-sm text-gray-500">Balance: 0.0</span>
+                  <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>From</span>
+                  <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Balance: 0.0</span>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <select
-                    value={fromChain}
-                    onChange={(e) => setFromChain(parseInt(e.target.value))}
-                    className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
-                  >
+                <select
+                  value={fromChain}
+                  onChange={(e) => setFromChain(parseInt(e.target.value))}
+                  className="w-full rounded-xl px-4 py-3 text-sm sm:text-base font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{
+                    backgroundColor: 'var(--bg-tertiary)',
+                    border: '1px solid var(--border-color)',
+                    color: 'var(--text-primary)',
+                  }}
+                >
                     {supportedNetworks.map((network) => (
                       <option key={network.id} value={network.id}>
                         {network.icon} {network.name}
                       </option>
                     ))}
-                  </select>
-                </div>
+                </select>
               </div>
 
               {/* Switch Networks Button */}
-              <div className="flex justify-center">
+              <div className="flex justify-center -my-1">
                 <button
                   onClick={switchChains}
-                  className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                  className="p-2 rounded-xl transition-colors border-2"
+                  style={{
+                    backgroundColor: 'var(--bg-primary)',
+                    borderColor: 'var(--primary-color)',
+                    color: 'var(--primary-color)',
+                  }}
                   aria-label="Switch networks"
                 >
-                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                   </svg>
                 </button>
               </div>
 
               {/* To Network */}
-              <div className="bg-gray-750 rounded-xl p-4">
+              <div
+                className="rounded-xl p-4"
+                style={{
+                  backgroundColor: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-color)',
+                }}
+              >
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-gray-400 text-sm sm:text-base">To Network</span>
-                  <span className="text-xs sm:text-sm text-gray-500">Balance: 0.0</span>
+                  <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>To</span>
+                  <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Balance: 0.0</span>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <select
-                    value={toChain}
-                    onChange={(e) => setToChain(parseInt(e.target.value))}
-                    className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
-                  >
+                <select
+                  value={toChain}
+                  onChange={(e) => setToChain(parseInt(e.target.value))}
+                  className="w-full rounded-xl px-4 py-3 text-sm sm:text-base font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{
+                    backgroundColor: 'var(--bg-tertiary)',
+                    border: '1px solid var(--border-color)',
+                    color: 'var(--text-primary)',
+                  }}
+                >
                     {supportedNetworks.map((network) => (
                       <option key={network.id} value={network.id}>
                         {network.icon} {network.name}
                       </option>
                     ))}
-                  </select>
-                </div>
+                </select>
               </div>
             </div>
 
             {/* Token Selection */}
-            <div className="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0 sm:space-x-4">
-              <div className="flex items-center space-x-2 w-full sm:w-auto">
-                <button
-                  onClick={() => openTokenModal('from')}
-                  className="flex items-center space-x-2 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg transition-colors w-full sm:w-auto justify-center sm:justify-start"
-                >
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+              <button
+                onClick={() => openTokenModal('from')}
+                className="flex items-center space-x-2 px-4 py-3 rounded-xl transition-colors w-full sm:w-auto justify-center"
+                style={{
+                  backgroundColor: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--text-primary)',
+                }}
+              >
                   <span className="text-xl sm:text-2xl">{getTokenLogo(fromToken)}</span>
-                  <span className="text-white font-medium text-sm sm:text-base">{getTokenName(fromToken)}</span>
+                  <span className="font-medium text-sm sm:text-base">{getTokenName(fromToken)}</span>
                   <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
-                </button>
-              </div>
+              </button>
               
-              <div className="flex items-center space-x-2 w-full sm:w-auto">
-                <button
-                  onClick={() => openTokenModal('to')}
-                  className="flex items-center space-x-2 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg transition-colors w-full sm:w-auto justify-center sm:justify-start"
-                >
+              <button
+                onClick={() => openTokenModal('to')}
+                className="flex items-center space-x-2 px-4 py-3 rounded-xl transition-colors w-full sm:w-auto justify-center"
+                style={{
+                  backgroundColor: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--text-primary)',
+                }}
+              >
                   <span className="text-xl sm:text-2xl">{getTokenLogo(toToken)}</span>
-                  <span className="text-white font-medium text-sm sm:text-base">{getTokenName(toToken)}</span>
+                  <span className="font-medium text-sm sm:text-base">{getTokenName(toToken)}</span>
                   <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
-                </button>
-              </div>
+              </button>
             </div>
 
             {/* Amount Input */}
-            <div className="bg-gray-750 rounded-xl p-4 mb-4 sm:mb-6">
+            <div
+              className="rounded-xl p-4 mb-6"
+              style={{
+                backgroundColor: 'var(--bg-secondary)',
+                border: '1px solid var(--border-color)',
+              }}
+            >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-gray-400 text-sm sm:text-base">Amount</span>
                 <span className="text-gray-400 text-xs sm:text-sm">Balance: 0.0</span>
@@ -407,7 +457,13 @@ export default function Bridge() {
             </div>
 
             {/* Bridge Details */}
-            <div className="bg-gray-750 rounded-xl p-4 space-y-3">
+            <div
+              className="rounded-xl p-4 space-y-3 mb-6"
+              style={{
+                backgroundColor: 'var(--bg-secondary)',
+                border: '1px solid var(--border-color)',
+              }}
+            >
               <div className="flex items-center justify-between">
                 <span className="text-gray-400 text-sm sm:text-base">Estimated Fee</span>
                 <span className="text-white text-sm sm:text-base">{estimatedFee.toFixed(4)} ETH</span>
@@ -429,11 +485,15 @@ export default function Bridge() {
             </div>
 
             {/* Bridge Button */}
-            <div className="mt-4 sm:mt-6">
+            <div>
               <button
                 onClick={handleBridge}
                 disabled={isBridging || !account || !amount || parseFloat(amount) <= 0 || fromChain === toChain}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-lg transition-colors text-base sm:text-lg"
+                className="w-full font-bold py-4 px-8 rounded-xl transition-all text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: 'var(--primary-color)',
+                  color: '#fff',
+                }}
               >
                 {isBridging ? (
                   <div className="flex items-center justify-center">
@@ -448,13 +508,26 @@ export default function Bridge() {
           </div>
 
           {/* Bridge Status */}
-          <div className="bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg mb-4 sm:mb-6">
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">Bridge Status</h3>
+          <div
+            className="rounded-2xl p-4 sm:p-6 shadow-lg mb-6"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
+            }}
+          >
+            <h3 className="text-lg font-bold mb-4 sm:mb-6" style={{ color: 'var(--text-primary)' }}>Recent bridges</h3>
             
             {bridgeTransactions.length > 0 ? (
               <div className="space-y-3 sm:space-y-4">
                 {bridgeTransactions.map((tx) => (
-                  <div key={tx.id} className="bg-gray-750 rounded-lg p-3 sm:p-4">
+                  <div
+                    key={tx.id}
+                    className="rounded-xl p-3 sm:p-4 mb-3"
+                    style={{
+                      backgroundColor: 'var(--bg-secondary)',
+                      border: '1px solid var(--border-color)',
+                    }}
+                  >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
                       <div className="flex items-center space-x-3">
                         <div className={`w-3 h-3 rounded-full ${getStatusColor(tx.status)}`}></div>
@@ -503,31 +576,44 @@ export default function Bridge() {
           </div>
 
           {/* Bridge Information */}
-          <div className="bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">How Bridge Works</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+          <div
+            className="rounded-2xl p-4 sm:p-6 shadow-lg"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
+            }}
+          >
+            <h3 className="text-lg font-bold mb-4 sm:mb-6" style={{ color: 'var(--text-primary)' }}>How it works</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center">
-                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <div
+                  className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
+                  style={{ backgroundColor: 'var(--primary-color)' }}
+                >
                   <span className="text-white font-bold text-lg">1</span>
                 </div>
-                <h4 className="text-white font-semibold mb-2 text-sm sm:text-base">Select Networks</h4>
-                <p className="text-gray-300 text-xs sm:text-sm">Choose source and destination blockchains</p>
+                <h4 className="font-semibold mb-2 text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>Select networks</h4>
+                <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>Choose source and destination blockchains</p>
               </div>
-              
               <div className="text-center">
-                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <div
+                  className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
+                  style={{ backgroundColor: 'var(--primary-color)' }}
+                >
                   <span className="text-white font-bold text-lg">2</span>
                 </div>
-                <h4 className="text-white font-semibold mb-2 text-sm sm:text-base">Enter Amount</h4>
-                <p className="text-gray-300 text-xs sm:text-sm">Specify the amount you want to bridge</p>
+                <h4 className="font-semibold mb-2 text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>Enter amount</h4>
+                <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>Specify the amount you want to bridge</p>
               </div>
-              
               <div className="text-center">
-                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <div
+                  className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
+                  style={{ backgroundColor: 'var(--primary-color)' }}
+                >
                   <span className="text-white font-bold text-lg">3</span>
                 </div>
-                <h4 className="text-white font-semibold mb-2 text-sm sm:text-base">Confirm & Wait</h4>
-                <p className="text-gray-300 text-xs sm:text-sm">Confirm transaction and wait for completion</p>
+                <h4 className="font-semibold mb-2 text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>Confirm & wait</h4>
+                <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>Confirm transaction and wait for completion</p>
               </div>
             </div>
           </div>

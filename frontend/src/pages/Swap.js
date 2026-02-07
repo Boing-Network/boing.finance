@@ -1785,11 +1785,17 @@ const Swap = () => {
         {/* Main Content Container */}
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           {/* Header */}
-          <div className="text-center mb-4 sm:mb-6">
-            <h1 className="text-3xl sm:text-4xl font-bold text-theme-primary mb-2 sm:mb-4">
-              Swap Tokens
+          <div className="text-center mb-6 sm:mb-8">
+            <h1
+              className="text-3xl sm:text-4xl font-bold mb-2 sm:mb-4"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              Swap
             </h1>
-            <p className="text-lg sm:text-xl text-theme-secondary max-w-2xl mx-auto">
+            <p
+              className="text-lg sm:text-xl max-w-2xl mx-auto"
+              style={{ color: 'var(--text-secondary)' }}
+            >
               Trade tokens instantly with the best rates across multiple networks
             </p>
           </div>
@@ -1803,12 +1809,19 @@ const Swap = () => {
           <div className="lg:col-span-2">
 
           {/* Swap Interface */}
-          <div className="rounded-xl p-4 sm:p-6 shadow-lg mb-4 sm:mb-6" style={{
-            backgroundColor: 'var(--bg-card)',
-            border: '1px solid var(--border-color)'
-          }}>
+          <div
+            className="rounded-2xl p-4 sm:p-6 shadow-xl mb-4 sm:mb-6"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
+              boxShadow: '0 4px 24px var(--shadow)',
+            }}
+          >
             {/* Network Status Indicator */}
-            <div className="mb-4 p-3 rounded-lg border">
+            <div
+              className="mb-4 p-3 rounded-xl border"
+              style={{ borderColor: 'var(--border-color)' }}
+            >
               {(() => {
                 const status = getNetworkStatusMessage();
                 const statusColors = {
@@ -1841,8 +1854,6 @@ const Swap = () => {
                 );
               })()}
             </div>
-
-            <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">Swap Tokens</h2>
 
             {/* Token Selection */}
             <div className="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0 sm:space-x-4">
