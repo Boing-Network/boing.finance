@@ -31,6 +31,7 @@ export default function Analytics() {
   const queryClient = useQueryClient();
   const [timeRange, setTimeRange] = useState(() => getStored(STORAGE_KEYS.timeRange, '24h'));
   const [activeSection, setActiveSection] = useState(() => getStored(STORAGE_KEYS.section, 'overview'));
+  const [overviewStep, setOverviewStep] = useState(1); // Wizard sub-steps for Overview
   const [selectedNetwork, setSelectedNetwork] = useState('all');
 
   useEffect(() => {
@@ -44,18 +45,19 @@ export default function Analytics() {
     } catch (_) {}
   }, [activeSection]);
 
+  // Reset overview step when switching sections
+  useEffect(() => {
+    if (activeSection !== 'overview') setOverviewStep(1);
+  }, [activeSection]);
+
   const { data: analytics, isLoading, error, refetch: refetchAnalytics, isFetching: analyticsFetching, dataUpdatedAt } = useQuery({
     queryKey: ['analytics', timeRange],
-    queryFn: () => {
-      return fetchAnalytics(timeRange);
-    },
-    refetchInterval: 60000, // Refetch every minute
-    retry: 1, // Only retry once on failure
-    retryDelay: 2000, // Wait 2 seconds before retry
-    staleTime: 30000, // Consider data stale after 30 seconds
-    onError: () => {
-      // Silently handle errors - component will show empty state
-    }
+    queryFn: () => fetchAnalytics(timeRange),
+    refetchInterval: 60000,
+    retry: 1,
+    retryDelay: 2000,
+    staleTime: 0, // Always refetch when switching time range (fixes toggle bug)
+    onError: () => {},
   });
 
   const fetchAnalytics = async (range) => {
@@ -221,8 +223,8 @@ export default function Analytics() {
   const { data: defiLlamaVolumeData, isFetched: defiLlamaFetched } = useQuery({
     queryKey: ['defillama-dex-volume', timeRange],
     queryFn: () => getDexVolumeChart(timeRange),
-    refetchInterval: 300000, // 5 min
-    staleTime: 120000,
+    refetchInterval: 300000,
+    staleTime: 0, // Always refetch when switching time range
     retry: 2,
     retryDelay: 1500,
   });
@@ -249,7 +251,8 @@ export default function Analytics() {
     },
     refetchInterval: 300000,
     retry: 1,
-    retryDelay: 5000, // Longer delay on retry to avoid 429
+    retryDelay: 5000,
+    staleTime: 0, // Always refetch when switching time range
     enabled: defiLlamaFetched && (!defiLlamaVolumeData || defiLlamaVolumeData.length === 0),
   });
 
@@ -494,8 +497,57 @@ export default function Analytics() {
               <div className="space-y-8">
                 {/* Overview Section */}
                 {activeSection === 'overview' && (
-                  <div id="analytics-panel-overview" role="tabpanel" aria-labelledby="tab-overview" className="space-y-8">
-                  <>
+                  <div id="analytics-panel-overview" role="tabpanel" aria-labelledby="tab-overview" className="space-y-6">
+                  {/* Wizard step navigation for Overview */}
+                  <div
+                    className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl"
+                    style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
+                  >
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { step: 1, label: 'Summary', icon: '📊' },
+                        { step: 2, label: 'Networks', icon: '🌐' },
+                        { step: 3, label: 'Pairs', icon: '🔄' },
+                        { step: 4, label: 'Activity', icon: '📈' },
+                        { step: 5, label: 'Insights', icon: '💡' },
+                      ].map(({ step, label, icon }) => (
+                        <button
+                          key={step}
+                          type="button"
+                          onClick={() => setOverviewStep(step)}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                            overviewStep === step ? 'bg-blue-500 text-white' : 'hover:bg-gray-600 text-gray-300'
+                          }`}
+                        >
+                          <span>{icon}</span>
+                          <span>{label}</span>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      {overviewStep > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => setOverviewStep(overviewStep - 1)}
+                          className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-600 hover:bg-gray-500 text-white"
+                        >
+                          ← Previous
+                        </button>
+                      )}
+                      {overviewStep < 5 && (
+                        <button
+                          type="button"
+                          onClick={() => setOverviewStep(overviewStep + 1)}
+                          className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white"
+                        >
+                          Next →
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Step 1: Key Metrics + Volume Chart */}
+                  {(overviewStep === 1) && <>
                 {/* Key Metrics - Compact */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   {isLoading && !marketData?.data ? (
@@ -514,23 +566,32 @@ export default function Analytics() {
                       border: '1px solid var(--border-color)',
                     }}
                   >
-                    <MetricTooltip content="Total 24h trading volume. Sources: DefiLlama (DEX), GeckoTerminal (DEX sample), or CoinGecko (global).">
+                    <MetricTooltip content={`Total ${timeRange === '24h' ? '24h' : timeRange === '7d' ? '7-day' : timeRange === '30d' ? '30-day' : '1-year'} DEX volume. Sources: DefiLlama, GeckoTerminal, or CoinGecko.`}>
                       <h3 className="text-sm font-medium mb-1 inline-flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
-                        24h Volume
+                        Volume ({timeRange})
                         <span className="text-gray-500 cursor-help text-xs">ⓘ</span>
                       </h3>
                     </MetricTooltip>
                     <p className="text-xl sm:text-2xl font-bold text-blue-400">
                       {(() => {
                         let volume = 0;
-                        if (analytics?.totalVolume && parseFloat(analytics.totalVolume) > 0) {
+                        if (analytics?.totalVolume && parseFloat(analytics.totalVolume) > 0 && timeRange === '24h') {
                           volume = parseFloat(analytics.totalVolume);
                         } else if (defiLlamaVolumeData?.length) {
-                          const last = defiLlamaVolumeData[defiLlamaVolumeData.length - 1];
-                          volume = last?.volume ?? 0;
-                        } else if (geckoTerminalVolume?.volume24h) {
+                          // For 7d/30d/1y: sum all points for period total; for 24h use last point
+                          if (timeRange === '24h') {
+                            const last = defiLlamaVolumeData[defiLlamaVolumeData.length - 1];
+                            volume = last?.volume ?? 0;
+                          } else {
+                            volume = defiLlamaVolumeData.reduce((sum, p) => sum + (Number(p?.volume) || 0), 0);
+                          }
+                        } else if (historicalVolumeData?.length) {
+                          volume = timeRange === '24h'
+                            ? (historicalVolumeData[historicalVolumeData.length - 1]?.volume ?? 0)
+                            : historicalVolumeData.reduce((sum, p) => sum + (Number(p?.volume) || 0), 0);
+                        } else if (geckoTerminalVolume?.volume24h && timeRange === '24h') {
                           volume = geckoTerminalVolume.volume24h;
-                        } else if (marketData?.data?.total_volume?.usd) {
+                        } else if (marketData?.data?.total_volume?.usd && timeRange === '24h') {
                           volume = marketData.data.total_volume.usd;
                         }
                         if (volume === 0 || isNaN(volume)) return 'N/A';
@@ -644,143 +705,6 @@ export default function Analytics() {
                   </div>
                 )}
 
-                {/* Crypto News (NewsAPI.org) */}
-                {activeSection === 'overview' && cryptoNews?.articles?.length > 0 && (
-                  <div
-                    className="rounded-2xl shadow-xl p-6"
-                    style={{
-                      backgroundColor: 'var(--bg-card)',
-                      border: '1px solid var(--border-color)',
-                    }}
-                  >
-                    <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                      <span>📰</span> Crypto & DeFi News
-                    </h2>
-                    <p className="text-sm text-gray-400 mb-4">Latest headlines from NewsAPI.org. Updates every 10 minutes.</p>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {cryptoNews.articles.slice(0, 6).map((article, idx) => (
-                        <a
-                          key={idx}
-                          href={article.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block p-4 rounded-xl bg-gray-700/50 border border-gray-600 hover:border-blue-500/50 hover:bg-gray-700/70 transition-colors"
-                        >
-                          <p className="font-medium text-white line-clamp-2 mb-1">{article.title}</p>
-                          <p className="text-xs text-gray-400">
-                            {article.source} · {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : ''}
-                          </p>
-                        </a>
-                      ))}
-                    </div>
-                    <p className="text-xs text-gray-500 mt-3">Powered by NewsAPI.org</p>
-                  </div>
-                )}
-
-                {/* Platform activity (backend dashboard stats) */}
-                {activeSection === 'overview' && dashboardStats && (
-                  <div
-                    className="rounded-2xl shadow-xl p-6"
-                    style={{
-                      backgroundColor: 'var(--bg-card)',
-                      border: '1px solid var(--border-color)',
-                    }}
-                  >
-                    <h2 className="text-xl font-bold text-white mb-4">Platform Activity</h2>
-                    <p className="text-sm text-gray-400 mb-4">User interactions and engagement for the selected time range.</p>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                      <div className="bg-gray-700/50 rounded-xl p-4 border border-gray-600">
-                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Interactions</p>
-                        <p className="text-2xl font-bold text-white">{Number(dashboardStats.total_interactions ?? 0).toLocaleString()}</p>
-                      </div>
-                      <div className="bg-gray-700/50 rounded-xl p-4 border border-gray-600">
-                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Unique users</p>
-                        <p className="text-2xl font-bold text-white">{Number(dashboardStats.unique_users ?? 0).toLocaleString()}</p>
-                      </div>
-                      <div className="bg-gray-700/50 rounded-xl p-4 border border-gray-600">
-                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Searches</p>
-                        <p className="text-2xl font-bold text-white">{Number(dashboardStats.total_searches ?? 0).toLocaleString()}</p>
-                      </div>
-                      <div className="bg-gray-700/50 rounded-xl p-4 border border-gray-600">
-                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Page views</p>
-                        <p className="text-2xl font-bold text-white">{Number(dashboardStats.page_views ?? 0).toLocaleString()}</p>
-                      </div>
-                      <div className="bg-gray-700/50 rounded-xl p-4 border border-gray-600">
-                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Errors logged</p>
-                        <p className="text-2xl font-bold text-white">{Number(dashboardStats.total_errors ?? 0).toLocaleString()}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* NFT-gated Pro Analytics Placeholder */}
-                <div className="interactive-card bg-gradient-to-r from-purple-900/40 to-blue-900/40 rounded-2xl p-6 border border-purple-500/30">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-2xl">✨</span>
-                        <h2 className="text-xl font-bold text-white">Pro Analytics</h2>
-                        <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-purple-500/30 text-purple-300">NFT Holders</span>
-                      </div>
-                      <p className="text-sm text-gray-300 mb-2">
-                        Unlock advanced analytics, exclusive insights, and priority support when you hold Boing NFTs.
-                      </p>
-                      <a
-                        href="/create-nft"
-                        className="inline-block interactive-button px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium"
-                      >
-                        Learn more →
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Price Insights - 7-Day Forecast (Predictive Analytics) */}
-                {priceInsights && priceInsights.length > 0 && (
-                  <div
-                    className="rounded-2xl shadow-xl p-6"
-                    style={{
-                      backgroundColor: 'var(--bg-card)',
-                      border: '1px solid var(--border-color)',
-                    }}
-                  >
-                    <h2 className="text-2xl font-bold text-white mb-4">Price Insights (7-Day Forecast)</h2>
-                    <p className="text-sm text-gray-400 mb-4">
-                      Trend-based predictions from historical data. Not financial advice — use with caution.
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {priceInsights.map((insight) => (
-                        <div key={insight.symbol} className="bg-gray-700 rounded-xl p-4 border border-gray-600">
-                          <div className="flex justify-between items-start mb-2">
-                            <span className="text-white font-semibold">{insight.symbol}</span>
-                            <span className={`text-xs px-2 py-1 rounded ${
-                              insight.trend === 'up' ? 'bg-green-500/20 text-green-400' :
-                              insight.trend === 'down' ? 'bg-red-500/20 text-red-400' :
-                              'bg-gray-500/20 text-gray-400'
-                            }`}>
-                              {insight.trend?.toUpperCase() || 'NEUTRAL'}
-                            </span>
-                          </div>
-                          {insight.predictedPrice != null && insight.currentPrice && (
-                            <>
-                              <div className="text-sm text-gray-300">
-                                Current: ${insight.currentPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                              </div>
-                              <div className="text-sm text-blue-300 mt-1">
-                                Est. 7d: ${insight.predictedPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                              </div>
-                            </>
-                          )}
-                          <div className="flex justify-between mt-2 text-xs text-gray-400">
-                            <span>Confidence: {insight.confidence || 0}%</span>
-                            {insight.volatility != null && <span>Volatility: {insight.volatility}%</span>}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 {/* Volume Chart */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                   <div className="mb-4">
@@ -873,7 +797,10 @@ export default function Analytics() {
                     </div>
                   )}
                 </div>
+                  </>}
 
+                  {/* Step 2: Network Performance + Network Distribution */}
+                  {(overviewStep === 2) && <>
                 {/* Network Performance */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                   <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -995,7 +922,10 @@ export default function Analytics() {
                     </ResponsiveContainer>
                   </div>
                 )}
+                  </>}
 
+                  {/* Step 3: Top Trading Pairs */}
+                  {(overviewStep === 3) && <>
                 {/* Top Trading Pairs */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                   <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -1089,7 +1019,10 @@ export default function Analytics() {
                     </div>
                   )}
                 </div>
+                  </>}
 
+                  {/* Step 4: User Activity */}
+                  {(overviewStep === 4) && <>
                 {/* User Activity Chart */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
                   <h2 className="text-2xl font-bold text-white mb-6">User Activity</h2>
@@ -1172,7 +1105,79 @@ export default function Analytics() {
                     </div>
                   )}
                 </div>
-                  </>
+                  </>}
+
+                  {/* Step 5: Price Insights, News, Platform Activity */}
+                  {(overviewStep === 5) && <>
+                {cryptoNews?.articles?.length > 0 && (
+                  <div
+                    className="rounded-2xl shadow-xl p-6 mb-6"
+                    style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
+                  >
+                    <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">📰 Crypto & DeFi News</h2>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {cryptoNews.articles.slice(0, 6).map((article, idx) => (
+                        <a
+                          key={idx}
+                          href={article.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block p-4 rounded-xl bg-gray-700/50 border border-gray-600 hover:border-blue-500/50 hover:bg-gray-700/70 transition-colors"
+                        >
+                          <p className="font-medium text-white line-clamp-2 mb-1">{article.title}</p>
+                          <p className="text-xs text-gray-400">{article.source} · {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : ''}</p>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {dashboardStats && (
+                  <div className="rounded-2xl shadow-xl p-6 mb-6" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                    <h2 className="text-xl font-bold text-white mb-4">Platform Activity</h2>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                      {[
+                        { k: 'total_interactions', l: 'Interactions' },
+                        { k: 'unique_users', l: 'Unique users' },
+                        { k: 'total_searches', l: 'Searches' },
+                        { k: 'page_views', l: 'Page views' },
+                        { k: 'total_errors', l: 'Errors logged' },
+                      ].map(({ k, l }) => (
+                        <div key={k} className="bg-gray-700/50 rounded-xl p-4 border border-gray-600">
+                          <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{l}</p>
+                          <p className="text-2xl font-bold text-white">{Number(dashboardStats[k] ?? 0).toLocaleString()}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="interactive-card bg-gradient-to-r from-purple-900/40 to-blue-900/40 rounded-2xl p-6 border border-purple-500/30 mb-6">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">✨ Pro Analytics <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-purple-500/30 text-purple-300">NFT Holders</span></h2>
+                      <p className="text-sm text-gray-300 mb-2">Unlock advanced analytics when you hold Boing NFTs.</p>
+                      <a href="/create-nft" className="inline-block px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium">Learn more →</a>
+                    </div>
+                  </div>
+                </div>
+                {priceInsights && priceInsights.length > 0 && (
+                  <div className="rounded-2xl shadow-xl p-6" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                    <h2 className="text-2xl font-bold text-white mb-4">Price Insights (7-Day Forecast)</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {priceInsights.map((insight) => (
+                        <div key={insight.symbol} className="bg-gray-700 rounded-xl p-4 border border-gray-600">
+                          <div className="flex justify-between items-start mb-2">
+                            <span className="text-white font-semibold">{insight.symbol}</span>
+                            <span className={`text-xs px-2 py-1 rounded ${insight.trend === 'up' ? 'bg-green-500/20 text-green-400' : insight.trend === 'down' ? 'bg-red-500/20 text-red-400' : 'bg-gray-500/20 text-gray-400'}`}>{insight.trend?.toUpperCase() || 'NEUTRAL'}</span>
+                          </div>
+                          {insight.predictedPrice != null && insight.currentPrice && (
+                            <div className="text-sm"><span className="text-gray-300">Current:</span> ${insight.currentPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })} · <span className="text-blue-300">Est. 7d:</span> ${insight.predictedPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                  </>}
                   </div>
                 )}
 
