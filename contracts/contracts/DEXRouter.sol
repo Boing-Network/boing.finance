@@ -24,6 +24,30 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
     using SafeERC20 for IERC20;
     using Address for address;
 
+    error InvalidFactory();
+    error InvalidWeth();
+    error EmergencyStopActive();
+    error ManagerAccessRequired();
+    error NotAuthorized();
+    error RateLimitExceeded();
+    error InvalidToken();
+    error BlacklistedToken();
+    error TokenNotWhitelisted();
+    error Expired();
+    error InvalidPath();
+    error InvalidTo();
+    error InsufficientInputAmount();
+    error InsufficientOutputAmount();
+    error PriceImpactTooHigh();
+    error ExcessiveInputAmount();
+    error InsufficientAmounts();
+    error InsufficientLiquidity();
+    error InsufficientAAmount();
+    error InsufficientBAmount();
+    error EthTransferFailed();
+    error ToleranceTooHigh();
+    error LimitTooHigh();
+
     // Factory address
     address public immutable factory;
     
@@ -105,8 +129,8 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
     event WhitelistEnabled(bool enabled);
 
     constructor(address _factory, address _WETH) Ownable(msg.sender) {
-        require(_factory != address(0), "Router: INVALID_FACTORY");
-        require(_WETH != address(0), "Router: INVALID_WETH");
+        if (_factory == address(0)) revert InvalidFactory();
+        if (_WETH == address(0)) revert InvalidWeth();
         factory = _factory;
         WETH = _WETH;
         emergencyStop = false;
@@ -121,43 +145,30 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
     // ============ MODIFIERS ============
     
     modifier notEmergencyStopped() {
-        require(!emergencyStop, "Router: Emergency stop active");
+        if (emergencyStop) revert EmergencyStopActive();
         _;
     }
-    
+
     modifier onlyManager() {
-        require(
-            msg.sender == owner() || isManager[msg.sender],
-            "Router: Manager access required"
-        );
+        if (msg.sender != owner() && !isManager[msg.sender]) revert ManagerAccessRequired();
         _;
     }
-    
+
     modifier onlyAuthorized() {
-        require(
-            msg.sender == owner() || 
-            isManager[msg.sender] || 
-            isOperator[msg.sender],
-            "Router: Not authorized"
-        );
+        if (msg.sender != owner() && !isManager[msg.sender] && !isOperator[msg.sender]) revert NotAuthorized();
         _;
     }
-    
+
     modifier rateLimited() {
-        require(
-            block.timestamp >= lastSwapTime[msg.sender] + SWAP_COOLDOWN,
-            "Router: Rate limit exceeded"
-        );
+        if (block.timestamp < lastSwapTime[msg.sender] + SWAP_COOLDOWN) revert RateLimitExceeded();
         _;
         lastSwapTime[msg.sender] = block.timestamp;
     }
-    
+
     modifier validToken(address token) {
-        require(token != address(0), "Router: Invalid token");
-        require(!blacklistedTokens[token], "Router: Token blacklisted");
-        if (whitelistEnabled) {
-            require(whitelistedTokens[token], "Router: Token not whitelisted");
-        }
+        if (token == address(0)) revert InvalidToken();
+        if (blacklistedTokens[token]) revert BlacklistedToken();
+        if (whitelistEnabled && !whitelistedTokens[token]) revert TokenNotWhitelisted();
         _;
     }
 
@@ -173,33 +184,28 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         address to,
         uint256 deadline
     ) external nonReentrant whenNotPaused notEmergencyStopped rateLimited returns (uint256[] memory amounts) {
-        require(deadline >= block.timestamp, "Router: EXPIRED");
-        require(path.length >= 2, "Router: INVALID_PATH");
-        require(to != address(0), "Router: INVALID_TO");
-        require(amountIn > 0, "Router: INSUFFICIENT_INPUT_AMOUNT");
-        
-        // Validate tokens
+        if (deadline < block.timestamp) revert Expired();
+        if (path.length < 2) revert InvalidPath();
+        if (to == address(0)) revert InvalidTo();
+        if (amountIn == 0) revert InsufficientInputAmount();
+
         for (uint256 i = 0; i < path.length; i++) {
-            require(path[i] != address(0), "Router: Invalid token");
-            require(!blacklistedTokens[path[i]], "Router: Token blacklisted");
-            if (whitelistEnabled) {
-                require(whitelistedTokens[path[i]], "Router: Token not whitelisted");
-            }
+            if (path[i] == address(0)) revert InvalidToken();
+            if (blacklistedTokens[path[i]]) revert BlacklistedToken();
+            if (whitelistEnabled && !whitelistedTokens[path[i]]) revert TokenNotWhitelisted();
         }
-        
+
         amounts = getAmountsOut(amountIn, path);
         uint256 amountOut = amounts[amounts.length - 1];
-        
-        // Enhanced slippage protection
+
         uint256 slippageTolerance = _getSlippageTolerance(msg.sender);
-        uint256 minAmountOut = amountOutMin > 0 ? amountOutMin : 
+        uint256 minAmountOut = amountOutMin > 0 ? amountOutMin :
             (amountOut * (10000 - slippageTolerance)) / 10000;
-        
-        require(amountOut >= minAmountOut, "Router: INSUFFICIENT_OUTPUT_AMOUNT");
-        
-        // Calculate price impact
+
+        if (amountOut < minAmountOut) revert InsufficientOutputAmount();
+
         uint256 priceImpact = _calculatePriceImpact(amountIn, path[0], amountOut, path[path.length - 1]);
-        require(priceImpact <= maxPriceImpact, "Router: PRICE_IMPACT_TOO_HIGH");
+        if (priceImpact > maxPriceImpact) revert PriceImpactTooHigh();
         
         IERC20(path[0]).safeTransferFrom(msg.sender, address(this), amountIn);
         _swap(amounts, path, to);
@@ -226,29 +232,25 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         address to,
         uint256 deadline
     ) external nonReentrant whenNotPaused notEmergencyStopped rateLimited returns (uint256[] memory amounts) {
-        require(deadline >= block.timestamp, "Router: EXPIRED");
-        require(path.length >= 2, "Router: INVALID_PATH");
-        require(to != address(0), "Router: INVALID_TO");
-        require(amountOut > 0, "Router: INSUFFICIENT_OUTPUT_AMOUNT");
-        
-        // Validate tokens
+        if (deadline < block.timestamp) revert Expired();
+        if (path.length < 2) revert InvalidPath();
+        if (to == address(0)) revert InvalidTo();
+        if (amountOut == 0) revert InsufficientOutputAmount();
+
         for (uint256 i = 0; i < path.length; i++) {
-            require(path[i] != address(0), "Router: Invalid token");
-            require(!blacklistedTokens[path[i]], "Router: Token blacklisted");
-            if (whitelistEnabled) {
-                require(whitelistedTokens[path[i]], "Router: Token not whitelisted");
-            }
+            if (path[i] == address(0)) revert InvalidToken();
+            if (blacklistedTokens[path[i]]) revert BlacklistedToken();
+            if (whitelistEnabled && !whitelistedTokens[path[i]]) revert TokenNotWhitelisted();
         }
-        
+
         amounts = getAmountsIn(amountOut, path);
         uint256 amountIn = amounts[0];
-        
-        require(amountIn <= amountInMax, "Router: EXCESSIVE_INPUT_AMOUNT");
-        
-        // Calculate price impact
+
+        if (amountIn > amountInMax) revert ExcessiveInputAmount();
+
         uint256 priceImpact = _calculatePriceImpact(amountIn, path[0], amountOut, path[path.length - 1]);
-        require(priceImpact <= maxPriceImpact, "Router: PRICE_IMPACT_TOO_HIGH");
-        
+        if (priceImpact > maxPriceImpact) revert PriceImpactTooHigh();
+
         IERC20(path[0]).safeTransferFrom(msg.sender, address(this), amountIn);
         _swap(amounts, path, to);
         
@@ -273,34 +275,29 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         address to,
         uint256 deadline
     ) external payable nonReentrant whenNotPaused notEmergencyStopped rateLimited returns (uint256[] memory amounts) {
-        require(deadline >= block.timestamp, "Router: EXPIRED");
-        require(path.length >= 2, "Router: INVALID_PATH");
-        require(path[0] == WETH, "Router: INVALID_PATH");
-        require(to != address(0), "Router: INVALID_TO");
-        require(msg.value > 0, "Router: INSUFFICIENT_INPUT_AMOUNT");
-        
-        // Validate tokens
+        if (deadline < block.timestamp) revert Expired();
+        if (path.length < 2) revert InvalidPath();
+        if (path[0] != WETH) revert InvalidPath();
+        if (to == address(0)) revert InvalidTo();
+        if (msg.value == 0) revert InsufficientInputAmount();
+
         for (uint256 i = 0; i < path.length; i++) {
-            require(path[i] != address(0), "Router: Invalid token");
-            require(!blacklistedTokens[path[i]], "Router: Token blacklisted");
-            if (whitelistEnabled) {
-                require(whitelistedTokens[path[i]], "Router: Token not whitelisted");
-            }
+            if (path[i] == address(0)) revert InvalidToken();
+            if (blacklistedTokens[path[i]]) revert BlacklistedToken();
+            if (whitelistEnabled && !whitelistedTokens[path[i]]) revert TokenNotWhitelisted();
         }
-        
+
         amounts = getAmountsOut(msg.value, path);
         uint256 amountOut = amounts[amounts.length - 1];
-        
-        // Enhanced slippage protection
+
         uint256 slippageTolerance = _getSlippageTolerance(msg.sender);
-        uint256 minAmountOut = amountOutMin > 0 ? amountOutMin : 
+        uint256 minAmountOut = amountOutMin > 0 ? amountOutMin :
             (amountOut * (10000 - slippageTolerance)) / 10000;
-        
-        require(amountOut >= minAmountOut, "Router: INSUFFICIENT_OUTPUT_AMOUNT");
-        
-        // Calculate price impact
+
+        if (amountOut < minAmountOut) revert InsufficientOutputAmount();
+
         uint256 priceImpact = _calculatePriceImpact(msg.value, WETH, amountOut, path[path.length - 1]);
-        require(priceImpact <= maxPriceImpact, "Router: PRICE_IMPACT_TOO_HIGH");
+        if (priceImpact > maxPriceImpact) revert PriceImpactTooHigh();
         
         // Wrap ETH to WETH
         IWETH(WETH).deposit{value: msg.value}();
@@ -329,29 +326,25 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         address to,
         uint256 deadline
     ) external nonReentrant whenNotPaused notEmergencyStopped rateLimited returns (uint256[] memory amounts) {
-        require(deadline >= block.timestamp, "Router: EXPIRED");
-        require(path.length >= 2, "Router: INVALID_PATH");
-        require(path[path.length - 1] == WETH, "Router: INVALID_PATH");
-        require(to != address(0), "Router: INVALID_TO");
-        require(amountOut > 0, "Router: INSUFFICIENT_OUTPUT_AMOUNT");
-        
-        // Validate tokens
+        if (deadline < block.timestamp) revert Expired();
+        if (path.length < 2) revert InvalidPath();
+        if (path[path.length - 1] != WETH) revert InvalidPath();
+        if (to == address(0)) revert InvalidTo();
+        if (amountOut == 0) revert InsufficientOutputAmount();
+
         for (uint256 i = 0; i < path.length; i++) {
-            require(path[i] != address(0), "Router: Invalid token");
-            require(!blacklistedTokens[path[i]], "Router: Token blacklisted");
-            if (whitelistEnabled) {
-                require(whitelistedTokens[path[i]], "Router: Token not whitelisted");
-            }
+            if (path[i] == address(0)) revert InvalidToken();
+            if (blacklistedTokens[path[i]]) revert BlacklistedToken();
+            if (whitelistEnabled && !whitelistedTokens[path[i]]) revert TokenNotWhitelisted();
         }
-        
+
         amounts = getAmountsIn(amountOut, path);
         uint256 amountIn = amounts[0];
-        
-        require(amountIn <= amountInMax, "Router: EXCESSIVE_INPUT_AMOUNT");
-        
-        // Calculate price impact
+
+        if (amountIn > amountInMax) revert ExcessiveInputAmount();
+
         uint256 priceImpact = _calculatePriceImpact(amountIn, path[0], amountOut, WETH);
-        require(priceImpact <= maxPriceImpact, "Router: PRICE_IMPACT_TOO_HIGH");
+        if (priceImpact > maxPriceImpact) revert PriceImpactTooHigh();
         
         IERC20(path[0]).safeTransferFrom(msg.sender, address(this), amountIn);
         _swap(amounts, path, address(this));
@@ -359,9 +352,8 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         // Unwrap WETH to ETH
         IWETH(WETH).withdraw(amounts[amounts.length - 1]);
         
-        // Transfer ETH to recipient
         (bool success,) = to.call{value: amounts[amounts.length - 1]}("");
-        require(success, "Router: ETH_TRANSFER_FAILED");
+        if (!success) revert EthTransferFailed();
         
         emit SwapTokensForExactETH(
             msg.sender, 
@@ -390,21 +382,15 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         address to,
         uint256 deadline
     ) external nonReentrant whenNotPaused notEmergencyStopped returns (uint256 amountA, uint256 amountB, uint256 liquidity) {
-        require(deadline >= block.timestamp, "Router: EXPIRED");
-        require(to != address(0), "Router: INVALID_TO");
-        require(amountADesired > 0 && amountBDesired > 0, "Router: INSUFFICIENT_AMOUNTS");
-        // Inline token validation for tokenA
-        require(tokenA != address(0), "Router: Invalid token");
-        require(!blacklistedTokens[tokenA], "Router: Token blacklisted");
-        if (whitelistEnabled) {
-            require(whitelistedTokens[tokenA], "Router: Token not whitelisted");
-        }
-        // Inline token validation for tokenB
-        require(tokenB != address(0), "Router: Invalid token");
-        require(!blacklistedTokens[tokenB], "Router: Token blacklisted");
-        if (whitelistEnabled) {
-            require(whitelistedTokens[tokenB], "Router: Token not whitelisted");
-        }
+        if (deadline < block.timestamp) revert Expired();
+        if (to == address(0)) revert InvalidTo();
+        if (amountADesired == 0 || amountBDesired == 0) revert InsufficientAmounts();
+        if (tokenA == address(0)) revert InvalidToken();
+        if (blacklistedTokens[tokenA]) revert BlacklistedToken();
+        if (whitelistEnabled && !whitelistedTokens[tokenA]) revert TokenNotWhitelisted();
+        if (tokenB == address(0)) revert InvalidToken();
+        if (blacklistedTokens[tokenB]) revert BlacklistedToken();
+        if (whitelistEnabled && !whitelistedTokens[tokenB]) revert TokenNotWhitelisted();
         
         (amountA, amountB) = _addLiquidity(tokenA, tokenB, amountADesired, amountBDesired, amountAMin, amountBMin);
         address pair = IDEXFactory(factory).getPairAddress(tokenA, tokenB);
@@ -427,28 +413,22 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         address to,
         uint256 deadline
     ) external nonReentrant whenNotPaused notEmergencyStopped returns (uint256 amountA, uint256 amountB) {
-        require(deadline >= block.timestamp, "Router: EXPIRED");
-        require(to != address(0), "Router: INVALID_TO");
-        require(liquidity > 0, "Router: INSUFFICIENT_LIQUIDITY");
-        // Inline token validation for tokenA
-        require(tokenA != address(0), "Router: Invalid token");
-        require(!blacklistedTokens[tokenA], "Router: Token blacklisted");
-        if (whitelistEnabled) {
-            require(whitelistedTokens[tokenA], "Router: Token not whitelisted");
-        }
-        // Inline token validation for tokenB
-        require(tokenB != address(0), "Router: Invalid token");
-        require(!blacklistedTokens[tokenB], "Router: Token blacklisted");
-        if (whitelistEnabled) {
-            require(whitelistedTokens[tokenB], "Router: Token not whitelisted");
-        }
-        
+        if (deadline < block.timestamp) revert Expired();
+        if (to == address(0)) revert InvalidTo();
+        if (liquidity == 0) revert InsufficientLiquidity();
+        if (tokenA == address(0)) revert InvalidToken();
+        if (blacklistedTokens[tokenA]) revert BlacklistedToken();
+        if (whitelistEnabled && !whitelistedTokens[tokenA]) revert TokenNotWhitelisted();
+        if (tokenB == address(0)) revert InvalidToken();
+        if (blacklistedTokens[tokenB]) revert BlacklistedToken();
+        if (whitelistEnabled && !whitelistedTokens[tokenB]) revert TokenNotWhitelisted();
+
         address pair = IDEXFactory(factory).getPairAddress(tokenA, tokenB);
         IDEXPair(pair).transferFrom(msg.sender, pair, liquidity);
         (amountA, amountB) = IDEXPair(pair).burn(to);
-        
-        require(amountA >= amountAMin, "Router: INSUFFICIENT_A_AMOUNT");
-        require(amountB >= amountBMin, "Router: INSUFFICIENT_B_AMOUNT");
+
+        if (amountA < amountAMin) revert InsufficientAAmount();
+        if (amountB < amountBMin) revert InsufficientBAmount();
     }
 
     // ============ VIEW FUNCTIONS ============
@@ -458,7 +438,7 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         view 
         returns (uint256[] memory amounts) 
     {
-        require(path.length >= 2, "Router: INVALID_PATH");
+        if (path.length < 2) revert InvalidPath();
         amounts = new uint256[](path.length);
         amounts[0] = amountIn;
         
@@ -473,7 +453,7 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         view 
         returns (uint256[] memory amounts) 
     {
-        require(path.length >= 2, "Router: INVALID_PATH");
+        if (path.length < 2) revert InvalidPath();
         amounts = new uint256[](path.length);
         amounts[amounts.length - 1] = amountOut;
         
@@ -488,8 +468,8 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         pure 
         returns (uint256 amountOut) 
     {
-        require(amountIn > 0, "Router: INSUFFICIENT_INPUT_AMOUNT");
-        require(reserveIn > 0 && reserveOut > 0, "Router: INSUFFICIENT_LIQUIDITY");
+        if (amountIn == 0) revert InsufficientInputAmount();
+        if (reserveIn == 0 || reserveOut == 0) revert InsufficientLiquidity();
         
         uint256 amountInWithFee = amountIn * 997; // 0.3% fee
         uint256 numerator = amountInWithFee * reserveOut;
@@ -502,8 +482,8 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         pure 
         returns (uint256 amountIn) 
     {
-        require(amountOut > 0, "Router: INSUFFICIENT_OUTPUT_AMOUNT");
-        require(reserveIn > 0 && reserveOut > 0, "Router: INSUFFICIENT_LIQUIDITY");
+        if (amountOut == 0) revert InsufficientOutputAmount();
+        if (reserveIn == 0 || reserveOut == 0) revert InsufficientLiquidity();
         
         uint256 numerator = reserveIn * amountOut * 1000;
         uint256 denominator = (reserveOut - amountOut) * 997; // 0.3% fee
@@ -540,12 +520,12 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
             } else {
                 uint256 amountBOptimal = quote(amountADesired, reserveA, reserveB);
                 if (amountBOptimal <= amountBDesired) {
-                    require(amountBOptimal >= amountBMin, "Router: INSUFFICIENT_B_AMOUNT");
+                    if (amountBOptimal < amountBMin) revert InsufficientBAmount();
                     (amountA, amountB) = (amountADesired, amountBOptimal);
                 } else {
                     uint256 amountAOptimal = quote(amountBDesired, reserveB, reserveA);
                     assert(amountAOptimal <= amountADesired);
-                    require(amountAOptimal >= amountAMin, "Router: INSUFFICIENT_A_AMOUNT");
+                    if (amountAOptimal < amountAMin) revert InsufficientAAmount();
                     (amountA, amountB) = (amountAOptimal, amountBDesired);
                 }
             }
@@ -557,8 +537,8 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         pure 
         returns (uint256 amountB) 
     {
-        require(amountA > 0, "Router: INSUFFICIENT_AMOUNT");
-        require(reserveA > 0 && reserveB > 0, "Router: INSUFFICIENT_LIQUIDITY");
+        if (amountA == 0) revert InsufficientAmounts();
+        if (reserveA == 0 || reserveB == 0) revert InsufficientLiquidity();
         amountB = (amountA * reserveB) / reserveA;
     }
 
@@ -614,7 +594,7 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
      * @dev Update slippage tolerance (manager only)
      */
     function updateSlippageTolerance(uint256 newTolerance) external onlyManager {
-        require(newTolerance <= MAX_SLIPPAGE_TOLERANCE, "Router: Tolerance too high");
+        if (newTolerance > MAX_SLIPPAGE_TOLERANCE) revert ToleranceTooHigh();
         uint256 oldTolerance = defaultSlippageTolerance;
         defaultSlippageTolerance = newTolerance;
         emit SlippageToleranceUpdated(oldTolerance, newTolerance);
@@ -624,7 +604,7 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
      * @dev Update price impact limit (manager only)
      */
     function updatePriceImpactLimit(uint256 newLimit) external onlyManager {
-        require(newLimit <= MAX_PRICE_IMPACT, "Router: Limit too high");
+        if (newLimit > MAX_PRICE_IMPACT) revert LimitTooHigh();
         uint256 oldLimit = maxPriceImpact;
         maxPriceImpact = newLimit;
         emit PriceImpactLimitUpdated(oldLimit, newLimit);

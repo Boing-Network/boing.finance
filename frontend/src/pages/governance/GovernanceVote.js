@@ -3,17 +3,31 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { PageHeader, PageCard } from '../../components/PageLayout';
 import { useWalletConnection } from '../../hooks/useWalletConnection';
+import { useNetwork } from '../../hooks/useNetwork';
+import { createProposal } from '../../services/governanceApi';
 
 export default function GovernanceVote() {
   const { account } = useWalletConnection();
+  const { chainId } = useNetwork();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!account) return;
-    setSubmitted(true);
+    setLoading(true);
+    setError(null);
+    try {
+      await createProposal({ chainId: chainId || 1, title, description, createdBy: account, status: 'pending' });
+      setSubmitted(true);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -49,8 +63,9 @@ export default function GovernanceVote() {
                   <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Description</label>
                   <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe your proposal in detail..." required rows={6} className="w-full px-4 py-3 rounded-lg border bg-gray-800/50 resize-none" style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} />
                 </div>
+                {error && <p className="text-amber-400 text-sm">{error}</p>}
                 <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>You need BOING tokens to create a proposal. Minimum threshold: 10,000 BOING.</div>
-                <button type="submit" className="w-full py-3 rounded-lg font-medium bg-cyan-500 hover:bg-cyan-600 text-white transition-colors">Submit Proposal</button>
+                <button type="submit" disabled={loading} className="w-full py-3 rounded-lg font-medium bg-cyan-500 hover:bg-cyan-600 text-white transition-colors disabled:opacity-50">Submit Proposal</button>
               </form>
             )}
           </PageCard>

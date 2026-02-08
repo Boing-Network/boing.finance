@@ -13,6 +13,13 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
  * @custom:security-contact security@mochi.com
  */
 contract PriceOracle is Ownable, Pausable {
+    error NoPriceFeedAvailable();
+    error InvalidPrice();
+    error StaleRound();
+    error StalePrice();
+    error InvalidPriceFeedAddress();
+    error UpdateTooFrequent();
+
     // Price feed mapping: token => price feed address
     mapping(address => address) public priceFeeds;
     
@@ -36,7 +43,7 @@ contract PriceOracle is Ownable, Pausable {
      * @dev Get the latest price for a token
      */
     function getPrice(address token) external view returns (uint256) {
-        require(priceFeeds[token] != address(0) || fallbackPrices[token] > 0, "Oracle: No price feed available");
+        if (priceFeeds[token] == address(0) && fallbackPrices[token] == 0) revert NoPriceFeedAvailable();
         
         if (priceFeeds[token] != address(0)) {
             return getChainlinkPrice(token);
@@ -45,21 +52,26 @@ contract PriceOracle is Ownable, Pausable {
         }
     }
     
+    // Maximum allowed staleness for Chainlink price (default 1 hour)
+    uint256 public constant MAX_PRICE_AGE = 1 hours;
+
     /**
-     * @dev Get price from Chainlink feed
+     * @dev Get price from Chainlink feed with staleness and validity checks (industry standard)
      */
     function getChainlinkPrice(address token) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(priceFeeds[token]);
         
         (
-            /* uint80 roundID */,
+            uint80 roundId,
             int256 price,
-            /*uint startedAt*/,
-            /*uint timeStamp*/,
-            /*uint80 answeredInRound*/
+            ,
+            uint256 updatedAt,
+            uint80 answeredInRound
         ) = priceFeed.latestRoundData();
         
-        require(price > 0, "Oracle: Invalid price");
+        if (price <= 0) revert InvalidPrice();
+        if (answeredInRound < roundId) revert StaleRound();
+        if (block.timestamp - updatedAt > MAX_PRICE_AGE) revert StalePrice();
         return uint256(price);
     }
     
@@ -81,7 +93,7 @@ contract PriceOracle is Ownable, Pausable {
      * @dev Set Chainlink price feed for a token
      */
     function setPriceFeed(address token, address priceFeed) external onlyOwner {
-        require(priceFeed != address(0), "Oracle: Invalid price feed address");
+        if (priceFeed == address(0)) revert InvalidPriceFeedAddress();
         priceFeeds[token] = priceFeed;
         emit PriceFeedUpdated(token, priceFeed);
     }
@@ -90,7 +102,7 @@ contract PriceOracle is Ownable, Pausable {
      * @dev Set fallback price for a token
      */
     function setFallbackPrice(address token, uint256 price) external onlyOwner {
-        require(price > 0, "Oracle: Invalid price");
+        if (price == 0) revert InvalidPrice();
         fallbackPrices[token] = price;
         lastUpdateTime[token] = block.timestamp;
         emit FallbackPriceUpdated(token, price);
@@ -101,11 +113,8 @@ contract PriceOracle is Ownable, Pausable {
      * @dev Update fallback price (with time check)
      */
     function updateFallbackPrice(address token, uint256 price) external onlyOwner {
-        require(price > 0, "Oracle: Invalid price");
-        require(
-            block.timestamp >= lastUpdateTime[token] + MIN_UPDATE_INTERVAL,
-            "Oracle: Update too frequent"
-        );
+        if (price == 0) revert InvalidPrice();
+        if (block.timestamp < lastUpdateTime[token] + MIN_UPDATE_INTERVAL) revert UpdateTooFrequent();
         
         fallbackPrices[token] = price;
         lastUpdateTime[token] = block.timestamp;

@@ -215,6 +215,91 @@ export const analyticsSnapshots = sqliteTable('analytics_snapshots', {
   rangeNetworkTimestampIdx: index('analytics_snapshots_range_network_timestamp_idx').on(table.range, table.network, table.timestamp)
 }));
 
+// Governance: proposals (metadata + optional on-chain proposal id)
+export const governanceProposals = sqliteTable('governance_proposals', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  chainId: integer('chain_id').notNull(),
+  contractProposalId: text('contract_proposal_id'), // on-chain proposal id when contract deployed
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  status: text('status').notNull(), // 'active' | 'passed' | 'rejected' | 'pending'
+  createdBy: text('created_by').notNull(),
+  votesFor: text('votes_for').default('0'),
+  votesAgainst: text('votes_against').default('0'),
+  startBlock: integer('start_block'),
+  endBlock: integer('end_block'),
+  endDate: text('end_date'),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`)
+}, (table) => ({
+  chainIdIdx: index('gov_proposals_chain_id_idx').on(table.chainId),
+  statusIdx: index('gov_proposals_status_idx').on(table.status),
+  createdAtIdx: index('gov_proposals_created_at_idx').on(table.createdAt)
+}));
+
+// Governance: votes (per user per proposal)
+export const governanceVotes = sqliteTable('governance_votes', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  proposalId: integer('proposal_id').notNull(),
+  voter: text('voter').notNull(),
+  support: integer('support').notNull(), // 1 = for, 0 = against
+  weight: text('weight').notNull(),
+  txHash: text('tx_hash'),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`)
+}, (table) => ({
+  proposalIdIdx: index('gov_votes_proposal_id_idx').on(table.proposalId),
+  voterIdx: index('gov_votes_voter_idx').on(table.voter)
+}));
+
+// Treasury: snapshots (balance/allocations per chain, when no contract or cached from contract)
+export const treasurySnapshots = sqliteTable('treasury_snapshots', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  chainId: integer('chain_id').notNull(),
+  totalUsd: text('total_usd').notNull(),
+  allocations: text('allocations'), // JSON
+  multisigSigners: text('multisig_signers'), // e.g. "3/5"
+  timestamp: text('timestamp').default(sql`CURRENT_TIMESTAMP`)
+}, (table) => ({
+  chainIdIdx: index('treasury_chain_id_idx').on(table.chainId),
+  timestampIdx: index('treasury_timestamp_idx').on(table.timestamp)
+}));
+
+// BOING Points: user total (off-chain accrual until claim contract exists)
+export const userPoints = sqliteTable('user_points', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  address: text('address').notNull().unique(),
+  points: integer('points').notNull().default(0),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`)
+}, (table) => ({
+  addressIdx: index('user_points_address_idx').on(table.address)
+}));
+
+// BOING Points: activity log (for history and audit)
+export const pointsActivity = sqliteTable('points_activity', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  address: text('address').notNull(),
+  action: text('action').notNull(), // 'swap', 'liquidity_add', 'bridge', 'deploy', 'vote'
+  points: integer('points').notNull(),
+  txHash: text('tx_hash'),
+  chainId: integer('chain_id'),
+  metadata: text('metadata'),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`)
+}, (table) => ({
+  addressIdx: index('points_activity_address_idx').on(table.address),
+  createdAtIdx: index('points_activity_created_at_idx').on(table.createdAt)
+}));
+
+// Contract registry: deployed contract addresses per chain (for frontend/backend to read)
+export const contractRegistry = sqliteTable('contract_registry', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  chainId: integer('chain_id').notNull(),
+  contractName: text('contract_name').notNull(), // 'governor', 'treasury', 'boingToken', 'nftStaking'
+  address: text('address').notNull(),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`)
+}, (table) => ({
+  chainNameIdx: index('contract_registry_chain_name_idx').on(table.chainId, table.contractName)
+}));
+
 // Portfolio snapshots for PnL tracking (D1)
 export const portfolioSnapshots = sqliteTable('portfolio_snapshots', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -230,6 +315,13 @@ export const portfolioSnapshots = sqliteTable('portfolio_snapshots', {
 }));
 
 export const schema = {
+  // Governance & BOING
+  governanceProposals,
+  governanceVotes,
+  treasurySnapshots,
+  userPoints,
+  pointsActivity,
+  contractRegistry,
   // New D1-optimized tables
   knownTokens,
   portfolioSnapshots,

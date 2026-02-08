@@ -5,6 +5,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./TokenStructs.sol";
 
 /**
@@ -15,6 +17,7 @@ import "./TokenStructs.sol";
  */
 contract TokenFactory is Ownable, ReentrancyGuard, Pausable {
     using Clones for address;
+    using SafeERC20 for IERC20;
     
     // Plan enumeration (for service fee calculation)
     enum Plan { Basic, Professional, Enterprise }
@@ -488,12 +491,9 @@ contract TokenFactory is Ownable, ReentrancyGuard, Pausable {
     function emergencyRecover(address tokenAddress, address to, uint256 amount) external onlyOwner {
         require(to != address(0), "TokenFactory: Invalid recipient address");
         require(amount > 0, "TokenFactory: Amount must be greater than 0");
+        require(tokenAddress != address(0), "TokenFactory: Use emergencyRecoverETH for ETH");
         
-        // Transfer tokens
-        (bool success, ) = tokenAddress.call(
-            abi.encodeWithSignature("transfer(address,uint256)", to, amount)
-        );
-        require(success, "TokenFactory: Token transfer failed");
+        IERC20(tokenAddress).safeTransfer(to, amount);
     }
     
     /**
