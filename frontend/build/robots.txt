@@ -1,12 +1,11 @@
 # robots.txt for boing.finance
+# https://boing.finance
 
 User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /admin/
+Disallow: /_redirects
 
 # Sitemap
 Sitemap: https://boing.finance/sitemap.xml
-
-# Crawl-delay (optional, helps prevent overloading)
-Crawl-delay: 1

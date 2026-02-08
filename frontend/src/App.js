@@ -5,6 +5,8 @@ import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './i18n'; // Initialize i18n
 import { WalletProvider } from './contexts/WalletContext';
+import { SolanaWalletProvider } from './contexts/SolanaWalletContext';
+import ChainTypeSelector from './components/ChainTypeSelector';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AchievementProvider } from './contexts/AchievementContext';
 import AchievementOverlay from './components/AchievementOverlay';
@@ -284,6 +286,7 @@ function AppContent() {
                 onOpenDefi101={() => { setDefi101Open(true); setToolsDropdownOpen(false); }}
               />
               <div className="flex items-center gap-2 border-l pl-2" style={{ borderColor: 'var(--border-color)' }}>
+                <ChainTypeSelector />
                 <NetworkSelector />
                 <WalletConnect />
               </div>
@@ -620,6 +623,7 @@ function AppContent() {
                   </div>
                 </div>
                 <div className="space-y-2">
+                  <ChainTypeSelector />
                   <NetworkSelector />
                   <WalletConnect />
                 </div>
@@ -819,6 +823,7 @@ function App() {
         <HelmetProvider>
           <ThemeProvider>
             <WalletProvider>
+              <SolanaWalletProvider>
               <AchievementProvider>
                 <AchievementOverlay />
               <BaseMiniAppWrapper>
@@ -859,6 +864,7 @@ function App() {
                 </Router>
               </BaseMiniAppWrapper>
               </AchievementProvider>
+              </SolanaWalletProvider>
             </WalletProvider>
           </ThemeProvider>
         </HelmetProvider>

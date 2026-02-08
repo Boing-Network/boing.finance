@@ -4,6 +4,9 @@ import { useLocation } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { useWallet } from '../contexts/WalletContext';
 import { useAchievements } from '../contexts/AchievementContext';
+import { useChainType, useSolanaWallet } from '../contexts/SolanaWalletContext';
+import { createSPLToken } from '../services/solanaTokenService';
+import { SOLANA_NETWORKS } from '../config/solanaConfig';
 import toast from 'react-hot-toast';
 import { getNetworkByChainId } from '../config/networks';
 import AdvancedERC20Artifact from '../artifacts/AdvancedERC20.json';
@@ -74,6 +77,164 @@ function ToggleButton({ enabled, onToggle, disabled, size = "md" }) {
         `}
       />
     </button>
+  );
+}
+
+// Solana SPL Token Deploy (shown when chain type is Solana)
+function DeployTokenSolanaContent() {
+  const { connection, address, connected, connectWallet, signTransaction, network } = useSolanaWallet();
+  const [name, setName] = useState('');
+  const [symbol, setSymbol] = useState('');
+  const [decimals, setDecimals] = useState(9);
+  const [initialSupply, setInitialSupply] = useState('');
+  const [deploying, setDeploying] = useState(false);
+  const [mintAddress, setMintAddress] = useState('');
+  const [signature, setSignature] = useState('');
+
+  const solanaNetwork = SOLANA_NETWORKS[network] || SOLANA_NETWORKS.devnet;
+
+  const handleDeploy = async (e) => {
+    e.preventDefault();
+    if (!connected || !address || !connection || !signTransaction) {
+      toast.error('Please connect your Solana wallet first.');
+      return;
+    }
+    if (!name.trim() || !symbol.trim()) {
+      toast.error('Name and symbol are required.');
+      return;
+    }
+    setDeploying(true);
+    setMintAddress('');
+    setSignature('');
+    try {
+      const result = await createSPLToken(connection, address, signTransaction, {
+        name: name.trim(),
+        symbol: symbol.trim().toUpperCase(),
+        decimals: Number(decimals) || 9,
+        initialSupply: initialSupply || '0',
+      });
+      setMintAddress(result.mintAddress);
+      setSignature(result.signature);
+      toast.success('SPL token deployed successfully!');
+    } catch (err) {
+      console.error('SPL deploy error:', err);
+      toast.error(err?.message || 'Failed to deploy SPL token');
+    } finally {
+      setDeploying(false);
+    }
+  };
+
+  return (
+    <div className="relative min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
+      <EnhancedAnimatedBackground />
+      <div className="relative z-10 container mx-auto px-4 py-8">
+        <div className="max-w-xl mx-auto">
+          <Helmet>
+            <title>Deploy SPL Token - Solana | Boing Finance</title>
+          </Helmet>
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+              Deploy SPL Token
+            </h1>
+            <p className="text-xl" style={{ color: 'var(--text-secondary)' }}>
+              Create an SPL token on Solana {solanaNetwork.name}
+            </p>
+          </div>
+
+          {!connected ? (
+            <div className="rounded-xl border p-8 text-center" style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'var(--border-color)',
+            }}>
+              <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>
+                Connect your Solana wallet (Phantom, Solflare) to deploy an SPL token.
+              </p>
+              <button
+                onClick={connectWallet}
+                className="px-6 py-3 rounded-lg font-medium"
+                style={{ backgroundColor: 'var(--accent-primary)', color: 'white' }}
+              >
+                Connect Solana Wallet
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleDeploy} className="rounded-xl border p-6 space-y-4" style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'var(--border-color)',
+            }}>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Token Name</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="My Token"
+                  className="w-full px-4 py-2 rounded-lg border"
+                  style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Symbol</label>
+                <input
+                  type="text"
+                  value={symbol}
+                  onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+                  placeholder="MTK"
+                  className="w-full px-4 py-2 rounded-lg border"
+                  style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Decimals</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={9}
+                  value={decimals}
+                  onChange={(e) => setDecimals(Number(e.target.value) || 9)}
+                  className="w-full px-4 py-2 rounded-lg border"
+                  style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                />
+                <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>9 is standard for Solana</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Initial Supply</label>
+                <input
+                  type="text"
+                  value={initialSupply}
+                  onChange={(e) => setInitialSupply(e.target.value)}
+                  placeholder="1000000"
+                  className="w-full px-4 py-2 rounded-lg border"
+                  style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={deploying}
+                className="w-full px-6 py-3 rounded-lg font-medium disabled:opacity-50"
+                style={{ backgroundColor: 'var(--accent-primary)', color: 'white' }}
+              >
+                {deploying ? 'Deploying…' : 'Deploy SPL Token'}
+              </button>
+              {mintAddress && signature && (
+                <div className="mt-4 pt-4 border-t space-y-2" style={{ borderColor: 'var(--border-color)' }}>
+                  <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Deployed!</p>
+                  <p className="text-xs break-all" style={{ color: 'var(--text-secondary)' }}>Mint: {mintAddress}</p>
+                  <a
+                    href={`${solanaNetwork.explorer}/tx/${signature}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-500 hover:underline"
+                  >
+                    View on Explorer
+                  </a>
+                </div>
+              )}
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -382,7 +543,8 @@ async function manualDeployWithInterface({ signer, ERC20_ABI, ERC20_BYTECODE, co
 
 export default function DeployToken() {
   const location = useLocation();
-  
+  const { isSolana } = useChainType();
+
   // Check for template data from navigation
   useEffect(() => {
     if (location.state?.template) {
@@ -1287,6 +1449,8 @@ export default function DeployToken() {
       }
     }
   };
+
+  if (isSolana) return <DeployTokenSolanaContent />;
 
   return (
     <>

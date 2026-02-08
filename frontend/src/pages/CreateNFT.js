@@ -1,12 +1,21 @@
 // Create NFT - Top-notch minting UX
 // Industry standards: ERC-721 metadata, local image upload, bulk minting, IPFS/R2 storage
+// Solana: SPL NFT (0 decimals, supply 1) with IPFS metadata
 
 import React, { useState, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useWallet } from '../contexts/WalletContext';
+import { useChainType, useSolanaWallet } from '../contexts/SolanaWalletContext';
 import EmptyState from '../components/EmptyState';
 import { uploadToIPFS, uploadMetadataToIPFS, validateFile } from '../utils/ipfsUpload';
+import { createSPLNFT } from '../services/solanaNftService';
+import { SOLANA_NETWORKS } from '../config/solanaConfig';
 import toast from 'react-hot-toast';
+
+const SOLANA_NFT_STEPS = [
+  { id: 'upload', label: 'Image & Details', icon: '🖼️' },
+  { id: 'review', label: 'Review & Mint', icon: '✅' },
+];
 
 const STEPS = [
   { id: 'collection', label: 'Collection', icon: '📦' },
@@ -71,7 +80,204 @@ function parseMetadataCSV(text, maxRows = 10000) {
   return list;
 }
 
+// Solana SPL NFT wizard (shown when chain type is Solana)
+function CreateNFTSolanaContent() {
+  const { connection, address, connected, connectWallet, signTransaction, network } = useSolanaWallet();
+  const [step, setStep] = useState('upload');
+  const [name, setName] = useState('');
+  const [symbol, setSymbol] = useState('');
+  const [description, setDescription] = useState('');
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [isMinting, setIsMinting] = useState(false);
+  const [mintAddress, setMintAddress] = useState('');
+  const [signature, setSignature] = useState('');
+
+  const solanaNetwork = SOLANA_NETWORKS[network] || SOLANA_NETWORKS.devnet;
+
+  const handleImageSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Max 10MB');
+      return;
+    }
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setImagePreview(reader.result);
+    reader.readAsDataURL(file);
+  };
+
+  const handleMint = async (e) => {
+    e.preventDefault();
+    if (!connected || !address || !connection || !signTransaction) {
+      toast.error('Please connect your Solana wallet.');
+      return;
+    }
+    if (!name.trim() || !symbol.trim() || !imageFile) {
+      toast.error('Name, symbol, and image are required.');
+      return;
+    }
+    setIsMinting(true);
+    setMintAddress('');
+    setSignature('');
+    try {
+      const result = await createSPLNFT(connection, address, signTransaction, {
+        name: name.trim(),
+        symbol: symbol.trim().toUpperCase().slice(0, 10),
+        description: description.trim(),
+        imageFile,
+      });
+      setMintAddress(result.mintAddress);
+      setSignature(result.signature);
+      toast.success('NFT minted successfully!');
+    } catch (err) {
+      console.error('SPL NFT mint error:', err);
+      toast.error(err?.message || 'Failed to mint NFT');
+    } finally {
+      setIsMinting(false);
+    }
+  };
+
+  return (
+    <>
+      <Helmet>
+        <title>Create SPL NFT - Solana | Boing Finance</title>
+        <meta name="description" content="Mint SPL NFTs on Solana. Image upload, IPFS metadata." />
+      </Helmet>
+      <div className="relative z-10 container mx-auto px-4 py-8">
+        <div className="max-w-xl mx-auto">
+          <div className="text-center mb-6">
+            <h1 className="text-4xl font-bold text-white mb-2">Create SPL NFT</h1>
+            <p className="text-gray-400">Mint an NFT on Solana {solanaNetwork.name}. Image + metadata stored on IPFS.</p>
+          </div>
+
+          {!connected ? (
+            <div className="rounded-xl border p-8 text-center" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+              <p className="mb-4 text-gray-400">Connect your Solana wallet to mint NFTs.</p>
+              <button
+                onClick={connectWallet}
+                className="px-6 py-3 rounded-lg font-medium bg-cyan-600 text-white hover:bg-cyan-500"
+              >
+                Connect Solana Wallet
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="flex justify-center gap-2 mb-6">
+                {SOLANA_NFT_STEPS.map((s, i) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => setStep(s.id)}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${
+                      step === s.id ? 'bg-cyan-500/30 text-cyan-300 border border-cyan-400/50' : 'bg-gray-700/50 text-gray-500'
+                    }`}
+                  >
+                    <span>{s.icon}</span>
+                    <span>{s.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="rounded-2xl border p-6" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+                {step === 'upload' && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Image *</label>
+                      <input type="file" accept="image/*" onChange={handleImageSelect} className="block w-full text-gray-400" />
+                      {imagePreview && <img src={imagePreview} alt="Preview" className="mt-2 max-h-48 rounded-lg object-contain" />}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Name *</label>
+                      <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="My NFT"
+                        className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Symbol *</label>
+                      <input
+                        type="text"
+                        value={symbol}
+                        onChange={(e) => setSymbol(e.target.value.toUpperCase().slice(0, 10))}
+                        placeholder="NFT"
+                        className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                      <textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Describe your NFT"
+                        rows={3}
+                        className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setStep('review')}
+                      disabled={!name.trim() || !symbol.trim() || !imageFile}
+                      className="w-full py-3 rounded-lg font-medium bg-cyan-600 text-white disabled:opacity-50"
+                    >
+                      Next: Review & Mint
+                    </button>
+                  </div>
+                )}
+
+                {step === 'review' && (
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-4">
+                      {imagePreview && <img src={imagePreview} alt="Preview" className="w-24 h-24 rounded-lg object-cover" />}
+                      <div>
+                        <p className="font-semibold text-white">{name || 'Untitled'}</p>
+                        <p className="text-sm text-gray-400">{symbol || '—'}</p>
+                        {description && <p className="text-sm text-gray-300 mt-1">{description}</p>}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button type="button" onClick={() => setStep('upload')} className="px-4 py-2 rounded-lg bg-gray-600 text-white text-sm">
+                        Back
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleMint}
+                        disabled={isMinting || !name.trim() || !symbol.trim() || !imageFile}
+                        className="flex-1 py-3 rounded-lg font-medium bg-cyan-600 text-white disabled:opacity-50"
+                      >
+                        {isMinting ? 'Minting…' : 'Mint NFT'}
+                      </button>
+                    </div>
+                    {mintAddress && signature && (
+                      <div className="mt-4 pt-4 border-t border-gray-600 space-y-2">
+                        <p className="text-sm font-medium text-white">Minted!</p>
+                        <p className="text-xs text-gray-400 break-all">Mint: {mintAddress}</p>
+                        <a href={`${solanaNetwork.explorer}/tx/${signature}`} target="_blank" rel="noopener noreferrer" className="text-sm text-cyan-400 hover:underline">
+                          View on Explorer
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default function CreateNFT() {
+  const { isSolana } = useChainType();
   const { account, isConnected, getCurrentNetwork, connectWallet } = useWallet();
   const [step, setStep] = useState('collection');
   const [collectionName, setCollectionName] = useState('');
@@ -368,6 +574,8 @@ export default function CreateNFT() {
     setGeneratedDynamicMetadata(list);
     toast.success(`Generated ${list.length} metadata entries`);
   };
+
+  if (isSolana) return <CreateNFTSolanaContent />;
 
   if (!isConnected) {
     return (

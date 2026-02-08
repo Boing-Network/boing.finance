@@ -6,6 +6,8 @@ import axios from 'axios';
 import config from '../config';
 import SettingsModal from '../components/SettingsModal';
 import { useWallet } from '../contexts/WalletContext';
+import { useChainType } from '../contexts/SolanaWalletContext';
+import { LiquiditySolanaContent } from '../components/SolanaFeaturePlaceholder';
 import { Helmet } from 'react-helmet-async';
 import { getNetworkByChainId } from '../config/networks';
 import { DexFeatureBanner } from '../components/NetworkSupportBanner';
@@ -16,6 +18,7 @@ const getApiUrl = () => {
 };
 
 const Liquidity = () => {
+  const { isSolana } = useChainType();
   const { isConnected, account } = useWalletConnection();
   const { chainId, switchNetwork } = useWallet();
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -99,6 +102,8 @@ const Liquidity = () => {
     setSettings(newSettings);
     localStorage.setItem('liquiditySettings', JSON.stringify(newSettings));
   };
+
+  if (isSolana) return <LiquiditySolanaContent />;
 
   // Show connect wallet message if not connected
   if (!isConnected || !account) {
