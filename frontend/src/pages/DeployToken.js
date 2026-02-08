@@ -80,6 +80,20 @@ function ToggleButton({ enabled, onToggle, disabled, size = "md" }) {
   );
 }
 
+// Record Solana deployment to backend (non-blocking)
+async function recordSolanaDeployment({ mintAddress, creatorAddress, network, type, name, symbol, metadataUri, signature }) {
+  try {
+    const url = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8787';
+    await fetch(`${url}/api/solana/deployments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mintAddress, creatorAddress, network, type, name, symbol, metadataUri, signature }),
+    });
+  } catch (e) {
+    console.warn('Record deployment failed:', e);
+  }
+}
+
 // Solana SPL Token Deploy (shown when chain type is Solana)
 function DeployTokenSolanaContent() {
   const { connection, address, connected, connectWallet, signTransaction, network } = useSolanaWallet();
@@ -87,6 +101,7 @@ function DeployTokenSolanaContent() {
   const [symbol, setSymbol] = useState('');
   const [decimals, setDecimals] = useState(9);
   const [initialSupply, setInitialSupply] = useState('');
+  const [logoFile, setLogoFile] = useState(null);
   const [deploying, setDeploying] = useState(false);
   const [mintAddress, setMintAddress] = useState('');
   const [signature, setSignature] = useState('');
@@ -112,10 +127,21 @@ function DeployTokenSolanaContent() {
         symbol: symbol.trim().toUpperCase(),
         decimals: Number(decimals) || 9,
         initialSupply: initialSupply || '0',
+        logoFile: logoFile || undefined,
       });
       setMintAddress(result.mintAddress);
       setSignature(result.signature);
       toast.success('SPL token deployed successfully!');
+      recordSolanaDeployment({
+        mintAddress: result.mintAddress,
+        creatorAddress: address,
+        network,
+        type: 'token',
+        name: name.trim(),
+        symbol: symbol.trim().toUpperCase(),
+        metadataUri: result.metadataUri,
+        signature: result.signature,
+      });
     } catch (err) {
       console.error('SPL deploy error:', err);
       toast.error(err?.message || 'Failed to deploy SPL token');
@@ -163,12 +189,23 @@ function DeployTokenSolanaContent() {
               borderColor: 'var(--border-color)',
             }}>
               <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Token Logo (optional)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+                  className="block w-full text-sm"
+                  style={{ color: 'var(--text-secondary)' }}
+                />
+              </div>
+              <div>
                 <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Token Name</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="My Token"
+                  maxLength={32}
                   className="w-full px-4 py-2 rounded-lg border"
                   style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
                 />

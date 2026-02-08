@@ -4,7 +4,7 @@
  * Separate from EVM WalletContext - use ChainTypeSelector to switch between EVM and Solana
  */
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { Connection, PublicKey } from '@solana/web3.js';
+import { Connection } from '@solana/web3.js';
 
 const SolanaWalletContext = createContext();
 
@@ -46,7 +46,24 @@ export const SolanaWalletProvider = ({ children }) => {
     }
   });
 
-  const network = process.env.REACT_APP_SOLANA_NETWORK === 'mainnet' ? 'mainnet' : 'devnet';
+  const [solanaNetwork, setSolanaNetworkState] = useState(() => {
+    try {
+      return localStorage.getItem('boing_solana_network') || (process.env.REACT_APP_SOLANA_NETWORK === 'mainnet' ? 'mainnet' : 'devnet');
+    } catch {
+      return 'devnet';
+    }
+  });
+
+  const network = solanaNetwork;
+  const setSolanaNetwork = useCallback((net) => {
+    setSolanaNetworkState(net);
+    try {
+      localStorage.setItem('boing_solana_network', net);
+    } catch (e) {
+      // ignore
+    }
+  }, []);
+
   const rpcUrl = network === 'mainnet'
     ? (process.env.REACT_APP_SOLANA_MAINNET_RPC || 'https://api.mainnet-beta.solana.com')
     : (process.env.REACT_APP_SOLANA_DEVNET_RPC || 'https://api.devnet.solana.com');
@@ -143,6 +160,7 @@ export const SolanaWalletProvider = ({ children }) => {
     balance,
     connection,
     network,
+    setSolanaNetwork,
     connectWallet,
     disconnectWallet,
     refreshBalance,

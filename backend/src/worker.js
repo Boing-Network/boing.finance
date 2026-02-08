@@ -12,6 +12,7 @@ import { createPortfolioRoutes } from './routes/portfolioRoutes.js';
 import { createAIRoutes } from './routes/aiRoutes.js';
 import { createGovernanceRoutes } from './routes/governanceRoutes.js';
 import { createBoingRoutes } from './routes/boingRoutes.js';
+import { createSolanaRoutes } from './routes/solanaRoutes.js';
 import collectAnalytics from './scheduled/collectAnalytics.js';
 
 // Create main app
@@ -193,6 +194,11 @@ const boingRoutes = createBoingRoutes();
 boingRoutes.use('*', dbMiddleware);
 boingRoutes.use('*', cacheMiddleware);
 app.route('/api/boing', boingRoutes);
+
+// Mount Solana routes (deployments) at /api/solana
+const solanaRoutes = createSolanaRoutes();
+solanaRoutes.use('*', dbMiddleware);
+app.route('/api/solana', solanaRoutes);
 
 // Webhook routes
 app.post('/api/webhook', async (c) => {

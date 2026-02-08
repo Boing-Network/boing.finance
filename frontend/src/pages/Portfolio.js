@@ -2,6 +2,8 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useWallet } from '../contexts/WalletContext';
+import { useChainType } from '../contexts/SolanaWalletContext';
+import PortfolioSolanaContent from '../components/PortfolioSolanaContent';
 import { Helmet } from 'react-helmet-async';
 import { ethers } from 'ethers';
 import { useBlockchainPools } from '../hooks/useBlockchainPools';
@@ -25,6 +27,7 @@ import toast from 'react-hot-toast';
 // MochiAstronaut component
 
 export default function Portfolio() {
+  const { isSolana } = useChainType();
   const [searchParams, setSearchParams] = useSearchParams();
   const { account, chainId, connectWallet } = useWallet();
   const [selectedNetwork, setSelectedNetwork] = useState('all');
@@ -397,6 +400,8 @@ export default function Portfolio() {
     
     localStorage.setItem('boing_last_portfolio_value', currentValue.toString());
   }, [portfolioSummary, account]);
+
+  if (isSolana) return <PortfolioSolanaContent />;
 
   if (!account) {
     return (

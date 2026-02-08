@@ -300,6 +300,26 @@ export const contractRegistry = sqliteTable('contract_registry', {
   chainNameIdx: index('contract_registry_chain_name_idx').on(table.chainId, table.contractName)
 }));
 
+// Solana deployments - tokens and NFTs (D1)
+export const solanaDeployments = sqliteTable('solana_deployments', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  mintAddress: text('mint_address').notNull().unique(),
+  creatorAddress: text('creator_address').notNull(),
+  network: text('network').notNull(), // 'mainnet' | 'devnet'
+  type: text('type').notNull(), // 'token' | 'nft'
+  name: text('name').notNull(),
+  symbol: text('symbol').notNull(),
+  metadataUri: text('metadata_uri'),
+  signature: text('signature').notNull(),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+  mintIdx: index('solana_deployments_mint_idx').on(table.mintAddress),
+  creatorIdx: index('solana_deployments_creator_idx').on(table.creatorAddress),
+  networkIdx: index('solana_deployments_network_idx').on(table.network),
+  typeIdx: index('solana_deployments_type_idx').on(table.type),
+  createdAtIdx: index('solana_deployments_created_at_idx').on(table.createdAt),
+}));
+
 // Portfolio snapshots for PnL tracking (D1)
 export const portfolioSnapshots = sqliteTable('portfolio_snapshots', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -315,6 +335,7 @@ export const portfolioSnapshots = sqliteTable('portfolio_snapshots', {
 }));
 
 export const schema = {
+  solanaDeployments,
   // Governance & BOING
   governanceProposals,
   governanceVotes,

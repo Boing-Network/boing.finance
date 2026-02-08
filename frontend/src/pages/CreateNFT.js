@@ -135,6 +135,22 @@ function CreateNFTSolanaContent() {
       setMintAddress(result.mintAddress);
       setSignature(result.signature);
       toast.success('NFT minted successfully!');
+      // Record to backend (non-blocking)
+      const url = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8787';
+      fetch(`${url}/api/solana/deployments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mintAddress: result.mintAddress,
+          creatorAddress: address,
+          network,
+          type: 'nft',
+          name: name.trim(),
+          symbol: symbol.trim().toUpperCase().slice(0, 10),
+          metadataUri: result.metadataUri,
+          signature: result.signature,
+        }),
+      }).catch((e) => console.warn('Record deployment failed:', e));
     } catch (err) {
       console.error('SPL NFT mint error:', err);
       toast.error(err?.message || 'Failed to mint NFT');
