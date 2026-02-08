@@ -251,4 +251,78 @@ INSERT OR IGNORE INTO cache (key, value, expires_at) VALUES
 INSERT OR IGNORE INTO user_interactions (user_id, action, token_address, chain_id, amount) VALUES
 ('0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6', 'view', '0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9', 11155111, NULL),
 ('0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6', 'search', '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238', 11155111, NULL),
-('0x1234567890123456789012345678901234567890', 'swap', '0x779877A7B0D9E8603169DdbD7836e478b4624789', 1, '1000000000000000000'); 
+('0x1234567890123456789012345678901234567890', 'swap', '0x779877A7B0D9E8603169DdbD7836e478b4624789', 1, '1000000000000000000');
+
+-- Governance & BOING tables (backend integration foundation)
+CREATE TABLE IF NOT EXISTS governance_proposals (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  chain_id INTEGER NOT NULL,
+  contract_proposal_id TEXT,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  status TEXT NOT NULL,
+  created_by TEXT NOT NULL,
+  votes_for TEXT DEFAULT '0',
+  votes_against TEXT DEFAULT '0',
+  start_block INTEGER,
+  end_block INTEGER,
+  end_date TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS gov_proposals_chain_id_idx ON governance_proposals(chain_id);
+CREATE INDEX IF NOT EXISTS gov_proposals_status_idx ON governance_proposals(status);
+CREATE INDEX IF NOT EXISTS gov_proposals_created_at_idx ON governance_proposals(created_at);
+
+CREATE TABLE IF NOT EXISTS governance_votes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  proposal_id INTEGER NOT NULL,
+  voter TEXT NOT NULL,
+  support INTEGER NOT NULL,
+  weight TEXT NOT NULL,
+  tx_hash TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS gov_votes_proposal_id_idx ON governance_votes(proposal_id);
+CREATE INDEX IF NOT EXISTS gov_votes_voter_idx ON governance_votes(voter);
+
+CREATE TABLE IF NOT EXISTS treasury_snapshots (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  chain_id INTEGER NOT NULL,
+  total_usd TEXT NOT NULL,
+  allocations TEXT,
+  multisig_signers TEXT,
+  timestamp TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS treasury_chain_id_idx ON treasury_snapshots(chain_id);
+CREATE INDEX IF NOT EXISTS treasury_timestamp_idx ON treasury_snapshots(timestamp);
+
+CREATE TABLE IF NOT EXISTS user_points (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  address TEXT NOT NULL UNIQUE,
+  points INTEGER NOT NULL DEFAULT 0,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS user_points_address_idx ON user_points(address);
+
+CREATE TABLE IF NOT EXISTS points_activity (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  address TEXT NOT NULL,
+  action TEXT NOT NULL,
+  points INTEGER NOT NULL,
+  tx_hash TEXT,
+  chain_id INTEGER,
+  metadata TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS points_activity_address_idx ON points_activity(address);
+CREATE INDEX IF NOT EXISTS points_activity_created_at_idx ON points_activity(created_at);
+
+CREATE TABLE IF NOT EXISTS contract_registry (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  chain_id INTEGER NOT NULL,
+  contract_name TEXT NOT NULL,
+  address TEXT NOT NULL,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE UNIQUE INDEX IF NOT EXISTS contract_registry_chain_name_idx ON contract_registry(chain_id, contract_name); 

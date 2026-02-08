@@ -2,11 +2,23 @@
 pragma solidity ^0.8.20;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-contract LiquidityLocker is Ownable {
+contract LiquidityLocker is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
+
+    error InvalidFactory();
+    error OnlyFactory();
+    error InvalidPair();
+    error InvalidAmount();
+    error InvalidDuration();
+    error DurationTooLong();
+    error InvalidIndex();
+    error NotOwner();
+    error AlreadyUnlocked();
+    error NotExpired();
 
     struct LiquidityLock {
         address owner;
@@ -39,17 +51,17 @@ contract LiquidityLocker is Ownable {
     address public factory;
 
     modifier onlyFactory() {
-        require(msg.sender == factory, "ONLY_FACTORY");
+        if (msg.sender != factory) revert OnlyFactory();
         _;
     }
 
     constructor(address _factory) Ownable(msg.sender) {
-        require(_factory != address(0), "INV_FACTORY");
+        if (_factory == address(0)) revert InvalidFactory();
         factory = _factory;
     }
 
     function setFactory(address _factory) external onlyOwner {
-        require(_factory != address(0), "INV_FACTORY");
+        if (_factory == address(0)) revert InvalidFactory();
         factory = _factory;
     }
 
@@ -60,11 +72,14 @@ contract LiquidityLocker is Ownable {
         uint256 lockDuration,
         string memory description,
         uint256 lockFee
-    ) external onlyFactory {
-        require(pair != address(0), "INV_PAIR");
-        require(amount > 0, "INV_AMT");
-        require(lockDuration > 0, "INV_DUR");
-        require(lockDuration <= 365 days, "LONG");
+    ) external onlyFactory nonReentrant {
+        if (pair == address(0)) revert InvalidPair();
+        if (amount == 0) revert InvalidAmount();
+        if (lockDuration == 0) revert InvalidDuration();
+        if (lockDuration > 365 days) revert DurationTooLong();
+
+        // Pull LP tokens from factory (factory must approve before calling)
+        IERC20(pair).safeTransferFrom(msg.sender, address(this), amount);
 
         // Create lock
         LiquidityLock memory newLock = LiquidityLock({
@@ -81,19 +96,22 @@ contract LiquidityLocker is Ownable {
         emit LockFeeCollected(user, lockFee, block.timestamp);
     }
 
-    function unlockLiquidity(address pair, uint256 lockIndex, address user) external onlyFactory {
-        require(pair != address(0), "INV_PAIR");
-        require(lockIndex < liquidityLocks[pair].length, "INV_IDX");
+    function unlockLiquidity(address pair, uint256 lockIndex, address user) external onlyFactory nonReentrant {
+        if (pair == address(0)) revert InvalidPair();
+        if (lockIndex >= liquidityLocks[pair].length) revert InvalidIndex();
         LiquidityLock storage lock = liquidityLocks[pair][lockIndex];
-        require(lock.owner == user, "NOT_OWNER");
-        require(lock.isLocked, "UNLOCKED");
-        require(block.timestamp >= lock.unlockTime, "NOT_EXPIRED");
+        if (lock.owner != user) revert NotOwner();
+        if (!lock.isLocked) revert AlreadyUnlocked();
+        if (block.timestamp < lock.unlockTime) revert NotExpired();
 
+        uint256 amount = lock.amount;
         lock.isLocked = false;
-        totalLockedLiquidity[pair] -= lock.amount;
-        totalLiquidityLocked -= lock.amount;
+        lock.amount = 0; // Prevent reentrancy
+        totalLockedLiquidity[pair] -= amount;
+        totalLiquidityLocked -= amount;
 
-        emit LiquidityUnlocked(pair, user, lock.amount, block.timestamp);
+        IERC20(pair).safeTransfer(user, amount);
+        emit LiquidityUnlocked(pair, user, amount, block.timestamp);
     }
 
     // View functions for DEXFactory or UI

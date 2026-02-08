@@ -1,13 +1,37 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 import "./interfaces/IDEXPair.sol";
+import "./interfaces/ILiquidityLocker.sol";
 import "./DEXPair.sol";
 
 contract DEXFactoryV2 is IDEXFactory, Ownable {
+    error IdenticalTokens();
+    error ZeroAddress();
+    error PairExists();
+    error Create2Failed();
+    error InvalidAmounts();
+    error NoLocker();
+    error InvalidDuration();
+    error MintFailed();
+    error ApproveFailed();
+    error LockFailed();
+    error TransferFailed();
+    error FeeTooHigh();
+    error InvalidLocker();
+    error InvalidPair();
+    error NoLpBalance();
+    error UnlockFailed();
+    struct PermitData {
+        uint256 deadline;
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+    }
+
     mapping(address => mapping(address => address)) public _getPair;
     address[] public allPairs;
     uint256 public totalPairsCreated;
@@ -26,7 +50,7 @@ contract DEXFactoryV2 is IDEXFactory, Ownable {
     event InitialLiquidityLocked(address indexed pair, address indexed user, uint256 amount, uint256 lockDuration);
 
     constructor(address _liquidityLocker) Ownable(msg.sender) {
-        require(_liquidityLocker != address(0), "INV_LOCKER");
+        if (_liquidityLocker == address(0)) revert InvalidLocker();
         liquidityLocker = _liquidityLocker;
     }
 
@@ -35,16 +59,16 @@ contract DEXFactoryV2 is IDEXFactory, Ownable {
     }
     
     function _createPair(address tokenA, address tokenB) internal returns (address pair) {
-        require(tokenA != tokenB, "ID"); // Identical addresses
-        require(tokenA != address(0) && tokenB != address(0), "ZA"); // Zero address
+        if (tokenA == tokenB) revert IdenticalTokens();
+        if (tokenA == address(0) || tokenB == address(0)) revert ZeroAddress();
         (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
-        require(_getPair[token0][token1] == address(0), "PC"); // Pair exists
+        if (_getPair[token0][token1] != address(0)) revert PairExists();
         bytes memory bytecode = type(DEXPair).creationCode;
         bytes32 salt = keccak256(abi.encodePacked(token0, token1));
         assembly {
             pair := create2(0, add(bytecode, 0x20), mload(bytecode), salt)
         }
-        require(pair != address(0), "C2F"); // CREATE2 failed
+        if (pair == address(0)) revert Create2Failed();
         IDEXPair(pair).initialize(token0, token1);
         _getPair[token0][token1] = pair;
         _getPair[token1][token0] = pair;
@@ -74,44 +98,45 @@ contract DEXFactoryV2 is IDEXFactory, Ownable {
         uint256 lockDuration,
         string memory lockDescription
     ) external returns (address pair, uint256 liquidity) {
-        require(tokenA != tokenB, "ID"); // Identical addresses
-        require(tokenA != address(0) && tokenB != address(0), "ZA"); // Zero address
-        require(amountA > 0 && amountB > 0, "INV_AMOUNTS"); // Valid amounts
+        if (tokenA == tokenB) revert IdenticalTokens();
+        if (tokenA == address(0) || tokenB == address(0)) revert ZeroAddress();
+        if (amountA == 0 || amountB == 0) revert InvalidAmounts();
         
-        // Create the pair
         pair = _createPair(tokenA, tokenB);
+        if (!IERC20(tokenA).transferFrom(msg.sender, pair, amountA)) revert TransferFailed();
+        if (!IERC20(tokenB).transferFrom(msg.sender, pair, amountB)) revert TransferFailed();
         
-        // Transfer tokens from user to pair contract
-        require(IERC20(tokenA).transferFrom(msg.sender, pair, amountA), "TF_A_FAILED");
-        require(IERC20(tokenB).transferFrom(msg.sender, pair, amountB), "TF_B_FAILED");
-        
-        if (shouldLockLiquidity) {
-            require(liquidityLocker != address(0), "NO_LOCKER");
-            require(lockDuration > 0, "INV_DURATION");
-            
-            // Mint initial liquidity directly to the factory for locking
-            liquidity = IDEXPair(pair).mint(address(this));
-            require(liquidity > 0, "MINT_FAILED");
-            
-            // Calculate lock fee (0.1% of LP tokens)
-            uint256 lockFee = (liquidity * 10) / 10000; // 0.1%
-            uint256 lockAmount = liquidity - lockFee;
-            
-            // Lock the liquidity directly (factory already owns the LP tokens)
-            (bool success, ) = liquidityLocker.call(
-                abi.encodeWithSignature(
-                    "lockLiquidity(address,address,uint256,uint256,string,uint256)",
-                    pair, msg.sender, lockAmount, lockDuration, lockDescription, lockFee
-                )
-            );
-            require(success, "LOCK_FAILED");
-            
-            emit InitialLiquidityLocked(pair, msg.sender, lockAmount, lockDuration);
-        } else {
-            // Mint initial liquidity to the user
-            liquidity = IDEXPair(pair).mint(msg.sender);
-            require(liquidity > 0, "MINT_FAILED");
-        }
+        liquidity = shouldLockLiquidity
+            ? _mintAndLock(pair, msg.sender, lockDuration, lockDescription)
+            : _mintToUser(pair, msg.sender);
+    }
+
+    function _mintToUser(address pair, address to) internal returns (uint256 liquidity) {
+        liquidity = IDEXPair(pair).mint(to);
+        if (liquidity == 0) revert MintFailed();
+    }
+
+    function _mintAndLock(
+        address pair,
+        address user,
+        uint256 lockDuration,
+        string memory lockDescription
+    ) internal returns (uint256 liquidity) {
+        if (liquidityLocker == address(0)) revert NoLocker();
+        if (lockDuration == 0) revert InvalidDuration();
+
+        liquidity = IDEXPair(pair).mint(address(this));
+        if (liquidity == 0) revert MintFailed();
+
+        uint256 lockFee = (liquidity * 10) / 10000;
+        uint256 lockAmount = liquidity - lockFee;
+
+        if (!IERC20(pair).approve(liquidityLocker, lockAmount)) revert ApproveFailed();
+        ILiquidityLocker(liquidityLocker).lockLiquidity(
+            pair, user, lockAmount, lockDuration, lockDescription, lockFee
+        );
+
+        emit InitialLiquidityLocked(pair, user, lockAmount, lockDuration);
     }
 
     /**
@@ -123,8 +148,10 @@ contract DEXFactoryV2 is IDEXFactory, Ownable {
      * @param shouldLockLiquidity Whether to lock the initial liquidity
      * @param lockDuration Duration to lock liquidity (if locking)
      * @param lockDescription Description for the lock (if locking)
-     * @param permitA Permit data for tokenA (deadline, v, r, s)
-     * @param permitB Permit data for tokenB (deadline, v, r, s)
+     * @param deadlineA Permit deadline for tokenA
+     * @param vA,rA,sA Permit signature for tokenA
+     * @param deadlineB Permit deadline for tokenB
+     * @param vB,rB,sB Permit signature for tokenB
      * @return pair The created pair address
      * @return liquidity The amount of LP tokens minted
      */
@@ -145,63 +172,50 @@ contract DEXFactoryV2 is IDEXFactory, Ownable {
         bytes32 rB,
         bytes32 sB
     ) external returns (address pair, uint256 liquidity) {
-        require(tokenA != tokenB, "ID"); // Identical addresses
-        require(tokenA != address(0) && tokenB != address(0), "ZA"); // Zero address
-        require(amountA > 0 && amountB > 0, "INV_AMOUNTS"); // Valid amounts
-        
-        // Create the pair
+        return _createPairWithLiquidityPermit(
+            tokenA, tokenB, amountA, amountB,
+            shouldLockLiquidity, lockDuration, lockDescription,
+            PermitData(deadlineA, vA, rA, sA),
+            PermitData(deadlineB, vB, rB, sB)
+        );
+    }
+
+    function _createPairWithLiquidityPermit(
+        address tokenA,
+        address tokenB,
+        uint256 amountA,
+        uint256 amountB,
+        bool shouldLockLiquidity,
+        uint256 lockDuration,
+        string memory lockDescription,
+        PermitData memory permitA,
+        PermitData memory permitB
+    ) internal returns (address pair, uint256 liquidity) {
+        if (tokenA == tokenB) revert IdenticalTokens();
+        if (tokenA == address(0) || tokenB == address(0)) revert ZeroAddress();
+        if (amountA == 0 || amountB == 0) revert InvalidAmounts();
+
         pair = _createPair(tokenA, tokenB);
-        
-        // Use permit to approve tokens (gasless approval)
-        if (deadlineA > 0) {
-            try IERC20Permit(tokenA).permit(msg.sender, address(this), amountA, deadlineA, vA, rA, sA) {
-                // Permit successful
-            } catch {
-                // Permit failed, try to use existing allowance
-                require(IERC20(tokenA).allowance(msg.sender, address(this)) >= amountA, "INSUFFICIENT_ALLOWANCE_A");
+
+        if (permitA.deadline > 0) {
+            try IERC20Permit(tokenA).permit(msg.sender, address(this), amountA, permitA.deadline, permitA.v, permitA.r, permitA.s) {}
+            catch {
+                if (IERC20(tokenA).allowance(msg.sender, address(this)) < amountA) revert TransferFailed();
             }
         }
-        
-        if (deadlineB > 0) {
-            try IERC20Permit(tokenB).permit(msg.sender, address(this), amountB, deadlineB, vB, rB, sB) {
-                // Permit successful
-            } catch {
-                // Permit failed, try to use existing allowance
-                require(IERC20(tokenB).allowance(msg.sender, address(this)) >= amountB, "INSUFFICIENT_ALLOWANCE_B");
+        if (permitB.deadline > 0) {
+            try IERC20Permit(tokenB).permit(msg.sender, address(this), amountB, permitB.deadline, permitB.v, permitB.r, permitB.s) {}
+            catch {
+                if (IERC20(tokenB).allowance(msg.sender, address(this)) < amountB) revert TransferFailed();
             }
         }
-        
-        // Transfer tokens from user to pair contract
-        require(IERC20(tokenA).transferFrom(msg.sender, pair, amountA), "TF_A_FAILED");
-        require(IERC20(tokenB).transferFrom(msg.sender, pair, amountB), "TF_B_FAILED");
-        
-        if (shouldLockLiquidity) {
-            require(liquidityLocker != address(0), "NO_LOCKER");
-            require(lockDuration > 0, "INV_DURATION");
-            
-            // Mint initial liquidity directly to the factory for locking
-            liquidity = IDEXPair(pair).mint(address(this));
-            require(liquidity > 0, "MINT_FAILED");
-            
-            // Calculate lock fee (0.1% of LP tokens)
-            uint256 lockFee = (liquidity * 10) / 10000; // 0.1%
-            uint256 lockAmount = liquidity - lockFee;
-            
-            // Lock the liquidity directly (factory already owns the LP tokens)
-            (bool success, ) = liquidityLocker.call(
-                abi.encodeWithSignature(
-                    "lockLiquidity(address,address,uint256,uint256,string,uint256)",
-                    pair, msg.sender, lockAmount, lockDuration, lockDescription, lockFee
-                )
-            );
-            require(success, "LOCK_FAILED");
-            
-            emit InitialLiquidityLocked(pair, msg.sender, lockAmount, lockDuration);
-        } else {
-            // Mint initial liquidity to the user
-            liquidity = IDEXPair(pair).mint(msg.sender);
-            require(liquidity > 0, "MINT_FAILED");
-        }
+
+        if (!IERC20(tokenA).transferFrom(msg.sender, pair, amountA)) revert TransferFailed();
+        if (!IERC20(tokenB).transferFrom(msg.sender, pair, amountB)) revert TransferFailed();
+
+        liquidity = shouldLockLiquidity
+            ? _mintAndLock(pair, msg.sender, lockDuration, lockDescription)
+            : _mintToUser(pair, msg.sender);
     }
 
     function getPair(address tokenA, address tokenB) external view returns (address pair) {
@@ -210,14 +224,14 @@ contract DEXFactoryV2 is IDEXFactory, Ownable {
     }
     
     function getPairAddress(address tokenA, address tokenB) external view returns (address) {
-        return _getPair[tokenA][tokenB];
+        (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
+        return _getPair[token0][token1];
     }
 
     function allPairsLength() external view returns (uint256) {
         return allPairs.length;
     }
     
-    // Enhanced liquidity locking with automatic initial liquidity lock
     function lockLiquidity(
         address pair,
         address user,
@@ -226,72 +240,50 @@ contract DEXFactoryV2 is IDEXFactory, Ownable {
         string memory description,
         uint256 lockFee
     ) external {
-        require(liquidityLocker != address(0), "NO_LOCKER");
-        // Delegate to liquidity locker
-        (bool success, ) = liquidityLocker.call(
-            abi.encodeWithSignature(
-                "lockLiquidity(address,address,uint256,uint256,string,uint256)",
-                pair, user, amount, lockDuration, description, lockFee
-            )
-        );
-        require(success, "LOCK_FAILED");
+        if (liquidityLocker == address(0)) revert NoLocker();
+        if (!IERC20(pair).transferFrom(msg.sender, address(this), amount)) revert TransferFailed();
+        if (!IERC20(pair).approve(liquidityLocker, amount)) revert ApproveFailed();
+        ILiquidityLocker(liquidityLocker).lockLiquidity(pair, user, amount, lockDuration, description, lockFee);
     }
     
-    // Special function for locking initial liquidity automatically
     function lockInitialLiquidity(
         address pair,
         address user,
         uint256 lockDuration,
         string memory description
     ) external {
-        require(liquidityLocker != address(0), "NO_LOCKER");
-        require(pair != address(0), "INV_PAIR");
-        
-        // Get the user's LP token balance
+        if (liquidityLocker == address(0)) revert NoLocker();
+        if (pair == address(0)) revert InvalidPair();
+
         uint256 lpBalance = IERC20(pair).balanceOf(user);
-        require(lpBalance > 0, "NO_LP");
-        
-        // Calculate lock fee (0.1% of LP tokens)
-        uint256 lockFee = (lpBalance * 10) / 10000; // 0.1%
+        if (lpBalance == 0) revert NoLpBalance();
+
+        uint256 lockFee = (lpBalance * 10) / 10000;
         uint256 lockAmount = lpBalance - lockFee;
-        
-        // Transfer LP tokens from user to factory (user must approve first)
-        require(IERC20(pair).transferFrom(user, address(this), lpBalance), "TF_FAILED");
-        
-        // Lock the liquidity
-        (bool success, ) = liquidityLocker.call(
-            abi.encodeWithSignature(
-                "lockLiquidity(address,address,uint256,uint256,string,uint256)",
-                pair, user, lockAmount, lockDuration, description, lockFee
-            )
+
+        if (!IERC20(pair).transferFrom(user, address(this), lpBalance)) revert TransferFailed();
+        if (!IERC20(pair).approve(liquidityLocker, lockAmount)) revert ApproveFailed();
+        ILiquidityLocker(liquidityLocker).lockLiquidity(
+            pair, user, lockAmount, lockDuration, description, lockFee
         );
-        require(success, "LOCK_FAILED");
-        
+
         emit InitialLiquidityLocked(pair, user, lockAmount, lockDuration);
     }
     
     function unlockLiquidity(address pair, uint256 lockIndex, address user) external {
-        require(liquidityLocker != address(0), "NO_LOCKER");
-        // Delegate to liquidity locker
-        (bool success, ) = liquidityLocker.call(
-            abi.encodeWithSignature(
-                "unlockLiquidity(address,uint256,address)",
-                pair, lockIndex, user
-            )
-        );
-        require(success, "UNLOCK_FAILED");
+        if (liquidityLocker == address(0)) revert NoLocker();
+        ILiquidityLocker(liquidityLocker).unlockLiquidity(pair, lockIndex, user);
     }
     
-    // Admin functions
     function setLiquidityLocker(address _liquidityLocker) external onlyOwner {
-        require(_liquidityLocker != address(0), "INV_LOCKER");
+        if (_liquidityLocker == address(0)) revert InvalidLocker();
         address oldLocker = liquidityLocker;
         liquidityLocker = _liquidityLocker;
         emit LiquidityLockerUpdated(oldLocker, _liquidityLocker);
     }
-    
+
     function setFeeRate(uint256 newFeeRate) public onlyOwner {
-        require(newFeeRate <= MAX_FEE_RATE, "FEE_TOO_HIGH");
+        if (newFeeRate > MAX_FEE_RATE) revert FeeTooHigh();
         uint256 oldFee = feeRate;
         feeRate = newFeeRate;
         emit FeeRateUpdated(oldFee, newFeeRate);

@@ -10,6 +10,8 @@ import { createAPIRoutes } from './routes/apiRoutes.js';
 import { createWalletActivityRoutes } from './routes/walletActivityRoutes.js';
 import { createPortfolioRoutes } from './routes/portfolioRoutes.js';
 import { createAIRoutes } from './routes/aiRoutes.js';
+import { createGovernanceRoutes } from './routes/governanceRoutes.js';
+import { createBoingRoutes } from './routes/boingRoutes.js';
 import collectAnalytics from './scheduled/collectAnalytics.js';
 
 // Create main app
@@ -179,6 +181,18 @@ app.route('/api/portfolio', portfolioRoutes);
 // Mount AI Assistant routes at /api/ai (no DB required)
 const aiRoutes = createAIRoutes();
 app.route('/api/ai', aiRoutes);
+
+// Mount Governance routes at /api/governance
+const governanceRoutes = createGovernanceRoutes();
+governanceRoutes.use('*', dbMiddleware);
+governanceRoutes.use('*', cacheMiddleware);
+app.route('/api/governance', governanceRoutes);
+
+// Mount BOING routes (points, activity) at /api/boing
+const boingRoutes = createBoingRoutes();
+boingRoutes.use('*', dbMiddleware);
+boingRoutes.use('*', cacheMiddleware);
+app.route('/api/boing', boingRoutes);
 
 // Webhook routes
 app.post('/api/webhook', async (c) => {

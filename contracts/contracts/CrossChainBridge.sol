@@ -18,6 +18,27 @@ contract CrossChainBridge is ReentrancyGuard, Pausable, Ownable, EIP712 {
     using SafeERC20 for IERC20;
     using ECDSA for bytes32;
 
+    error TokenNotSupported();
+    error ChainNotSupported();
+    error InvalidAmount();
+    error InvalidRecipient();
+    error AmountBelowMinimum();
+    error AmountAboveMaximum();
+    error ChainDailyVolumeExceeded();
+    error TokenDailyVolumeExceeded();
+    error OnlyValidators();
+    error TransferAlreadyProcessed();
+    error InvalidSignatures();
+    error BatchTooLarge();
+    error ArrayLengthMismatch();
+    error InvalidValidatorAddress();
+    error ValidatorAlreadyExists();
+    error ValidatorDoesNotExist();
+    error TooFewValidators();
+    error TooManyRequiredSignatures();
+    error AtLeastOneSignatureRequired();
+    error InsufficientSignatures();
+
     // Bridge events
     event TokenLocked(
         address indexed token,
@@ -187,17 +208,16 @@ contract CrossChainBridge is ReentrancyGuard, Pausable, Ownable, EIP712 {
         uint256 targetChainId,
         address targetRecipient
     ) external nonReentrant whenNotPaused {
-        require(tokenConfigs[token].supported, "Bridge: Token not supported");
-        require(chainConfigs[targetChainId].supported, "Bridge: Chain not supported");
-        require(amount > 0, "Bridge: Amount must be greater than 0");
-        require(targetRecipient != address(0), "Bridge: Invalid recipient");
-        
+        if (!tokenConfigs[token].supported) revert TokenNotSupported();
+        if (!chainConfigs[targetChainId].supported) revert ChainNotSupported();
+        if (amount == 0) revert InvalidAmount();
+        if (targetRecipient == address(0)) revert InvalidRecipient();
+
         ChainConfig storage chainConfig = chainConfigs[targetChainId];
         TokenConfig storage tokenConfig = tokenConfigs[token];
-        
-        // Check amount limits
-        require(amount >= chainConfig.minAmount, "Bridge: Amount below minimum");
-        require(amount <= chainConfig.maxAmount, "Bridge: Amount above maximum");
+
+        if (amount < chainConfig.minAmount) revert AmountBelowMinimum();
+        if (amount > chainConfig.maxAmount) revert AmountAboveMaximum();
         
         // Check daily volume limits
         _checkDailyVolumeLimits(chainConfig, tokenConfig, amount);
@@ -248,14 +268,13 @@ contract CrossChainBridge is ReentrancyGuard, Pausable, Ownable, EIP712 {
         bytes32 transferId,
         bytes calldata signatures
     ) external nonReentrant whenNotPaused {
-        require(validators[msg.sender], "Bridge: Only validators can unlock");
-        require(!processedTransfers[transferId], "Bridge: Transfer already processed");
-        require(tokenConfigs[token].supported, "Bridge: Token not supported");
-        require(amount > 0, "Bridge: Amount must be greater than 0");
-        require(recipient != address(0), "Bridge: Invalid recipient");
+        if (!validators[msg.sender]) revert OnlyValidators();
+        if (processedTransfers[transferId]) revert TransferAlreadyProcessed();
+        if (!tokenConfigs[token].supported) revert TokenNotSupported();
+        if (amount == 0) revert InvalidAmount();
+        if (recipient == address(0)) revert InvalidRecipient();
 
-        // Verify signatures
-        require(_verifySignatures(transferId, signatures), "Bridge: Invalid signatures");
+        if (!_verifySignatures(transferId, signatures)) revert InvalidSignatures();
 
         processedTransfers[transferId] = true;
 
@@ -283,25 +302,23 @@ contract CrossChainBridge is ReentrancyGuard, Pausable, Ownable, EIP712 {
         bytes32[] calldata transferIds,
         bytes[] calldata signatures
     ) external nonReentrant whenNotPaused {
-        require(validators[msg.sender], "Bridge: Only validators can unlock");
-        require(tokens.length <= MAX_BATCH_SIZE, "Bridge: Batch too large");
-        require(
-            tokens.length == recipients.length &&
-            tokens.length == amounts.length &&
-            tokens.length == sourceChainIds.length &&
-            tokens.length == transferIds.length &&
-            tokens.length == signatures.length,
-            "Bridge: Array length mismatch"
-        );
+        if (!validators[msg.sender]) revert OnlyValidators();
+        if (tokens.length > MAX_BATCH_SIZE) revert BatchTooLarge();
+        if (
+            tokens.length != recipients.length ||
+            tokens.length != amounts.length ||
+            tokens.length != sourceChainIds.length ||
+            tokens.length != transferIds.length ||
+            tokens.length != signatures.length
+        ) revert ArrayLengthMismatch();
 
         for (uint256 i = 0; i < tokens.length; i++) {
-            require(!processedTransfers[transferIds[i]], "Bridge: Transfer already processed");
-            require(tokenConfigs[tokens[i]].supported, "Bridge: Token not supported");
-            require(amounts[i] > 0, "Bridge: Amount must be greater than 0");
-            require(recipients[i] != address(0), "Bridge: Invalid recipient");
+            if (processedTransfers[transferIds[i]]) revert TransferAlreadyProcessed();
+            if (!tokenConfigs[tokens[i]].supported) revert TokenNotSupported();
+            if (amounts[i] == 0) revert InvalidAmount();
+            if (recipients[i] == address(0)) revert InvalidRecipient();
 
-            // Verify signature
-            require(_verifySignature(transferIds[i], signatures[i]), "Bridge: Invalid signature");
+            if (!_verifySignature(transferIds[i], signatures[i])) revert InvalidSignatures();
 
             processedTransfers[transferIds[i]] = true;
             IERC20(tokens[i]).safeTransfer(recipients[i], amounts[i]);
@@ -319,8 +336,8 @@ contract CrossChainBridge is ReentrancyGuard, Pausable, Ownable, EIP712 {
 
     // Admin functions
     function addValidator(address validator) external onlyOwner {
-        require(validator != address(0), "Bridge: Invalid validator address");
-        require(!validators[validator], "Bridge: Validator already exists");
+        if (validator == address(0)) revert InvalidValidatorAddress();
+        if (validators[validator]) revert ValidatorAlreadyExists();
         
         validators[validator] = true;
         validatorCount++;
@@ -329,8 +346,8 @@ contract CrossChainBridge is ReentrancyGuard, Pausable, Ownable, EIP712 {
     }
 
     function removeValidator(address validator) external onlyOwner {
-        require(validators[validator], "Bridge: Validator does not exist");
-        require(validatorCount > requiredSignatures, "Bridge: Too few validators");
+        if (!validators[validator]) revert ValidatorDoesNotExist();
+        if (validatorCount <= requiredSignatures) revert TooFewValidators();
         
         validators[validator] = false;
         validatorCount--;
@@ -339,8 +356,8 @@ contract CrossChainBridge is ReentrancyGuard, Pausable, Ownable, EIP712 {
     }
 
     function setRequiredSignatures(uint256 _requiredSignatures) external onlyOwner {
-        require(_requiredSignatures <= validatorCount, "Bridge: Too many required signatures");
-        require(_requiredSignatures > 0, "Bridge: At least one signature required");
+        if (_requiredSignatures > validatorCount) revert TooManyRequiredSignatures();
+        if (_requiredSignatures == 0) revert AtLeastOneSignatureRequired();
         
         requiredSignatures = _requiredSignatures;
     }
@@ -409,7 +426,7 @@ contract CrossChainBridge is ReentrancyGuard, Pausable, Ownable, EIP712 {
     }
 
     function _verifySignatures(bytes32 transferId, bytes calldata signatures) internal view returns (bool) {
-        require(signatures.length >= requiredSignatures * 65, "Bridge: Insufficient signatures");
+        if (signatures.length < requiredSignatures * 65) revert InsufficientSignatures();
         
         bytes32 hash = _hashTypedDataV4(transferId);
         address[] memory signers = new address[](requiredSignatures);
@@ -450,14 +467,8 @@ contract CrossChainBridge is ReentrancyGuard, Pausable, Ownable, EIP712 {
         if (block.timestamp - chainConfig.lastVolumeReset >= 1 days) {
             // Volume will be reset in _updateDailyVolumes
         } else {
-            require(
-                chainConfig.dailyVolume + amount <= chainConfig.maxDailyVolume,
-                "Bridge: Chain daily volume limit exceeded"
-            );
-            require(
-                tokenConfig.dailyVolume + amount <= tokenConfig.maxDailyVolume,
-                "Bridge: Token daily volume limit exceeded"
-            );
+            if (chainConfig.dailyVolume + amount > chainConfig.maxDailyVolume) revert ChainDailyVolumeExceeded();
+            if (tokenConfig.dailyVolume + amount > tokenConfig.maxDailyVolume) revert TokenDailyVolumeExceeded();
         }
     }
 

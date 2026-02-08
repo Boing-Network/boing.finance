@@ -1,19 +1,44 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
 import { PageHeader, PageCard } from '../../components/PageLayout';
 import { useWalletConnection } from '../../hooks/useWalletConnection';
-
-const MOCK_ACTIVITIES = [
-  { action: 'Swap completed', points: 10, date: '2025-02-04' },
-  { action: 'Liquidity added', points: 25, date: '2025-02-03' },
-  { action: 'Bridge used', points: 15, date: '2025-02-02' },
-  { action: 'Token deployed', points: 50, date: '2025-02-01' },
-];
+import { getPoints, getPointsActivity } from '../../services/boingApi';
 
 export default function BoingPoints() {
   const { account } = useWalletConnection();
-  const totalPoints = account ? 1250 : 0;
+  const [pointsData, setPointsData] = useState({ points: 0, updatedAt: null });
+  const [activity, setActivity] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!account) {
+      setPointsData({ points: 0, updatedAt: null });
+      setActivity([]);
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    Promise.all([getPoints(account), getPointsActivity(account, { limit: 20 })])
+      .then(([pts, act]) => {
+        if (cancelled) return;
+        setPointsData({ points: pts?.points ?? 0, updatedAt: pts?.updatedAt ?? null });
+        setActivity(Array.isArray(act) ? act : []);
+      })
+      .catch((e) => {
+        if (!cancelled) {
+          setError(e.message);
+          setPointsData({ points: 0, updatedAt: null });
+          setActivity([]);
+        }
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [account]);
+
+  const totalPoints = pointsData.points;
 
   return (
     <>
@@ -26,10 +51,11 @@ export default function BoingPoints() {
 
         {account ? (
           <>
+            {error && <p className="text-amber-400 text-sm mb-4">API: {error}</p>}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <PageCard>
                 <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>Your Points</p>
-                <p className="text-4xl font-bold text-cyan-400">{totalPoints.toLocaleString()}</p>
+                {loading ? <p className="text-4xl font-bold text-cyan-400">…</p> : <p className="text-4xl font-bold text-cyan-400">{totalPoints.toLocaleString()}</p>}
                 <p className="text-xs mt-2" style={{ color: 'var(--text-tertiary)' }}>Points are earned automatically when you use the protocol.</p>
               </PageCard>
               <PageCard>
@@ -47,15 +73,21 @@ export default function BoingPoints() {
             <PageCard className="mb-6">
               <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Recent Activity</h3>
               <div className="space-y-3">
-                {MOCK_ACTIVITIES.map((a, i) => (
-                  <div key={i} className="flex items-center justify-between py-3 border-b last:border-0" style={{ borderColor: 'var(--border-color)' }}>
-                    <div>
-                      <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{a.action}</p>
-                      <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{a.date}</p>
+                {loading ? (
+                  <p className="py-6 text-center text-sm" style={{ color: 'var(--text-tertiary)' }}>Loading…</p>
+                ) : activity.length === 0 ? (
+                  <p className="py-6 text-center text-sm" style={{ color: 'var(--text-tertiary)' }}>No activity yet. Use the protocol to earn points.</p>
+                ) : (
+                  activity.map((a, i) => (
+                    <div key={a.id ?? i} className="flex items-center justify-between py-3 border-b last:border-0" style={{ borderColor: 'var(--border-color)' }}>
+                      <div>
+                        <p className="font-medium capitalize" style={{ color: 'var(--text-primary)' }}>{a.action?.replace(/_/g, ' ') || 'Activity'}</p>
+                        <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{a.createdAt ? new Date(a.createdAt).toLocaleString() : '—'}</p>
+                      </div>
+                      <span className="text-green-400 font-medium">+{a.points ?? 0} pts</span>
                     </div>
-                    <span className="text-green-400 font-medium">+{a.points} pts</span>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </PageCard>
 

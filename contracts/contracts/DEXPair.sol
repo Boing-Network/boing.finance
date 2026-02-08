@@ -16,6 +16,21 @@ import "./interfaces/IDEXFactory.sol";
  */
 contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
+
+    error Forbidden();
+    error AlreadyInitialized();
+    error Overflow();
+    error InsufficientInputAmount();
+    error InsufficientReserves();
+    error InsufficientLiquidityMinted();
+    error LiquidityTooLarge();
+    error InsufficientLiquidityBurned();
+    error InsufficientOutputAmount();
+    error InsufficientLiquidity();
+    error InvalidTo();
+    error K();
+    error Expired();
+    error InvalidSignature();
     
     // Token addresses
     address public override token0;
@@ -50,8 +65,16 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
     event TimelockProposalExecuted(bytes32 indexed proposalId);
     
     modifier onlyFactory() {
-        require(msg.sender == factory, "DEXPair: FORBIDDEN");
+        if (msg.sender != factory) revert Forbidden();
         _;
+    }
+
+    function pause() external onlyFactory {
+        _pause();
+    }
+
+    function unpause() external onlyFactory {
+        _unpause();
     }
     
     modifier notEmergencyStopped() {
@@ -65,7 +88,7 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
     
     // Private initializer
     function _initialize(address _token0, address _token1, IDEXFactory.PoolSecurityConfig memory _securityConfig) private {
-        require(token0 == address(0), "DEXPair: ALREADY_INITIALIZED");
+        if (token0 != address(0)) revert AlreadyInitialized();
         token0 = _token0;
         token1 = _token1;
         securityConfig = _securityConfig;
@@ -112,7 +135,7 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
      * @dev Update reserves and price oracle
      */
     function _update(uint256 balance0, uint256 balance1, uint112 _reserve0, uint112 _reserve1) private {
-        require(balance0 <= type(uint112).max && balance1 <= type(uint112).max, "DEXPair: OVERFLOW");
+        if (balance0 > type(uint112).max || balance1 > type(uint112).max) revert Overflow();
         uint32 blockTimestamp = uint32(block.timestamp % 2**32);
         uint32 timeElapsed = blockTimestamp - blockTimestampLast;
         if (timeElapsed > 0 && _reserve0 != 0 && _reserve1 != 0) {
@@ -142,18 +165,18 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
         uint256 amount0 = balance0 - _reserve0;
         uint256 amount1 = balance1 - _reserve1;
         
-        require(amount0 > 0 && amount1 > 0, "DEXPair: INSUFFICIENT_INPUT_AMOUNT");
-        
+        if (amount0 == 0 || amount1 == 0) revert InsufficientInputAmount();
+
         uint256 _totalSupply = totalSupply;
         if (_totalSupply == 0) {
             liquidity = sqrt(amount0 * amount1) - MINIMUM_LIQUIDITY;
-            _mint(address(0), MINIMUM_LIQUIDITY); // permanently lock the first MINIMUM_LIQUIDITY tokens
+            _mint(address(0), MINIMUM_LIQUIDITY);
         } else {
-            require(_reserve0 > 0 && _reserve1 > 0, "DEXPair: INSUFFICIENT_RESERVES");
+            if (_reserve0 == 0 || _reserve1 == 0) revert InsufficientReserves();
             liquidity = min((amount0 * _totalSupply) / _reserve0, (amount1 * _totalSupply) / _reserve1);
         }
-        require(liquidity > 0, "DEXPair: INSUFFICIENT_LIQUIDITY_MINTED");
-        require(liquidity <= type(uint256).max - totalSupply, "DEXPair: LIQUIDITY_TOO_LARGE");
+        if (liquidity == 0) revert InsufficientLiquidityMinted();
+        if (liquidity > type(uint256).max - totalSupply) revert LiquidityTooLarge();
         
         _mint(to, liquidity);
         _update(balance0, balance1, _reserve0, _reserve1);
@@ -180,7 +203,7 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
         uint256 _totalSupply = totalSupply;
         amount0 = (liquidity * balance0) / _totalSupply;
         amount1 = (liquidity * balance1) / _totalSupply;
-        require(amount0 > 0 && amount1 > 0, "DEXPair: INSUFFICIENT_LIQUIDITY_BURNED");
+        if (amount0 == 0 || amount1 == 0) revert InsufficientLiquidityBurned();
         
         _burn(address(this), liquidity);
         IERC20(_token0).safeTransfer(to, amount0);
@@ -201,16 +224,16 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
         whenNotPaused 
         notEmergencyStopped
     {
-        require(amount0Out > 0 || amount1Out > 0, "DEXPair: INSUFFICIENT_OUTPUT_AMOUNT");
+        if (amount0Out == 0 && amount1Out == 0) revert InsufficientOutputAmount();
         (uint112 _reserve0, uint112 _reserve1,) = _getReserves();
-        require(amount0Out < _reserve0 && amount1Out < _reserve1, "DEXPair: INSUFFICIENT_LIQUIDITY");
+        if (amount0Out >= _reserve0 || amount1Out >= _reserve1) revert InsufficientLiquidity();
         
         uint256 balance0;
         uint256 balance1;
         {
             address _token0 = token0;
             address _token1 = token1;
-            require(to != _token0 && to != _token1, "DEXPair: INVALID_TO");
+            if (to == _token0 || to == _token1) revert InvalidTo();
             if (amount0Out > 0) IERC20(_token0).safeTransfer(to, amount0Out);
             if (amount1Out > 0) IERC20(_token1).safeTransfer(to, amount1Out);
             if (data.length > 0) IDEXCallee(to).dexCall(msg.sender, amount0Out, amount1Out, data);
@@ -220,11 +243,11 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
         
         uint256 amount0In = balance0 > _reserve0 - amount0Out ? balance0 - (_reserve0 - amount0Out) : 0;
         uint256 amount1In = balance1 > _reserve1 - amount1Out ? balance1 - (_reserve1 - amount1Out) : 0;
-        require(amount0In > 0 || amount1In > 0, "DEXPair: INSUFFICIENT_INPUT_AMOUNT");
+        if (amount0In == 0 && amount1In == 0) revert InsufficientInputAmount();
         {
             uint256 balance0Adjusted = balance0 * 1000 - amount0In * 3;
             uint256 balance1Adjusted = balance1 * 1000 - amount1In * 3;
-            require(balance0Adjusted * balance1Adjusted >= uint256(_reserve0) * uint256(_reserve1) * (1000**2), "DEXPair: K");
+            if (balance0Adjusted * balance1Adjusted < uint256(_reserve0) * uint256(_reserve1) * (1000**2)) revert K();
         }
         
         _update(balance0, balance1, _reserve0, _reserve1);
@@ -239,8 +262,7 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
     
     // ERC20 functions
     function _mint(address to, uint256 value) internal {
-        require(totalSupply + value >= totalSupply, "DEXPair: OVERFLOW");
-        require(balanceOf[to] + value >= balanceOf[to], "DEXPair: OVERFLOW");
+        if (totalSupply + value < totalSupply || balanceOf[to] + value < balanceOf[to]) revert Overflow();
         totalSupply += value;
         balanceOf[to] += value;
     }
@@ -349,7 +371,7 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
         bytes32 r,
         bytes32 s
     ) external override {
-        require(deadline >= block.timestamp, "DEXPair: EXPIRED");
+        if (deadline < block.timestamp) revert Expired();
         bytes32 structHash = keccak256(
             abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline)
         );
@@ -357,7 +379,7 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
             abi.encodePacked("\x19\x01", _DOMAIN_SEPARATOR(), structHash)
         );
         address signer = ecrecover(hash, v, r, s);
-        require(signer == owner, "DEXPair: INVALID_SIGNATURE");
+        if (signer != owner) revert InvalidSignature();
         allowance[owner][spender] = value;
         emit Approval(owner, spender, value);
     }
