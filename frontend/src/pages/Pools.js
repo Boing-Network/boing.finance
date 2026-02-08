@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useWallet } from '../contexts/WalletContext';
+import { useChainType } from '../contexts/SolanaWalletContext';
+import { PoolsSolanaContent } from '../components/SolanaFeaturePlaceholder';
 import EmptyState from '../components/EmptyState';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
@@ -680,7 +682,7 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
 };
 
 const Pools = () => {
-  // Component rendering
+  const { isSolana } = useChainType();
   const { isConnected, account } = useWalletConnection();
   const { chainId } = useWallet();
   const { record: recordAchievement } = useAchievements() || {};
@@ -979,6 +981,8 @@ const Pools = () => {
     { id: 'user', name: 'My Pools', count: userPools?.length || 0 },
     { id: 'created', name: 'Created', count: createdPools?.length || 0 }
   ];
+
+  if (isSolana) return <PoolsSolanaContent />;
 
   if (!isConnected || !account) {
     return (

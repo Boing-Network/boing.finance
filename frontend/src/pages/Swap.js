@@ -3,6 +3,8 @@ import { Helmet } from 'react-helmet-async';
 import { ethers } from 'ethers';
 import { useWallet } from '../contexts/WalletContext';
 import { useWalletConnection } from '../hooks/useWalletConnection';
+import { useChainType } from '../contexts/SolanaWalletContext';
+import { SwapSolanaContent } from '../components/SolanaFeaturePlaceholder';
 import { useAchievements } from '../contexts/AchievementContext';
 import { getContractAddress, getContractAddresses } from '../config/contracts';
 import { getNetworkByChainId } from '../config/networks';
@@ -18,6 +20,7 @@ import TrendingPairs from '../components/TrendingPairs';
 
 
 const Swap = () => {
+  const { isSolana } = useChainType();
   const { isConnected, account } = useWalletConnection();
   const { chainId } = useWallet();
   const { record: recordAchievement } = useAchievements() || {};
@@ -1724,6 +1727,8 @@ const Swap = () => {
       setIsSwapping(false);
     }
   };
+
+  if (isSolana) return <SwapSolanaContent />;
 
   return (
     <>

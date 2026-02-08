@@ -4,6 +4,14 @@ This document provides a comprehensive overview of blockchain networks for mass 
 
 ---
 
+## Implementation Order
+
+**See also:**
+- **[INTEGRATION_ROADMAP.md](./INTEGRATION_ROADMAP.md)** — Phased implementation order: Solana first, then EVM by user activity
+- **[SOLANA_INTEGRATION_PLAN.md](./SOLANA_INTEGRATION_PLAN.md)** — Detailed Solana integration plan (non-EVM stack)
+
+---
+
 ## Currently Supported Networks
 
 | Network | Chain ID | TokenFactory | DEX | Status |

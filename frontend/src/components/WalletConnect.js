@@ -1,57 +1,73 @@
 import React, { useState } from 'react';
 import { useWallet } from '../contexts/WalletContext';
+import { useSolanaWallet, useChainType, CHAIN_TYPE_SOLANA } from '../contexts/SolanaWalletContext';
 import { ChevronDownIcon, WalletIcon, XMarkIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import WalletSelectionModal from './WalletSelectionModal';
 
 const WalletConnect = () => {
-  const {
-    account,
-    isConnected,
-    isConnecting,
-    disconnectWallet,
-    getCurrentNetwork,
-    getAccountBalance,
-    walletType
-  } = useWallet();
+  const chainType = useChainType?.()?.chainType ?? 'evm';
+  const isSolana = chainType === CHAIN_TYPE_SOLANA;
+
+  const evmWallet = useWallet();
+  const solanaWallet = useSolanaWallet?.() ?? null;
+
+  const account = isSolana ? (solanaWallet?.address ?? null) : evmWallet.account;
+  const isConnected = isSolana ? (solanaWallet?.connected ?? false) : evmWallet.isConnected;
+  const isConnecting = isSolana ? (solanaWallet?.connecting ?? false) : evmWallet.isConnecting;
+  const displayBalance = isSolana ? (solanaWallet?.balance ?? null) : evmBalance;
+  const balanceLoading = isSolana ? false : evmBalanceLoading;
 
   const [showDropdown, setShowDropdown] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
-  const [balance, setBalance] = useState(null);
-  const [balanceLoading, setBalanceLoading] = useState(false);
+  const [evmBalance, setEvmBalance] = useState(null);
+  const [evmBalanceLoading, setEvmBalanceLoading] = useState(false);
 
-  // Get balance when account changes
+  // EVM balance when EVM chain
   React.useEffect(() => {
+    if (isSolana) return;
     let isMounted = true;
-    if (isConnected && account) {
-      setBalanceLoading(true);
-      getAccountBalance().then((bal) => {
+    if (evmWallet.isConnected && evmWallet.account) {
+      setEvmBalanceLoading(true);
+      evmWallet.getAccountBalance?.().then((bal) => {
         if (isMounted) {
-          setBalance(bal);
-          setBalanceLoading(false);
+          setEvmBalance(bal);
+          setEvmBalanceLoading(false);
         }
       });
     } else {
-      setBalance(null);
-      setBalanceLoading(false);
+      setEvmBalance(null);
+      setEvmBalanceLoading(false);
     }
     return () => { isMounted = false; };
-  }, [isConnected, account, getAccountBalance]);
+  }, [isSolana, evmWallet.isConnected, evmWallet.account, evmWallet.getAccountBalance]);
 
-  const handleConnect = () => {
-    // Show wallet selection modal
+  const handleConnect = async () => {
+    if (isSolana && solanaWallet) {
+      try {
+        await solanaWallet.connectWallet();
+        toast.success('Solana wallet connected!');
+      } catch (err) {
+        toast.error(err?.message || 'Failed to connect Solana wallet. Install Phantom or Solflare.');
+      }
+      return;
+    }
     setShowWalletModal(true);
   };
 
   const handleDisconnect = () => {
-    disconnectWallet();
+    if (isSolana && solanaWallet) {
+      solanaWallet.disconnectWallet();
+      setShowDropdown(false);
+      toast.success('Solana wallet disconnected.');
+      return;
+    }
+    evmWallet.disconnectWallet();
     setShowDropdown(false);
-    
-    // Show additional message about manual wallet disconnection and permission revocation
+    const walletName = evmWallet.walletType === 'coinbase' ? 'Coinbase Wallet' : evmWallet.walletType === 'metamask' ? 'MetaMask' : 'wallet';
     setTimeout(() => {
-      const walletName = walletType === 'coinbase' ? 'Coinbase Wallet' : walletType === 'metamask' ? 'MetaMask' : 'wallet';
-      toast.success(`Disconnected from app. To switch wallets or ensure complete privacy, please also disconnect from ${walletName} settings and revoke permissions.`, {
-        duration: 8000,
+      toast.success(`Disconnected. To fully revoke, also disconnect from ${walletName} settings.`, {
+        duration: 6000,
         icon: '🔗',
       });
     }, 1000);
@@ -69,7 +85,7 @@ const WalletConnect = () => {
     return num.toFixed(4);
   };
 
-  const currentNetwork = getCurrentNetwork();
+  const currentNetwork = isSolana ? { name: 'Solana', nativeCurrency: { symbol: 'SOL' } } : evmWallet.getCurrentNetwork?.();
 
   if (isConnecting) {
     return (
@@ -118,28 +134,28 @@ const WalletConnect = () => {
                 <div className="text-theme-primary text-sm min-h-[1.5em] flex items-center">
                   {balanceLoading ? (
                     <span className="w-4 h-4 border-2 border-theme-primary border-t-transparent rounded-full animate-spin inline-block mr-2"></span>
-                  ) : balance !== null ? (
-                    <>{formatBalance(balance)} {currentNetwork?.nativeCurrency?.symbol || 'ETH'}</>
+                  ) : displayBalance !== null ? (
+                    <>{formatBalance(displayBalance)} {currentNetwork?.nativeCurrency?.symbol || 'ETH'}</>
                   ) : (
                     '--'
                   )}
                 </div>
               </div>
 
-              {/* Switch Wallet Button */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowDropdown(false);
-                  setTimeout(() => {
-                    setShowWalletModal(true);
-                  }, 100);
-                }}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2 mb-2"
-              >
-                <ArrowPathIcon className="w-4 h-4" />
-                <span>Switch Wallet</span>
-              </button>
+              {/* Switch Wallet Button - EVM only */}
+              {!isSolana && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDropdown(false);
+                    setTimeout(() => setShowWalletModal(true), 100);
+                  }}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2 mb-2"
+                >
+                  <ArrowPathIcon className="w-4 h-4" />
+                  <span>Switch Wallet</span>
+                </button>
+              )}
 
               {/* Disconnect Button */}
               <button
@@ -179,10 +195,7 @@ const WalletConnect = () => {
         onClose={() => {
           setShowWalletModal(false);
         }}
-        onWalletSelected={(wallet) => {
-          console.log('Wallet selected:', wallet);
-          setShowWalletModal(false);
-        }}
+        onWalletSelected={() => setShowWalletModal(false)}
       />
     </>
   );

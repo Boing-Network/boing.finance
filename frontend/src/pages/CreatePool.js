@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useWallet } from '../contexts/WalletContext';
+import { useChainType } from '../contexts/SolanaWalletContext';
+import { CreatePoolSolanaContent } from '../components/SolanaFeaturePlaceholder';
 import toast from 'react-hot-toast';
 import { ethers } from 'ethers';
 import DEXFactoryABI from '../artifacts/DEXFactory.json';
@@ -55,6 +57,7 @@ function ToggleButton({ enabled, onToggle, disabled, size = "md" }) {
 
 
 function CreatePool() {
+  const { isSolana } = useChainType();
   const { isConnected, account, connectWallet } = useWalletConnection();
   const { chainId, switchNetwork } = useWallet();
   const { record: recordAchievement } = useAchievements() || {};
@@ -1235,6 +1238,8 @@ function CreatePool() {
     
     return permitData;
   };
+
+  if (isSolana) return <CreatePoolSolanaContent />;
 
   if (!isConnected) {
     return (
