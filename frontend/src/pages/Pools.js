@@ -64,19 +64,12 @@ const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveL
   };
 
   const getChainName = (chainId) => {
-    switch (chainId) {
-      case 1: return 'Ethereum';
-      case 137: return 'Polygon';
-      case 56: return 'BSC';
-      case 42161: return 'Arbitrum';
-      case 10: return 'Optimism';
-      case 11155111: return 'Sepolia';
-      default: return `Chain ${chainId}`;
-    }
+    const names = { 1: 'Ethereum', 137: 'Polygon', 56: 'BSC', 42161: 'Arbitrum', 10: 'Optimism', 8453: 'Base', 11155111: 'Sepolia', 43114: 'Avalanche', 250: 'Fantom', 59144: 'Linea', 324: 'zkSync Era', 534352: 'Scroll', 1101: 'Polygon zkEVM', 5000: 'Mantle', 81457: 'Blast', 204: 'opBNB', 34443: 'Mode' };
+    return names[chainId] || `Chain ${chainId}`;
   };
 
   const getChainColor = (chainId) => {
-    const colors = { 1: 'bg-blue-500', 137: 'bg-purple-500', 56: 'bg-yellow-500', 42161: 'bg-blue-600', 10: 'bg-red-500', 8453: 'bg-indigo-500', 11155111: 'bg-gray-500' };
+    const colors = { 1: 'bg-blue-500', 137: 'bg-purple-500', 56: 'bg-yellow-500', 42161: 'bg-blue-600', 10: 'bg-red-500', 8453: 'bg-indigo-500', 11155111: 'bg-gray-500', 43114: 'bg-red-600', 250: 'bg-blue-700', 59144: 'bg-cyan-500', 324: 'bg-indigo-600', 534352: 'bg-amber-400', 1101: 'bg-purple-600', 5000: 'bg-stone-600', 81457: 'bg-yellow-400', 204: 'bg-yellow-600', 34443: 'bg-red-700' };
     return colors[chainId] || 'bg-gray-500';
   };
 

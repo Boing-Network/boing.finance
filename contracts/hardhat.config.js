@@ -1,6 +1,6 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
-const { MAINNET_NETWORKS, TESTNET_NETWORKS, TIER2_NETWORKS } = require("./config/networks");
+const { MAINNET_NETWORKS, TESTNET_NETWORKS, TIER2_NETWORKS, TIER3_NETWORKS } = require("./config/networks");
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -97,6 +97,17 @@ module.exports = {
       chainId: 1,
       gasPrice: 20000000000, // 20 gwei
     },
+    // Tier 3 - Expansion networks (TokenFactory deploy when funded)
+    avalanche: { url: TIER3_NETWORKS.avalanche.rpcUrl, chainId: 43114, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
+    fantom: { url: TIER3_NETWORKS.fantom.rpcUrl, chainId: 250, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
+    zkSyncEra: { url: TIER3_NETWORKS.zkSyncEra.rpcUrl, chainId: 324, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
+    linea: { url: TIER3_NETWORKS.linea.rpcUrl, chainId: 59144, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
+    scroll: { url: TIER3_NETWORKS.scroll.rpcUrl, chainId: 534352, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
+    polygonZkEVM: { url: TIER3_NETWORKS.polygonZkEVM.rpcUrl, chainId: 1101, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
+    mantle: { url: TIER3_NETWORKS.mantle.rpcUrl, chainId: 5000, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
+    blast: { url: TIER3_NETWORKS.blast.rpcUrl, chainId: 81457, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
+    opbnb: { url: TIER3_NETWORKS.opbnb.rpcUrl, chainId: 204, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
+    mode: { url: TIER3_NETWORKS.mode.rpcUrl, chainId: 34443, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
   },
   etherscan: {
     apiKey: {

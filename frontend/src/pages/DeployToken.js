@@ -431,6 +431,16 @@ const SERVICE_CHARGES = {
       42161: { amount: 0.01, currency: 'ETH' }, // Arbitrum ~$20-30
       10: { amount: 0.015, currency: 'ETH' }, // Optimism ~$30-45
       8453: { amount: 0.01, currency: 'ETH' }, // Base ~$20-30
+      43114: { amount: 0.5, currency: 'AVAX' }, // Avalanche ~$15-25
+      250: { amount: 50, currency: 'FTM' }, // Fantom ~$15-25
+      59144: { amount: 0.005, currency: 'ETH' }, // Linea ~$10-20
+      324: { amount: 0.005, currency: 'ETH' }, // zkSync Era ~$10-20
+      534352: { amount: 0.005, currency: 'ETH' }, // Scroll ~$10-20
+      1101: { amount: 0.005, currency: 'ETH' }, // Polygon zkEVM ~$10-20
+      5000: { amount: 25, currency: 'MNT' }, // Mantle ~$15-25
+      81457: { amount: 0.005, currency: 'ETH' }, // Blast ~$10-20
+      204: { amount: 0.002, currency: 'BNB' }, // opBNB ~$1-3
+      34443: { amount: 0.002, currency: 'ETH' }, // Mode ~$3-8
       11155111: { amount: 0.001, currency: 'ETH' }, // Sepolia ~$2-3
       80001: { amount: 2, currency: 'MATIC' }, // Mumbai ~$1.60-2.40
       97: { amount: 0.005, currency: 'tBNB' }, // BSC Testnet ~$1.50-2.50
@@ -455,6 +465,16 @@ const SERVICE_CHARGES = {
       42161: { amount: 0.03, currency: 'ETH' }, // Arbitrum ~$60-90
       10: { amount: 0.045, currency: 'ETH' }, // Optimism ~$90-135
       8453: { amount: 0.03, currency: 'ETH' }, // Base ~$60-90
+      43114: { amount: 1.5, currency: 'AVAX' }, // Avalanche ~$45-75
+      250: { amount: 150, currency: 'FTM' }, // Fantom ~$45-75
+      59144: { amount: 0.015, currency: 'ETH' }, // Linea ~$30-60
+      324: { amount: 0.015, currency: 'ETH' }, // zkSync Era ~$30-60
+      534352: { amount: 0.015, currency: 'ETH' }, // Scroll ~$30-60
+      1101: { amount: 0.015, currency: 'ETH' }, // Polygon zkEVM ~$30-60
+      5000: { amount: 75, currency: 'MNT' }, // Mantle ~$45-75
+      81457: { amount: 0.015, currency: 'ETH' }, // Blast ~$30-60
+      204: { amount: 0.006, currency: 'BNB' }, // opBNB ~$3-9
+      34443: { amount: 0.006, currency: 'ETH' }, // Mode ~$9-24
       11155111: { amount: 0.003, currency: 'ETH' }, // Sepolia ~$6-9
       80001: { amount: 6, currency: 'MATIC' }, // Mumbai ~$4.80-7.20
       97: { amount: 0.015, currency: 'tBNB' }, // BSC Testnet ~$4.50-7.50
@@ -488,6 +508,16 @@ const SERVICE_CHARGES = {
       42161: { amount: 0.06, currency: 'ETH' }, // Arbitrum ~$120-180
       10: { amount: 0.09, currency: 'ETH' }, // Optimism ~$180-270
       8453: { amount: 0.06, currency: 'ETH' }, // Base ~$120-180
+      43114: { amount: 3, currency: 'AVAX' }, // Avalanche ~$90-150
+      250: { amount: 300, currency: 'FTM' }, // Fantom ~$90-150
+      59144: { amount: 0.03, currency: 'ETH' }, // Linea ~$60-120
+      324: { amount: 0.03, currency: 'ETH' }, // zkSync Era ~$60-120
+      534352: { amount: 0.03, currency: 'ETH' }, // Scroll ~$60-120
+      1101: { amount: 0.03, currency: 'ETH' }, // Polygon zkEVM ~$60-120
+      5000: { amount: 150, currency: 'MNT' }, // Mantle ~$90-150
+      81457: { amount: 0.03, currency: 'ETH' }, // Blast ~$60-120
+      204: { amount: 0.012, currency: 'BNB' }, // opBNB ~$6-18
+      34443: { amount: 0.012, currency: 'ETH' }, // Mode ~$18-48
       11155111: { amount: 0.006, currency: 'ETH' }, // Sepolia ~$12-18
       80001: { amount: 12, currency: 'MATIC' }, // Mumbai ~$9.60-14.40
       97: { amount: 0.03, currency: 'tBNB' }, // BSC Testnet ~$9-15
@@ -1727,7 +1757,7 @@ export default function DeployToken() {
                     <div className="text-center">
                       <h3 className="text-xl font-bold style={{ color: 'var(--text-primary)' }} mb-2">{plan.name}</h3>
                       <div className="text-3xl font-bold text-blue-400 mb-4">
-                        {plan.prices[network?.chainId || 1].amount} {plan.prices[network?.chainId || 1].currency}
+                        {(plan.prices[network?.chainId] || plan.prices[1])?.amount} {(plan.prices[network?.chainId] || plan.prices[1])?.currency}
                       </div>
                       
                       {showPricing && (
@@ -2188,7 +2218,7 @@ export default function DeployToken() {
                         Deploying Token...
                       </div>
                     ) : (
-                      `Deploy Token (${SERVICE_CHARGES[selectedPlan].prices[network?.chainId || 1].amount} ${SERVICE_CHARGES[selectedPlan].prices[network?.chainId || 1].currency})`
+                      `Deploy Token (${(SERVICE_CHARGES[selectedPlan].prices[network?.chainId] || SERVICE_CHARGES[selectedPlan].prices[1])?.amount} ${(SERVICE_CHARGES[selectedPlan].prices[network?.chainId] || SERVICE_CHARGES[selectedPlan].prices[1])?.currency})`
                     )}
                   </button>
                 </div>

@@ -7,6 +7,7 @@ This document provides a comprehensive overview of blockchain networks for mass 
 ## Implementation Order
 
 **See also:**
+- **[INTEGRATION_PRINCIPLES.md](./INTEGRATION_PRINCIPLES.md)** — Prioritization (user activity first), maximum-capabilities checklist, security standards
 - **[INTEGRATION_ROADMAP.md](./INTEGRATION_ROADMAP.md)** — Phased implementation order: Solana first, then EVM by user activity
 - **[SOLANA_INTEGRATION_PLAN.md](./SOLANA_INTEGRATION_PLAN.md)** — Detailed Solana integration plan (non-EVM stack)
 
@@ -23,6 +24,16 @@ This document provides a comprehensive overview of blockchain networks for mass 
 | BSC | 56 | ✅ | — | Token deploy live |
 | Optimism | 10 | ✅ | — | Token deploy live |
 | Arbitrum | 42161 | ✅ | — | Token deploy live |
+| Avalanche C-Chain | 43114 | Config | — | Config ready, deploy pending |
+| Fantom | 250 | Config | — | Config ready, deploy pending |
+| Linea | 59144 | Config | — | Config ready, deploy pending |
+| zkSync Era | 324 | Config | — | Config ready, deploy pending |
+| Scroll | 534352 | Config | — | Config ready, deploy pending |
+| Polygon zkEVM | 1101 | Config | — | Config ready, deploy pending |
+| Mantle | 5000 | Config | — | Config ready, deploy pending |
+| Blast | 81457 | Config | — | Config ready, deploy pending |
+| opBNB | 204 | Config | — | Config ready, deploy pending |
+| Mode | 34443 | Config | — | Config ready, deploy pending |
 
 ---
 
@@ -238,7 +249,9 @@ This document provides a comprehensive overview of blockchain networks for mass 
 
 ## Cost Summary for Mass Deployment
 
-*Rough cost to deploy full suite (TokenFactory, TokenImplementation, DEXFactory, DEXRouter, LiquidityLocker, PriceOracle, CrossChainBridge) on each network:*
+*Rough cost to deploy full suite (TokenFactory, TokenImplementation, DEXFactory, DEXRouter, LiquidityLocker, PriceOracle, CrossChainBridge) on each network.*
+
+**For a detailed layout plan with all features and all networks, see [DEPLOYMENT_COST_PLAN.md](./DEPLOYMENT_COST_PLAN.md).**
 
 | Network | Est. Total Deploy Cost |
 |---------|------------------------|
