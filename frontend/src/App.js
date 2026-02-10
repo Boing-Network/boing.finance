@@ -111,22 +111,27 @@ const comingSoon = {
 };
 
 // Navigation data with categories - explicit boolean flags for state management
-const createNavigation = () => Object.freeze({
-  trading: Object.freeze([
+// Trade & Deploy = merged Trading + Deployment for single-row navbar
+const createNavigation = () => {
+  const trading = Object.freeze([
     Object.freeze({ name: 'Swap', href: '/swap', icon: '🔄', description: 'Trade tokens instantly', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Bridge', href: '/bridge', icon: '🌉', description: 'Cross-chain transfers', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Pools', href: '/pools', icon: '🏊', description: 'Liquidity pools', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Tokens', href: '/tokens', icon: '🪙', description: 'Token management', isAvailable: true, comingSoon: false, testnetOnly: false })
-  ]),
+  ]);
+  const deployment = Object.freeze([
+    Object.freeze({ name: 'Deploy Token', href: '/deploy-token', icon: '🚀', description: 'Create your own tokens', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Create NFT', href: '/create-nft', icon: '🖼️', description: 'Mint NFTs', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Create Pool', href: '/create-pool', icon: '🏊', description: 'Create liquidity pools', isAvailable: true, comingSoon: false, testnetOnly: false })
+  ]);
+  return Object.freeze({
+  trading,
+  deployment,
+  tradeAndDeploy: Object.freeze([...trading, ...deployment]),
   analytics: Object.freeze([
     Object.freeze({ name: 'Analytics', href: '/analytics', icon: '📊', description: 'Market insights', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Portfolio', href: '/portfolio', icon: '💼', description: 'Your holdings', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Activity', href: '/activity', icon: '📋', description: 'Swaps, liquidity & bridge', isAvailable: true, comingSoon: false, testnetOnly: false })
-  ]),
-  deployment: Object.freeze([
-    Object.freeze({ name: 'Deploy Token', href: '/deploy-token', icon: '🚀', description: 'Create your own tokens', isAvailable: true, comingSoon: false, testnetOnly: false }),
-    Object.freeze({ name: 'Create NFT', href: '/create-nft', icon: '🖼️', description: 'Mint NFTs', isAvailable: true, comingSoon: false, testnetOnly: false }),
-    Object.freeze({ name: 'Create Pool', href: '/create-pool', icon: '🏊', description: 'Create liquidity pools', isAvailable: true, comingSoon: false, testnetOnly: false })
   ]),
   governance: Object.freeze([
     Object.freeze({ name: 'Proposals', href: '/governance/proposals', icon: '📜', description: 'View and vote on proposals', isAvailable: true, comingSoon: false, testnetOnly: false }),
@@ -142,7 +147,8 @@ const createNavigation = () => Object.freeze({
     Object.freeze({ name: 'Roadmap', href: '/boing/roadmap', icon: '🚀', description: 'Boing community roadmap', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Activities', href: '/boing/activities', icon: '🎯', description: 'Community activities & events', isAvailable: true, comingSoon: false, testnetOnly: false })
   ])
-});
+  });
+};
 
 // Create navigation once and store in module scope to prevent recreation
 const navigation = createNavigation();
@@ -200,18 +206,16 @@ function AppContent() {
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [aiChatOpen, setAiChatOpen] = useState(false);
   const [defi101Open, setDefi101Open] = useState(false);
-  const [tradingDropdownOpen, setTradingDropdownOpen] = useState(false);
+  const [tradeAndDeployDropdownOpen, setTradeAndDeployDropdownOpen] = useState(false);
   const [analyticsDropdownOpen, setAnalyticsDropdownOpen] = useState(false);
-  const [deploymentDropdownOpen, setDeploymentDropdownOpen] = useState(false);
   const [governanceDropdownOpen, setGovernanceDropdownOpen] = useState(false);
   const [boingDropdownOpen, setBoingDropdownOpen] = useState(false);
   const [toolsDropdownOpen, setToolsDropdownOpen] = useState(false);
   const { account } = useWalletConnection();
 
   const closeAllDropdowns = () => {
-    setTradingDropdownOpen(false);
+    setTradeAndDeployDropdownOpen(false);
     setAnalyticsDropdownOpen(false);
-    setDeploymentDropdownOpen(false);
     setGovernanceDropdownOpen(false);
     setBoingDropdownOpen(false);
     setToolsDropdownOpen(false);
@@ -281,27 +285,23 @@ function AppContent() {
               </button>
             </div>
 
-            {/* Desktop Navigation - Show on large screens and above */}
+            {/* Desktop Navigation - Show on large screens and above (single row: Trade & Deploy, Analytics, Governance, BOING) */}
             <div className="hidden lg:flex items-center justify-center flex-1 min-w-0">
-              <nav className="flex items-center gap-0.5 xl:gap-1 flex-wrap justify-center">
-                <DropdownMenu label="Trading" items={memoizedNavigation.trading} isOpen={tradingDropdownOpen}
-                  onToggle={() => { const next = !tradingDropdownOpen; setAnalyticsDropdownOpen(false); setDeploymentDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setTradingDropdownOpen(next); }}
-                  onClose={() => setTradingDropdownOpen(false)}
+              <nav className="flex items-center gap-0.5 xl:gap-1 flex-nowrap justify-center">
+                <DropdownMenu label="Trade & Deploy" items={memoizedNavigation.tradeAndDeploy} isOpen={tradeAndDeployDropdownOpen}
+                  onToggle={() => { const next = !tradeAndDeployDropdownOpen; setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setTradeAndDeployDropdownOpen(next); }}
+                  onClose={() => setTradeAndDeployDropdownOpen(false)}
                 />
                 <DropdownMenu label="Analytics" items={memoizedNavigation.analytics} isOpen={analyticsDropdownOpen}
-                  onToggle={() => { const next = !analyticsDropdownOpen; setTradingDropdownOpen(false); setDeploymentDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setAnalyticsDropdownOpen(next); }}
+                  onToggle={() => { const next = !analyticsDropdownOpen; setTradeAndDeployDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setAnalyticsDropdownOpen(next); }}
                   onClose={() => setAnalyticsDropdownOpen(false)}
                 />
-                <DropdownMenu label="Deployment" items={memoizedNavigation.deployment} isOpen={deploymentDropdownOpen}
-                  onToggle={() => { const next = !deploymentDropdownOpen; setTradingDropdownOpen(false); setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setDeploymentDropdownOpen(next); }}
-                  onClose={() => setDeploymentDropdownOpen(false)}
-                />
                 <DropdownMenu label="Governance" items={memoizedNavigation.governance} isOpen={governanceDropdownOpen}
-                  onToggle={() => { const next = !governanceDropdownOpen; setTradingDropdownOpen(false); setAnalyticsDropdownOpen(false); setDeploymentDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setGovernanceDropdownOpen(next); }}
+                  onToggle={() => { const next = !governanceDropdownOpen; setTradeAndDeployDropdownOpen(false); setAnalyticsDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setGovernanceDropdownOpen(next); }}
                   onClose={() => setGovernanceDropdownOpen(false)}
                 />
                 <DropdownMenu label="BOING" items={memoizedNavigation.boing} isOpen={boingDropdownOpen}
-                  onToggle={() => { const next = !boingDropdownOpen; setTradingDropdownOpen(false); setAnalyticsDropdownOpen(false); setDeploymentDropdownOpen(false); setGovernanceDropdownOpen(false); setToolsDropdownOpen(false); setBoingDropdownOpen(next); }}
+                  onToggle={() => { const next = !boingDropdownOpen; setTradeAndDeployDropdownOpen(false); setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setToolsDropdownOpen(false); setBoingDropdownOpen(next); }}
                   onClose={() => setBoingDropdownOpen(false)}
                 />
               </nav>
@@ -311,7 +311,7 @@ function AppContent() {
             <div className="hidden lg:flex items-center flex-shrink-0 gap-2 pl-2">
               <ToolsDropdown
                 isOpen={toolsDropdownOpen}
-                onToggle={() => { const next = !toolsDropdownOpen; setTradingDropdownOpen(false); setAnalyticsDropdownOpen(false); setDeploymentDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(next); }}
+                onToggle={() => { const next = !toolsDropdownOpen; setTradeAndDeployDropdownOpen(false); setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(next); }}
                 onClose={() => setToolsDropdownOpen(false)}
                 onOpenHistory={() => { setHistoryModalOpen(true); setToolsDropdownOpen(false); }}
                 onOpenAiChat={() => { setAiChatOpen(true); setToolsDropdownOpen(false); }}
@@ -324,32 +324,28 @@ function AppContent() {
               </div>
             </div>
 
-            {/* Medium Screen Navigation - Show on medium screens only (md to lg) */}
+            {/* Medium Screen Navigation - Show on medium screens only (md to lg), single row */}
             <div className="hidden md:flex lg:hidden items-center gap-1 flex-shrink-0">
-              <nav className="flex items-center gap-1 mr-1">
-                <DropdownMenu label="Trade" items={memoizedNavigation.trading} isOpen={tradingDropdownOpen}
-                  onToggle={() => { const next = !tradingDropdownOpen; setAnalyticsDropdownOpen(false); setDeploymentDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setTradingDropdownOpen(next); }}
-                  onClose={() => setTradingDropdownOpen(false)}
+              <nav className="flex items-center gap-1 mr-1 flex-nowrap">
+                <DropdownMenu label="Trade & Deploy" items={memoizedNavigation.tradeAndDeploy} isOpen={tradeAndDeployDropdownOpen}
+                  onToggle={() => { const next = !tradeAndDeployDropdownOpen; setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setTradeAndDeployDropdownOpen(next); }}
+                  onClose={() => setTradeAndDeployDropdownOpen(false)}
                 />
                 <DropdownMenu label="Analytics" items={memoizedNavigation.analytics} isOpen={analyticsDropdownOpen}
-                  onToggle={() => { const next = !analyticsDropdownOpen; setTradingDropdownOpen(false); setDeploymentDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setAnalyticsDropdownOpen(next); }}
+                  onToggle={() => { const next = !analyticsDropdownOpen; setTradeAndDeployDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setAnalyticsDropdownOpen(next); }}
                   onClose={() => setAnalyticsDropdownOpen(false)}
                 />
-                <DropdownMenu label="Deploy" items={memoizedNavigation.deployment} isOpen={deploymentDropdownOpen}
-                  onToggle={() => { const next = !deploymentDropdownOpen; setTradingDropdownOpen(false); setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setDeploymentDropdownOpen(next); }}
-                  onClose={() => setDeploymentDropdownOpen(false)}
-                />
                 <DropdownMenu label="Governance" items={memoizedNavigation.governance} isOpen={governanceDropdownOpen}
-                  onToggle={() => { const next = !governanceDropdownOpen; setTradingDropdownOpen(false); setAnalyticsDropdownOpen(false); setDeploymentDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setGovernanceDropdownOpen(next); }}
+                  onToggle={() => { const next = !governanceDropdownOpen; setTradeAndDeployDropdownOpen(false); setAnalyticsDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setGovernanceDropdownOpen(next); }}
                   onClose={() => setGovernanceDropdownOpen(false)}
                 />
                 <DropdownMenu label="BOING" items={memoizedNavigation.boing} isOpen={boingDropdownOpen}
-                  onToggle={() => { const next = !boingDropdownOpen; setTradingDropdownOpen(false); setAnalyticsDropdownOpen(false); setDeploymentDropdownOpen(false); setGovernanceDropdownOpen(false); setToolsDropdownOpen(false); setBoingDropdownOpen(next); }}
+                  onToggle={() => { const next = !boingDropdownOpen; setTradeAndDeployDropdownOpen(false); setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setToolsDropdownOpen(false); setBoingDropdownOpen(next); }}
                   onClose={() => setBoingDropdownOpen(false)}
                 />
               </nav>
               <div className="flex items-center gap-1 pl-1 border-l" style={{ borderColor: 'var(--border-color)' }}>
-                <ToolsDropdown isOpen={toolsDropdownOpen} onToggle={() => { const next = !toolsDropdownOpen; setTradingDropdownOpen(false); setAnalyticsDropdownOpen(false); setDeploymentDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(next); }} onClose={() => setToolsDropdownOpen(false)}
+                <ToolsDropdown isOpen={toolsDropdownOpen} onToggle={() => { const next = !toolsDropdownOpen; setTradeAndDeployDropdownOpen(false); setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(next); }} onClose={() => setToolsDropdownOpen(false)}
                   onOpenHistory={() => { setHistoryModalOpen(true); setToolsDropdownOpen(false); }}
                   onOpenAiChat={() => { setAiChatOpen(true); setToolsDropdownOpen(false); }}
                   onOpenDefi101={() => { setDefi101Open(true); setToolsDropdownOpen(false); }}
@@ -385,14 +381,14 @@ function AppContent() {
             borderColor: 'var(--border-color)'
           }}>
             <div className="px-4 py-3 space-y-3">
-              {/* Trading Section */}
+              {/* Trade & Deploy Section (merged Trading + Deployment) */}
               <div className="rounded-lg p-3 border border-cyan-500/20" style={{
                 background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
                 borderColor: 'var(--border-color)'
               }}>
-                <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>Trading</h3>
+                <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>Trade & Deploy</h3>
                 <div className="space-y-1">
-                  {memoizedNavigation.trading.map((item) => (
+                  {memoizedNavigation.tradeAndDeploy.map((item) => (
                     <button
                       key={item.name}
                       onClick={() => {
@@ -446,59 +442,6 @@ function AppContent() {
                 <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>Analytics</h3>
                 <div className="space-y-1">
                   {memoizedNavigation.analytics.map((item) => (
-                    <button
-                      key={item.name}
-                      onClick={() => {
-                        if (item.isAvailable && !item.comingSoon) {
-                          window.location.href = item.href;
-                          closeMenu();
-                        }
-                      }}
-                      className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${(item.comingSoon || !item.isAvailable) ? 'cursor-not-allowed opacity-60' : ''}`}
-                      style={{
-                        color: (item.comingSoon || !item.isAvailable) ? 'var(--text-tertiary)' : 'var(--text-secondary)'
-                      }}
-                      onMouseEnter={(e) => {
-                        if (item.isAvailable && !item.comingSoon) {
-                          e.target.style.color = 'var(--text-primary)';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (item.isAvailable && !item.comingSoon) {
-                          e.target.style.color = 'var(--text-secondary)';
-                        }
-                      }}
-                      disabled={item.comingSoon || !item.isAvailable}
-                      title={item.comingSoon ? comingSoon.tooltip : (item.testnetOnly ? 'Available on Sepolia testnet only' : '')}
-                    >
-                      <span className="text-lg">{item.icon}</span>
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <span>{item.name}</span>
-                          {(item.comingSoon || !item.isAvailable) && (
-                            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>
-                          )}
-                          {item.testnetOnly && item.isAvailable && !item.comingSoon && (
-                            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-400/30">Testnet Only</span>
-                          )}
-                        </div>
-                        {item.description && (
-                          <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{item.description}</div>
-                        )}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Deployment Section */}
-              <div className="rounded-lg p-3 border border-cyan-500/20" style={{
-                background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
-                borderColor: 'var(--border-color)'
-              }}>
-                <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>Deployment</h3>
-                <div className="space-y-1">
-                  {memoizedNavigation.deployment.map((item) => (
                     <button
                       key={item.name}
                       onClick={() => {
