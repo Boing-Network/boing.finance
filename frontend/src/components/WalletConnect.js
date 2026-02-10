@@ -12,16 +12,16 @@ const WalletConnect = () => {
   const evmWallet = useWallet();
   const solanaWallet = useSolanaWallet?.() ?? null;
 
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [showWalletModal, setShowWalletModal] = useState(false);
+  const [evmBalance, setEvmBalance] = useState(null);
+  const [evmBalanceLoading, setEvmBalanceLoading] = useState(false);
+
   const account = isSolana ? (solanaWallet?.address ?? null) : evmWallet.account;
   const isConnected = isSolana ? (solanaWallet?.connected ?? false) : evmWallet.isConnected;
   const isConnecting = isSolana ? (solanaWallet?.connecting ?? false) : evmWallet.isConnecting;
   const displayBalance = isSolana ? (solanaWallet?.balance ?? null) : evmBalance;
   const balanceLoading = isSolana ? false : evmBalanceLoading;
-
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [showWalletModal, setShowWalletModal] = useState(false);
-  const [evmBalance, setEvmBalance] = useState(null);
-  const [evmBalanceLoading, setEvmBalanceLoading] = useState(false);
 
   // EVM balance when EVM chain
   React.useEffect(() => {
