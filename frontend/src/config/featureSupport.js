@@ -3,9 +3,14 @@
  * Derives from config/contracts.js so the app can show "Swap (via external DEX)",
  * "Create Pool (Sepolia only)", etc., and gate actions when contracts aren't deployed.
  */
-import { getContractAddresses } from './contracts';
+import CONTRACTS, { getContractAddresses } from './contracts';
 
 const ZERO = '0x0000000000000000000000000000000000000000';
+
+/** All EVM chain IDs we have config for (numeric keys in CONTRACTS). */
+const EVM_CHAIN_IDS = Object.keys(CONTRACTS)
+  .filter((k) => /^\d+$/.test(k))
+  .map(Number);
 
 const hasDeployed = (addr) => addr && addr !== ZERO;
 
@@ -53,20 +58,25 @@ export function getFeatureSupport(chainId) {
 
 /**
  * Chains where Create Pool / Liquidity (our DEX) is available.
+ * Derived from contracts.js – DEXFactory + DEXRouter deployed.
  */
 export function getChainsWithDex() {
-  return [11155111]; // Sepolia; add more as DEX is deployed
+  return EVM_CHAIN_IDS.filter((id) => getFeatureSupport(id).hasDex);
 }
 
 /**
  * Chains where Deploy Token (TokenFactory) is available.
+ * Derived from contracts.js – TokenFactory deployed and not zero address.
  */
 export function getChainsWithTokenFactory() {
-  const chainIds = [1, 137, 56, 42161, 10, 8453, 11155111];
-  return chainIds.filter((id) => {
-    const s = getFeatureSupport(id);
-    return s.hasTokenFactory;
-  });
+  return EVM_CHAIN_IDS.filter((id) => getFeatureSupport(id).hasTokenFactory);
+}
+
+/**
+ * Chains where Boing Bridge is available (CrossChainBridge deployed).
+ */
+export function getChainsWithBridge() {
+  return EVM_CHAIN_IDS.filter((id) => getFeatureSupport(id).bridge === 'boing');
 }
 
 export default getFeatureSupport;

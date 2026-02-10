@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { ethers } from 'ethers';
-import { getNetworkByChainId } from '../config/networks';
+import { getNetworkByChainId, getWalletAddChainParams } from '../config/networks';
 import toast from 'react-hot-toast';
 
 const WalletContext = createContext();
@@ -483,18 +483,11 @@ export const WalletProvider = ({ children }) => {
             });
           } catch (switchError) {
             if (switchError.code === 4902) {
-              // Network not added, add it
-              const network = getNetworkByChainId(chainId);
-              if (network) {
+              const addParams = getWalletAddChainParams(chainId);
+              if (addParams) {
                 await ethereumProvider.request({
                   method: 'wallet_addEthereumChain',
-                  params: [{
-                    chainId: `0x${chainId.toString(16)}`,
-                    chainName: network.name,
-                    nativeCurrency: network.nativeCurrency,
-                    rpcUrls: [network.rpcUrl],
-                    blockExplorerUrls: [network.explorer],
-                  }],
+                  params: [addParams],
                 });
               }
             } else {
@@ -837,20 +830,18 @@ export const WalletProvider = ({ children }) => {
 
     } catch (switchError) {
       console.log('⚠️ Network switch failed:', switchError);
-      // If the network doesn't exist in the wallet, add it
+      // If the network doesn't exist in the wallet, add it (mainnet-ready: uses rpcUrls array with fallbacks)
       if (switchError.code === 4902) {
         try {
+          const addParams = getWalletAddChainParams(targetChainId);
+          if (!addParams) {
+            throw new Error('Network config not available');
+          }
           const targetNetwork = getNetworkByChainId(targetChainId);
           console.log('📡 Adding network to wallet:', targetNetwork.name);
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: `0x${targetChainId.toString(16)}`,
-              chainName: targetNetwork.name,
-              nativeCurrency: targetNetwork.nativeCurrency,
-              rpcUrls: [targetNetwork.rpcUrl],
-              blockExplorerUrls: [targetNetwork.explorer],
-            }],
+            params: [addParams],
           });
           console.log('✅ Network added and switched successfully:', targetNetwork.name);
           

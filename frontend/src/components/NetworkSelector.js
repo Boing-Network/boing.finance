@@ -31,6 +31,16 @@ const NetworkSelector = () => {
       42161: '🔵', // Arbitrum
       10: '🔴', // Optimism
       8453: '🔵', // Base
+      43114: '❄️', // Avalanche
+      250: '💜', // Fantom
+      59144: '🔷', // Linea
+      324: '🟦', // zkSync Era
+      534352: '📜', // Scroll
+      1101: '🟣', // Polygon zkEVM
+      5000: '🟤', // Mantle
+      81457: '💛', // Blast
+      204: '🟡', // opBNB
+      34443: '🟣', // Mode
       11155111: '🧪', // Sepolia
       80001: '🧪', // Mumbai
       97: '🧪', // BSC Testnet

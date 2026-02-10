@@ -1,12 +1,14 @@
 import React from 'react';
 import { getNetworkByChainId } from '../config/networks';
 import { getChainsWithDex } from '../config/featureSupport';
+import { getExternalSwapUrl } from '../config/networkExternalLinks';
 
 /**
  * Shows a banner when the current chain doesn't support the feature (e.g. Create Pool / Liquidity).
  * Renders nothing if the chain is supported.
+ * For Swap/Liquidity/Pools: offers Switch to Boing network OR use external DEX (mainnet-ready).
  */
-export default function NetworkSupportBanner({ featureLabel, chainIdsSupported, currentChainId, onSwitchNetwork }) {
+export default function NetworkSupportBanner({ featureLabel, chainIdsSupported, currentChainId, onSwitchNetwork, showExternalLink = true }) {
   const supported = chainIdsSupported.includes(Number(currentChainId));
   if (supported || !currentChainId) return null;
 
@@ -15,6 +17,9 @@ export default function NetworkSupportBanner({ featureLabel, chainIdsSupported, 
     .filter(Boolean);
   const primaryChainId = chainIdsSupported[0];
   const primaryName = getNetworkByChainId(primaryChainId)?.name || `Chain ${primaryChainId}`;
+  const externalUrl = showExternalLink && (featureLabel === 'Swap' || featureLabel === 'Liquidity' || featureLabel === 'Create Pool')
+    ? getExternalSwapUrl(currentChainId)
+    : null;
 
   return (
     <div
@@ -26,17 +31,29 @@ export default function NetworkSupportBanner({ featureLabel, chainIdsSupported, 
     >
       <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
         <strong style={{ color: 'var(--text-primary)' }}>{featureLabel}</strong> is available on{' '}
-        {chainNames.length > 1 ? chainNames.join(', ') : primaryName}. Switch network to continue.
+        {chainNames.length > 1 ? chainNames.join(', ') : primaryName}. Switch network or use external DEX.
       </p>
-      {typeof onSwitchNetwork === 'function' && (
-        <button
-          type="button"
-          onClick={() => onSwitchNetwork(primaryChainId)}
-          className="px-4 py-2 rounded-lg font-medium transition-all duration-200 bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-600 hover:to-blue-700"
-        >
-          Switch to {primaryName}
-        </button>
-      )}
+      <div className="flex flex-wrap gap-2">
+        {externalUrl && (
+          <a
+            href={externalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 rounded-lg font-medium transition-all duration-200 border border-cyan-500 text-cyan-500 hover:bg-cyan-500/10"
+          >
+            {featureLabel} on External DEX →
+          </a>
+        )}
+        {typeof onSwitchNetwork === 'function' && (
+          <button
+            type="button"
+            onClick={() => onSwitchNetwork(primaryChainId)}
+            className="px-4 py-2 rounded-lg font-medium transition-all duration-200 bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-600 hover:to-blue-700"
+          >
+            Switch to {primaryName}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
