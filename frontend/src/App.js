@@ -10,7 +10,6 @@ import ChainTypeSelector from './components/ChainTypeSelector';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AchievementProvider } from './contexts/AchievementContext';
 import AchievementOverlay from './components/AchievementOverlay';
-import AchievementPanel from './components/AchievementPanel';
 import { useWalletConnection } from './hooks/useWalletConnection';
 import BaseMiniAppWrapper from './components/BaseMiniAppWrapper';
 import BaseNetworkOptimizer from './components/BaseNetworkOptimizer';
@@ -70,7 +69,40 @@ const BoingPoints = lazy(() => import('./pages/boing/BoingPoints'));
 const BoingRoadmap = lazy(() => import('./pages/boing/BoingRoadmap'));
 const BoingActivities = lazy(() => import('./pages/boing/BoingActivities'));
 
-// QueryClient will be created inside App component to avoid initialization issues
+// QueryClient singleton at module top to avoid "Cannot access before initialization"
+// (production bundle evaluation order can cause TDZ if this is declared after App)
+let queryClientInstance = null;
+function getQueryClient() {
+  if (!queryClientInstance) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[App] Creating QueryClient instance at:', new Date().toISOString());
+    }
+    try {
+      queryClientInstance = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: 1,
+            refetchOnWindowFocus: false,
+            staleTime: 5 * 60 * 1000,
+            throwOnError: false,
+            onError: () => {}
+          },
+        },
+      });
+    } catch (error) {
+      queryClientInstance = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: 1,
+            refetchOnWindowFocus: false,
+            throwOnError: false,
+          },
+        },
+      });
+    }
+  }
+  return queryClientInstance;
+}
 
 // Helper for coming soon
 const comingSoon = {
@@ -163,7 +195,7 @@ function PageTransitionRoutes() {
 }
 
 function AppContent() {
-  const location = useLocation();
+  const _location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [aiChatOpen, setAiChatOpen] = useState(false);
@@ -731,53 +763,8 @@ function AppContent() {
   );
 }
 
-// Create QueryClient in module scope to ensure it's only created once
-// This prevents issues with React Query initialization across remounts
-let queryClientInstance = null;
-
-function getQueryClient() {
-  if (!queryClientInstance) {
-    console.log('[App] Creating QueryClient instance at:', new Date().toISOString());
-    try {
-      queryClientInstance = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: 1,
-            refetchOnWindowFocus: false,
-            staleTime: 5 * 60 * 1000, // 5 minutes
-            // Add error handling to prevent crashes
-            throwOnError: false,
-            // Ensure queries don't fail silently
-            onError: () => {
-              // Silently handle errors
-            }
-          },
-        },
-      });
-      // QueryClient initialized
-    } catch (error) {
-      // Return a basic QueryClient as fallback
-      queryClientInstance = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: 1,
-            refetchOnWindowFocus: false,
-            throwOnError: false,
-          },
-        },
-      });
-    }
-  }
-  return queryClientInstance;
-}
-
 function App() {
-  // Use the singleton QueryClient instance
-  const queryClient = React.useMemo(() => {
-    return getQueryClient();
-  }, []); // Empty deps - only get once
-  
-  // Removed console.log for production
+  const queryClient = React.useMemo(() => getQueryClient(), []);
 
   // Add global error handler for React Query errors
   React.useEffect(() => {
@@ -1140,8 +1127,8 @@ function Home() {
   );
 }
 
-// Floating Boing Astronaut Mascot (SVG, up-down animation)
-function BoingAstronaut() {
+// Floating Boing Astronaut Mascot (SVG, up-down animation) - kept for potential future use
+function _BoingAstronaut() {
   return (
     <svg width="80" height="80" viewBox="0 0 200 200" className="animate-float" fill="none" xmlns="http://www.w3.org/2000/svg">
       <g>
