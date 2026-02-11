@@ -15,8 +15,8 @@ export default function ChainTypeSelector() {
   const { network, setSolanaNetwork } = useSolanaWallet();
 
   return (
-    <div className="flex items-center gap-2">
-      <div className="flex items-center gap-1 p-1 rounded-lg bg-black/20 border" style={{ borderColor: 'var(--border-color)' }}>
+    <div className="flex items-center gap-3 flex-shrink-0">
+      <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-black/20 border" style={{ borderColor: 'var(--border-color)' }}>
         {CHAIN_TYPES.map((ct) => (
           <button
             key={ct.id}
@@ -37,7 +37,7 @@ export default function ChainTypeSelector() {
         ))}
       </div>
       {isSolana && (
-        <div className="flex items-center gap-1 p-1 rounded-lg bg-black/10 border" style={{ borderColor: 'var(--border-color)' }}>
+        <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-black/10 border" style={{ borderColor: 'var(--border-color)' }}>
           {['devnet', 'mainnet'].map((net) => (
             <button
               key={net}
