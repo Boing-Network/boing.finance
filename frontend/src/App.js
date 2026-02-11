@@ -274,8 +274,8 @@ function AppContent() {
         <ShootingStars />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <div className="flex-shrink-0">
+            {/* Logo - shifted left with margin for separation from nav */}
+            <div className="flex-shrink-0 -ml-1 mr-6 lg:mr-8">
               <button
                 onClick={() => window.location.href = '/'}
                 className="flex items-center space-x-2 font-bold text-xl"
@@ -287,7 +287,7 @@ function AppContent() {
 
             {/* Desktop Navigation - Show on large screens and above (single row: Trade & Deploy, Analytics, Governance, BOING) */}
             <div className="hidden lg:flex items-center justify-center flex-1 min-w-0">
-              <nav className="flex items-center gap-0.5 xl:gap-1 flex-nowrap justify-center">
+              <nav className="flex items-center gap-3 xl:gap-4 flex-nowrap justify-center">
                 <DropdownMenu label="Trade & Deploy" items={memoizedNavigation.tradeAndDeploy} isOpen={tradeAndDeployDropdownOpen}
                   onToggle={() => { const next = !tradeAndDeployDropdownOpen; setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setTradeAndDeployDropdownOpen(next); }}
                   onClose={() => setTradeAndDeployDropdownOpen(false)}
@@ -307,8 +307,8 @@ function AppContent() {
               </nav>
             </div>
 
-            {/* Desktop Right: Tools dropdown + Wallet + Network */}
-            <div className="hidden lg:flex items-center flex-shrink-0 gap-2 pl-2">
+            {/* Desktop Right: Tools dropdown + ChainType (Solana devnet|mainnet) + Network + Wallet */}
+            <div className="hidden lg:flex items-center flex-shrink-0 gap-4 pl-4">
               <ToolsDropdown
                 isOpen={toolsDropdownOpen}
                 onToggle={() => { const next = !toolsDropdownOpen; setTradeAndDeployDropdownOpen(false); setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(next); }}
@@ -317,7 +317,7 @@ function AppContent() {
                 onOpenAiChat={() => { setAiChatOpen(true); setToolsDropdownOpen(false); }}
                 onOpenDefi101={() => { setDefi101Open(true); setToolsDropdownOpen(false); }}
               />
-              <div className="flex items-center gap-2 border-l pl-2" style={{ borderColor: 'var(--border-color)' }}>
+              <div className="flex items-center gap-4 border-l pl-4" style={{ borderColor: 'var(--border-color)' }}>
                 <ChainTypeSelector />
                 <NetworkSelector />
                 <WalletConnect />
@@ -325,8 +325,8 @@ function AppContent() {
             </div>
 
             {/* Medium Screen Navigation - Show on medium screens only (md to lg), single row */}
-            <div className="hidden md:flex lg:hidden items-center gap-1 flex-shrink-0">
-              <nav className="flex items-center gap-1 mr-1 flex-nowrap">
+            <div className="hidden md:flex lg:hidden items-center gap-3 flex-shrink-0">
+              <nav className="flex items-center gap-3 mr-2 flex-nowrap">
                 <DropdownMenu label="Trade & Deploy" items={memoizedNavigation.tradeAndDeploy} isOpen={tradeAndDeployDropdownOpen}
                   onToggle={() => { const next = !tradeAndDeployDropdownOpen; setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setTradeAndDeployDropdownOpen(next); }}
                   onClose={() => setTradeAndDeployDropdownOpen(false)}
@@ -344,7 +344,7 @@ function AppContent() {
                   onClose={() => setBoingDropdownOpen(false)}
                 />
               </nav>
-              <div className="flex items-center gap-1 pl-1 border-l" style={{ borderColor: 'var(--border-color)' }}>
+              <div className="flex items-center gap-3 pl-3 border-l" style={{ borderColor: 'var(--border-color)' }}>
                 <ToolsDropdown isOpen={toolsDropdownOpen} onToggle={() => { const next = !toolsDropdownOpen; setTradeAndDeployDropdownOpen(false); setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(next); }} onClose={() => setToolsDropdownOpen(false)}
                   onOpenHistory={() => { setHistoryModalOpen(true); setToolsDropdownOpen(false); }}
                   onOpenAiChat={() => { setAiChatOpen(true); setToolsDropdownOpen(false); }}
