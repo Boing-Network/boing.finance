@@ -666,7 +666,7 @@ function AppContent() {
             <div className="lg:col-span-5">
               <div className="flex items-center mb-4 sm:mb-6">
                 <Logo size={48} className="mr-3 sm:mr-4" showText={false} />
-                <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">boing</h3>
+                <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">boing.finance</h3>
               </div>
               <p className="text-sm sm:text-base mb-4 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                 The most advanced decentralized exchange with cross-chain capabilities, 
@@ -719,7 +719,7 @@ function AppContent() {
           
           <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-cyan-500/20" style={{ borderColor: 'var(--border-color)' }}>
             <p className="text-xs sm:text-sm text-center" style={{ color: 'var(--text-secondary)' }}>
-              © 2025 boing. All rights reserved. Built with ❤️ for the DeFi community.
+              © 2026 boing.finance. All rights reserved. Built with ❤️ for the DeFi community.
             </p>
           </div>
         </div>
