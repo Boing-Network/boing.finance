@@ -211,6 +211,7 @@ function AppContent() {
   const [governanceDropdownOpen, setGovernanceDropdownOpen] = useState(false);
   const [boingDropdownOpen, setBoingDropdownOpen] = useState(false);
   const [toolsDropdownOpen, setToolsDropdownOpen] = useState(false);
+  const [isMediumNavOpen, setIsMediumNavOpen] = useState(false);
   const { account } = useWalletConnection();
 
   const closeAllDropdowns = () => {
@@ -219,6 +220,7 @@ function AppContent() {
     setGovernanceDropdownOpen(false);
     setBoingDropdownOpen(false);
     setToolsDropdownOpen(false);
+    setIsMediumNavOpen(false);
   };
   
   // Navigation is already frozen and immutable, no need to memoize
@@ -251,6 +253,7 @@ function AppContent() {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         setIsMenuOpen(false);
+        setIsMediumNavOpen(false);
         setHistoryModalOpen(false);
         setAiChatOpen(false);
         setDefi101Open(false);
@@ -274,8 +277,8 @@ function AppContent() {
         <ShootingStars dense />
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-x-4 sm:gap-x-5 lg:gap-x-6 xl:gap-x-8 h-14 sm:h-16">
-            {/* Logo - min-width reserves space so center nav never overlaps */}
-            <div className="flex-shrink-0 min-w-[120px] sm:min-w-[140px] lg:min-w-[160px] pr-2 sm:pr-0">
+            {/* Logo - compact min-width keeps it close to left edge */}
+            <div className="flex-shrink-0 min-w-0 pl-0 pr-2 sm:pr-3">
               <button
                 onClick={() => window.location.href = '/'}
                 className="flex items-center space-x-2 font-bold text-xl whitespace-nowrap"
@@ -326,28 +329,45 @@ function AppContent() {
               </div>
             </div>
 
-            {/* Medium Screen Navigation - md to lg */}
-            <div className="hidden md:flex lg:hidden items-center gap-x-4 flex-shrink-0 min-w-0 overflow-hidden">
-              <nav className="flex items-center gap-2 flex-nowrap min-w-0">
-                <DropdownMenu label="Trade & Deploy" items={memoizedNavigation.tradeAndDeploy} isOpen={tradeAndDeployDropdownOpen}
-                  onToggle={() => { const next = !tradeAndDeployDropdownOpen; setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setTradeAndDeployDropdownOpen(next); }}
-                  onClose={() => setTradeAndDeployDropdownOpen(false)}
-                />
-                <DropdownMenu label="Analytics" items={memoizedNavigation.analytics} isOpen={analyticsDropdownOpen}
-                  onToggle={() => { const next = !analyticsDropdownOpen; setTradeAndDeployDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setAnalyticsDropdownOpen(next); }}
-                  onClose={() => setAnalyticsDropdownOpen(false)}
-                />
-                <DropdownMenu label="Governance" items={memoizedNavigation.governance} isOpen={governanceDropdownOpen}
-                  onToggle={() => { const next = !governanceDropdownOpen; setTradeAndDeployDropdownOpen(false); setAnalyticsDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setGovernanceDropdownOpen(next); }}
-                  onClose={() => setGovernanceDropdownOpen(false)}
-                />
-                <DropdownMenu label="BOING" items={memoizedNavigation.boing} isOpen={boingDropdownOpen}
-                  onToggle={() => { const next = !boingDropdownOpen; setTradeAndDeployDropdownOpen(false); setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setToolsDropdownOpen(false); setBoingDropdownOpen(next); }}
-                  onClose={() => setBoingDropdownOpen(false)}
-                />
-              </nav>
+            {/* Medium Screen Navigation - md to lg: hamburger + tools/network/wallet */}
+            <div className="hidden md:flex lg:hidden items-center gap-x-3 flex-shrink-0">
+              {/* Hamburger for main nav items */}
+              <div className="relative flex-shrink-0">
+                <button
+                  onClick={() => setIsMediumNavOpen(!isMediumNavOpen)}
+                  className="flex items-center justify-center w-10 h-10 rounded-lg transition-colors"
+                  style={{
+                    color: isMediumNavOpen ? 'var(--text-primary)' : 'var(--text-secondary)',
+                    backgroundColor: isMediumNavOpen ? 'var(--bg-tertiary)' : 'transparent'
+                  }}
+                  aria-label="Toggle navigation menu"
+                  aria-expanded={isMediumNavOpen}
+                >
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    {isMediumNavOpen ? (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    ) : (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    )}
+                  </svg>
+                </button>
+                {isMediumNavOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" aria-hidden="true" onClick={() => setIsMediumNavOpen(false)} />
+                    <div
+                      className="absolute left-0 top-full mt-1 z-50 w-72 max-h-[80vh] overflow-y-auto rounded-lg border shadow-xl"
+                      style={{
+                        background: 'linear-gradient(to bottom, var(--bg-secondary), var(--bg-tertiary))',
+                        borderColor: 'var(--border-color)'
+                      }}
+                    >
+                      <MediumNavPanel navigation={memoizedNavigation} onNavigate={() => setIsMediumNavOpen(false)} comingSoon={comingSoon} />
+                    </div>
+                  </>
+                )}
+              </div>
               <div className="flex items-center gap-2 pl-3 border-l flex-shrink-0" style={{ borderColor: 'var(--border-color)' }}>
-                <div className="flex-shrink-0"><ToolsDropdown isOpen={toolsDropdownOpen} onToggle={() => { const next = !toolsDropdownOpen; setTradeAndDeployDropdownOpen(false); setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(next); }} onClose={() => setToolsDropdownOpen(false)}
+                <div className="flex-shrink-0"><ToolsDropdown isOpen={toolsDropdownOpen} onToggle={() => { const next = !toolsDropdownOpen; setIsMediumNavOpen(false); setToolsDropdownOpen(next); }} onClose={() => setToolsDropdownOpen(false)}
                   onOpenHistory={() => { setHistoryModalOpen(true); setToolsDropdownOpen(false); }}
                   onOpenAiChat={() => { setAiChatOpen(true); setToolsDropdownOpen(false); }}
                   onOpenDefi101={() => { setDefi101Open(true); setToolsDropdownOpen(false); }}
@@ -1314,6 +1334,58 @@ function ToolsDropdown({ isOpen, onToggle, onClose, onOpenHistory, onOpenAiChat,
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// Medium viewport nav panel (hamburger dropdown)
+function MediumNavPanel({ navigation, onNavigate, comingSoon }) {
+  const NavSection = ({ title, items }) => (
+    <div className="p-2 border-b last:border-b-0" style={{ borderColor: 'var(--border-color)' }}>
+      <h3 className="text-xs font-medium mb-1.5 px-2 uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>{title}</h3>
+      <div className="space-y-0.5">
+        {items.map((item) => (
+          <button
+            key={item.name}
+            onClick={() => {
+              if (item.isAvailable && !item.comingSoon) {
+                window.location.href = item.href;
+                onNavigate();
+              }
+            }}
+            className={`w-full text-left px-2 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${(item.comingSoon || !item.isAvailable) ? 'cursor-not-allowed opacity-60' : ''}`}
+            style={{ color: (item.comingSoon || !item.isAvailable) ? 'var(--text-tertiary)' : 'var(--text-secondary)' }}
+            onMouseEnter={(e) => { if (item.isAvailable && !item.comingSoon) e.currentTarget.style.color = 'var(--text-primary)'; }}
+            onMouseLeave={(e) => { if (item.isAvailable && !item.comingSoon) e.currentTarget.style.color = 'var(--text-secondary)'; }}
+            disabled={item.comingSoon || !item.isAvailable}
+            title={item.comingSoon ? comingSoon.tooltip : ''}
+          >
+            <span className="text-base">{item.icon}</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span>{item.name}</span>
+                {(item.comingSoon || !item.isAvailable) && (
+                  <span className="px-1.5 py-0.5 rounded text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>
+                )}
+                {item.testnetOnly && item.isAvailable && !item.comingSoon && (
+                  <span className="px-1.5 py-0.5 rounded text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-400/30">Testnet</span>
+                )}
+              </div>
+              {item.description && (
+                <div className="text-xs truncate" style={{ color: 'var(--text-tertiary)' }}>{item.description}</div>
+              )}
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+  return (
+    <div className="py-2">
+      <NavSection title="Trade & Deploy" items={navigation.tradeAndDeploy} />
+      <NavSection title="Analytics" items={navigation.analytics} />
+      <NavSection title="Governance" items={navigation.governance} />
+      <NavSection title="BOING" items={navigation.boing} />
     </div>
   );
 }
