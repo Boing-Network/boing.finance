@@ -8,7 +8,8 @@ const OverviewSection = () => {
         <p className="text-lg leading-relaxed mb-6" style={{ color: 'var(--text-secondary)' }}>
           boing.finance is a next-generation decentralized exchange (DEX) that enables seamless trading across multiple blockchain networks. 
           Built with modern web3 technologies, boing.finance provides a unified platform for token swapping, liquidity provision, 
-          cross-chain bridging, token deployment, and comprehensive portfolio management.
+          cross-chain bridging, token and NFT deployment, governance, the BOING ecosystem, and comprehensive portfolio management. 
+          Use the AI DeFi Assistant for guidance and explore Help Center, Developer Tools, and DeFi 101 for learning.
         </p>
         
         <div className="grid md:grid-cols-2 gap-6 mb-8">
@@ -59,9 +60,30 @@ const OverviewSection = () => {
           
           <div className="text-center p-4 rounded-lg border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <div className="text-3xl mb-2">🪙</div>
-            <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Token Deployment</h4>
+            <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Token & NFT Deployment</h4>
             <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Deploy your own tokens with advanced features and customization
+              Deploy tokens, create NFTs, and create liquidity pools—no coding required
+            </p>
+          </div>
+          <div className="text-center p-4 rounded-lg border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+            <div className="text-3xl mb-2">📜</div>
+            <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Governance</h4>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              Vote on proposals and participate in DAO governance
+            </p>
+          </div>
+          <div className="text-center p-4 rounded-lg border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+            <div className="text-3xl mb-2">🎯</div>
+            <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>BOING Ecosystem</h4>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              NFT staking, points, rewards, and community activities
+            </p>
+          </div>
+          <div className="text-center p-4 rounded-lg border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+            <div className="text-3xl mb-2">🤖</div>
+            <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>AI Assistant & Tools</h4>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              AI DeFi Assistant, DeFi 101, transaction history, developer tools
             </p>
           </div>
         </div>
@@ -206,11 +228,12 @@ const OverviewSection = () => {
             <h4 className="text-lg font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>🚀 Advanced Features</h4>
             <ul className="space-y-2" style={{ color: 'var(--text-secondary)' }}>
               <li>• Cross-chain token bridging</li>
-              <li>• Advanced token deployment</li>
-              <li>• Real-time analytics dashboard</li>
-              <li>• Portfolio tracking across networks</li>
-              <li>• Gas fee optimization</li>
-              <li>• Multi-wallet support</li>
+              <li>• Token, NFT, and pool deployment</li>
+              <li>• Governance and DAO voting</li>
+              <li>• BOING ecosystem (staking, points, activities)</li>
+              <li>• Real-time analytics and portfolio tracking</li>
+              <li>• AI DeFi Assistant and DeFi 101</li>
+              <li>• Gas fee optimization and multi-wallet support</li>
             </ul>
           </div>
           

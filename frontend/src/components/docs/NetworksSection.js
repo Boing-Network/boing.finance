@@ -65,7 +65,7 @@ const NetworksSection = () => {
           style={{ color: 'var(--text-primary)'  }}>Supported Networks</h2>
         <p className=" text-lg leading-relaxed mb-8"
           style={{ color: 'var(--text-secondary)'  }}>
-          mochi supports 15+ blockchain networks, from major Layer 1s to emerging Layer 2 solutions. 
+          boing.finance supports 15+ blockchain networks, from major Layer 1s to emerging Layer 2 solutions. 
           All networks use the ERC-20 token standard and are EVM-compatible, ensuring seamless 
           cross-chain trading and liquidity provision.
         </p>
@@ -214,7 +214,7 @@ const NetworksSection = () => {
           style={{ backgroundColor: 'var(--bg-card)'  }}>
           <p className=" mb-4"
           style={{ color: 'var(--text-secondary)'  }}>
-            mochi is designed to easily support new blockchain networks. To add a new network:
+            boing.finance is designed to easily support new blockchain networks. To add a new network:
           </p>
           <div className="space-y-4">
             <div className="flex items-start space-x-4">

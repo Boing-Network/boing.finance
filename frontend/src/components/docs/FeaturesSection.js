@@ -67,6 +67,50 @@ const FeaturesSection = () => {
         'Token information and contract verification',
         'Price alerts and market notifications'
       ]
+    },
+    {
+      icon: '🚀',
+      title: 'Token & NFT Deployment',
+      description: 'Deploy tokens, create NFTs, and create liquidity pools',
+      details: [
+        'Deploy ERC-20 tokens with custom supply and metadata',
+        'Create and mint NFTs with metadata and images',
+        'Create new trading pairs and liquidity pools',
+        'No coding required—deploy from the web interface'
+      ]
+    },
+    {
+      icon: '📜',
+      title: 'Governance',
+      description: 'Participate in protocol governance and vote on proposals',
+      details: [
+        'View and vote on governance proposals',
+        'DAO treasury and roadmap visibility',
+        'Community forums and social links',
+        'Educational resources on how governance works'
+      ]
+    },
+    {
+      icon: '🎯',
+      title: 'BOING Ecosystem',
+      description: 'NFT staking, points, rewards, and community activities',
+      details: [
+        'Stake Boing NFTs for rewards',
+        'Earn points through trading and liquidity',
+        'Community activities and events',
+        'Roadmap and upcoming initiatives'
+      ]
+    },
+    {
+      icon: '🤖',
+      title: 'AI DeFi Assistant & Tools',
+      description: 'Get help and use built-in tools',
+      details: [
+        'AI DeFi Assistant for questions and guidance',
+        'DeFi 101 learning resource',
+        'Transaction history and tracking',
+        'Developer tools and contract utilities'
+      ]
     }
   ];
 
@@ -115,8 +159,8 @@ const FeaturesSection = () => {
       <div>
         <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Platform Features</h2>
         <p className="text-lg leading-relaxed mb-8" style={{ color: 'var(--text-secondary)' }}>
-          mochi offers a comprehensive suite of DeFi features designed to provide the best 
-          cross-chain trading experience. From basic token swaps to advanced portfolio management, 
+          boing.finance offers a comprehensive suite of DeFi features designed to provide the best 
+          cross-chain trading experience. From basic token swaps to governance, NFT creation, and the BOING ecosystem, 
           every feature is built with security, efficiency, and user experience in mind.
         </p>
       </div>
@@ -226,7 +270,7 @@ const FeaturesSection = () => {
                 <th className="text-left  font-semibold py-3"
           style={{ color: 'var(--text-primary)'  }}>Feature</th>
                 <th className="text-center  font-semibold py-3"
-          style={{ color: 'var(--text-primary)'  }}>mochi</th>
+          style={{ color: 'var(--text-primary)'  }}>boing.finance</th>
                 <th className="text-center text-gray-400 font-semibold py-3">Traditional DEXs</th>
               </tr>
             </thead>

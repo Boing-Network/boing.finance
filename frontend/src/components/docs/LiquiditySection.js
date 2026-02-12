@@ -8,7 +8,7 @@ const LiquiditySection = () => {
           style={{ color: 'var(--text-primary)'  }}>Liquidity Provision Guide</h2>
         <p className=" text-lg leading-relaxed mb-8"
           style={{ color: 'var(--text-secondary)'  }}>
-          Learn how to provide liquidity to trading pairs and earn fees on mochi. Liquidity provision is 
+          Learn how to provide liquidity to trading pairs and earn fees on boing.finance. Liquidity provision is 
           a key component of DeFi that allows you to earn passive income while supporting the ecosystem.
         </p>
       </div>
@@ -61,7 +61,7 @@ const LiquiditySection = () => {
           style={{ color: 'var(--text-primary)'  }}>Constant Product Formula</h4>
             <p className=" mb-4"
           style={{ color: 'var(--text-secondary)'  }}>
-              mochi uses the constant product formula: <code className="bg-gray-800 px-2 py-1 rounded">x * y = k</code>
+              boing.finance uses the constant product formula: <code className="bg-gray-800 px-2 py-1 rounded">x * y = k</code>
             </p>
             <ul className="space-y-2 "
           style={{ color: 'var(--text-secondary)'  }}>

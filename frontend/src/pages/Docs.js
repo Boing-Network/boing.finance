@@ -16,6 +16,8 @@ import TechnicalSection from '../components/docs/TechnicalSection';
 import APISection from '../components/docs/APISection';
 import SecuritySection from '../components/docs/SecuritySection';
 import FAQSection from '../components/docs/FAQSection';
+import GovernanceSection from '../components/docs/GovernanceSection';
+import BoingSection from '../components/docs/BoingSection';
 
 
 const Docs = () => {
@@ -32,6 +34,8 @@ const Docs = () => {
     { id: 'tokens', title: 'Token Management', icon: '🪙' },
     { id: 'analytics', title: 'Analytics & Data', icon: '📊' },
     { id: 'portfolio', title: 'Portfolio Management', icon: '💼' },
+    { id: 'governance', title: 'Governance', icon: '📜' },
+    { id: 'boing', title: 'BOING Ecosystem', icon: '🎯' },
     { id: 'technical', title: 'Technical Specs', icon: '⚙️' },
     { id: 'api', title: 'API Reference', icon: '🔌' },
     { id: 'security', title: 'Security', icon: '🔒' },
@@ -117,6 +121,8 @@ const Docs = () => {
                 {activeSection === 'tokens' && <TokensSection />}
                 {activeSection === 'analytics' && <AnalyticsSection />}
                 {activeSection === 'portfolio' && <PortfolioSection />}
+                {activeSection === 'governance' && <GovernanceSection />}
+                {activeSection === 'boing' && <BoingSection />}
                 {activeSection === 'technical' && <TechnicalSection />}
                 {activeSection === 'api' && <APISection />}
                 {activeSection === 'security' && <SecuritySection />}

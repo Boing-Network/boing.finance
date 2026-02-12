@@ -8,7 +8,7 @@ const TokensSection = () => {
           style={{ color: 'var(--text-primary)'  }}>Token Management Guide</h2>
         <p className=" text-lg leading-relaxed mb-8"
           style={{ color: 'var(--text-secondary)'  }}>
-          Learn how to discover, track, and manage tokens across all supported networks on mochi. 
+          Learn how to discover, track, and manage tokens across all supported networks on boing.finance. 
           From popular tokens to newly launched projects, find everything you need to know about token management.
         </p>
       </div>
@@ -72,7 +72,7 @@ const TokensSection = () => {
           <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
           style={{ backgroundColor: 'var(--bg-card)'  }}>
             <h4 className="text-lg font-semibold  mb-4"
-          style={{ color: 'var(--text-primary)'  }}>Step 2: Add to mochi</h4>
+          style={{ color: 'var(--text-primary)'  }}>Step 2: Add to boing.finance</h4>
             <div className="space-y-3">
               <p className=""
           style={{ color: 'var(--text-secondary)'  }}>1. Navigate to the Tokens page</p>

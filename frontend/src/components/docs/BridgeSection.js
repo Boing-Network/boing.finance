@@ -8,7 +8,7 @@ const BridgeSection = () => {
           style={{ color: 'var(--text-primary)'  }}>Cross-Chain Bridge Guide</h2>
         <p className=" text-lg leading-relaxed mb-8"
           style={{ color: 'var(--text-secondary)'  }}>
-          Learn how to transfer tokens between different blockchain networks using mochi's cross-chain bridge. 
+          Learn how to transfer tokens between different blockchain networks using boing.finance's cross-chain bridge. 
           Our bridge infrastructure enables seamless asset movement across 15+ supported networks.
         </p>
       </div>
@@ -212,7 +212,7 @@ const BridgeSection = () => {
           style={{ color: 'var(--text-primary)'  }}>Step 1: Connect and Select</h4>
             <div className="space-y-3">
               <p className=""
-          style={{ color: 'var(--text-secondary)'  }}>1. Connect your wallet to mochi</p>
+          style={{ color: 'var(--text-secondary)'  }}>1. Connect your wallet to boing.finance</p>
               <p className=""
           style={{ color: 'var(--text-secondary)'  }}>2. Navigate to the Bridge page</p>
               <p className=""

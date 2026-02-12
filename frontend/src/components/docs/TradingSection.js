@@ -8,7 +8,7 @@ const TradingSection = () => {
           style={{ color: 'var(--text-primary)'  }}>Trading Guide</h2>
         <p className=" text-lg leading-relaxed mb-8"
           style={{ color: 'var(--text-secondary)'  }}>
-          Learn how to trade tokens on mochi with our comprehensive guide. From basic swaps to advanced 
+          Learn how to trade tokens on boing.finance with our comprehensive guide. From basic swaps to advanced 
           trading strategies, we'll walk you through everything you need to know to start trading safely and efficiently.
         </p>
       </div>

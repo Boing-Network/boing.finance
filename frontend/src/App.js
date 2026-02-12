@@ -958,7 +958,7 @@ function Home() {
               boing.finance
             </h1>
             <p className="text-lg leading-relaxed mb-12" style={{ color: 'var(--text-secondary)' }}>
-              The ultimate multi-network DeFi platform for cross-chain trading, token deployment, and comprehensive financial tools across Ethereum, Polygon, BSC, Arbitrum, Optimism, and Base networks.
+              The ultimate multi-network DeFi platform for cross-chain trading, token deployment, governance, and the BOING ecosystem. Swap, provide liquidity, bridge assets, deploy tokens, create NFTs, vote on proposals, and earn rewards—all from one unified interface across Ethereum, Polygon, BSC, Arbitrum, Optimism, Base, and more.
             </p>
           </div>
 
@@ -976,6 +976,9 @@ function Home() {
             <Highlight icon={<BridgeIcon />} text="Cross-chain bridge" />
             <Highlight icon={<TokensIcon />} text="All your tokens" />
             <Highlight icon={<DeployTokenIcon />} text="Deploy tokens" />
+            <span className="text-2xl px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-400/20">📜 Governance</span>
+            <span className="text-2xl px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-400/20">🎯 BOING Ecosystem</span>
+            <span className="text-2xl px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-400/20">🤖 AI DeFi Assistant</span>
           </div>
 
           {/* Animated SVG Hero Section */}
@@ -1055,11 +1058,62 @@ function Home() {
                   <a key={item.name} href={item.href} className="block">{CardContent}</a>
                 );
               })}
-              {memoizedNav.deployment.filter((item) => item.name === 'Deploy Token').map((item) => (
-                <a key={item.name} href={item.href} className="block">
-                  <FeatureCard title={item.name} icon={<DeployTokenIcon />} description={item.description || ''} />
+              {memoizedNav.deployment.map((item) => {
+                const getIcon = () => {
+                  if (item.name === 'Deploy Token') return <DeployTokenIcon />;
+                  if (item.name === 'Create NFT') return <span className="text-2xl">🖼️</span>;
+                  if (item.name === 'Create Pool') return <LiquidityIcon />;
+                  return <DeployTokenIcon />;
+                };
+                return (
+                  <a key={item.name} href={item.href} className="block">
+                    <FeatureCard title={item.name} icon={getIcon()} description={item.description || ''} />
+                  </a>
+                );
+              })}
+            </div>
+
+            {/* Governance & BOING Sections */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+              <div className="lg:col-span-2">
+                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Governance</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {memoizedNav.governance.slice(0, 4).map((item) => (
+                    <a key={item.name} href={item.href} className="block">
+                      <FeatureCard title={item.name} icon={<span className="text-xl">{item.icon}</span>} description={item.description || ''} />
+                    </a>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>BOING Ecosystem</h3>
+                <div className="space-y-4">
+                  {memoizedNav.boing.map((item) => (
+                    <a key={item.name} href={item.href} className="block">
+                      <FeatureCard title={item.name} icon={<span className="text-xl">{item.icon}</span>} description={item.description || ''} />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Tools & Resources */}
+            <div className="mt-8">
+              <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Tools & Resources</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <a href="/docs" className="block">
+                  <FeatureCard title="Documentation" icon={<span className="text-xl">📖</span>} description="Guides for swapping, liquidity, bridging, and deployment" />
                 </a>
-              ))}
+                <a href="/developer-tools" className="block">
+                  <FeatureCard title="Developer Tools" icon={<span className="text-xl">🔧</span>} description="Contract utilities and debugging tools" />
+                </a>
+                <a href="/watchlist" className="block">
+                  <FeatureCard title="Watchlist" icon={<span className="text-xl">⭐</span>} description="Track tokens and price alerts" />
+                </a>
+                <a href="/help-center" className="block">
+                  <FeatureCard title="Help Center" icon={<span className="text-xl">❓</span>} description="FAQs and support - AI Assistant available" />
+                </a>
+              </div>
             </div>
           </div>
 
@@ -1075,13 +1129,13 @@ function Home() {
                   No permission required - just deploy, add liquidity, and start trading!
                 </p>
                 <div className="flex flex-wrap gap-2 justify-center">
-                  <span className="text-sm cursor-not-allowed" style={{ color: 'var(--text-tertiary)' }}>Browse Tokens</span>
+                  <a href="/tokens" className="text-sm underline transition-colors hover:opacity-80" style={{ color: 'var(--primary-color)' }}>Browse Tokens</a>
                   <span style={{ color: 'var(--text-tertiary)' }}>•</span>
-                  <a href="/deploy-token" className="text-sm underline transition-colors" style={{ color: 'var(--primary-color)' }}>Deploy Token</a>
+                  <a href="/deploy-token" className="text-sm underline transition-colors hover:opacity-80" style={{ color: 'var(--primary-color)' }}>Deploy Token</a>
                   <span style={{ color: 'var(--text-tertiary)' }}>•</span>
-                  <span className="text-sm cursor-not-allowed" style={{ color: 'var(--text-tertiary)' }}>Create Pairs</span>
+                  <a href="/create-pool" className="text-sm underline transition-colors hover:opacity-80" style={{ color: 'var(--primary-color)' }}>Create Pairs</a>
                   <span style={{ color: 'var(--text-tertiary)' }}>•</span>
-                  <span className="text-sm cursor-not-allowed" style={{ color: 'var(--text-tertiary)' }}>Start Trading</span>
+                  <a href="/swap" className="text-sm underline transition-colors hover:opacity-80" style={{ color: 'var(--primary-color)' }}>Start Trading</a>
                 </div>
               </div>
             </div>

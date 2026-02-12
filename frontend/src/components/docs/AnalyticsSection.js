@@ -8,7 +8,7 @@ const AnalyticsSection = () => {
           style={{ color: 'var(--text-primary)'  }}>Analytics & Data Guide</h2>
         <p className=" text-lg leading-relaxed mb-8"
           style={{ color: 'var(--text-secondary)'  }}>
-          Explore comprehensive market data, trading analytics, and performance metrics on mochi. 
+          Explore comprehensive market data, trading analytics, and performance metrics on boing.finance. 
           Our analytics dashboard provides real-time insights to help you make informed trading decisions.
         </p>
       </div>
