@@ -156,7 +156,7 @@ const navigation = createNavigation();
 function PageTransitionRoutes() {
   const location = useLocation();
   return (
-    <div key={location.pathname} className="page-transition-enter">
+    <div key={location.pathname} className="page-transition-enter flex-1 flex flex-col min-h-0">
       <Routes location={location}>
         <Route path="/" element={<Home />} />
         <Route path="/swap" element={<Swap />} />
@@ -262,16 +262,16 @@ function AppContent() {
   }, []);
 
   return (
-    <div className="relative min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
+    <div className="relative flex flex-col min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
       <EnhancedAnimatedBackground />
       <BaseNetworkOptimizer />
       
       {/* Navigation */}
-      <nav className="relative z-30 backdrop-blur-sm border-b border-cyan-500/30 shadow-lg shadow-cyan-500/20" style={{ 
+      <nav className="relative z-30 flex-shrink-0 backdrop-blur-sm border-b border-cyan-500/30 shadow-lg shadow-cyan-500/20" style={{ 
         backgroundColor: 'var(--bg-primary)',
         borderColor: 'var(--border-color)'
       }}>
-        <ShootingStars />
+        <ShootingStars dense />
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-x-4 sm:gap-x-5 lg:gap-x-6 xl:gap-x-8 h-14 sm:h-16">
             {/* Logo - min-width reserves space so center nav never overlaps */}
@@ -610,10 +610,10 @@ function AppContent() {
         )}
       </nav>
       
-      <main className="flex-1 relative">
+      <main className="flex-1 flex flex-col relative">
         {/* Page Content with Error Boundary and Suspense */}
         <ErrorBoundary>
-          <div className="relative z-10">
+          <div className="relative z-10 flex-1 flex flex-col min-h-0">
             <Suspense fallback={<LoadingSpinner />}>
               <PageTransitionRoutes />
             </Suspense>
@@ -635,11 +635,11 @@ function AppContent() {
       <AIChatModal isOpen={aiChatOpen} onClose={() => setAiChatOpen(false)} />
       <DeFi101Modal isOpen={defi101Open} onClose={() => setDefi101Open(false)} />
       
-      <footer className="w-full border-t border-cyan-500/30 shadow-lg shadow-cyan-500/20 relative z-20" style={{
+      <footer className="w-full flex-shrink-0 mt-auto border-t border-cyan-500/30 shadow-lg shadow-cyan-500/20 relative z-20" style={{
         backgroundColor: 'var(--bg-primary)',
         borderColor: 'var(--border-color)'
       }}>
-        <ShootingStars />
+        <ShootingStars dense />
         <div className="max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 sm:gap-10">
             {/* Brand Section - Full width on mobile, spans 5 columns on larger screens */}
