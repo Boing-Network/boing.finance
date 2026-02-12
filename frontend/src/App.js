@@ -273,9 +273,9 @@ function AppContent() {
       }}>
         <ShootingStars />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between gap-x-4 lg:gap-x-6 xl:gap-x-8 h-16">
             {/* Logo */}
-            <div className="flex-shrink-0 mr-4 lg:mr-6 xl:mr-8">
+            <div className="flex-shrink-0">
               <button
                 onClick={() => window.location.href = '/'}
                 className="flex items-center space-x-2 font-bold text-xl"
@@ -307,8 +307,8 @@ function AppContent() {
               </nav>
             </div>
 
-            {/* Desktop Right: Tools + ChainType + Network + Wallet */}
-            <div className="hidden lg:flex items-center flex-shrink-0 gap-2 xl:gap-3 2xl:gap-4 pl-2 xl:pl-4">
+            {/* Desktop Right: Tools + ChainType + Network + Wallet - gap-x on parent ensures separation from BOING */}
+            <div className="hidden lg:flex items-center flex-shrink-0 gap-2 xl:gap-3 2xl:gap-4">
               <div className="flex-shrink-0">
                 <ToolsDropdown
                 isOpen={toolsDropdownOpen}
@@ -319,16 +319,16 @@ function AppContent() {
                 onOpenDefi101={() => { setDefi101Open(true); setToolsDropdownOpen(false); }}
               />
               </div>
-              <div className="flex items-center gap-2 xl:gap-3 2xl:gap-4 border-l pl-2 xl:pl-4" style={{ borderColor: 'var(--border-color)' }}>
+              <div className="flex items-center gap-2 xl:gap-3 2xl:gap-4 border-l pl-3 xl:pl-4" style={{ borderColor: 'var(--border-color)' }}>
                 <div className="flex-shrink-0"><ChainTypeSelector /></div>
                 <div className="flex-shrink-0"><NetworkSelector /></div>
                 <div className="flex-shrink-0"><WalletConnect /></div>
               </div>
             </div>
 
-            {/* Medium Screen Navigation - md to lg */}
-            <div className="hidden md:flex lg:hidden items-center gap-2 flex-shrink-0 min-w-0">
-              <nav className="flex items-center gap-2 mr-2 flex-nowrap">
+            {/* Medium Screen Navigation - md to lg - gap ensures separation between nav and Tools */}
+            <div className="hidden md:flex lg:hidden items-center gap-x-4 flex-shrink-0 min-w-0">
+              <nav className="flex items-center gap-2 flex-nowrap">
                 <DropdownMenu label="Trade & Deploy" items={memoizedNavigation.tradeAndDeploy} isOpen={tradeAndDeployDropdownOpen}
                   onToggle={() => { const next = !tradeAndDeployDropdownOpen; setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setTradeAndDeployDropdownOpen(next); }}
                   onClose={() => setTradeAndDeployDropdownOpen(false)}
@@ -346,7 +346,7 @@ function AppContent() {
                   onClose={() => setBoingDropdownOpen(false)}
                 />
               </nav>
-              <div className="flex items-center gap-2 pl-2 border-l flex-shrink-0" style={{ borderColor: 'var(--border-color)' }}>
+              <div className="flex items-center gap-2 pl-3 border-l flex-shrink-0" style={{ borderColor: 'var(--border-color)' }}>
                 <div className="flex-shrink-0"><ToolsDropdown isOpen={toolsDropdownOpen} onToggle={() => { const next = !toolsDropdownOpen; setTradeAndDeployDropdownOpen(false); setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(next); }} onClose={() => setToolsDropdownOpen(false)}
                   onOpenHistory={() => { setHistoryModalOpen(true); setToolsDropdownOpen(false); }}
                   onOpenAiChat={() => { setAiChatOpen(true); setToolsDropdownOpen(false); }}
