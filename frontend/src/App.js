@@ -275,22 +275,22 @@ function AppContent() {
         borderColor: 'var(--border-color)'
       }}>
         <ShootingStars dense />
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-x-4 sm:gap-x-5 lg:gap-x-6 xl:gap-x-8 h-14 sm:h-16">
-            {/* Logo - compact min-width keeps it close to left edge */}
-            <div className="flex-shrink-0 min-w-0 pl-0 pr-2 sm:pr-3">
+        <div className="max-w-7xl mx-auto pl-2 pr-3 sm:pl-3 sm:pr-4 md:pl-4 md:pr-6 lg:pl-4 lg:pr-8 xl:pl-6 xl:pr-8">
+          <div className="flex items-center justify-between gap-x-2 sm:gap-x-3 lg:gap-x-4 xl:gap-x-6 h-14 sm:h-16">
+            {/* Logo - tight to left edge, fixed width to prevent overlap */}
+            <div className="flex-shrink-0 -ml-1 lg:-ml-2">
               <button
                 onClick={() => window.location.href = '/'}
-                className="flex items-center space-x-2 font-bold text-xl whitespace-nowrap"
+                className="flex items-center gap-1.5 font-bold text-xl whitespace-nowrap"
                 style={{ color: 'var(--text-primary)' }}
               >
-                <Logo size={40} showText={true} className="drop-shadow-[0_0_8px_rgba(6,182,212,0.4)] shrink-0" />
+                <Logo size={36} showText={true} className="drop-shadow-[0_0_8px_rgba(6,182,212,0.4)] shrink-0" />
               </button>
             </div>
 
-            {/* Desktop Navigation - flex-1 with min-w-0 so it can shrink but never overlap logo */}
-            <div className="hidden lg:flex items-center justify-center flex-1 min-w-0 overflow-hidden">
-              <nav className="flex items-center gap-2 xl:gap-3 2xl:gap-4 flex-nowrap justify-center min-w-0">
+            {/* Desktop Navigation - flex-1, min-width ensures BOING stays visible */}
+            <div className="hidden lg:flex items-center justify-center flex-1 min-w-[480px] overflow-visible">
+              <nav className="flex items-center gap-1.5 xl:gap-2 2xl:gap-3 flex-nowrap justify-center">
                 <DropdownMenu label="Trade & Deploy" items={memoizedNavigation.tradeAndDeploy} isOpen={tradeAndDeployDropdownOpen}
                   onToggle={() => { const next = !tradeAndDeployDropdownOpen; setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setTradeAndDeployDropdownOpen(next); }}
                   onClose={() => setTradeAndDeployDropdownOpen(false)}
@@ -310,8 +310,8 @@ function AppContent() {
               </nav>
             </div>
 
-            {/* Desktop Right: Tools + ChainType + Network + Wallet - gap-x on parent ensures separation from BOING */}
-            <div className="hidden lg:flex items-center flex-shrink-0 gap-2 xl:gap-3 2xl:gap-4">
+            {/* Desktop Right: Tools + ChainType + Network + Wallet */}
+            <div className="hidden lg:flex items-center flex-shrink-0 min-w-0 gap-1.5 xl:gap-2 2xl:gap-3">
               <div className="flex-shrink-0">
                 <ToolsDropdown
                 isOpen={toolsDropdownOpen}
@@ -322,7 +322,7 @@ function AppContent() {
                 onOpenDefi101={() => { setDefi101Open(true); setToolsDropdownOpen(false); }}
               />
               </div>
-              <div className="flex items-center gap-2 xl:gap-3 2xl:gap-4 border-l pl-3 xl:pl-4" style={{ borderColor: 'var(--border-color)' }}>
+              <div className="flex items-center gap-1.5 xl:gap-2 2xl:gap-3 border-l pl-2 xl:pl-3 shrink-0" style={{ borderColor: 'var(--border-color)' }}>
                 <div className="flex-shrink-0"><ChainTypeSelector /></div>
                 <div className="flex-shrink-0"><NetworkSelector /></div>
                 <div className="flex-shrink-0"><WalletConnect /></div>
@@ -1397,7 +1397,7 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
       <button
         onClick={onToggle}
         onBlur={() => setTimeout(onClose, 150)}
-        className="px-2.5 py-2 xl:px-3 2xl:px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-1 group hover:bg-cyan-500/10"
+        className="px-2 py-1.5 xl:px-2.5 2xl:px-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-1 group hover:bg-cyan-500/10"
         style={{ color: 'var(--text-secondary)' }}
         onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
         onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}

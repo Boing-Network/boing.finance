@@ -69,7 +69,7 @@ module.exports = {
           '0%': { transform: 'translateX(-100px) translateY(0px)', opacity: '0' },
           '10%': { opacity: '1' },
           '90%': { opacity: '1' },
-          '100%': { transform: 'translateX(calc(100vw + 100px)) translateY(-180px)', opacity: '0' },
+          '100%': { transform: 'translateX(calc(100vw + 100px)) translateY(calc(-28vw))', opacity: '0' },
         },
         shootingStar2: {
           '0%': { transform: 'translateX(calc(100vw + 100px)) translateY(0px)', opacity: '0' },
@@ -81,7 +81,7 @@ module.exports = {
           '0%': { transform: 'translateX(0px) translateY(-50px)', opacity: '0' },
           '10%': { opacity: '1' },
           '90%': { opacity: '1' },
-          '100%': { transform: 'translateX(calc(100vw + 50px)) translateY(calc(100vh + 50px))', opacity: '0' },
+          '100%': { transform: 'translateX(calc(100vw + 50px)) translateY(calc(100vw))', opacity: '0' },
         },
         shootingStar4: {
           '0%': { transform: 'translateX(calc(100vw + 50px)) translateY(calc(100vh + 50px))', opacity: '0' },
@@ -93,25 +93,25 @@ module.exports = {
           '0%': { transform: 'translateX(-80px) translateY(20px)', opacity: '0' },
           '5%': { opacity: '0.8' },
           '95%': { opacity: '0.8' },
-          '100%': { transform: 'translateX(calc(100vw + 80px)) translateY(-120px)', opacity: '0' },
+          '100%': { transform: 'translateX(calc(100vw + 80px)) translateY(calc(-18vw))', opacity: '0' },
         },
         shootingStar6: {
           '0%': { transform: 'translateX(calc(100vw + 60px)) translateY(-20px)', opacity: '0' },
           '8%': { opacity: '0.7' },
           '92%': { opacity: '0.7' },
-          '100%': { transform: 'translateX(-60px) translateY(120px)', opacity: '0' },
+          '100%': { transform: 'translateX(-60px) translateY(calc(18vw))', opacity: '0' },
         },
         shootingStar7: {
           '0%': { transform: 'translateX(30%) translateY(-60px)', opacity: '0' },
           '12%': { opacity: '0.6' },
           '88%': { opacity: '0.6' },
-          '100%': { transform: 'translateX(calc(100vw + 100px)) translateY(120px)', opacity: '0' },
+          '100%': { transform: 'translateX(calc(100vw + 100px)) translateY(calc(70vw))', opacity: '0' },
         },
         shootingStar8: {
           '0%': { transform: 'translateX(70%) translateY(120px)', opacity: '0' },
           '7%': { opacity: '0.5' },
           '93%': { opacity: '0.5' },
-          '100%': { transform: 'translateX(-200px) translateY(-200px)', opacity: '0' },
+          '100%': { transform: 'translateX(calc(-25vw)) translateY(calc(-25vw))', opacity: '0' },
         },
         floatSlow: {
           '0%, 100%': { transform: 'translateY(0px)', opacity: '0.3' },
