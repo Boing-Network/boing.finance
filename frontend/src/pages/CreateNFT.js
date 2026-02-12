@@ -1,6 +1,6 @@
 // Create NFT - Top-notch minting UX
 // Industry standards: ERC-721 metadata, local image upload, bulk minting, IPFS/R2 storage
-// Solana: SPL NFT (0 decimals, supply 1) with IPFS metadata
+// Solana: SPL NFT (0 decimals, supply 1) with R2-hosted metadata
 
 import React, { useState, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
@@ -163,13 +163,13 @@ function CreateNFTSolanaContent() {
     <>
       <Helmet>
         <title>Create SPL NFT - Solana | Boing Finance</title>
-        <meta name="description" content="Mint SPL NFTs on Solana. Image upload, IPFS metadata." />
+        <meta name="description" content="Mint SPL NFTs on Solana. Image + metadata stored on Cloudflare R2." />
       </Helmet>
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="max-w-xl mx-auto">
           <div className="text-center mb-6">
             <h1 className="text-4xl font-bold text-white mb-2">Create SPL NFT</h1>
-            <p className="text-gray-400">Mint an NFT on Solana {solanaNetwork.name}. Image + metadata stored on IPFS.</p>
+            <p className="text-gray-400">Mint an NFT on Solana {solanaNetwork.name}. Image + metadata stored on Cloudflare R2.</p>
           </div>
 
           {!connected ? (

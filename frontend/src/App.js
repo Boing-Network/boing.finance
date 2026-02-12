@@ -272,22 +272,22 @@ function AppContent() {
         borderColor: 'var(--border-color)'
       }}>
         <ShootingStars />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-x-4 lg:gap-x-6 xl:gap-x-8 h-16">
-            {/* Logo */}
-            <div className="flex-shrink-0">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-x-4 sm:gap-x-5 lg:gap-x-6 xl:gap-x-8 h-14 sm:h-16">
+            {/* Logo - min-width reserves space so center nav never overlaps */}
+            <div className="flex-shrink-0 min-w-[120px] sm:min-w-[140px] lg:min-w-[160px] pr-2 sm:pr-0">
               <button
                 onClick={() => window.location.href = '/'}
-                className="flex items-center space-x-2 font-bold text-xl"
+                className="flex items-center space-x-2 font-bold text-xl whitespace-nowrap"
                 style={{ color: 'var(--text-primary)' }}
               >
-                <Logo size={40} showText={true} className="drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]" />
+                <Logo size={40} showText={true} className="drop-shadow-[0_0_8px_rgba(6,182,212,0.4)] shrink-0" />
               </button>
             </div>
 
-            {/* Desktop Navigation - center flex; responsive gaps to fit at lg */}
-            <div className="hidden lg:flex items-center justify-center flex-1 min-w-0">
-              <nav className="flex items-center gap-2 xl:gap-3 2xl:gap-4 flex-nowrap justify-center">
+            {/* Desktop Navigation - flex-1 with min-w-0 so it can shrink but never overlap logo */}
+            <div className="hidden lg:flex items-center justify-center flex-1 min-w-0 overflow-hidden">
+              <nav className="flex items-center gap-2 xl:gap-3 2xl:gap-4 flex-nowrap justify-center min-w-0">
                 <DropdownMenu label="Trade & Deploy" items={memoizedNavigation.tradeAndDeploy} isOpen={tradeAndDeployDropdownOpen}
                   onToggle={() => { const next = !tradeAndDeployDropdownOpen; setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setTradeAndDeployDropdownOpen(next); }}
                   onClose={() => setTradeAndDeployDropdownOpen(false)}
@@ -326,9 +326,9 @@ function AppContent() {
               </div>
             </div>
 
-            {/* Medium Screen Navigation - md to lg - gap ensures separation between nav and Tools */}
-            <div className="hidden md:flex lg:hidden items-center gap-x-4 flex-shrink-0 min-w-0">
-              <nav className="flex items-center gap-2 flex-nowrap">
+            {/* Medium Screen Navigation - md to lg */}
+            <div className="hidden md:flex lg:hidden items-center gap-x-4 flex-shrink-0 min-w-0 overflow-hidden">
+              <nav className="flex items-center gap-2 flex-nowrap min-w-0">
                 <DropdownMenu label="Trade & Deploy" items={memoizedNavigation.tradeAndDeploy} isOpen={tradeAndDeployDropdownOpen}
                   onToggle={() => { const next = !tradeAndDeployDropdownOpen; setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setTradeAndDeployDropdownOpen(next); }}
                   onClose={() => setTradeAndDeployDropdownOpen(false)}
