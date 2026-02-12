@@ -8,7 +8,6 @@ import { useWallet } from '../contexts/WalletContext';
 import { useChainType, useSolanaWallet } from '../contexts/SolanaWalletContext';
 import EmptyState from '../components/EmptyState';
 import { uploadToIPFS, uploadMetadataToIPFS, validateFile } from '../utils/ipfsUpload';
-import { createSPLNFT } from '../services/solanaNftService';
 import { SOLANA_NETWORKS } from '../config/solanaConfig';
 import toast from 'react-hot-toast';
 
@@ -126,6 +125,7 @@ function CreateNFTSolanaContent() {
     setMintAddress('');
     setSignature('');
     try {
+      const { createSPLNFT } = await import('../services/solanaNftService');
       const result = await createSPLNFT(connection, address, signTransaction, {
         name: name.trim(),
         symbol: symbol.trim().toUpperCase().slice(0, 10),
