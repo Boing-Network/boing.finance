@@ -107,17 +107,17 @@
   --warning-color: #f59e0b;
   --error-color: #ef4444;
   
-  /* Light Theme Colors - Clean and modern */
+  /* Light Theme Colors - Clean and modern (softer for comfort) */
   --bg-primary: #ffffff;
   --bg-secondary: #f8fafc;
   --bg-tertiary: #f1f5f9;
   --bg-card: #ffffff;
   --text-primary: #0f172a;
-  --text-secondary: #1e293b;
-  --text-tertiary: #334155;
+  --text-secondary: #334155;
+  --text-tertiary: #64748b;
   --border-color: #e2e8f0;
   --border-hover: #cbd5e1;
-  --shadow: rgba(0, 0, 0, 0.05);
+  --shadow: rgba(0, 0, 0, 0.06);
   --shadow-hover: rgba(0, 0, 0, 0.1);
   
   /* Colored box backgrounds and text */
@@ -288,9 +288,9 @@ body {
   color: var(--text-tertiary);
 }
 
-/* Loading Animation */
+/* Loading Animation - theme-aware */
 .loading-spinner {
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid var(--border-color);
   border-top: 2px solid var(--primary-color);
   border-radius: 50%;
   width: 20px;

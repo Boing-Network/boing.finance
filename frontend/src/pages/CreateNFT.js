@@ -168,13 +168,13 @@ function CreateNFTSolanaContent() {
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="max-w-xl mx-auto">
           <div className="text-center mb-6">
-            <h1 className="text-4xl font-bold text-white mb-2">Create SPL NFT</h1>
-            <p className="text-gray-400">Mint an NFT on Solana {solanaNetwork.name}. Image + metadata stored on Cloudflare R2.</p>
+            <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Create SPL NFT</h1>
+            <p className="text-theme-tertiary">Mint an NFT on Solana {solanaNetwork.name}. Image + metadata stored on Cloudflare R2.</p>
           </div>
 
           {!connected ? (
             <div className="rounded-xl border p-8 text-center" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-              <p className="mb-4 text-gray-400">Connect your Solana wallet to mint NFTs.</p>
+              <p className="mb-4 text-theme-tertiary">Connect your Solana wallet to mint NFTs.</p>
               <button
                 onClick={connectWallet}
                 className="px-6 py-3 rounded-lg font-medium bg-cyan-600 text-white hover:bg-cyan-500"
@@ -191,8 +191,9 @@ function CreateNFTSolanaContent() {
                     type="button"
                     onClick={() => setStep(s.id)}
                     className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${
-                      step === s.id ? 'bg-cyan-500/30 text-cyan-300 border border-cyan-400/50' : 'bg-gray-700/50 text-gray-500'
+                      step === s.id ? 'bg-cyan-500/30 text-cyan-300 border border-cyan-400/50' : 'border border-transparent'
                     }`}
+                    style={step !== s.id ? { backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-tertiary)' } : {}}
                   >
                     <span>{s.icon}</span>
                     <span>{s.label}</span>
@@ -204,38 +205,38 @@ function CreateNFTSolanaContent() {
                 {step === 'upload' && (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Image *</label>
-                      <input type="file" accept="image/*" onChange={handleImageSelect} className="block w-full text-gray-400" />
+                      <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Image *</label>
+                      <input type="file" accept="image/*" onChange={handleImageSelect} className="block w-full text-theme-tertiary" />
                       {imagePreview && <img src={imagePreview} alt="Preview" className="mt-2 max-h-48 rounded-lg object-contain" />}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Name *</label>
+                      <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Name *</label>
                       <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="My NFT"
-                        className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white"
+                        className="w-full px-4 py-2 rounded-lg input-field"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Symbol *</label>
+                      <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Symbol *</label>
                       <input
                         type="text"
                         value={symbol}
                         onChange={(e) => setSymbol(e.target.value.toUpperCase().slice(0, 10))}
                         placeholder="NFT"
-                        className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white"
+                        className="w-full px-4 py-2 rounded-lg input-field"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                      <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Description</label>
                       <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="Describe your NFT"
                         rows={3}
-                        className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white"
+                        className="w-full px-4 py-2 rounded-lg input-field"
                       />
                     </div>
                     <button
@@ -254,13 +255,13 @@ function CreateNFTSolanaContent() {
                     <div className="flex items-start gap-4">
                       {imagePreview && <img src={imagePreview} alt="Preview" className="w-24 h-24 rounded-lg object-cover" />}
                       <div>
-                        <p className="font-semibold text-white">{name || 'Untitled'}</p>
-                        <p className="text-sm text-gray-400">{symbol || '—'}</p>
-                        {description && <p className="text-sm text-gray-300 mt-1">{description}</p>}
+                        <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{name || 'Untitled'}</p>
+                        <p className="text-sm text-theme-tertiary">{symbol || '—'}</p>
+                        {description && <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{description}</p>}
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <button type="button" onClick={() => setStep('upload')} className="px-4 py-2 rounded-lg bg-gray-600 text-white text-sm">
+                      <button type="button" onClick={() => setStep('upload')} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
                         Back
                       </button>
                       <button
@@ -274,7 +275,7 @@ function CreateNFTSolanaContent() {
                     </div>
                     {mintAddress && signature && (
                       <div className="mt-4 pt-4 border-t border-gray-600 space-y-2">
-                        <p className="text-sm font-medium text-white">Minted!</p>
+                        <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Minted!</p>
                         <p className="text-xs text-gray-400 break-all">Mint: {mintAddress}</p>
                         <a href={`${solanaNetwork.explorer}/tx/${signature}`} target="_blank" rel="noopener noreferrer" className="text-sm text-cyan-400 hover:underline">
                           View on Explorer
@@ -630,8 +631,8 @@ export default function CreateNFT() {
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-6">
-            <h1 className="text-4xl font-bold text-white mb-2">Create NFT</h1>
-            <p className="text-gray-400">Upload images from your computer, add metadata, and mint. Supports single, bulk, and dynamic collections up to 10,000.</p>
+            <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Create NFT</h1>
+            <p className="text-theme-tertiary">Upload images from your computer, add metadata, and mint. Supports single, bulk, and dynamic collections up to 10,000.</p>
           </div>
 
           {/* Mode: Standard vs Dynamic collection */}
@@ -639,14 +640,16 @@ export default function CreateNFT() {
             <button
               type="button"
               onClick={() => { setMode('standard'); setStep('collection'); }}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${mode === 'standard' ? 'bg-cyan-600 text-white' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${mode === 'standard' ? 'bg-cyan-600 text-white' : ''}`}
+              style={mode !== 'standard' ? { backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' } : {}}
             >
               Standard mint
             </button>
             <button
               type="button"
               onClick={() => { setMode('dynamic'); setStep('collection'); }}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${mode === 'dynamic' ? 'bg-cyan-600 text-white' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${mode === 'dynamic' ? 'bg-cyan-600 text-white' : ''}`}
+              style={mode !== 'dynamic' ? { backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' } : {}}
             >
               Dynamic collection (up to 10k)
             </button>

@@ -74,7 +74,7 @@ const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveL
   };
 
   return (
-    <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-gray-600 transition-colors">
+    <div className="rounded-xl p-6 border transition-colors hover:opacity-95" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
@@ -91,7 +91,7 @@ const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveL
             </div>
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
               {pool.token0?.symbol}/{pool.token1?.symbol}
             </h3>
             <div className="flex items-center space-x-2">
@@ -114,27 +114,27 @@ const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveL
           </div>
         </div>
         <div className="text-right">
-          <p className="text-sm text-gray-400">Fee</p>
-          <p className="text-white font-semibold">{pool.fee ? `${(pool.fee * 100).toFixed(2)}%` : '0.3%'}</p>
+          <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>Fee</p>
+          <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{pool.fee ? `${(pool.fee * 100).toFixed(2)}%` : '0.3%'}</p>
         </div>
       </div>
 
       {/* Pool Info */}
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <p className="text-sm text-gray-400">Token 0</p>
-          <p className="text-white font-medium">{pool.token0?.symbol}</p>
+          <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>Token 0</p>
+          <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{pool.token0?.symbol}</p>
           {type === 'user' && (
-            <p className="text-sm text-gray-300">
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
               {parseFloat(pool.token0?.formattedAmount || pool.token0?.formattedReserve || 0).toFixed(4)}
             </p>
           )}
         </div>
         <div>
-          <p className="text-sm text-gray-400">Token 1</p>
-          <p className="text-white font-medium">{pool.token1?.symbol}</p>
+          <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>Token 1</p>
+          <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{pool.token1?.symbol}</p>
           {type === 'user' && (
-            <p className="text-sm text-gray-300">
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
               {parseFloat(pool.token1?.formattedAmount || pool.token1?.formattedReserve || 0).toFixed(4)}
             </p>
           )}
@@ -144,28 +144,28 @@ const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveL
       {/* Analytics for all pools */}
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <p className="text-sm text-gray-400">APY</p>
-          <p className="text-green-400 font-medium">
+          <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>APY</p>
+          <p className="text-green-600 dark:text-green-400 font-medium">
             {pool.apy && pool.apy > 0 ? `${pool.apy.toFixed(2)}%` : 'No data'}
           </p>
         </div>
         <div>
-          <p className="text-sm text-gray-400">24h Volume</p>
-          <p className="text-white font-medium">
+          <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>24h Volume</p>
+          <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
             {pool.formattedVolume24h && pool.volume24h > 0 ? pool.formattedVolume24h : 'No data'}
           </p>
         </div>
         {analytics && (
           <>
             <div>
-              <p className="text-sm text-gray-400">Total Liquidity</p>
-              <p className="text-white font-medium">
+              <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>Total Liquidity</p>
+              <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
                 {analytics.totalLiquidity && parseFloat(analytics.totalLiquidity) > 0 ? `$${parseFloat(analytics.totalLiquidity).toLocaleString()}` : 'No data'}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-400">Swap Count</p>
-              <p className="text-white font-medium">
+              <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>Swap Count</p>
+              <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
                 {pool.swapCount && pool.swapCount > 0 ? pool.swapCount.toLocaleString() : 'No data'}
               </p>
             </div>
@@ -275,27 +275,29 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}>
+      <div className="rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white">Pool Details</h2>
+          <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Pool Details</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white text-2xl"
+            className="text-2xl hover:opacity-80 transition-opacity"
+            style={{ color: 'var(--text-tertiary)' }}
           >
             ×
           </button>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex space-x-1 mb-6 bg-gray-700 rounded-lg p-1">
+        <div className="flex space-x-1 mb-6 rounded-lg p-1" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
           <button
             onClick={() => setActiveTab('details')}
             className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
               activeTab === 'details'
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:text-white hover:bg-gray-600'
+                : ''
             }`}
+            style={activeTab !== 'details' ? { color: 'var(--text-secondary)' } : {}}
           >
             Details
           </button>
@@ -304,8 +306,9 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
             className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
               activeTab === 'add'
                 ? 'bg-green-600 text-white'
-                : 'text-gray-300 hover:text-white hover:bg-gray-600'
+                : ''
             }`}
+            style={activeTab !== 'add' ? { color: 'var(--text-secondary)' } : {}}
           >
             Add Liquidity
           </button>
@@ -315,8 +318,9 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
               className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
                 activeTab === 'remove'
                   ? 'bg-red-600 text-white'
-                  : 'text-gray-300 hover:text-white hover:bg-gray-600'
+                  : ''
               }`}
+              style={activeTab !== 'remove' ? { color: 'var(--text-secondary)' } : {}}
             >
               Remove Liquidity
             </button>
@@ -327,65 +331,65 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
         {activeTab === 'details' && (
           <div className="space-y-6">
             {/* Pool Info */}
-            <div className="bg-gray-700 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-white mb-3">Pool Information</h3>
+            <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+              <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Pool Information</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-400">Pool Address</p>
-                  <p className="text-white font-mono text-sm break-all">{pool.address}</p>
+                  <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>Pool Address</p>
+                  <p className="font-mono text-sm break-all" style={{ color: 'var(--text-primary)' }}>{pool.address}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Trading Fee</p>
-                  <p className="text-white font-medium">{pool.fee ? `${(pool.fee * 100).toFixed(2)}%` : '0.3%'}</p>
+                  <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>Trading Fee</p>
+                  <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{pool.fee ? `${(pool.fee * 100).toFixed(2)}%` : '0.3%'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">APY</p>
-                  <p className="text-white font-medium">{pool.apy && pool.apy > 0 ? `${pool.apy.toFixed(2)}%` : 'No data'}</p>
+                  <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>APY</p>
+                  <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{pool.apy && pool.apy > 0 ? `${pool.apy.toFixed(2)}%` : 'No data'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">24h Volume</p>
-                  <p className="text-white font-medium">{pool.formattedVolume24h && pool.volume24h > 0 ? pool.formattedVolume24h : 'No data'}</p>
+                  <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>24h Volume</p>
+                  <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{pool.formattedVolume24h && pool.volume24h > 0 ? pool.formattedVolume24h : 'No data'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Source</p>
-                  <p className="text-white font-medium">{pool.source || 'Unknown'}</p>
+                  <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>Source</p>
+                  <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{pool.source || 'Unknown'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Total Liquidity</p>
-                  <p className="text-white font-medium">{pool.formattedTvl ? pool.formattedTvl : '$0'}</p>
-                  <p className="text-xs text-gray-500">(Token amounts, not USD value)</p>
+                  <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>Total Liquidity</p>
+                  <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{pool.formattedTvl ? pool.formattedTvl : '$0'}</p>
+                  <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>(Token amounts, not USD value)</p>
                 </div>
               </div>
             </div>
 
             {/* Token Information */}
-            <div className="bg-gray-700 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-white mb-3">Token Information</h3>
+            <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+              <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Token Information</h3>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-gray-600 rounded-lg">
+                <div className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
                   <div>
-                    <p className="text-white font-medium">{pool.token0?.symbol}</p>
-                    <p className="text-sm text-gray-400">{pool.token0?.name}</p>
-                    <p className="text-xs text-gray-500">{pool.token0?.address}</p>
+                    <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{pool.token0?.symbol}</p>
+                    <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>{pool.token0?.name}</p>
+                    <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{pool.token0?.address}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-white font-medium">
+                    <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
                       {parseFloat(pool.token0?.formattedReserve || pool.token0?.formattedAmount || 0).toFixed(4)}
                     </p>
-                    <p className="text-sm text-gray-400">Reserve</p>
+                    <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>Reserve</p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-gray-600 rounded-lg">
+                <div className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
                   <div>
-                    <p className="text-white font-medium">{pool.token1?.symbol}</p>
-                    <p className="text-sm text-gray-400">{pool.token1?.name}</p>
-                    <p className="text-xs text-gray-500">{pool.token1?.address}</p>
+                    <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{pool.token1?.symbol}</p>
+                    <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>{pool.token1?.name}</p>
+                    <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{pool.token1?.address}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-white font-medium">
+                    <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
                       {parseFloat(pool.token1?.formattedReserve || pool.token1?.formattedAmount || 0).toFixed(4)}
                     </p>
-                    <p className="text-sm text-gray-400">Reserve</p>
+                    <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>Reserve</p>
                   </div>
                 </div>
               </div>
@@ -393,16 +397,16 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
 
             {/* User Position */}
             {pool.userShare && (
-              <div className="bg-gray-700 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-white mb-3">Your Position</h3>
+              <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+                <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Your Position</h3>
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
-                    <p className="text-sm text-gray-400">Your Share</p>
-                    <p className="text-white font-medium">{(pool.userShare * 100).toFixed(2)}%</p>
+                    <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>Your Share</p>
+                    <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{(pool.userShare * 100).toFixed(2)}%</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-400">LP Tokens</p>
-                    <p className="text-white font-medium">
+                    <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>LP Tokens</p>
+                    <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
                       {pool.lpBalance ? parseFloat(ethers.formatUnits(pool.lpBalance, 18)).toFixed(4) : '0.0000'}
                     </p>
                   </div>
@@ -426,12 +430,12 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
         {/* Add Liquidity Tab */}
         {activeTab === 'add' && (
           <div className="space-y-6">
-            <div className="bg-gray-700 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-white mb-4">Add Liquidity</h3>
+            <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+              <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Add Liquidity</h3>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
                     {pool.token0?.symbol} Amount
                   </label>
                   <input
@@ -439,12 +443,13 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
                     value={token0Amount}
                     onChange={(e) => handleToken0AmountChange(e.target.value)}
                     placeholder="0.0"
-                    className="w-full bg-gray-600 border border-gray-500 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
                     {pool.token1?.symbol} Amount
                   </label>
                   <input
@@ -452,7 +457,8 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
                     value={token1Amount}
                     onChange={(e) => setToken1Amount(e.target.value)}
                     placeholder="0.0"
-                    className="w-full bg-gray-600 border border-gray-500 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                   />
                 </div>
                 
@@ -471,12 +477,12 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
         {/* Remove Liquidity Tab */}
         {activeTab === 'remove' && pool.userShare && (
           <div className="space-y-6">
-            <div className="bg-gray-700 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-white mb-4">Remove Liquidity</h3>
+            <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+              <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Remove Liquidity</h3>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
                     Remove Percentage
                   </label>
                   <div className="flex space-x-2 mb-3">
@@ -487,20 +493,21 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
                         className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                           removePercentage === percent
                             ? 'bg-red-600 text-white'
-                            : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                            : ''
                         }`}
+                        style={removePercentage !== percent ? { backgroundColor: 'var(--bg-secondary)', color: 'var(--text-secondary)' } : {}}
                       >
                         {percent}%
                       </button>
                     ))}
                   </div>
                   
-                  <div className="bg-gray-600 rounded-lg p-3">
-                    <p className="text-sm text-gray-400 mb-1">You will receive:</p>
-                    <p className="text-white font-medium">
+                  <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                    <p className="text-sm mb-1" style={{ color: 'var(--text-tertiary)' }}>You will receive:</p>
+                    <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
                       {pool.token0?.symbol}: {pool.token0?.formattedAmount ? ((parseFloat(pool.token0.formattedAmount) * removePercentage) / 100).toFixed(4) : '0.0000'}
                     </p>
-                    <p className="text-white font-medium">
+                    <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
                       {pool.token1?.symbol}: {pool.token1?.formattedAmount ? ((parseFloat(pool.token1.formattedAmount) * removePercentage) / 100).toFixed(4) : '0.0000'}
                     </p>
                   </div>
@@ -569,16 +576,16 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
   if (!pools || pools.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-400">No pools found</p>
+        <p style={{ color: 'var(--text-tertiary)' }}>No pools found</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-800 rounded-xl overflow-hidden">
+    <div className="rounded-xl overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
       {/* Table Header */}
-      <div className="bg-gray-700 px-6 py-4 border-b border-gray-600 hover:bg-gray-650 transition-colors duration-200">
-        <div className="grid grid-cols-11 gap-4 text-sm font-medium text-gray-300">
+      <div className="px-6 py-4 border-b transition-colors duration-200" style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border-color)' }}>
+        <div className="grid grid-cols-11 gap-4 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
           <div className="col-span-3">Pool</div>
           <div className="col-span-2">Total Liquidity</div>
           <div className="col-span-2">APY</div>
@@ -588,11 +595,12 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
       </div>
 
       {/* Table Body */}
-      <div className="divide-y divide-gray-700">
+      <div className="divide-y" style={{ borderColor: 'var(--border-color)' }}>
         {pools.map((pool, index) => (
           <div 
             key={`${pool.address}-${index}`} 
-            className="px-6 py-2 hover:bg-gray-700 hover:shadow-lg hover:border-l-4 hover:border-l-blue-500 transition-all duration-200 cursor-pointer group relative"
+            className="px-6 py-2 hover:shadow-lg hover:border-l-4 hover:border-l-blue-500 transition-all duration-200 cursor-pointer group relative"
+            style={{ borderLeftColor: 'transparent' }}
             onClick={() => handleRowClick(pool)}
           >
             {/* Hover overlay for better visual feedback */}
@@ -615,9 +623,9 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
                     </div>
                   </div>
                   <div className="flex-1">
-                    <div className="text-white font-medium flex items-center group-hover:text-blue-300 transition-colors duration-200">
+                    <div className="font-medium flex items-center group-hover:text-blue-300 transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>
                       {pool.token0?.symbol}/{pool.token1?.symbol}
-                      <span className="ml-2 text-gray-400 group-hover:text-blue-400 group-hover:translate-x-1 transition-all duration-200">
+                      <span className="ml-2 group-hover:text-blue-400 group-hover:translate-x-1 transition-all duration-200" style={{ color: 'var(--text-tertiary)' }}>
                         →
                       </span>
                     </div>

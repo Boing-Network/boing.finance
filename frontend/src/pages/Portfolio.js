@@ -640,8 +640,9 @@ export default function Portfolio() {
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                       selectedNetwork === network.id
                         ? `${network.color} text-white`
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        : ''
                     }`}
+                    style={selectedNetwork !== network.id ? { backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' } : {}}
                   >
                     {network.id === 'all' ? 'All' : network.name}
                   </button>
@@ -653,7 +654,7 @@ export default function Portfolio() {
             {portfolioLoading || (balancesLoading && !tokenBalances) ? (
               <div className="space-y-8">
                 <PortfolioSummarySkeleton />
-                <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                <div className="rounded-2xl shadow-xl p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
                   <TokenBalanceSkeleton count={5} />
                 </div>
               </div>
@@ -691,9 +692,9 @@ export default function Portfolio() {
                 </div>
 
                 {/* Portfolio Value Chart */}
-                <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                <div className="rounded-2xl shadow-xl p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-white">Portfolio Value History</h2>
+                    <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Portfolio Value History</h2>
                   </div>
                   {portfolioHistory7d.length > 0 ? (
                     <ResponsiveContainer width="100%" height={300}>
@@ -704,12 +705,12 @@ export default function Portfolio() {
                             <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                        <XAxis dataKey="date" stroke="#9CA3AF" />
-                        <YAxis stroke="#9CA3AF" />
+                        <CartesianGrid strokeDasharray="3 3" className="opacity-40" style={{ stroke: 'var(--border-color)' }} />
+                        <XAxis dataKey="date" style={{ stroke: 'var(--text-tertiary)' }} />
+                        <YAxis style={{ stroke: 'var(--text-tertiary)' }} />
                         <Tooltip 
-                          contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
-                          labelStyle={{ color: '#F3F4F6' }}
+                          contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
+                          labelStyle={{ color: 'var(--text-primary)' }}
                           formatter={(value) => [`$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 'Portfolio Value']}
                         />
                         <Area 

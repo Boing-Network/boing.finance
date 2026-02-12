@@ -271,39 +271,39 @@ const FeaturesSection = () => {
           style={{ color: 'var(--text-primary)'  }}>Feature</th>
                 <th className="text-center  font-semibold py-3"
           style={{ color: 'var(--text-primary)'  }}>boing.finance</th>
-                <th className="text-center text-gray-400 font-semibold py-3">Traditional DEXs</th>
+                <th className="text-center font-semibold py-3" style={{ color: 'var(--text-tertiary)' }}>Traditional DEXs</th>
               </tr>
             </thead>
             <tbody className="space-y-2">
-              <tr className="border-b border-gray-700">
+              <tr className="border-b" style={{ borderColor: 'var(--border-color)' }}>
                 <td className=" py-3"
           style={{ color: 'var(--text-secondary)'  }}>Cross-Chain Trading</td>
                 <td className="text-center text-green-400 py-3">✓</td>
                 <td className="text-center text-red-400 py-3">✗</td>
               </tr>
-              <tr className="border-b border-gray-700">
+              <tr className="border-b" style={{ borderColor: 'var(--border-color)' }}>
                 <td className=" py-3"
           style={{ color: 'var(--text-secondary)'  }}>Multi-Network Support</td>
                 <td className="text-center text-green-400 py-3">15+ Networks</td>
-                <td className="text-center text-gray-400 py-3">1-2 Networks</td>
+                <td className="text-center py-3" style={{ color: 'var(--text-tertiary)' }}>1-2 Networks</td>
               </tr>
-              <tr className="border-b border-gray-700">
+              <tr className="border-b" style={{ borderColor: 'var(--border-color)' }}>
                 <td className=" py-3"
           style={{ color: 'var(--text-secondary)'  }}>Permissionless Pairs</td>
                 <td className="text-center text-green-400 py-3">✓</td>
                 <td className="text-center text-green-400 py-3">✓</td>
               </tr>
-              <tr className="border-b border-gray-700">
+              <tr className="border-b" style={{ borderColor: 'var(--border-color)' }}>
                 <td className=" py-3"
           style={{ color: 'var(--text-secondary)'  }}>Portfolio Management</td>
                 <td className="text-center text-green-400 py-3">Cross-Chain</td>
-                <td className="text-center text-gray-400 py-3">Single Chain</td>
+                <td className="text-center py-3" style={{ color: 'var(--text-tertiary)' }}>Single Chain</td>
               </tr>
-              <tr className="border-b border-gray-700">
+              <tr className="border-b" style={{ borderColor: 'var(--border-color)' }}>
                 <td className=" py-3"
           style={{ color: 'var(--text-secondary)'  }}>Gas Optimization</td>
                 <td className="text-center text-green-400 py-3">Advanced</td>
-                <td className="text-center text-gray-400 py-3">Basic</td>
+                <td className="text-center py-3" style={{ color: 'var(--text-tertiary)' }}>Basic</td>
               </tr>
             </tbody>
           </table>

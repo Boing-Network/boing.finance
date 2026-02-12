@@ -82,20 +82,21 @@ const OnboardingChecklist = ({ compact = false }) => {
   }
 
   return (
-    <div className="bg-gray-800/80 border border-gray-700 rounded-xl p-4">
+    <div className="rounded-xl p-4 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
       <div className="flex items-center justify-between mb-2">
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="text-white font-semibold flex items-center gap-2"
+          className="font-semibold flex items-center gap-2"
+          style={{ color: 'var(--text-primary)' }}
         >
-          <span className="text-cyan-400">Getting Started</span>
-          <span className="text-gray-500 text-sm">{doneCount}/{steps.length}</span>
+          <span className="text-cyan-500">Getting Started</span>
+          <span className="text-sm" style={{ color: 'var(--text-tertiary)' }}>{doneCount}/{steps.length}</span>
           <svg className={`w-4 h-4 transition-transform ${isCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
         {allDone && (
-          <button onClick={handleDismiss} className="text-xs text-gray-500 hover:text-gray-400">
+          <button onClick={handleDismiss} className="text-xs hover:opacity-80 transition-opacity" style={{ color: 'var(--text-tertiary)' }}>
             Dismiss
           </button>
         )}

@@ -765,8 +765,8 @@ export default function Analytics() {
                           }}
                         />
                         <Tooltip 
-                          contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
-                          labelStyle={{ color: '#F3F4F6' }}
+                          contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
+                          labelStyle={{ color: 'var(--text-primary)' }}
                           formatter={(value) => `$${parseFloat(value).toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
                         />
                         <Legend />
@@ -837,8 +837,8 @@ export default function Analytics() {
                             <XAxis dataKey="network" stroke="#9CA3AF" />
                             <YAxis stroke="#9CA3AF" />
                             <Tooltip 
-                              contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
-                              labelStyle={{ color: '#F3F4F6' }}
+                              contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
+                              labelStyle={{ color: 'var(--text-primary)' }}
                             />
                             <Legend />
                             <Bar dataKey="volume" fill="#3B82F6" name="Volume (USD)" />
@@ -915,8 +915,8 @@ export default function Analytics() {
                           ))}
                         </Pie>
                         <Tooltip 
-                          contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
-                          labelStyle={{ color: '#F3F4F6' }}
+                          contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
+                          labelStyle={{ color: 'var(--text-primary)' }}
                         />
                       </PieChart>
                     </ResponsiveContainer>
@@ -1059,8 +1059,8 @@ export default function Analytics() {
                               <XAxis dataKey="action" stroke="#9CA3AF" />
                               <YAxis stroke="#9CA3AF" />
                               <Tooltip 
-                                contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
-                                labelStyle={{ color: '#F3F4F6' }}
+                                contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
+                                labelStyle={{ color: 'var(--text-primary)' }}
                               />
                               <Legend />
                               <Bar dataKey="count" fill="#8B5CF6" name="Actions" />

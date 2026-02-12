@@ -70,7 +70,7 @@ export default function GovernanceTreasury() {
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis type="number" stroke="#9CA3AF" tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
               <YAxis type="category" dataKey="name" stroke="#9CA3AF" width={70} />
-              <Tooltip contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }} formatter={(v) => [`$${v.toLocaleString()}`, '']} />
+              <Tooltip contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }} formatter={(v) => [`$${v.toLocaleString()}`, '']} />
               <Bar dataKey="value" fill="#06b6d4" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>

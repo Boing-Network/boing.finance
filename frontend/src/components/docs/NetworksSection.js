@@ -83,7 +83,7 @@ const NetworksSection = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-lg font-semibold "
           style={{ color: 'var(--text-primary)'  }}>{network.name}</h4>
-                  <span className="text-sm text-gray-400">#{network.chainId}</span>
+                  <span className="text-sm" style={{ color: 'var(--text-tertiary)' }}>#{network.chainId}</span>
                 </div>
                 <div className="flex items-center space-x-2 mb-4">
                   <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
@@ -153,7 +153,7 @@ const NetworksSection = () => {
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-gray-700">
+              <tr className="border-b" style={{ borderColor: 'var(--border-color)' }}>
                 <td className=" py-3"
           style={{ color: 'var(--text-secondary)'  }}>Ethereum</td>
                 <td className="text-center  py-3"
@@ -165,7 +165,7 @@ const NetworksSection = () => {
                 <td className="text-center  py-3"
           style={{ color: 'var(--text-secondary)'  }}>High Security</td>
               </tr>
-              <tr className="border-b border-gray-700">
+              <tr className="border-b" style={{ borderColor: 'var(--border-color)' }}>
                 <td className=" py-3"
           style={{ color: 'var(--text-secondary)'  }}>Polygon</td>
                 <td className="text-center  py-3"
@@ -177,7 +177,7 @@ const NetworksSection = () => {
                 <td className="text-center  py-3"
           style={{ color: 'var(--text-secondary)'  }}>Low Fees</td>
               </tr>
-              <tr className="border-b border-gray-700">
+              <tr className="border-b" style={{ borderColor: 'var(--border-color)' }}>
                 <td className=" py-3"
           style={{ color: 'var(--text-secondary)'  }}>Arbitrum</td>
                 <td className="text-center  py-3"
@@ -189,7 +189,7 @@ const NetworksSection = () => {
                 <td className="text-center  py-3"
           style={{ color: 'var(--text-secondary)'  }}>Low Fees</td>
               </tr>
-              <tr className="border-b border-gray-700">
+              <tr className="border-b" style={{ borderColor: 'var(--border-color)' }}>
                 <td className=" py-3"
           style={{ color: 'var(--text-secondary)'  }}>Base</td>
                 <td className="text-center  py-3"
