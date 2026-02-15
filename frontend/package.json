@@ -88,5 +88,12 @@
     "tailwindcss": "^3.3.0",
     "typescript": "^4.9.5"
   },
-  "proxy": "http://localhost:3001"
+  "proxy": "http://localhost:3001",
+  "overrides": {
+    "@solana/codecs": "2.3.0",
+    "@solana/codecs-core": "2.3.0",
+    "@solana/codecs-data-structures": "2.3.0",
+    "@solana/codecs-numbers": "2.3.0",
+    "@solana/codecs-strings": "2.3.0"
+  }
 }
