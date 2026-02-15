@@ -136,6 +136,7 @@ const ShareTokenModal = ({ token, isOpen, onClose }) => {
           <textarea
             id="share-token-custom-message"
             name="customMessage"
+            autoComplete="off"
             value={customMessage}
             onChange={(e) => setCustomMessage(e.target.value)}
             placeholder="Add a custom message to your share..."

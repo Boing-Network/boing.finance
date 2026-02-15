@@ -215,6 +215,7 @@ function CreateNFTSolanaContent() {
                         id="nft-single-name"
                         name="name"
                         type="text"
+                        autoComplete="off"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="My NFT"

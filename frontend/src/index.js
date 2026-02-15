@@ -1,3 +1,5 @@
+// Solana wallet adapter styles first so its @import (Google Fonts) is at the top of the combined stylesheet
+import '@solana/wallet-adapter-react-ui/styles.css';
 // Polyfill Buffer for browser (required by Solana/Web3 deps in chunks)
 import { Buffer } from 'buffer';
 import React from 'react';

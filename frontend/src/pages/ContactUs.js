@@ -161,6 +161,7 @@ const ContactUs = () => {
                         type="text"
                         id="name"
                         name="name"
+                        autoComplete="name"
                         value={formData.name}
                         onChange={handleInputChange}
                         required
@@ -177,6 +178,7 @@ const ContactUs = () => {
                         type="email"
                         id="email"
                         name="email"
+                        autoComplete="email"
                         value={formData.email}
                         onChange={handleInputChange}
                         required
@@ -193,6 +195,7 @@ const ContactUs = () => {
                     <select
                       id="category"
                       name="category"
+                      autoComplete="off"
                       value={formData.category}
                       onChange={handleInputChange}
                       required
@@ -214,6 +217,7 @@ const ContactUs = () => {
                       type="text"
                       id="subject"
                       name="subject"
+                      autoComplete="off"
                       value={formData.subject}
                       onChange={handleInputChange}
                       required
@@ -229,6 +233,7 @@ const ContactUs = () => {
                     <textarea
                       id="message"
                       name="message"
+                      autoComplete="off"
                       value={formData.message}
                       onChange={handleInputChange}
                       required

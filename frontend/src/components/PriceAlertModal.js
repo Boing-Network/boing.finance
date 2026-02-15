@@ -97,6 +97,7 @@ export default function PriceAlertModal({ isOpen, onClose, token }) {
               <select
                 id="price-alert-condition"
                 name="condition"
+                autoComplete="off"
                 value={condition}
                 onChange={(e) => setCondition(e.target.value)}
                 className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600"
@@ -111,6 +112,7 @@ export default function PriceAlertModal({ isOpen, onClose, token }) {
                 id="price-alert-target"
                 name="targetPrice"
                 type="number"
+                autoComplete="off"
                 value={targetPrice}
                 onChange={(e) => setTargetPrice(e.target.value)}
                 placeholder="0.00"

@@ -237,6 +237,7 @@ const BugReport = () => {
                           type="text"
                           id="title"
                           name="title"
+                          autoComplete="off"
                           value={formData.title}
                           onChange={handleInputChange}
                           required
@@ -258,6 +259,7 @@ const BugReport = () => {
                           <select
                             id="severity"
                             name="severity"
+                            autoComplete="off"
                             value={formData.severity}
                             onChange={handleInputChange}
                             required
@@ -283,6 +285,7 @@ const BugReport = () => {
                           <select
                             id="category"
                             name="category"
+                            autoComplete="off"
                             value={formData.category}
                             onChange={handleInputChange}
                             required
@@ -314,6 +317,7 @@ const BugReport = () => {
                         <textarea
                           id="description"
                           name="description"
+                          autoComplete="off"
                           value={formData.description}
                           onChange={handleInputChange}
                           required
@@ -335,6 +339,7 @@ const BugReport = () => {
                         <textarea
                           id="steps"
                           name="steps"
+                          autoComplete="off"
                           value={formData.steps}
                           onChange={handleInputChange}
                           required
@@ -357,6 +362,7 @@ const BugReport = () => {
                           <textarea
                             id="expected"
                             name="expected"
+                            autoComplete="off"
                             value={formData.expected}
                             onChange={handleInputChange}
                             rows={3}
@@ -377,6 +383,7 @@ const BugReport = () => {
                           <textarea
                             id="actual"
                             name="actual"
+                            autoComplete="off"
                             value={formData.actual}
                             onChange={handleInputChange}
                             rows={3}
@@ -404,6 +411,7 @@ const BugReport = () => {
                           <select
                             id="browser"
                             name="browser"
+                            autoComplete="off"
                             value={formData.browser}
                             onChange={handleInputChange}
                             className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -454,6 +462,7 @@ const BugReport = () => {
                           <select
                             id="network"
                             name="network"
+                            autoComplete="off"
                             value={formData.network}
                             onChange={handleInputChange}
                             className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -487,6 +496,7 @@ const BugReport = () => {
                             type="email"
                             id="email"
                             name="email"
+                            autoComplete="email"
                             value={formData.email}
                             onChange={handleInputChange}
                             className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -507,6 +517,7 @@ const BugReport = () => {
                             type="text"
                             id="walletAddress"
                             name="walletAddress"
+                            autoComplete="off"
                             value={formData.walletAddress}
                             onChange={handleInputChange}
                             className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"

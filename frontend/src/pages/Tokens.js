@@ -472,6 +472,7 @@ const Tokens = () => {
                   id="tokens-search"
                   name="tokenSearch"
                   type="text"
+                  autoComplete="off"
                   value={filters.search || searchAddress}
                   onChange={(e) => {
                     setSearchAddress(e.target.value);

@@ -266,6 +266,7 @@ const GlobalSearch = ({ isOpen, onClose }) => {
               id="global-search-input"
               name="globalSearch"
               type="text"
+              autoComplete="off"
               value={query}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
