@@ -467,7 +467,10 @@ const Tokens = () => {
             {/* Quick Search */}
             <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 sm:gap-4 mb-4">
               <div className="flex-1 min-w-0 w-full sm:w-auto">
+                <label htmlFor="tokens-search" className="sr-only">Search by name, symbol, or address</label>
                 <input
+                  id="tokens-search"
+                  name="tokenSearch"
                   type="text"
                   value={filters.search || searchAddress}
                   onChange={(e) => {

@@ -448,7 +448,10 @@ export default function Bridge() {
                 <span className="text-gray-400 text-xs sm:text-sm">Balance: 0.0</span>
               </div>
               <div className="flex items-center space-x-3">
+                <label htmlFor="bridge-amount" className="sr-only">Amount</label>
                 <input
+                  id="bridge-amount"
+                  name="amount"
                   type="number"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}

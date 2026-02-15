@@ -201,7 +201,10 @@ const HelpCenter = () => {
             {/* Search Bar */}
             <div className="rounded-lg p-6 mb-8 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
               <div className="relative max-w-2xl mx-auto">
+                <label htmlFor="help-center-search" className="sr-only">Search for help articles</label>
                 <input
+                  id="help-center-search"
+                  name="helpSearch"
                   type="text"
                   placeholder="Search for help articles..."
                   value={searchQuery}

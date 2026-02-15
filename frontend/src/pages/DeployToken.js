@@ -188,8 +188,10 @@ function DeployTokenSolanaContent() {
               borderColor: 'var(--border-color)',
             }}>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Token Logo (optional)</label>
+                <label htmlFor="deploy-solana-logo" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Token Logo (optional)</label>
                 <input
+                  id="deploy-solana-logo"
+                  name="logo"
                   type="file"
                   accept="image/*"
                   onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
@@ -198,8 +200,10 @@ function DeployTokenSolanaContent() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Token Name</label>
+                <label htmlFor="deploy-solana-name" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Token Name</label>
                 <input
+                  id="deploy-solana-name"
+                  name="name"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -210,8 +214,10 @@ function DeployTokenSolanaContent() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Symbol</label>
+                <label htmlFor="deploy-solana-symbol" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Symbol</label>
                 <input
+                  id="deploy-solana-symbol"
+                  name="symbol"
                   type="text"
                   value={symbol}
                   onChange={(e) => setSymbol(e.target.value.toUpperCase())}
@@ -221,8 +227,10 @@ function DeployTokenSolanaContent() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Decimals</label>
+                <label htmlFor="deploy-solana-decimals" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Decimals</label>
                 <input
+                  id="deploy-solana-decimals"
+                  name="decimals"
                   type="number"
                   min={0}
                   max={9}
@@ -234,8 +242,10 @@ function DeployTokenSolanaContent() {
                 <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>9 is standard for Solana</p>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Initial Supply</label>
+                <label htmlFor="deploy-solana-supply" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Initial Supply</label>
                 <input
+                  id="deploy-solana-supply"
+                  name="initialSupply"
                   type="text"
                   value={initialSupply}
                   onChange={(e) => setInitialSupply(e.target.value)}
@@ -1792,10 +1802,12 @@ export default function DeployToken() {
                   <h3 className="text-xl sm:text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4 sm:mb-6">Basic Token Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <div>
-                      <label className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
+                      <label htmlFor="deploy-evm-name" className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
                         Token Name *
                       </label>
                       <input
+                        id="deploy-evm-name"
+                        name="name"
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
@@ -1811,10 +1823,12 @@ export default function DeployToken() {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
+                      <label htmlFor="deploy-evm-symbol" className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
                         Token Symbol *
                       </label>
                       <input
+                        id="deploy-evm-symbol"
+                        name="symbol"
                         type="text"
                         value={symbol}
                         onChange={(e) => setSymbol(e.target.value)}
@@ -1831,10 +1845,12 @@ export default function DeployToken() {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
+                      <label htmlFor="deploy-evm-decimals" className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
                         Decimals
                       </label>
                       <select
+                        id="deploy-evm-decimals"
+                        name="decimals"
                         value={decimals}
                         onChange={(e) => setDecimals(parseInt(e.target.value))}
                         className="w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
@@ -1846,10 +1862,12 @@ export default function DeployToken() {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
+                      <label htmlFor="deploy-evm-supply" className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
                         Initial Supply *
                       </label>
                       <input
+                        id="deploy-evm-supply"
+                        name="initialSupply"
                         type="number"
                         value={initialSupply}
                         onChange={(e) => setInitialSupply(e.target.value)}
@@ -1894,10 +1912,12 @@ export default function DeployToken() {
                   <h3 className="text-xl sm:text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4 sm:mb-6">Project Information</h3>
                   <div className="space-y-4 sm:space-y-6">
                     <div>
-                      <label className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
+                      <label htmlFor="deploy-evm-website" className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
                         Website URL *
                       </label>
                       <input
+                        id="deploy-evm-website"
+                        name="website"
                         type="url"
                         value={website}
                         onChange={(e) => setWebsite(e.target.value)}
@@ -1913,10 +1933,12 @@ export default function DeployToken() {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
+                      <label htmlFor="deploy-evm-description" className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
                         Project Description
                       </label>
                       <textarea
+                        id="deploy-evm-description"
+                        name="description"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
@@ -2061,7 +2083,10 @@ export default function DeployToken() {
                           {/* Conditional inputs */}
                           {feature.featureKey === "enableFreezing" && enableFreezing && isAllowed && (
                             <div className="mt-3 sm:mt-4">
+                              <label htmlFor="deploy-freezing-authority" className="sr-only">Freezing authority address</label>
                               <input
+                                id="deploy-freezing-authority"
+                                name="freezingAuthority"
                                 type="text"
                                 value={freezingAuthority}
                                 onChange={(e) => setFreezingAuthority(e.target.value)}
@@ -2073,7 +2098,10 @@ export default function DeployToken() {
                           
                           {feature.featureKey === "cooldown" && cooldownPeriod !== '' && isAllowed && (
                             <div className="mt-3 sm:mt-4">
+                              <label htmlFor="deploy-cooldown-period" className="sr-only">Cooldown period (seconds)</label>
                               <input
+                                id="deploy-cooldown-period"
+                                name="cooldownPeriod"
                                 type="number"
                                 value={cooldownPeriod}
                                 onChange={(e) => setCooldownPeriod(e.target.value)}
@@ -2093,7 +2121,10 @@ export default function DeployToken() {
                           {feature.featureKey === "antiWhale" && antiWhaleEnabled && isAllowed && (
                             <div className="mt-3 sm:mt-4">
                               <div className="flex items-center space-x-2">
+                                <label htmlFor="deploy-max-wallet-pct" className="sr-only">Max wallet percentage</label>
                                 <input
+                                  id="deploy-max-wallet-pct"
+                                  name="maxWalletPercentage"
                                   type="range"
                                   min="0.1"
                                   max="5"
@@ -2114,7 +2145,10 @@ export default function DeployToken() {
                           {feature.featureKey === "timelock" && timelockEnabled && isAllowed && (
                             <div className="mt-3 sm:mt-4">
                               <div className="flex items-center space-x-2">
+                                <label htmlFor="deploy-timelock-delay" className="sr-only">Timelock delay (hours)</label>
                                 <input
+                                  id="deploy-timelock-delay"
+                                  name="timelockDelay"
                                   type="range"
                                   min="1"
                                   max="168"
@@ -2133,7 +2167,10 @@ export default function DeployToken() {
                           
                           {feature.featureKey === "maxTxAmount" && maxTxAmount !== '' && isAllowed && (
                             <div className="mt-3 sm:mt-4">
+                              <label htmlFor="deploy-max-tx-amount" className="sr-only">Max transaction amount (%)</label>
                               <input
+                                id="deploy-max-tx-amount"
+                                name="maxTxAmount"
                                 type="number"
                                 value={maxTxAmount}
                                 onChange={(e) => setMaxTxAmount(e.target.value)}
@@ -2161,10 +2198,12 @@ export default function DeployToken() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     {Object.entries(socialLinks).map(([platform, value]) => (
                       <div key={platform}>
-                        <label className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
+                        <label htmlFor={`deploy-social-${platform}`} className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
                           {platform.charAt(0).toUpperCase() + platform.slice(1)} URL
                         </label>
                         <input
+                          id={`deploy-social-${platform}`}
+                          name={`social-${platform}`}
                           type="url"
                           value={value}
                           onChange={(e) => handleSocialLinkChange(platform, e.target.value)}

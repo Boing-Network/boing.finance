@@ -28,10 +28,12 @@ const TokenFilters = ({ filters, onFilterChange, onClearFilters }) => {
       <div className="space-y-4">
         {/* Search Filter */}
         <div>
-          <label className="block text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
+          <label htmlFor="token-filters-search" className="block text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
             Search
           </label>
           <input
+            id="token-filters-search"
+            name="search"
             type="text"
             value={filters.search || ''}
             onChange={(e) => onFilterChange('search', e.target.value)}
@@ -47,10 +49,12 @@ const TokenFilters = ({ filters, onFilterChange, onClearFilters }) => {
 
         {/* Network Filter */}
         <div>
-          <label className="block text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
+          <label htmlFor="token-filters-network" className="block text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
             Network
           </label>
           <select
+            id="token-filters-network"
+            name="network"
             value={filters.network || 'all'}
             onChange={(e) => onFilterChange('network', e.target.value)}
             className="w-full px-3 py-2 rounded border text-sm"
@@ -73,10 +77,12 @@ const TokenFilters = ({ filters, onFilterChange, onClearFilters }) => {
 
         {/* Sort Filter */}
         <div>
-          <label className="block text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
+          <label htmlFor="token-filters-sort" className="block text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
             Sort By
           </label>
           <select
+            id="token-filters-sort"
+            name="sortBy"
             value={filters.sortBy || 'trending'}
             onChange={(e) => onFilterChange('sortBy', e.target.value)}
             className="w-full px-3 py-2 rounded border text-sm"

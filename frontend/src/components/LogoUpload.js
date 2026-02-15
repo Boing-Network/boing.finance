@@ -171,8 +171,11 @@ const LogoUpload = ({ onLogoUpload, onLogoChange, currentLogo, disabled = false 
         onDrop={handleDrop}
         onClick={handleClick}
       >
+        <label htmlFor="logo-upload-file" className="sr-only">Upload logo image</label>
         <input
           ref={fileInputRef}
+          id="logo-upload-file"
+          name="logoFile"
           type="file"
           accept="image/*"
           onChange={handleFileInput}
@@ -335,10 +338,12 @@ const LogoUpload = ({ onLogoUpload, onLogoChange, currentLogo, disabled = false 
 
       {/* Manual URL Input */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label htmlFor="logo-upload-url" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Or enter logo URL manually
         </label>
         <input
+          id="logo-upload-url"
+          name="logoUrl"
           type="url"
           placeholder="https://example.com/logo.png or ipfs://QmXxxx..."
           value={currentLogo || ''}

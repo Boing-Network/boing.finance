@@ -55,8 +55,9 @@ export default function SettingsModal({ isOpen, onClose, onSave, initialSettings
           <label className="block text-theme-secondary mb-3 font-medium">Gas Fee Priority</label>
           <div className="space-y-2">
             {gasPriorityOptions.map((option) => (
-              <label key={option.value} className="flex items-center p-3 border border-theme rounded-lg cursor-pointer hover:bg-theme-secondary transition-colors">
+              <label key={option.value} htmlFor={`settings-gas-${option.value}`} className="flex items-center p-3 border border-theme rounded-lg cursor-pointer hover:bg-theme-secondary transition-colors">
                 <input
+                  id={`settings-gas-${option.value}`}
                   type="radio"
                   name="gasPriority"
                   value={option.value}
@@ -78,8 +79,10 @@ export default function SettingsModal({ isOpen, onClose, onSave, initialSettings
 
         {/* Slippage Tolerance */}
         <div className="mb-4">
-          <label className="block text-theme-secondary mb-1">Slippage Tolerance (%)</label>
+          <label htmlFor="settings-slippage" className="block text-theme-secondary mb-1">Slippage Tolerance (%)</label>
           <input
+            id="settings-slippage"
+            name="slippage"
             type="number"
             min="0.1"
             max="5"
@@ -92,8 +95,10 @@ export default function SettingsModal({ isOpen, onClose, onSave, initialSettings
 
         {/* Transaction Deadline */}
         <div className="mb-4">
-          <label className="block text-theme-secondary mb-1">Transaction Deadline (minutes)</label>
+          <label htmlFor="settings-deadline" className="block text-theme-secondary mb-1">Transaction Deadline (minutes)</label>
           <input
+            id="settings-deadline"
+            name="deadline"
             type="number"
             min="1"
             max="60"

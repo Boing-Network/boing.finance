@@ -63,8 +63,8 @@ function ILCalculator() {
   const ilPercent = 2 * (Math.sqrt(p) / (1 + p) - 1) * 100;
   return (
     <div className="p-4 rounded-lg border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-      <p className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>If one token price moves by:</p>
-      <input type="range" min="-90" max="200" value={priceChange} onChange={(e) => setPriceChange(Number(e.target.value))} className="w-full mb-2" />
+      <label htmlFor="defi101-price-change" className="text-sm mb-2 block" style={{ color: 'var(--text-secondary)' }}>If one token price moves by:</label>
+      <input id="defi101-price-change" name="priceChange" type="range" min="-90" max="200" value={priceChange} onChange={(e) => setPriceChange(Number(e.target.value))} className="w-full mb-2" />
       <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
         IL approx <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{ilPercent.toFixed(2)}%</span>
       </p>

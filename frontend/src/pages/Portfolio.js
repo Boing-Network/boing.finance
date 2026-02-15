@@ -791,8 +791,10 @@ export default function Portfolio() {
                     <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                       <h2 className="text-2xl font-bold text-white">Token Balances</h2>
                       <div className="flex flex-wrap items-center gap-2">
-                        <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-300">
+                        <label htmlFor="portfolio-hide-zero" className="flex items-center gap-2 cursor-pointer text-sm text-gray-300">
                           <input
+                            id="portfolio-hide-zero"
+                            name="hideZeroBalances"
                             type="checkbox"
                             checked={hideZeroBalances}
                             onChange={(e) => setHideZeroBalances(e.target.checked)}
@@ -800,8 +802,10 @@ export default function Portfolio() {
                           />
                           Hide zero balances
                         </label>
-                        <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-300">
+                        <label htmlFor="portfolio-group-network" className="flex items-center gap-2 cursor-pointer text-sm text-gray-300">
                           <input
+                            id="portfolio-group-network"
+                            name="groupByNetwork"
                             type="checkbox"
                             checked={groupByNetwork}
                             onChange={(e) => setGroupByNetwork(e.target.checked)}
@@ -809,7 +813,10 @@ export default function Portfolio() {
                           />
                           Group by network
                         </label>
+                        <label htmlFor="portfolio-network-select" className="sr-only">Network</label>
                         <select
+                          id="portfolio-network-select"
+                          name="trackedNetwork"
                           value={trackedNetworks[0] || chainId || 11155111}
                           onChange={(e) => setTrackedNetworks([parseInt(e.target.value)])}
                           className="px-3 py-2 rounded-lg bg-gray-700 text-white text-sm"

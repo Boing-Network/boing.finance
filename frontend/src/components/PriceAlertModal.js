@@ -93,8 +93,10 @@ export default function PriceAlertModal({ isOpen, onClose, token }) {
           <h3 className="text-lg font-semibold text-white mb-4">Create New Alert</h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-gray-300 text-sm mb-2">Alert when price is</label>
+              <label htmlFor="price-alert-condition" className="block text-gray-300 text-sm mb-2">Alert when price is</label>
               <select
+                id="price-alert-condition"
+                name="condition"
                 value={condition}
                 onChange={(e) => setCondition(e.target.value)}
                 className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600"
@@ -104,8 +106,10 @@ export default function PriceAlertModal({ isOpen, onClose, token }) {
               </select>
             </div>
             <div>
-              <label className="block text-gray-300 text-sm mb-2">Target Price (USD)</label>
+              <label htmlFor="price-alert-target" className="block text-gray-300 text-sm mb-2">Target Price (USD)</label>
               <input
+                id="price-alert-target"
+                name="targetPrice"
                 type="number"
                 value={targetPrice}
                 onChange={(e) => setTargetPrice(e.target.value)}

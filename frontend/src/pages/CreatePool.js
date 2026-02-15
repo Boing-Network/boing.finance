@@ -1336,7 +1336,10 @@ function CreatePool() {
                         {showCustomTokenInput && customTokenInputFor === 'token0' && (
                           <div className="p-3 border-b border-gray-600 custom-token-input">
                             <form onSubmit={handleCustomTokenSubmit} className="space-y-2">
+                              <label htmlFor="create-pool-custom-token0-address" className="sr-only">Token contract address</label>
                               <input
+                                id="create-pool-custom-token0-address"
+                                name="customTokenAddress"
                                 type="text"
                                 value={customTokenAddress}
                                 onChange={(e) => setCustomTokenAddress(e.target.value)}
@@ -1433,7 +1436,10 @@ function CreatePool() {
                         {showCustomTokenInput && customTokenInputFor === 'token1' && (
                           <div className="p-3 border-b border-gray-600 custom-token-input">
                             <form onSubmit={handleCustomTokenSubmit} className="space-y-2">
+                              <label htmlFor="create-pool-custom-token1-address" className="sr-only">Token contract address</label>
                               <input
+                                id="create-pool-custom-token1-address"
+                                name="customTokenAddress"
                                 type="text"
                                 value={customTokenAddress}
                                 onChange={(e) => setCustomTokenAddress(e.target.value)}
@@ -1510,7 +1516,7 @@ function CreatePool() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="block text-sm font-medium text-gray-600">Token A Amount</label>
+                      <label htmlFor="create-pool-token0-amount" className="block text-sm font-medium text-gray-600">Token A Amount</label>
                       {getToken0Balance() !== null && (
                         <button
                           type="button"
@@ -1523,6 +1529,8 @@ function CreatePool() {
                       )}
                     </div>
                     <input
+                      id="create-pool-token0-amount"
+                      name="token0Amount"
                       type="number"
                       value={token0Amount}
                       onChange={(e) => setToken0Amount(e.target.value)}
@@ -1532,7 +1540,7 @@ function CreatePool() {
                   </div>
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="block text-sm font-medium text-gray-600">Token B Amount</label>
+                      <label htmlFor="create-pool-token1-amount" className="block text-sm font-medium text-gray-600">Token B Amount</label>
                       {getToken1Balance() !== null && (
                         <button
                           type="button"
@@ -1545,6 +1553,8 @@ function CreatePool() {
                       )}
                     </div>
                     <input
+                      id="create-pool-token1-amount"
+                      name="token1Amount"
                       type="number"
                       value={token1Amount}
                       onChange={(e) => setToken1Amount(e.target.value)}
@@ -1622,7 +1632,7 @@ function CreatePool() {
                   <div className="space-y-4">
                     <div>
                       <div className="flex justify-between items-center mb-2">
-                        <label className="block text-sm font-medium text-gray-600">
+                        <label htmlFor="create-pool-lock-duration" className="block text-sm font-medium text-gray-600">
                           Lock Duration: {Math.round(lockDuration / (24 * 60 * 60))} days
                         </label>
                         <span className="text-xs text-gray-500">
@@ -1630,6 +1640,8 @@ function CreatePool() {
                         </span>
                       </div>
                       <input
+                        id="create-pool-lock-duration"
+                        name="lockDuration"
                         type="range"
                         min="1"
                         max="365"
@@ -1647,8 +1659,10 @@ function CreatePool() {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-600 mb-1">Lock Description (optional)</label>
+                      <label htmlFor="create-pool-lock-description" className="block text-sm font-medium text-gray-600 mb-1">Lock Description (optional)</label>
                       <input
+                        id="create-pool-lock-description"
+                        name="lockDescription"
                         type="text"
                         value={lockDescription}
                         onChange={(e) => setLockDescription(e.target.value)}

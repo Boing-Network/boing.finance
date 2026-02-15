@@ -159,8 +159,11 @@ const AIChatModal = ({ isOpen, onClose, context }) => {
         {/* Input */}
         <div className="p-4 border-t border-gray-700">
           <div className="flex gap-2">
+            <label htmlFor="ai-chat-input" className="sr-only">Ask about DeFi</label>
             <input
               ref={inputRef}
+              id="ai-chat-input"
+              name="aiChatMessage"
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}

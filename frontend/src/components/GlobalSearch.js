@@ -260,9 +260,11 @@ const GlobalSearch = ({ isOpen, onClose }) => {
             <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
+            <label htmlFor="global-search-input" className="sr-only">Search tokens, NFTs, addresses, or pages</label>
             <input
               ref={inputRef}
               id="global-search-input"
+              name="globalSearch"
               type="text"
               value={query}
               onChange={handleInputChange}

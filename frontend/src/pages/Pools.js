@@ -435,10 +435,12 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                  <label htmlFor="pool-add-token0-amount" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
                     {pool.token0?.symbol} Amount
                   </label>
                   <input
+                    id="pool-add-token0-amount"
+                    name="token0Amount"
                     type="number"
                     value={token0Amount}
                     onChange={(e) => handleToken0AmountChange(e.target.value)}
@@ -449,10 +451,12 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                  <label htmlFor="pool-add-token1-amount" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
                     {pool.token1?.symbol} Amount
                   </label>
                   <input
+                    id="pool-add-token1-amount"
+                    name="token1Amount"
                     type="number"
                     value={token1Amount}
                     onChange={(e) => setToken1Amount(e.target.value)}
@@ -1232,7 +1236,10 @@ const Pools = () => {
                   {/* Search Bar */}
                   <div className="mb-6">
                     <div className="relative">
+                      <label htmlFor="pools-search" className="sr-only">Search pools by token symbol or name</label>
                       <input
+                        id="pools-search"
+                        name="poolsSearch"
                         type="text"
                         placeholder="Search pools by token symbol or name, then press Enter..."
                         value={searchQuery}

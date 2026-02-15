@@ -169,7 +169,10 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
         
         {/* Search */}
         <div className="mb-4">
+          <label htmlFor="token-mgmt-search" className="sr-only">Search by name or paste address</label>
           <input
+            id="token-mgmt-search"
+            name="searchTerm"
             type="text"
             placeholder="Search by name or paste address"
             value={searchTerm}
@@ -205,10 +208,12 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
           {activeTab === 'import' ? (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="token-mgmt-import-address" className="block text-sm font-medium text-gray-300 mb-2">
                   Token Contract Address
                 </label>
                 <input
+                  id="token-mgmt-import-address"
+                  name="importAddress"
                   type="text"
                   placeholder="0x..."
                   value={importAddress}

@@ -130,10 +130,12 @@ const ShareTokenModal = ({ token, isOpen, onClose }) => {
 
         {/* Custom Message */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label htmlFor="share-token-custom-message" className="block text-sm font-medium text-gray-300 mb-2">
             Custom Message (Optional)
           </label>
           <textarea
+            id="share-token-custom-message"
+            name="customMessage"
             value={customMessage}
             onChange={(e) => setCustomMessage(e.target.value)}
             placeholder="Add a custom message to your share..."
@@ -225,11 +227,13 @@ const ShareTokenModal = ({ token, isOpen, onClose }) => {
 
         {/* Shareable Link */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label htmlFor="share-token-link" className="block text-sm font-medium text-gray-300 mb-2">
             Shareable Link
           </label>
           <div className="flex items-center space-x-2">
             <input
+              id="share-token-link"
+              name="shareableLink"
               type="text"
               value={shareableLink}
               readOnly

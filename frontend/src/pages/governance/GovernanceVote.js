@@ -56,12 +56,12 @@ export default function GovernanceVote() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Proposal Title</label>
-                  <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Add support for new network" required className="w-full px-4 py-3 rounded-lg border bg-gray-800/50" style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} />
+                  <label htmlFor="governance-proposal-title" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Proposal Title</label>
+                  <input id="governance-proposal-title" name="title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Add support for new network" required className="w-full px-4 py-3 rounded-lg border bg-gray-800/50" style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Description</label>
-                  <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe your proposal in detail..." required rows={6} className="w-full px-4 py-3 rounded-lg border bg-gray-800/50 resize-none" style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} />
+                  <label htmlFor="governance-proposal-description" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Description</label>
+                  <textarea id="governance-proposal-description" name="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe your proposal in detail..." required rows={6} className="w-full px-4 py-3 rounded-lg border bg-gray-800/50 resize-none" style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} />
                 </div>
                 {error && <p className="text-amber-400 text-sm">{error}</p>}
                 <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>You need BOING tokens to create a proposal. Minimum threshold: 10,000 BOING.</div>

@@ -1860,7 +1860,10 @@ const Swap = () => {
                     <div className="p-3 border-b border-gray-700">
                       <h3 className="text-white font-medium mb-2">Select Token</h3>
                       <div className="relative">
+                        <label htmlFor="swap-token-in-search" className="sr-only">Search tokens</label>
                         <input
+                          id="swap-token-in-search"
+                          name="tokenInSearch"
                           type="text"
                           placeholder="Search tokens..."
                           className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg text-sm"
@@ -1956,7 +1959,10 @@ const Swap = () => {
                     <div className="p-3 border-b border-gray-700">
                       <h3 className="text-white font-medium mb-2">Select Token</h3>
                       <div className="relative">
+                        <label htmlFor="swap-token-out-search" className="sr-only">Search tokens</label>
                         <input
+                          id="swap-token-out-search"
+                          name="tokenOutSearch"
                           type="text"
                           placeholder="Search tokens..."
                           className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg text-sm"
@@ -2063,7 +2069,10 @@ const Swap = () => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
+                  <label htmlFor="swap-amount-in" className="sr-only">Amount to swap</label>
                   <input
+                    id="swap-amount-in"
+                    name="amountIn"
                     type="number"
                     value={amountIn}
                     onChange={(e) => {
@@ -2101,7 +2110,10 @@ const Swap = () => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
+                  <label htmlFor="swap-amount-out" className="sr-only">Amount you receive</label>
                   <input
+                    id="swap-amount-out"
+                    name="amountOut"
                     type="number"
                     value={amountOut}
                     readOnly

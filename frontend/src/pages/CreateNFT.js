@@ -205,13 +205,15 @@ function CreateNFTSolanaContent() {
                 {step === 'upload' && (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Image *</label>
-                      <input type="file" accept="image/*" onChange={handleImageSelect} className="block w-full text-theme-tertiary" />
+                      <label htmlFor="nft-single-image" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Image *</label>
+                      <input id="nft-single-image" name="image" type="file" accept="image/*" onChange={handleImageSelect} className="block w-full text-theme-tertiary" />
                       {imagePreview && <img src={imagePreview} alt="Preview" className="mt-2 max-h-48 rounded-lg object-contain" />}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Name *</label>
+                      <label htmlFor="nft-single-name" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Name *</label>
                       <input
+                        id="nft-single-name"
+                        name="name"
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
@@ -220,8 +222,10 @@ function CreateNFTSolanaContent() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Symbol *</label>
+                      <label htmlFor="nft-single-symbol" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Symbol *</label>
                       <input
+                        id="nft-single-symbol"
+                        name="symbol"
                         type="text"
                         value={symbol}
                         onChange={(e) => setSymbol(e.target.value.toUpperCase().slice(0, 10))}
@@ -230,8 +234,10 @@ function CreateNFTSolanaContent() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Description</label>
+                      <label htmlFor="nft-single-description" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Description</label>
                       <textarea
+                        id="nft-single-description"
+                        name="description"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="Describe your NFT"
@@ -689,8 +695,10 @@ export default function CreateNFT() {
                       </p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Collection Name *</label>
+                      <label htmlFor="nft-dynamic-collection-name" className="block text-sm font-medium text-gray-300 mb-2">Collection Name *</label>
                       <input
+                        id="nft-dynamic-collection-name"
+                        name="collectionName"
                         type="text"
                         value={collectionName}
                         onChange={(e) => setCollectionName(e.target.value)}
@@ -699,8 +707,10 @@ export default function CreateNFT() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Symbol *</label>
+                      <label htmlFor="nft-dynamic-collection-symbol" className="block text-sm font-medium text-gray-300 mb-2">Symbol *</label>
                       <input
+                        id="nft-dynamic-collection-symbol"
+                        name="collectionSymbol"
                         type="text"
                         value={collectionSymbol}
                         onChange={(e) => setCollectionSymbol(e.target.value.toUpperCase().slice(0, 10))}
@@ -710,8 +720,10 @@ export default function CreateNFT() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Collection size (up to 10,000)</label>
+                      <label htmlFor="nft-dynamic-size" className="block text-sm font-medium text-gray-300 mb-2">Collection size (up to 10,000)</label>
                       <select
+                        id="nft-dynamic-size"
+                        name="dynamicSize"
                         value={dynamicSize}
                         onChange={(e) => setDynamicSize(Number(e.target.value))}
                         className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-cyan-500"
@@ -726,8 +738,10 @@ export default function CreateNFT() {
                       <p className="text-cyan-200/80 text-sm mt-1">Charged when you deploy or mint the collection. Fee supports infrastructure and ongoing development.</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Description (optional)</label>
+                      <label htmlFor="nft-dynamic-description" className="block text-sm font-medium text-gray-300 mb-2">Description (optional)</label>
                       <textarea
+                        id="nft-dynamic-description"
+                        name="collectionDescription"
                         value={collectionDescription}
                         onChange={(e) => setCollectionDescription(e.target.value)}
                         placeholder="Description of your dynamic collection"
@@ -873,8 +887,10 @@ export default function CreateNFT() {
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Collection Name *</label>
+                  <label htmlFor="nft-collection-name" className="block text-sm font-medium text-gray-300 mb-2">Collection Name *</label>
                   <input
+                    id="nft-collection-name"
+                    name="collectionName"
                     type="text"
                     value={collectionName}
                     onChange={(e) => setCollectionName(e.target.value)}
@@ -883,8 +899,10 @@ export default function CreateNFT() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Symbol *</label>
+                  <label htmlFor="nft-collection-symbol" className="block text-sm font-medium text-gray-300 mb-2">Symbol *</label>
                   <input
+                    id="nft-collection-symbol"
+                    name="collectionSymbol"
                     type="text"
                     value={collectionSymbol}
                     onChange={(e) => setCollectionSymbol(e.target.value.toUpperCase().slice(0, 10))}
@@ -894,8 +912,10 @@ export default function CreateNFT() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Description (optional)</label>
+                  <label htmlFor="nft-collection-description" className="block text-sm font-medium text-gray-300 mb-2">Description (optional)</label>
                   <textarea
+                    id="nft-collection-description"
+                    name="collectionDescription"
                     value={collectionDescription}
                     onChange={(e) => setCollectionDescription(e.target.value)}
                     placeholder="A short description of your collection"
@@ -911,12 +931,15 @@ export default function CreateNFT() {
               <div className="space-y-6">
                 <p className="text-gray-400 text-sm">Select images from your computer. You can add multiple for bulk minting (max {MAX_FILES_BULK}).</p>
                 <label
+                  htmlFor="nft-bulk-images"
                   className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer bg-gray-700/50 hover:bg-gray-700 hover:border-cyan-500/50 transition-colors"
                   onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-cyan-500/50'); }}
                   onDragLeave={(e) => { e.currentTarget.classList.remove('border-cyan-500/50'); }}
                   onDrop={(e) => { e.preventDefault(); e.currentTarget.classList.remove('border-cyan-500/50'); addFiles(e.dataTransfer.files); }}
                 >
                   <input
+                    id="nft-bulk-images"
+                    name="bulkImages"
                     type="file"
                     accept={ACCEPTED_IMAGE_TYPES}
                     multiple
@@ -969,8 +992,10 @@ export default function CreateNFT() {
                 {useSameMetadata ? (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Name base *</label>
+                      <label htmlFor="nft-bulk-name" className="block text-sm font-medium text-gray-300 mb-2">Name base *</label>
                       <input
+                        id="nft-bulk-name"
+                        name="bulkName"
                         type="text"
                         value={bulkName}
                         onChange={(e) => setBulkName(e.target.value)}
@@ -979,8 +1004,10 @@ export default function CreateNFT() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Description (optional)</label>
+                      <label htmlFor="nft-bulk-description" className="block text-sm font-medium text-gray-300 mb-2">Description (optional)</label>
                       <textarea
+                        id="nft-bulk-description"
+                        name="bulkDescription"
                         value={bulkDescription}
                         onChange={(e) => setBulkDescription(e.target.value)}
                         placeholder="Description for all tokens"
@@ -997,14 +1024,20 @@ export default function CreateNFT() {
                           {previews[i] && <img src={previews[i]} alt="" className="w-12 h-12 object-cover rounded" />}
                           <span className="text-gray-400">Token #{i + 1}</span>
                         </div>
+                        <label htmlFor={`nft-token-name-${i}`} className="sr-only">Token name</label>
                         <input
+                          id={`nft-token-name-${i}`}
+                          name={`tokenName-${i}`}
                           type="text"
                           value={meta?.name ?? ''}
                           onChange={(e) => updateTokenMeta(i, 'name', e.target.value)}
                           placeholder="Token name *"
                           className="w-full px-3 py-2 rounded bg-gray-700 border border-gray-600 text-white text-sm mb-2"
                         />
+                        <label htmlFor={`nft-token-desc-${i}`} className="sr-only">Token description</label>
                         <textarea
+                          id={`nft-token-desc-${i}`}
+                          name={`tokenDescription-${i}`}
                           value={meta?.description ?? ''}
                           onChange={(e) => updateTokenMeta(i, 'description', e.target.value)}
                           placeholder="Description"
@@ -1014,14 +1047,20 @@ export default function CreateNFT() {
                         <div className="mb-2 text-xs font-medium text-gray-400">Attributes (traits for OpenSea etc.)</div>
                         {(meta?.attributes || []).map((attr, ai) => (
                           <div key={ai} className="flex gap-2 mb-2">
+                            <label htmlFor={`nft-trait-type-${i}-${ai}`} className="sr-only">Trait type</label>
                             <input
+                              id={`nft-trait-type-${i}-${ai}`}
+                              name={`traitType-${i}-${ai}`}
                               type="text"
                               value={attr.trait_type ?? ''}
                               onChange={(e) => updateTokenAttribute(i, ai, 'trait_type', e.target.value)}
                               placeholder="Trait (e.g. Background)"
                               className="flex-1 px-3 py-1.5 rounded bg-gray-700 border border-gray-600 text-white text-sm"
                             />
+                            <label htmlFor={`nft-trait-value-${i}-${ai}`} className="sr-only">Trait value</label>
                             <input
+                              id={`nft-trait-value-${i}-${ai}`}
+                              name={`traitValue-${i}-${ai}`}
                               type="text"
                               value={attr.value ?? ''}
                               onChange={(e) => updateTokenAttribute(i, ai, 'value', e.target.value)}

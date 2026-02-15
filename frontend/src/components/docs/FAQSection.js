@@ -240,7 +240,10 @@ const FAQSection = () => {
       <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
           style={{ backgroundColor: 'var(--bg-card)'  }}>
         <div className="relative">
+          <label htmlFor="faq-search" className="sr-only">Search FAQs</label>
           <input
+            id="faq-search"
+            name="faqSearch"
             type="text"
             placeholder="Search FAQs..."
             className="w-full bg-gray-700 border  rounded-lg px-4 py-3 style={{ color: 'var(--text-primary)' }} placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"

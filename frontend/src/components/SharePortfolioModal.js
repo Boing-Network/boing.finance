@@ -62,8 +62,10 @@ export default function SharePortfolioModal({ isOpen, onClose, portfolioData }) 
 
         {/* Anonymize Option */}
         <div className="mb-6">
-          <label className="flex items-center space-x-2 cursor-pointer">
+          <label htmlFor="share-portfolio-anonymize" className="flex items-center space-x-2 cursor-pointer">
             <input
+              id="share-portfolio-anonymize"
+              name="anonymize"
               type="checkbox"
               checked={anonymize}
               onChange={(e) => setAnonymize(e.target.checked)}
