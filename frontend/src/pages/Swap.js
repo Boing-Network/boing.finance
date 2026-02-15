@@ -1865,6 +1865,7 @@ const Swap = () => {
                           id="swap-token-in-search"
                           name="tokenInSearch"
                           type="text"
+                          autoComplete="off"
                           placeholder="Search tokens..."
                           className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg text-sm"
                           onChange={(e) => {
@@ -1964,6 +1965,7 @@ const Swap = () => {
                           id="swap-token-out-search"
                           name="tokenOutSearch"
                           type="text"
+                          autoComplete="off"
                           placeholder="Search tokens..."
                           className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg text-sm"
                           onChange={(e) => {

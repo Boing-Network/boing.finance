@@ -1241,6 +1241,7 @@ const Pools = () => {
                         id="pools-search"
                         name="poolsSearch"
                         type="text"
+                        autoComplete="off"
                         placeholder="Search pools by token symbol or name, then press Enter..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}

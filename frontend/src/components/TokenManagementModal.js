@@ -174,6 +174,7 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
             id="token-mgmt-search"
             name="searchTerm"
             type="text"
+            autoComplete="off"
             placeholder="Search by name or paste address"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

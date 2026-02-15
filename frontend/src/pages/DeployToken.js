@@ -205,6 +205,7 @@ function DeployTokenSolanaContent() {
                   id="deploy-solana-name"
                   name="name"
                   type="text"
+                  autoComplete="off"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="My Token"
@@ -219,6 +220,7 @@ function DeployTokenSolanaContent() {
                   id="deploy-solana-symbol"
                   name="symbol"
                   type="text"
+                  autoComplete="off"
                   value={symbol}
                   onChange={(e) => setSymbol(e.target.value.toUpperCase())}
                   placeholder="MTK"
@@ -1809,6 +1811,7 @@ export default function DeployToken() {
                         id="deploy-evm-name"
                         name="name"
                         type="text"
+                        autoComplete="off"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
@@ -1830,6 +1833,7 @@ export default function DeployToken() {
                         id="deploy-evm-symbol"
                         name="symbol"
                         type="text"
+                        autoComplete="off"
                         value={symbol}
                         onChange={(e) => setSymbol(e.target.value)}
                         className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
@@ -1851,6 +1855,7 @@ export default function DeployToken() {
                       <select
                         id="deploy-evm-decimals"
                         name="decimals"
+                        autoComplete="off"
                         value={decimals}
                         onChange={(e) => setDecimals(parseInt(e.target.value))}
                         className="w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
@@ -1919,6 +1924,7 @@ export default function DeployToken() {
                         id="deploy-evm-website"
                         name="website"
                         type="url"
+                        autoComplete="url"
                         value={website}
                         onChange={(e) => setWebsite(e.target.value)}
                         className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
@@ -1939,6 +1945,7 @@ export default function DeployToken() {
                       <textarea
                         id="deploy-evm-description"
                         name="description"
+                        autoComplete="off"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"

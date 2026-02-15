@@ -35,6 +35,7 @@ const TokenFilters = ({ filters, onFilterChange, onClearFilters }) => {
             id="token-filters-search"
             name="search"
             type="text"
+            autoComplete="off"
             value={filters.search || ''}
             onChange={(e) => onFilterChange('search', e.target.value)}
             placeholder="Search by name, symbol, or address..."

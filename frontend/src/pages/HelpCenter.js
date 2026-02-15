@@ -206,6 +206,7 @@ const HelpCenter = () => {
                   id="help-center-search"
                   name="helpSearch"
                   type="text"
+                  autoComplete="off"
                   placeholder="Search for help articles..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}

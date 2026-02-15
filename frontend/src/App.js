@@ -31,7 +31,6 @@ import ProactiveTipsBanner from './components/ProactiveTipsBanner';
 import DeFi101Modal from './components/DeFi101Modal';
 import BoingMascot from './components/BoingMascot';
 import priceAlertService from './services/priceAlertService';
-import './styles/globals.css';
 
 // Lazy load all page components for code splitting
 const Swap = lazy(() => import('./pages/Swap'));
@@ -265,18 +264,18 @@ function AppContent() {
   }, []);
 
   return (
-    <div className="relative flex flex-col min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
+    <div className="relative flex flex-col min-h-screen min-w-0 overflow-x-hidden" style={{ backgroundColor: 'var(--bg-primary)' }}>
       <EnhancedAnimatedBackground />
       <BaseNetworkOptimizer />
       
-      {/* Navigation */}
-      <nav className="relative z-30 flex-shrink-0 backdrop-blur-sm border-b border-cyan-500/30 shadow-lg shadow-cyan-500/20" style={{ 
+      {/* Navigation - w-full and min-w-0 to prevent horizontal scroll */}
+      <nav className="relative z-30 flex-shrink-0 w-full min-w-0 backdrop-blur-sm border-b border-cyan-500/30 shadow-lg shadow-cyan-500/20" style={{ 
         backgroundColor: 'var(--bg-primary)',
         borderColor: 'var(--border-color)'
       }}>
         <ShootingStars dense />
-        <div className="max-w-7xl mx-auto pl-2 pr-3 sm:pl-3 sm:pr-4 md:pl-4 md:pr-6 lg:pl-4 lg:pr-8 xl:pl-6 xl:pr-8">
-          <div className="flex items-center justify-between gap-x-2 sm:gap-x-3 lg:gap-x-4 xl:gap-x-6 h-14 sm:h-16">
+        <div className="w-full max-w-7xl mx-auto pl-2 pr-3 sm:pl-3 sm:pr-4 md:pl-4 md:pr-6 lg:pl-4 lg:pr-8 xl:pl-6 xl:pr-8 min-w-0">
+          <div className="flex items-center justify-between gap-x-2 sm:gap-x-3 lg:gap-x-4 xl:gap-x-6 h-14 sm:h-16 min-w-0">
             {/* Logo - tight to left edge, fixed width to prevent overlap */}
             <div className="flex-shrink-0 -ml-1 lg:-ml-2">
               <button
@@ -288,9 +287,9 @@ function AppContent() {
               </button>
             </div>
 
-            {/* Desktop Navigation - flex-1, min-width ensures BOING stays visible */}
-            <div className="hidden lg:flex items-center justify-center flex-1 min-w-[480px] overflow-visible">
-              <nav className="flex items-center gap-1.5 xl:gap-2 2xl:gap-3 flex-nowrap justify-center">
+            {/* Desktop Navigation - flex-1 with min-w-0 so it can shrink on narrow lg */}
+            <div className="hidden lg:flex items-center justify-center flex-1 min-w-0 overflow-hidden">
+              <nav className="flex items-center gap-1.5 xl:gap-2 2xl:gap-3 flex-nowrap justify-center min-w-0">
                 <DropdownMenu label="Trade & Deploy" items={memoizedNavigation.tradeAndDeploy} isOpen={tradeAndDeployDropdownOpen}
                   onToggle={() => { const next = !tradeAndDeployDropdownOpen; setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setTradeAndDeployDropdownOpen(next); }}
                   onClose={() => setTradeAndDeployDropdownOpen(false)}
@@ -311,7 +310,7 @@ function AppContent() {
             </div>
 
             {/* Desktop Right: Tools + ChainType + Network + Wallet */}
-            <div className="hidden lg:flex items-center flex-shrink-0 min-w-0 gap-1.5 xl:gap-2 2xl:gap-3">
+            <div className="hidden lg:flex items-center flex-shrink-0 min-w-0 gap-1.5 xl:gap-2 2xl:gap-3 overflow-hidden">
               <div className="flex-shrink-0">
                 <ToolsDropdown
                 isOpen={toolsDropdownOpen}
