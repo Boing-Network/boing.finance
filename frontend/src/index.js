@@ -1,3 +1,9 @@
+// Polyfill Buffer for browser (required by Solana/Web3 deps in chunks)
+import { Buffer } from 'buffer';
+if (typeof window !== 'undefined') {
+  window.Buffer = Buffer;
+}
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import ErrorBoundary from './components/ErrorBoundary';
