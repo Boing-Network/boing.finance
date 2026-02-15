@@ -10,10 +10,25 @@ const SolanaWalletContext = createContext();
 
 export { SolanaWalletContext };
 
+const DEFAULT_SOLANA_WALLET_VALUE = {
+  publicKey: null,
+  address: null,
+  connected: false,
+  connecting: false,
+  balance: null,
+  connection: null,
+  network: 'devnet',
+  setSolanaNetwork: () => {},
+  connectWallet: async () => { console.warn('Solana wallet not available - ensure SolanaWalletProvider wraps your app'); },
+  disconnectWallet: () => {},
+  refreshBalance: async () => null,
+  signTransaction: async () => { throw new Error('Solana wallet not connected'); },
+};
+
 export const useSolanaWallet = () => {
   const context = useContext(SolanaWalletContext);
   if (!context) {
-    throw new Error('useSolanaWallet must be used within SolanaWalletProvider');
+    return DEFAULT_SOLANA_WALLET_VALUE;
   }
   return context;
 };

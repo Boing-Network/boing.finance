@@ -12,7 +12,6 @@ import { getNetworkByChainId } from '../config/networks';
 import AdvancedERC20Artifact from '../artifacts/AdvancedERC20.json';
 import TokenFactoryArtifact from '../artifacts/TokenFactory.json';
 import TokenImplementationArtifact from '../artifacts/TokenImplementation.json';
-import { useNetwork } from '../hooks/useNetwork';
 import { getApiUrl } from '../config';
 import axios from 'axios';
 import TokenManagementModal from '../components/TokenManagementModal';
@@ -176,7 +175,7 @@ function DeployTokenSolanaContent() {
                 Connect your Solana wallet (Phantom, Solflare) to deploy an SPL token.
               </p>
               <button
-                onClick={connectWallet}
+                onClick={() => connectWallet?.()}
                 className="px-6 py-3 rounded-lg font-medium"
                 style={{ backgroundColor: 'var(--accent-primary)', color: 'white' }}
               >
@@ -610,7 +609,8 @@ async function manualDeployWithInterface({ signer, ERC20_ABI, ERC20_BYTECODE, co
 
 export default function DeployToken() {
   const location = useLocation();
-  const { isSolana } = useChainType();
+  const chainTypeContext = useChainType();
+  const isSolana = chainTypeContext?.isSolana ?? false;
 
   // Check for template data from navigation
   useEffect(() => {
@@ -704,8 +704,8 @@ export default function DeployToken() {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [shareData, setShareData] = useState(null);
 
-  // Get current network
-  const network = getCurrentNetwork();
+  // Get current network (safe - may be null when wallet not connected)
+  const network = (typeof getCurrentNetwork === 'function' ? getCurrentNetwork() : null);
 
   // Helper function to get current pricing for selected network
   const getCurrentPricing = (planKey) => {
@@ -750,7 +750,8 @@ export default function DeployToken() {
 
   // Helper function to check if a feature is allowed for current plan
   const isFeatureAllowed = (featureKey) => {
-    return SERVICE_CHARGES[selectedPlan].allowedFeatures.includes(featureKey);
+    const plan = SERVICE_CHARGES[selectedPlan];
+    return plan?.allowedFeatures?.includes(featureKey) ?? false;
   };
 
   // Helper function to get feature restriction message
@@ -767,39 +768,29 @@ export default function DeployToken() {
 
   // Reset disabled features when plan changes
   useEffect(() => {
+    const plan = SERVICE_CHARGES[selectedPlan];
+    const allowed = plan?.allowedFeatures ?? [];
     // Reset features that are not allowed in the new plan
-    if (!SERVICE_CHARGES[selectedPlan].allowedFeatures.includes('enableFreezing')) {
+    if (!allowed.includes('enableFreezing')) {
       setEnableFreezing(false);
       setFreezingAuthority('');
     }
-    if (!SERVICE_CHARGES[selectedPlan].allowedFeatures.includes('enableBlacklist')) {
-      setEnableBlacklist(false);
-    }
-    if (!SERVICE_CHARGES[selectedPlan].allowedFeatures.includes('maxTxAmount')) {
-      setMaxTxAmount('');
-    }
-    if (!SERVICE_CHARGES[selectedPlan].allowedFeatures.includes('renounceOwnership')) {
-      setRenounceOwnership(false);
-    }
-    if (!SERVICE_CHARGES[selectedPlan].allowedFeatures.includes('antiBot')) {
-      setAntiBotEnabled(false);
-    }
-    if (!SERVICE_CHARGES[selectedPlan].allowedFeatures.includes('cooldown')) {
-      setCooldownPeriod('');
-    }
-    if (!SERVICE_CHARGES[selectedPlan].allowedFeatures.includes('antiWhale')) {
+    if (!allowed.includes('enableBlacklist')) setEnableBlacklist(false);
+    if (!allowed.includes('maxTxAmount')) setMaxTxAmount('');
+    if (!allowed.includes('renounceOwnership')) setRenounceOwnership(false);
+    if (!allowed.includes('antiBot')) setAntiBotEnabled(false);
+    if (!allowed.includes('cooldown')) setCooldownPeriod('');
+    if (!allowed.includes('antiWhale')) {
       setAntiWhaleEnabled(false);
       setMaxWalletEnabled(false);
       setMaxWalletPercentage('');
     }
-    if (!SERVICE_CHARGES[selectedPlan].allowedFeatures.includes('pauseFunction')) {
-      setPauseFunctionEnabled(false);
-    }
-    if (!SERVICE_CHARGES[selectedPlan].allowedFeatures.includes('timelock')) {
+    if (!allowed.includes('pauseFunction')) setPauseFunctionEnabled(false);
+    if (!allowed.includes('timelock')) {
       setTimelockEnabled(false);
       setTimelockDelay('');
     }
-    if (!SERVICE_CHARGES[selectedPlan].allowedFeatures.includes('maxWallet')) {
+    if (!allowed.includes('maxWallet')) {
       setMaxWalletEnabled(false);
       setMaxWalletPercentage('');
     }
