@@ -276,8 +276,44 @@ function AppContent() {
         <ShootingStars dense />
         <div className="w-full max-w-7xl mx-auto pl-2 pr-3 sm:pl-3 sm:pr-4 md:pl-4 md:pr-6 lg:pl-4 lg:pr-8 xl:pl-6 xl:pr-8 min-w-0">
           <div className="flex items-center justify-between gap-x-2 sm:gap-x-3 lg:gap-x-4 xl:gap-x-6 h-14 sm:h-16 min-w-0">
+            {/* Hamburger for nav items: 768px–1149px only (left side); hidden on mobile and desktop */}
+            <div className="hidden md:flex min-[1150px]:hidden items-center flex-shrink-0 relative">
+              <button
+                onClick={() => setIsMediumNavOpen(!isMediumNavOpen)}
+                className="flex items-center justify-center w-10 h-10 rounded-lg transition-colors"
+                style={{
+                  color: isMediumNavOpen ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  backgroundColor: isMediumNavOpen ? 'var(--bg-tertiary)' : 'transparent'
+                }}
+                aria-label="Toggle navigation menu"
+                aria-expanded={isMediumNavOpen}
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  {isMediumNavOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
+              {isMediumNavOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" aria-hidden="true" onClick={() => setIsMediumNavOpen(false)} />
+                  <div
+                    className="absolute left-0 top-full mt-1 z-50 w-72 max-h-[80vh] overflow-y-auto rounded-lg border shadow-xl"
+                    style={{
+                      background: 'linear-gradient(to bottom, var(--bg-secondary), var(--bg-tertiary))',
+                      borderColor: 'var(--border-color)'
+                    }}
+                  >
+                    <MediumNavPanel navigation={memoizedNavigation} onNavigate={() => setIsMediumNavOpen(false)} comingSoon={comingSoon} />
+                  </div>
+                </>
+              )}
+            </div>
+
             {/* Logo - tight to left edge, fixed width to prevent overlap */}
-            <div className="flex-shrink-0 -ml-1 lg:-ml-2">
+            <div className="flex-shrink-0 -ml-1 min-[1150px]:-ml-2">
               <button
                 onClick={() => window.location.href = '/'}
                 className="flex items-center gap-1.5 font-bold text-xl whitespace-nowrap"
@@ -287,8 +323,8 @@ function AppContent() {
               </button>
             </div>
 
-            {/* Desktop Navigation - flex-1 with min-w-0 so it can shrink on narrow lg */}
-            <div className="hidden lg:flex items-center justify-center flex-1 min-w-0 overflow-hidden">
+            {/* Desktop Navigation - visible from 1150px so nav doesn't overlap logo/tools */}
+            <div className="hidden min-[1150px]:flex items-center justify-center flex-1 min-w-0 overflow-hidden">
               <nav className="flex items-center gap-1.5 xl:gap-2 2xl:gap-3 flex-nowrap justify-center min-w-0">
                 <DropdownMenu label="Trade & Deploy" items={memoizedNavigation.tradeAndDeploy} isOpen={tradeAndDeployDropdownOpen}
                   onToggle={() => { const next = !tradeAndDeployDropdownOpen; setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setTradeAndDeployDropdownOpen(next); }}
@@ -309,8 +345,8 @@ function AppContent() {
               </nav>
             </div>
 
-            {/* Desktop Right: Tools + ChainType + Network + Wallet */}
-            <div className="hidden lg:flex items-center flex-shrink-0 min-w-0 gap-1.5 xl:gap-2 2xl:gap-3 overflow-hidden">
+            {/* Desktop Right: Tools + ChainType + Network + Wallet - visible from 1150px */}
+            <div className="hidden min-[1150px]:flex items-center flex-shrink-0 min-w-0 gap-1.5 xl:gap-2 2xl:gap-3 overflow-hidden">
               <div className="flex-shrink-0">
                 <ToolsDropdown
                 isOpen={toolsDropdownOpen}
@@ -328,44 +364,8 @@ function AppContent() {
               </div>
             </div>
 
-            {/* Medium Screen Navigation - md to lg: hamburger + tools/network/wallet */}
-            <div className="hidden md:flex lg:hidden items-center gap-x-3 flex-shrink-0">
-              {/* Hamburger for main nav items */}
-              <div className="relative flex-shrink-0">
-                <button
-                  onClick={() => setIsMediumNavOpen(!isMediumNavOpen)}
-                  className="flex items-center justify-center w-10 h-10 rounded-lg transition-colors"
-                  style={{
-                    color: isMediumNavOpen ? 'var(--text-primary)' : 'var(--text-secondary)',
-                    backgroundColor: isMediumNavOpen ? 'var(--bg-tertiary)' : 'transparent'
-                  }}
-                  aria-label="Toggle navigation menu"
-                  aria-expanded={isMediumNavOpen}
-                >
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    {isMediumNavOpen ? (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    ) : (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    )}
-                  </svg>
-                </button>
-                {isMediumNavOpen && (
-                  <>
-                    <div className="fixed inset-0 z-40" aria-hidden="true" onClick={() => setIsMediumNavOpen(false)} />
-                    <div
-                      className="absolute left-0 top-full mt-1 z-50 w-72 max-h-[80vh] overflow-y-auto rounded-lg border shadow-xl"
-                      style={{
-                        background: 'linear-gradient(to bottom, var(--bg-secondary), var(--bg-tertiary))',
-                        borderColor: 'var(--border-color)'
-                      }}
-                    >
-                      <MediumNavPanel navigation={memoizedNavigation} onNavigate={() => setIsMediumNavOpen(false)} comingSoon={comingSoon} />
-                    </div>
-                  </>
-                )}
-              </div>
-              <div className="flex items-center gap-2 pl-3 border-l flex-shrink-0" style={{ borderColor: 'var(--border-color)' }}>
+            {/* Tools + Network + Wallet: 768px–1149px (right side when hamburger is shown) */}
+            <div className="hidden md:flex min-[1150px]:hidden items-center gap-2 pl-3 border-l flex-shrink-0" style={{ borderColor: 'var(--border-color)' }}>
                 <div className="flex-shrink-0"><ToolsDropdown isOpen={toolsDropdownOpen} onToggle={() => { const next = !toolsDropdownOpen; setIsMediumNavOpen(false); setToolsDropdownOpen(next); }} onClose={() => setToolsDropdownOpen(false)}
                   onOpenHistory={() => { setHistoryModalOpen(true); setToolsDropdownOpen(false); }}
                   onOpenAiChat={() => { setAiChatOpen(true); setToolsDropdownOpen(false); }}
@@ -373,10 +373,9 @@ function AppContent() {
                 /></div>
                 <div className="flex-shrink-0"><NetworkSelector /></div>
                 <div className="flex-shrink-0"><WalletConnect /></div>
-              </div>
             </div>
 
-            {/* Mobile menu button - Show on mobile and medium screens */}
+            {/* Mobile menu button - Show below 768px */}
             <div className="md:hidden flex-shrink-0">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
