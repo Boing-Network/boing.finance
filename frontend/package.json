@@ -43,7 +43,7 @@
     "start": "react-scripts start",
     "prebuild": "node scripts/update-service-worker-version.js && node scripts/generate-version-manifest.js",
     "postbuild": "node scripts/generate-version-manifest.js",
-    "build": "npm run generate-manifest && GENERATE_SOURCEMAP=false react-scripts build",
+    "build": "npm run generate-manifest && cross-env CI=false GENERATE_SOURCEMAP=false react-scripts build",
     "build:prod": "cross-env CI=false REACT_APP_ENVIRONMENT=production GENERATE_SOURCEMAP=false react-scripts build",
     "build:staging": "cross-env CI=false REACT_APP_ENVIRONMENT=staging GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",
