@@ -175,7 +175,7 @@ export const showEnhancedToast = (message, type = 'info', options = {}) => {
 
 // Toast with notification
 export const showToastWithNotification = async (message, type = 'info', notificationOptions = null) => {
-  const toast = require('react-hot-toast');
+  const _toast = require('react-hot-toast');
   
   // Show toast
   const toastId = showEnhancedToast(message, type);

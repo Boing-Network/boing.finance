@@ -73,4 +73,5 @@ export async function getDexVolumeChart(timeRange) {
   });
 }
 
-export default { getDexOverview, getDexVolumeChart };
+const defillamaService = { getDexOverview, getDexVolumeChart };
+export default defillamaService;

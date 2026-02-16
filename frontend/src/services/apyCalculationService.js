@@ -1,4 +1,3 @@
-/* global BigInt */
 import { ethers } from 'ethers';
 
 // DEX Pair ABI for swap events
@@ -155,7 +154,7 @@ class APYCalculationService {
   /**
    * Calculate trading volume from swap events
    */
-  calculateTradingVolume(swapEvents, pairContract) {
+  calculateTradingVolume(swapEvents, _pairContract) {
     let totalVolumeUSD = 0;
     let swapCount = 0;
 

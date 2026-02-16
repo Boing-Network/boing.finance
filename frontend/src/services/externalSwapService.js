@@ -222,7 +222,7 @@ class ExternalSwapService {
   }
 
   // Estimate gas for swap
-  estimateGas(dexName, amountIn, amountOut) {
+  estimateGas(dexName, _amountIn, _amountOut) {
     // Rough gas estimates for different DEXs
     const gasEstimates = {
       'uniswapV2': 150000,

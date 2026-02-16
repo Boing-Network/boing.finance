@@ -4,8 +4,8 @@
  */
 
 const STORAGE_PREFIX = 'boing_achievements_';
-const POINTS_STORAGE = 'boing_points';
-const STREAK_STORAGE = 'boing_streak';
+const _POINTS_STORAGE = 'boing_points';
+const _STREAK_STORAGE = 'boing_streak';
 const LEADERBOARD_STORAGE = 'boing_leaderboard'; // placeholder for future backend
 
 export const ACHIEVEMENTS = {

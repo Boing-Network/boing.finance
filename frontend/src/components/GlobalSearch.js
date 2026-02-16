@@ -45,7 +45,8 @@ const GlobalSearch = ({ isOpen, onClose }) => {
     }
   }, [isOpen]);
 
-  // Debounced search function
+  // Debounced search function (debounce hides deps from eslint; intentional)
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- debounce wrapper has unknown deps
   const performSearch = useCallback(
     debounce(async (searchQuery) => {
       if (!searchQuery.trim()) {
@@ -272,6 +273,7 @@ const GlobalSearch = ({ isOpen, onClose }) => {
               onKeyDown={handleKeyDown}
               placeholder="Search tokens, NFTs, addresses, or pages... (Press / to focus)"
               className="flex-1 bg-transparent text-white placeholder-gray-400 outline-none text-lg"
+              role="combobox"
               aria-label="Global search"
               aria-autocomplete="list"
               aria-controls="search-results"

@@ -121,7 +121,7 @@ export const getWatchlistCount = () => {
   return getWatchlist().length;
 };
 
-export default {
+const tokenWatchlist = {
   getWatchlist,
   addToWatchlist,
   removeFromWatchlist,
@@ -130,3 +130,4 @@ export default {
   clearWatchlist,
   getWatchlistCount
 };
+export default tokenWatchlist;

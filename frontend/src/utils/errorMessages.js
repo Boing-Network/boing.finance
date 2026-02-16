@@ -170,10 +170,11 @@ export const formatError = (error) => {
   };
 };
 
-export default {
+const errorMessages = {
   getErrorMessage,
   getErrorRecovery,
   isRecoverableError,
   formatError
 };
+export default errorMessages;
 

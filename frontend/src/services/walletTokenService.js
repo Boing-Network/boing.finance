@@ -81,7 +81,7 @@ class WalletTokenService {
       // Filter tokens with non-zero balances
       const userTokens = [nativeToken];
       
-      tokenBalances.forEach((result, index) => {
+      tokenBalances.forEach((result, _index) => {
         if (result.status === 'fulfilled' && result.value) {
           const token = result.value;
           if (parseFloat(token.balance) > 0) {
@@ -141,10 +141,10 @@ class WalletTokenService {
       const dexTokens = [];
       
       // Uniswap V2 Factory on Sepolia
-      const uniswapFactory = '0x7E0987E5b3a30e3f2828572Bb659A548460a3003';
+      const _uniswapFactory = '0x7E0987E5b3a30e3f2828572Bb659A548460a3003';
       
       // Try to get some common token pairs from Uniswap
-      const commonPairs = [
+      const _commonPairs = [
         '0x4b96e5b5c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8', // WETH/USDC
         '0x5b96e5b5c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8', // WETH/USDT
         '0x6b96e5b5c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8', // WETH/DAI

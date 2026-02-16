@@ -152,7 +152,7 @@ export const clearAllAlerts = () => {
   }
 };
 
-export default {
+const priceAlerts = {
   getPriceAlerts,
   addPriceAlert,
   removePriceAlert,
@@ -161,4 +161,5 @@ export default {
   getActiveAlertsForToken,
   clearAllAlerts
 };
+export default priceAlerts;
 

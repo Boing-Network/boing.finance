@@ -136,7 +136,7 @@ export const trackPageView = async (page, metadata = {}) => {
   });
 };
 
-export default {
+const analyticsService = {
   trackUserActivity,
   fetchWalletActivity,
   trackSwap,
@@ -145,4 +145,5 @@ export default {
   trackSearch,
   trackPageView
 };
+export default analyticsService;
 

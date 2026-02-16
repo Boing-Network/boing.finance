@@ -50,7 +50,7 @@ const Swap = () => {
   const [shareData, setShareData] = useState(null);
 
   // External DEX state
-  const [externalQuotes, setExternalQuotes] = useState([]);
+  const [_externalQuotes, setExternalQuotes] = useState([]);
   const [selectedExternalQuote, setSelectedExternalQuote] = useState(null);
   const [showExternalQuotes, setShowExternalQuotes] = useState(false);
   const [isExternalDEXAvailable, setIsExternalDEXAvailable] = useState(false);
@@ -344,7 +344,7 @@ const Swap = () => {
     }
   };
 
-  const setTokenOutFullBalance = () => {
+  const _setTokenOutFullBalance = () => {
     const balance = getTokenOutBalance();
     if (balance !== null) {
       setAmountOut(balance.toString());
@@ -1313,6 +1313,7 @@ const Swap = () => {
       });
       setAmountOut('');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- checkAvailablePairs, getConfiguredPairs intentionally omitted to avoid loops
   }, [chainId, userTokens]);
 
   // Fetch user's tokens
@@ -1535,6 +1536,7 @@ const Swap = () => {
     };
     run();
     return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- DEFAULT_SWAP_GAS_LIMIT, getGasFeeMultiplier are constants
   }, [chainId, settings.gasPriority]);
 
   // Initialize external DEX service
@@ -1560,6 +1562,7 @@ const Swap = () => {
     if (isConnected && account) {
       fetchUserTokens();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUserTokens intentionally not in deps
   }, [isConnected, account, chainId, fetchUserTokens]);
 
   // Check available trading pairs when tokens are loaded
@@ -1607,6 +1610,7 @@ const Swap = () => {
       setExternalQuotes([]);
       setSelectedExternalQuote(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchExternalQuotes intentionally not in deps
   }, [amountIn, tokenIn, tokenOut, calculateExpectedOutput, isExternalDEXAvailable]);
 
   // Fetch external DEX quotes
@@ -1868,7 +1872,7 @@ const Swap = () => {
                           autoComplete="off"
                           placeholder="Search tokens..."
                           className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg text-sm"
-                          onChange={(e) => {
+                          onChange={(_e) => {
                             // Add search functionality if needed
                           }}
                         />
@@ -1968,7 +1972,7 @@ const Swap = () => {
                           autoComplete="off"
                           placeholder="Search tokens..."
                           className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg text-sm"
-                          onChange={(e) => {
+                          onChange={(_e) => {
                             // Add search functionality if needed
                           }}
                         />

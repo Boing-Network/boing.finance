@@ -40,6 +40,7 @@ const WalletConnect = () => {
       setEvmBalanceLoading(false);
     }
     return () => { isMounted = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- evmWallet object identity changes; we depend on its properties
   }, [isSolana, evmWallet.isConnected, evmWallet.account, evmWallet.getAccountBalance]);
 
   const handleConnect = async () => {

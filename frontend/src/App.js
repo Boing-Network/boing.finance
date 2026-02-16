@@ -1127,6 +1127,8 @@ function Home() {
                 </a>
               </div>
             </section>
+          </section>
+
           </div>
 
           {/* 6. Token creation CTA banner */}
@@ -1150,7 +1152,6 @@ function Home() {
               </div>
             </div>
           </div>
-        </div>
       </div>
     </>
   );

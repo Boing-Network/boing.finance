@@ -9,7 +9,7 @@ import { useAchievements } from '../contexts/AchievementContext';
 export default function ProactiveTipsBanner() {
   const [tip, setTip] = useState(null);
   const [dismissed, setDismissed] = useState(false);
-  const { chainId } = useWallet();
+  const { chainId: _chainId } = useWallet();
   const { isConnected, account } = useWalletConnection();
   const { getState } = useAchievements() || {};
 

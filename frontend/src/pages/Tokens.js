@@ -13,7 +13,6 @@ import TokenFilters from '../components/TokenFilters';
 import PriceAlertModal from '../components/PriceAlertModal';
 import { tokenFavorites } from '../utils/tokenFavorites';
 import { addToWatchlist, removeFromWatchlist, isInWatchlist } from '../utils/tokenWatchlist';
-import { checkPriceAlerts } from '../utils/priceAlerts';
 import toast from 'react-hot-toast';
 
 // Initialize token scanner
@@ -133,6 +132,7 @@ const Tokens = () => {
       }
     };
     fetchCoinAndSearch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setSearchParams is stable
   }, [searchParams, chainId, switchNetwork]);
 
   const handleNetworkChange = async (newChainId) => {

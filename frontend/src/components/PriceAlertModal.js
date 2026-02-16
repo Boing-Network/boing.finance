@@ -2,7 +2,7 @@
 // Allows users to create and manage price alerts
 
 import React, { useState, useEffect } from 'react';
-import { addPriceAlert, getPriceAlerts, removePriceAlert, updatePriceAlert } from '../utils/priceAlerts';
+import { addPriceAlert, getPriceAlerts, removePriceAlert } from '../utils/priceAlerts';
 import toast from 'react-hot-toast';
 
 export default function PriceAlertModal({ isOpen, onClose, token }) {

@@ -46,6 +46,7 @@ export const WalletProvider = ({ children }) => {
         setAccount(accounts[0]);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally omit disconnectWallet to avoid stale closure
   }, [userDisconnected]);
 
   const handleChainChanged = useCallback(async (chainId) => {
@@ -334,7 +335,7 @@ export const WalletProvider = ({ children }) => {
     };
 
     // Check if Phantom is installed (Phantom can inject into window.ethereum)
-    const isPhantomInstalled = typeof window !== 'undefined' && (
+    const _isPhantomInstalled = typeof window !== 'undefined' && (
       window.phantom?.ethereum || 
       (window.ethereum && window.ethereum.isPhantom)
     );

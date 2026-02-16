@@ -158,7 +158,7 @@ export const ListItemSkeleton = ({ count = 5 }) => {
   );
 };
 
-export default {
+const SkeletonLoader = {
   PortfolioSummarySkeleton,
   TokenBalanceSkeleton,
   PoolCardSkeleton,
@@ -168,3 +168,4 @@ export default {
   CardSkeleton,
   ListItemSkeleton
 };
+export default SkeletonLoader;

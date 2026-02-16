@@ -49,4 +49,5 @@ export function PageCard({ children, className = '', ...props }) {
   );
 }
 
-export default { PageHeader, PageCard };
+const PageLayout = { PageHeader, PageCard };
+export default PageLayout;

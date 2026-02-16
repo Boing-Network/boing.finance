@@ -69,7 +69,7 @@ class PriceAlertService {
       });
 
       // Check each unique token
-      for (const [key, tokenAlerts] of tokenMap.entries()) {
+      for (const [key, _tokenAlerts] of tokenMap.entries()) {
         const [address, chainId] = key.split('-');
         
         try {
@@ -138,5 +138,6 @@ class PriceAlertService {
   }
 }
 
-export default new PriceAlertService();
+const priceAlertServiceInstance = new PriceAlertService();
+export default priceAlertServiceInstance;
 

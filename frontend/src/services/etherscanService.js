@@ -221,5 +221,6 @@ class EtherscanService {
   }
 }
 
-export default new EtherscanService();
+const etherscanServiceInstance = new EtherscanService();
+export default etherscanServiceInstance;
 

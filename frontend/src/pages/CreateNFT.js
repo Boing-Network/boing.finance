@@ -7,7 +7,7 @@ import { Helmet } from 'react-helmet-async';
 import { useWallet } from '../contexts/WalletContext';
 import { useChainType, useSolanaWallet } from '../contexts/SolanaWalletContext';
 import EmptyState from '../components/EmptyState';
-import { uploadToIPFS, uploadMetadataToIPFS, validateFile } from '../utils/ipfsUpload';
+import { uploadToIPFS, validateFile } from '../utils/ipfsUpload';
 import { SOLANA_NETWORKS } from '../config/solanaConfig';
 import toast from 'react-hot-toast';
 
@@ -59,7 +59,7 @@ function parseMetadataCSV(text, maxRows = 10000) {
   const headers = lines[0].split(',').map((h) => h.trim().replace(/^"|"$/g, ''));
   const nameCol = headers.findIndex((h) => /^name$/i.test(h));
   const descCol = headers.findIndex((h) => /^description$/i.test(h));
-  const traitCols = headers
+  const _traitCols = headers
     .map((h, i) => (i !== nameCol && i !== descCol && i !== -1 && /^image$/i.test(h) ? -1 : i))
     .map((i, idx) => (i >= 0 && nameCol !== idx && descCol !== idx && !/^image$/i.test(headers[idx]) ? idx : -1));
   const list = [];
@@ -185,7 +185,7 @@ function CreateNFTSolanaContent() {
           ) : (
             <>
               <div className="flex justify-center gap-2 mb-6">
-                {SOLANA_NFT_STEPS.map((s, i) => (
+                {SOLANA_NFT_STEPS.map((s, _i) => (
                   <button
                     key={s.id}
                     type="button"
@@ -302,7 +302,7 @@ function CreateNFTSolanaContent() {
 
 export default function CreateNFT() {
   const { isSolana } = useChainType();
-  const { account, isConnected, getCurrentNetwork, connectWallet } = useWallet();
+  const { account: _account, isConnected, getCurrentNetwork, connectWallet } = useWallet();
   const [step, setStep] = useState('collection');
   const [collectionName, setCollectionName] = useState('');
   const [collectionSymbol, setCollectionSymbol] = useState('');
@@ -318,7 +318,7 @@ export default function CreateNFT() {
   const [bulkName, setBulkName] = useState('');
   const [bulkDescription, setBulkDescription] = useState('');
 
-  const [isMinting, setIsMinting] = useState(false);
+  const [_isMinting, _setIsMinting] = useState(false);
 
   const [mode, setMode] = useState('standard');
   const [dynamicSize, setDynamicSize] = useState(1000);
@@ -627,7 +627,7 @@ export default function CreateNFT() {
     );
   }
 
-  const currentStepIndex = STEPS.findIndex((s) => s.id === step);
+  const _currentStepIndex = STEPS.findIndex((s) => s.id === step);
 
   return (
     <>

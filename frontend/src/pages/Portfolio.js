@@ -15,13 +15,13 @@ import alchemyService from '../services/alchemyService';
 import { NETWORKS } from '../config/networks';
 import { exportPortfolio, exportPortfolioPDF } from '../utils/exportData';
 import { notificationService } from '../utils/notifications';
-import { PortfolioSummarySkeleton, TokenBalanceSkeleton, PoolCardSkeleton, ChartSkeleton } from '../components/SkeletonLoader';
+import { PortfolioSummarySkeleton, TokenBalanceSkeleton, ChartSkeleton } from '../components/SkeletonLoader';
 import { savePortfolioSnapshot, getPortfolioHistoryForChart } from '../utils/portfolioHistory';
 import { saveSnapshot, getSnapshots } from '../services/portfolioSnapshotService';
 import SharePortfolioModal from '../components/SharePortfolioModal';
 import NFTDetailModal from '../components/NFTDetailModal';
 import EmptyState from '../components/EmptyState';
-import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import toast from 'react-hot-toast';
 
 // MochiAstronaut component
@@ -60,7 +60,7 @@ export default function Portfolio() {
   
   // Safely extract values with defaults
   const blockchainInitialized = blockchainPoolsHook?.isInitialized || false;
-  const blockchainLoading = blockchainPoolsHook?.isLoading || false;
+  const _blockchainLoading = blockchainPoolsHook?.isLoading || false;
   const blockchainError = blockchainPoolsHook?.error || null;
   const getBlockchainUserPositions = blockchainPoolsHook?.getUserPositions || (async () => []);
   const getBlockchainCreatedPools = blockchainPoolsHook?.getUserCreatedPools || (async () => []);
@@ -313,6 +313,7 @@ export default function Portfolio() {
     if (chainId && !trackedNetworks.includes(chainId)) {
       setTrackedNetworks([...trackedNetworks, chainId]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setTrackedNetworks functional update not used; trackedNetworks intentionally omitted
   }, [chainId]);
 
   // Save portfolio snapshot periodically (localStorage + D1 API)
@@ -350,8 +351,8 @@ export default function Portfolio() {
       return filtered.length > 0 ? filtered : getPortfolioHistoryForChart(7);
     }
     return getPortfolioHistoryForChart(7);
-  }, [apiHistory, portfolioSummary]);
-  const portfolioHistory30d = useMemo(() => {
+  }, [apiHistory]);
+  const _portfolioHistory30d = useMemo(() => {
     if (apiHistory && apiHistory.length > 0) {
       const cutoff = new Date();
       cutoff.setDate(cutoff.getDate() - 30);
@@ -362,7 +363,7 @@ export default function Portfolio() {
       return filtered.length > 0 ? filtered : getPortfolioHistoryForChart(30);
     }
     return getPortfolioHistoryForChart(30);
-  }, [apiHistory, portfolioSummary]);
+  }, [apiHistory]);
 
   const networks = [
     { id: 'all', name: 'All Networks', color: 'bg-gray-500' },

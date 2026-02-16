@@ -2,15 +2,14 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import config from '../config';
 import { Helmet } from 'react-helmet-async';
-import { LineChart, Line, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import { BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import coingeckoService from '../services/coingeckoService';
-import theGraphService from '../services/theGraphService';
 import { getDexVolumeChart } from '../services/defillamaService';
 import { getDexVolume24h } from '../services/geckoterminalService';
 import { getCryptoNews } from '../services/newsService';
 import { exportAnalytics } from '../utils/exportData';
 import { getPricePrediction } from '../utils/predictiveAnalytics';
-import { ChartSkeleton, AnalyticsCardSkeleton } from '../components/SkeletonLoader';
+import { ChartSkeleton } from '../components/SkeletonLoader';
 import MetricTooltip from '../components/Tooltip';
 import { downloadCSV } from '../utils/exportData';
 import toast from 'react-hot-toast';
@@ -50,7 +49,7 @@ export default function Analytics() {
     if (activeSection !== 'overview') setOverviewStep(1);
   }, [activeSection]);
 
-  const { data: analytics, isLoading, error, refetch: refetchAnalytics, isFetching: analyticsFetching, dataUpdatedAt } = useQuery({
+  const { data: analytics, isLoading, error, isFetching: analyticsFetching, dataUpdatedAt } = useQuery({
     queryKey: ['analytics', timeRange],
     queryFn: () => fetchAnalytics(timeRange),
     refetchInterval: 60000,
@@ -184,7 +183,6 @@ export default function Analytics() {
         return [];
       }
 
-      return [];
     },
     refetchInterval: 300000, // Refetch every 5 minutes
     enabled: true, // Always enabled
@@ -194,7 +192,7 @@ export default function Analytics() {
   // No need for separate query - using analytics.networkStats instead
 
   // Fetch price insights (predictions for BTC & ETH using existing predictive analytics)
-  const { data: priceInsights, isLoading: priceInsightsLoading } = useQuery({
+  const { data: priceInsights } = useQuery({
     queryKey: ['price-insights'],
     queryFn: async () => {
       const insights = [];

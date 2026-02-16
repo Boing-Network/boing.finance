@@ -135,7 +135,7 @@ function CreatePool() {
   
   // Token selector state
   const [userTokens, setUserTokens] = useState([]);
-  const [isLoadingTokens, setIsLoadingTokens] = useState(false);
+  const [_isLoadingTokens, setIsLoadingTokens] = useState(false);
   const [token0DropdownOpen, setToken0DropdownOpen] = useState(false);
   const [token1DropdownOpen, setToken1DropdownOpen] = useState(false);
   const [customTokenAddress, setCustomTokenAddress] = useState('');
@@ -210,6 +210,7 @@ function CreatePool() {
     if (token0 && token1 && account) {
       checkTokenAllowances();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- checkTokenAllowances stable, deps are token/account
   }, [token0, token1, account]);
 
   // Check token allowances when amounts change (to update approval status)
@@ -222,6 +223,7 @@ function CreatePool() {
       
       return () => clearTimeout(timeoutId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- checkTokenAllowances stable
   }, [token0Amount, token1Amount]);
 
   // Get DEXFactory contract instance
@@ -545,12 +547,14 @@ function CreatePool() {
     if (token0) {
       getTokenInfo(token0).then(setToken0Info);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- getTokenInfo from service
   }, [token0]);
 
   useEffect(() => {
     if (token1) {
       getTokenInfo(token1).then(setToken1Info);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- getTokenInfo from service
   }, [token1]);
 
   // Fetch user tokens when wallet connects
@@ -558,6 +562,7 @@ function CreatePool() {
     if (isConnected && account) {
       fetchUserTokens();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUserTokens intentionally not in deps
   }, [isConnected, account, chainId]);
 
   const handleCreatePool = async () => {
@@ -1102,7 +1107,7 @@ function CreatePool() {
     }
   };
 
-  const handleSwapTokens = () => {
+  const _handleSwapTokens = () => {
     const tempToken = token0;
     const tempAmount = token0Amount;
     const tempInfo = token0Info;

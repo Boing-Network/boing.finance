@@ -189,7 +189,7 @@ export class TokenScanner {
   }
 
   // Scan DEX factory for new pairs
-  async scanDEXFactory(factoryAddress, chainId, hoursBack = 24) {
+  async scanDEXFactory(factoryAddress, chainId, _hoursBack = 24) {
     try {
       const provider = this.getProvider(chainId);
       const factoryContract = new ethers.Contract(factoryAddress, FACTORY_ABI, provider);
@@ -522,7 +522,7 @@ export class TokenScanner {
       const tokenAddress = address.toLowerCase();
       
       // Create contract interface for ERC20
-      const abi = [
+      const _abi = [
         'function name() view returns (string)',
         'function symbol() view returns (string)',
         'function decimals() view returns (uint8)',

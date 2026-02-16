@@ -70,7 +70,7 @@ export const predictNextPrice = (prices, days = 1) => {
     return prices[prices.length - 1]; // Return last known price
   }
   
-  const lastPrice = prices[prices.length - 1];
+  const _lastPrice = prices[prices.length - 1];
   const predicted = trend.slope * (prices.length + days - 1) + trend.intercept;
   
   // Don't predict negative prices
@@ -148,7 +148,7 @@ export const getPricePrediction = (historicalPrices, daysAhead = 7) => {
   };
 };
 
-export default {
+const predictiveAnalytics = {
   calculateSMA,
   calculateEMA,
   calculateTrend,
@@ -156,4 +156,5 @@ export default {
   calculateVolatility,
   getPricePrediction
 };
+export default predictiveAnalytics;
 

@@ -1,13 +1,13 @@
 import { ethers } from 'ethers';
 
 // External DEX factory addresses on Sepolia
-const EXTERNAL_DEX_FACTORIES = {
+const _EXTERNAL_DEX_FACTORIES = {
   uniswapV2: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D', // Uniswap V2 Router
   sushiswap: '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506', // SushiSwap Router
 };
 
 // Basic ABI for checking LP token balances
-const LP_TOKEN_ABI = [
+const _LP_TOKEN_ABI = [
   'function balanceOf(address owner) view returns (uint256)',
   'function totalSupply() view returns (uint256)',
   'function token0() view returns (address)',
@@ -125,4 +125,5 @@ class ExternalDexService {
   }
 }
 
-export default new ExternalDexService(); 
+const externalDexServiceInstance = new ExternalDexService();
+export default externalDexServiceInstance; 

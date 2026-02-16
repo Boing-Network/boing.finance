@@ -173,8 +173,7 @@ const SmartContractsSection = () => {
           {/* Core DEX Contracts */}
           <div>
             <h4 className="text-lg font-semibold mb-4 border-b pb-2"
-          style={{ borderColor: 'var(--border-color)' }}
-          style={{ color: 'var(--text-primary)'  }}>
+          style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}>
               Core DEX Contracts
             </h4>
             <div className="grid gap-4">
@@ -200,8 +199,7 @@ const SmartContractsSection = () => {
           {contracts.tokens && Object.keys(contracts.tokens).length > 0 && (
             <div>
               <h4 className="text-lg font-semibold mb-4 border-b pb-2"
-          style={{ borderColor: 'var(--border-color)' }}
-          style={{ color: 'var(--text-primary)'  }}>
+          style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}>
                 Mock Tokens (Testing)
               </h4>
               <div className="grid gap-4">
@@ -227,8 +225,7 @@ const SmartContractsSection = () => {
           {contracts.pairs && Object.keys(contracts.pairs).length > 0 && (
             <div>
               <h4 className="text-lg font-semibold mb-4 border-b pb-2"
-          style={{ borderColor: 'var(--border-color)' }}
-          style={{ color: 'var(--text-primary)'  }}>
+          style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}>
                 Trading Pairs
               </h4>
               <div className="grid gap-4">

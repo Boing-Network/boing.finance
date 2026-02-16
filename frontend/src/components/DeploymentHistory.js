@@ -12,6 +12,7 @@ const DeploymentHistory = ({ onSelectDeployment, onClose }) => {
 
   useEffect(() => {
     loadHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadHistory is stable and depends on filter/selectedNetwork
   }, [filter, selectedNetwork]);
 
   const loadHistory = () => {

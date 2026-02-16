@@ -6,7 +6,7 @@ import { exportPortfolioPDF } from '../utils/exportData';
 import toast from 'react-hot-toast';
 
 export default function SharePortfolioModal({ isOpen, onClose, portfolioData }) {
-  const [shareType, setShareType] = useState('link'); // 'link' or 'image'
+  const [_shareType, _setShareType] = useState('link'); // 'link' or 'image' (reserved for future use)
   const [anonymize, setAnonymize] = useState(true);
 
   if (!isOpen || !portfolioData) return null;

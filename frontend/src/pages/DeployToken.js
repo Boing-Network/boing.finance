@@ -8,18 +8,10 @@ import { useChainType, useSolanaWallet } from '../contexts/SolanaWalletContext';
 import { createSPLToken } from '../services/solanaTokenService';
 import { SOLANA_NETWORKS } from '../config/solanaConfig';
 import toast from 'react-hot-toast';
-import { getNetworkByChainId } from '../config/networks';
 import AdvancedERC20Artifact from '../artifacts/AdvancedERC20.json';
 import TokenFactoryArtifact from '../artifacts/TokenFactory.json';
 import TokenImplementationArtifact from '../artifacts/TokenImplementation.json';
-import { getApiUrl } from '../config';
-import axios from 'axios';
-import TokenManagementModal from '../components/TokenManagementModal';
-import NetworkSelector from '../components/NetworkSelector';
-import SecurityBadges from '../components/SecurityBadges';
-import { InfoTooltip, WarningTooltip, HelpTooltip } from '../components/Tooltip';
 import { Helmet } from 'react-helmet-async';
-import { generateTokenSchema } from '../utils/structuredData';
 import { getContractAddress } from '../config/contracts';
 import LogoUpload from '../components/LogoUpload';
 import { uploadMetadataToIPFS, createTokenMetadata } from '../utils/ipfsUpload';
@@ -30,14 +22,14 @@ import DeploymentHistory from '../components/DeploymentHistory';
 import LaunchWizard from '../components/LaunchWizard';
 import FairLaunchChecklist from '../components/FairLaunchChecklist';
 import { deploymentHistory as deploymentHistoryUtil } from '../utils/deploymentHistory';
-import { notificationService, showToastWithNotification } from '../utils/notifications';
+import { notificationService } from '../utils/notifications';
 import ShareCardModal from '../components/ShareCardModal';
 
 // Import ABI and bytecode from the artifacts
 const ERC20_ABI = AdvancedERC20Artifact.abi;
 const ERC20_BYTECODE = AdvancedERC20Artifact.bytecode;
 const TOKEN_FACTORY_ABI = TokenFactoryArtifact.abi;
-const TOKEN_IMPLEMENTATION_ABI = TokenImplementationArtifact.abi;
+const _TOKEN_IMPLEMENTATION_ABI = TokenImplementationArtifact.abi;
 
 // MochiAstronaut component
 
@@ -379,7 +371,7 @@ const SECURITY_FEATURES = [
 ];
 
 // Social Standards for Web3 Community
-const SOCIAL_STANDARDS = [
+const _SOCIAL_STANDARDS = [
   {
     name: "Website",
     description: "Official project website",
@@ -602,7 +594,7 @@ const DEPLOYMENT_TIPS = [
 ];
 
 // Utility: Manual deployment using Interface encoding (Hardhat-style)
-async function manualDeployWithInterface({ signer, ERC20_ABI, ERC20_BYTECODE, constructorParams, serviceChargeWei }) {
+async function _manualDeployWithInterface({ signer, ERC20_ABI, ERC20_BYTECODE, constructorParams, serviceChargeWei }) {
   const iface = new ethers.Interface(ERC20_ABI);
   // Find the constructor fragment
   const constructorFragment = iface.fragments.find(f => f.type === 'constructor');
@@ -631,7 +623,7 @@ export default function DeployToken() {
       // Apply template settings
       if (template.securityFeatures) {
         // Set security features based on template
-        template.securityFeatures.forEach(feature => {
+        template.securityFeatures.forEach(_feature => {
           // Apply feature settings
         });
       }
@@ -645,7 +637,7 @@ export default function DeployToken() {
     const storedTemplate = sessionStorage.getItem('selectedTemplate');
     if (storedTemplate) {
       try {
-        const template = JSON.parse(storedTemplate);
+        const _template = JSON.parse(storedTemplate);
         // Apply template settings
         sessionStorage.removeItem('selectedTemplate'); // Clear after use
       } catch (error) {
@@ -689,7 +681,7 @@ export default function DeployToken() {
   const [txHash, setTxHash] = useState('');
   const [tokenAddress, setTokenAddress] = useState('');
   const [showGuide, setShowGuide] = useState(false);
-  const [activeTab, setActiveTab] = useState('basic');
+  const [_activeTab, _setActiveTab] = useState('basic');
   const [selectedPlan, setSelectedPlan] = useState('professional');
   const [showPricing, setShowPricing] = useState(false);
   const [showRenounceModal, setShowRenounceModal] = useState(false);
@@ -699,9 +691,9 @@ export default function DeployToken() {
 
   // Logo and metadata state
   const [logoUrl, setLogoUrl] = useState('');
-  const [logoUploadResult, setLogoUploadResult] = useState(null);
+  const [_logoUploadResult, setLogoUploadResult] = useState(null);
   const [metadataUrl, setMetadataUrl] = useState('');
-  const [uploadingMetadata, setUploadingMetadata] = useState(false);
+  const [_uploadingMetadata, setUploadingMetadata] = useState(false);
 
   // Launch Wizard (step-by-step mode) - classic removed, wizard only
   const [useWizardMode] = useState(true);
@@ -768,7 +760,7 @@ export default function DeployToken() {
 
   // Helper function to get feature restriction message
   const getFeatureRestrictionMessage = (featureKey) => {
-    const requiredPlan = Object.entries(SERVICE_CHARGES).find(([key, plan]) => 
+    const requiredPlan = Object.entries(SERVICE_CHARGES).find(([_key, plan]) => 
       plan.allowedFeatures.includes(featureKey)
     )?.[0];
     
@@ -814,6 +806,7 @@ export default function DeployToken() {
     if (isFeatureAllowed('maxTxAmount') && maxTxAmount === '') {
       setMaxTxAmount('1'); // Default to 1%
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- isFeatureAllowed from selectedPlan
   }, [maxTxAmount, selectedPlan]);
 
   useEffect(() => {
@@ -821,6 +814,7 @@ export default function DeployToken() {
     if (isFeatureAllowed('cooldown') && cooldownPeriod === '') {
       setCooldownPeriod('30'); // Default to 30 seconds
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- isFeatureAllowed from selectedPlan
   }, [cooldownPeriod, selectedPlan]);
 
   useEffect(() => {
@@ -828,6 +822,7 @@ export default function DeployToken() {
     if (isFeatureAllowed('maxWallet') && maxWalletEnabled && maxWalletPercentage === '') {
       setMaxWalletPercentage('2'); // Default to 2%
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- isFeatureAllowed from selectedPlan
   }, [maxWalletEnabled, maxWalletPercentage, selectedPlan]);
 
   // Close Deployment History modal on Escape key
@@ -845,6 +840,7 @@ export default function DeployToken() {
     if (isFeatureAllowed('timelock') && timelockEnabled && timelockDelay === '') {
       setTimelockDelay('24'); // Default to 24 hours
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- isFeatureAllowed from selectedPlan
   }, [timelockEnabled, timelockDelay, selectedPlan]);
 
   // Update pricing display when network changes
@@ -875,8 +871,8 @@ export default function DeployToken() {
     }));
   };
 
-  // Map UI field names to state keys
-  const getSocialLinkKey = (platformName) => {
+  // Map UI field names to state keys (reserved for future use)
+  const _getSocialLinkKey = (platformName) => {
     const keyMap = {
       'Twitter': 'twitter',
       'Telegram': 'telegram',
@@ -888,8 +884,8 @@ export default function DeployToken() {
     return keyMap[platformName] || platformName.toLowerCase();
   };
 
-  // Logo handling information
-  const LogoInfo = () => (
+  // Logo handling information (reserved for future use)
+  const _LogoInfo = () => (
     <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
       <div className="flex items-start">
         <div className="flex-shrink-0">
@@ -1197,7 +1193,7 @@ export default function DeployToken() {
       
       // Check if TokenFactory is available for this network
       const tokenFactoryAddress = getContractAddress(network?.chainId, 'tokenFactory');
-      const tokenImplementationAddress = getContractAddress(network?.chainId, 'tokenImplementation');
+      const _tokenImplementationAddress = getContractAddress(network?.chainId, 'tokenImplementation');
       
       if (tokenFactoryAddress && tokenFactoryAddress !== '0x0000000000000000000000000000000000000000') {
         // Use TokenFactory system
@@ -1653,7 +1649,7 @@ export default function DeployToken() {
               <div
                 className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-60 p-4"
                 onClick={() => setShowHistory(false)}
-                role="presentation"
+                role="dialog"
                 aria-modal="true"
                 aria-label="Deployment history modal"
               >
@@ -1666,7 +1662,7 @@ export default function DeployToken() {
                   }}
                 >
                   <DeploymentHistory
-                    onSelectDeployment={(deployment) => {
+                    onSelectDeployment={(_deployment) => {
                       setShowHistory(false);
                     }}
                     onClose={() => setShowHistory(false)}

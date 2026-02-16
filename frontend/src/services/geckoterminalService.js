@@ -33,4 +33,5 @@ export async function getDexVolume24h() {
   }
 }
 
-export default { getDexVolume24h };
+const geckoterminalService = { getDexVolume24h };
+export default geckoterminalService;

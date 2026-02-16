@@ -105,10 +105,11 @@ export const clearPortfolioHistory = () => {
   }
 };
 
-export default {
+const portfolioHistory = {
   savePortfolioSnapshot,
   getPortfolioHistory,
   getPortfolioHistoryForChart,
   clearPortfolioHistory
 };
+export default portfolioHistory;
 

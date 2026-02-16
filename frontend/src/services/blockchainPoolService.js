@@ -1,4 +1,3 @@
-/* global BigInt */
 import { ethers } from 'ethers';
 import { getContractAddress } from '../config/contracts';
 import apyCalculationService from './apyCalculationService';
@@ -818,7 +817,7 @@ class BlockchainPoolService {
   }
 
   // Get pool analytics (volume, fees, etc.)
-  async getPoolAnalytics(pairAddress, timeRange = '24h') {
+  async getPoolAnalytics(pairAddress, _timeRange = '24h') {
     if (!this.provider || !pairAddress) {
       return null;
     }

@@ -5,7 +5,6 @@
 import { ethers } from 'ethers';
 import { NETWORKS } from '../config/networks';
 import coingeckoService from './coingeckoService';
-import etherscanService from './etherscanService';
 import theGraphService from './theGraphService';
 import alchemyService from './alchemyService';
 
@@ -298,5 +297,6 @@ class PortfolioService {
   }
 }
 
-export default new PortfolioService();
+const portfolioServiceInstance = new PortfolioService();
+export default portfolioServiceInstance;
 

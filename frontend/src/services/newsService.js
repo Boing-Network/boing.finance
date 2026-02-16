@@ -4,7 +4,7 @@
 
 const NEWSAPI_BASE = 'https://newsapi.org/v2';
 const API_KEY = process.env.REACT_APP_NEWSAPI_KEY;
-const CACHE_TTL_MS = 10 * 60 * 1000; // 10 min cache
+const _CACHE_TTL_MS = 10 * 60 * 1000; // 10 min cache
 
 /**
  * Fetch crypto/DeFi news from NewsAPI.org.
@@ -61,4 +61,5 @@ export async function getCryptoNews(options = {}) {
   }
 }
 
-export default { getCryptoNews };
+const newsService = { getCryptoNews };
+export default newsService;

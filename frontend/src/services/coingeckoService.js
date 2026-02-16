@@ -307,5 +307,6 @@ class CoinGeckoService {
   }
 }
 
-export default new CoinGeckoService();
+const coingeckoServiceInstance = new CoinGeckoService();
+export default coingeckoServiceInstance;
 

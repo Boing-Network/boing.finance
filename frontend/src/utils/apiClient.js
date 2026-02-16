@@ -101,4 +101,5 @@ export function clearApiCache() {
   cache.clear();
 }
 
-export default { fetchWithRetry, cachedFetch, clearApiCache };
+const apiClient = { fetchWithRetry, cachedFetch, clearApiCache };
+export default apiClient;

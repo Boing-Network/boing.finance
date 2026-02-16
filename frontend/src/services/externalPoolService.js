@@ -1,4 +1,3 @@
-/* global BigInt */
 import { ethers } from 'ethers';
 
 class ExternalPoolService {
@@ -162,7 +161,7 @@ class ExternalPoolService {
   /**
    * Get Uniswap V3 pools
    */
-  async getUniswapV3Pools(provider, factoryAddress, limit = 500) {
+  async getUniswapV3Pools(provider, factoryAddress, _limit = 500) {
     // Uniswap V3 is more complex, so we'll return a simplified version
     // In a full implementation, you'd need to handle multiple fee tiers and positions
     return [];

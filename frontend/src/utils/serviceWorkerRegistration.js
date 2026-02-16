@@ -2,7 +2,7 @@
 // Handles service worker registration and updates with aggressive cache invalidation
 
 // Flag to prevent multiple simultaneous reloads
-let isReloading = false;
+let _isReloading = false;
 let lastVersionCheck = 0;
 const VERSION_CHECK_COOLDOWN = 2000; // 2 seconds cooldown between checks
 

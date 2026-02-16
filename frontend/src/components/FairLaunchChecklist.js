@@ -26,7 +26,7 @@ const CHECKLIST_ITEMS = [
 
 export default function FairLaunchChecklist({
   tokenAddress,
-  txHash,
+  txHash: _txHash,
   chainId,
   onRenounce,
   isRenounced,

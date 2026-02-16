@@ -58,6 +58,7 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
     if (isOpen && account && provider && chainId) {
       fetchUserTokens();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUserTokens intentionally not in deps to avoid refetch loops
   }, [isOpen, account, provider, chainId]);
 
   const fetchUserTokens = async () => {

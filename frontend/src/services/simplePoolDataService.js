@@ -1,4 +1,3 @@
-/* global BigInt */
 import { ethers } from 'ethers';
 
 class SimplePoolDataService {
@@ -52,8 +51,8 @@ class SimplePoolDataService {
       const realisticData = this.calculateRealisticMetrics(reserve0, reserve1, totalSupplyNum, pool.source);
 
       // Calculate TVL properly (avoid scientific notation)
-      const reserve0Num = Number(reserve0);
-      const reserve1Num = Number(reserve1);
+      const _reserve0Num = Number(reserve0);
+      const _reserve1Num = Number(reserve1);
       
       // Convert reserves to human-readable amounts for TVL calculation
       const reserve0Human = parseFloat(ethers.formatUnits(reserve0, token0Info.decimals));
@@ -135,11 +134,11 @@ class SimplePoolDataService {
   /**
    * Calculate realistic metrics based on pool characteristics
    */
-  calculateRealisticMetrics(reserve0, reserve1, totalSupply, source) {
+  calculateRealisticMetrics(reserve0, reserve1, _totalSupply, _source) {
     // Convert BigInt reserves to numbers for calculations, but be careful with precision
     const reserve0Num = Number(reserve0);
     const reserve1Num = Number(reserve1);
-    const totalLiquidity = reserve0Num + reserve1Num;
+    const _totalLiquidity = reserve0Num + reserve1Num;
     
     // For now, return zero values to indicate no real data available
     // This will be replaced with actual swap event data when available

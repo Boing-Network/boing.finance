@@ -744,7 +744,7 @@ const Pools = () => {
     refetchInterval: 30000,
     retry: 1, // Reduce retries to prevent long loading
     retryDelay: 1000,
-    onError: (error) => {
+    onError: (_error) => {
       // User pools query error
       setUseBlockchainFallback(true);
     }

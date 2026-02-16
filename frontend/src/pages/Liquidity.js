@@ -4,7 +4,6 @@ import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import config from '../config';
-import SettingsModal from '../components/SettingsModal';
 import { useWallet } from '../contexts/WalletContext';
 import { useChainType } from '../contexts/SolanaWalletContext';
 import { LiquiditySolanaContent } from '../components/SolanaFeaturePlaceholder';
@@ -21,8 +20,8 @@ const Liquidity = () => {
   const { isSolana } = useChainType();
   const { isConnected, account } = useWalletConnection();
   const { chainId, switchNetwork } = useWallet();
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settings, setSettings] = useState(() => {
+  const [_settingsOpen, _setSettingsOpen] = useState(false);
+  const [_settings, setSettings] = useState(() => {
     const saved = localStorage.getItem('swapSettings');
     return saved ? JSON.parse(saved) : { slippage: 0.5, deadline: 20, darkMode: false };
   });
@@ -86,11 +85,11 @@ const Liquidity = () => {
 
   const getChainName = (id) => getNetworkByChainId(id)?.name || (typeof id === 'string' ? id : `Chain ${id}`);
 
-  const handleCollectFees = (positionId) => {
+  const handleCollectFees = (_positionId) => {
     toast.success('Fees collected successfully!');
   };
 
-  const handleRemoveLiquidity = (positionId) => {
+  const handleRemoveLiquidity = (_positionId) => {
     toast.success('Liquidity removed successfully!');
   };
 
@@ -98,7 +97,7 @@ const Liquidity = () => {
     // Implementation needed
   };
 
-  const handleSaveSettings = (newSettings) => {
+  const _handleSaveSettings = (newSettings) => {
     setSettings(newSettings);
     localStorage.setItem('liquiditySettings', JSON.stringify(newSettings));
   };

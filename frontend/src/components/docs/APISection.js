@@ -23,8 +23,8 @@ const APISection = () => {
       </div>
 
       {/* API Overview */}
-      <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+      <div className="rounded-lg p-6 border"
+          style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-card)' }}>
         <h3 className="text-xl font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>API Overview</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -59,8 +59,8 @@ const APISection = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+      <div className="rounded-lg p-6 border"
+          style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-card)' }}>
         <div className="flex flex-wrap gap-2 mb-6">
           {tabs.map((tab) => (
             <button
@@ -257,8 +257,7 @@ const WebSocketContent = () => (
       <h5 className="text-md font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>🔌 Connection Example</h5>
       <pre className="p-4 rounded text-sm overflow-x-auto"
-          style={{ backgroundColor: 'var(--bg-tertiary)' }}
-          style={{ color: 'var(--text-secondary)'  }}>
+          style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
 {`const ws = new WebSocket('wss://api.boing.finance/ws');
 
 ws.onopen = () => {
@@ -296,8 +295,7 @@ const SDKContent = () => (
       <h5 className="text-md font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>🚀 Quick Start</h5>
       <pre className="p-4 rounded text-sm overflow-x-auto"
-          style={{ backgroundColor: 'var(--bg-tertiary)' }}
-          style={{ color: 'var(--text-secondary)'  }}>
+          style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
 {`import { BoingFinance } from '@boing-finance/sdk';
 
 const boing = new BoingFinance({
@@ -350,8 +348,7 @@ const ExamplesContent = () => (
       <h5 className="text-md font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>💱 Swap Example</h5>
       <pre className="p-4 rounded text-sm overflow-x-auto"
-          style={{ backgroundColor: 'var(--bg-tertiary)' }}
-          style={{ color: 'var(--text-secondary)'  }}>
+          style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
 {`// Get swap quote
 const response = await fetch('https://api.boing.finance/v1/swap/quote', {
   method: 'POST',
@@ -374,8 +371,7 @@ console.log('Swap quote:', quote);`}
       <h5 className="text-md font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>💧 Add Liquidity Example</h5>
       <pre className="p-4 rounded text-sm overflow-x-auto"
-          style={{ backgroundColor: 'var(--bg-tertiary)' }}
-          style={{ color: 'var(--text-secondary)'  }}>
+          style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
 {`// Add liquidity to pool
 const response = await fetch('https://api.boing.finance/v1/liquidity/add', {
   method: 'POST',
@@ -399,8 +395,7 @@ console.log('Liquidity added:', result);`}
       <h5 className="text-md font-medium  mb-3"
           style={{ color: 'var(--text-primary)'  }}>🌉 Bridge Example</h5>
       <pre className="p-4 rounded text-sm overflow-x-auto"
-          style={{ backgroundColor: 'var(--bg-tertiary)' }}
-          style={{ color: 'var(--text-secondary)'  }}>
+          style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
 {`// Initiate cross-chain transfer
 const response = await fetch('https://api.boing.finance/v1/bridge/initiate', {
   method: 'POST',
