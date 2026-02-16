@@ -967,21 +967,21 @@ function Home() {
         })}
         </script>
       </Helmet>
-      <div className="relative z-10 container mx-auto px-4 py-8">
+      <div className="relative z-10 container mx-auto px-4 py-10 md:py-14">
         <div className="max-w-7xl mx-auto">
           {/* 1. Hero: Title, slogan, one-line value prop */}
-          <section className="text-center relative z-10 mb-10">
+          <section className="text-center relative z-10 mb-14 md:mb-16">
             <h1 className="hero-title text-4xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 bg-clip-text text-transparent mb-2 leading-tight pb-2 drop-shadow-[0_0_20px_rgba(6,182,212,0.4)]">
               boing.finance
             </h1>
             <p className="text-lg md:text-xl font-medium mb-3 bg-gradient-to-r from-cyan-400/90 via-cyan-300 to-blue-400/90 bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(6,182,212,0.3)]">
               The DeFi that always bounces back.
             </p>
-            <p className="text-lg leading-relaxed max-w-2xl mx-auto mb-8" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-lg leading-relaxed max-w-2xl mx-auto mb-10" style={{ color: 'var(--text-secondary)' }}>
               Swap, add liquidity, bridge assets, and deploy tokens on EVM and Solana—all in one place. No code required.
             </p>
             {/* Feature highlights strip: primary actions right under hero */}
-            <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mb-10 fade-in delay-200">
+            <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mb-12 fade-in delay-200">
               <Highlight icon={<SwapIcon />} text="Lightning-fast swaps" />
               <Highlight icon={<LiquidityIcon />} text="Earn with liquidity" />
               <Highlight icon={<AnalyticsIcon />} text="Real-time analytics" />
@@ -989,9 +989,9 @@ function Home() {
               <Highlight icon={<BridgeIcon />} text="Cross-chain bridge" />
               <Highlight icon={<TokensIcon />} text="All your tokens" />
               <Highlight icon={<DeployTokenIcon />} text="Deploy tokens" />
-              <span className="text-2xl px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-400/20">📜 Governance</span>
-              <span className="text-2xl px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-400/20">🎯 BOING Ecosystem</span>
-              <span className="text-2xl px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-400/20">🤖 AI Assistant</span>
+              <Highlight icon={<span className="text-xl">📜</span>} text="Governance" />
+              <Highlight icon={<span className="text-xl">🎯</span>} text="BOING Ecosystem" />
+              <Highlight icon={<span className="text-xl">🤖</span>} text="AI Assistant" />
             </div>
             <p className="text-xl text-center max-w-xl mx-auto mb-2" style={{ color: 'var(--text-secondary)' }}>Fast, secure DeFi. For everyone.</p>
           </section>
@@ -1002,7 +1002,7 @@ function Home() {
           </div>
 
           {/* 2. Getting started: Onboarding + For You (positioned before feature grid so new users see next steps first) */}
-          <section className="flex flex-col lg:flex-row gap-8 mb-10 fade-in delay-300">
+          <section className="flex flex-col lg:flex-row gap-8 mb-14 md:mb-16 fade-in delay-300">
             <div className="lg:max-w-sm shrink-0">
               <OnboardingChecklist />
             </div>
@@ -1012,12 +1012,12 @@ function Home() {
           </section>
 
           {/* Proactive Tips (when connected) - right after onboarding */}
-          <section className="mb-10 max-w-2xl mx-auto fade-in delay-350">
+          <section className="mb-14 md:mb-16 max-w-2xl mx-auto fade-in delay-350">
             <ProactiveTipsBanner />
           </section>
 
           {/* 3. Main product: Feature cards (Trade, Analytics, Deploy) */}
-          <section className="space-y-8 fade-in delay-400">
+          <section className="space-y-8 mb-14 md:mb-16 fade-in delay-400">
             <h2 className="text-2xl font-bold text-center" style={{ color: 'var(--text-primary)' }}>What you can do</h2>
             {/* First row - 6 cards in 3 columns - dynamically generated from navigation */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -1083,7 +1083,7 @@ function Home() {
             </div>
 
             {/* 4. Governance & BOING */}
-            <section className="mt-12">
+            <section className="mt-16 md:mt-20">
               <h2 className="text-2xl font-bold text-center mb-8" style={{ color: 'var(--text-primary)' }}>Governance & Ecosystem</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">
@@ -1110,19 +1110,19 @@ function Home() {
             </section>
 
             {/* 5. Tools & Resources */}
-            <section className="mt-12">
+            <section className="mt-16 md:mt-20">
               <h2 className="text-2xl font-bold text-center mb-6" style={{ color: 'var(--text-primary)' }}>Tools & Resources</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <a href="/docs" className="block">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
+                <a href="/docs" className="block h-full">
                   <FeatureCard title="Documentation" icon={<span className="text-xl">📖</span>} description="Guides for swapping, liquidity, bridging, and deployment" />
                 </a>
-                <a href="/developer-tools" className="block">
+                <a href="/developer-tools" className="block h-full">
                   <FeatureCard title="Developer Tools" icon={<span className="text-xl">🔧</span>} description="Contract utilities and debugging tools" />
                 </a>
-                <a href="/watchlist" className="block">
+                <a href="/watchlist" className="block h-full">
                   <FeatureCard title="Watchlist" icon={<span className="text-xl">⭐</span>} description="Track tokens and price alerts" />
                 </a>
-                <a href="/help-center" className="block">
+                <a href="/help-center" className="block h-full">
                   <FeatureCard title="Help Center" icon={<span className="text-xl">❓</span>} description="FAQs and support — use the AI button for help" />
                 </a>
               </div>
@@ -1132,7 +1132,7 @@ function Home() {
           </div>
 
           {/* 6. Token creation CTA banner */}
-          <div className="mt-8 mb-4 flex justify-center fade-in delay-800">
+          <div className="mt-14 md:mt-16 mb-8 flex justify-center fade-in delay-800">
             <div className="rounded-xl px-6 py-4 bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 max-w-2xl">
               <div className="text-center">
                 <div className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>🚀 Create Your Own Tokens & Trading Pairs!</div>
@@ -1327,7 +1327,7 @@ function DeployTokenIcon() {
 function FeatureCard({ title, icon, description, comingSoon }) {
   return (
     <div
-      className={`group relative backdrop-blur-sm border border-cyan-400/20 rounded-xl p-6 transition-all duration-500 overflow-hidden ${comingSoon ? 'opacity-60 cursor-not-allowed' : 'hover:border-cyan-400/40 hover:scale-105 hover:shadow-xl hover:shadow-cyan-500/20'}`}
+      className={`group relative backdrop-blur-sm border border-cyan-400/20 rounded-xl p-6 transition-all duration-500 overflow-hidden h-full flex flex-col ${comingSoon ? 'opacity-60 cursor-not-allowed' : 'hover:border-cyan-400/40 hover:scale-105 hover:shadow-xl hover:shadow-cyan-500/20'}`}
       style={{
         background: 'linear-gradient(to bottom right, var(--bg-card), var(--bg-secondary))',
         borderColor: comingSoon ? 'var(--border-color)' : 'rgba(34, 211, 238, 0.2)'
@@ -1335,7 +1335,7 @@ function FeatureCard({ title, icon, description, comingSoon }) {
       title={comingSoon ? 'This feature will be available after mainnet launch.' : ''}
     >
       <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-      <div className="relative z-10 text-center">
+      <div className="relative z-10 text-center flex flex-col flex-1 min-h-0">
         <div className="flex items-center justify-center mb-4">
           <span className="text-2xl mr-3 text-cyan-400 group-hover:text-cyan-300 transition-colors duration-300 animate-pulse">{icon}</span>
           <h3 className="text-lg font-semibold transition-colors duration-300 flex items-center" style={{ color: 'var(--text-primary)' }}>
@@ -1345,7 +1345,7 @@ function FeatureCard({ title, icon, description, comingSoon }) {
             )}
           </h3>
         </div>
-        <p className="text-sm leading-relaxed transition-colors duration-300" style={{ color: 'var(--text-secondary)' }}>{description}</p>
+        <p className="text-sm leading-relaxed transition-colors duration-300 flex-1" style={{ color: 'var(--text-secondary)' }}>{description}</p>
       </div>
     </div>
   );
