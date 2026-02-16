@@ -55,8 +55,8 @@ export default function GovernanceProposals() {
   return (
     <>
       <Helmet>
-        <title>Governance Proposals | boing.finance</title>
-        <meta name="description" content="View and vote on boing.finance governance proposals." />
+        <title>Governance Proposals | boing.finance — View & Vote</title>
+        <meta name="description" content="View and vote on boing.finance governance proposals. Shape the future of the protocol." />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         <PageHeader

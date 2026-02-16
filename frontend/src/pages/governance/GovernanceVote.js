@@ -33,8 +33,8 @@ export default function GovernanceVote() {
   return (
     <>
       <Helmet>
-        <title>Vote & Create Proposals | boing.finance</title>
-        <meta name="description" content="Participate in boing.finance governance. Vote on proposals and create your own." />
+        <title>Governance Vote | boing.finance — Proposals & DAO</title>
+        <meta name="description" content="Vote on proposals and create your own. Participate in boing.finance DAO governance." />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <PageHeader title="Governance Vote" subtitle="Create proposals and vote using your BOING tokens. Your voice shapes the protocol." />

@@ -133,8 +133,8 @@ export default function Activity() {
   return (
     <>
       <Helmet>
-        <title>Activity - boing.finance</title>
-        <meta name="description" content="View your swaps, liquidity, and bridge transactions on boing.finance" />
+        <title>Activity | boing.finance — Swaps, Liquidity & Bridge History</title>
+        <meta name="description" content="View your swap, liquidity, and bridge history on EVM and Solana. Full transaction history with boing.finance." />
       </Helmet>
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="max-w-3xl mx-auto">

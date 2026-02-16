@@ -6,7 +6,7 @@ import React from 'react';
 import { useChainType, useSolanaWallet } from '../contexts/SolanaWalletContext';
 
 const CHAIN_TYPES = [
-  { id: 'evm', label: 'EVM', networks: 'Ethereum, Base, Polygon, BSC...', icon: '⟠' },
+  { id: 'evm', label: 'EVM', networks: 'EVM chains', icon: '⟠' },
   { id: 'solana', label: 'Solana', networks: 'Mainnet & Devnet', icon: '◎' },
 ];
 

@@ -49,7 +49,7 @@ const FeaturesSection = () => {
     {
       icon: '💼',
       title: 'Portfolio Management',
-      description: 'Unified view of all your assets across multiple networks',
+      description: 'Unified view of your assets on EVM and Solana',
       details: [
         'Cross-chain portfolio aggregation',
         'Asset allocation and diversification tracking',
@@ -60,7 +60,7 @@ const FeaturesSection = () => {
     {
       icon: '🪙',
       title: 'Token Management',
-      description: 'Discover, track, and manage tokens across all networks',
+      description: 'Discover, track, and manage tokens on EVM and Solana',
       details: [
         'Token discovery and trending lists',
         'Custom token lists and watchlists',
@@ -241,7 +241,7 @@ const FeaturesSection = () => {
           style={{ color: 'var(--text-primary)'  }}>Gas Optimization</h4>
             <p className=" text-sm"
           style={{ color: 'var(--text-secondary)'  }}>
-              Advanced gas estimation and optimization to minimize transaction costs across all networks
+              Advanced gas estimation to minimize costs on EVM and Solana
             </p>
           </div>
           

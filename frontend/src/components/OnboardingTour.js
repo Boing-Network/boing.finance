@@ -43,7 +43,7 @@ const OnboardingTour = ({ onComplete }) => {
     {
       id: 'portfolio',
       title: 'Track Your Portfolio',
-      content: 'Monitor your token holdings across all networks in one place.',
+      content: 'Monitor your token holdings on EVM and Solana in one place.',
       target: '[data-tour="portfolio"]',
       position: 'bottom',
       action: () => {
@@ -65,7 +65,7 @@ const OnboardingTour = ({ onComplete }) => {
     {
       id: 'tokens',
       title: 'Explore Tokens',
-      content: 'Discover and manage tokens across multiple blockchains.',
+      content: 'Discover and manage tokens on EVM and Solana.',
       target: '[data-tour="tokens"]',
       position: 'bottom',
       action: () => {

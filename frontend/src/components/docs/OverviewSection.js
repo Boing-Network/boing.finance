@@ -6,18 +6,15 @@ const OverviewSection = () => {
       <div>
         <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Platform Overview</h2>
         <p className="text-lg leading-relaxed mb-6" style={{ color: 'var(--text-secondary)' }}>
-          boing.finance is a next-generation decentralized exchange (DEX) that enables seamless trading across multiple blockchain networks. 
-          Built with modern web3 technologies, boing.finance provides a unified platform for token swapping, liquidity provision, 
-          cross-chain bridging, token and NFT deployment, governance, the BOING ecosystem, and comprehensive portfolio management. 
-          Use the AI DeFi Assistant for guidance and explore Help Center, Developer Tools, and DeFi 101 for learning.
+          boing.finance is a DEX for swapping, liquidity, bridging, token & NFT deployment, and governance on EVM and Solana. 
+          One interface, one portfolio. Use the AI Assistant, Help Center, and DeFi 101 to get started.
         </p>
         
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h3 className="text-xl font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>🎯 Mission</h3>
             <p style={{ color: 'var(--text-secondary)' }}>
-              Democratize access to decentralized finance by providing a seamless, 
-              cross-chain trading experience that works across all major blockchain networks.
+              Democratize access to DeFi with a single interface for EVM and Solana.
             </p>
           </div>
           
@@ -104,7 +101,7 @@ const OverviewSection = () => {
             <div className="text-3xl mb-2">🌐</div>
             <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Cross-Chain</h4>
             <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Trade tokens across multiple blockchain networks seamlessly
+              Trade across EVM and Solana from one place
             </p>
           </div>
           
@@ -112,7 +109,7 @@ const OverviewSection = () => {
             <div className="text-3xl mb-2">⚡</div>
             <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Fast & Efficient</h4>
             <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Optimized for speed and cost-effectiveness across all networks
+              Optimized for speed and cost on EVM and Solana
             </p>
           </div>
         </div>
@@ -187,8 +184,7 @@ const OverviewSection = () => {
             <div>
               <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Connect Your Wallet</h4>
               <p style={{ color: 'var(--text-secondary)' }}>
-                Connect your Web3 wallet (MetaMask, WalletConnect, etc.) to start trading. 
-                boing.finance supports all major wallet providers across multiple networks.
+                Connect your Web3 wallet (MetaMask, WalletConnect, etc.) to start. We support major wallets on EVM and Solana.
               </p>
             </div>
           </div>
@@ -200,8 +196,7 @@ const OverviewSection = () => {
             <div>
               <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Select Network</h4>
               <p style={{ color: 'var(--text-secondary)' }}>
-                Choose from 15+ supported blockchain networks including Ethereum, Polygon, 
-                Arbitrum, Base, and many more emerging networks.
+                Choose from supported EVM chains or Solana.
               </p>
             </div>
           </div>

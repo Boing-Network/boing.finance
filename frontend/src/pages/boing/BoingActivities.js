@@ -14,8 +14,8 @@ export default function BoingActivities() {
   return (
     <>
       <Helmet>
-        <title>Community Activities | boing.finance</title>
-        <meta name="description" content="Community activities, campaigns, and events on boing.finance." />
+        <title>Community Activities | boing.finance — Events & Campaigns</title>
+        <meta name="description" content="Community activities, campaigns, and events. Get involved with boing.finance." />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <PageHeader title="Community Activities" subtitle="Campaigns, events, and activities for the Boing community." />

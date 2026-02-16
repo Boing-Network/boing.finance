@@ -23,7 +23,7 @@ const Blog = () => {
         id: 1,
         title: 'Welcome to Boing Finance',
         excerpt: 'We\'re excited to launch our platform for token deployment and trading.',
-        content: 'Boing Finance is a decentralized exchange platform that makes it easy to deploy tokens and trade across multiple blockchains...',
+        content: 'Boing Finance is a DEX to deploy tokens and trade on EVM and Solana.',
         author: 'Boing Team',
         date: '2025-01-28',
         image: '/hero-image.png',
@@ -71,8 +71,8 @@ const Blog = () => {
   return (
     <div className="relative min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
       <Helmet>
-        <title>Blog & News - Boing Finance</title>
-        <meta name="description" content="Latest news, updates, and announcements from Boing Finance" />
+        <title>Blog & News | boing.finance — Updates & Announcements</title>
+        <meta name="description" content="Latest news, updates, and announcements from boing.finance. The DeFi that always bounces back." />
       </Helmet>
       <EnhancedAnimatedBackground />
       

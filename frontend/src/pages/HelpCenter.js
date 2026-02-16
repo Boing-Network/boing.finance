@@ -29,7 +29,7 @@ const HelpCenter = () => {
         {
           id: 'network-switching',
           title: 'Switching Between Networks',
-          content: 'How to switch between different blockchain networks like Ethereum, Polygon, and Arbitrum.',
+          content: 'How to switch between EVM chains and Solana.',
           tags: ['network', 'switching', 'blockchain']
         }
       ]
@@ -165,10 +165,10 @@ const HelpCenter = () => {
   return (
     <>
       <Helmet>
-        <title>Help Center - boing.finance</title>
-        <meta name="description" content="Get help with boing.finance - Comprehensive guides, FAQs, and support resources for our cross-chain decentralized exchange platform." />
+        <title>Help Center | boing.finance — Guides, FAQs & Support</title>
+        <meta name="description" content="Get help with boing.finance. Guides for swap, liquidity, bridge, deploy token, and wallet. FAQs and support." />
         <meta name="keywords" content="help center, support, FAQ, guides, boing.finance, DEX, troubleshooting" />
-        <meta property="og:title" content="Help Center - boing.finance" />
+        <meta property="og:title" content="Help Center | boing.finance" />
         <meta property="og:description" content="Get help with boing.finance - Comprehensive guides and support resources." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/help" />

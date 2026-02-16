@@ -83,8 +83,8 @@ const DeveloperTools = () => {
   return (
     <>
       <Helmet>
-        <title>Developer Tools - API Documentation | Boing Finance</title>
-        <meta name="description" content="API documentation, rate limits, and developer resources for boing.finance" />
+        <title>Developer Tools | boing.finance — API & Docs</title>
+        <meta name="description" content="API documentation, rate limits, and developer resources for boing.finance. Build on EVM and Solana." />
       </Helmet>
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">

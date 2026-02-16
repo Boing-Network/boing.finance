@@ -5,10 +5,10 @@ const Terms = () => {
   return (
     <>
       <Helmet>
-        <title>Terms of Service - boing.finance</title>
-        <meta name="description" content="Terms of Service for boing.finance - Legal terms and conditions for using our cross-chain decentralized exchange platform." />
+        <title>Terms of Service | boing.finance</title>
+        <meta name="description" content="Terms of Service for boing.finance. Legal terms for using our DeFi platform on EVM and Solana." />
         <meta name="keywords" content="terms of service, legal, terms and conditions, boing.finance, DEX" />
-        <meta property="og:title" content="Terms of Service - boing.finance" />
+        <meta property="og:title" content="Terms of Service | boing.finance" />
         <meta property="og:description" content="Terms of Service for boing.finance - Legal terms and conditions for using our cross-chain decentralized exchange platform." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/terms" />
@@ -82,9 +82,9 @@ const Terms = () => {
                   boing.finance is a decentralized exchange protocol that enables users to:
                 </p>
                 <ul className="list-disc list-inside style={{ color: 'var(--text-secondary)' }} space-y-2 mb-4">
-                  <li>Trade digital assets across multiple blockchain networks</li>
+                  <li>Trade digital assets on EVM and Solana</li>
                   <li>Provide liquidity to trading pools</li>
-                  <li>Bridge assets between different blockchains</li>
+                  <li>Bridge assets between EVM and Solana</li>
                   <li>Deploy and manage custom tokens</li>
                   <li>Access analytics and portfolio management tools</li>
                 </ul>

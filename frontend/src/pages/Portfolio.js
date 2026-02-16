@@ -412,7 +412,7 @@ export default function Portfolio() {
               Portfolio
             </h1>
             <p className="text-xl mb-8" style={{ color: 'var(--text-secondary)' }}>
-              Connect your wallet to view your portfolio and track your assets across all networks.
+              Connect your wallet to view your portfolio on EVM and Solana.
             </p>
             <div
               className="rounded-2xl shadow-xl p-8 max-w-md mx-auto"
@@ -439,16 +439,16 @@ export default function Portfolio() {
   return (
     <>
       <Helmet>
-        <title>Portfolio - boing.finance</title>
-        <meta name="description" content="Manage your DeFi portfolio with boing.finance. Track balances, earnings, and performance across all supported blockchains." />
-        <meta name="keywords" content="DeFi portfolio, cryptocurrency portfolio, token balances, portfolio tracking, multi-chain portfolio" />
-        <meta property="og:title" content="Portfolio - boing.finance" />
-        <meta property="og:description" content="Manage your DeFi portfolio with boing.finance." />
+        <title>Portfolio | boing.finance — Track Balances on EVM & Solana</title>
+        <meta name="description" content="Track your DeFi portfolio in one place. Balances, NFTs, and performance on EVM and Solana with boing.finance." />
+        <meta name="keywords" content="DeFi portfolio, token balances, boing finance, EVM, Solana, portfolio tracking" />
+        <meta property="og:title" content="Portfolio | boing.finance" />
+        <meta property="og:description" content="Track balances and performance on EVM and Solana." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/portfolio" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Portfolio - boing.finance" />
-        <meta name="twitter:description" content="Manage your DeFi portfolio." />
+        <meta name="twitter:title" content="Portfolio | boing.finance" />
+        <meta name="twitter:description" content="Track your DeFi portfolio on EVM and Solana." />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
@@ -1176,7 +1176,7 @@ export default function Portfolio() {
                     <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                       <h2 className="text-2xl font-bold text-white">Collectibles</h2>
                       <p className="text-sm text-gray-400">
-                        NFTs from Ethereum, Polygon, Arbitrum, Optimism, Base & Sepolia (via Alchemy)
+                        NFTs from supported EVM chains (via Alchemy)
                       </p>
                     </div>
                     {collectionFromUrl && (
@@ -1261,7 +1261,7 @@ export default function Portfolio() {
                       <EmptyState
                         variant="nfts"
                         title="No collectibles found"
-                        description="NFTs on supported networks (Ethereum, Polygon, Arbitrum, Optimism, Base, Sepolia) will appear here."
+                        description="NFTs on supported EVM chains will appear here."
                         secondaryLabel="View Bridge"
                         secondaryHref="/bridge"
                       />

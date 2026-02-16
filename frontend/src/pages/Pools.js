@@ -993,18 +993,18 @@ const Pools = () => {
     return (
       <>
         <Helmet>
-          <title>Pools - boing.finance</title>
-          <meta name="description" content="View and manage your liquidity pools on boing.finance" />
+          <title>Liquidity Pools | boing.finance — View & Manage Pools</title>
+          <meta name="description" content="View and manage your liquidity pools on EVM and Solana. Track positions and earn fees with boing.finance." />
         </Helmet>
         <div className="relative min-h-screen">
           <div className="relative z-10 container mx-auto px-4 py-8">
             <div className="max-w-2xl mx-auto text-center">
               <h1 className="text-3xl font-bold text-white mb-4">Liquidity Pools</h1>
-              <p className="text-gray-300 mb-8">Connect your wallet to view your pools</p>
+              <p className="text-gray-300 mb-8">Connect your wallet to see your pools and positions.</p>
               <div className="bg-gray-800 rounded-xl p-8 border border-gray-700">
                 <div className="text-6xl mb-4">🏊</div>
                 <h2 className="text-xl font-semibold text-white mb-2">Wallet Required</h2>
-                <p className="text-gray-400 mb-6">Please connect your wallet to view your liquidity pools</p>
+                <p className="text-gray-400 mb-6">Connect your wallet to view your liquidity pools and earnings.</p>
                 <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200">
                   Connect Wallet
                 </button>

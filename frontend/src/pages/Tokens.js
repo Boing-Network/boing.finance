@@ -368,10 +368,10 @@ const Tokens = () => {
   return (
     <>
       <Helmet>
-        <title>Token Directory - boing.finance</title>
-        <meta name="description" content="Explore and manage tokens on boing.finance. Browse supported tokens, view details, and add to your favorites across multiple blockchains." />
-        <meta name="keywords" content="token directory, cryptocurrency tokens, token list, DeFi tokens, multi-chain tokens" />
-        <meta property="og:title" content="Token Directory - boing.finance" />
+        <title>Token Directory | boing.finance — Explore Tokens on EVM & Solana</title>
+        <meta name="description" content="Explore and manage tokens on EVM and Solana. Search, watchlist, and view details with boing.finance." />
+        <meta name="keywords" content="token directory, DeFi tokens, boing finance, EVM, Solana, token list" />
+        <meta property="og:title" content="Token Directory | boing.finance" />
         <meta property="og:description" content="Explore and manage tokens on boing.finance." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/tokens" />

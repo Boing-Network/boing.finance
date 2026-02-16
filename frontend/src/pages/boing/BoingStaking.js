@@ -19,8 +19,8 @@ export default function BoingStaking() {
   return (
     <>
       <Helmet>
-        <title>NFT Staking | boing.finance</title>
-        <meta name="description" content="Stake your Boing NFTs to earn rewards on boing.finance." />
+        <title>NFT Staking | boing.finance — Stake BOING NFTs, Earn Rewards</title>
+        <meta name="description" content="Stake your Boing NFTs to earn rewards. NFT staking on boing.finance." />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         <PageHeader title="NFT Staking" subtitle="Stake your Boing NFTs to earn BOING rewards and unlock Pro Analytics." />

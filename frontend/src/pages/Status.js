@@ -159,10 +159,10 @@ const Status = () => {
   return (
     <>
       <Helmet>
-        <title>System Status - boing.finance</title>
-        <meta name="description" content="Check the current status of boing.finance services, uptime, and incident history for our cross-chain decentralized exchange platform." />
+        <title>System Status | boing.finance — Uptime & Incidents</title>
+        <meta name="description" content="Check boing.finance service status, uptime, and incident history. Real-time status for swap, bridge, and deploy." />
         <meta name="keywords" content="system status, uptime, incidents, monitoring, boing.finance, DEX" />
-        <meta property="og:title" content="System Status - boing.finance" />
+        <meta property="og:title" content="System Status | boing.finance" />
         <meta property="og:description" content="Check the current status of boing.finance services and uptime monitoring." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/status" />

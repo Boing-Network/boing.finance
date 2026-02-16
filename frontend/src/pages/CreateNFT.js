@@ -605,8 +605,8 @@ export default function CreateNFT() {
     return (
       <>
         <Helmet>
-          <title>Create NFT - Mint Your Collectibles | Boing Finance</title>
-          <meta name="description" content="Create and mint NFTs. Upload images from your device, add metadata, and bulk mint." />
+          <title>Create NFT | boing.finance — Mint on EVM & Solana</title>
+          <meta name="description" content="Create and mint NFTs on EVM or Solana. Upload images, add metadata, bulk mint. No code with boing.finance." />
         </Helmet>
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-2xl mx-auto">
@@ -614,7 +614,7 @@ export default function CreateNFT() {
               <EmptyState
                 variant="nfts"
                 title="Connect your wallet"
-                description="Connect your wallet to create and mint NFTs."
+                description="Connect your wallet to create and mint NFTs on EVM or Solana."
                 action={connectWallet}
                 actionLabel="Connect Wallet"
                 secondaryLabel="Deploy Token instead"
@@ -632,8 +632,8 @@ export default function CreateNFT() {
   return (
     <>
       <Helmet>
-        <title>Create NFT - Mint Your Collectibles | Boing Finance</title>
-        <meta name="description" content="Create and mint NFTs with local image upload and bulk minting. ERC-721 metadata, IPFS storage." />
+        <title>Create NFT | boing.finance — Mint on EVM & Solana</title>
+        <meta name="description" content="Mint NFTs on EVM or Solana. Upload images, add metadata, bulk mint. IPFS storage with boing.finance." />
       </Helmet>
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="max-w-3xl mx-auto">

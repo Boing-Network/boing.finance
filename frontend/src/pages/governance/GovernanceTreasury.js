@@ -38,8 +38,8 @@ export default function GovernanceTreasury() {
   return (
     <>
       <Helmet>
-        <title>DAO Treasury | boing.finance</title>
-        <meta name="description" content="View the boing.finance DAO treasury balance and allocations." />
+        <title>DAO Treasury | boing.finance — Treasury & Allocations</title>
+        <meta name="description" content="View boing.finance DAO treasury balance, allocations, and usage." />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         <PageHeader

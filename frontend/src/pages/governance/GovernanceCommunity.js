@@ -13,8 +13,8 @@ export default function GovernanceCommunity() {
   return (
     <>
       <Helmet>
-        <title>Governance Community | boing.finance</title>
-        <meta name="description" content="Join the boing.finance community. Discord, Twitter, Telegram, and governance forum." />
+        <title>Community | boing.finance — Discord, Telegram & Forum</title>
+        <meta name="description" content="Join the boing.finance community. Discord, Telegram, Twitter, and governance forum." />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <PageHeader title="Governance Community" subtitle="Connect with the community, discuss proposals, and participate in governance." />

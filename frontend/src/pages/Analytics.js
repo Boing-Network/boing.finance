@@ -355,16 +355,16 @@ export default function Analytics() {
   return (
     <>
       <Helmet>
-        <title>Analytics Dashboard - boing.finance</title>
-        <meta name="description" content="Track your DeFi performance with boing.finance analytics. Real-time market data, trading insights, and portfolio analytics." />
-        <meta name="keywords" content="DeFi analytics, trading analytics, market data, portfolio tracking, cryptocurrency analytics" />
-        <meta property="og:title" content="Analytics Dashboard - boing.finance" />
-        <meta property="og:description" content="Track your DeFi performance with boing.finance analytics." />
+        <title>Analytics | boing.finance — Market Data & DeFi Insights</title>
+        <meta name="description" content="Real-time DeFi analytics on EVM and Solana. Market data, pool stats, and trading insights with boing.finance." />
+        <meta name="keywords" content="DeFi analytics, market data, boing finance, EVM, Solana, pool stats" />
+        <meta property="og:title" content="Analytics | boing.finance" />
+        <meta property="og:description" content="Real-time market data and DeFi insights on EVM and Solana." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/analytics" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Analytics Dashboard - boing.finance" />
-        <meta name="twitter:description" content="Track your DeFi performance with analytics." />
+        <meta name="twitter:title" content="Analytics | boing.finance" />
+        <meta name="twitter:description" content="DeFi analytics and market data on EVM and Solana." />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />

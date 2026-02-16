@@ -43,8 +43,8 @@ export default function BoingPoints() {
   return (
     <>
       <Helmet>
-        <title>Boing Points | boing.finance</title>
-        <meta name="description" content="Earn Boing points for using boing.finance. Redeem for rewards." />
+        <title>Boing Points | boing.finance — Earn & Redeem</title>
+        <meta name="description" content="Earn Boing points when you use boing.finance. Redeem for rewards and perks." />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <PageHeader title="Boing Points" subtitle="Earn points for every action on boing.finance. Swap, bridge, add liquidity, and more." />

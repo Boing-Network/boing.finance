@@ -104,10 +104,10 @@ const ContactUs = () => {
   return (
     <>
       <Helmet>
-        <title>Contact Us - boing.finance</title>
-        <meta name="description" content="Get in touch with boing.finance - Contact our support team, join our community, or report issues with our cross-chain decentralized exchange platform." />
+        <title>Contact Us | boing.finance — Support & Community</title>
+        <meta name="description" content="Get in touch with boing.finance. Support, community links, and how to report issues." />
         <meta name="keywords" content="contact, support, help, boing.finance, DEX, customer service" />
-        <meta property="og:title" content="Contact Us - boing.finance" />
+        <meta property="og:title" content="Contact Us | boing.finance" />
         <meta property="og:description" content="Get in touch with boing.finance - Contact our support team and join our community." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/contact" />

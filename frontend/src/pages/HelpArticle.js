@@ -27,19 +27,11 @@ const HelpArticle = () => {
           <li>Click the "Connect Wallet" button in the top-right corner</li>
           <li>Select your preferred wallet from the list</li>
           <li>Approve the connection in your wallet popup</li>
-          <li>Choose your desired network (Ethereum, Polygon, Arbitrum, etc.)</li>
+          <li>Choose your desired network (EVM or Solana)</li>
         </ol>
         
         <h3>Network Support</h3>
-        <p>boing.finance currently supports 6 major networks:</p>
-        <ul>
-          <li>Ethereum Mainnet</li>
-          <li>Polygon</li>
-          <li>Arbitrum One</li>
-          <li>Optimism</li>
-          <li>Base</li>
-          <li>BNB Smart Chain</li>
-        </ul>
+        <p>boing.finance supports EVM chains and Solana. Use the network selector to pick your chain.</p>
         
         <h3>Troubleshooting</h3>
         <p><strong>If connection fails:</strong></p>
@@ -85,12 +77,7 @@ const HelpArticle = () => {
         </ul>
         
         <h3>Gas Fees</h3>
-        <p>Gas fees vary by network:</p>
-        <ul>
-          <li><strong>Ethereum:</strong> Higher fees, more secure</li>
-          <li><strong>Polygon:</strong> Lower fees, faster transactions</li>
-          <li><strong>Arbitrum/Optimism:</strong> L2 scaling solutions with reduced costs</li>
-        </ul>
+        <p>Gas fees vary by chain: mainnet EVM is higher; L2s and Solana are typically lower.</p>
         
         <h3>Best Practices</h3>
         <ul>
@@ -106,18 +93,10 @@ const HelpArticle = () => {
       category: 'Getting Started',
       content: `
         <h2>Switching Between Blockchain Networks</h2>
-        <p>boing.finance operates across multiple blockchain networks. Learn how to switch between them.</p>
+        <p>boing.finance supports EVM chains and Solana. Learn how to switch between them.</p>
         
         <h3>Supported Networks</h3>
-        <p>boing.finance currently supports 6 major blockchain networks:</p>
-        <ul>
-          <li><strong>Ethereum Mainnet</strong> - Original smart contract platform</li>
-          <li><strong>Polygon</strong> - Ethereum scaling solution</li>
-          <li><strong>Arbitrum One</strong> - Optimistic rollup for Ethereum</li>
-          <li><strong>Optimism</strong> - Layer 2 scaling solution</li>
-          <li><strong>Base</strong> - Coinbase's Layer 2 network</li>
-          <li><strong>BNB Smart Chain</strong> - Binance's blockchain</li>
-        </ul>
+        <p>boing.finance supports EVM chains (mainnets and testnets) and Solana. Use the network selector to switch.</p>
         
         <h3>How to Switch Networks</h3>
         <ol>

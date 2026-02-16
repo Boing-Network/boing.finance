@@ -110,11 +110,11 @@ const Liquidity = () => {
     return (
       <>
         <Helmet>
-          <title>Liquidity Pools - boing.finance</title>
-          <meta name="description" content="Provide liquidity to earn rewards with boing.finance. Create and manage liquidity pools across multiple blockchains." />
+          <title>Add Liquidity | boing.finance — Earn Fees on EVM & Solana</title>
+          <meta name="description" content="Add liquidity and earn trading fees on EVM and Solana. Create and manage pools in one place with boing.finance." />
           <meta name="keywords" content="liquidity pools, DeFi, yield farming, AMM, automated market maker, liquidity provision" />
-          <meta property="og:title" content="Liquidity Pools - boing.finance" />
-          <meta property="og:description" content="Provide liquidity to earn rewards with boing.finance." />
+          <meta property="og:title" content="Add Liquidity | boing.finance" />
+          <meta property="og:description" content="Add liquidity and earn fees on EVM and Solana." />
           <meta property="og:type" content="website" />
           <meta property="og:url" content="https://boing.finance/pools" />
           <meta name="twitter:card" content="summary_large_image" />
@@ -126,7 +126,7 @@ const Liquidity = () => {
         </Helmet>
         <div className="relative max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 overflow-x-hidden"><div className="relative z-10"><div className="text-center py-12">
               <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">Connect Your Wallet</h1>
-              <p className="text-gray-300 mb-8">Connect your wallet to manage liquidity</p>
+              <p className="text-gray-300 mb-8">Connect your wallet to add liquidity and earn fees.</p>
               <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200">
                 Connect Wallet
               </button>
@@ -140,16 +140,16 @@ const Liquidity = () => {
   return (
     <>
       <Helmet>
-        <title>Liquidity Pools - boing.finance</title>
-        <meta name="description" content="Provide liquidity to earn rewards with boing.finance. Create and manage liquidity pools across multiple blockchains." />
-        <meta name="keywords" content="liquidity pools, DeFi, yield farming, AMM, automated market maker, liquidity provision" />
-        <meta property="og:title" content="Liquidity Pools - boing.finance" />
-        <meta property="og:description" content="Provide liquidity to earn rewards with boing.finance." />
+        <title>Add Liquidity | boing.finance — Earn Fees on EVM & Solana</title>
+        <meta name="description" content="Add liquidity and earn trading fees on EVM and Solana. Create and manage pools in one place with boing.finance." />
+        <meta name="keywords" content="liquidity, DeFi, boing finance, EVM, Solana, AMM, earn fees" />
+        <meta property="og:title" content="Add Liquidity | boing.finance" />
+        <meta property="og:description" content="Add liquidity and earn fees on EVM and Solana." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://boing.finance/pools" />
+        <meta property="og:url" content="https://boing.finance/liquidity" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Liquidity Pools - boing.finance" />
-        <meta name="twitter:description" content="Provide liquidity to earn rewards." />
+        <meta name="twitter:title" content="Add Liquidity | boing.finance" />
+        <meta name="twitter:description" content="Earn fees by adding liquidity on EVM and Solana." />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />

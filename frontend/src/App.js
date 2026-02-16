@@ -670,7 +670,7 @@ function AppContent() {
                 The DeFi that always bounces back.
               </p>
               <p className="text-xs sm:text-sm mb-4 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                Cross-chain trading, token deployment, and governance—all from one unified interface.
+                Swap, bridge, and deploy on EVM and Solana—one interface.
               </p>
               <div className="flex space-x-3 sm:space-x-4">
                 <a href="https://twitter.com/boing_finance" target="_blank" rel="noopener noreferrer" className="transition-colors p-1 sm:p-2" style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>
@@ -790,7 +790,7 @@ function App() {
                     
                     {/* Open Graph Meta Tags for better sharing */}
                     <meta property="og:title" content="boing.finance - DeFi Platform" />
-                    <meta property="og:description" content="Deploy tokens, create liquidity pools, and trade across multiple networks with ease." />
+                    <meta property="og:description" content="Deploy tokens, create pools, and trade on EVM and Solana with ease." />
                     <meta property="og:image" content="https://boing.finance/hero-image.png" />
                     <meta property="og:url" content="https://boing.finance/" />
                     <meta property="og:type" content="website" />
@@ -798,7 +798,7 @@ function App() {
                     {/* Twitter Card Meta Tags */}
                     <meta name="twitter:card" content="summary_large_image" />
                     <meta name="twitter:title" content="boing.finance - DeFi Platform" />
-                    <meta name="twitter:description" content="Deploy tokens, create liquidity pools, and trade across multiple networks with ease." />
+                    <meta name="twitter:description" content="Deploy tokens, create pools, and trade on EVM and Solana with ease." />
                     <meta name="twitter:image" content="https://boing.finance/hero-image.png" />
                   </Helmet>
                   <AppContent />
@@ -835,18 +835,18 @@ function Home() {
   return (
     <>
       <Helmet>
-        <title>Boing Finance - Deploy Tokens & Trade Crypto | Cross-Chain DEX</title>
-        <meta name="description" content="The DeFi that always bounces back. Deploy your own tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance—the user-friendly cross-chain DEX." />
-        <meta name="keywords" content="deploy token, crypto, blockchain, DEX, decentralized exchange, liquidity pool, cross-chain, token creation, cryptocurrency, DeFi, trading, swap, boing finance, token deployment, create token, ERC20, token launch" />
-        <meta property="og:title" content="Boing Finance - Deploy Tokens & Trade Crypto | Cross-Chain DEX" />
-        <meta property="og:description" content="The DeFi that always bounces back. Deploy tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance." />
+        <title>boing.finance | DeFi That Bounces Back — Swap, Deploy & Trade on EVM & Solana</title>
+        <meta name="description" content="The DeFi that always bounces back. Swap tokens, add liquidity, bridge assets, and deploy your own token on EVM and Solana. One interface, no code." />
+        <meta name="keywords" content="boing finance, DeFi, DEX, swap tokens, liquidity pool, deploy token, cross-chain bridge, EVM, Solana, decentralized exchange, create token, ERC20, token launch" />
+        <meta property="og:title" content="boing.finance | DeFi That Bounces Back — Swap, Deploy & Trade" />
+        <meta property="og:description" content="The DeFi that always bounces back. Swap, add liquidity, bridge, and deploy tokens on EVM and Solana. One interface." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance" />
-        <meta property="og:site_name" content="Boing Finance" />
+        <meta property="og:site_name" content="boing.finance" />
         <meta property="og:locale" content="en_US" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Boing Finance - Deploy Tokens & Trade Crypto" />
-        <meta name="twitter:description" content="The DeFi that always bounces back. Deploy tokens, create pools, and trade across chains with Boing Finance." />
+        <meta name="twitter:title" content="boing.finance | DeFi That Bounces Back" />
+        <meta name="twitter:description" content="Swap, add liquidity, bridge, and deploy tokens on EVM and Solana. The DeFi that always bounces back." />
         <meta name="twitter:site" content="@boingfinance" />
         <link rel="canonical" href="https://boing.finance" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -860,7 +860,7 @@ function Home() {
           "@type": "WebSite",
           "name": "Boing Finance",
           "url": "https://boing.finance",
-          "description": "The DeFi that always bounces back. Deploy tokens, create liquidity pools, and trade across multiple blockchains with boing.finance.",
+          "description": "The DeFi that always bounces back. Deploy tokens, create pools, and trade on EVM and Solana with boing.finance.",
           "potentialAction": {
             "@type": "SearchAction",
             "target": "https://boing.finance/tokens?q={search_term_string}",
@@ -880,7 +880,7 @@ function Home() {
             "@type": "ImageObject",
             "url": "https://boing.finance/logo.svg"
           },
-          "description": "Deploy tokens, create liquidity pools, and trade across multiple blockchains with boing.finance - the most user-friendly decentralized exchange (DEX) for token deployment and cross-chain trading.",
+          "description": "The DeFi that always bounces back. Deploy tokens, create pools, and trade on EVM and Solana with boing.finance.",
           "sameAs": [
             "https://twitter.com/boingfinance"
           ],
@@ -898,7 +898,7 @@ function Home() {
           "@context": "https://schema.org",
           "@type": "FinancialProduct",
           "name": "boing.finance DeFi Platform",
-          "description": "Decentralized exchange for token deployment, liquidity pools, and cross-chain trading.",
+          "description": "The DeFi that always bounces back. Swap, add liquidity, bridge, and deploy tokens on EVM and Solana.",
           "provider": {
             "@type": "Organization",
             "name": "boing.finance",
@@ -928,7 +928,7 @@ function Home() {
               "name": "What blockchains does Boing Finance support?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Boing Finance supports multiple blockchains including Ethereum, Polygon, BSC, Arbitrum, Optimism, and Base for cross-chain token deployment and trading."
+                "text": "Boing Finance supports EVM chains and Solana for cross-chain token deployment and trading."
               }
             },
             {
@@ -961,7 +961,7 @@ function Home() {
               The DeFi that always bounces back.
             </p>
             <p className="text-lg leading-relaxed mb-12" style={{ color: 'var(--text-secondary)' }}>
-              The ultimate multi-network DeFi platform for cross-chain trading, token deployment, governance, and the BOING ecosystem. Swap, provide liquidity, bridge assets, deploy tokens, create NFTs, vote on proposals, and earn rewards—all from one unified interface across Ethereum, Polygon, BSC, Arbitrum, Optimism, Base, and more.
+              Swap, add liquidity, bridge assets, and deploy tokens on EVM and Solana—all in one place. No code required.
             </p>
           </div>
 
@@ -993,7 +993,7 @@ function Home() {
               <circle cx="100" cy="100" r="30" stroke="#fff" strokeWidth="1.5" fill="none" opacity="0.09" />
               <animateTransform attributeName="transform" from="0 100 100" to="360 100 100" dur="18s" repeatCount="indefinite" />
             </svg>
-            <p className="text-xl text-center max-w-2xl mb-2" style={{ color: 'var(--text-secondary)' }}>Fast, secure, and user-friendly DeFi for everyone.</p>
+            <p className="text-xl text-center max-w-2xl mb-2" style={{ color: 'var(--text-secondary)' }}>Fast, secure DeFi. For everyone.</p>
           </div>
 
           {/* Onboarding Checklist + For You */}

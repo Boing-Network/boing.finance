@@ -21,17 +21,17 @@ const FAQSection = () => {
         {
           id: 'gs-1',
           question: 'What is boing.finance?',
-          answer: 'boing.finance is a decentralized exchange (DEX) that allows users to trade cryptocurrencies across multiple blockchain networks. It features automated market making, liquidity provision, cross-chain bridging, and token deployment capabilities.'
+          answer: 'boing.finance is a DEX for trading, liquidity, bridging, and token deployment on EVM and Solana.'
         },
         {
           id: 'gs-2',
           question: 'How do I connect my wallet?',
-          answer: 'Click the "Connect Wallet" button in the top right corner. We support MetaMask, WalletConnect, and other popular Web3 wallets. Make sure your wallet is set to a supported network.'
+          answer: 'Click Connect Wallet in the top right. We support MetaMask, WalletConnect, and other Web3 wallets. Set your wallet to a supported EVM chain or Solana.'
         },
         {
           id: 'gs-3',
           question: 'Which networks are supported?',
-          answer: 'We support Ethereum, Polygon, BSC, Arbitrum, Optimism, Base, Avalanche, Fantom, and their respective testnets. More networks are being added regularly.'
+          answer: 'We support EVM chains and Solana, plus their testnets. More networks are added regularly.'
         },
         {
           id: 'gs-4',

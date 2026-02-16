@@ -13,8 +13,8 @@ export default function BoingRoadmap() {
   return (
     <>
       <Helmet>
-        <title>Boing Roadmap | boing.finance</title>
-        <meta name="description" content="Boing community roadmap. NFT staking, points, and ecosystem growth." />
+        <title>Boing Roadmap | boing.finance — Ecosystem & Growth</title>
+        <meta name="description" content="Boing ecosystem roadmap: NFT staking, points, and community growth." />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <PageHeader title="Boing Roadmap" subtitle="Our community-focused roadmap for NFT staking, points, and ecosystem growth." />

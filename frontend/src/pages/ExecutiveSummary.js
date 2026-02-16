@@ -5,10 +5,10 @@ const ExecutiveSummary = () => {
   return (
     <>
       <Helmet>
-        <title>boing.finance - Cross-Chain DeFi Infrastructure Platform</title>
-        <meta name="description" content="Next-generation cross-chain DeFi platform enabling seamless trading, token deployment, and liquidity management across 6+ blockchain networks with 95% gas cost reduction" />
-        <meta name="keywords" content="cross-chain DeFi, DEX, token factory, liquidity management, blockchain, EVM compatible, Injective" />
-        <meta property="og:title" content="boing.finance - Cross-Chain DeFi Infrastructure Platform" />
+        <title>Executive Summary | boing.finance — DeFi on EVM & Solana</title>
+        <meta name="description" content="boing.finance executive summary: cross-chain DeFi, token deployment, liquidity, and bridge on EVM and Solana. The DeFi that bounces back." />
+        <meta name="keywords" content="cross-chain DeFi, DEX, boing.finance, EVM, Solana, token deployment, liquidity" />
+        <meta property="og:title" content="Executive Summary | boing.finance" />
         <meta property="og:description" content="Next-generation cross-chain DeFi platform with live deployment across 6 networks" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/executive-summary" />
@@ -140,7 +140,7 @@ const ExecutiveSummary = () => {
                 The DeFi ecosystem is highly fragmented, creating significant barriers for users:
               </p>
               <ul className="mb-6 space-y-2" style={{ color: 'var(--text-secondary)' }}>
-                <li>• <strong>Fragmented Liquidity</strong> - Users must navigate 10+ different DEXs across multiple networks</li>
+                <li>• <strong>Fragmented Liquidity</strong> - Users juggle many DEXs across EVM and Solana</li>
                 <li>• <strong>High Cross-Chain Fees</strong> - Bridge costs can exceed 5-10% of transaction value</li>
                 <li>• <strong>Technical Complexity</strong> - Deploying tokens across networks requires deep technical knowledge</li>
                 <li>• <strong>Slow Transactions</strong> - Cross-chain transfers can take hours with current solutions</li>
@@ -153,11 +153,11 @@ const ExecutiveSummary = () => {
                 boing.finance provides a comprehensive cross-chain DeFi platform featuring:
               </p>
               <ul className="space-y-2" style={{ color: 'var(--text-secondary)' }}>
-                <li>• <strong>Cross-Chain Trading</strong> - Unified interface for trading across 6+ networks</li>
+                <li>• <strong>Cross-Chain Trading</strong> - One interface for EVM and Solana</li>
                 <li>• <strong>Token Factory</strong> - One-click token deployment with enterprise security</li>
                 <li>• <strong>Liquidity Management</strong> - Advanced AMM pools with yield farming</li>
                 <li>• <strong>Cross-Chain Bridge</strong> - Secure, fast, and cost-effective transfers</li>
-                <li>• <strong>Analytics Dashboard</strong> - Real-time portfolio tracking across all networks</li>
+                <li>• <strong>Analytics Dashboard</strong> - Real-time portfolio tracking on EVM and Solana</li>
               </ul>
             </div>
 
@@ -253,9 +253,9 @@ const ExecutiveSummary = () => {
                   <h3 className="text-lg font-bold mb-4"
           style={{ color: 'var(--text-primary)' }}>Technical Achievements:</h3>
                   <ul className="space-y-2" style={{ color: 'var(--warning-text)' }}>
-                    <li>✅ <strong>6 Networks Deployed</strong> - Ethereum, Arbitrum, Base, Polygon, BSC, Optimism</li>
+                    <li>✅ <strong>EVM & Solana</strong> - Deployed across supported EVM chains and Solana</li>
                     <li>✅ <strong>17+ Smart Contracts</strong> - All verified (no professional audits conducted)</li>
-                    <li>✅ <strong>Live Platform</strong> - Fully functional across all networks</li>
+                    <li>✅ <strong>Live Platform</strong> - Fully functional on EVM and Solana</li>
                     <li>✅ <strong>Zero Exploits</strong> - No security incidents or vulnerabilities</li>
                   </ul>
                 </div>

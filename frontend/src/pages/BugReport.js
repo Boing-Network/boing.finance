@@ -119,10 +119,10 @@ const BugReport = () => {
   return (
     <>
       <Helmet>
-        <title>Bug Report - boing.finance</title>
-        <meta name="description" content="Report bugs and issues with boing.finance - Help us improve our cross-chain decentralized exchange platform by submitting detailed bug reports." />
+        <title>Bug Report | boing.finance — Report Issues</title>
+        <meta name="description" content="Report bugs and issues with boing.finance. Help us improve by submitting a detailed bug report." />
         <meta name="keywords" content="bug report, issues, feedback, support, boing.finance, DEX" />
-        <meta property="og:title" content="Bug Report - boing.finance" />
+        <meta property="og:title" content="Bug Report | boing.finance" />
         <meta property="og:description" content="Report bugs and issues with boing.finance - Help us improve our platform." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/bug-report" />

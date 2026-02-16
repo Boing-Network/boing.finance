@@ -5,10 +5,10 @@ const Whitepaper = () => {
   return (
     <>
       <Helmet>
-        <title>Whitepaper - boing.finance</title>
-        <meta name="description" content="Technical whitepaper for boing.finance - Cross-chain decentralized exchange architecture, tokenomics, and roadmap." />
-        <meta name="keywords" content="whitepaper, technical documentation, tokenomics, roadmap, cross-chain DEX, boing.finance" />
-        <meta property="og:title" content="Whitepaper - boing.finance" />
+        <title>Whitepaper | boing.finance — Architecture, Tokenomics & Roadmap</title>
+        <meta name="description" content="boing.finance whitepaper: cross-chain DEX architecture, tokenomics, bridge protocol, and roadmap for EVM and Solana." />
+        <meta name="keywords" content="whitepaper, tokenomics, roadmap, cross-chain DEX, boing.finance, EVM, Solana" />
+        <meta property="og:title" content="Whitepaper | boing.finance" />
         <meta property="og:description" content="Technical whitepaper for boing.finance - Cross-chain decentralized exchange architecture, tokenomics, and roadmap." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/whitepaper" />
@@ -59,15 +59,15 @@ const Whitepaper = () => {
               <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>1. Executive Summary</h2>
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
                 <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
-                  boing.finance is a next-generation decentralized exchange (DEX) protocol designed to facilitate seamless cross-chain trading and liquidity provision across multiple blockchain networks. Our platform addresses the critical need for interoperability in the DeFi ecosystem by providing a unified interface for trading assets across different blockchains.
+                  boing.finance is a DEX for cross-chain trading and liquidity on EVM and Solana. One interface for swaps, bridge, and token deployment—no centralized intermediaries.
                 </p>
                 <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
-                  The protocol leverages advanced smart contract technology, automated market maker (AMM) mechanisms, and cross-chain bridge infrastructure to enable users to trade tokens across Ethereum, Polygon, Arbitrum, and other supported networks without the need for centralized intermediaries.
+                  AMM-based swaps, cross-chain bridge, and token deployment on EVM and Solana.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                   <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4 text-center">
                     <div className="text-2xl font-bold text-blue-400 mb-2">Multi-Chain</div>
-                    <div className="text-sm style={{ color: 'var(--text-secondary)' }}">Support for multiple blockchain networks</div>
+                    <div className="text-sm style={{ color: 'var(--text-secondary)' }}">EVM & Solana support</div>
                   </div>
                   <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4 text-center">
                     <div className="text-2xl font-bold text-green-400 mb-2">AMM</div>
@@ -87,14 +87,14 @@ const Whitepaper = () => {
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
                 <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Problem Statement</h3>
                 <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
-                  The current DeFi landscape is fragmented across multiple blockchain networks, each with its own ecosystem of tokens, liquidity pools, and trading protocols. This fragmentation creates significant barriers for users who want to access assets across different chains, requiring multiple wallets, complex bridging processes, and exposure to various risks.
+                  DeFi is fragmented across chains: different wallets, bridges, and UIs. boing.finance unifies access on EVM and Solana.
                 </p>
                 <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4 mt-6">Solution Overview</h3>
                 <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
                   boing.finance provides a comprehensive solution through:
                 </p>
                 <ul className="list-disc list-inside style={{ color: 'var(--text-secondary)' }} space-y-2 mb-4">
-                  <li>Unified trading interface across multiple blockchains</li>
+                  <li>Unified trading on EVM and Solana</li>
                   <li>Automated market maker pools with cross-chain liquidity</li>
                   <li>Secure bridge protocol for asset transfers</li>
                   <li>Advanced analytics and portfolio management tools</li>
@@ -363,7 +363,7 @@ const Whitepaper = () => {
               <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>9. Conclusion</h2>
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
                 <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
-                  boing.finance represents a promising foundation for cross-chain decentralized finance, with core infrastructure already deployed across multiple blockchain networks. Our platform addresses the critical need for interoperability in the DeFi ecosystem through a modular architecture designed for scalability and security.
+                  boing.finance delivers cross-chain DeFi on EVM and Solana with a modular, secure architecture.
                 </p>
                 <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
                   Currently in early development phase, boing.finance has successfully deployed 17+ smart contracts across 6 networks and provides functional token deployment capabilities. Many advanced features are developed locally but await funding for production deployment, professional audits, and team expansion.

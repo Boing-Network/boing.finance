@@ -1525,18 +1525,18 @@ export default function DeployToken() {
   return (
     <>
       <Helmet>
-        <title>Deploy Token - Create Your Own Crypto Token | Boing Finance</title>
-        <meta name="description" content="Deploy your own cryptocurrency token in minutes with Boing Finance. No coding required - create ERC20 tokens with advanced security features, professional infrastructure, and cross-chain support." />
-        <meta name="keywords" content="deploy token, crypto, create token, cryptocurrency, ERC20, token deployment, smart contract, DeFi token, blockchain token, token creation, launch token, crypto token maker" />
-        <meta property="og:title" content="Deploy Token - Create Your Own Crypto Token | Boing Finance" />
-        <meta property="og:description" content="Deploy your own cryptocurrency token in minutes with Boing Finance. No coding required - create ERC20 tokens with advanced security features and cross-chain support." />
+        <title>Deploy Token | boing.finance — Create ERC20 & SPL Tokens, No Code</title>
+        <meta name="description" content="Deploy your own token on EVM or Solana in minutes. No code required. Security features, fair launch, and cross-chain support with boing.finance." />
+        <meta name="keywords" content="deploy token, create token, ERC20, SPL, boing finance, token launch, DeFi, no code" />
+        <meta property="og:title" content="Deploy Token | boing.finance" />
+        <meta property="og:description" content="Create your own token on EVM or Solana. No code. Security built in." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/deploy-token" />
-        <meta property="og:site_name" content="Boing Finance" />
+        <meta property="og:site_name" content="boing.finance" />
         <meta property="og:locale" content="en_US" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Deploy Token - Create Your Own Crypto Token" />
-        <meta name="twitter:description" content="Deploy your own cryptocurrency token in minutes with Boing Finance. No coding required - create ERC20 tokens with advanced security features." />
+        <meta name="twitter:title" content="Deploy Token | boing.finance" />
+        <meta name="twitter:description" content="Create your own token on EVM or Solana. No code required." />
         <meta name="twitter:site" content="@boingfinance" />
         <link rel="canonical" href="https://boing.finance/deploy-token" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -1550,7 +1550,7 @@ export default function DeployToken() {
           "@type": "WebPage",
           "name": "Deploy Token - Create Your Own Crypto Token",
           "url": "https://boing.finance/deploy-token",
-          "description": "Deploy your own cryptocurrency token in minutes with Boing Finance. No coding required - create ERC20 tokens with advanced security features, professional infrastructure, and cross-chain support.",
+          "description": "Deploy your own token on EVM or Solana in minutes. No code. Security and fair launch with boing.finance.",
           "mainEntity": {
             "@type": "Service",
             "name": "Token Deployment Service",

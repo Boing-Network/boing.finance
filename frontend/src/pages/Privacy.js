@@ -5,10 +5,10 @@ const Privacy = () => {
   return (
     <>
       <Helmet>
-        <title>Privacy Policy - boing.finance</title>
-        <meta name="description" content="Privacy Policy for boing.finance - How we collect, use, and protect your information on our cross-chain decentralized exchange platform." />
+        <title>Privacy Policy | boing.finance</title>
+        <meta name="description" content="Privacy Policy for boing.finance. How we collect, use, and protect your information." />
         <meta name="keywords" content="privacy policy, data protection, GDPR, privacy, boing.finance, DEX" />
-        <meta property="og:title" content="Privacy Policy - boing.finance" />
+        <meta property="og:title" content="Privacy Policy | boing.finance" />
         <meta property="og:description" content="Privacy Policy for boing.finance - How we collect, use, and protect your information." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/privacy" />

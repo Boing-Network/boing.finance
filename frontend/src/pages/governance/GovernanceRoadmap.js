@@ -13,8 +13,8 @@ export default function GovernanceRoadmap() {
   return (
     <>
       <Helmet>
-        <title>Governance Roadmap | boing.finance</title>
-        <meta name="description" content="Governance roadmap and milestones for boing.finance DAO." />
+        <title>Governance Roadmap | boing.finance — DAO Milestones</title>
+        <meta name="description" content="Governance roadmap and milestones for the boing.finance DAO." />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <PageHeader title="Governance Roadmap" subtitle="Our path to a fully decentralized, community-driven protocol." />

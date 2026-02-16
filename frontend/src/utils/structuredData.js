@@ -8,7 +8,7 @@ export const generateOrganizationSchema = () => {
     name: 'boing.finance',
     url: 'https://boing.finance',
     logo: 'https://boing.finance/logo.svg',
-    description: 'Deploy tokens, create liquidity pools, and trade across multiple blockchains with boing.finance - the most user-friendly decentralized exchange (DEX) for token deployment and cross-chain trading.',
+    description: 'The DeFi that always bounces back. Deploy tokens, create pools, and trade on EVM and Solana with boing.finance.',
     sameAs: [
       'https://twitter.com/boingfinance'
     ],
@@ -26,7 +26,7 @@ export const generateWebSiteSchema = () => {
     '@type': 'WebSite',
     name: 'boing.finance',
     url: 'https://boing.finance',
-    description: 'Deploy tokens, create liquidity pools, and trade across multiple blockchains with boing.finance.',
+    description: 'Deploy tokens, create pools, and trade on EVM and Solana with boing.finance.',
     potentialAction: {
       '@type': 'SearchAction',
       target: {

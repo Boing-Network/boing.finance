@@ -8,8 +8,7 @@ const PortfolioSection = () => {
           style={{ color: 'var(--text-primary)'  }}>Portfolio Management Guide</h2>
         <p className=" text-lg leading-relaxed mb-8"
           style={{ color: 'var(--text-secondary)'  }}>
-          Manage your entire DeFi portfolio across multiple blockchain networks from a single interface. 
-          Track performance, analyze positions, and optimize your investments with comprehensive portfolio tools.
+          One interface for your DeFi portfolio on EVM and Solana. Track performance and optimize positions.
         </p>
       </div>
 
@@ -24,7 +23,7 @@ const PortfolioSection = () => {
           style={{ color: 'var(--text-primary)'  }}>Total Portfolio Value</h4>
             <ul className="space-y-2 "
           style={{ color: 'var(--text-secondary)'  }}>
-              <li>• Real-time valuation across all networks</li>
+              <li>• Real-time valuation on EVM and Solana</li>
               <li>• USD equivalent calculations</li>
               <li>• Historical value tracking</li>
               <li>• Performance over time</li>
@@ -339,7 +338,7 @@ const PortfolioSection = () => {
           style={{ color: 'var(--text-primary)'  }}>💡 Portfolio Best Practices</h4>
             <ul className="space-y-2 "
           style={{ color: 'var(--text-secondary)'  }}>
-              <li>• Diversify across multiple networks and tokens</li>
+              <li>• Diversify across chains and tokens</li>
               <li>• Regularly rebalance your portfolio</li>
               <li>• Monitor impermanent loss in liquidity positions</li>
               <li>• Keep some assets in stablecoins for opportunities</li>

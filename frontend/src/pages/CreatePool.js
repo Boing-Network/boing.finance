@@ -1245,8 +1245,8 @@ function CreatePool() {
     return (
       <>
         <Helmet>
-          <title>Create Pool - boing.finance</title>
-          <meta name="description" content="Create new liquidity pools on boing.finance. Deploy trading pairs and earn fees from trades." />
+          <title>Create Pool | boing.finance — New Liquidity Pools on EVM & Solana</title>
+          <meta name="description" content="Create new liquidity pools on EVM and Solana. Deploy trading pairs and earn fees with boing.finance." />
           <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
@@ -1255,11 +1255,11 @@ function CreatePool() {
           <div className="relative z-10 container mx-auto px-4 py-8">
             <div className="max-w-2xl mx-auto text-center">
               <h1 className="text-3xl font-bold text-white mb-4">Create Liquidity Pool</h1>
-              <p className="text-gray-300 mb-8">Connect your wallet to create new trading pairs</p>
+              <p className="text-gray-300 mb-8">Connect your wallet to create new pools and earn fees.</p>
               <div className="bg-gray-800 rounded-xl p-8 border border-gray-700">
                 <div className="text-6xl mb-4">🔗</div>
                 <h2 className="text-xl font-semibold text-white mb-2">Wallet Required</h2>
-                <p className="text-gray-400 mb-6">Please connect your wallet to create liquidity pools</p>
+                <p className="text-gray-400 mb-6">Connect your wallet to create liquidity pools and start earning.</p>
                 <button 
                   onClick={connectWallet}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200"
@@ -1277,8 +1277,8 @@ function CreatePool() {
   return (
     <>
       <Helmet>
-        <title>Create Pool - boing.finance</title>
-        <meta name="description" content="Create new liquidity pools on boing.finance. Deploy trading pairs and earn fees from trades." />
+        <title>Create Pool | boing.finance — New Liquidity Pools on EVM & Solana</title>
+        <meta name="description" content="Create new liquidity pools on EVM and Solana. Deploy pairs, earn fees. One interface with boing.finance." />
         <meta name="keywords" content="liquidity pools, create pool, DeFi, AMM, trading pairs" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />

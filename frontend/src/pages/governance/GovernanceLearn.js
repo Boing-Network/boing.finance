@@ -30,8 +30,8 @@ export default function GovernanceLearn() {
   return (
     <>
       <Helmet>
-        <title>How Governance Works | boing.finance</title>
-        <meta name="description" content="Learn how boing.finance governance works. Voting, proposals, and DAO structure." />
+        <title>How Governance Works | boing.finance — Voting & Proposals</title>
+        <meta name="description" content="Learn how boing.finance governance works: voting, proposals, quorum, and DAO structure." />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-3xl">
         <PageHeader title="How Governance Works" subtitle="A guide to participating in boing.finance DAO governance." />

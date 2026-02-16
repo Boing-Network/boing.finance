@@ -45,10 +45,10 @@ const Docs = () => {
   return (
     <>
       <Helmet>
-        <title>Documentation - boing.finance</title>
-        <meta name="description" content="Learn how to use boing.finance with our comprehensive documentation. Guides for swapping, liquidity provision, bridging, and token deployment." />
-        <meta name="keywords" content="boing.finance documentation, DeFi guides, DEX tutorial, liquidity pools guide, cross-chain bridge tutorial" />
-        <meta property="og:title" content="Documentation - boing.finance" />
+        <title>Documentation | boing.finance — Guides for Swap, Liquidity, Bridge & Deploy</title>
+        <meta name="description" content="Learn how to use boing.finance. Docs for swap, liquidity, bridge, token deployment, and APIs on EVM and Solana." />
+        <meta name="keywords" content="boing.finance documentation, DeFi guides, DEX tutorial, liquidity, bridge, deploy token" />
+        <meta property="og:title" content="Documentation | boing.finance" />
         <meta property="og:description" content="Learn how to use boing.finance with our comprehensive documentation." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/docs" />

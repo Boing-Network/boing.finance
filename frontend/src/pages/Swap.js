@@ -1733,16 +1733,16 @@ const Swap = () => {
   return (
     <>
       <Helmet>
-        <title>Swap Tokens - boing.finance</title>
-        <meta name="description" content="Swap tokens instantly across multiple blockchains with boing.finance. Get the best rates with our advanced DEX aggregator." />
-        <meta name="keywords" content="token swap, DEX, decentralized exchange, cryptocurrency trading, cross-chain swap" />
-        <meta property="og:title" content="Swap Tokens - boing.finance" />
-        <meta property="og:description" content="Swap tokens instantly across multiple blockchains with boing.finance." />
+        <title>Swap Tokens | boing.finance — Trade on EVM & Solana</title>
+        <meta name="description" content="Swap tokens instantly on EVM and Solana. Get the best rates with boing.finance—the DeFi that always bounces back." />
+        <meta name="keywords" content="swap tokens, DEX, boing finance, EVM, Solana, token swap, decentralized exchange" />
+        <meta property="og:title" content="Swap Tokens | boing.finance" />
+        <meta property="og:description" content="Swap tokens on EVM and Solana. Best rates, one interface." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/swap" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Swap Tokens - boing.finance" />
-        <meta name="twitter:description" content="Swap tokens instantly across multiple blockchains." />
+        <meta name="twitter:title" content="Swap Tokens | boing.finance" />
+        <meta name="twitter:description" content="Swap tokens on EVM and Solana. Best rates." />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />

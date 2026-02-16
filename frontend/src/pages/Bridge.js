@@ -274,16 +274,16 @@ export default function Bridge() {
   return (
     <>
       <Helmet>
-        <title>Cross-Chain Bridge - boing.finance</title>
-        <meta name="description" content="Bridge tokens between different blockchains with boing.finance. Secure, fast, and cost-effective cross-chain transfers." />
-        <meta name="keywords" content="cross-chain bridge, blockchain bridge, token bridge, DeFi bridge, multi-chain" />
-        <meta property="og:title" content="Cross-Chain Bridge - boing.finance" />
-        <meta property="og:description" content="Bridge tokens between different blockchains with boing.finance." />
+        <title>Cross-Chain Bridge | boing.finance — Move Assets Between EVM & Solana</title>
+        <meta name="description" content="Bridge tokens between EVM and Solana securely. Fast, low-cost transfers with boing.finance." />
+        <meta name="keywords" content="cross-chain bridge, token bridge, boing finance, EVM, Solana, DeFi bridge" />
+        <meta property="og:title" content="Cross-Chain Bridge | boing.finance" />
+        <meta property="og:description" content="Bridge tokens between EVM and Solana. Secure and fast." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/bridge" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Cross-Chain Bridge - boing.finance" />
-        <meta name="twitter:description" content="Bridge tokens between different blockchains." />
+        <meta name="twitter:title" content="Bridge | boing.finance" />
+        <meta name="twitter:description" content="Bridge tokens between EVM and Solana." />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />

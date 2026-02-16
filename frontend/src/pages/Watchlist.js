@@ -9,8 +9,8 @@ export default function Watchlist() {
   return (
     <>
       <Helmet>
-        <title>Token Watchlist - boing.finance</title>
-        <meta name="description" content="Track your favorite tokens with real-time price updates on boing.finance." />
+        <title>Token Watchlist | boing.finance — Track Prices</title>
+        <meta name="description" content="Track your favorite tokens with real-time prices on boing.finance. Watchlist for EVM and Solana." />
       </Helmet>
       <div className="relative min-h-screen">
         <div className="relative z-10 container mx-auto px-4 py-8">

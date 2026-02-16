@@ -335,7 +335,7 @@ const LiquiditySection = () => {
             <ul className="space-y-1  text-sm"
           style={{ color: 'var(--text-secondary)'  }}>
               <li>• Only invest what you can afford to lose</li>
-              <li>• Diversify across multiple pairs and networks</li>
+              <li>• Diversify across pairs and chains</li>
               <li>• Use open source smart contracts</li>
               <li>• Monitor positions regularly</li>
               <li>• Have an exit strategy</li>
