@@ -1,4 +1,5 @@
-import React, { useState, lazy, Suspense } from 'react';
+import React, { useState, useRef, useEffect, lazy, Suspense } from 'react';
+import { createPortal } from 'react-dom';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
@@ -345,15 +346,14 @@ function AppContent() {
               </nav>
             </div>
 
-            {/* Desktop Right: Tools + ChainType + Network + Wallet - visible from 1150px */}
-            <div className="hidden min-[1150px]:flex items-center flex-shrink-0 min-w-0 gap-1.5 xl:gap-2 2xl:gap-3 overflow-hidden">
-              <div className="flex-shrink-0">
+            {/* Desktop Right: Tools + ChainType + Network + Wallet - visible from 1150px; overflow-visible so Tools dropdown is not clipped */}
+            <div className="hidden min-[1150px]:flex items-center flex-shrink-0 min-w-0 gap-1.5 xl:gap-2 2xl:gap-3 overflow-visible">
+              <div className="flex-shrink-0 relative">
                 <ToolsDropdown
                 isOpen={toolsDropdownOpen}
                 onToggle={() => { const next = !toolsDropdownOpen; setTradeAndDeployDropdownOpen(false); setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(next); }}
                 onClose={() => setToolsDropdownOpen(false)}
                 onOpenHistory={() => { setHistoryModalOpen(true); setToolsDropdownOpen(false); }}
-                onOpenAiChat={() => { setAiChatOpen(true); setToolsDropdownOpen(false); }}
                 onOpenDefi101={() => { setDefi101Open(true); setToolsDropdownOpen(false); }}
               />
               </div>
@@ -368,7 +368,6 @@ function AppContent() {
             <div className="hidden md:flex min-[1150px]:hidden items-center gap-2 pl-3 border-l flex-shrink-0" style={{ borderColor: 'var(--border-color)' }}>
                 <div className="flex-shrink-0"><ToolsDropdown isOpen={toolsDropdownOpen} onToggle={() => { const next = !toolsDropdownOpen; setIsMediumNavOpen(false); setToolsDropdownOpen(next); }} onClose={() => setToolsDropdownOpen(false)}
                   onOpenHistory={() => { setHistoryModalOpen(true); setToolsDropdownOpen(false); }}
-                  onOpenAiChat={() => { setAiChatOpen(true); setToolsDropdownOpen(false); }}
                   onOpenDefi101={() => { setDefi101Open(true); setToolsDropdownOpen(false); }}
                 /></div>
                 <div className="flex-shrink-0"><NetworkSelector /></div>
@@ -651,6 +650,23 @@ function AppContent() {
 
       {/* AI DeFi Assistant Modal */}
       <AIChatModal isOpen={aiChatOpen} onClose={() => setAiChatOpen(false)} />
+      {/* Floating AI Assistant button - bottom right, visible on all pages */}
+      <button
+        type="button"
+        onClick={() => setAiChatOpen(true)}
+        className="fixed bottom-6 right-6 z-[40] w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent"
+        style={{
+          background: 'linear-gradient(135deg, rgba(34, 211, 238, 0.9), rgba(59, 130, 246, 0.9))',
+          border: '1px solid rgba(34, 211, 238, 0.5)',
+          boxShadow: '0 4px 20px rgba(34, 211, 238, 0.35)'
+        }}
+        aria-label="Open AI DeFi Assistant"
+        title="AI Assistant"
+      >
+        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+        </svg>
+      </button>
       <DeFi101Modal isOpen={defi101Open} onClose={() => setDefi101Open(false)} />
       
       <footer className="w-full flex-shrink-0 mt-auto border-t border-cyan-500/30 shadow-lg shadow-cyan-500/20 relative z-20" style={{
@@ -953,66 +969,56 @@ function Home() {
       </Helmet>
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center relative z-10">
+          {/* 1. Hero: Title, slogan, one-line value prop */}
+          <section className="text-center relative z-10 mb-10">
             <h1 className="hero-title text-4xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 bg-clip-text text-transparent mb-2 leading-tight pb-2 drop-shadow-[0_0_20px_rgba(6,182,212,0.4)]">
               boing.finance
             </h1>
-            <p className="text-lg md:text-xl font-medium mb-4 bg-gradient-to-r from-cyan-400/90 via-cyan-300 to-blue-400/90 bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(6,182,212,0.3)]">
+            <p className="text-lg md:text-xl font-medium mb-3 bg-gradient-to-r from-cyan-400/90 via-cyan-300 to-blue-400/90 bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(6,182,212,0.3)]">
               The DeFi that always bounces back.
             </p>
-            <p className="text-lg leading-relaxed mb-12" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-lg leading-relaxed max-w-2xl mx-auto mb-8" style={{ color: 'var(--text-secondary)' }}>
               Swap, add liquidity, bridge assets, and deploy tokens on EVM and Solana—all in one place. No code required.
             </p>
-          </div>
+            {/* Feature highlights strip: primary actions right under hero */}
+            <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mb-10 fade-in delay-200">
+              <Highlight icon={<SwapIcon />} text="Lightning-fast swaps" />
+              <Highlight icon={<LiquidityIcon />} text="Earn with liquidity" />
+              <Highlight icon={<AnalyticsIcon />} text="Real-time analytics" />
+              <Highlight icon={<PortfolioIcon />} text="Unified portfolio" />
+              <Highlight icon={<BridgeIcon />} text="Cross-chain bridge" />
+              <Highlight icon={<TokensIcon />} text="All your tokens" />
+              <Highlight icon={<DeployTokenIcon />} text="Deploy tokens" />
+              <span className="text-2xl px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-400/20">📜 Governance</span>
+              <span className="text-2xl px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-400/20">🎯 BOING Ecosystem</span>
+              <span className="text-2xl px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-400/20">🤖 AI Assistant</span>
+            </div>
+            <p className="text-xl text-center max-w-xl mx-auto mb-2" style={{ color: 'var(--text-secondary)' }}>Fast, secure DeFi. For everyone.</p>
+          </section>
 
-          {/* Floating Boing Mascot (easter egg: click to bounce) */}
+          {/* Floating Boing Mascot (easter egg: click to bounce) - top right */}
           <div className="absolute top-20 right-10 hidden lg:block">
             <BoingMascot />
           </div>
 
-          {/* Feature Highlights Strip */}
-          <div className="flex flex-wrap justify-center gap-6 mb-12 fade-in delay-300">
-            <Highlight icon={<SwapIcon />} text="Lightning-fast swaps" />
-            <Highlight icon={<LiquidityIcon />} text="Earn with liquidity" />
-            <Highlight icon={<AnalyticsIcon />} text="Real-time analytics" />
-            <Highlight icon={<PortfolioIcon />} text="Unified portfolio" />
-            <Highlight icon={<BridgeIcon />} text="Cross-chain bridge" />
-            <Highlight icon={<TokensIcon />} text="All your tokens" />
-            <Highlight icon={<DeployTokenIcon />} text="Deploy tokens" />
-            <span className="text-2xl px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-400/20">📜 Governance</span>
-            <span className="text-2xl px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-400/20">🎯 BOING Ecosystem</span>
-            <span className="text-2xl px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-400/20">🤖 AI DeFi Assistant</span>
-          </div>
-
-          {/* Animated SVG Hero Section */}
-          <div className="flex flex-col items-center justify-center mb-16 fade-in delay-400">
-            <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="animate-spin-slow mb-4">
-              <circle cx="100" cy="100" r="90" stroke="#00E0FF" strokeWidth="4" fill="none" opacity="0.2" />
-              <circle cx="100" cy="100" r="70" stroke="#7B61FF" strokeWidth="3" fill="none" opacity="0.15" />
-              <circle cx="100" cy="100" r="50" stroke="#00FFB2" strokeWidth="2" fill="none" opacity="0.12" />
-              <circle cx="100" cy="100" r="30" stroke="#fff" strokeWidth="1.5" fill="none" opacity="0.09" />
-              <animateTransform attributeName="transform" from="0 100 100" to="360 100 100" dur="18s" repeatCount="indefinite" />
-            </svg>
-            <p className="text-xl text-center max-w-2xl mb-2" style={{ color: 'var(--text-secondary)' }}>Fast, secure DeFi. For everyone.</p>
-          </div>
-
-          {/* Onboarding Checklist + For You */}
-          <div className="mt-6 mb-8 flex flex-col sm:flex-row gap-6 justify-center items-start max-w-2xl mx-auto fade-in delay-450">
-            <div className="w-full sm:w-auto">
+          {/* 2. Getting started: Onboarding + For You (positioned before feature grid so new users see next steps first) */}
+          <section className="flex flex-col lg:flex-row gap-8 mb-10 fade-in delay-300">
+            <div className="lg:max-w-sm shrink-0">
               <OnboardingChecklist />
             </div>
-            <div className="w-full sm:w-64 shrink-0">
+            <div className="flex-1 min-w-0">
               <ForYouSection />
             </div>
-          </div>
+          </section>
 
-          {/* Proactive Tips (when connected) */}
-          <div className="mb-6 max-w-2xl mx-auto fade-in delay-450">
+          {/* Proactive Tips (when connected) - right after onboarding */}
+          <section className="mb-10 max-w-2xl mx-auto fade-in delay-350">
             <ProactiveTipsBanner />
-          </div>
+          </section>
 
-          {/* Features Section */}
-          <div className="mt-8 space-y-8 fade-in delay-500">
+          {/* 3. Main product: Feature cards (Trade, Analytics, Deploy) */}
+          <section className="space-y-8 fade-in delay-400">
+            <h2 className="text-2xl font-bold text-center" style={{ color: 'var(--text-primary)' }}>What you can do</h2>
             {/* First row - 6 cards in 3 columns - dynamically generated from navigation */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {memoizedNav.trading.map((item) => {
@@ -1076,8 +1082,10 @@ function Home() {
               })}
             </div>
 
-            {/* Governance & BOING Sections */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+            {/* 4. Governance & BOING */}
+            <section className="mt-12">
+              <h2 className="text-2xl font-bold text-center mb-8" style={{ color: 'var(--text-primary)' }}>Governance & Ecosystem</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">
                 <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Governance</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1099,10 +1107,11 @@ function Home() {
                 </div>
               </div>
             </div>
+            </section>
 
-            {/* Tools & Resources */}
-            <div className="mt-8">
-              <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Tools & Resources</h3>
+            {/* 5. Tools & Resources */}
+            <section className="mt-12">
+              <h2 className="text-2xl font-bold text-center mb-6" style={{ color: 'var(--text-primary)' }}>Tools & Resources</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <a href="/docs" className="block">
                   <FeatureCard title="Documentation" icon={<span className="text-xl">📖</span>} description="Guides for swapping, liquidity, bridging, and deployment" />
@@ -1114,15 +1123,13 @@ function Home() {
                   <FeatureCard title="Watchlist" icon={<span className="text-xl">⭐</span>} description="Track tokens and price alerts" />
                 </a>
                 <a href="/help-center" className="block">
-                  <FeatureCard title="Help Center" icon={<span className="text-xl">❓</span>} description="FAQs and support - AI Assistant available" />
+                  <FeatureCard title="Help Center" icon={<span className="text-xl">❓</span>} description="FAQs and support — use the AI button for help" />
                 </a>
               </div>
-            </div>
+            </section>
           </div>
 
-
-
-          {/* Token Creation Info Banner */}
+          {/* 6. Token creation CTA banner */}
           <div className="mt-8 mb-4 flex justify-center fade-in delay-800">
             <div className="rounded-xl px-6 py-4 bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 max-w-2xl">
               <div className="text-center">
@@ -1343,11 +1350,56 @@ function FeatureCard({ title, icon, description, comingSoon }) {
   );
 }
 
-// Tools dropdown: Language, Theme, AI Chat, Transaction History, DeFi 101
-function ToolsDropdown({ isOpen, onToggle, onClose, onOpenHistory, onOpenAiChat, onOpenDefi101 }) {
+// Tools dropdown: Language, Theme, Transaction History, DeFi 101 (AI Assistant is in floating FAB)
+// Renders panel via portal so it is not clipped by overflow-x-hidden on the app wrapper.
+function ToolsDropdown({ isOpen, onToggle, onClose, onOpenHistory, onOpenDefi101 }) {
+  const buttonRef = useRef(null);
+  const [position, setPosition] = useState({ top: 0, right: 0 });
+
+  useEffect(() => {
+    if (!isOpen || !buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    setPosition({ top: rect.bottom + 8, right: Math.max(8, window.innerWidth - rect.right) });
+  }, [isOpen]);
+
+  const dropdownContent = isOpen && (
+    <>
+      <div className="fixed inset-0 z-[45]" aria-hidden="true" onClick={onClose} />
+      <div
+        className="fixed w-52 backdrop-blur-sm rounded-xl shadow-xl z-[50]"
+        style={{
+          top: position.top,
+          right: position.right,
+          backgroundColor: 'var(--bg-card)',
+          border: '1px solid var(--border-color)'
+        }}
+      >
+        <div className="py-2 px-2">
+          <div className="flex items-center justify-between px-3 py-2 border-b mb-2" style={{ borderColor: 'var(--border-color)' }}>
+            <span className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>Language</span>
+            <LanguageSelector />
+          </div>
+          <div className="flex items-center justify-between px-3 py-2 border-b mb-2" style={{ borderColor: 'var(--border-color)' }}>
+            <span className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>Theme</span>
+            <ThemeToggle />
+          </div>
+          <button onClick={onOpenHistory} className="w-full text-left px-3 py-2.5 text-sm flex items-center gap-3 hover:bg-cyan-500/10 rounded-lg transition-colors" style={{ color: 'var(--text-secondary)' }}>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            Transaction History
+          </button>
+          <button onClick={onOpenDefi101} className="w-full text-left px-3 py-2.5 text-sm flex items-center gap-3 hover:bg-cyan-500/10 rounded-lg transition-colors" style={{ color: 'var(--text-secondary)' }}>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+            DeFi 101
+          </button>
+        </div>
+      </div>
+    </>
+  );
+
   return (
     <div className="relative flex-shrink-0">
       <button
+        ref={buttonRef}
         type="button"
         onClick={onToggle}
         className="p-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center hover:bg-cyan-500/10"
@@ -1367,35 +1419,9 @@ function ToolsDropdown({ isOpen, onToggle, onClose, onOpenHistory, onOpenAiChat,
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
-      {isOpen && (
-        <>
-          <div className="fixed inset-0 z-[45]" aria-hidden="true" onClick={onClose} />
-          <div className="absolute right-0 top-full mt-2 w-52 backdrop-blur-sm rounded-xl shadow-xl z-[50]" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-          <div className="py-2 px-2">
-            <div className="flex items-center justify-between px-3 py-2 border-b mb-2" style={{ borderColor: 'var(--border-color)' }}>
-              <span className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>Language</span>
-              <LanguageSelector />
-            </div>
-            <div className="flex items-center justify-between px-3 py-2 border-b mb-2" style={{ borderColor: 'var(--border-color)' }}>
-              <span className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>Theme</span>
-              <ThemeToggle />
-            </div>
-            <button onClick={onOpenAiChat} className="w-full text-left px-3 py-2.5 text-sm flex items-center gap-3 hover:bg-cyan-500/10 rounded-lg transition-colors" style={{ color: 'var(--text-secondary)' }}>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
-              AI Assistant
-            </button>
-            <button onClick={onOpenHistory} className="w-full text-left px-3 py-2.5 text-sm flex items-center gap-3 hover:bg-cyan-500/10 rounded-lg transition-colors" style={{ color: 'var(--text-secondary)' }}>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              Transaction History
-            </button>
-            <button onClick={onOpenDefi101} className="w-full text-left px-3 py-2.5 text-sm flex items-center gap-3 hover:bg-cyan-500/10 rounded-lg transition-colors" style={{ color: 'var(--text-secondary)' }}>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-              DeFi 101
-            </button>
-          </div>
-        </div>
-        </>
-      )}
+      {dropdownContent && typeof document !== 'undefined' && document.body
+        ? createPortal(dropdownContent, document.body)
+        : null}
     </div>
   );
 }
