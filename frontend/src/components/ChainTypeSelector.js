@@ -1,9 +1,9 @@
 /**
  * Chain Type Selector - Switch between EVM and Solana
- * When Solana: shows mainnet/devnet toggle
+ * Solana devnet/mainnet toggle lives in wallet modal and wallet dropdown (no navbar shift).
  */
 import React from 'react';
-import { useChainType, useSolanaWallet } from '../contexts/SolanaWalletContext';
+import { useChainType } from '../contexts/SolanaWalletContext';
 
 const CHAIN_TYPES = [
   { id: 'evm', label: 'EVM', networks: 'EVM chains', icon: '⟠' },
@@ -11,8 +11,7 @@ const CHAIN_TYPES = [
 ];
 
 export default function ChainTypeSelector() {
-  const { chainType, setChainType, isSolana } = useChainType();
-  const { network, setSolanaNetwork } = useSolanaWallet();
+  const { chainType, setChainType } = useChainType();
 
   return (
     <div className="flex items-center gap-2 flex-shrink-0">
@@ -36,22 +35,6 @@ export default function ChainTypeSelector() {
           </button>
         ))}
       </div>
-      {isSolana && (
-        <div className="flex items-center gap-1 p-1 rounded-lg bg-black/10 border" style={{ borderColor: 'var(--border-color)' }}>
-          {['devnet', 'mainnet'].map((net) => (
-            <button
-              key={net}
-              onClick={() => setSolanaNetwork(net)}
-              className={`px-2 py-1 rounded text-xs font-medium ${
-                network === net ? 'bg-cyan-500/30 text-cyan-300' : 'hover:bg-white/5'
-              }`}
-              style={{ color: network === net ? 'var(--primary-color)' : 'var(--text-secondary)' }}
-            >
-              {net === 'mainnet' ? 'Mainnet' : 'Devnet'}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

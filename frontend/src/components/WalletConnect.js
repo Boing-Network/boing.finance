@@ -44,15 +44,7 @@ const WalletConnect = () => {
   }, [isSolana, evmWallet.isConnected, evmWallet.account, evmWallet.getAccountBalance]);
 
   const handleConnect = async () => {
-    if (isSolana && solanaWallet) {
-      try {
-        await solanaWallet.connectWallet();
-        toast.success('Solana wallet connected!');
-      } catch (err) {
-        toast.error(err?.message || 'Failed to connect Solana wallet. Install Phantom or Solflare.');
-      }
-      return;
-    }
+    // Both EVM and Solana open the same modal (modal shows network toggle for Solana, wallet list for EVM)
     setShowWalletModal(true);
   };
 
@@ -122,10 +114,27 @@ const WalletConnect = () => {
               {currentNetwork && (
                 <div className="mb-4">
                   <div className="text-sm text-theme-tertiary mb-1">Network</div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                    <span className="text-theme-primary text-sm">{currentNetwork.name}</span>
-                  </div>
+                  {isSolana && solanaWallet?.setSolanaNetwork ? (
+                    <div className="flex items-center gap-1 p-1 rounded-lg bg-black/10 border border-theme w-fit">
+                      {['devnet', 'mainnet'].map((net) => (
+                        <button
+                          key={net}
+                          onClick={() => solanaWallet.setSolanaNetwork(net)}
+                          className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                            solanaWallet?.network === net ? 'bg-cyan-500/30 text-cyan-300' : 'hover:bg-white/5'
+                          }`}
+                          style={{ color: solanaWallet?.network === net ? 'var(--primary-color)' : 'var(--text-secondary)' }}
+                        >
+                          {net === 'mainnet' ? 'Mainnet' : 'Devnet'}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <span className="text-theme-primary text-sm">{currentNetwork.name}</span>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -143,20 +152,18 @@ const WalletConnect = () => {
                 </div>
               </div>
 
-              {/* Switch Wallet Button - EVM only */}
-              {!isSolana && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowDropdown(false);
-                    setTimeout(() => setShowWalletModal(true), 100);
-                  }}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2 mb-2"
-                >
-                  <ArrowPathIcon className="w-4 h-4" />
-                  <span>Switch Wallet</span>
-                </button>
-              )}
+              {/* Switch Wallet / Network - opens modal (EVM: wallet list; Solana: network toggle + reconnect) */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDropdown(false);
+                  setTimeout(() => setShowWalletModal(true), 100);
+                }}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2 mb-2"
+              >
+                <ArrowPathIcon className="w-4 h-4" />
+                <span>{isSolana ? 'Network / Wallet' : 'Switch Wallet'}</span>
+              </button>
 
               {/* Disconnect Button */}
               <button
