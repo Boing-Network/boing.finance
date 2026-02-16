@@ -666,9 +666,11 @@ function AppContent() {
                 <Logo size={48} className="mr-3 sm:mr-4" showText={false} />
                 <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">boing.finance</h3>
               </div>
-              <p className="text-sm sm:text-base mb-4 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                The most advanced decentralized exchange with cross-chain capabilities, 
-                providing seamless trading across multiple networks.
+              <p className="text-sm sm:text-base font-medium mb-1 bg-gradient-to-r from-cyan-400/90 to-blue-400/90 bg-clip-text text-transparent">
+                The DeFi that always bounces back.
+              </p>
+              <p className="text-xs sm:text-sm mb-4 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                Cross-chain trading, token deployment, and governance—all from one unified interface.
               </p>
               <div className="flex space-x-3 sm:space-x-4">
                 <a href="https://twitter.com/boing_finance" target="_blank" rel="noopener noreferrer" className="transition-colors p-1 sm:p-2" style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>
@@ -834,17 +836,17 @@ function Home() {
     <>
       <Helmet>
         <title>Boing Finance - Deploy Tokens & Trade Crypto | Cross-Chain DEX</title>
-        <meta name="description" content="Deploy your own tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance. The most user-friendly decentralized exchange for token deployment and cross-chain trading." />
+        <meta name="description" content="The DeFi that always bounces back. Deploy your own tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance—the user-friendly cross-chain DEX." />
         <meta name="keywords" content="deploy token, crypto, blockchain, DEX, decentralized exchange, liquidity pool, cross-chain, token creation, cryptocurrency, DeFi, trading, swap, boing finance, token deployment, create token, ERC20, token launch" />
         <meta property="og:title" content="Boing Finance - Deploy Tokens & Trade Crypto | Cross-Chain DEX" />
-        <meta property="og:description" content="Deploy your own tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance. The most user-friendly decentralized exchange for token deployment and cross-chain trading." />
+        <meta property="og:description" content="The DeFi that always bounces back. Deploy tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance" />
         <meta property="og:site_name" content="Boing Finance" />
         <meta property="og:locale" content="en_US" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Boing Finance - Deploy Tokens & Trade Crypto" />
-        <meta name="twitter:description" content="Deploy your own tokens, create liquidity pools, and trade across multiple blockchains. The most user-friendly DEX for token deployment." />
+        <meta name="twitter:description" content="The DeFi that always bounces back. Deploy tokens, create pools, and trade across chains with Boing Finance." />
         <meta name="twitter:site" content="@boingfinance" />
         <link rel="canonical" href="https://boing.finance" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -858,7 +860,7 @@ function Home() {
           "@type": "WebSite",
           "name": "Boing Finance",
           "url": "https://boing.finance",
-          "description": "Deploy tokens, create liquidity pools, and trade across multiple blockchains with Boing Finance - the most user-friendly decentralized exchange (DEX) for token deployment and cross-chain trading.",
+          "description": "The DeFi that always bounces back. Deploy tokens, create liquidity pools, and trade across multiple blockchains with boing.finance.",
           "potentialAction": {
             "@type": "SearchAction",
             "target": "https://boing.finance/tokens?q={search_term_string}",
@@ -952,9 +954,12 @@ function Home() {
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center relative z-10">
-            <h1 className="hero-title text-4xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 bg-clip-text text-transparent mb-6 leading-tight pb-2 drop-shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+            <h1 className="hero-title text-4xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 bg-clip-text text-transparent mb-2 leading-tight pb-2 drop-shadow-[0_0_20px_rgba(6,182,212,0.4)]">
               boing.finance
             </h1>
+            <p className="text-lg md:text-xl font-medium mb-4 bg-gradient-to-r from-cyan-400/90 via-cyan-300 to-blue-400/90 bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(6,182,212,0.3)]">
+              The DeFi that always bounces back.
+            </p>
             <p className="text-lg leading-relaxed mb-12" style={{ color: 'var(--text-secondary)' }}>
               The ultimate multi-network DeFi platform for cross-chain trading, token deployment, governance, and the BOING ecosystem. Swap, provide liquidity, bridge assets, deploy tokens, create NFTs, vote on proposals, and earn rewards—all from one unified interface across Ethereum, Polygon, BSC, Arbitrum, Optimism, Base, and more.
             </p>
@@ -1343,13 +1348,15 @@ function ToolsDropdown({ isOpen, onToggle, onClose, onOpenHistory, onOpenAiChat,
   return (
     <div className="relative flex-shrink-0">
       <button
+        type="button"
         onClick={onToggle}
-        onBlur={() => setTimeout(onClose, 150)}
         className="p-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center hover:bg-cyan-500/10"
         style={{ color: 'var(--text-secondary)' }}
         onMouseEnter={(e) => { e.target.style.color = 'var(--text-primary)'; }}
         onMouseLeave={(e) => { e.target.style.color = 'var(--text-secondary)'; }}
         aria-label="Tools and preferences"
+        aria-expanded={isOpen}
+        aria-haspopup="true"
         title="Tools"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1361,7 +1368,9 @@ function ToolsDropdown({ isOpen, onToggle, onClose, onOpenHistory, onOpenAiChat,
         </svg>
       </button>
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-52 backdrop-blur-sm rounded-xl shadow-xl z-50" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+        <>
+          <div className="fixed inset-0 z-[45]" aria-hidden="true" onClick={onClose} />
+          <div className="absolute right-0 top-full mt-2 w-52 backdrop-blur-sm rounded-xl shadow-xl z-[50]" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
           <div className="py-2 px-2">
             <div className="flex items-center justify-between px-3 py-2 border-b mb-2" style={{ borderColor: 'var(--border-color)' }}>
               <span className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>Language</span>
@@ -1385,6 +1394,7 @@ function ToolsDropdown({ isOpen, onToggle, onClose, onOpenHistory, onOpenAiChat,
             </button>
           </div>
         </div>
+        </>
       )}
     </div>
   );
