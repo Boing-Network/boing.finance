@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useWallet } from '../contexts/WalletContext';
+import { useChainType, useSolanaWallet, CHAIN_TYPE_SOLANA } from '../contexts/SolanaWalletContext';
 import { XMarkIcon, CheckIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
 const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
   const { detectWalletProviders, connectWalletWithProvider } = useWallet();
+  const chainType = useChainType?.()?.chainType ?? 'evm';
+  const isSolana = chainType === CHAIN_TYPE_SOLANA;
+  const solanaWallet = useSolanaWallet?.() ?? null;
   const [availableWallets, setAvailableWallets] = useState([]);
   const [selectedWallet, setSelectedWallet] = useState(null);
   const [isConnecting, setIsConnecting] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !isSolana) {
       const providers = detectWalletProviders();
       const wallets = [];
 
@@ -61,7 +65,7 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
 
       setAvailableWallets(wallets);
     }
-  }, [isOpen, detectWalletProviders]);
+  }, [isOpen, isSolana, detectWalletProviders]);
 
   const handleWalletSelect = (wallet) => {
     if (!wallet.available) {
@@ -71,7 +75,7 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
     setSelectedWallet(wallet);
   };
 
-  const handleConnect = async () => {
+  const handleConnectEVM = async () => {
     if (!selectedWallet || !selectedWallet.available) {
       toast.error('Please select a wallet');
       return;
@@ -79,11 +83,10 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
 
     setIsConnecting(true);
     try {
-      // Connect with the selected wallet provider (no network selection - uses current network)
       const success = await connectWalletWithProvider(
         selectedWallet.provider,
         selectedWallet.id,
-        null // null means use current network
+        null
       );
 
       if (success) {
@@ -98,6 +101,24 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
     } catch (error) {
       console.error('Connection error:', error);
       toast.error(error.message || 'Failed to connect wallet');
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  const handleConnectSolana = async () => {
+    if (!solanaWallet?.connectWallet) {
+      toast.error('Solana wallet not available. Install Phantom or Solflare.');
+      return;
+    }
+    setIsConnecting(true);
+    try {
+      await solanaWallet.connectWallet();
+      toast.success('Solana wallet connected!');
+      if (onWalletSelected) onWalletSelected({ id: 'solana' });
+      onClose();
+    } catch (err) {
+      toast.error(err?.message || 'Failed to connect Solana wallet.');
     } finally {
       setIsConnecting(false);
     }
@@ -162,7 +183,7 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
       >
         {/* Header - Fixed at top */}
         <div className="flex items-center justify-between p-6 border-b border-theme flex-shrink-0 bg-theme-card rounded-t-lg">
-          <h2 className="text-xl font-bold text-theme-primary">Select Wallet</h2>
+          <h2 className="text-xl font-bold text-theme-primary">{isSolana ? 'Connect Solana' : 'Select Wallet'}</h2>
           <button
             onClick={onClose}
             className="text-theme-tertiary hover:text-theme-primary transition-colors"
@@ -175,51 +196,90 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
         {/* Content - Scrollable */}
         <div className="flex-1 overflow-y-auto p-6 min-h-0">
           <div className="space-y-6">
-            {/* Wallet Selection */}
-            <div>
-              <h3 className="text-sm font-semibold text-theme-secondary mb-3">Select Wallet</h3>
-              <div className="space-y-2">
-                {availableWallets.map((wallet) => (
-                  <button
-                    key={wallet.id}
-                    onClick={() => handleWalletSelect(wallet)}
-                    disabled={!wallet.available}
-                    className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-                      selectedWallet?.id === wallet.id
-                        ? 'border-blue-500 bg-blue-500/10'
-                        : 'border-theme hover:border-theme-primary'
-                    } ${
-                      !wallet.available
-                        ? 'opacity-50 cursor-not-allowed'
-                        : 'cursor-pointer'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <span className="text-2xl">{wallet.icon}</span>
-                        <div>
-                          <div className="font-medium text-theme-primary">{wallet.name}</div>
-                          {!wallet.available && wallet.message && (
-                            <div className="text-xs text-theme-tertiary mt-1">{wallet.message}</div>
-                          )}
+            {isSolana ? (
+              /* Solana: network toggle + connect */
+              <>
+                <div>
+                  <h3 className="text-sm font-semibold text-theme-secondary mb-3">Solana network</h3>
+                  <div className="flex items-center gap-1 p-1 rounded-lg bg-black/10 border border-theme w-fit">
+                    {['devnet', 'mainnet'].map((net) => (
+                      <button
+                        key={net}
+                        onClick={() => solanaWallet?.setSolanaNetwork?.(net)}
+                        className={`px-3 py-2 rounded text-sm font-medium transition-colors ${
+                          solanaWallet?.network === net ? 'bg-cyan-500/30 text-cyan-300' : 'hover:bg-white/5 text-theme-secondary'
+                        }`}
+                        style={{ color: solanaWallet?.network === net ? 'var(--primary-color)' : undefined }}
+                      >
+                        {net === 'mainnet' ? 'Mainnet' : 'Devnet'}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-theme-tertiary mt-2">Switch network before connecting. Use Phantom or Solflare.</p>
+                </div>
+              </>
+            ) : (
+              /* EVM: wallet list */
+              <div>
+                <h3 className="text-sm font-semibold text-theme-secondary mb-3">Select Wallet</h3>
+                <div className="space-y-2">
+                  {availableWallets.map((wallet) => (
+                    <button
+                      key={wallet.id}
+                      onClick={() => handleWalletSelect(wallet)}
+                      disabled={!wallet.available}
+                      className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
+                        selectedWallet?.id === wallet.id
+                          ? 'border-blue-500 bg-blue-500/10'
+                          : 'border-theme hover:border-theme-primary'
+                      } ${
+                        !wallet.available
+                          ? 'opacity-50 cursor-not-allowed'
+                          : 'cursor-pointer'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <span className="text-2xl">{wallet.icon}</span>
+                          <div>
+                            <div className="font-medium text-theme-primary">{wallet.name}</div>
+                            {!wallet.available && wallet.message && (
+                              <div className="text-xs text-theme-tertiary mt-1">{wallet.message}</div>
+                            )}
+                          </div>
                         </div>
+                        {selectedWallet?.id === wallet.id && (
+                          <CheckIcon className="w-5 h-5 text-blue-500" />
+                        )}
                       </div>
-                      {selectedWallet?.id === wallet.id && (
-                        <CheckIcon className="w-5 h-5 text-blue-500" />
-                      )}
-                    </div>
-                  </button>
-                ))}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
         {/* Connect Button - Fixed at bottom */}
         <div className="p-6 border-t border-theme flex-shrink-0">
-          {selectedWallet && selectedWallet.available ? (
+          {isSolana ? (
             <button
-              onClick={handleConnect}
+              onClick={handleConnectSolana}
+              disabled={isConnecting}
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+            >
+              {isConnecting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Connecting...</span>
+                </>
+              ) : (
+                <span>Connect Solana Wallet</span>
+              )}
+            </button>
+          ) : selectedWallet && selectedWallet.available ? (
+            <button
+              onClick={handleConnectEVM}
               disabled={isConnecting}
               className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
             >
@@ -234,7 +294,7 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
             </button>
           ) : (
             <div className="h-[48px] flex items-center justify-center">
-              <span className="text-sm text-theme-tertiary">Select a wallet to connect</span>
+              <span className="text-sm text-theme-tertiary">{isSolana ? 'Choose network above, then connect' : 'Select a wallet to connect'}</span>
             </div>
           )}
         </div>
