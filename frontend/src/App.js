@@ -323,8 +323,8 @@ function AppContent() {
               </button>
             </div>
 
-            {/* Desktop Navigation - visible from 1150px so nav doesn't overlap logo/tools */}
-            <div className="hidden min-[1150px]:flex items-center justify-center flex-1 min-w-0 overflow-hidden">
+            {/* Desktop Navigation - visible from 1150px; overflow-visible so dropdowns aren't clipped */}
+            <div className="hidden min-[1150px]:flex items-center justify-center flex-1 min-w-0 overflow-visible">
               <nav className="flex items-center gap-1.5 xl:gap-2 2xl:gap-3 flex-nowrap justify-center min-w-0">
                 <DropdownMenu label="Trade & Deploy" items={memoizedNavigation.tradeAndDeploy} isOpen={tradeAndDeployDropdownOpen}
                   onToggle={() => { const next = !tradeAndDeployDropdownOpen; setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setTradeAndDeployDropdownOpen(next); }}
@@ -1447,12 +1447,14 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
   return (
     <div className="relative flex-shrink-0">
       <button
+        type="button"
         onClick={onToggle}
-        onBlur={() => setTimeout(onClose, 150)}
         className="px-2 py-1.5 xl:px-2.5 2xl:px-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-1 group hover:bg-cyan-500/10"
         style={{ color: 'var(--text-secondary)' }}
         onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
         onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+        aria-expanded={isOpen}
+        aria-haspopup="true"
       >
         <span>{label}</span>
         <svg 
@@ -1465,7 +1467,9 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
         </svg>
       </button>
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-52 backdrop-blur-sm rounded-xl shadow-xl z-50 animate-in slide-in-from-top-2 duration-200" style={{
+        <>
+          <div className="fixed inset-0 z-[45]" aria-hidden="true" onClick={onClose} />
+          <div className="absolute top-full left-0 mt-2 w-52 backdrop-blur-sm rounded-xl shadow-xl z-[50]" style={{
           backgroundColor: 'var(--bg-card)',
           border: '1px solid var(--border-color)',
           boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
@@ -1526,6 +1530,7 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
             })}
           </div>
         </div>
+        </>
       )}
     </div>
   );
