@@ -970,7 +970,7 @@ function Home() {
       <div className="relative z-10 container mx-auto px-4 py-10 md:py-14">
         <div className="max-w-7xl mx-auto">
           {/* 1. Hero: Title, slogan, one-line value prop */}
-          <section className="text-center relative z-10 mb-14 md:mb-16">
+          <section className="text-center relative z-10 mb-20 md:mb-24">
             <h1 className="hero-title text-4xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 bg-clip-text text-transparent mb-2 leading-tight pb-2 drop-shadow-[0_0_20px_rgba(6,182,212,0.4)]">
               boing.finance
             </h1>
@@ -1002,7 +1002,7 @@ function Home() {
           </div>
 
           {/* 2. Getting started: Onboarding + For You (positioned before feature grid so new users see next steps first) */}
-          <section className="flex flex-col lg:flex-row gap-8 mb-14 md:mb-16 fade-in delay-300">
+          <section className="flex flex-col lg:flex-row gap-8 mb-20 md:mb-24 fade-in delay-300">
             <div className="lg:max-w-sm shrink-0">
               <OnboardingChecklist />
             </div>
@@ -1012,12 +1012,12 @@ function Home() {
           </section>
 
           {/* Proactive Tips (when connected) - right after onboarding */}
-          <section className="mb-14 md:mb-16 max-w-2xl mx-auto fade-in delay-350">
+          <section className="mb-20 md:mb-24 max-w-2xl mx-auto fade-in delay-350">
             <ProactiveTipsBanner />
           </section>
 
           {/* 3. Main product: Feature cards (Trade, Analytics, Deploy) */}
-          <section className="space-y-8 mb-14 md:mb-16 fade-in delay-400">
+          <section className="space-y-10 mb-20 md:mb-24 fade-in delay-400">
             <h2 className="text-2xl font-bold text-center" style={{ color: 'var(--text-primary)' }}>What you can do</h2>
             {/* First row - 6 cards in 3 columns - dynamically generated from navigation */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -1083,7 +1083,7 @@ function Home() {
             </div>
 
             {/* 4. Governance & BOING */}
-            <section className="mt-16 md:mt-20">
+            <section className="mt-20 md:mt-28">
               <h2 className="text-2xl font-bold text-center mb-8" style={{ color: 'var(--text-primary)' }}>Governance & Ecosystem</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">
@@ -1110,7 +1110,7 @@ function Home() {
             </section>
 
             {/* 5. Tools & Resources */}
-            <section className="mt-16 md:mt-20">
+            <section className="mt-20 md:mt-28">
               <h2 className="text-2xl font-bold text-center mb-6" style={{ color: 'var(--text-primary)' }}>Tools & Resources</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
                 <a href="/docs" className="block h-full">
@@ -1132,7 +1132,7 @@ function Home() {
           </div>
 
           {/* 6. Token creation CTA banner */}
-          <div className="mt-14 md:mt-16 mb-8 flex justify-center fade-in delay-800">
+          <div className="mt-24 md:mt-32 mb-10 flex justify-center fade-in delay-800">
             <div className="rounded-xl px-6 py-4 bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 max-w-2xl">
               <div className="text-center">
                 <div className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>🚀 Create Your Own Tokens & Trading Pairs!</div>
