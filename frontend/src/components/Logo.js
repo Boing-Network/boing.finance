@@ -1,14 +1,21 @@
 import React from 'react';
+import { useTheme } from '../contexts/ThemeContext';
+
+const LOGO_DARK = '/assets/logo-dark-transparent.png';
+const LOGO_LIGHT = '/assets/logo-light-transparent.png';
 
 /**
- * Logo: icon (logo.svg) with optional wordmark.
+ * Logo: transparent PNG for dark/light mode with optional wordmark.
  * showComic=true uses the official "BOING!" comic-style asset from the design system.
  */
 const Logo = ({ size = 40, className = "", showText = false, showComic = false }) => {
+  const theme = useTheme();
+  const logoSrc = theme?.mode === 'light' ? LOGO_LIGHT : LOGO_DARK;
+
   return (
     <div className={`flex items-center ${className}`}>
       <img
-        src="/logo.svg"
+        src={logoSrc}
         alt="Boing"
         width={size}
         height={size}
