@@ -270,7 +270,7 @@ function AppContent() {
       <BaseNetworkOptimizer />
       
       {/* Navigation - w-full and min-w-0 to prevent horizontal scroll */}
-      <nav className="relative z-30 flex-shrink-0 w-full min-w-0 backdrop-blur-sm border-b border-cyan-500/30 shadow-lg shadow-cyan-500/20" style={{ 
+      <nav className="relative z-30 flex-shrink-0 w-full min-w-0 backdrop-blur-sm border-b border-[#00E5CC]/30 shadow-lg shadow-[#00E5CC]/20" style={{ 
         backgroundColor: 'var(--bg-primary)',
         borderColor: 'var(--border-color)'
       }}>
@@ -395,13 +395,13 @@ function AppContent() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-cyan-500/30 backdrop-blur-sm shadow-lg shadow-cyan-500/20" style={{
+          <div className="md:hidden border-t border-[#00E5CC]/30 backdrop-blur-sm shadow-lg shadow-[#00E5CC]/20" style={{
             background: 'linear-gradient(to right, var(--bg-secondary), var(--bg-tertiary), var(--bg-secondary))',
             borderColor: 'var(--border-color)'
           }}>
             <div className="px-4 py-3 space-y-3">
               {/* Trade & Deploy Section (merged Trading + Deployment) */}
-              <div className="rounded-lg p-3 border border-cyan-500/20" style={{
+              <div className="rounded-lg p-3 border border-[#00E5CC]/20" style={{
                 background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
                 borderColor: 'var(--border-color)'
               }}>
@@ -454,7 +454,7 @@ function AppContent() {
               </div>
 
               {/* Analytics Section */}
-              <div className="rounded-lg p-3 border border-cyan-500/20" style={{
+              <div className="rounded-lg p-3 border border-[#00E5CC]/20" style={{
                 background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
                 borderColor: 'var(--border-color)'
               }}>
@@ -507,7 +507,7 @@ function AppContent() {
               </div>
 
               {/* Governance Section */}
-              <div className="rounded-lg p-3 border border-cyan-500/20" style={{
+              <div className="rounded-lg p-3 border border-[#00E5CC]/20" style={{
                 background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
                 borderColor: 'var(--border-color)'
               }}>
@@ -532,7 +532,7 @@ function AppContent() {
               </div>
 
               {/* BOING Section */}
-              <div className="rounded-lg p-3 border border-cyan-500/20" style={{
+              <div className="rounded-lg p-3 border border-[#00E5CC]/20" style={{
                 background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
                 borderColor: 'var(--border-color)'
               }}>
@@ -557,13 +557,13 @@ function AppContent() {
               </div>
 
               {/* Mobile Wallet Controls */}
-              <div className="space-y-3 pt-3 border-t border-cyan-500/20" style={{ borderColor: 'var(--border-color)' }}>
+              <div className="space-y-3 pt-3 border-t border-[#00E5CC]/20" style={{ borderColor: 'var(--border-color)' }}>
                 <button
                   onClick={() => {
                     setAiChatOpen(true);
                     closeMenu();
                   }}
-                  className="w-full text-left px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 border border-cyan-500/20"
+                  className="w-full text-left px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 border border-[#00E5CC]/20"
                   style={{
                     color: 'var(--text-secondary)',
                     background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
@@ -582,7 +582,7 @@ function AppContent() {
                     setHistoryModalOpen(true);
                     closeMenu();
                   }}
-                  className="w-full text-left px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 border border-cyan-500/20"
+                  className="w-full text-left px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 border border-[#00E5CC]/20"
                   style={{
                     color: 'var(--text-secondary)',
                     background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
@@ -596,7 +596,7 @@ function AppContent() {
                   </svg>
                   <span>Transaction History</span>
                 </button>
-                <div className="w-full text-left px-3 py-3 rounded-lg text-base font-medium flex items-center space-x-3 border border-cyan-500/20" style={{
+                <div className="w-full text-left px-3 py-3 rounded-lg text-base font-medium flex items-center space-x-3 border border-[#00E5CC]/20" style={{
                   color: 'var(--text-secondary)',
                   background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
                   borderColor: 'var(--border-color)'
@@ -606,7 +606,7 @@ function AppContent() {
                     <LanguageSelector />
                   </div>
                 </div>
-                <div className="w-full text-left px-3 py-3 rounded-lg text-base font-medium flex items-center space-x-3 border border-cyan-500/20" style={{
+                <div className="w-full text-left px-3 py-3 rounded-lg text-base font-medium flex items-center space-x-3 border border-[#00E5CC]/20" style={{
                   color: 'var(--text-secondary)',
                   background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
                   borderColor: 'var(--border-color)'
@@ -656,9 +656,9 @@ function AppContent() {
         onClick={() => setAiChatOpen(true)}
         className="fixed bottom-6 right-6 z-[40] w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent"
         style={{
-          background: 'linear-gradient(135deg, rgba(34, 211, 238, 0.9), rgba(59, 130, 246, 0.9))',
-          border: '1px solid rgba(34, 211, 238, 0.5)',
-          boxShadow: '0 4px 20px rgba(34, 211, 238, 0.35)'
+          background: 'linear-gradient(135deg, #00E5CC, #00B4FF)',
+          border: '1px solid rgba(0, 229, 204, 0.5)',
+          boxShadow: '0 4px 20px rgba(0, 229, 204, 0.35)'
         }}
         aria-label="Open AI DeFi Assistant"
         title="AI Assistant"
@@ -669,7 +669,7 @@ function AppContent() {
       </button>
       <DeFi101Modal isOpen={defi101Open} onClose={() => setDefi101Open(false)} />
       
-      <footer className="w-full flex-shrink-0 mt-auto border-t border-cyan-500/30 shadow-lg shadow-cyan-500/20 relative z-20" style={{
+      <footer className="w-full flex-shrink-0 mt-auto border-t border-[#00E5CC]/30 shadow-lg shadow-[#00E5CC]/20 relative z-20" style={{
         backgroundColor: 'var(--bg-primary)',
         borderColor: 'var(--border-color)'
       }}>
@@ -680,10 +680,10 @@ function AppContent() {
             <div className="lg:col-span-5">
               <div className="flex items-center mb-4 sm:mb-6">
                 <Logo size={48} className="mr-3 sm:mr-4" showText={false} />
-                <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">boing.finance</h3>
+                <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#00E5CC] via-[#00E5CC] to-[#00B4FF] bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(0,229,204,0.6)]">boing.finance</h3>
               </div>
-              <p className="text-sm sm:text-base font-medium mb-1 bg-gradient-to-r from-cyan-400/90 to-blue-400/90 bg-clip-text text-transparent">
-                The DeFi that always bounces back.
+              <p className="text-sm sm:text-base font-medium mb-1 bg-gradient-to-r from-[#00E5CC]/90 to-[#00B4FF]/90 bg-clip-text text-transparent">
+                Authentic. Decentralized. Optimal. Quality-Assured.
               </p>
               <p className="text-xs sm:text-sm mb-4 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                 Swap, bridge, and deploy on EVM and Solana—one interface.
@@ -733,7 +733,7 @@ function AppContent() {
             </div>
           </div>
           
-          <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-cyan-500/20" style={{ borderColor: 'var(--border-color)' }}>
+          <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-[#00E5CC]/20" style={{ borderColor: 'var(--border-color)' }}>
             <p className="text-xs sm:text-sm text-center" style={{ color: 'var(--text-secondary)' }}>
               © 2026 boing.finance. All rights reserved. Built with ❤️ for the DeFi community.
             </p>
@@ -971,11 +971,11 @@ function Home() {
         <div className="max-w-7xl mx-auto">
           {/* 1. Hero: Title, slogan, one-line value prop */}
           <section className="text-center relative z-10 mb-20 md:mb-24">
-            <h1 className="hero-title text-4xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 bg-clip-text text-transparent mb-2 leading-tight pb-2 drop-shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+            <h1 className="hero-title text-4xl md:text-6xl font-bold bg-gradient-to-r from-[#00E5CC] via-[#00E5CC] to-[#00B4FF] bg-clip-text text-transparent mb-2 leading-tight pb-2 drop-shadow-[0_0_20px_rgba(0,229,204,0.4)]">
               boing.finance
             </h1>
-            <p className="text-lg md:text-xl font-medium mb-3 bg-gradient-to-r from-cyan-400/90 via-cyan-300 to-blue-400/90 bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(6,182,212,0.3)]">
-              The DeFi that always bounces back.
+            <p className="text-lg md:text-xl font-medium mb-3 bg-gradient-to-r from-[#00E5CC]/90 via-[#00E5CC] to-[#00B4FF]/90 bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(0,229,204,0.3)]">
+              Authentic. Decentralized. Optimal. Quality-Assured.
             </p>
             <p className="text-lg leading-relaxed max-w-2xl mx-auto mb-10" style={{ color: 'var(--text-secondary)' }}>
               Swap, add liquidity, bridge assets, and deploy tokens on EVM and Solana—all in one place. No code required.
@@ -1164,7 +1164,7 @@ function _BoingAstronaut() {
       <g>
         <ellipse cx="100" cy="175" rx="28" ry="8" fill="currentColor" opacity="0.08" />
         <ellipse cx="100" cy="85" rx="48" ry="44" fill="#fff" stroke="#bfc9d9" strokeWidth="3" />
-        <ellipse cx="100" cy="85" rx="42" ry="38" fill="#00E0FF" fillOpacity="0.2" stroke="#7dd3fc" strokeWidth="3" />
+        <ellipse cx="100" cy="85" rx="42" ry="38" fill="#00E5CC" fillOpacity="0.2" stroke="#00B4FF" strokeWidth="3" />
         <ellipse cx="100" cy="90" rx="32" ry="30" fill="#f8fafc" stroke="#bfc9d9" strokeWidth="2" />
         <ellipse cx="88" cy="95" rx="5" ry="5" fill="#60a5fa" />
         <ellipse cx="112" cy="95" rx="5" ry="5" fill="#60a5fa" />
@@ -1190,12 +1190,12 @@ function _BoingAstronaut() {
 // Feature Highlights Strip
 function Highlight({ icon, text }) {
   return (
-    <div className="group relative flex items-center space-x-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-400/20 hover:border-cyan-400/40 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/20">
-      <span className="text-xl text-cyan-400 group-hover:text-cyan-300 transition-colors duration-300 animate-pulse">{icon}</span>
+    <div className="group relative flex items-center space-x-2 px-4 py-2 rounded-lg bg-gradient-to-r from-[#00E5CC]/10 to-[#00B4FF]/10 border border-[#00E5CC]/20 hover:border-[#00E5CC]/40 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[#00E5CC]/20">
+      <span className="text-xl text-[#00E5CC] group-hover:text-[#00B4FF] transition-colors duration-300 animate-pulse">{icon}</span>
       <span className="text-sm font-medium transition-colors duration-300" style={{ 
         color: 'var(--text-secondary)'
       }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>{text}</span>
-      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-[#00E5CC]/5 to-[#00B4FF]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
     </div>
   );
 }
@@ -1208,9 +1208,9 @@ function SwapIcon() {
     <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
       <defs>
         <linearGradient id="swapGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#00E0FF" />
-          <stop offset="50%" stopColor="#00FFB2" />
-          <stop offset="100%" stopColor="#7B61FF" />
+          <stop offset="0%" stopColor="#00E5CC" />
+          <stop offset="50%" stopColor="#00E5CC" />
+          <stop offset="100%" stopColor="#00B4FF" />
         </linearGradient>
       </defs>
       <path fill="url(#swapGradient)" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" stroke="url(#swapGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -1223,9 +1223,9 @@ function LiquidityIcon() {
     <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
       <defs>
         <linearGradient id="liquidityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#00E0FF" />
-          <stop offset="50%" stopColor="#00FFB2" />
-          <stop offset="100%" stopColor="#7B61FF" />
+          <stop offset="0%" stopColor="#00E5CC" />
+          <stop offset="50%" stopColor="#00E5CC" />
+          <stop offset="100%" stopColor="#00B4FF" />
         </linearGradient>
       </defs>
       <path fill="url(#liquidityGradient)" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" stroke="url(#liquidityGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -1238,9 +1238,9 @@ function AnalyticsIcon() {
     <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
       <defs>
         <linearGradient id="analyticsGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#00E0FF" />
-          <stop offset="50%" stopColor="#00FFB2" />
-          <stop offset="100%" stopColor="#7B61FF" />
+          <stop offset="0%" stopColor="#00E5CC" />
+          <stop offset="50%" stopColor="#00E5CC" />
+          <stop offset="100%" stopColor="#00B4FF" />
         </linearGradient>
       </defs>
       <path fill="url(#analyticsGradient)" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke="url(#analyticsGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -1253,9 +1253,9 @@ function PortfolioIcon() {
     <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
       <defs>
         <linearGradient id="portfolioGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#00E0FF" />
-          <stop offset="50%" stopColor="#00FFB2" />
-          <stop offset="100%" stopColor="#7B61FF" />
+          <stop offset="0%" stopColor="#00E5CC" />
+          <stop offset="50%" stopColor="#00E5CC" />
+          <stop offset="100%" stopColor="#00B4FF" />
         </linearGradient>
       </defs>
       <path fill="url(#portfolioGradient)" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke="url(#portfolioGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -1268,9 +1268,9 @@ function ActivityIcon() {
     <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
       <defs>
         <linearGradient id="activityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#00E0FF" />
-          <stop offset="50%" stopColor="#00FFB2" />
-          <stop offset="100%" stopColor="#7B61FF" />
+          <stop offset="0%" stopColor="#00E5CC" />
+          <stop offset="50%" stopColor="#00E5CC" />
+          <stop offset="100%" stopColor="#00B4FF" />
         </linearGradient>
       </defs>
       <path fill="url(#activityGradient)" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" stroke="url(#activityGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -1283,9 +1283,9 @@ function BridgeIcon() {
     <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
       <defs>
         <linearGradient id="bridgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#00E0FF" />
-          <stop offset="50%" stopColor="#00FFB2" />
-          <stop offset="100%" stopColor="#7B61FF" />
+          <stop offset="0%" stopColor="#00E5CC" />
+          <stop offset="50%" stopColor="#00E5CC" />
+          <stop offset="100%" stopColor="#00B4FF" />
         </linearGradient>
       </defs>
       <path fill="url(#bridgeGradient)" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke="url(#bridgeGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -1298,9 +1298,9 @@ function TokensIcon() {
     <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
       <defs>
         <linearGradient id="tokensGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#00E0FF" />
-          <stop offset="50%" stopColor="#00FFB2" />
-          <stop offset="100%" stopColor="#7B61FF" />
+          <stop offset="0%" stopColor="#00E5CC" />
+          <stop offset="50%" stopColor="#00E5CC" />
+          <stop offset="100%" stopColor="#00B4FF" />
         </linearGradient>
       </defs>
       <path fill="url(#tokensGradient)" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" stroke="url(#tokensGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -1313,9 +1313,9 @@ function DeployTokenIcon() {
     <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
       <defs>
         <linearGradient id="deployGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#00E0FF" />
-          <stop offset="50%" stopColor="#00FFB2" />
-          <stop offset="100%" stopColor="#7B61FF" />
+          <stop offset="0%" stopColor="#00E5CC" />
+          <stop offset="50%" stopColor="#00E5CC" />
+          <stop offset="100%" stopColor="#00B4FF" />
         </linearGradient>
       </defs>
       <path fill="url(#deployGradient)" d="M12 6v6m0 0v6m0-6h6m-6 0H6" stroke="url(#deployGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -1327,17 +1327,17 @@ function DeployTokenIcon() {
 function FeatureCard({ title, icon, description, comingSoon }) {
   return (
     <div
-      className={`group relative backdrop-blur-sm border border-cyan-400/20 rounded-xl p-6 transition-all duration-500 overflow-hidden h-full flex flex-col ${comingSoon ? 'opacity-60 cursor-not-allowed' : 'hover:border-cyan-400/40 hover:scale-105 hover:shadow-xl hover:shadow-cyan-500/20'}`}
+      className={`group relative backdrop-blur-sm border border-[#00E5CC]/20 rounded-xl p-6 transition-all duration-500 overflow-hidden h-full flex flex-col ${comingSoon ? 'opacity-60 cursor-not-allowed' : 'hover:border-[#00E5CC]/40 hover:scale-105 hover:shadow-xl hover:shadow-[#00E5CC]/20'}`}
       style={{
         background: 'linear-gradient(to bottom right, var(--bg-card), var(--bg-secondary))',
-        borderColor: comingSoon ? 'var(--border-color)' : 'rgba(34, 211, 238, 0.2)'
+        borderColor: comingSoon ? 'var(--border-color)' : 'rgba(0, 229, 204, 0.2)'
       }}
       title={comingSoon ? 'This feature will be available after mainnet launch.' : ''}
     >
-      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-[#00E5CC]/5 to-[#00B4FF]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
       <div className="relative z-10 text-center flex flex-col flex-1 min-h-0">
         <div className="flex items-center justify-center mb-4">
-          <span className="text-2xl mr-3 text-cyan-400 group-hover:text-cyan-300 transition-colors duration-300 animate-pulse">{icon}</span>
+          <span className="text-2xl mr-3 text-[#00E5CC] group-hover:text-[#00B4FF] transition-colors duration-300 animate-pulse">{icon}</span>
           <h3 className="text-lg font-semibold transition-colors duration-300 flex items-center" style={{ color: 'var(--text-primary)' }}>
             {title}
             {comingSoon && (
@@ -1384,11 +1384,11 @@ function ToolsDropdown({ isOpen, onToggle, onClose, onOpenHistory, onOpenDefi101
             <span className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>Theme</span>
             <ThemeToggle />
           </div>
-          <button onClick={onOpenHistory} className="w-full text-left px-3 py-2.5 text-sm flex items-center gap-3 hover:bg-cyan-500/10 rounded-lg transition-colors" style={{ color: 'var(--text-secondary)' }}>
+          <button onClick={onOpenHistory} className="w-full text-left px-3 py-2.5 text-sm flex items-center gap-3 hover:bg-[#00E5CC]/10 rounded-lg transition-colors" style={{ color: 'var(--text-secondary)' }}>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             Transaction History
           </button>
-          <button onClick={onOpenDefi101} className="w-full text-left px-3 py-2.5 text-sm flex items-center gap-3 hover:bg-cyan-500/10 rounded-lg transition-colors" style={{ color: 'var(--text-secondary)' }}>
+          <button onClick={onOpenDefi101} className="w-full text-left px-3 py-2.5 text-sm flex items-center gap-3 hover:bg-[#00E5CC]/10 rounded-lg transition-colors" style={{ color: 'var(--text-secondary)' }}>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
             DeFi 101
           </button>
@@ -1403,7 +1403,7 @@ function ToolsDropdown({ isOpen, onToggle, onClose, onOpenHistory, onOpenDefi101
         ref={buttonRef}
         type="button"
         onClick={onToggle}
-        className="p-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center hover:bg-cyan-500/10"
+        className="p-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center hover:bg-[#00E5CC]/10"
         style={{ color: 'var(--text-secondary)' }}
         onMouseEnter={(e) => { e.target.style.color = 'var(--text-primary)'; }}
         onMouseLeave={(e) => { e.target.style.color = 'var(--text-secondary)'; }}
@@ -1486,7 +1486,7 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
       <button
         type="button"
         onClick={onToggle}
-        className="px-2 py-1.5 xl:px-2.5 2xl:px-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-1 group hover:bg-cyan-500/10"
+        className="px-2 py-1.5 xl:px-2.5 2xl:px-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-1 group hover:bg-[#00E5CC]/10"
         style={{ color: 'var(--text-secondary)' }}
         onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
         onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
@@ -1530,7 +1530,7 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
                       // Item is disabled
                     }
                   }}
-                  className={`w-full text-left px-4 py-2.5 text-sm flex items-center space-x-3 group transition-all duration-200 rounded-lg mx-1 ${shouldDisable ? 'cursor-not-allowed opacity-60' : 'hover:bg-cyan-500/10'}`}
+                  className={`w-full text-left px-4 py-2.5 text-sm flex items-center space-x-3 group transition-all duration-200 rounded-lg mx-1 ${shouldDisable ? 'cursor-not-allowed opacity-60' : 'hover:bg-[#00E5CC]/10'}`}
                   style={{
                     color: shouldDisable ? 'var(--text-tertiary)' : 'var(--text-secondary)'
                   }}

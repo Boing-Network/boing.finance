@@ -25,7 +25,7 @@ module.exports = {
         'border-hover': 'var(--border-hover)',
         // Legacy colors for backward compatibility
         'text-muted': 'var(--text-tertiary)',
-        highlight: '#00FFB2',
+        highlight: '#00E5CC',
       },
       fontFamily: {
         sans: ['Comfortaa', 'system-ui', 'sans-serif'],
@@ -57,8 +57,8 @@ module.exports = {
           '100%': { transform: 'translateX(0)' },
         },
         'pulse-glow': {
-          '0%': { boxShadow: '0 0 5px #3b82f6, 0 0 10px #3b82f6, 0 0 15px #3b82f6' },
-          '100%': { boxShadow: '0 0 10px #3b82f6, 0 0 20px #3b82f6, 0 0 30px #3b82f6' },
+          '0%': { boxShadow: '0 0 5px #00E5CC, 0 0 10px #00E5CC, 0 0 15px #00E5CC' },
+          '100%': { boxShadow: '0 0 10px #00E5CC, 0 0 20px #00E5CC, 0 0 30px #00E5CC' },
         },
         pulseFade: {
           '0%': { opacity: '0.1' },
