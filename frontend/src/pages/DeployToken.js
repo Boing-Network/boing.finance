@@ -1741,7 +1741,7 @@ export default function DeployToken() {
                     }`}
                     style={{
                       backgroundColor: 'var(--bg-card)',
-                      borderColor: selectedPlan === key ? '#3b82f6' : 'var(--border-color)'
+                      borderColor: selectedPlan === key ? 'var(--accent-cyan)' : 'var(--border-color)'
                     }}
                     onClick={() => setSelectedPlan(key)}
                   >

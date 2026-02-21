@@ -6,12 +6,6 @@ import BoingHeroScene from './BoingHeroScene';
  * fish, bioluminescent orbs. Uses modified background when present; overlays
  * full Boing hero robot + environment (enhanced via scripts/enhance_hero.py).
  */
-const BOING_PRIMARY = '#00E5CC';
-const BOING_SECONDARY = '#00B4FF';
-const DEEP_NAVY = '#0A0E1A';
-const COSMIC_PURPLE = '#6366f1';
-const GLOW_PINK = '#a78bfa';
-
 const BASE = process.env.PUBLIC_URL || '';
 const BOING_BG_IMAGE = `${BASE}/images/boing_background_dark.png`;
 const BOING_BG_MODIFIED = `${BASE}/images/boing_background_dark_modified.png`;
@@ -41,7 +35,7 @@ function EnhancedAnimatedBackground() {
       <div
         className="absolute inset-0 w-full h-full"
         style={{
-          background: `linear-gradient(180deg, #050810 0%, ${DEEP_NAVY} 25%, #0d1430 60%, ${DEEP_NAVY} 100%)`,
+          background: `linear-gradient(180deg, #050810 0%, var(--bg-primary) 25%, var(--bg-tertiary) 60%, var(--bg-primary) 100%)`,
         }}
       />
       {bgImageLoaded && (

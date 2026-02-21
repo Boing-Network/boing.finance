@@ -207,7 +207,7 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
                         key={net}
                         onClick={() => solanaWallet?.setSolanaNetwork?.(net)}
                         className={`px-3 py-2 rounded text-sm font-medium transition-colors ${
-                          solanaWallet?.network === net ? 'bg-[#00E5CC]/30 text-[#00E5CC]' : 'hover:bg-white/5 text-theme-secondary'
+                          solanaWallet?.network === net ? 'bg-[var(--secondary-bg)] text-primary' : 'hover:bg-white/5 text-theme-secondary'
                         }`}
                         style={{ color: solanaWallet?.network === net ? 'var(--primary-color)' : undefined }}
                       >
@@ -266,7 +266,7 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
             <button
               onClick={handleConnectSolana}
               disabled={isConnecting}
-              className="w-full bg-[#00E5CC] hover:bg-[#00d4bc] disabled:bg-gray-600 disabled:cursor-not-allowed text-[#0A0E1A] px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+              className="w-full btn-primary disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
             >
               {isConnecting ? (
                 <>
@@ -281,7 +281,7 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
             <button
               onClick={handleConnectEVM}
               disabled={isConnecting}
-              className="w-full bg-[#00E5CC] hover:bg-[#00d4bc] disabled:bg-gray-600 disabled:cursor-not-allowed text-[#0A0E1A] px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+              className="w-full btn-primary disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
             >
               {isConnecting ? (
                 <>

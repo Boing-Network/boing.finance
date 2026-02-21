@@ -1,22 +1,34 @@
 import React from 'react';
 
-const Logo = ({ size = 40, className = "", showText = false }) => {
+/**
+ * Logo: icon (logo.svg) with optional wordmark.
+ * showComic=true uses the official "BOING!" comic-style asset from the design system.
+ */
+const Logo = ({ size = 40, className = "", showText = false, showComic = false }) => {
   return (
     <div className={`flex items-center ${className}`}>
       <img
         src="/logo.svg"
-        alt="boing logo"
+        alt="Boing"
         width={size}
         height={size}
-        style={{ 
+        style={{
           display: 'inline-block',
-          filter: 'drop-shadow(0 0 4px rgba(6, 182, 212, 0.3))'
+          filter: 'drop-shadow(0 0 8px var(--glow-cyan))',
         }}
       />
-      {showText && (
-        <span className="ml-2 text-xl font-normal bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 bg-clip-text text-transparent hover:from-cyan-300 hover:via-cyan-400 hover:to-blue-500 transition-all duration-300">
+      {showText && !showComic && (
+        <span className="ml-2 text-xl font-normal gradient-text">
           boing.finance
         </span>
+      )}
+      {showText && showComic && (
+        <img
+          src="/assets/logo-boing-comic.png"
+          alt="BOING!"
+          className="ml-2 h-6 md:h-7 w-auto object-contain"
+          style={{ filter: 'drop-shadow(0 0 6px var(--glow-cyan))' }}
+        />
       )}
     </div>
   );

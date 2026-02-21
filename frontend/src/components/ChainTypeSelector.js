@@ -22,7 +22,7 @@ export default function ChainTypeSelector() {
             onClick={() => setChainType(ct.id)}
             className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
               chainType === ct.id
-                ? 'bg-[#00E5CC]/30 text-[#00E5CC]'
+                ? 'bg-[var(--secondary-bg)] text-primary'
                 : 'hover:bg-white/5'
             }`}
             style={{

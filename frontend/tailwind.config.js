@@ -25,10 +25,12 @@ module.exports = {
         'border-hover': 'var(--border-hover)',
         // Legacy colors for backward compatibility
         'text-muted': 'var(--text-tertiary)',
-        highlight: '#00E5CC',
+        highlight: 'var(--accent-teal)',
       },
       fontFamily: {
-        sans: ['Comfortaa', 'system-ui', 'sans-serif'],
+        sans: ['Comfortaa', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        display: ['Orbitron', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
@@ -57,8 +59,8 @@ module.exports = {
           '100%': { transform: 'translateX(0)' },
         },
         'pulse-glow': {
-          '0%': { boxShadow: '0 0 5px #00E5CC, 0 0 10px #00E5CC, 0 0 15px #00E5CC' },
-          '100%': { boxShadow: '0 0 10px #00E5CC, 0 0 20px #00E5CC, 0 0 30px #00E5CC' },
+          '0%': { boxShadow: '0 0 5px var(--glow-cyan), 0 0 10px var(--glow-cyan), 0 0 15px var(--glow-cyan)' },
+          '100%': { boxShadow: '0 0 10px var(--glow-cyan), 0 0 20px var(--glow-cyan), 0 0 30px var(--glow-cyan)' },
         },
         pulseFade: {
           '0%': { opacity: '0.1' },

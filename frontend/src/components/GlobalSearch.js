@@ -252,7 +252,7 @@ const GlobalSearch = ({ isOpen, onClose }) => {
       aria-labelledby="global-search-label"
     >
       <div 
-        className="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl mx-4 border border-[#00E5CC]"
+        className="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl mx-4 border border-border"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input */}
@@ -304,7 +304,7 @@ const GlobalSearch = ({ isOpen, onClose }) => {
         <div id="search-results" className="max-h-96 overflow-y-auto">
           {isLoading ? (
             <div className="p-8 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00E5CC] mx-auto"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
               <p className="text-gray-400 mt-4">Searching...</p>
             </div>
           ) : results.length > 0 ? (
@@ -316,7 +316,7 @@ const GlobalSearch = ({ isOpen, onClose }) => {
                   aria-selected={index === selectedIndex}
                   className={`p-4 cursor-pointer transition-colors ${
                     index === selectedIndex
-                      ? 'bg-[#00E5CC]/20 border-l-4 border-[#00E5CC]'
+                      ? 'bg-[var(--secondary-bg)] border-l-4 border-primary'
                       : 'hover:bg-gray-700 border-l-4 border-transparent'
                   }`}
                   onClick={() => handleSelectResult(result)}
@@ -376,7 +376,7 @@ const GlobalSearch = ({ isOpen, onClose }) => {
                     setSearchHistory([]);
                     localStorage.removeItem('boing_search_history');
                   }}
-                  className="text-xs text-[#00E5CC] hover:text-[#00B4FF]"
+                  className="text-xs text-primary hover:text-secondary"
                 >
                   Clear
                 </button>

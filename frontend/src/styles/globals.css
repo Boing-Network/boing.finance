@@ -1,8 +1,11 @@
+/* Step 3: Google Fonts — Comfortaa, Orbitron, JetBrains Mono */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Comfortaa:wght@400;700&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Boing Network typography: Comfortaa — outerspace-oceanic theme */
+/* Local font fallback (optional) */
 @font-face {
   font-family: 'Comfortaa';
   font-style: normal;
@@ -65,7 +68,7 @@
 
 /* Focus visible styles for keyboard navigation */
 *:focus-visible {
-  outline: 2px solid var(--primary-color, #00E5CC);
+  outline: 2px solid var(--accent-teal);
   outline-offset: 2px;
 }
 
@@ -74,8 +77,8 @@
   position: absolute;
   top: -40px;
   left: 0;
-  background: var(--primary-color, #00E5CC);
-  color: #0A0E1A;
+  background: var(--accent-teal);
+  color: var(--bg-primary);
   padding: 8px;
   text-decoration: none;
   z-index: 100;
@@ -97,83 +100,95 @@
   }
 }
 
-/* Boing Network — Outerspace-oceanic theme (promotional video / brand).
-   Dark mode = deep navy + teal/blue glow; light = soft white-teal. */
-/* Custom CSS Variables - Light Theme (Default) - Soft White-Teal */
+/* ============================================================
+   BOING NETWORK — OFFICIAL DESIGN TOKENS
+   Source: BOING_DESIGN_SYSTEM.md, Section 10
+   ============================================================ */
 :root {
-  --font-family: 'Comfortaa', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --primary-color: #00E5CC;
-  --secondary-color: #00B4FF;
-  --accent-color: #00E5CC;
-  --success-color: #10b981;
-  --warning-color: #f59e0b;
-  --error-color: #ef4444;
-  
-  /* Light Theme - Soft White-Teal (#F0FFFE per brand) */
-  --bg-primary: #F0FFFE;
-  --bg-secondary: #e0f7f5;
-  --bg-tertiary: #cceeea;
-  --bg-card: #ffffff;
-  --text-primary: #0A0E1A;
-  --text-secondary: #334155;
-  --text-tertiary: #64748b;
-  --border-color: #99e0db;
-  --border-hover: #00E5CC;
-  --shadow: rgba(0, 229, 204, 0.08);
-  --shadow-hover: rgba(0, 229, 204, 0.15);
-  
-  /* Colored box backgrounds and text */
-  --success-bg: rgba(16, 185, 129, 0.1);
-  --success-text: #065f46;
-  --success-hover: #047857;
-  --info-bg: rgba(0, 180, 255, 0.1);
-  --info-text: #0A0E1A;
-  --info-hover: #0099dd;
-  --warning-bg: rgba(245, 158, 11, 0.1);
-  --warning-text: #92400e;
-  --warning-hover: #b45309;
-  --error-bg: rgba(239, 68, 68, 0.1);
-  --error-text: #991b1b;
-  --error-hover: #b91c1c;
-  --secondary-bg: rgba(0, 229, 204, 0.1);
-  --secondary-text: #0A0E1A;
-  --secondary-hover: #00B4FF;
-}
-
-/* Dark Theme - Deep Navy (#0A0E1A per brand) */
-.dark {
+  /* === BACKGROUNDS === */
   --bg-primary: #0A0E1A;
-  --bg-secondary: #0f1629;
-  --bg-tertiary: #151d33;
-  --bg-card: #151d33;
+  --bg-secondary: #121829;
+  --bg-tertiary: #1A2235;
+  --bg-card: rgba(18, 24, 41, 0.7);
+  /* === TEXT === */
   --text-primary: #F0FFFE;
-  --text-secondary: #b8e8e4;
-  --text-tertiary: #7dd3ce;
+  --text-secondary: #B8E6E3;
+  --text-tertiary: #7EB8B5;
+  /* === ACCENTS === */
+  --accent-teal: #00E5CC;
+  --accent-cyan: #00B4FF;
+  --accent-gold: #FACC15;
+  --accent-gold-dim: #EAB308;
+  --accent-purple: #9B59B6;
+  --mascot-yellow: #FFE000;
+  /* === BORDERS === */
   --border-color: rgba(0, 229, 204, 0.2);
   --border-hover: rgba(0, 229, 204, 0.5);
-  --shadow: rgba(0, 0, 0, 0.3);
-  --shadow-hover: rgba(0, 229, 204, 0.15);
-  
-  /* Colored box backgrounds and text - Dark Theme */
+  /* === GLOWS (for box-shadow / text-shadow) === */
+  --glow-cyan: rgba(0, 229, 204, 0.4);
+  --glow-cyan-soft: rgba(0, 229, 204, 0.15);
+  --glow-blue: rgba(0, 180, 255, 0.35);
+  --glow-gold: rgba(250, 204, 21, 0.35);
+  --glow-purple: rgba(155, 89, 182, 0.35);
+  --bg-nav: rgba(10, 14, 26, 0.8);
+  --accent-cyan-bg: rgba(0, 180, 255, 0.1);
+  --overlay-gradient-start: rgba(10, 14, 26, 0.3);
+  --overlay-gradient-end: rgba(10, 14, 26, 0.6);
+  /* === SHADOWS === */
+  --shadow: rgba(0, 0, 0, 0.35);
+  --shadow-hover: rgba(0, 0, 0, 0.45);
+  /* === TYPOGRAPHY === */
+  --font-sans: 'Comfortaa', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Orbitron', sans-serif;
+  --font-display-serif: 'Cinzel', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  /* === MOTION === */
+  --motion-float-duration: 9s;
+  --motion-glow-duration: 5s;
+  --motion-transition: 0.3s ease;
+  --motion-easing: ease-in-out;
+  /* Legacy aliases for existing components / Tailwind */
+  --font-family: var(--font-sans);
+  --primary-color: var(--accent-teal);
+  --secondary-color: var(--accent-cyan);
+  --accent-color: var(--accent-teal);
+  --success-color: #10b981;
+  --warning-color: var(--accent-gold);
+  --error-color: #ef4444;
   --success-bg: rgba(16, 185, 129, 0.2);
   --success-text: #6ee7b7;
   --success-hover: #34d399;
-  --info-bg: rgba(0, 180, 255, 0.2);
+  --info-bg: var(--glow-blue);
   --info-text: #7dd3fc;
-  --info-hover: #00B4FF;
-  --warning-bg: rgba(245, 158, 11, 0.2);
+  --info-hover: var(--accent-cyan);
+  --warning-bg: var(--glow-gold);
   --warning-text: #fbbf24;
-  --warning-hover: #f59e0b;
+  --warning-hover: var(--accent-gold);
   --error-bg: rgba(239, 68, 68, 0.2);
   --error-text: #fca5a5;
   --error-hover: #f87171;
   --secondary-bg: rgba(0, 229, 204, 0.15);
-  --secondary-text: #00E5CC;
-  --secondary-hover: #00B4FF;
+  --secondary-text: var(--accent-teal);
+  --secondary-hover: var(--accent-cyan);
 }
 
-/* Base Styles */
-* {
+/* Dark class: same as :root (single-theme design) */
+.dark {
+  --bg-primary: #0A0E1A;
+  --bg-secondary: #121829;
+  --bg-tertiary: #1A2235;
+  --bg-card: rgba(18, 24, 41, 0.7);
+  --text-primary: #F0FFFE;
+  --text-secondary: #B8E6E3;
+  --text-tertiary: #7EB8B5;
+  --border-color: rgba(0, 229, 204, 0.2);
+  --border-hover: rgba(0, 229, 204, 0.5);
+  --shadow: rgba(0, 0, 0, 0.35);
+  --shadow-hover: rgba(0, 0, 0, 0.45);
+}
+
+/* === BASE STYLES (Step 4) === */
+*, *::before, *::after {
   box-sizing: border-box;
 }
 
@@ -183,8 +198,17 @@ html {
 }
 
 body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
   overflow-x: hidden;
   max-width: 100%;
+  line-height: 1.6;
+  transition: background-color var(--motion-transition), color var(--motion-transition);
 }
 
 #root {
@@ -193,19 +217,34 @@ body {
   min-width: 0;
 }
 
-html,
-body,
-#root {
-  font-family: var(--font-family);
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  color: var(--text-primary);
+}
+h1 { text-shadow: 0 0 20px var(--glow-cyan); }
+h2 { text-shadow: 0 0 12px var(--glow-cyan); }
+
+p {
+  color: var(--text-secondary);
+  line-height: 1.7;
 }
 
-body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  line-height: 1.6;
-  transition: background-color 0.3s ease, color 0.3s ease;
+a {
+  color: var(--accent-cyan);
+  text-decoration: none;
+  transition: all var(--motion-transition);
+}
+a:hover {
+  filter: brightness(1.2);
+  text-shadow: 0 0 8px var(--glow-blue);
+}
+
+code, pre, .monospace {
+  font-family: var(--font-mono);
+  color: var(--accent-teal);
+  background-color: var(--bg-tertiary);
+  border-radius: 4px;
+  padding: 2px 6px;
 }
 
 /* Custom Scrollbar */
@@ -224,6 +263,36 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary-color);
+}
+
+/* === BACKGROUND STYLES (Step 6) === */
+/* Landing: full Aquatic-Space scene (coral, jellyfish, starfield) from design system */
+.page-landing {
+  background-image: url('/assets/boing-aquatic-space-bg.webp');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+.page-landing::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    var(--overlay-gradient-start) 0%,
+    var(--overlay-gradient-end) 100%
+  );
+  z-index: 0;
+  pointer-events: none;
+}
+
+.page-app {
+  background-color: var(--bg-primary);
+  background-image: url('/assets/hex-grid.svg');
+  background-repeat: repeat;
+  background-size: 60px 60px;
+  min-height: 100vh;
 }
 
 /* Glass Morphism Effect */
@@ -249,64 +318,127 @@ body {
   background-clip: text;
 }
 
-/* Button Styles */
-.btn-primary {
-  background: linear-gradient(to right, #00E5CC, #00B4FF);
-  color: #0A0E1A;
-  @apply font-medium py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#00E5CC] focus:ring-opacity-50;
+/* === BUTTONS (Step 5.1) === */
+.btn-primary, button[data-variant="primary"] {
+  background: linear-gradient(135deg, var(--accent-teal), var(--accent-cyan));
+  color: var(--bg-primary);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 28px;
+  cursor: pointer;
+  transition: all var(--motion-transition);
+  box-shadow: 0 0 16px var(--glow-cyan);
 }
-.btn-primary:hover {
-  background: linear-gradient(to right, #00d4bc, #0099dd);
+.btn-primary:hover, button[data-variant="primary"]:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 28px var(--glow-cyan);
 }
 
-.btn-secondary {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+.btn-secondary, button[data-variant="secondary"] {
+  background-color: transparent;
+  color: var(--accent-cyan);
   border: 1px solid var(--border-color);
-  @apply font-medium py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#00E5CC] focus:ring-opacity-50;
+  border-radius: 8px;
+  padding: 12px 28px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: all var(--motion-transition);
 }
-
-.btn-secondary:hover {
-  background: var(--border-hover);
+.btn-secondary:hover, button[data-variant="secondary"]:hover {
+  background-color: var(--accent-cyan-bg);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 12px var(--glow-blue);
 }
 
 .btn-outline {
   background: transparent;
   color: var(--text-secondary);
   border: 1px solid var(--border-color);
-  @apply font-medium py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#00E5CC] focus:ring-opacity-50;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-family: var(--font-sans);
+  transition: all var(--motion-transition);
 }
-
 .btn-outline:hover {
   color: var(--text-primary);
   border-color: var(--border-hover);
 }
 
-/* Card Styles */
-.card {
+/* === CARDS & PANELS (Step 5.2) === */
+.card, [class*="card-"], [class*="-card"] {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  box-shadow: 0 4px 6px var(--shadow);
-  @apply rounded-xl p-6;
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 30px var(--shadow);
+  transition: border-color var(--motion-transition), box-shadow var(--motion-transition);
+}
+.card:hover, [class*="card-"]:hover, [class*="-card"]:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 4px 30px var(--glow-cyan);
 }
 
 .card-hover {
-  @apply card transition-all duration-200;
+  transition: border-color var(--motion-transition), box-shadow var(--motion-transition);
 }
-
 .card-hover:hover {
   border-color: var(--border-hover);
-  box-shadow: 0 8px 25px var(--shadow-hover);
+  box-shadow: 0 4px 30px var(--glow-cyan);
 }
 
-/* Input Styles */
+/* === NAVIGATION BAR (Step 5.3) === */
+nav, .navbar, header {
+  background: var(--bg-nav);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-color);
+  padding: 12px 32px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+nav a, .navbar a {
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  transition: color var(--motion-transition);
+}
+nav a:hover, .navbar a:hover,
+nav a.active, .navbar a.active {
+  color: var(--accent-teal);
+  text-shadow: none;
+}
+
+/* === INPUT FIELDS & FORM ELEMENTS (Step 5.4) === */
+input, textarea, select {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  padding: 12px 16px;
+  width: 100%;
+  transition: border-color var(--motion-transition), box-shadow var(--motion-transition);
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--accent-teal);
+  box-shadow: 0 0 8px var(--glow-cyan);
+}
+input::placeholder, textarea::placeholder {
+  color: var(--text-tertiary);
+}
+
 .input-field {
-  background: var(--bg-secondary);
+  background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
-  @apply rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00E5CC] focus:border-transparent transition-all duration-200;
+  border-radius: 8px;
+  padding: 12px 16px;
 }
-
 .input-field::placeholder {
   color: var(--text-tertiary);
 }
@@ -333,10 +465,10 @@ body {
 
 @keyframes pulse-glow {
   from {
-    box-shadow: 0 0 5px var(--primary-color), 0 0 10px var(--primary-color), 0 0 15px var(--primary-color);
+    box-shadow: 0 0 5px var(--glow-cyan), 0 0 10px var(--glow-cyan), 0 0 15px var(--glow-cyan);
   }
   to {
-    box-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color), 0 0 30px var(--primary-color);
+    box-shadow: 0 0 10px var(--glow-cyan), 0 0 20px var(--glow-cyan), 0 0 30px var(--glow-cyan);
   }
 }
 
@@ -370,7 +502,35 @@ body {
   }
 }
 
-/* Boing hero asset: shared float animation (mascot, footer, background scene) */
+/* === BOING NETWORK ANIMATION KEYFRAMES (Step 7) === */
+@keyframes boing-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes boing-glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px var(--glow-cyan); }
+  50% { box-shadow: 0 0 24px var(--glow-cyan), 0 0 48px var(--glow-cyan-soft); }
+}
+@keyframes boing-fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes boing-shoot-star {
+  from { transform: translateX(-100px) translateY(0) rotate(-30deg); opacity: 1; }
+  to { transform: translateX(120vw) translateY(-50px) rotate(-30deg); opacity: 0; }
+}
+
+.animate-float {
+  animation: boing-float var(--motion-float-duration) var(--motion-easing) infinite;
+}
+.animate-glow-pulse {
+  animation: boing-glow-pulse var(--motion-glow-duration) var(--motion-easing) infinite;
+}
+.animate-fade-in-up {
+  animation: boing-fade-in-up 0.6s ease-out both;
+}
+
+/* Legacy hero float (mascot, footer) */
 @keyframes boing-hero-float {
   0%, 100% { transform: translateY(0) scale(1); }
   50% { transform: translateY(-8px) scale(1.02); }
@@ -390,24 +550,23 @@ body {
   }
 }
 
-/* Dark Mode Overrides (Boing deep navy) */
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
-    --background-dark: #0A0E1A;
-    --background-light: #0f1629;
+    --background-dark: var(--bg-primary);
+    --background-light: var(--bg-secondary);
   }
 }
 
 /* Focus Styles for Accessibility */
 *:focus {
-  outline: 2px solid var(--primary-color);
+  outline: 2px solid var(--accent-teal);
   outline-offset: 2px;
 }
 
 /* Selection Styles */
 ::selection {
-  background: var(--primary-color);
-  color: white;
+  background: var(--accent-teal);
+  color: var(--bg-primary);
 }
 
 /* Print Styles */
@@ -468,20 +627,19 @@ a, .link {
   text-shadow: none;
 }
 
-/* Dark mode - Boing neon (primary teal) */
 .dark a, .dark .link {
-  color: #00E5CC;
-  text-shadow: 0 0 8px rgba(0, 229, 204, 0.5);
+  color: var(--accent-teal);
+  text-shadow: 0 0 8px var(--glow-cyan);
 }
 
 :root a:hover, :root .link:hover {
-  color: var(--secondary-color);
-  text-shadow: none;
+  color: var(--accent-cyan);
+  text-shadow: 0 0 8px var(--glow-blue);
 }
 
 .dark a:hover, .dark .link:hover {
-  color: #00B4FF;
-  text-shadow: 0 0 12px rgba(0, 180, 255, 0.6);
+  color: var(--accent-cyan);
+  text-shadow: 0 0 12px var(--glow-blue);
 }
 
 button, .btn {
@@ -498,19 +656,18 @@ button, .btn {
   color: var(--primary-color);
 }
 
-/* Dark mode - Boing primary */
 .dark button, .dark .btn {
-  color: #00E5CC;
+  color: var(--accent-teal);
 }
 
 :root button:hover, :root .btn:hover {
-  color: var(--secondary-color);
+  color: var(--accent-cyan);
   background: transparent;
   box-shadow: none;
 }
 
 .dark button:hover, .dark .btn:hover {
-  color: #00B4FF;
+  color: var(--accent-cyan);
   background: transparent;
   box-shadow: none;
 }
@@ -521,10 +678,9 @@ button, .btn {
   box-shadow: 0 2px 24px var(--shadow);
 }
 
-/* Dark mode - Boing glow */
 .dark .card, .dark .panel {
   background: var(--bg-card);
-  box-shadow: 0 2px 24px rgba(0, 229, 204, 0.12);
+  box-shadow: 0 2px 24px var(--glow-cyan);
 }
 
 /* Custom Animations for Landing Page */

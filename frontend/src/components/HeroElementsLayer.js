@@ -69,7 +69,7 @@ function HeroElementsLayer() {
                 opacity: loaded[el.file] ? 0.9 : 0,
                 transition: 'opacity 0.6s ease',
                 transformStyle: 'preserve-3d',
-                filter: 'drop-shadow(0 0 10px rgba(0, 229, 204, 0.2))',
+                filter: 'drop-shadow(0 0 10px var(--border-color))',
                 ['--hero-scale']: pos.scale,
                 ['--hero-delay']: `${pos.delay}s`,
               }}

@@ -624,7 +624,7 @@ export default function Portfolio() {
                     }`}
                     style={
                       activeTab === tab.id
-                        ? { backgroundColor: 'var(--primary-color)', color: '#fff' }
+                        ? { backgroundColor: 'var(--primary-color)', color: 'var(--bg-primary)' }
                         : { color: 'var(--text-secondary)' }
                     }
                   >
@@ -702,8 +702,8 @@ export default function Portfolio() {
                       <AreaChart data={portfolioHistory7d} isAnimationActive animationDuration={800} animationEasing="ease-out">
                         <defs>
                           <linearGradient id="portfolioGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                            <stop offset="5%" stopColor="var(--accent-cyan)" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="var(--accent-cyan)" stopOpacity={0}/>
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" className="opacity-40" style={{ stroke: 'var(--border-color)' }} />
@@ -717,7 +717,7 @@ export default function Portfolio() {
                         <Area 
                           type="monotone" 
                           dataKey="value" 
-                          stroke="#3B82F6" 
+                          stroke="var(--accent-cyan)" 
                           fill="url(#portfolioGradient)" 
                           name="Portfolio Value"
                         />

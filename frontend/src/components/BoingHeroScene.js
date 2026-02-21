@@ -39,7 +39,7 @@ function BoingHeroScene() {
           objectFit: 'contain',
           objectPosition: '100% 100%',
           opacity: 0.24,
-          filter: 'drop-shadow(0 0 30px rgba(0, 229, 204, 0.08))',
+          filter: 'drop-shadow(0 0 30px var(--glow-cyan-soft))',
         }}
       />
       <style>{`

@@ -71,20 +71,20 @@ function CreatePool() {
         height: 20px;
         width: 20px;
         border-radius: 50%;
-        background: #3b82f6;
+        background: var(--accent-cyan);
         cursor: pointer;
-        border: 2px solid #1e40af;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        border: 2px solid var(--border-hover);
+        box-shadow: 0 2px 4px var(--shadow);
       }
       
       .slider::-moz-range-thumb {
         height: 20px;
         width: 20px;
         border-radius: 50%;
-        background: #3b82f6;
+        background: var(--accent-cyan);
         cursor: pointer;
-        border: 2px solid #1e40af;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        border: 2px solid var(--border-hover);
+        box-shadow: 0 2px 4px var(--shadow);
       }
       
       .slider:focus {

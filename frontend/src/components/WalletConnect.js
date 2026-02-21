@@ -82,8 +82,8 @@ const WalletConnect = () => {
 
   if (isConnecting) {
     return (
-      <button className="bg-[#00E5CC] hover:bg-[#00d4bc] text-[#0A0E1A] px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
-        <div className="w-4 h-4 border-2 border-[#0A0E1A] border-t-transparent rounded-full animate-spin"></div>
+      <button className="btn-primary px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
+        <div className="w-4 h-4 border-2 border-[var(--bg-primary)] border-t-transparent rounded-full animate-spin"></div>
         <span>Connecting...</span>
       </button>
     );
@@ -121,7 +121,7 @@ const WalletConnect = () => {
                           key={net}
                           onClick={() => solanaWallet.setSolanaNetwork(net)}
                           className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-                            solanaWallet?.network === net ? 'bg-[#00E5CC]/30 text-[#00E5CC]' : 'hover:bg-white/5'
+                            solanaWallet?.network === net ? 'bg-[var(--secondary-bg)] text-primary' : 'hover:bg-white/5'
                           }`}
                           style={{ color: solanaWallet?.network === net ? 'var(--primary-color)' : 'var(--text-secondary)' }}
                         >
@@ -159,7 +159,7 @@ const WalletConnect = () => {
                   setShowDropdown(false);
                   setTimeout(() => setShowWalletModal(true), 100);
                 }}
-                className="w-full bg-[#00E5CC] hover:bg-[#00d4bc] text-[#0A0E1A] px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2 mb-2"
+                className="w-full btn-primary px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2 mb-2"
               >
                 <ArrowPathIcon className="w-4 h-4" />
                 <span>{isSolana ? 'Network / Wallet' : 'Switch Wallet'}</span>
@@ -192,7 +192,7 @@ const WalletConnect = () => {
     <>
       <button
         onClick={handleConnect}
-        className="bg-[#00E5CC] hover:bg-[#00d4bc] text-[#0A0E1A] px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+        className="btn-primary px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
       >
         <WalletIcon className="w-4 h-4" />
         <span>Connect Wallet</span>
