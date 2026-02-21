@@ -13,7 +13,8 @@ export default function Confetti({ active, onComplete, duration = 2500 }) {
     canvas.width = width;
     canvas.height = height;
 
-    const colors = ['#22d3ee', '#06b6d4', '#0891b2', '#0e7490', '#67e8f9', '#a5f3fc'];
+    // Design system: accent-teal #00E5CC, accent-cyan #00B4FF (canvas needs resolved colors)
+    const colors = ['#00E5CC', '#00B4FF', '#B8E6E3', '#7EB8B5', 'rgba(0,229,204,0.4)', 'rgba(0,180,255,0.35)'];
     const particles = [];
     const count = 80;
 

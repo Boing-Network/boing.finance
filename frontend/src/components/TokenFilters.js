@@ -108,7 +108,7 @@ const TokenFilters = ({ filters, onFilterChange, onClearFilters }) => {
             checked={filters.favoritesOnly || false}
             onChange={(e) => onFilterChange('favoritesOnly', e.target.checked)}
             className="w-4 h-4 rounded"
-            style={{ accentColor: '#3b82f6' }}
+            style={{ accentColor: 'var(--accent-cyan)' }}
           />
           <label htmlFor="favoritesOnly" className="ml-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
             Show favorites only

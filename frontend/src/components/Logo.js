@@ -1,7 +1,7 @@
 import React from 'react';
 
 /** Boing logo (Official Visual Design System): icon-only transparent PNG — used throughout the app. */
-const LOGO_ICON = '/assets/icon-only-transparent.png';
+const LOGO_ICON = `${process.env.PUBLIC_URL || ''}/assets/icon-only-transparent.png`;
 
 /**
  * Logo: icon-only transparent PNG with optional wordmark.
@@ -27,7 +27,7 @@ const Logo = ({ size = 40, className = "", showText = false, showComic = false }
       )}
       {showText && showComic && (
         <img
-          src="/assets/logo-boing-comic.png"
+          src={`${process.env.PUBLIC_URL || ''}/assets/logo-boing-comic.png`}
           alt="BOING!"
           className="ml-2 h-6 md:h-7 w-auto object-contain"
           style={{ filter: 'drop-shadow(0 0 6px var(--glow-cyan))' }}

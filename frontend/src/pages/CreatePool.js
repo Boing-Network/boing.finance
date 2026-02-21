@@ -92,11 +92,11 @@ function CreatePool() {
       }
       
       .slider:focus::-webkit-slider-thumb {
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        box-shadow: 0 0 0 3px var(--glow-cyan);
       }
       
       .slider:focus::-moz-range-thumb {
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        box-shadow: 0 0 0 3px var(--glow-cyan);
       }
     `;
     document.head.appendChild(style);
@@ -1654,7 +1654,7 @@ function CreatePool() {
                         onChange={(e) => setLockDuration(Number(e.target.value) * 24 * 60 * 60)}
                         className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
                         style={{
-                          background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(Math.round(lockDuration / (24 * 60 * 60)) - 1) / 364 * 100}%, #4b5563 ${(Math.round(lockDuration / (24 * 60 * 60)) - 1) / 364 * 100}%, #4b5563 100%)`
+                          background: `linear-gradient(to right, var(--accent-cyan) 0%, var(--accent-cyan) ${(Math.round(lockDuration / (24 * 60 * 60)) - 1) / 364 * 100}%, var(--bg-tertiary) ${(Math.round(lockDuration / (24 * 60 * 60)) - 1) / 364 * 100}%, var(--bg-tertiary) 100%)`
                         }}
                       />
                       <div className="flex justify-between text-xs text-gray-500 mt-1">

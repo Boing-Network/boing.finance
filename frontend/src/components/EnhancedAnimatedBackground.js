@@ -250,7 +250,7 @@ function EnhancedAnimatedBackground() {
         </circle>
 
         {/* Twinkling specks */}
-        <circle cx="24" cy="10" r="0.12" fill="#fff">
+        <circle cx="24" cy="10" r="0.12" fill="var(--text-primary)">
           <animate attributeName="opacity" values="0.2;1;0.2" dur="2.5s" repeatCount="indefinite" />
         </circle>
         <circle cx="54" cy="20" r="0.1" fill={BOING_PRIMARY}>

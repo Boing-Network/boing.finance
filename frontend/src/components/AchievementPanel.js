@@ -32,7 +32,7 @@ export default function AchievementPanel({ compact = true }) {
               key={a.id}
               className="w-6 h-6 rounded-full flex items-center justify-center text-xs border-2 border-gray-800"
               style={{
-                backgroundColor: unlocked.includes(a.id) ? 'rgba(34, 211, 238, 0.3)' : 'var(--bg-secondary)',
+                backgroundColor: unlocked.includes(a.id) ? 'var(--glow-cyan-soft)' : 'var(--bg-secondary)',
                 opacity: unlocked.includes(a.id) ? 1 : 0.4
               }}
               title={unlocked.includes(a.id) ? a.name : `${a.name} (locked)`}
@@ -71,7 +71,7 @@ export default function AchievementPanel({ compact = true }) {
             key={a.id}
             className="rounded-lg p-2 flex items-center gap-2"
             style={{
-              backgroundColor: unlocked.includes(a.id) ? 'rgba(34, 211, 238, 0.1)' : 'var(--bg-secondary)',
+              backgroundColor: unlocked.includes(a.id) ? 'var(--accent-cyan-bg)' : 'var(--bg-secondary)',
               opacity: unlocked.includes(a.id) ? 1 : 0.6
             }}
           >

@@ -17,7 +17,7 @@ export default function AchievementToast({ achievement, onDismiss }) {
       className="fixed bottom-6 right-6 z-[100] max-w-sm rounded-xl border shadow-xl flex items-center gap-4 p-4"
       style={{
         background: 'linear-gradient(135deg, var(--bg-card), var(--bg-secondary))',
-        borderColor: 'rgba(34, 211, 238, 0.5)'
+        borderColor: 'var(--glow-cyan)'
       }}
     >
       <div className="text-4xl">{achievement.icon}</div>

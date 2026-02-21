@@ -49,7 +49,7 @@ export default function ProactiveTipsBanner() {
           <a
             href={tip.cta}
             className="px-3 py-1 rounded font-medium"
-            style={{ backgroundColor: 'var(--primary-color)', color: '#fff' }}
+            style={{ backgroundColor: 'var(--primary-color)', color: 'var(--bg-primary)' }}
           >
             Go
           </a>

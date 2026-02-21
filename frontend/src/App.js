@@ -14,7 +14,6 @@ import AchievementOverlay from './components/AchievementOverlay';
 import { useWalletConnection } from './hooks/useWalletConnection';
 import BaseMiniAppWrapper from './components/BaseMiniAppWrapper';
 import BaseNetworkOptimizer from './components/BaseNetworkOptimizer';
-import EnhancedAnimatedBackground from './components/EnhancedAnimatedBackground';
 import WalletConnect from './components/WalletConnect';
 import NetworkSelector from './components/NetworkSelector';
 import TransactionHistoryModal from './components/TransactionHistoryModal';
@@ -270,7 +269,6 @@ function AppContent() {
 
   return (
     <div className={`relative flex flex-col min-h-screen min-w-0 overflow-x-hidden ${pageBackgroundClass}`}>
-      <EnhancedAnimatedBackground />
       <BaseNetworkOptimizer />
       
       {/* Navigation - global nav styles from globals.css (border, backdrop, z-index) */}
@@ -321,7 +319,7 @@ function AppContent() {
                 className="flex items-center gap-1.5 font-bold text-xl whitespace-nowrap"
                 style={{ color: 'var(--text-primary)' }}
               >
-                <Logo size={36} showText={true} showComic={true} className="shrink-0" style={{ filter: 'drop-shadow(0 0 8px var(--glow-cyan))' }} />
+                <Logo size={36} showText={true} showComic={false} className="shrink-0" style={{ filter: 'drop-shadow(0 0 8px var(--glow-cyan))' }} />
               </button>
             </div>
 
@@ -674,7 +672,7 @@ function AppContent() {
             {/* Brand Section - Full width on mobile, spans 5 columns on larger screens */}
             <div className="lg:col-span-5 relative">
               <div className="flex items-center mb-4 sm:mb-6">
-                <Logo size={48} className="mr-3 sm:mr-4" showText={true} showComic={true} />
+                <Logo size={48} className="mr-3 sm:mr-4" showText={true} showComic={false} />
               </div>
               {/* Official Boing Bot mascot - design system asset */}
               <img
@@ -1198,24 +1196,24 @@ function _BoingAstronaut() {
     <svg width="80" height="80" viewBox="0 0 200 200" className="animate-float" fill="none" xmlns="http://www.w3.org/2000/svg">
       <g>
         <ellipse cx="100" cy="175" rx="28" ry="8" fill="currentColor" opacity="0.08" />
-        <ellipse cx="100" cy="85" rx="48" ry="44" fill="#fff" stroke="#bfc9d9" strokeWidth="3" />
+        <ellipse cx="100" cy="85" rx="48" ry="44" fill="var(--text-primary)" stroke="var(--border-color)" strokeWidth="3" />
         <ellipse cx="100" cy="85" rx="42" ry="38" fill="var(--accent-teal)" fillOpacity="0.2" stroke="var(--accent-cyan)" strokeWidth="3" />
-        <ellipse cx="100" cy="90" rx="32" ry="30" fill="#f8fafc" stroke="#bfc9d9" strokeWidth="2" />
-        <ellipse cx="88" cy="95" rx="5" ry="5" fill="#60a5fa" />
-        <ellipse cx="112" cy="95" rx="5" ry="5" fill="#60a5fa" />
-        <ellipse cx="88" cy="94" rx="1.2" ry="2" fill="#fff" opacity="0.7" />
-        <ellipse cx="112" cy="94" rx="1.2" ry="2" fill="#fff" opacity="0.7" />
-        <ellipse cx="85" cy="75" rx="12" ry="6" fill="#fff" opacity="0.18" />
-        <ellipse cx="100" cy="140" rx="28" ry="24" fill="#e0e7ef" stroke="#bfc9d9" strokeWidth="2" />
-        <ellipse cx="78" cy="135" rx="7" ry="13" fill="#e0e7ef" stroke="#bfc9d9" strokeWidth="2" />
-        <ellipse cx="122" cy="135" rx="7" ry="13" fill="#e0e7ef" stroke="#bfc9d9" strokeWidth="2" />
-        <ellipse cx="72" cy="147" rx="6" ry="6" fill="#f8fafc" stroke="#bfc9d9" strokeWidth="2" />
-        <ellipse cx="128" cy="147" rx="6" ry="6" fill="#f8fafc" stroke="#bfc9d9" strokeWidth="2" />
-        <ellipse cx="88" cy="165" rx="7" ry="12" fill="#e0e7ef" stroke="#bfc9d9" strokeWidth="2" />
-        <ellipse cx="112" cy="165" rx="7" ry="12" fill="#e0e7ef" stroke="#bfc9d9" strokeWidth="2" />
-        <ellipse cx="88" cy="180" rx="8" ry="4" fill="#a5b4fc" />
-        <ellipse cx="112" cy="180" rx="8" ry="4" fill="#a5b4fc" />
-        <ellipse cx="100" cy="150" rx="10" ry="8" fill="#bae6fd" stroke="#7dd3fc" strokeWidth="1.5" />
+        <ellipse cx="100" cy="90" rx="32" ry="30" fill="var(--text-primary)" stroke="var(--border-color)" strokeWidth="2" />
+        <ellipse cx="88" cy="95" rx="5" ry="5" fill="var(--accent-cyan)" />
+        <ellipse cx="112" cy="95" rx="5" ry="5" fill="var(--accent-cyan)" />
+        <ellipse cx="88" cy="94" rx="1.2" ry="2" fill="var(--text-primary)" opacity="0.7" />
+        <ellipse cx="112" cy="94" rx="1.2" ry="2" fill="var(--text-primary)" opacity="0.7" />
+        <ellipse cx="85" cy="75" rx="12" ry="6" fill="var(--text-primary)" opacity="0.18" />
+        <ellipse cx="100" cy="140" rx="28" ry="24" fill="var(--text-secondary)" stroke="var(--border-color)" strokeWidth="2" />
+        <ellipse cx="78" cy="135" rx="7" ry="13" fill="var(--text-secondary)" stroke="var(--border-color)" strokeWidth="2" />
+        <ellipse cx="122" cy="135" rx="7" ry="13" fill="var(--text-secondary)" stroke="var(--border-color)" strokeWidth="2" />
+        <ellipse cx="72" cy="147" rx="6" ry="6" fill="var(--text-primary)" stroke="var(--border-color)" strokeWidth="2" />
+        <ellipse cx="128" cy="147" rx="6" ry="6" fill="var(--text-primary)" stroke="var(--border-color)" strokeWidth="2" />
+        <ellipse cx="88" cy="165" rx="7" ry="12" fill="var(--text-secondary)" stroke="var(--border-color)" strokeWidth="2" />
+        <ellipse cx="112" cy="165" rx="7" ry="12" fill="var(--text-secondary)" stroke="var(--border-color)" strokeWidth="2" />
+        <ellipse cx="88" cy="180" rx="8" ry="4" fill="var(--accent-purple)" />
+        <ellipse cx="112" cy="180" rx="8" ry="4" fill="var(--accent-purple)" />
+        <ellipse cx="100" cy="150" rx="10" ry="8" fill="var(--info-text)" stroke="var(--accent-cyan)" strokeWidth="1.5" />
       </g>
       <animateTransform attributeName="transform" type="translate" values="0 0; 0 -12; 0 0" dur="4s" repeatCount="indefinite" />
     </svg>
@@ -1544,7 +1542,7 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
           <div className="absolute top-full left-0 mt-2 w-52 backdrop-blur-sm rounded-xl shadow-xl z-[50]" style={{
           backgroundColor: 'var(--bg-card)',
           border: '1px solid var(--border-color)',
-          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+          boxShadow: '0 10px 25px -5px var(--shadow), 0 10px 10px -5px var(--shadow)'
         }}>
           <div className="py-1.5">
             {items.map((item) => {

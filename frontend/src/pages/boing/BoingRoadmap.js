@@ -26,13 +26,13 @@ export default function BoingRoadmap() {
               <div key={m.phase} className="relative pl-14">
                 <div className="absolute left-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
                   style={{
-                    backgroundColor: m.status === 'completed' ? '#10b981' : m.status === 'current' ? '#8b5cf6' : 'var(--bg-tertiary)',
-                    color: m.status === 'upcoming' ? 'var(--text-tertiary)' : '#fff',
+                    backgroundColor: m.status === 'completed' ? 'var(--success-color)' : m.status === 'current' ? 'var(--accent-purple)' : 'var(--bg-tertiary)',
+                    color: m.status === 'upcoming' ? 'var(--text-tertiary)' : 'var(--text-primary)',
                   }}
                 >
                   {m.status === 'completed' ? '✓' : m.status === 'current' ? '•' : '○'}
                 </div>
-                <PageCard className="border-l-4" style={{ borderLeftColor: m.status === 'current' ? '#8b5cf6' : 'transparent' }}>
+                <PageCard className="border-l-4" style={{ borderLeftColor: m.status === 'current' ? 'var(--accent-purple)' : 'transparent' }}>
                   <div className="flex flex-wrap items-center gap-2 mb-3">
                     <span className="text-xs font-medium px-2 py-1 rounded-full bg-purple-500/20 text-purple-400">{m.phase}</span>
                     <span className={`text-xs px-2 py-1 rounded-full ${m.status === 'completed' ? 'bg-green-500/20 text-green-400' : m.status === 'current' ? 'bg-purple-500/20 text-purple-400' : 'bg-gray-500/20 text-gray-400'}`}>{m.status}</span>

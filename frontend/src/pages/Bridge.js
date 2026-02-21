@@ -489,7 +489,7 @@ export default function Bridge() {
                 className="w-full font-bold py-4 px-8 rounded-xl transition-all text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   backgroundColor: 'var(--primary-color)',
-                  color: '#fff',
+                  color: 'var(--bg-primary)',
                 }}
               >
                 {isBridging ? (

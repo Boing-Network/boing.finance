@@ -745,16 +745,16 @@ export default function Analytics() {
                   ) : generateTimeSeriesData.length > 0 ? (
                     <ResponsiveContainer width="100%" height={300}>
                       <AreaChart data={generateTimeSeriesData} isAnimationActive animationDuration={800} animationEasing="ease-out">
-                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
                         <XAxis 
                           dataKey="time" 
-                          stroke="#9CA3AF"
+                          stroke="var(--text-tertiary)"
                           angle={timeRange === '1y' ? -45 : 0}
                           textAnchor={timeRange === '1y' ? 'end' : 'middle'}
                           height={timeRange === '1y' ? 80 : 30}
                         />
                         <YAxis 
-                          stroke="#9CA3AF"
+                          stroke="var(--text-tertiary)"
                           tickFormatter={(value) => {
                             if (value >= 1e12) return `$${(value / 1e12).toFixed(2)}T`;
                             if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
@@ -771,8 +771,8 @@ export default function Analytics() {
                         <Area 
                           type="monotone" 
                           dataKey="volume" 
-                          stroke="#3B82F6" 
-                          fill="#3B82F6" 
+                          stroke="var(--accent-cyan)" 
+                          fill="var(--accent-cyan)" 
                           fillOpacity={0.3} 
                           name="Volume (USD)" 
                         />
@@ -831,16 +831,16 @@ export default function Analytics() {
                             users: stats.users || 0,
                             pools: stats.pools || 0
                           }))} isAnimationActive animationDuration={600} animationEasing="ease-out">
-                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                            <XAxis dataKey="network" stroke="#9CA3AF" />
-                            <YAxis stroke="#9CA3AF" />
+                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                            <XAxis dataKey="network" stroke="var(--text-tertiary)" />
+                            <YAxis stroke="var(--text-tertiary)" />
                             <Tooltip 
                               contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
                               labelStyle={{ color: 'var(--text-primary)' }}
                             />
                             <Legend />
-                            <Bar dataKey="volume" fill="#3B82F6" name="Volume (USD)" />
-                            <Bar dataKey="pools" fill="#10B981" name="Pools" />
+                            <Bar dataKey="volume" fill="var(--accent-cyan)" name="Volume (USD)" />
+                            <Bar dataKey="pools" fill="var(--success-color)" name="Pools" />
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
@@ -905,11 +905,11 @@ export default function Analytics() {
                           labelLine={false}
                           label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                           outerRadius={80}
-                          fill="#8884d8"
+                          fill="var(--accent-cyan)"
                           dataKey="value"
                         >
                           {Object.keys(analytics?.networkStats || {}).map((_, index) => (
-                            <Cell key={`cell-${index}`} fill={['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'][index % 6]} />
+                            <Cell key={`cell-${index}`} fill={['#00B4FF', '#10b981', '#FACC15', '#ef4444', '#9B59B6', '#00E5CC'][index % 6]} />
                           ))}
                         </Pie>
                         <Tooltip 
@@ -1053,15 +1053,15 @@ export default function Analytics() {
                               action: action.replace('_', ' ').toUpperCase(),
                               count: Array.isArray(count) ? count.length : count
                             }))} isAnimationActive animationDuration={600} animationEasing="ease-out">
-                              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                              <XAxis dataKey="action" stroke="#9CA3AF" />
-                              <YAxis stroke="#9CA3AF" />
+                              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                              <XAxis dataKey="action" stroke="var(--text-tertiary)" />
+                              <YAxis stroke="var(--text-tertiary)" />
                               <Tooltip 
                                 contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
                                 labelStyle={{ color: 'var(--text-primary)' }}
                               />
                               <Legend />
-                              <Bar dataKey="count" fill="#8B5CF6" name="Actions" />
+                              <Bar dataKey="count" fill="var(--accent-purple)" name="Actions" />
                             </BarChart>
                           </ResponsiveContainer>
                         )}

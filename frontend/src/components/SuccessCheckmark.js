@@ -31,9 +31,9 @@ export default function SuccessCheckmark({ show, onComplete }) {
           <div
             className="w-24 h-24 rounded-full flex items-center justify-center"
             style={{
-              background: 'linear-gradient(135deg, rgba(34, 211, 238, 0.3), rgba(6, 182, 212, 0.2))',
-              border: '3px solid rgba(34, 211, 238, 0.6)',
-              boxShadow: '0 0 40px rgba(34, 211, 238, 0.4)'
+              background: 'linear-gradient(135deg, var(--glow-cyan-soft), var(--accent-cyan-bg))',
+              border: '3px solid var(--glow-cyan)',
+              boxShadow: '0 0 40px var(--glow-cyan)'
             }}
           >
             <motion.svg

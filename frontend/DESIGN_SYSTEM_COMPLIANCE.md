@@ -48,8 +48,8 @@ This document cross-references the official PDFs (boing_design_system.md, Boing_
 - Hover: 0.3s ease, translateY(-2px) / scale where specified
 
 ### 7. Hardcoded colors
-- Replaced with design tokens across App.js, shared components (mascot, background, ShootingStars, GlobalSearch, Wallet*, etc.), and key pages (Portfolio, DeployToken, Pools, CreatePool)
-- Token definitions live only in `:root` / `.dark` in `globals.css`
+- Replaced with design tokens across App.js, shared components (mascot, background, ShootingStars, GlobalSearch, Wallet*, ThemeToggle, TokenDetailsModal, TokenFilters, ProactiveTipsBanner, AchievementPanel, AchievementToast, SuccessCheckmark, Confetti, LanguageSelector, EnhancedAnimatedBackground), and pages (Portfolio, DeployToken, Pools, CreatePool, Bridge, Analytics, BoingRoadmap, BoingStaking, GovernanceTreasury, GovernanceRoadmap).
+- Token definitions live only in `:root` / `.dark` in `globals.css`. Charts (Recharts) use `var(--accent-cyan)`, `var(--text-tertiary)`, `var(--border-color)`, and design-system hex palette where needed.
 
 ### 8. Principles (from PDFs)
 - **Depth & immersion:** Dark navy base, layered backgrounds, parallax/float

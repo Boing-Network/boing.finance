@@ -66,7 +66,7 @@ const LanguageSelector = () => {
           style={{
             backgroundColor: 'var(--bg-card)',
             border: '1px solid var(--border-color)',
-            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+            boxShadow: '0 10px 25px -5px var(--shadow), 0 10px 10px -5px var(--shadow)'
           }}
         >
           <div className="py-1.5">

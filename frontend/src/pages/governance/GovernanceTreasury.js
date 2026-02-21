@@ -6,11 +6,11 @@ import { getTreasury } from '../../services/governanceApi';
 import { useNetwork } from '../../hooks/useNetwork';
 
 const FALLBACK_ALLOCATIONS = [
-  { name: 'Liquidity', value: 0, color: '#06b6d4' },
-  { name: 'Grants', value: 0, color: '#8b5cf6' },
+  { name: 'Liquidity', value: 0, color: '#00B4FF' },
+  { name: 'Grants', value: 0, color: '#9B59B6' },
   { name: 'Development', value: 0, color: '#10b981' },
-  { name: 'Marketing', value: 0, color: '#f59e0b' },
-  { name: 'Reserve', value: 0, color: '#6366f1' },
+  { name: 'Marketing', value: 0, color: '#FACC15' },
+  { name: 'Reserve', value: 0, color: '#00E5CC' },
 ];
 
 export default function GovernanceTreasury() {
@@ -27,7 +27,7 @@ export default function GovernanceTreasury() {
       .then((d) => {
         if (cancelled) return;
         const allocs = Array.isArray(d.allocations) && d.allocations.length
-          ? d.allocations.map((a) => ({ name: a.name || a.label || 'Other', value: Number(a.value || 0), color: a.color || '#06b6d4' }))
+          ? d.allocations.map((a) => ({ name: a.name || a.label || 'Other', value: Number(a.value || 0), color: a.color || '#00B4FF' }))
           : FALLBACK_ALLOCATIONS;
         setData({ totalUsd: d.totalUsd || '0', allocations: allocs, multisigSigners: d.multisigSigners, timestamp: d.timestamp });
       })
@@ -67,11 +67,11 @@ export default function GovernanceTreasury() {
           <h3 className="text-lg font-semibold mb-6" style={{ color: 'var(--text-primary)' }}>Allocation Breakdown</h3>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={data.allocations} layout="vertical" margin={{ left: 80 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis type="number" stroke="#9CA3AF" tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-              <YAxis type="category" dataKey="name" stroke="#9CA3AF" width={70} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+              <XAxis type="number" stroke="var(--text-tertiary)" tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+              <YAxis type="category" dataKey="name" stroke="var(--text-tertiary)" width={70} />
               <Tooltip contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }} formatter={(v) => [`$${v.toLocaleString()}`, '']} />
-              <Bar dataKey="value" fill="#06b6d4" radius={[0, 4, 4, 0]} />
+              <Bar dataKey="value" fill="var(--accent-cyan)" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </PageCard>

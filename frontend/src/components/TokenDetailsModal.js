@@ -187,7 +187,7 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network, onSetPriceAlert })
               className="p-2 rounded-lg transition-colors"
               style={{
                 backgroundColor: isFavorite ? 'var(--bg-secondary)' : 'var(--bg-tertiary)',
-                color: isFavorite ? '#fbbf24' : 'var(--text-secondary)'
+                color: isFavorite ? 'var(--accent-gold)' : 'var(--text-secondary)'
               }}
               title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             >
@@ -223,7 +223,7 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network, onSetPriceAlert })
               }`}
               style={{
                 color: activeTab === tab ? 'var(--text-primary)' : 'var(--text-secondary)',
-                borderBottomColor: activeTab === tab ? '#3b82f6' : 'transparent'
+                borderBottomColor: activeTab === tab ? 'var(--accent-cyan)' : 'transparent'
               }}
             >
               {tab}
@@ -327,7 +327,7 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network, onSetPriceAlert })
                   }}
                   className="flex-1 px-4 py-2 rounded-lg text-center transition-colors"
                   style={{
-                    backgroundColor: '#10B981',
+                    backgroundColor: 'var(--success-color)',
                     color: 'white'
                   }}
                 >

@@ -26,13 +26,13 @@ export default function GovernanceRoadmap() {
               <div key={m.phase} className="relative pl-14">
                 <div className="absolute left-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
                   style={{
-                    backgroundColor: m.status === 'completed' ? '#10b981' : m.status === 'current' ? '#06b6d4' : 'var(--bg-tertiary)',
-                    color: m.status === 'upcoming' ? 'var(--text-tertiary)' : '#fff',
+                    backgroundColor: m.status === 'completed' ? 'var(--success-color)' : m.status === 'current' ? 'var(--accent-cyan)' : 'var(--bg-tertiary)',
+                    color: m.status === 'upcoming' ? 'var(--text-tertiary)' : 'var(--text-primary)',
                   }}
                 >
                   {m.status === 'completed' ? '✓' : m.status === 'current' ? '•' : m.phase.slice(-1)}
                 </div>
-                <PageCard className="border-l-4" style={{ borderLeftColor: m.status === 'current' ? '#06b6d4' : 'transparent' }}>
+                <PageCard className="border-l-4" style={{ borderLeftColor: m.status === 'current' ? 'var(--accent-cyan)' : 'transparent' }}>
                   <div className="flex flex-wrap items-center gap-2 mb-3">
                     <span className="text-xs font-medium px-2 py-1 rounded-full bg-cyan-500/20 text-cyan-400">{m.phase}</span>
                     <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{m.date}</span>
