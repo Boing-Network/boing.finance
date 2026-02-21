@@ -370,6 +370,15 @@ body {
   }
 }
 
+/* Boing hero asset: shared float animation (mascot, footer, background scene) */
+@keyframes boing-hero-float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-8px) scale(1.02); }
+}
+.boing-hero-float {
+  animation: boing-hero-float 6s ease-in-out infinite;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .card {
