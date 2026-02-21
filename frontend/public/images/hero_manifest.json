@@ -1,0 +1,16 @@
+[
+  {
+    "id": "hero",
+    "file": "hero_optimized.png",
+    "width": 1200,
+    "height": 1200,
+    "use": "hero, background"
+  },
+  {
+    "id": "thumb",
+    "file": "hero_thumb.png",
+    "width": 380,
+    "height": 380,
+    "use": "mascot, footer"
+  }
+]

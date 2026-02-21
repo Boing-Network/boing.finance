@@ -677,11 +677,19 @@ function AppContent() {
         <div className="max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 sm:gap-10">
             {/* Brand Section - Full width on mobile, spans 5 columns on larger screens */}
-            <div className="lg:col-span-5">
+            <div className="lg:col-span-5 relative">
               <div className="flex items-center mb-4 sm:mb-6">
                 <Logo size={48} className="mr-3 sm:mr-4" showText={false} />
                 <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#00E5CC] via-[#00E5CC] to-[#00B4FF] bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(0,229,204,0.6)]">boing.finance</h3>
               </div>
+              {/* Hero robot + environment (optimized thumb) - presence across app */}
+              <img
+                src={`${process.env.PUBLIC_URL || ''}/images/hero_thumb.png`}
+                alt=""
+                className="boing-hero-float absolute -right-2 bottom-0 w-24 h-auto opacity-30 pointer-events-none hidden sm:block"
+                style={{ maxHeight: '100px', objectFit: 'contain' }}
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
               <p className="text-sm sm:text-base font-medium mb-1 bg-gradient-to-r from-[#00E5CC]/90 to-[#00B4FF]/90 bg-clip-text text-transparent">
                 Authentic. Decentralized. Optimal. Quality-Assured.
               </p>

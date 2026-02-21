@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import HeroElementsLayer from './HeroElementsLayer';
+import BoingHeroScene from './BoingHeroScene';
 
 /**
- * Outerspace-oceanic theme: deep sea + cosmic. Subtle hex grid, animated
- * jellyfish & fish, bioluminescent orbs. Uses modified background PNG when
- * present; overlays extracted hero elements with 3D motion.
+ * Outerspace-oceanic theme: deep sea + cosmic. Subtle hex grid, jellyfish &
+ * fish, bioluminescent orbs. Uses modified background when present; overlays
+ * full Boing hero robot + environment (enhanced via scripts/enhance_hero.py).
  */
 const BOING_PRIMARY = '#00E5CC';
 const BOING_SECONDARY = '#00B4FF';
@@ -51,7 +51,7 @@ function EnhancedAnimatedBackground() {
           aria-hidden
         />
       )}
-      <HeroElementsLayer />
+      <BoingHeroScene />
 
       <svg
         width="100%"
