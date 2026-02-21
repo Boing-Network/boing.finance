@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Comfortaa font family - bundled from src/assets/fonts (webpack-resolvable paths) */
+/* Boing Network typography: Comfortaa — outerspace-oceanic theme */
 @font-face {
   font-family: 'Comfortaa';
   font-style: normal;
@@ -65,7 +65,7 @@
 
 /* Focus visible styles for keyboard navigation */
 *:focus-visible {
-  outline: 2px solid var(--primary-color, #06b6d4);
+  outline: 2px solid var(--primary-color, #00E5CC);
   outline-offset: 2px;
 }
 
@@ -74,8 +74,8 @@
   position: absolute;
   top: -40px;
   left: 0;
-  background: var(--primary-color, #06b6d4);
-  color: white;
+  background: var(--primary-color, #00E5CC);
+  color: #0A0E1A;
   padding: 8px;
   text-decoration: none;
   z-index: 100;
@@ -97,77 +97,79 @@
   }
 }
 
-/* Custom CSS Variables - Light Theme (Default) */
+/* Boing Network — Outerspace-oceanic theme (promotional video / brand).
+   Dark mode = deep navy + teal/blue glow; light = soft white-teal. */
+/* Custom CSS Variables - Light Theme (Default) - Soft White-Teal */
 :root {
   --font-family: 'Comfortaa', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --primary-color: #3b82f6;
-  --secondary-color: #8b5cf6;
-  --accent-color: #06b6d4;
+  --primary-color: #00E5CC;
+  --secondary-color: #00B4FF;
+  --accent-color: #00E5CC;
   --success-color: #10b981;
   --warning-color: #f59e0b;
   --error-color: #ef4444;
   
-  /* Light Theme Colors - Clean and modern (softer for comfort) */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  --bg-tertiary: #f1f5f9;
+  /* Light Theme - Soft White-Teal (#F0FFFE per brand) */
+  --bg-primary: #F0FFFE;
+  --bg-secondary: #e0f7f5;
+  --bg-tertiary: #cceeea;
   --bg-card: #ffffff;
-  --text-primary: #0f172a;
+  --text-primary: #0A0E1A;
   --text-secondary: #334155;
   --text-tertiary: #64748b;
-  --border-color: #e2e8f0;
-  --border-hover: #cbd5e1;
-  --shadow: rgba(0, 0, 0, 0.06);
-  --shadow-hover: rgba(0, 0, 0, 0.1);
+  --border-color: #99e0db;
+  --border-hover: #00E5CC;
+  --shadow: rgba(0, 229, 204, 0.08);
+  --shadow-hover: rgba(0, 229, 204, 0.15);
   
   /* Colored box backgrounds and text */
   --success-bg: rgba(16, 185, 129, 0.1);
   --success-text: #065f46;
   --success-hover: #047857;
-  --info-bg: rgba(59, 130, 246, 0.1);
-  --info-text: #1e40af;
-  --info-hover: #1d4ed8;
+  --info-bg: rgba(0, 180, 255, 0.1);
+  --info-text: #0A0E1A;
+  --info-hover: #0099dd;
   --warning-bg: rgba(245, 158, 11, 0.1);
   --warning-text: #92400e;
   --warning-hover: #b45309;
   --error-bg: rgba(239, 68, 68, 0.1);
   --error-text: #991b1b;
   --error-hover: #b91c1c;
-  --secondary-bg: rgba(139, 92, 246, 0.1);
-  --secondary-text: #6b21a8;
-  --secondary-hover: #7c3aed;
+  --secondary-bg: rgba(0, 229, 204, 0.1);
+  --secondary-text: #0A0E1A;
+  --secondary-hover: #00B4FF;
 }
 
-/* Dark Theme Colors */
+/* Dark Theme - Deep Navy (#0A0E1A per brand) */
 .dark {
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-tertiary: #334155;
-  --bg-card: #1e293b;
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-tertiary: #94a3b8;
-  --border-color: #334155;
-  --border-hover: #475569;
+  --bg-primary: #0A0E1A;
+  --bg-secondary: #0f1629;
+  --bg-tertiary: #151d33;
+  --bg-card: #151d33;
+  --text-primary: #F0FFFE;
+  --text-secondary: #b8e8e4;
+  --text-tertiary: #7dd3ce;
+  --border-color: rgba(0, 229, 204, 0.2);
+  --border-hover: rgba(0, 229, 204, 0.5);
   --shadow: rgba(0, 0, 0, 0.3);
-  --shadow-hover: rgba(0, 0, 0, 0.4);
+  --shadow-hover: rgba(0, 229, 204, 0.15);
   
   /* Colored box backgrounds and text - Dark Theme */
   --success-bg: rgba(16, 185, 129, 0.2);
   --success-text: #6ee7b7;
   --success-hover: #34d399;
-  --info-bg: rgba(59, 130, 246, 0.2);
-  --info-text: #93c5fd;
-  --info-hover: #60a5fa;
+  --info-bg: rgba(0, 180, 255, 0.2);
+  --info-text: #7dd3fc;
+  --info-hover: #00B4FF;
   --warning-bg: rgba(245, 158, 11, 0.2);
   --warning-text: #fbbf24;
   --warning-hover: #f59e0b;
   --error-bg: rgba(239, 68, 68, 0.2);
   --error-text: #fca5a5;
   --error-hover: #f87171;
-  --secondary-bg: rgba(139, 92, 246, 0.2);
-  --secondary-text: #c4b5fd;
-  --secondary-hover: #a78bfa;
+  --secondary-bg: rgba(0, 229, 204, 0.15);
+  --secondary-text: #00E5CC;
+  --secondary-hover: #00B4FF;
 }
 
 /* Base Styles */
@@ -249,14 +251,19 @@ body {
 
 /* Button Styles */
 .btn-primary {
-  @apply bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50;
+  background: linear-gradient(to right, #00E5CC, #00B4FF);
+  color: #0A0E1A;
+  @apply font-medium py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#00E5CC] focus:ring-opacity-50;
+}
+.btn-primary:hover {
+  background: linear-gradient(to right, #00d4bc, #0099dd);
 }
 
 .btn-secondary {
   background: var(--bg-tertiary);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
-  @apply font-medium py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50;
+  @apply font-medium py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#00E5CC] focus:ring-opacity-50;
 }
 
 .btn-secondary:hover {
@@ -267,7 +274,7 @@ body {
   background: transparent;
   color: var(--text-secondary);
   border: 1px solid var(--border-color);
-  @apply font-medium py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50;
+  @apply font-medium py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#00E5CC] focus:ring-opacity-50;
 }
 
 .btn-outline:hover {
@@ -297,7 +304,7 @@ body {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
-  @apply rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
+  @apply rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00E5CC] focus:border-transparent transition-all duration-200;
 }
 
 .input-field::placeholder {
@@ -374,11 +381,11 @@ body {
   }
 }
 
-/* Dark Mode Overrides */
+/* Dark Mode Overrides (Boing deep navy) */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background-dark: #0a0a0a;
-    --background-light: #1a1a1a;
+  :root:not(.light) {
+    --background-dark: #0A0E1A;
+    --background-light: #0f1629;
   }
 }
 
@@ -452,10 +459,10 @@ a, .link {
   text-shadow: none;
 }
 
-/* Dark mode - neon effects */
+/* Dark mode - Boing neon (primary teal) */
 .dark a, .dark .link {
-  color: #00E0FF;
-  text-shadow: 0 0 8px #00E0FF88;
+  color: #00E5CC;
+  text-shadow: 0 0 8px rgba(0, 229, 204, 0.5);
 }
 
 :root a:hover, :root .link:hover {
@@ -464,8 +471,8 @@ a, .link {
 }
 
 .dark a:hover, .dark .link:hover {
-  color: #7B61FF;
-  text-shadow: 0 0 12px #7B61FF99;
+  color: #00B4FF;
+  text-shadow: 0 0 12px rgba(0, 180, 255, 0.6);
 }
 
 button, .btn {
@@ -482,9 +489,9 @@ button, .btn {
   color: var(--primary-color);
 }
 
-/* Dark mode - neon effects */
+/* Dark mode - Boing primary */
 .dark button, .dark .btn {
-  color: #00E0FF;
+  color: #00E5CC;
 }
 
 :root button:hover, :root .btn:hover {
@@ -494,7 +501,7 @@ button, .btn {
 }
 
 .dark button:hover, .dark .btn:hover {
-  color: #7B61FF;
+  color: #00B4FF;
   background: transparent;
   box-shadow: none;
 }
@@ -505,10 +512,10 @@ button, .btn {
   box-shadow: 0 2px 24px var(--shadow);
 }
 
-/* Dark mode - neon effects */
+/* Dark mode - Boing glow */
 .dark .card, .dark .panel {
-  background: #10101A;
-  box-shadow: 0 2px 24px #00E0FF22;
+  background: var(--bg-card);
+  box-shadow: 0 2px 24px rgba(0, 229, 204, 0.12);
 }
 
 /* Custom Animations for Landing Page */
