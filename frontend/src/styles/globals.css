@@ -268,7 +268,7 @@ code, pre, .monospace {
 /* === BACKGROUND STYLES (Step 6) === */
 /* Landing: full Aquatic-Space scene (coral, jellyfish, starfield) from design system */
 .page-landing {
-  background-image: url('/assets/boing-aquatic-space-bg.webp');
+  background-image: url('../assets/boing-aquatic-space-bg.webp');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -289,7 +289,7 @@ code, pre, .monospace {
 
 .page-app {
   background-color: var(--bg-primary);
-  background-image: url('/assets/hex-grid.svg');
+  background-image: url('../assets/hex-grid.svg');
   background-repeat: repeat;
   background-size: 60px 60px;
   min-height: 100vh;

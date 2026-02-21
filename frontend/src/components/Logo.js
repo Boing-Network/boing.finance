@@ -1,5 +1,6 @@
 import React from 'react';
 
+/** Boing logo (Official Visual Design System): icon-only transparent PNG — used throughout the app. */
 const LOGO_ICON = '/assets/icon-only-transparent.png';
 
 /**

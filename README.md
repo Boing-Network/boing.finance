@@ -199,6 +199,8 @@ All project documentation lives in the **[docs](./docs)** folder:
 | [product-roadmap.md](./docs/product-roadmap.md) | Roadmap, UX ideas, NFT plans, AI integration |
 | [boing-tokenomics.md](./docs/boing-tokenomics.md) | BOING token economics and distribution |
 | [adding-a-network.md](./docs/adding-a-network.md) | How to add a new blockchain network (single-point config) |
+| [integration.md](./docs/integration.md) | Network prioritization, roadmap, capabilities, and supported networks |
+| [solana.md](./docs/solana.md) | Solana integration plan and security practices |
 
 ## 🔧 Configuration
 

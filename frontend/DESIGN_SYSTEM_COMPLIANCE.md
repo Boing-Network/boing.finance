@@ -2,6 +2,8 @@
 
 This document cross-references the official PDFs (boing_design_system.md, Boing_Network_Official_Visual_Design_System, Cursor_AI_Agent_Prompt, visual_notes, boing_ai_prompt) against the current implementation.
 
+**App logo:** The official placeholder logo is `public/assets/icon-only-transparent.png`. It is used in the navbar, footer, both manifests (`manifest.json`, `site.webmanifest`), JSON-LD in `index.html`, and structured data. Theme/background in manifests use design token `#0A0E1A` (--bg-primary).
+
 ---
 
 ## ✅ Implemented (aligned with Official Visual Design System + Cursor prompt)
@@ -33,7 +35,7 @@ This document cross-references the official PDFs (boing_design_system.md, Boing_
 - **Inputs:** `--bg-tertiary`, border, focus `--accent-teal` + glow, placeholder `--text-tertiary`
 
 ### 5. Backgrounds
-- **Landing:** `.page-landing` — full-bleed background image, overlay gradient (0.3 → 0.6) for legibility; currently uses `/images/boing_robot_hero.png` (see Assets below)
+- **Landing:** `.page-landing` — full-bleed background image, overlay gradient (0.3 → 0.6) for legibility; uses `src/assets/boing-aquatic-space-bg.webp` (see Assets below)
 - **App:** `.page-app` — `--bg-primary` + `/assets/hex-grid.svg` (60×60, stroke rgba(0,229,204,0.06))
 - App.js applies `page-landing` on `/` and `page-app` on all other routes
 
@@ -87,7 +89,7 @@ All official assets are wired from **`frontend/public/assets/`**.
 
 5. **“BOING!” comic-style logo**  
    - **From visual_notes:** Orange–yellow gradient (#FF9900 → #FFD700), comic/display style.  
-   - **Status:** No dedicated logo asset in code. If you have an official “BOING!” logo (SVG/PNG), add it to `public/` and use it in the header or marketing; optional CSS class can use `--accent-gold` / gradient for text version.
+   - **Status:** App logo is `icon-only-transparent.png` (nav, footer, manifests, JSON-LD). Optional wordmark: `logo-boing-comic.png` when `showComic={true}`. If you have an official “BOING!” logo (SVG/PNG), add it to `public/` and use it in the header or marketing; optional CSS class can use `--accent-gold` / gradient for text version.
 
 ---
 
@@ -97,3 +99,17 @@ All official assets are wired from **`frontend/public/assets/`**.
 - **Hex grid** opacity was set to **0.06** and **landing overlay** to **0.3 → 0.6**; **navbar** to **0.8** to match the Official doc.
 - **Cinzel** was added as an optional display serif (`--font-display-serif`) for high-impact titles.
 - All **`public/assets/`** images (aquatic-space background, mascots, comic logo, pillars, hex-grid) are wired into the app as described above.
+- **Placeholder logo:** `icon-only-transparent.png` is the single source for the Boing icon (navbar, footer, manifests, JSON-LD). Theme colors in manifest/site.webmanifest use design token `#0A0E1A` (--bg-primary).
+
+---
+
+## Design takeover audit (historical)
+
+*Merged from DESIGN_TAKEOVER_AUDIT.md. This section documents the initial audit that preceded the design system implementation.*
+
+- **Global stylesheet:** `frontend/src/styles/globals.css` is the single place for CSS custom properties and base styles (imported from `index.js`).
+- **Component library:** Buttons (AccessibleButton, `.btn-primary`/`.btn-secondary`/`.btn-outline`), cards (PageLayout, `.card`, `.glass`), nav in App.js, inputs via `.input-field`.
+- **Hardcoded colors:** Replaced with design tokens in globals.css; Tailwind config uses `var(--accent-teal)` and `var(--glow-cyan)`.
+- **Fonts:** Comfortaa, Orbitron, JetBrains Mono (Google Fonts + local Comfortaa); `--font-sans`, `--font-display`, `--font-mono`.
+- **Backgrounds:** `.page-landing` and `.page-app`; App.js applies by route. Hex grid and aquatic background as above.
+- **Final state:** Steps 1–8 completed; colors, fonts, backgrounds, and motion aligned with Boing Network Official Visual Design System.

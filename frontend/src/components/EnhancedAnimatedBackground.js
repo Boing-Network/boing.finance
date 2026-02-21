@@ -3,12 +3,17 @@ import BoingHeroScene from './BoingHeroScene';
 
 /**
  * Outerspace-oceanic theme: deep sea + cosmic. Subtle hex grid, jellyfish &
- * fish, bioluminescent orbs. Uses modified background when present; overlays
- * full Boing hero robot + environment (enhanced via scripts/enhance_hero.py).
+ * fish, bioluminescent orbs. Uses design system tokens from globals.css.
  */
 const BASE = process.env.PUBLIC_URL || '';
 const BOING_BG_IMAGE = `${BASE}/images/boing_background_dark.png`;
 const BOING_BG_MODIFIED = `${BASE}/images/boing_background_dark_modified.png`;
+
+/* Design system tokens (match globals.css :root — single source of truth) */
+const BOING_PRIMARY = 'var(--accent-teal)';
+const BOING_SECONDARY = 'var(--accent-cyan)';
+const COSMIC_PURPLE = 'var(--accent-purple)';
+const GLOW_PINK = 'var(--glow-purple)';
 
 function EnhancedAnimatedBackground() {
   const [bgImageUrl, setBgImageUrl] = useState(BOING_BG_IMAGE);
@@ -35,7 +40,7 @@ function EnhancedAnimatedBackground() {
       <div
         className="absolute inset-0 w-full h-full"
         style={{
-          background: `linear-gradient(180deg, #050810 0%, var(--bg-primary) 25%, var(--bg-tertiary) 60%, var(--bg-primary) 100%)`,
+          background: `linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-primary) 25%, var(--bg-tertiary) 60%, var(--bg-primary) 100%)`,
         }}
       />
       {bgImageLoaded && (

@@ -31,6 +31,9 @@ const ERC20_BYTECODE = AdvancedERC20Artifact.bytecode;
 const TOKEN_FACTORY_ABI = TokenFactoryArtifact.abi;
 const _TOKEN_IMPLEMENTATION_ABI = TokenImplementationArtifact.abi;
 
+/** Boing logo URL (design system) — used as default when token has no custom logo. */
+const BOING_LOGO_URL = 'https://boing.finance/assets/icon-only-transparent.png';
+
 // MochiAstronaut component
 
 // Toggle Button Component
@@ -1036,7 +1039,7 @@ export default function DeployToken() {
 
       // Step 2: Upload logo and metadata to IPFS
       setCurrentStepIndex(1);
-      let finalLogoUrl = logoUrl || 'https://placeholder.com/logo.png';
+      let finalLogoUrl = logoUrl || BOING_LOGO_URL;
       let metadataUrl = null;
       
       if (logoUrl || name || symbol) {
