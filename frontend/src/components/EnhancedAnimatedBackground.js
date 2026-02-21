@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import HeroElementsLayer from './HeroElementsLayer';
 
 /**
  * Outerspace-oceanic theme: deep sea + cosmic. Subtle hex grid, animated
- * jellyfish & fish, bioluminescent orbs. Aligned with Boing Network brand.
+ * jellyfish & fish, bioluminescent orbs. Uses modified background PNG when
+ * present; overlays extracted hero elements with 3D motion.
  */
 const BOING_PRIMARY = '#00E5CC';
 const BOING_SECONDARY = '#00B4FF';
@@ -10,15 +12,27 @@ const DEEP_NAVY = '#0A0E1A';
 const COSMIC_PURPLE = '#6366f1';
 const GLOW_PINK = '#a78bfa';
 
-const BOING_BG_IMAGE = `${process.env.PUBLIC_URL || ''}/images/boing_background_dark.png`;
+const BASE = process.env.PUBLIC_URL || '';
+const BOING_BG_IMAGE = `${BASE}/images/boing_background_dark.png`;
+const BOING_BG_MODIFIED = `${BASE}/images/boing_background_dark_modified.png`;
 
 function EnhancedAnimatedBackground() {
+  const [bgImageUrl, setBgImageUrl] = useState(BOING_BG_IMAGE);
   const [bgImageLoaded, setBgImageLoaded] = useState(false);
   useEffect(() => {
-    const img = new Image();
-    img.onload = () => setBgImageLoaded(true);
-    img.onerror = () => {};
-    img.src = BOING_BG_IMAGE;
+    const modified = new Image();
+    modified.onload = () => {
+      setBgImageUrl(BOING_BG_MODIFIED);
+      setBgImageLoaded(true);
+    };
+    modified.onerror = () => {
+      setBgImageUrl(BOING_BG_IMAGE);
+      const fallback = new Image();
+      fallback.onload = () => setBgImageLoaded(true);
+      fallback.onerror = () => setBgImageLoaded(false);
+      fallback.src = BOING_BG_IMAGE;
+    };
+    modified.src = BOING_BG_MODIFIED;
   }, []);
 
   return (
@@ -33,10 +47,11 @@ function EnhancedAnimatedBackground() {
       {bgImageLoaded && (
         <div
           className="absolute inset-0 w-full h-full opacity-40 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${BOING_BG_IMAGE})` }}
+          style={{ backgroundImage: `url(${bgImageUrl})` }}
           aria-hidden
         />
       )}
+      <HeroElementsLayer />
 
       <svg
         width="100%"
