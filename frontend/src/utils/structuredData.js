@@ -7,7 +7,7 @@ export const generateOrganizationSchema = () => {
     '@type': 'Organization',
     name: 'boing.finance',
     url: 'https://boing.finance',
-    logo: 'https://boing.finance/assets/logo-dark-transparent.png',
+    logo: 'https://boing.finance/assets/icon-only-transparent.png',
     description: 'The DeFi that always bounces back. Deploy tokens, create pools, and trade on EVM and Solana with boing.finance.',
     sameAs: [
       'https://twitter.com/boingfinance'
@@ -68,7 +68,7 @@ export const generateTokenSchema = (tokenData) => {
     name: tokenData.name,
     description: tokenData.description || `Token: ${tokenData.symbol}`,
     identifier: tokenData.address,
-    image: tokenData.logoUrl || 'https://boing.finance/assets/logo-dark-transparent.png',
+    image: tokenData.logoUrl || 'https://boing.finance/assets/icon-only-transparent.png',
     additionalProperty: [
       {
         '@type': 'PropertyValue',

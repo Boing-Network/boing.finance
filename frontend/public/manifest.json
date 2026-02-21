@@ -10,9 +10,9 @@
       "purpose": "any maskable"
     },
     {
-      "src": "/logo.svg",
+      "src": "/assets/icon-only-transparent.png",
       "sizes": "any",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],
@@ -27,7 +27,7 @@
     {
       "src": "screenshot-portrait.png",
       "sizes": "540x720",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "form_factor": "narrow"
     }
   ],

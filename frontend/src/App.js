@@ -896,7 +896,7 @@ function Home() {
           "url": "https://boing.finance",
           "logo": {
             "@type": "ImageObject",
-            "url": "https://boing.finance/assets/logo-dark-transparent.png"
+            "url": "https://boing.finance/assets/icon-only-transparent.png"
           },
           "description": "The DeFi that always bounces back. Deploy tokens, create pools, and trade on EVM and Solana with boing.finance.",
           "sameAs": [
