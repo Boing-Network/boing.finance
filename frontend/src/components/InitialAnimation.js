@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useCallback, useId } from 'react';
-import BoingMascot from './BoingMascot';
 import { useTheme } from '../contexts/ThemeContext';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 
 const SESSION_KEY = 'boing-splash-seen';
 const DURATION_MS = 3200;
 const DURATION_REDUCED_MS = 1200;
+
+const ASSETS = `${process.env.PUBLIC_URL || ''}/assets`;
+const MASCOT_SRC = `${ASSETS}/mascot-default.png`;
+const MASCOT_FALLBACK = `${ASSETS}/mascot-winking.png`;
 
 /**
  * Full-viewport initial animation: Boing Mascot centered with aquatic & outer-space
@@ -14,6 +17,7 @@ const DURATION_REDUCED_MS = 1200;
 function InitialAnimation({ onComplete }) {
   const [visible, setVisible] = useState(true);
   const [exiting, setExiting] = useState(false);
+  const [mascotSrc, setMascotSrc] = useState(MASCOT_SRC);
   const { mode } = useTheme();
   const prefersReducedMotion = usePrefersReducedMotion();
   const duration = prefersReducedMotion ? DURATION_REDUCED_MS : DURATION_MS;
@@ -24,13 +28,14 @@ function InitialAnimation({ onComplete }) {
     try {
       sessionStorage.setItem(SESSION_KEY, '1');
     } catch (_) {}
-    // Allow exit animation to run, then notify
+    // Cinematic outro: content recedes, then overlay fades (OUTRO_MS total) before unmount
+    const OUTRO_MS = prefersReducedMotion ? 500 : 1100;
     const t = setTimeout(() => {
       setVisible(false);
       onComplete?.();
-    }, 480);
+    }, OUTRO_MS);
     return () => clearTimeout(t);
-  }, [onComplete, exiting]);
+  }, [onComplete, exiting, prefersReducedMotion]);
 
   useEffect(() => {
     const t = setTimeout(finish, duration);
@@ -48,6 +53,7 @@ function InitialAnimation({ onComplete }) {
       className="initial-animation"
       data-reduced={reduced ? 'true' : undefined}
       data-exiting={exiting ? 'true' : undefined}
+      data-intro={!exiting ? 'true' : undefined}
       data-theme={mode}
       onClick={handleClick}
       onKeyDown={(e) => e.key === 'Enter' && handleClick()}
@@ -104,9 +110,16 @@ function InitialAnimation({ onComplete }) {
               </div>
             ))}
           </div>
-          {/* Center: Boing Mascot */}
+          {/* Center: Boing Mascot (transparent PNG from assets) */}
           <div className="initial-animation__mascot">
-            <BoingMascot size={200} variant="hero" className="initial-animation__mascot-btn" />
+            <img
+              src={mascotSrc}
+              alt=""
+              width={200}
+              height={200}
+              className="initial-animation__mascot-img"
+              onError={() => setMascotSrc(MASCOT_FALLBACK)}
+            />
           </div>
         </div>
         <p className="initial-animation__hint">Click or wait to continue</p>
@@ -152,18 +165,27 @@ function getStyles() {
       justify-content: center;
       cursor: pointer;
       background: transparent;
-      transition: opacity 0.5s ease, visibility 0.5s ease;
+      transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s ease;
     }
     .initial-animation[data-exiting="true"] {
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
+      transition-duration: 1s;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     }
     .initial-animation__bg {
       position: absolute;
       inset: 0;
       background: linear-gradient(180deg, #020408 0%, #030810 45%, #040c18 100%);
       opacity: 0.98;
+    }
+    .initial-animation[data-intro="true"] .initial-animation__bg {
+      animation: initial-bg-in 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes initial-bg-in {
+      from { opacity: 0; }
+      to { opacity: 0.98; }
     }
     .initial-animation[data-theme="light"] .initial-animation__bg {
       background: linear-gradient(180deg, #030810 0%, #051220 45%, #061828 100%);
@@ -175,6 +197,26 @@ function getStyles() {
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      opacity: 0;
+      transform: scale(0.92);
+    }
+    .initial-animation[data-intro="true"] .initial-animation__content {
+      animation: initial-content-in 1s cubic-bezier(0.22, 1, 0.36, 1) 0.25s forwards;
+    }
+    .initial-animation[data-reduced="true"] .initial-animation__content {
+      animation-duration: 0.5s;
+      animation-delay: 0.1s;
+    }
+    .initial-animation[data-exiting="true"] .initial-animation__content {
+      animation: initial-content-out 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes initial-content-in {
+      from { opacity: 0; transform: scale(0.92); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes initial-content-out {
+      from { opacity: 1; transform: scale(1); }
+      to { opacity: 0; transform: scale(0.96); }
     }
     .initial-animation__orbit-zone {
       position: relative;
@@ -295,28 +337,25 @@ function getStyles() {
     .initial-animation__mascot {
       position: relative;
       z-index: 5;
-      animation: initial-mascot-in 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-      opacity: 0;
-      transform: scale(0.6);
     }
-    .initial-animation[data-reduced="true"] .initial-animation__mascot {
-      animation-duration: 0.4s;
+    .initial-animation__mascot-img {
+      display: block;
+      width: 200px;
+      height: auto;
+      max-height: 200px;
+      min-height: 200px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 20px var(--glow-cyan-soft)) drop-shadow(0 0 40px var(--glow-cyan));
+      animation: initial-mascot-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s forwards;
+      opacity: 0;
+      transform: scale(0.88);
+    }
+    .initial-animation[data-reduced="true"] .initial-animation__mascot-img {
+      animation-duration: 0.35s;
+      animation-delay: 0.2s;
     }
     @keyframes initial-mascot-in {
-      0% {
-        opacity: 0;
-        transform: scale(0.6);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-    .initial-animation__mascot-btn {
-      pointer-events: none;
-    }
-    .initial-animation__mascot img {
-      filter: drop-shadow(0 0 20px var(--glow-cyan-soft)) drop-shadow(0 0 40px var(--glow-cyan));
+      to { opacity: 1; transform: scale(1); }
     }
     .initial-animation__hint {
       margin-top: 1.5rem;
