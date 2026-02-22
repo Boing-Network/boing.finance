@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useCallback, useId } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 
 const SESSION_KEY = 'boing-splash-seen';
-const DURATION_MS = 3200;
-const DURATION_REDUCED_MS = 1200;
+const DURATION_MS = 4200;
+const DURATION_REDUCED_MS = 1800;
 
 const ASSETS = `${process.env.PUBLIC_URL || ''}/assets`;
 const MASCOT_SRC = `${ASSETS}/mascot-default.png`;
 const MASCOT_FALLBACK = `${ASSETS}/mascot-winking.png`;
 
 /**
- * Full-viewport initial animation: Boing Mascot centered with aquatic & outer-space
- * theme elements orbiting around. Shown once per session; respects reduced motion.
+ * Cinematic 3D initial animation: portal reveal with mascot emerging,
+ * then eases into the web app. Unique, branded intro.
  */
 function InitialAnimation({ onComplete }) {
   const [visible, setVisible] = useState(true);
@@ -28,8 +28,7 @@ function InitialAnimation({ onComplete }) {
     try {
       sessionStorage.setItem(SESSION_KEY, '1');
     } catch (_) {}
-    // Cinematic outro: content recedes, then overlay fades (OUTRO_MS total) before unmount
-    const OUTRO_MS = prefersReducedMotion ? 500 : 1100;
+    const OUTRO_MS = prefersReducedMotion ? 600 : 1400;
     const t = setTimeout(() => {
       setVisible(false);
       onComplete?.();
@@ -50,10 +49,9 @@ function InitialAnimation({ onComplete }) {
 
   return (
     <div
-      className="initial-animation"
+      className="cinematic-splash"
       data-reduced={reduced ? 'true' : undefined}
       data-exiting={exiting ? 'true' : undefined}
-      data-intro={!exiting ? 'true' : undefined}
       data-theme={mode}
       onClick={handleClick}
       onKeyDown={(e) => e.key === 'Enter' && handleClick()}
@@ -61,100 +59,43 @@ function InitialAnimation({ onComplete }) {
       tabIndex={0}
       aria-label="Skip intro"
     >
-      <style>{getStyles()}</style>
-      <div className="initial-animation__bg" aria-hidden />
-      <div className="initial-animation__content">
-        <div className="initial-animation__orbit-zone">
-          {/* Inner orbit: bubbles (aquatic) — one rotating ring, orbs at top */}
-          <div className="initial-animation__orbit initial-animation__orbit--inner">
-            {[0, 60, 120, 180, 240, 300].map((deg) => (
-              <div key={deg} className="initial-animation__orbit-seed" style={{ transform: `rotate(${deg}deg)` }}>
-                <div className="initial-animation__orbit-spin">
-                  <div className="initial-animation__orb initial-animation__orb--bubble">
-                    <span className="initial-animation__bubble" />
-                  </div>
-                </div>
-              </div>
-            ))}
+      <style>{getCinematicStyles()}</style>
+      {/* Layer 1: Black → gradient base */}
+      <div className="cinematic-splash__bg" aria-hidden />
+      {/* Layer 2: Subtle starfield / depth */}
+      <div className="cinematic-splash__stars" aria-hidden />
+      {/* Layer 3: 3D scene container */}
+      <div className="cinematic-splash__scene">
+        <div className="cinematic-splash__portal-wrap">
+          {/* Glowing portal ring (3D rotated) */}
+          <div className="cinematic-splash__portal">
+            <div className="cinematic-splash__portal-ring cinematic-splash__portal-ring--outer" />
+            <div className="cinematic-splash__portal-ring cinematic-splash__portal-ring--mid" />
+            <div className="cinematic-splash__portal-ring cinematic-splash__portal-ring--inner" />
           </div>
-          {/* Middle orbit: stars (outer-space) */}
-          <div className="initial-animation__orbit initial-animation__orbit--middle">
-            {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
-              <div key={deg} className="initial-animation__orbit-seed" style={{ transform: `rotate(${deg}deg)` }}>
-                <div className="initial-animation__orbit-spin">
-                  <div className="initial-animation__orb initial-animation__orb--star">
-                    <StarIcon />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          {/* Outer orbit: planets + jellyfish (aquatic + space) */}
-          <div className="initial-animation__orbit initial-animation__orbit--outer">
-            {[0, 72, 144, 216, 288].map((deg) => (
-              <div key={`p-${deg}`} className="initial-animation__orbit-seed" style={{ transform: `rotate(${deg}deg)` }}>
-                <div className="initial-animation__orbit-spin">
-                  <div className="initial-animation__orb initial-animation__orb--planet">
-                    <span className="initial-animation__planet" />
-                  </div>
-                </div>
-              </div>
-            ))}
-            {[36, 108, 180, 252, 324].map((deg) => (
-              <div key={`j-${deg}`} className="initial-animation__orbit-seed" style={{ transform: `rotate(${deg}deg)` }}>
-                <div className="initial-animation__orbit-spin">
-                  <div className="initial-animation__orb initial-animation__orb--jelly">
-                    <JellyIcon />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          {/* Center: Boing Mascot (transparent PNG from assets) */}
-          <div className="initial-animation__mascot">
+          {/* Mascot emerges from center */}
+          <div className="cinematic-splash__mascot-wrap">
             <img
               src={mascotSrc}
               alt=""
-              width={200}
-              height={200}
-              className="initial-animation__mascot-img"
+              width={220}
+              height={220}
+              className="cinematic-splash__mascot-img"
               onError={() => setMascotSrc(MASCOT_FALLBACK)}
             />
           </div>
         </div>
-        <p className="initial-animation__hint">Click or wait to continue</p>
+        {/* Light rays / lens flare accent */}
+        <div className="cinematic-splash__rays" aria-hidden />
       </div>
+      <p className="cinematic-splash__hint">Click or wait to continue</p>
     </div>
   );
 }
 
-function StarIcon() {
-  const id = useId().replace(/:/g, '-');
-  return (
-    <svg className="initial-animation__star-svg" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <defs>
-        <linearGradient id={`splash-star-grad-${id}`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="var(--finance-primary)" />
-          <stop offset="100%" stopColor="var(--finance-green)" />
-        </linearGradient>
-      </defs>
-      <path d="M12 2l1.5 6.5L20 10l-5.5 1.5L12 18l-2.5-6.5L4 10l6.5-1.5L12 2z" fill={`url(#splash-star-grad-${id})`} stroke="var(--finance-primary)" strokeWidth="0.5" strokeOpacity="0.6" />
-    </svg>
-  );
-}
-
-function JellyIcon() {
-  return (
-    <svg className="initial-animation__jelly-svg" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <ellipse cx="12" cy="10" rx="6" ry="5" fill="var(--accent-teal)" fillOpacity="0.5" stroke="var(--finance-primary)" strokeWidth="0.8" strokeOpacity="0.7" />
-      <path d="M8 14 Q12 18 16 14" stroke="var(--finance-primary)" strokeWidth="0.6" strokeOpacity="0.6" fill="none" />
-    </svg>
-  );
-}
-
-function getStyles() {
+function getCinematicStyles() {
   return `
-    .initial-animation {
+    .cinematic-splash {
       position: fixed;
       inset: 0;
       width: 100vw;
@@ -164,218 +105,195 @@ function getStyles() {
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      background: transparent;
-      transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s ease;
+      background: #000;
+      transition: opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 1.3s ease;
     }
-    .initial-animation[data-exiting="true"] {
+    .cinematic-splash[data-exiting="true"] {
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
-      transition-duration: 1s;
-      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      transition-duration: 1.4s;
     }
-    .initial-animation__bg {
+    .cinematic-splash__bg {
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, #020408 0%, #030810 45%, #040c18 100%);
-      opacity: 0.98;
+      background: radial-gradient(ellipse 80% 60% at 50% 40%, #030a14 0%, #020408 45%, #000 100%);
+      opacity: 0;
+      animation: cinematic-bg-in 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.15s forwards;
     }
-    .initial-animation[data-intro="true"] .initial-animation__bg {
-      animation: initial-bg-in 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    .cinematic-splash[data-theme="light"] .cinematic-splash__bg {
+      background: radial-gradient(ellipse 80% 60% at 50% 40%, #051220 0%, #030810 50%, #020408 100%);
     }
-    @keyframes initial-bg-in {
-      from { opacity: 0; }
-      to { opacity: 0.98; }
+    @keyframes cinematic-bg-in {
+      to { opacity: 1; }
     }
-    .initial-animation[data-theme="light"] .initial-animation__bg {
-      background: linear-gradient(180deg, #030810 0%, #051220 45%, #061828 100%);
+    .cinematic-splash__stars {
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(1.5px 1.5px at 20% 30%, rgba(0,229,255,0.4), transparent),
+        radial-gradient(1.5px 1.5px at 60% 70%, rgba(0,255,136,0.3), transparent),
+        radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,0.35), transparent),
+        radial-gradient(1px 1px at 40% 80%, rgba(0,229,255,0.25), transparent);
+      background-size: 200% 200%;
+      opacity: 0;
+      animation: cinematic-stars-in 1.2s ease-out 0.4s forwards;
     }
-    .initial-animation__content {
+    @keyframes cinematic-stars-in {
+      to { opacity: 1; }
+    }
+    .cinematic-splash__scene {
       position: relative;
       z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      perspective: 1400px;
+      transform-style: preserve-3d;
       opacity: 0;
-      transform: scale(0.92);
+      transform: scale(0.85);
+      animation: cinematic-scene-in 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.5s forwards;
     }
-    .initial-animation[data-intro="true"] .initial-animation__content {
-      animation: initial-content-in 1s cubic-bezier(0.22, 1, 0.36, 1) 0.25s forwards;
-    }
-    .initial-animation[data-reduced="true"] .initial-animation__content {
-      animation-duration: 0.5s;
-      animation-delay: 0.1s;
-    }
-    .initial-animation[data-exiting="true"] .initial-animation__content {
-      animation: initial-content-out 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-    @keyframes initial-content-in {
-      from { opacity: 0; transform: scale(0.92); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    @keyframes initial-content-out {
-      from { opacity: 1; transform: scale(1); }
-      to { opacity: 0; transform: scale(0.96); }
-    }
-    .initial-animation__orbit-zone {
-      position: relative;
-      width: min(90vmin, 520px);
-      height: min(90vmin, 520px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .initial-animation__orbit {
-      position: absolute;
-      border-radius: 50%;
-      width: 100%;
-      height: 100%;
-    }
-    .initial-animation__orbit--inner { width: 55%; height: 55%; }
-    .initial-animation__orbit--middle { width: 75%; height: 75%; }
-    .initial-animation__orbit--outer { width: 100%; height: 100%; }
-    .initial-animation__orbit-seed {
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-    }
-    .initial-animation__orbit-spin {
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      animation: initial-orbit-spin linear infinite;
-    }
-    .initial-animation__orbit--inner .initial-animation__orbit-spin {
-      animation-duration: 22s;
-      animation-direction: reverse;
-    }
-    .initial-animation__orbit--middle .initial-animation__orbit-spin {
-      animation-duration: 28s;
-    }
-    .initial-animation__orbit--outer .initial-animation__orbit-spin {
-      animation-duration: 38s;
-      animation-direction: reverse;
-    }
-    .initial-animation[data-reduced="true"] .initial-animation__orbit-spin {
-      animation-duration: 0.001s;
-      animation-play-state: paused;
-    }
-    @keyframes initial-orbit-spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    .initial-animation__orb {
-      position: absolute;
-      left: 50%;
-      top: 0;
-      width: 24px;
-      height: 24px;
-      margin-left: -12px;
-      margin-top: -12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .initial-animation__orb--bubble {
-      width: 14px;
-      height: 14px;
-      margin-left: -7px;
-      margin-top: -7px;
-    }
-    .initial-animation__bubble {
-      display: block;
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), var(--finance-primary));
-      box-shadow: 0 0 10px var(--glow-cyan-soft);
-      opacity: 0.85;
-      animation: initial-bubble-pulse 2.5s ease-in-out infinite;
-    }
-    .initial-animation__orb--star {
-      width: 20px;
-      height: 20px;
-      margin-left: -10px;
-      margin-top: -10px;
-    }
-    .initial-animation__star-svg {
-      width: 100%;
-      height: 100%;
-      filter: drop-shadow(0 0 6px var(--glow-cyan-soft));
-    }
-    .initial-animation__orb--planet {
-      width: 18px;
-      height: 18px;
-      margin-left: -9px;
-      margin-top: -9px;
-    }
-    .initial-animation__planet {
-      display: block;
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, var(--finance-green), var(--finance-primary));
-      box-shadow: 0 0 12px var(--finance-purple-glow);
-      opacity: 0.7;
-    }
-    .initial-animation__orb--jelly {
-      width: 22px;
-      height: 22px;
-      margin-left: -11px;
-      margin-top: -11px;
-    }
-    .initial-animation__jelly-svg {
-      width: 100%;
-      height: 100%;
-      filter: drop-shadow(0 0 8px var(--glow-cyan-soft));
-    }
-    @keyframes initial-bubble-pulse {
-      0%, 100% { transform: scale(1); opacity: 0.85; }
-      50% { transform: scale(1.15); opacity: 1; }
-    }
-    .initial-animation__mascot {
-      position: relative;
-      z-index: 5;
-    }
-    .initial-animation__mascot-img {
-      display: block;
-      width: 200px;
-      height: auto;
-      max-height: 200px;
-      min-height: 200px;
-      object-fit: contain;
-      filter: drop-shadow(0 0 20px var(--glow-cyan-soft)) drop-shadow(0 0 40px var(--glow-cyan));
-      animation: initial-mascot-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s forwards;
-      opacity: 0;
-      transform: scale(0.88);
-    }
-    .initial-animation[data-reduced="true"] .initial-animation__mascot-img {
-      animation-duration: 0.35s;
+    .cinematic-splash[data-reduced="true"] .cinematic-splash__scene {
+      animation-duration: 0.7s;
       animation-delay: 0.2s;
     }
-    @keyframes initial-mascot-in {
+    .cinematic-splash[data-exiting="true"] .cinematic-splash__scene {
+      animation: cinematic-scene-out 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+    @keyframes cinematic-scene-in {
+      from { opacity: 0; transform: scale(0.85); }
       to { opacity: 1; transform: scale(1); }
     }
-    .initial-animation__hint {
-      margin-top: 1.5rem;
-      font-size: 0.8rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      opacity: 0.6;
-      color: var(--text-secondary);
-      animation: initial-hint-fade 0.8s 0.6s ease-out forwards;
-      opacity: 0;
+    @keyframes cinematic-scene-out {
+      from { opacity: 1; transform: scale(1); }
+      to { opacity: 0; transform: scale(1.15); }
     }
-    @keyframes initial-hint-fade {
-      to { opacity: 0.6; }
+    .cinematic-splash__portal-wrap {
+      position: relative;
+      width: min(85vmin, 440px);
+      height: min(85vmin, 440px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-style: preserve-3d;
+      animation: cinematic-portal-float 6s ease-in-out infinite;
+    }
+    .cinematic-splash[data-reduced="true"] .cinematic-splash__portal-wrap {
+      animation: none;
+    }
+    @keyframes cinematic-portal-float {
+      0%, 100% { transform: rotateY(0deg) rotateX(2deg); }
+      50% { transform: rotateY(5deg) rotateX(-1deg); }
+    }
+    .cinematic-splash__portal {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-style: preserve-3d;
+    }
+    .cinematic-splash__portal-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      opacity: 0;
+      animation: cinematic-ring-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .cinematic-splash__portal-ring--outer {
+      width: 100%;
+      height: 100%;
+      border-color: rgba(0, 229, 255, 0.5);
+      box-shadow: 0 0 40px rgba(0, 229, 255, 0.2), inset 0 0 30px rgba(0, 229, 255, 0.05);
+      animation-delay: 0.7s;
+      animation-fill-mode: backwards;
+    }
+    .cinematic-splash__portal-ring--mid {
+      width: 78%;
+      height: 78%;
+      border-color: rgba(0, 255, 136, 0.4);
+      box-shadow: 0 0 25px rgba(0, 255, 136, 0.15);
+      animation-delay: 0.85s;
+      animation-fill-mode: backwards;
+    }
+    .cinematic-splash__portal-ring--inner {
+      width: 52%;
+      height: 52%;
+      border-color: rgba(0, 229, 255, 0.6);
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.25);
+      animation-delay: 1s;
+      animation-fill-mode: backwards;
+    }
+    @keyframes cinematic-ring-in {
+      from {
+        opacity: 0;
+        transform: scale(0.7);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    .cinematic-splash__mascot-wrap {
+      position: relative;
+      z-index: 3;
+      transform-style: preserve-3d;
+      opacity: 0;
+      transform: scale(0.5) translateZ(-60px);
+      animation: cinematic-mascot-emerge 1.1s cubic-bezier(0.34, 1.56, 0.64, 1) 1s forwards;
+    }
+    .cinematic-splash[data-reduced="true"] .cinematic-splash__mascot-wrap {
+      animation-duration: 0.6s;
+      animation-delay: 0.4s;
+    }
+    @keyframes cinematic-mascot-emerge {
+      to {
+        opacity: 1;
+        transform: scale(1) translateZ(0);
+      }
+    }
+    .cinematic-splash__mascot-img {
+      display: block;
+      width: 220px;
+      height: auto;
+      max-height: 220px;
+      min-height: 220px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 30px rgba(0, 229, 255, 0.4)) drop-shadow(0 0 60px rgba(0, 255, 136, 0.2));
+    }
+    .cinematic-splash__rays {
+      position: absolute;
+      inset: -50%;
+      background: conic-gradient(from 0deg at 50% 50%, transparent 0deg 60deg, rgba(0,229,255,0.03) 60deg 120deg, transparent 120deg 240deg, rgba(0,255,136,0.02) 240deg 300deg, transparent 300deg);
+      animation: cinematic-rays-pulse 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .cinematic-splash[data-reduced="true"] .cinematic-splash__rays {
+      animation: none;
+      opacity: 0.5;
+    }
+    @keyframes cinematic-rays-pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+    .cinematic-splash__hint {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      opacity: 0;
+      animation: cinematic-hint-in 0.8s ease-out 2s forwards;
+    }
+    @keyframes cinematic-hint-in {
+      to { opacity: 0.5; }
     }
   `;
 }
 
 export default InitialAnimation;
 
-/** Check if we should show the splash this session (call once at app init). */
 export function shouldShowInitialAnimation() {
   if (typeof sessionStorage === 'undefined') return true;
   try {

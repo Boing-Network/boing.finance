@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
-const IMAGES_BASE = `${process.env.PUBLIC_URL || ''}/images`;
-const HERO_OPTIMIZED = `${IMAGES_BASE}/hero_optimized.png`;
+const ASSETS_BASE = `${process.env.PUBLIC_URL || ''}/assets`;
+const MASCOT_SRC = `${ASSETS_BASE}/mascot-default.png`;
 
 /**
- * Full Boing hero robot + environment (from enhance_hero.py). One cohesive
- * layer in the background with float animation. Presence across the app.
+ * Boing mascot (transparent PNG) as a background layer with float animation.
+ * Replaces the previous hero robot + coral reef image for a cleaner look.
  */
 function BoingHeroScene() {
   const [loaded, setLoaded] = useState(false);
@@ -14,7 +14,7 @@ function BoingHeroScene() {
     const img = new Image();
     img.onload = () => setLoaded(true);
     img.onerror = () => {};
-    img.src = HERO_OPTIMIZED;
+    img.src = MASCOT_SRC;
   }, []);
 
   if (!loaded) return null;
@@ -26,7 +26,7 @@ function BoingHeroScene() {
       aria-hidden
     >
       <img
-        src={HERO_OPTIMIZED}
+        src={MASCOT_SRC}
         alt=""
         className="boing-hero-scene-layer"
         style={{
