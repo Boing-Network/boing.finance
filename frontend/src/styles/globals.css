@@ -1,5 +1,5 @@
 /* Step 3: Google Fonts — Comfortaa, Orbitron, JetBrains Mono */
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Comfortaa:wght@400;700&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Comfortaa:wght@400;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;600;700;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -318,22 +318,39 @@ code, pre, .monospace {
   background-clip: text;
 }
 
-/* === BUTTONS (Step 5.1) === */
+/* === BUTTONS (Step 5.1) — Deep Trade uses var(--btn-primary-gradient) when set === */
 .btn-primary, button[data-variant="primary"] {
-  background: linear-gradient(135deg, var(--accent-teal), var(--accent-cyan));
-  color: var(--bg-primary);
+  background: var(--btn-primary-gradient, linear-gradient(135deg, var(--accent-teal), var(--accent-cyan)));
+  color: var(--boing-black, var(--bg-primary));
   font-family: var(--font-sans);
   font-weight: 700;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 8px);
   padding: 12px 28px;
   cursor: pointer;
   transition: all var(--motion-transition);
-  box-shadow: 0 0 16px var(--glow-cyan);
+  box-shadow: 0 0 20px var(--glow-cyan);
 }
 .btn-primary:hover, button[data-variant="primary"]:hover {
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 0 28px var(--glow-cyan);
+  box-shadow: 0 0 32px var(--finance-primary-glow, var(--glow-cyan));
+}
+/* Deep Trade: green CTA for trade/swap */
+.btn-green {
+  background: var(--btn-green-gradient, linear-gradient(135deg, var(--success-color), var(--finance-green-mid, #10b981)));
+  color: var(--boing-black, var(--bg-primary));
+  font-family: var(--font-sans);
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-md, 8px);
+  padding: 12px 28px;
+  cursor: pointer;
+  transition: all var(--motion-transition);
+  box-shadow: 0 0 20px var(--finance-green-glow, rgba(0, 255, 136, 0.2));
+}
+.btn-green:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 28px var(--finance-green-glow, rgba(0, 255, 136, 0.35));
 }
 
 .btn-secondary, button[data-variant="secondary"] {
@@ -366,20 +383,20 @@ code, pre, .monospace {
   border-color: var(--border-hover);
 }
 
-/* === CARDS & PANELS (Step 5.2) === */
+/* === CARDS & PANELS (Step 5.2) — Deep Trade glassmorphism === */
 .card, [class*="card-"], [class*="-card"] {
   background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
+  border: 1px solid var(--card-border, var(--border-color));
+  border-radius: var(--radius-lg, 16px);
   padding: 24px;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 4px 30px var(--shadow);
+  box-shadow: var(--shadow-card, 0 4px 30px var(--shadow));
   transition: border-color var(--motion-transition), box-shadow var(--motion-transition);
 }
 .card:hover, [class*="card-"]:hover, [class*="-card"]:hover {
-  border-color: var(--border-hover);
-  box-shadow: 0 4px 30px var(--glow-cyan);
+  border-color: var(--card-border-hover, var(--border-hover));
+  box-shadow: var(--shadow-cyan, 0 4px 30px var(--glow-cyan));
 }
 
 .card-hover {

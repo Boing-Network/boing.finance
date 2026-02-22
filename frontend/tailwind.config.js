@@ -7,7 +7,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Theme-aware colors using CSS variables
+        // Theme-aware colors using CSS variables (Deep Trade when tokens loaded)
         background: 'var(--bg-primary)',
         'background-secondary': 'var(--bg-secondary)',
         'background-tertiary': 'var(--bg-tertiary)',
@@ -23,12 +23,22 @@ module.exports = {
         'text-tertiary': 'var(--text-tertiary)',
         border: 'var(--border-color)',
         'border-hover': 'var(--border-hover)',
-        // Legacy colors for backward compatibility
+        // Legacy
         'text-muted': 'var(--text-tertiary)',
         highlight: 'var(--accent-teal)',
+        // Deep Trade finance palette (for utility classes)
+        'finance-primary': 'var(--finance-primary)',
+        'finance-green': 'var(--finance-green)',
+        'finance-gold': 'var(--finance-gold)',
+        'finance-red': 'var(--finance-red)',
+        'finance-purple': 'var(--finance-purple)',
+        boing: {
+          black: 'var(--boing-black)',
+          navy: 'var(--boing-navy)',
+        },
       },
       fontFamily: {
-        sans: ['Comfortaa', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        sans: ['var(--font-sans)', 'Comfortaa', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
         display: ['Orbitron', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },

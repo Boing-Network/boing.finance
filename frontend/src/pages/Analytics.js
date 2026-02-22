@@ -13,6 +13,7 @@ import { ChartSkeleton } from '../components/SkeletonLoader';
 import MetricTooltip from '../components/Tooltip';
 import { downloadCSV } from '../utils/exportData';
 import toast from 'react-hot-toast';
+import { CHART_COLORS } from '../theme/designTokens';
 
 // BoingAstronaut component
 
@@ -704,7 +705,7 @@ export default function Analytics() {
                 )}
 
                 {/* Volume Chart */}
-                <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                <div className="card rounded-2xl shadow-xl p-6">
                   <div className="mb-4">
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                       <h2 className="text-2xl font-bold text-white">Volume Over Time ({timeRanges.find(r => r.id === timeRange)?.name})</h2>
@@ -800,7 +801,7 @@ export default function Analytics() {
                   {/* Step 2: Network Performance + Network Distribution */}
                   {(overviewStep === 2) && <>
                 {/* Network Performance */}
-                <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                <div className="card rounded-2xl shadow-xl p-6">
                   <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                     <h2 className="text-2xl font-bold text-white">Network Performance</h2>
                     {analytics?.networkStats && Object.keys(analytics.networkStats).length > 0 && (
@@ -909,7 +910,7 @@ export default function Analytics() {
                           dataKey="value"
                         >
                           {Object.keys(analytics?.networkStats || {}).map((_, index) => (
-                            <Cell key={`cell-${index}`} fill={['#00B4FF', '#10b981', '#FACC15', '#ef4444', '#9B59B6', '#00E5CC'][index % 6]} />
+                            <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                           ))}
                         </Pie>
                         <Tooltip 
@@ -925,9 +926,9 @@ export default function Analytics() {
                   {/* Step 3: Top Trading Pairs */}
                   {(overviewStep === 3) && <>
                 {/* Top Trading Pairs */}
-                <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                <div className="card rounded-2xl shadow-xl p-6">
                   <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                    <h2 className="text-2xl font-bold text-white">Top Trading Pairs</h2>
+                    <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Top Trading Pairs</h2>
                     {analytics?.topPairs?.length > 0 && (
                       <button
                         onClick={() => {
@@ -1022,7 +1023,7 @@ export default function Analytics() {
                   {/* Step 4: User Activity */}
                   {(overviewStep === 4) && <>
                 {/* User Activity Chart */}
-                <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
+                <div className="card rounded-2xl shadow-xl p-6">
                   <h2 className="text-2xl font-bold text-white mb-6">User Activity</h2>
                   {analytics?.userActivity && (analytics.userActivity?.totalActions ?? 0) > 0 ? (
                     <>

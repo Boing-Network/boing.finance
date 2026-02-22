@@ -1,30 +1,36 @@
 import React, { useState, useEffect } from 'react';
 
 const ASSETS_BASE = `${process.env.PUBLIC_URL || ''}/assets`;
+const IMAGES_BASE = `${process.env.PUBLIC_URL || ''}/images`;
 const MASCOTS = {
   default: `${ASSETS_BASE}/mascot-default.png`,
   excited: `${ASSETS_BASE}/mascot-excited.png`,
   thinking: `${ASSETS_BASE}/mascot-thinking.png`,
   winking: `${ASSETS_BASE}/mascot-winking.png`,
+  hero: `${IMAGES_BASE}/boing_robot_hero.png`,
 };
 const FALLBACK = `${process.env.PUBLIC_URL || ''}/images/hero_thumb.png`;
 
 /**
  * Boing Bot mascot — official assets from design system.
- * variant: 'default' | 'excited' | 'thinking' | 'winking'. Shows excited on bounce.
+ * variant: 'default' | 'excited' | 'thinking' | 'winking' | 'hero'. Shows excited on bounce.
+ * Use variant="hero" for the landing hero (uses boing_robot_hero.png when available).
  */
 export default function BoingMascot({ className = '', size = 160, variant = 'default' }) {
   const [bounce, setBounce] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const src = bounce ? MASCOTS.excited : (MASCOTS[variant] || MASCOTS.default);
+  const [imgError, setImgError] = useState(false);
+  const baseSrc = MASCOTS[variant] || MASCOTS.default;
+  const src = bounce ? MASCOTS.excited : baseSrc;
 
   useEffect(() => {
+    setImgError(false);
     const img = new Image();
     img.onload = () => setLoaded(true);
     img.onerror = () => setLoaded(true);
-    img.src = MASCOTS.default;
-    [MASCOTS.excited, MASCOTS.thinking, MASCOTS.winking].forEach((u) => { const i = new Image(); i.src = u; });
-  }, []);
+    img.src = baseSrc;
+    [MASCOTS.default, MASCOTS.excited, MASCOTS.thinking, MASCOTS.winking, MASCOTS.hero].forEach((u) => { const i = new Image(); i.src = u; });
+  }, [baseSrc]);
 
   const handleClick = () => {
     setBounce(true);
@@ -40,10 +46,11 @@ export default function BoingMascot({ className = '', size = 160, variant = 'def
       aria-label="Boing mascot - click to bounce"
     >
       <img
-        src={loaded ? src : FALLBACK}
+        src={imgError ? FALLBACK : (loaded ? src : FALLBACK)}
         alt=""
         width={size}
         height={size}
+        onError={() => setImgError(true)}
         className={`block w-full h-auto object-contain ${bounce ? 'animate-bounce' : 'boing-hero-float'}`}
         style={{
           width: size,

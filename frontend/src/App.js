@@ -30,6 +30,7 @@ import ForYouSection from './components/ForYouSection';
 import ProactiveTipsBanner from './components/ProactiveTipsBanner';
 import DeFi101Modal from './components/DeFi101Modal';
 import BoingMascot from './components/BoingMascot';
+import TickerBar from './components/TickerBar';
 import priceAlertService from './services/priceAlertService';
 
 // Lazy load all page components for code splitting
@@ -265,7 +266,7 @@ function AppContent() {
 
   const location = useLocation();
   const isLandingPage = location.pathname === '/';
-  const pageBackgroundClass = isLandingPage ? 'page-landing' : 'page-app';
+  const pageBackgroundClass = isLandingPage ? 'page-landing deep-trade-bg' : 'page-app';
 
   return (
     <div className={`relative flex flex-col min-h-screen min-w-0 overflow-x-hidden ${pageBackgroundClass}`}>
@@ -620,7 +621,10 @@ function AppContent() {
           </div>
         )}
       </nav>
-      
+
+      {/* Deep Trade: scrolling ticker on landing only */}
+      {isLandingPage && <TickerBar />}
+
       <main className="flex-1 flex flex-col relative">
         {/* Page Content with Error Boundary and Suspense */}
         <ErrorBoundary>
@@ -967,39 +971,76 @@ function Home() {
         })}
         </script>
       </Helmet>
-      <div className="relative z-10 container mx-auto px-4 py-10 md:py-14">
+      <div className="relative z-10 container mx-auto px-4 pt-[5.5rem] pb-10 md:pt-24 md:pb-14">
         <div className="max-w-7xl mx-auto">
-          {/* 1. Hero: Title, slogan, one-line value prop */}
-          <section className="text-center relative z-10 mb-20 md:mb-24">
-            <h1 className="hero-title text-4xl md:text-6xl font-bold gradient-text mb-2 leading-tight pb-2" style={{ filter: 'drop-shadow(0 0 20px var(--glow-cyan))' }}>
-              boing.finance
-            </h1>
-            <p className="text-lg md:text-xl font-medium mb-3 gradient-text" style={{ filter: 'drop-shadow(0 0 12px var(--glow-cyan))' }}>
-              Authentic. Decentralized. Optimal. Quality-Assured.
-            </p>
-            <p className="text-lg leading-relaxed max-w-2xl mx-auto mb-10" style={{ color: 'var(--text-secondary)' }}>
-              Swap, add liquidity, bridge assets, and deploy tokens on EVM and Solana—all in one place. No code required.
-            </p>
-            {/* Feature highlights strip: primary actions right under hero */}
-            <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mb-12 fade-in delay-200">
-              <Highlight icon={<SwapIcon />} text="Lightning-fast swaps" />
-              <Highlight icon={<LiquidityIcon />} text="Earn with liquidity" />
-              <Highlight icon={<AnalyticsIcon />} text="Real-time analytics" />
-              <Highlight icon={<PortfolioIcon />} text="Unified portfolio" />
-              <Highlight icon={<BridgeIcon />} text="Cross-chain bridge" />
-              <Highlight icon={<TokensIcon />} text="All your tokens" />
-              <Highlight icon={<DeployTokenIcon />} text="Deploy tokens" />
-              <Highlight icon={<span className="text-xl">📜</span>} text="Governance" />
-              <Highlight icon={<span className="text-xl">🎯</span>} text="BOING Ecosystem" />
-              <Highlight icon={<span className="text-xl">🤖</span>} text="AI Assistant" />
+          {/* 1. Hero: Two-column layout — copy left, robot mascot right (Deep Trade + design system) */}
+          <section className="relative z-10 mb-20 md:mb-24">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-0">
+              {/* Left: copy and CTAs */}
+              <div className="text-center lg:text-left order-2 lg:order-1">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)', color: 'var(--finance-green)' }}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-finance-green animate-pulse" style={{ background: 'var(--finance-green)', boxShadow: '0 0 0 0 rgba(0,255,136,0.4)' }} />
+                  Live on EVM & Solana
+                </div>
+                <h1 className="hero-title text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-3 pb-2" style={{ fontFamily: 'var(--font-display)', background: 'linear-gradient(135deg, var(--finance-primary) 0%, var(--finance-green) 60%, #ffffff 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', filter: 'drop-shadow(0 0 20px var(--glow-cyan))' }}>
+                  DeFi That Bounces Back
+                </h1>
+                <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--finance-primary)', letterSpacing: '0.12em' }}>
+                  Authentic. Decentralized. Optimal. Quality-Assured.
+                </p>
+                <p className="text-base md:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0 mb-8" style={{ color: 'var(--text-secondary)' }}>
+                  Swap, add liquidity, bridge assets, and deploy tokens on EVM and Solana—all in one place. No code required.
+                </p>
+                {/* Stats row */}
+                <div className="flex flex-wrap justify-center lg:justify-start gap-6 md:gap-8 mb-8" style={{ fontFamily: 'var(--font-display)' }}>
+                  <div>
+                    <div className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>$0 <span style={{ color: 'var(--finance-green)', fontSize: '0.6em' }}>fees</span></div>
+                    <div className="text-xs uppercase tracking-wider mt-0.5" style={{ color: 'var(--text-tertiary)' }}>Protocol Fee</div>
+                  </div>
+                  <div>
+                    <div className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>~2s</div>
+                    <div className="text-xs uppercase tracking-wider mt-0.5" style={{ color: 'var(--text-tertiary)' }}>Block Time</div>
+                  </div>
+                  <div>
+                    <div className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>2 <span style={{ color: 'var(--finance-green)', fontSize: '0.6em' }}>chains</span></div>
+                    <div className="text-xs uppercase tracking-wider mt-0.5" style={{ color: 'var(--text-tertiary)' }}>EVM + Solana</div>
+                  </div>
+                </div>
+                {/* CTAs */}
+                <div className="flex flex-wrap justify-center lg:justify-start gap-3">
+                  <a href="/swap" className="btn btn-green inline-flex items-center gap-2">
+                    <span>⚡</span> Start Trading
+                  </a>
+                  <a href="/deploy-token" className="btn btn-primary inline-flex items-center gap-2">
+                    + Deploy Token
+                  </a>
+                  <a href="/docs" className="btn btn-outline inline-flex items-center gap-2">
+                    Get started →
+                  </a>
+                </div>
+                {/* Feature highlights strip */}
+                <div className="flex flex-wrap justify-center lg:justify-start gap-3 mt-10 fade-in delay-200">
+                  <Highlight icon={<SwapIcon />} text="Lightning-fast swaps" />
+                  <Highlight icon={<LiquidityIcon />} text="Earn with liquidity" />
+                  <Highlight icon={<AnalyticsIcon />} text="Real-time analytics" />
+                  <Highlight icon={<PortfolioIcon />} text="Unified portfolio" />
+                  <Highlight icon={<BridgeIcon />} text="Cross-chain bridge" />
+                  <Highlight icon={<TokensIcon />} text="All your tokens" />
+                  <Highlight icon={<DeployTokenIcon />} text="Deploy tokens" />
+                  <Highlight icon={<span className="text-xl">📜</span>} text="Governance" />
+                  <Highlight icon={<span className="text-xl">🎯</span>} text="BOING Ecosystem" />
+                  <Highlight icon={<span className="text-xl">🤖</span>} text="AI Assistant" />
+                </div>
+                <p className="text-lg text-center lg:text-left mt-6 max-w-xl mx-auto lg:mx-0" style={{ color: 'var(--text-secondary)' }}>Fast, secure DeFi. For everyone.</p>
+              </div>
+              {/* Right: Robot mascot (Deep Trade hero visual) */}
+              <div className="flex justify-center lg:justify-end order-1 lg:order-2">
+                <div className="relative flex items-center justify-center w-full max-w-sm lg:max-w-md">
+                  <BoingMascot className="block" size={220} variant="hero" />
+                </div>
+              </div>
             </div>
-            <p className="text-xl text-center max-w-xl mx-auto mb-2" style={{ color: 'var(--text-secondary)' }}>Fast, secure DeFi. For everyone.</p>
           </section>
-
-          {/* Floating Boing Mascot (easter egg: click to bounce) - top right */}
-          <div className="absolute top-20 right-10 hidden lg:block">
-            <BoingMascot />
-          </div>
 
           {/* 2. Getting started: Onboarding + For You (positioned before feature grid so new users see next steps first) */}
           <section className="flex flex-col lg:flex-row gap-8 mb-20 md:mb-24 fade-in delay-300">

@@ -1,0 +1,122 @@
+/**
+ * Boing Finance — "Deep Trade" Design Theme Tokens
+ * Source: Boing Design System — Site Variants (finance variant)
+ * Professional · Data-Driven · Dynamic · Powerful
+ */
+
+:root {
+  /* ── Core brand (shared) ───────────────────────────────────────── */
+  --boing-black: #030810;
+  --boing-navy: #060f1e;
+  --boing-navy-mid: #091828;
+  --boing-navy-light: #0d2040;
+
+  /* ── Finance accent palette ───────────────────────────────────── */
+  --finance-primary: #00e5ff;
+  --finance-primary-glow: rgba(0, 229, 255, 0.25);
+  --finance-green: #00ff88;
+  --finance-green-mid: #10b981;
+  --finance-green-glow: rgba(0, 255, 136, 0.2);
+  --finance-gold: #f59e0b;
+  --finance-gold-light: #fcd34d;
+  --finance-red: #ef4444;
+  --finance-red-light: #fca5a5;
+  --finance-purple: #8b5cf6;
+  --finance-purple-glow: rgba(139, 92, 246, 0.2);
+
+  /* Chart colors */
+  --chart-1: #00e5ff;
+  --chart-2: #00ff88;
+  --chart-3: #f59e0b;
+  --chart-4: #8b5cf6;
+  --chart-5: #ec4899;
+
+  /* ── Semantic mapping (Deep Trade overrides) ────────────────────── */
+  --bg-primary: var(--boing-black);
+  --bg-secondary: var(--boing-navy);
+  --bg-tertiary: var(--boing-navy-mid);
+  --bg-card: rgba(6, 15, 30, 0.8);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #475569;
+  --accent-teal: var(--finance-primary);
+  --accent-cyan: var(--finance-primary);
+  --primary-color: var(--finance-primary);
+  --secondary-color: var(--finance-green-mid);
+  --accent-color: var(--finance-primary);
+  --success-color: var(--finance-green);
+  --warning-color: var(--finance-gold);
+  --error-color: var(--finance-red);
+  --border-color: rgba(0, 229, 255, 0.12);
+  --border-hover: rgba(0, 229, 255, 0.35);
+  --glow-cyan: var(--finance-primary-glow);
+  --glow-cyan-soft: rgba(0, 229, 255, 0.15);
+  --glow-blue: var(--finance-primary-glow);
+  --glow-gold: rgba(245, 158, 11, 0.25);
+  --glow-purple: var(--finance-purple-glow);
+  --bg-nav: rgba(3, 8, 16, 0.9);
+  --accent-cyan-bg: rgba(0, 229, 255, 0.1);
+  --secondary-bg: rgba(0, 229, 255, 0.08);
+  --success-bg: rgba(0, 255, 136, 0.15);
+  --success-text: var(--finance-green);
+  --success-hover: var(--finance-green-mid);
+  --error-bg: rgba(239, 68, 68, 0.2);
+  --error-text: var(--finance-red-light);
+  --error-hover: var(--finance-red);
+  --warning-bg: rgba(245, 158, 11, 0.15);
+  --warning-text: var(--finance-gold);
+  --warning-hover: var(--finance-gold-light);
+  --info-bg: var(--accent-cyan-bg);
+  --info-text: var(--finance-primary);
+  --info-hover: var(--finance-primary);
+  --secondary-text: var(--finance-primary);
+  --secondary-hover: var(--finance-green-mid);
+
+  /* Card & surfaces (Deep Trade) */
+  --card-border: rgba(0, 229, 255, 0.12);
+  --card-border-hover: rgba(0, 229, 255, 0.35);
+  --shadow-cyan: 0 0 30px rgba(0, 229, 255, 0.15);
+  --shadow-green: 0 0 20px rgba(0, 255, 136, 0.15);
+  --shadow-card: 0 8px 40px rgba(0, 0, 0, 0.5);
+
+  /* Radius scale (shared) */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  /* Button gradients (Deep Trade) */
+  --btn-primary-gradient: linear-gradient(135deg, var(--finance-primary), var(--finance-green-mid));
+  --btn-green-gradient: linear-gradient(135deg, var(--finance-green), var(--finance-green-mid));
+
+  /* Typography (Deep Trade: Inter for body per design system) */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family: var(--font-sans);
+}
+
+/* Dark class: same Deep Trade values */
+.dark {
+  --bg-primary: var(--boing-black);
+  --bg-secondary: var(--boing-navy);
+  --bg-tertiary: var(--boing-navy-mid);
+  --bg-card: rgba(6, 15, 30, 0.8);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #475569;
+  --border-color: rgba(0, 229, 255, 0.12);
+  --border-hover: rgba(0, 229, 255, 0.35);
+}
+
+/* Deep Trade landing: grid overlay (trading terminal feel) */
+.page-landing.deep-trade-bg::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}

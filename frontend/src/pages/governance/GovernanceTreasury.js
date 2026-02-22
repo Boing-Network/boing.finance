@@ -4,14 +4,9 @@ import { PageHeader, PageCard } from '../../components/PageLayout';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { getTreasury } from '../../services/governanceApi';
 import { useNetwork } from '../../hooks/useNetwork';
+import { TREASURY_DEFAULT_ALLOCATIONS, TREASURY_ALLOCATION_COLORS } from '../../theme/designTokens';
 
-const FALLBACK_ALLOCATIONS = [
-  { name: 'Liquidity', value: 0, color: '#00B4FF' },
-  { name: 'Grants', value: 0, color: '#9B59B6' },
-  { name: 'Development', value: 0, color: '#10b981' },
-  { name: 'Marketing', value: 0, color: '#FACC15' },
-  { name: 'Reserve', value: 0, color: '#00E5CC' },
-];
+const FALLBACK_ALLOCATIONS = TREASURY_DEFAULT_ALLOCATIONS;
 
 export default function GovernanceTreasury() {
   const { chainId } = useNetwork();
@@ -27,7 +22,7 @@ export default function GovernanceTreasury() {
       .then((d) => {
         if (cancelled) return;
         const allocs = Array.isArray(d.allocations) && d.allocations.length
-          ? d.allocations.map((a) => ({ name: a.name || a.label || 'Other', value: Number(a.value || 0), color: a.color || '#00B4FF' }))
+          ? d.allocations.map((a) => ({ name: a.name || a.label || 'Other', value: Number(a.value || 0), color: a.color || TREASURY_ALLOCATION_COLORS.Other }))
           : FALLBACK_ALLOCATIONS;
         setData({ totalUsd: d.totalUsd || '0', allocations: allocs, multisigSigners: d.multisigSigners, timestamp: d.timestamp });
       })

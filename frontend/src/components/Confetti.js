@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { CONFETTI_COLORS } from '../theme/designTokens';
 
 export default function Confetti({ active, onComplete, duration = 2500 }) {
   const canvasRef = useRef(null);
@@ -13,8 +14,8 @@ export default function Confetti({ active, onComplete, duration = 2500 }) {
     canvas.width = width;
     canvas.height = height;
 
-    // Design system: accent-teal #00E5CC, accent-cyan #00B4FF (canvas needs resolved colors)
-    const colors = ['#00E5CC', '#00B4FF', '#B8E6E3', '#7EB8B5', 'rgba(0,229,204,0.4)', 'rgba(0,180,255,0.35)'];
+    // Deep Trade design system (canvas needs resolved hex/rgba)
+    const colors = CONFETTI_COLORS;
     const particles = [];
     const count = 80;
 

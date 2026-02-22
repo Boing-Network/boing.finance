@@ -7,6 +7,7 @@ import ReactDOM from 'react-dom/client';
 import ErrorBoundary from './components/ErrorBoundary';
 import { registerServiceWorker } from './utils/serviceWorkerRegistration';
 import './styles/globals.css';
+import './styles/deep-trade-tokens.css';
 import App from './App';
 
 if (typeof window !== 'undefined') {
