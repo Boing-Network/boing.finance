@@ -29,10 +29,9 @@ import OnboardingChecklist from './components/OnboardingChecklist';
 import ForYouSection from './components/ForYouSection';
 import ProactiveTipsBanner from './components/ProactiveTipsBanner';
 import DeFi101Modal from './components/DeFi101Modal';
-import BoingMascot from './components/BoingMascot';
 import TickerBar from './components/TickerBar';
 import BoingAnimatedBackground, { getFinanceBackgroundVariant } from './components/BoingAnimatedBackground';
-import InitialAnimation, { shouldShowInitialAnimation } from './components/InitialAnimation';
+import CinematicIntro, { shouldShowCinematicIntro } from './components/CinematicIntro';
 import { getPageVariant } from './utils/pageVariant';
 import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion';
 import priceAlertService from './services/priceAlertService';
@@ -157,18 +156,18 @@ const createNavigation = () => {
 // Create navigation once and store in module scope to prevent recreation
 const navigation = createNavigation();
 
-/** Renders initial splash once per session, then children. Use ?splash=1 to force-show for testing. */
+/** Renders "The Trade" cinematic intro once per session, then children. Use ?splash=1 to force-show for testing. */
 function InitialAnimationGate({ children }) {
   const [showSplash, setShowSplash] = useState(() => {
     const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
     if (params.get('splash') === '1' || params.get('showSplash') === '1') return true;
-    return shouldShowInitialAnimation();
+    return shouldShowCinematicIntro();
   });
   return (
     <>
       {showSplash && typeof document !== 'undefined' && document.body
         ? createPortal(
-            <InitialAnimation onComplete={() => setShowSplash(false)} />,
+            <CinematicIntro onComplete={() => setShowSplash(false)} />,
             document.body
           )
         : null}
@@ -1067,10 +1066,24 @@ function Home() {
                 </div>
                 <p className="text-lg text-center lg:text-left mt-6 max-w-xl mx-auto lg:mx-0" style={{ color: 'var(--text-secondary)' }}>Fast, secure DeFi. For everyone.</p>
               </div>
-              {/* Right: Robot mascot (Deep Trade hero visual) */}
+              {/* Right: Mascot only (transparent PNG from assets — no coral/hero composite) */}
               <div className="flex justify-center lg:justify-end order-1 lg:order-2">
                 <div className="relative flex items-center justify-center w-full max-w-sm lg:max-w-md">
-                  <BoingMascot className="block" size={220} variant="hero" />
+                  <img
+                    src={`${process.env.PUBLIC_URL || ''}/assets/mascot-default.png`}
+                    alt=""
+                    width={220}
+                    height={220}
+                    className="block w-full h-auto max-h-[220px] object-contain boing-hero-float"
+                    style={{
+                      minHeight: 220,
+                      objectFit: 'contain',
+                      filter: 'drop-shadow(0 0 12px var(--glow-cyan-soft))',
+                    }}
+                    onError={(e) => {
+                      e.target.src = `${process.env.PUBLIC_URL || ''}/assets/mascot-winking.png`;
+                    }}
+                  />
                 </div>
               </div>
             </div>
