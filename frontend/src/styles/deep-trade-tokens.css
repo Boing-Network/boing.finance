@@ -108,7 +108,7 @@
   --border-hover: rgba(0, 229, 255, 0.35);
 }
 
-/* Deep Trade landing: grid overlay (trading terminal feel) */
+/* Deep Trade landing: grid overlay when not using Canvas engine */
 .page-landing.deep-trade-bg::after {
   content: '';
   position: fixed;
@@ -119,4 +119,8 @@
     linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
   background-size: 60px 60px;
   pointer-events: none;
+}
+/* Canvas engine draws grid; hide CSS grid to avoid double layer */
+.page-landing.deep-trade-bg.animated-bg::after {
+  display: none;
 }

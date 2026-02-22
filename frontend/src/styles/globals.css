@@ -266,13 +266,17 @@ code, pre, .monospace {
 }
 
 /* === BACKGROUND STYLES (Step 6) === */
-/* Landing: full Aquatic-Space scene (coral, jellyfish, starfield) from design system */
+/* Landing: when not using animated canvas, fallback to static .webp */
 .page-landing {
   background-image: url('../assets/boing-aquatic-space-bg.webp');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   min-height: 100vh;
+}
+/* Migrated: animated Canvas background replaces static image and overlay */
+.page-landing.animated-bg {
+  background-image: none;
 }
 .page-landing::before {
   content: '';
@@ -286,6 +290,9 @@ code, pre, .monospace {
   z-index: 0;
   pointer-events: none;
 }
+.page-landing.animated-bg::before {
+  display: none;
+}
 
 .page-app {
   background-color: var(--bg-primary);
@@ -293,6 +300,11 @@ code, pre, .monospace {
   background-repeat: repeat;
   background-size: 60px 60px;
   min-height: 100vh;
+}
+/* Animated canvas draws its own background for app pages */
+.page-app.animated-bg {
+  background-image: none;
+  background-color: transparent;
 }
 
 /* Glass Morphism Effect */

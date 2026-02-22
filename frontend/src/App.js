@@ -31,6 +31,8 @@ import ProactiveTipsBanner from './components/ProactiveTipsBanner';
 import DeFi101Modal from './components/DeFi101Modal';
 import BoingMascot from './components/BoingMascot';
 import TickerBar from './components/TickerBar';
+import BoingAnimatedBackground, { getFinanceBackgroundVariant } from './components/BoingAnimatedBackground';
+import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion';
 import priceAlertService from './services/priceAlertService';
 
 // Lazy load all page components for code splitting
@@ -265,11 +267,17 @@ function AppContent() {
   }, []);
 
   const location = useLocation();
+  const prefersReducedMotion = usePrefersReducedMotion();
   const isLandingPage = location.pathname === '/';
-  const pageBackgroundClass = isLandingPage ? 'page-landing deep-trade-bg' : 'page-app';
+  const useAnimatedBg = !prefersReducedMotion;
+  const pageBackgroundClass = isLandingPage
+    ? `page-landing deep-trade-bg${useAnimatedBg ? ' animated-bg' : ''}`
+    : `page-app${useAnimatedBg ? ' animated-bg' : ''}`;
+  const bgVariant = getFinanceBackgroundVariant(location.pathname);
 
   return (
     <div className={`relative flex flex-col min-h-screen min-w-0 overflow-x-hidden ${pageBackgroundClass}`}>
+      {useAnimatedBg && <BoingAnimatedBackground variant={bgVariant} />}
       <BaseNetworkOptimizer />
       
       {/* Navigation - global nav styles from globals.css (border, backdrop, z-index) */}
