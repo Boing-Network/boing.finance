@@ -114,6 +114,28 @@ class CoinGeckoService {
     }
   }
 
+  // Get multiple coin prices in one call (for ticker bar, etc.)
+  async getSimplePrices(coinIds) {
+    const ids = Array.isArray(coinIds) ? coinIds.join(',') : coinIds;
+    const cacheKey = `simple_prices_${ids}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+      return cached.data;
+    }
+    try {
+      const response = await fetch(
+        this.getApiUrl(`/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`)
+      );
+      if (!response.ok) throw new Error(`CoinGecko API error: ${response.status}`);
+      const data = await response.json();
+      this.cache.set(cacheKey, { data, timestamp: Date.now() });
+      return data;
+    } catch (error) {
+      console.error('Error fetching simple prices:', error);
+      return {};
+    }
+  }
+
   // Get coin price by ID (for native tokens)
   async getCoinPrice(coinId) {
     const cacheKey = `coin_price_${coinId}`;

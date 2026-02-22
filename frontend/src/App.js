@@ -31,7 +31,7 @@ import ProactiveTipsBanner from './components/ProactiveTipsBanner';
 import DeFi101Modal from './components/DeFi101Modal';
 import BoingMascot from './components/BoingMascot';
 import TickerBar from './components/TickerBar';
-import BoingAnimatedBackground, { getFinanceBackgroundVariant } from './components/BoingAnimatedBackground';
+import BoingAnimatedBackground, { getFinanceBackgroundVariant, getPageVariant } from './components/BoingAnimatedBackground';
 import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion';
 import priceAlertService from './services/priceAlertService';
 
@@ -270,9 +270,10 @@ function AppContent() {
   const prefersReducedMotion = usePrefersReducedMotion();
   const isLandingPage = location.pathname === '/';
   const useAnimatedBg = !prefersReducedMotion;
+  const pageVariant = getPageVariant(location.pathname);
   const pageBackgroundClass = isLandingPage
-    ? `page-landing deep-trade-bg${useAnimatedBg ? ' animated-bg' : ''}`
-    : `page-app${useAnimatedBg ? ' animated-bg' : ''}`;
+    ? `page-landing deep-trade-bg page-variant-${pageVariant}${useAnimatedBg ? ' animated-bg' : ''}`
+    : `page-app page-variant-${pageVariant}${useAnimatedBg ? ' animated-bg' : ''}`;
   const bgVariant = getFinanceBackgroundVariant(location.pathname);
 
   return (
@@ -280,9 +281,10 @@ function AppContent() {
       {useAnimatedBg && <BoingAnimatedBackground variant={bgVariant} />}
       <BaseNetworkOptimizer />
       
-      {/* Navigation - global nav styles from globals.css (border, backdrop, z-index) */}
-      <nav className="relative z-30 flex-shrink-0 w-full min-w-0 border-b border-border shadow-lg">
-        <ShootingStars dense />
+      {/* Header: nav + ticker (sticky so ticker sits in flow directly under nav) */}
+      <header className="sticky top-0 z-30 flex flex-col flex-shrink-0 w-full min-w-0 bg-[var(--bg-primary)]">
+        <nav className="relative flex-shrink-0 w-full min-w-0 border-b border-border shadow-lg">
+          <ShootingStars dense />
         <div className="w-full max-w-7xl mx-auto pl-2 pr-3 sm:pl-3 sm:pr-4 md:pl-4 md:pr-6 lg:pl-4 lg:pr-8 xl:pl-6 xl:pr-8 min-w-0">
           <div className="flex items-center justify-between gap-x-2 sm:gap-x-3 lg:gap-x-4 xl:gap-x-6 h-14 sm:h-16 min-w-0">
             {/* Hamburger for nav items: 768px–1149px only (left side); hidden on mobile and desktop */}
@@ -628,10 +630,10 @@ function AppContent() {
             </div>
           </div>
         )}
-      </nav>
-
-      {/* Deep Trade: scrolling ticker on landing only */}
-      {isLandingPage && <TickerBar />}
+        </nav>
+        {/* Deep Trade: scrolling ticker on landing only — in flow directly under nav */}
+        {isLandingPage && <TickerBar />}
+      </header>
 
       <main className="flex-1 flex flex-col relative">
         {/* Page Content with Error Boundary and Suspense */}
@@ -979,7 +981,7 @@ function Home() {
         })}
         </script>
       </Helmet>
-      <div className="relative z-10 container mx-auto px-4 pt-[5.5rem] pb-10 md:pt-24 md:pb-14">
+      <div className="relative z-10 container mx-auto px-4 pt-[6rem] pb-10 md:pt-[7rem] md:pb-14">
         <div className="max-w-7xl mx-auto">
           {/* 1. Hero: Two-column layout — copy left, robot mascot right (Deep Trade + design system) */}
           <section className="relative z-10 mb-20 md:mb-24">
