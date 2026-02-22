@@ -3,16 +3,19 @@ import { useTheme } from '../contexts/ThemeContext';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 
 const SESSION_KEY = 'boing-splash-seen';
-const DURATION_MS = 4200;
-const DURATION_REDUCED_MS = 1800;
+const DURATION_MS = 4800;  // ~4.8s: 3-act plot (approach → reveal → welcome) then transition
+const DURATION_REDUCED_MS = 2200;
 
 const ASSETS = `${process.env.PUBLIC_URL || ''}/assets`;
 const MASCOT_SRC = `${ASSETS}/mascot-default.png`;
 const MASCOT_FALLBACK = `${ASSETS}/mascot-winking.png`;
 
 /**
- * Cinematic 3D initial animation: portal reveal with mascot emerging,
- * then eases into the web app. Unique, branded intro.
+ * Cinematic intro with a ~4s plot starring the Boing mascot:
+ * Act 1 — The approach: darkness, spotlight opens, portal awakens (low angle).
+ * Act 2 — The reveal: mascot emerges into the light; key + rim + flare (hero angle).
+ * Act 3 — The welcome: Boing holds center, gentle “hello” pulse, camera eases to eye-level; then transition into app.
+ * Lighting, angles, and motion support the story without burdening (skippable, respects reduced motion).
  */
 function InitialAnimation({ onComplete }) {
   const [visible, setVisible] = useState(true);
@@ -60,11 +63,15 @@ function InitialAnimation({ onComplete }) {
       aria-label="Skip intro"
     >
       <style>{getCinematicStyles()}</style>
-      {/* Layer 1: Black → gradient base with key light */}
+      {/* Act 1: Black → gradient base */}
       <div className="cinematic-splash__bg" aria-hidden />
-      {/* Layer 2: Key light / rim from top-right */}
+      {/* Act 1: Spotlight opens (narrow → wide) to draw focus */}
+      <div className="cinematic-splash__spotlight" aria-hidden />
+      {/* Act 2: Key light / rim from top-right as mascot is revealed */}
       <div className="cinematic-splash__key-light" aria-hidden />
-      {/* Layer 3: Subtle starfield with parallax drift */}
+      {/* Act 2: Fill light (softer, wraps) after reveal */}
+      <div className="cinematic-splash__fill-light" aria-hidden />
+      {/* Starfield with parallax drift */}
       <div className="cinematic-splash__stars" aria-hidden />
       {/* Layer 4: Vignette (darkened edges) */}
       <div className="cinematic-splash__vignette" aria-hidden />
@@ -132,6 +139,28 @@ function getCinematicStyles() {
     @keyframes cinematic-bg-in {
       to { opacity: 1; }
     }
+    .cinematic-splash__spotlight {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 50% 35% at 50% 38%, rgba(0,229,255,0.06) 0%, transparent 70%);
+      opacity: 0;
+      transform: scale(0.5);
+      animation: cinematic-spotlight-open 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.25s forwards;
+      pointer-events: none;
+    }
+    .cinematic-splash[data-reduced="true"] .cinematic-splash__spotlight {
+      animation-duration: 0.6s;
+    }
+    .cinematic-splash[data-exiting="true"] .cinematic-splash__spotlight {
+      animation: cinematic-spotlight-out 0.8s ease-in forwards;
+    }
+    @keyframes cinematic-spotlight-open {
+      from { opacity: 0; transform: scale(0.5); }
+      to { opacity: 1; transform: scale(1.4); }
+    }
+    @keyframes cinematic-spotlight-out {
+      to { opacity: 0; }
+    }
     .cinematic-splash__key-light {
       position: absolute;
       inset: 0;
@@ -147,6 +176,23 @@ function getCinematicStyles() {
       to { opacity: 1; }
     }
     @keyframes cinematic-key-out {
+      to { opacity: 0; }
+    }
+    .cinematic-splash__fill-light {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 100% 100% at 50% 70%, rgba(0,255,136,0.04) 0%, transparent 55%);
+      opacity: 0;
+      animation: cinematic-fill-in 1.2s ease-out 1.5s forwards;
+      pointer-events: none;
+    }
+    .cinematic-splash[data-exiting="true"] .cinematic-splash__fill-light {
+      animation: cinematic-fill-out 0.6s ease-in forwards;
+    }
+    @keyframes cinematic-fill-in {
+      to { opacity: 1; }
+    }
+    @keyframes cinematic-fill-out {
       to { opacity: 0; }
     }
     .cinematic-splash__stars {
@@ -197,24 +243,27 @@ function getCinematicStyles() {
       perspective: 1200px;
       transform-style: preserve-3d;
       opacity: 0;
-      transform: scale(0.82) rotateZ(-1.2deg);
-      animation: cinematic-scene-in 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.45s forwards;
+      transform: scale(0.82) rotateZ(-1.2deg) rotateX(4deg);
+      animation: cinematic-scene-in 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.45s forwards, cinematic-scene-ease 1.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 2.5s forwards;
     }
     .cinematic-splash[data-reduced="true"] .cinematic-splash__scene {
-      animation-duration: 0.75s;
-      animation-delay: 0.2s;
+      animation: cinematic-scene-in 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
     }
     .cinematic-splash[data-exiting="true"] .cinematic-splash__scene {
       animation: cinematic-scene-out 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
     }
     @keyframes cinematic-scene-in {
-      from { opacity: 0; transform: scale(0.82) rotateZ(-1.2deg); }
-      to { opacity: 1; transform: scale(1) rotateZ(-1deg); }
+      from { opacity: 0; transform: scale(0.82) rotateZ(-1.2deg) rotateX(4deg); }
+      to { opacity: 1; transform: scale(1) rotateZ(-1deg) rotateX(2deg); }
+    }
+    @keyframes cinematic-scene-ease {
+      from { transform: scale(1) rotateZ(-1deg) rotateX(2deg); }
+      to { transform: scale(1) rotateZ(0deg) rotateX(0deg); }
     }
     @keyframes cinematic-scene-out {
-      0% { opacity: 1; transform: scale(1) rotateZ(-1deg); filter: blur(0); }
-      40% { opacity: 1; transform: scale(1.08) rotateZ(0deg); filter: blur(2px); }
-      100% { opacity: 0; transform: scale(1.2) rotateZ(0deg); filter: blur(8px); }
+      0% { opacity: 1; transform: scale(1) rotateZ(0deg) rotateX(0deg); filter: blur(0); }
+      40% { opacity: 1; transform: scale(1.08) rotateZ(0deg) rotateX(0deg); filter: blur(2px); }
+      100% { opacity: 0; transform: scale(1.2) rotateZ(0deg) rotateX(0deg); filter: blur(8px); }
     }
     .cinematic-splash__portal-wrap {
       position: relative;
@@ -296,14 +345,17 @@ function getCinematicStyles() {
       transform-style: preserve-3d;
       opacity: 0;
       transform: scale(0.45) translateZ(-80px);
-      animation: cinematic-mascot-emerge 1.15s cubic-bezier(0.34, 1.56, 0.64, 1) 1s forwards;
+      animation: cinematic-mascot-emerge 1.15s cubic-bezier(0.34, 1.56, 0.64, 1) 1s forwards, cinematic-mascot-welcome 0.7s ease-in-out 3.2s forwards;
     }
     .cinematic-splash[data-reduced="true"] .cinematic-splash__mascot-wrap {
-      animation-duration: 0.6s;
-      animation-delay: 0.4s;
+      animation: cinematic-mascot-emerge 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s forwards;
     }
     @keyframes cinematic-mascot-emerge {
       to { opacity: 1; transform: scale(1) translateZ(0); }
+    }
+    @keyframes cinematic-mascot-welcome {
+      0%, 100% { transform: scale(1) translateZ(0); }
+      50% { transform: scale(1.04) translateZ(0); }
     }
     .cinematic-splash__mascot-rim {
       position: absolute;
@@ -322,6 +374,16 @@ function getCinematicStyles() {
       min-height: 220px;
       object-fit: contain;
       filter: drop-shadow(-8px -4px 20px rgba(0,229,255,0.35)) drop-shadow(8px 4px 24px rgba(0,255,136,0.2)) drop-shadow(0 0 40px rgba(0,229,255,0.25));
+      animation: cinematic-mascot-glow 4s ease-in-out 2s;
+    }
+    .cinematic-splash[data-reduced="true"] .cinematic-splash__mascot-img {
+      animation: none;
+    }
+    @keyframes cinematic-mascot-glow {
+      0%, 100% { filter: drop-shadow(-8px -4px 20px rgba(0,229,255,0.35)) drop-shadow(8px 4px 24px rgba(0,255,136,0.2)) drop-shadow(0 0 40px rgba(0,229,255,0.25)); }
+      25% { filter: drop-shadow(-8px -4px 24px rgba(0,229,255,0.45)) drop-shadow(8px 4px 28px rgba(0,255,136,0.3)) drop-shadow(0 0 50px rgba(0,229,255,0.35)); }
+      50% { filter: drop-shadow(-8px -4px 20px rgba(0,229,255,0.35)) drop-shadow(8px 4px 24px rgba(0,255,136,0.2)) drop-shadow(0 0 40px rgba(0,229,255,0.25)); }
+      75% { filter: drop-shadow(-8px -4px 22px rgba(0,229,255,0.4)) drop-shadow(8px 4px 26px rgba(0,255,136,0.25)) drop-shadow(0 0 48px rgba(0,229,255,0.3)); }
     }
     .cinematic-splash__rays {
       position: absolute;
