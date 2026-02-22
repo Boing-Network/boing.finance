@@ -31,7 +31,9 @@ import ProactiveTipsBanner from './components/ProactiveTipsBanner';
 import DeFi101Modal from './components/DeFi101Modal';
 import BoingMascot from './components/BoingMascot';
 import TickerBar from './components/TickerBar';
-import BoingAnimatedBackground, { getFinanceBackgroundVariant, getPageVariant } from './components/BoingAnimatedBackground';
+import BoingAnimatedBackground, { getFinanceBackgroundVariant } from './components/BoingAnimatedBackground';
+import InitialAnimation, { shouldShowInitialAnimation } from './components/InitialAnimation';
+import { getPageVariant } from './utils/pageVariant';
 import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion';
 import priceAlertService from './services/priceAlertService';
 
@@ -154,6 +156,17 @@ const createNavigation = () => {
 
 // Create navigation once and store in module scope to prevent recreation
 const navigation = createNavigation();
+
+/** Renders initial splash once per session, then children. */
+function InitialAnimationGate({ children }) {
+  const [showSplash, setShowSplash] = useState(() => shouldShowInitialAnimation());
+  return (
+    <>
+      {showSplash && <InitialAnimation onComplete={() => setShowSplash(false)} />}
+      {children}
+    </>
+  );
+}
 
 function PageTransitionRoutes() {
   const location = useLocation();
@@ -810,6 +823,7 @@ function App() {
                 <AchievementOverlay />
               <BaseMiniAppWrapper>
                 <Router>
+                  <InitialAnimationGate>
                   <Helmet>
                     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
                     <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
@@ -832,6 +846,7 @@ function App() {
                     <meta name="twitter:image" content="https://boing.finance/hero-image.png" />
                   </Helmet>
                   <AppContent />
+                  </InitialAnimationGate>
                   <Toaster
                     position="top-right"
                     toastOptions={{
