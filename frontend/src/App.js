@@ -157,12 +157,21 @@ const createNavigation = () => {
 // Create navigation once and store in module scope to prevent recreation
 const navigation = createNavigation();
 
-/** Renders initial splash once per session, then children. */
+/** Renders initial splash once per session, then children. Use ?splash=1 to force-show for testing. */
 function InitialAnimationGate({ children }) {
-  const [showSplash, setShowSplash] = useState(() => shouldShowInitialAnimation());
+  const [showSplash, setShowSplash] = useState(() => {
+    const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+    if (params.get('splash') === '1' || params.get('showSplash') === '1') return true;
+    return shouldShowInitialAnimation();
+  });
   return (
     <>
-      {showSplash && <InitialAnimation onComplete={() => setShowSplash(false)} />}
+      {showSplash && typeof document !== 'undefined' && document.body
+        ? createPortal(
+            <InitialAnimation onComplete={() => setShowSplash(false)} />,
+            document.body
+          )
+        : null}
       {children}
     </>
   );
