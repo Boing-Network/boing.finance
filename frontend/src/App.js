@@ -656,10 +656,10 @@ function AppContent() {
         {isLandingPage && <TickerBar />}
       </header>
 
-      <main className="flex-1 flex flex-col relative">
-        {/* Page Content with Error Boundary and Suspense */}
+      <main className="flex-1 flex flex-col relative min-h-0">
+        {/* Page Content with Error Boundary and Suspense — scroll container so Pillars/Tokenomics etc. are reachable */}
         <ErrorBoundary>
-          <div className="relative z-10 flex-1 flex flex-col min-h-0">
+          <div className="relative z-10 flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden">
             <Suspense fallback={<LoadingSpinner />}>
               <PageTransitionRoutes />
             </Suspense>
