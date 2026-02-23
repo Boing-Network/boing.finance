@@ -17,8 +17,7 @@ const PortfolioSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Portfolio Overview</h3>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Total Portfolio Value</h4>
             <ul className="space-y-2 "
@@ -31,8 +30,7 @@ const PortfolioSection = () => {
             </ul>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Asset Distribution</h4>
             <ul className="space-y-2 "
@@ -52,8 +50,7 @@ const PortfolioSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Cross-Chain Portfolio Management</h3>
         <div className="space-y-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Multi-Network Support</h4>
             <div className="grid md:grid-cols-2 gap-6">
@@ -92,8 +89,7 @@ const PortfolioSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Performance Tracking</h3>
         <div className="grid md:grid-cols-3 gap-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Returns Analysis</h4>
             <ul className="space-y-2 "
@@ -106,8 +102,7 @@ const PortfolioSection = () => {
             </ul>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Risk Metrics</h4>
             <ul className="space-y-2 "
@@ -120,8 +115,7 @@ const PortfolioSection = () => {
             </ul>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Trading Activity</h4>
             <ul className="space-y-2 "
@@ -141,8 +135,7 @@ const PortfolioSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Asset Management</h3>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Token Holdings</h4>
             <ul className="space-y-2 "
@@ -155,8 +148,7 @@ const PortfolioSection = () => {
             </ul>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Liquidity Positions</h4>
             <ul className="space-y-2 "
@@ -176,8 +168,7 @@ const PortfolioSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Advanced Portfolio Analytics</h3>
         <div className="space-y-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Asset Allocation Analysis</h4>
             <div className="grid md:grid-cols-2 gap-6">
@@ -216,8 +207,7 @@ const PortfolioSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Transaction History & Reporting</h3>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Transaction Tracking</h4>
             <ul className="space-y-2 "
@@ -230,8 +220,7 @@ const PortfolioSection = () => {
             </ul>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Reporting Tools</h4>
             <ul className="space-y-2 "
@@ -251,8 +240,7 @@ const PortfolioSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Portfolio Alerts & Notifications</h3>
         <div className="grid md:grid-cols-3 gap-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Price Alerts</h4>
             <ul className="space-y-2 "
@@ -265,8 +253,7 @@ const PortfolioSection = () => {
             </ul>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Risk Alerts</h4>
             <ul className="space-y-2 "
@@ -279,8 +266,7 @@ const PortfolioSection = () => {
             </ul>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Performance Alerts</h4>
             <ul className="space-y-2 "
@@ -300,8 +286,7 @@ const PortfolioSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Portfolio Optimization</h3>
         <div className="space-y-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Optimization Strategies</h4>
             <div className="grid md:grid-cols-2 gap-6">

@@ -18,8 +18,7 @@ const AnalyticsSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Market Overview</h3>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Global Metrics</h4>
             <ul className="space-y-2 "
@@ -32,8 +31,7 @@ const AnalyticsSection = () => {
             </ul>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Network Performance</h4>
             <ul className="space-y-2 "
@@ -53,8 +51,7 @@ const AnalyticsSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Price Charts & Technical Analysis</h3>
         <div className="grid md:grid-cols-3 gap-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Chart Types</h4>
             <ul className="space-y-2 "
@@ -67,8 +64,7 @@ const AnalyticsSection = () => {
             </ul>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Timeframes</h4>
             <ul className="space-y-2 "
@@ -81,8 +77,7 @@ const AnalyticsSection = () => {
             </ul>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Indicators</h4>
             <ul className="space-y-2 "
@@ -102,8 +97,7 @@ const AnalyticsSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Trading Analytics</h3>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Performance Metrics</h4>
             <ul className="space-y-2 "
@@ -116,8 +110,7 @@ const AnalyticsSection = () => {
             </ul>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Risk Analysis</h4>
             <ul className="space-y-2 "
@@ -137,8 +130,7 @@ const AnalyticsSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Liquidity Analytics</h3>
         <div className="space-y-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Pool Analysis</h4>
             <div className="grid md:grid-cols-2 gap-6">
@@ -177,8 +169,7 @@ const AnalyticsSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Market Trends & Insights</h3>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Trend Analysis</h4>
             <ul className="space-y-2 "
@@ -191,8 +182,7 @@ const AnalyticsSection = () => {
             </ul>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Network Insights</h4>
             <ul className="space-y-2 "
@@ -212,8 +202,7 @@ const AnalyticsSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Data Export & APIs</h3>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Export Options</h4>
             <ul className="space-y-2 "
@@ -226,8 +215,7 @@ const AnalyticsSection = () => {
             </ul>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>API Access</h4>
             <ul className="space-y-2 "
@@ -246,8 +234,7 @@ const AnalyticsSection = () => {
       <div>
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Custom Analytics</h3>
-        <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+        <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
           <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Advanced Features</h4>
           <div className="grid md:grid-cols-2 gap-6">

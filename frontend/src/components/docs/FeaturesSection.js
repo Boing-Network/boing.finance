@@ -171,8 +171,7 @@ const FeaturesSection = () => {
           style={{ color: 'var(--text-primary)'  }}>Core Features</h3>
         <div className="grid md:grid-cols-2 gap-6">
           {features.map((feature, index) => (
-            <div key={index} className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+            <div key={index} className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
               <div className="flex items-start space-x-4">
                 <div className="text-3xl">{feature.icon}</div>
                 <div className="flex-1">
@@ -202,8 +201,7 @@ const FeaturesSection = () => {
           style={{ color: 'var(--text-primary)'  }}>Technical Features</h3>
         <div className="grid md:grid-cols-2 gap-6">
           {technicalFeatures.map((category, index) => (
-            <div key={index} className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+            <div key={index} className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
               <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>{category.category}</h4>
               <ul className="space-y-2">
@@ -261,8 +259,7 @@ const FeaturesSection = () => {
       <div>
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Feature Comparison</h3>
-        <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }} overflow-x-auto"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+        <div className="rounded-lg p-6 border overflow-x-auto" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
           <table className="w-full">
             <thead>
               <tr className="border-b "

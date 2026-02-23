@@ -65,9 +65,9 @@ const NetworksSection = () => {
           style={{ color: 'var(--text-primary)'  }}>Supported Networks</h2>
         <p className=" text-lg leading-relaxed mb-8"
           style={{ color: 'var(--text-secondary)'  }}>
-          boing.finance supports 15+ blockchain networks, from major Layer 1s to emerging Layer 2 solutions. 
-          All networks use the ERC-20 token standard and are EVM-compatible, ensuring seamless 
-          cross-chain trading and liquidity provision.
+          boing.finance supports EVM chains (Ethereum, Polygon, Arbitrum, Base, and more) and Solana. 
+          EVM networks use the ERC-20 token standard; Solana uses SPL tokens. Use the network selector 
+          to switch chains and the Bridge to move assets cross-chain.
         </p>
       </div>
 
@@ -78,8 +78,7 @@ const NetworksSection = () => {
           style={{ color: 'var(--text-primary)'  }}>{category.category}</h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {category.networks.map((network, idx) => (
-              <div key={idx} className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+              <div key={idx} className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-lg font-semibold "
           style={{ color: 'var(--text-primary)'  }}>{network.name}</h4>
@@ -114,8 +113,7 @@ const NetworksSection = () => {
           style={{ color: 'var(--text-primary)'  }}>Network Features</h3>
         <div className="grid md:grid-cols-2 gap-6">
           {networkFeatures.map((feature, index) => (
-            <div key={index} className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+            <div key={index} className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
               <div className="flex items-start space-x-4">
                 <div className="text-3xl">{feature.icon}</div>
                 <div>
@@ -134,8 +132,7 @@ const NetworksSection = () => {
       <div>
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Network Comparison</h3>
-        <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }} overflow-x-auto"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+        <div className="rounded-lg p-6 border overflow-x-auto" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
           <table className="w-full">
             <thead>
               <tr className="border-b "
@@ -210,8 +207,7 @@ const NetworksSection = () => {
       <div>
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Adding New Networks</h3>
-        <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+        <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
           <p className=" mb-4"
           style={{ color: 'var(--text-secondary)'  }}>
             boing.finance is designed to easily support new blockchain networks. To add a new network:

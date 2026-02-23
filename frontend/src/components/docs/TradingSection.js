@@ -18,8 +18,7 @@ const TradingSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Getting Started with Trading</h3>
         <div className="space-y-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Step 1: Connect Your Wallet</h4>
             <div className="space-y-3">
@@ -34,8 +33,7 @@ const TradingSection = () => {
             </div>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Step 2: Select Network</h4>
             <div className="space-y-3">
@@ -50,8 +48,7 @@ const TradingSection = () => {
             </div>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Step 3: Choose Trading Pair</h4>
             <div className="space-y-3">
@@ -73,8 +70,7 @@ const TradingSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Understanding the Trading Interface</h3>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Input Fields</h4>
             <ul className="space-y-2 "
@@ -86,8 +82,7 @@ const TradingSection = () => {
             </ul>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Trading Details</h4>
             <ul className="space-y-2 "
@@ -106,8 +101,7 @@ const TradingSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Trading Parameters</h3>
         <div className="grid md:grid-cols-3 gap-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Slippage Tolerance</h4>
             <p className=" mb-3"
@@ -122,8 +116,7 @@ const TradingSection = () => {
             </div>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Gas Settings</h4>
             <p className=" mb-3"
@@ -138,8 +131,7 @@ const TradingSection = () => {
             </div>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Deadline</h4>
             <p className=" mb-3"
@@ -161,8 +153,7 @@ const TradingSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Trading Strategies</h3>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Basic Trading</h4>
             <ul className="space-y-2 "
@@ -174,8 +165,7 @@ const TradingSection = () => {
             </ul>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Advanced Trading</h4>
             <ul className="space-y-2 "

@@ -17,8 +17,7 @@ const BridgeSection = () => {
       <div>
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>What is Cross-Chain Bridging?</h3>
-        <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+        <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
           <p className=" mb-4"
           style={{ color: 'var(--text-secondary)'  }}>
             Cross-chain bridging allows you to transfer tokens from one blockchain network to another. 
@@ -56,8 +55,7 @@ const BridgeSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>How Cross-Chain Bridging Works</h3>
         <div className="space-y-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Step 1: Initiate Transfer</h4>
             <div className="space-y-3">
@@ -72,8 +70,7 @@ const BridgeSection = () => {
             </div>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Step 2: Lock and Mint</h4>
             <div className="space-y-3">
@@ -88,8 +85,7 @@ const BridgeSection = () => {
             </div>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Step 3: Confirmation</h4>
             <div className="space-y-3">
@@ -111,8 +107,7 @@ const BridgeSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Supported Bridge Routes</h3>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Major Networks</h4>
             <ul className="space-y-2 "
@@ -126,8 +121,7 @@ const BridgeSection = () => {
             </ul>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Layer 2 Networks</h4>
             <ul className="space-y-2 "
@@ -148,8 +142,7 @@ const BridgeSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Bridge Fees and Costs</h3>
         <div className="grid md:grid-cols-3 gap-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Network Fees</h4>
             <p className=" mb-3"
@@ -165,8 +158,7 @@ const BridgeSection = () => {
             </div>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Bridge Fees</h4>
             <p className=" mb-3"
@@ -182,8 +174,7 @@ const BridgeSection = () => {
             </div>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Processing Time</h4>
             <p className=" mb-3"
@@ -206,8 +197,7 @@ const BridgeSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>How to Use the Bridge</h3>
         <div className="space-y-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Step 1: Connect and Select</h4>
             <div className="space-y-3">
@@ -222,8 +212,7 @@ const BridgeSection = () => {
             </div>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Step 2: Choose Token and Amount</h4>
             <div className="space-y-3">
@@ -238,8 +227,7 @@ const BridgeSection = () => {
             </div>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Step 3: Confirm and Transfer</h4>
             <div className="space-y-3">
@@ -261,8 +249,7 @@ const BridgeSection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Bridge Security</h3>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Security Features</h4>
             <ul className="space-y-2 "
@@ -276,8 +263,7 @@ const BridgeSection = () => {
             </ul>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Risk Mitigation</h4>
             <ul className="space-y-2 "

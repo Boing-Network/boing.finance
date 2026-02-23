@@ -62,7 +62,7 @@ const FAQSection = () => {
         {
           id: 't-4',
           question: 'What are the trading fees?',
-          answer: 'Trading fees are 0.3% per swap, with 0.25% going to liquidity providers and 0.05% to the protocol. Bridge fees vary by network and are displayed before confirming cross-chain transfers.'
+          answer: 'boing.finance has zero protocol fees on swaps. Liquidity providers may earn from trading activity. Bridge fees vary by network and are displayed before confirming cross-chain transfers.'
         }
       ]
     },
@@ -237,8 +237,7 @@ const FAQSection = () => {
       </div>
 
       {/* Search Bar */}
-      <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+      <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
         <div className="relative">
           <label htmlFor="faq-search" className="sr-only">Search FAQs</label>
           <input
@@ -259,8 +258,7 @@ const FAQSection = () => {
       {/* FAQ Categories */}
       <div className="space-y-6">
         {faqCategories.map((category) => (
-          <div key={category.title} className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div key={category.title} className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h3 className="text-xl font-semibold  mb-4 flex items-center"
           style={{ color: 'var(--text-primary)'  }}>
               <span className="mr-3">{category.icon}</span>
@@ -298,8 +296,7 @@ const FAQSection = () => {
       </div>
 
       {/* Contact Support */}
-      <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+      <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
         <div className="text-center">
           <h3 className="text-xl font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Still Need Help?</h3>

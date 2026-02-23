@@ -14,8 +14,7 @@ const SecuritySection = () => {
       </div>
 
       {/* Security Overview */}
-      <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+      <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
         <h3 className="text-xl font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Security Overview</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -50,8 +49,7 @@ const SecuritySection = () => {
       </div>
 
       {/* Smart Contract Security */}
-      <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+      <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
         <h3 className="text-xl font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Smart Contract Security</h3>
         <div className="space-y-6">
@@ -104,8 +102,7 @@ const SecuritySection = () => {
       </div>
 
       {/* User Security */}
-      <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+      <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
         <h3 className="text-xl font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>User Security</h3>
         <div className="space-y-6">
@@ -163,8 +160,7 @@ const SecuritySection = () => {
       </div>
 
       {/* Network Security */}
-      <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+      <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
         <h3 className="text-xl font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Network Security</h3>
         <div className="space-y-6">
@@ -217,8 +213,7 @@ const SecuritySection = () => {
       </div>
 
       {/* Incident Response */}
-      <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+      <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
         <h3 className="text-xl font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Incident Response</h3>
         <div className="space-y-6">
@@ -288,8 +283,7 @@ const SecuritySection = () => {
       </div>
 
       {/* Security Checklist */}
-      <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+      <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
         <h3 className="text-xl font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Security Checklist</h3>
         <div className="space-y-4">

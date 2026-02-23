@@ -17,8 +17,7 @@ const LiquiditySection = () => {
       <div>
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>What is Liquidity Provision?</h3>
-        <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+        <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
           <p className=" mb-4"
           style={{ color: 'var(--text-secondary)'  }}>
             Liquidity provision is the process of depositing tokens into a trading pair to enable others to trade. 
@@ -55,8 +54,7 @@ const LiquiditySection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>How Automated Market Making (AMM) Works</h3>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Constant Product Formula</h4>
             <p className=" mb-4"
@@ -72,8 +70,7 @@ const LiquiditySection = () => {
             </ul>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Price Impact</h4>
             <p className=" mb-4"
@@ -96,8 +93,7 @@ const LiquiditySection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Adding Liquidity</h3>
         <div className="space-y-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Step 1: Choose a Trading Pair</h4>
             <div className="space-y-3">
@@ -112,8 +108,7 @@ const LiquiditySection = () => {
             </div>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Step 2: Provide Equal Value</h4>
             <div className="space-y-3">
@@ -128,8 +123,7 @@ const LiquiditySection = () => {
             </div>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Step 3: Confirm and Add</h4>
             <div className="space-y-3">
@@ -192,8 +186,7 @@ const LiquiditySection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Managing Your Liquidity Positions</h3>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Monitoring Performance</h4>
             <ul className="space-y-2 "
@@ -206,8 +199,7 @@ const LiquiditySection = () => {
             </ul>
           </div>
 
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Collecting Fees</h4>
             <ul className="space-y-2 "
@@ -227,8 +219,7 @@ const LiquiditySection = () => {
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Removing Liquidity</h3>
         <div className="space-y-4">
-          <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+          <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Step-by-Step Process</h4>
             <div className="space-y-3">
@@ -299,8 +290,7 @@ const LiquiditySection = () => {
       <div>
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Risk Management</h3>
-        <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+        <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
           <h4 className="text-lg font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Key Risks to Consider</h4>
           <div className="grid md:grid-cols-2 gap-6">

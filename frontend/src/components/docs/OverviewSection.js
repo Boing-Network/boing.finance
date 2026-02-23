@@ -7,7 +7,7 @@ const OverviewSection = () => {
         <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Platform Overview</h2>
         <p className="text-lg leading-relaxed mb-6" style={{ color: 'var(--text-secondary)' }}>
           boing.finance is a DEX for swapping, liquidity, bridging, token & NFT deployment, and governance on EVM and Solana. 
-          One interface, one portfolio. Use the AI Assistant, Help Center, and DeFi 101 to get started.
+          Zero protocol fees. One interface, one portfolio. Use the AI Assistant, Help Center, and DeFi 101 to get started.
         </p>
         
         <div className="grid md:grid-cols-2 gap-6 mb-8">

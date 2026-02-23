@@ -11,8 +11,6 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 
-const SESSION_KEY = 'boing-splash-seen';
-
 const CYAN = { r: 0, g: 229, b: 255 };
 const GREEN = { r: 0, g: 255, b: 136 };
 const DEEP_BG = '#020810';
@@ -240,9 +238,6 @@ function CinematicIntro({ onComplete }) {
     doneRef.current = true;
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     setExiting(true);
-    try {
-      sessionStorage.setItem(SESSION_KEY, '1');
-    } catch (_) {}
     const OUTRO_MS = prefersReducedMotion ? 500 : 1000;
     const t = setTimeout(() => {
       onComplete?.();
@@ -513,11 +508,10 @@ function CinematicIntro({ onComplete }) {
 
 export default CinematicIntro;
 
+/** Show intro on every landing page load/reload. Use ?noIntro=1 to skip for testing. */
 export function shouldShowCinematicIntro() {
-  if (typeof sessionStorage === 'undefined') return true;
-  try {
-    return sessionStorage.getItem(SESSION_KEY) !== '1';
-  } catch {
-    return true;
-  }
+  if (typeof window === 'undefined') return true;
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('noIntro') === '1') return false;
+  return true;
 }

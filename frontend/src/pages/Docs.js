@@ -72,11 +72,14 @@ const Docs = () => {
 
           {/* Navigation and Content */}
           <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 pb-8 sm:pb-12">
-            {/* Sidebar Navigation */}
-            <div className="lg:w-1/4">
-              <div className="rounded-xl p-4 sm:p-6 border lg:sticky lg:top-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4" style={{ color: 'var(--text-primary)' }}>Table of Contents</h3>
-                <nav className="space-y-1 sm:space-y-2">
+            {/* Sidebar Navigation — sticky so TOC stays visible as user scrolls */}
+            <div className="lg:w-1/4 lg:flex-shrink-0">
+              <div
+                className="rounded-xl p-4 sm:p-6 border lg:sticky lg:top-24 max-h-[calc(100vh-8rem)] lg:flex lg:flex-col"
+                style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
+              >
+                <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex-shrink-0" style={{ color: 'var(--text-primary)' }}>Table of Contents</h3>
+                <nav className="space-y-1 sm:space-y-2 overflow-y-auto min-h-0 flex-1 pr-1">
                   {sections.map((section) => (
                     <button
                       key={section.id}

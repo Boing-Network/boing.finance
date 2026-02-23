@@ -14,8 +14,7 @@ const TechnicalSection = () => {
       </div>
 
       {/* Smart Contract Architecture */}
-      <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+      <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
         <h3 className="text-xl font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Smart Contract Architecture</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -93,8 +92,7 @@ const TechnicalSection = () => {
       </div>
 
       {/* Protocol Specifications */}
-      <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+      <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
         <h3 className="text-xl font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Protocol Specifications</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -124,8 +122,7 @@ const TechnicalSection = () => {
       </div>
 
       {/* Security Features */}
-      <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+      <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
         <h3 className="text-xl font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Security Features</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -166,8 +163,7 @@ const TechnicalSection = () => {
       </div>
 
       {/* Gas Optimization */}
-      <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+      <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
         <h3 className="text-xl font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Gas Optimization</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -197,8 +193,7 @@ const TechnicalSection = () => {
       </div>
 
       {/* Network Integration */}
-      <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+      <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
         <h3 className="text-xl font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Network Integration</h3>
         <div className="space-y-4">
@@ -233,8 +228,7 @@ const TechnicalSection = () => {
       </div>
 
       {/* Development Tools */}
-      <div className=" rounded-lg p-6 border style={{ borderColor: 'var(--border-color)' }}"
-          style={{ backgroundColor: 'var(--bg-card)'  }}>
+      <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
         <h3 className="text-xl font-semibold  mb-4"
           style={{ color: 'var(--text-primary)'  }}>Development Tools</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
