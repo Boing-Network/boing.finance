@@ -67,7 +67,7 @@ jobs:
         working-directory: frontend
         run: npm run build:prod
         env:
-          REACT_APP_ENVIRONMENT: production
+          REACT_APP_ENV: production
           REACT_APP_BACKEND_URL: https://boing-api-prod.nico-chikuji.workers.dev
           CI: false
 
@@ -76,7 +76,7 @@ jobs:
         working-directory: frontend
         run: npm run build:staging
         env:
-          REACT_APP_ENVIRONMENT: staging
+          REACT_APP_ENV: staging
           REACT_APP_BACKEND_URL: https://boing-api-staging.nico-chikuji.workers.dev
           CI: false
 
@@ -87,7 +87,7 @@ jobs:
           echo "🚀 Deploying to Cloudflare Pages (Production)..."
           echo "Project: boing-finance-prod"
           echo "Note: Project will be auto-created if it doesn't exist"
-          wrangler pages deploy build \
+          wrangler pages deploy dist \
             --project-name=boing-finance-prod \
             --branch=main \
             --commit-dirty=true || {
@@ -108,7 +108,7 @@ jobs:
           echo "🚀 Deploying to Cloudflare Pages (Staging)..."
           echo "Project: boing-finance"
           echo "Note: Project will be auto-created if it doesn't exist"
-          wrangler pages deploy build \
+          wrangler pages deploy dist \
             --project-name=boing-finance \
             --branch=staging \
             --commit-dirty=true || {

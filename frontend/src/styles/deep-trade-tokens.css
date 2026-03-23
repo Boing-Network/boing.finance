@@ -124,3 +124,95 @@
 .page-landing.deep-trade-bg.animated-bg::after {
   display: none;
 }
+
+/* ── Page variants: per-route accent emphasis (Deep Trade palette) ─── */
+/* trade (default): cyan primary — already set in :root */
+.page-variant-trade { /* base */ }
+
+/* analytics: green accent emphasis */
+.page-variant-analytics {
+  --primary-color: var(--finance-green);
+  --accent-color: var(--finance-green);
+  --accent-teal: var(--finance-green);
+  --accent-cyan: var(--finance-green);
+  --border-color: rgba(0, 255, 136, 0.12);
+  --border-hover: rgba(0, 255, 136, 0.35);
+  --card-border: rgba(0, 255, 136, 0.12);
+  --card-border-hover: rgba(0, 255, 136, 0.35);
+  --glow-cyan: var(--finance-green-glow);
+  --glow-cyan-soft: rgba(0, 255, 136, 0.15);
+  --accent-cyan-bg: rgba(0, 255, 136, 0.1);
+  --secondary-bg: rgba(0, 255, 136, 0.08);
+  --btn-primary-gradient: linear-gradient(135deg, var(--finance-green), var(--finance-green-mid));
+}
+
+/* portfolio: gold/amber accent emphasis */
+.page-variant-portfolio {
+  --primary-color: var(--finance-gold);
+  --accent-color: var(--finance-gold);
+  --accent-teal: var(--finance-gold);
+  --accent-cyan: var(--finance-gold);
+  --border-color: rgba(245, 158, 11, 0.2);
+  --border-hover: rgba(245, 158, 11, 0.4);
+  --card-border: rgba(245, 158, 11, 0.2);
+  --card-border-hover: rgba(245, 158, 11, 0.4);
+  --glow-cyan: var(--glow-gold);
+  --glow-cyan-soft: rgba(245, 158, 11, 0.12);
+  --accent-cyan-bg: rgba(245, 158, 11, 0.08);
+  --secondary-bg: rgba(245, 158, 11, 0.06);
+  --btn-primary-gradient: linear-gradient(135deg, var(--finance-gold), var(--finance-gold-light));
+}
+
+/* governance: purple accent emphasis */
+.page-variant-governance {
+  --primary-color: var(--finance-purple);
+  --accent-color: var(--finance-purple);
+  --accent-teal: var(--finance-purple);
+  --accent-cyan: var(--finance-purple);
+  --border-color: rgba(139, 92, 246, 0.2);
+  --border-hover: rgba(139, 92, 246, 0.4);
+  --card-border: rgba(139, 92, 246, 0.2);
+  --card-border-hover: rgba(139, 92, 246, 0.4);
+  --glow-cyan: var(--finance-purple-glow);
+  --glow-cyan-soft: rgba(139, 92, 246, 0.15);
+  --accent-cyan-bg: rgba(139, 92, 246, 0.1);
+  --secondary-bg: rgba(139, 92, 246, 0.08);
+  --btn-primary-gradient: linear-gradient(135deg, var(--finance-purple), #a78bfa);
+}
+
+/* boing (staking, points, roadmap, activities): green + gold */
+.page-variant-boing {
+  --primary-color: var(--finance-green);
+  --accent-color: var(--finance-green);
+  --accent-teal: var(--finance-green);
+  --accent-cyan: var(--finance-green);
+  --border-color: rgba(0, 255, 136, 0.15);
+  --border-hover: rgba(245, 158, 11, 0.35);
+  --card-border: rgba(0, 255, 136, 0.15);
+  --card-border-hover: rgba(245, 158, 11, 0.3);
+  --glow-cyan: var(--finance-green-glow);
+  --glow-cyan-soft: rgba(0, 255, 136, 0.12);
+  --accent-cyan-bg: rgba(0, 255, 136, 0.08);
+  --secondary-bg: rgba(245, 158, 11, 0.06);
+  --btn-primary-gradient: linear-gradient(135deg, var(--finance-green), var(--finance-gold));
+}
+
+/* docs/blog/help/legal: softer cyan, readable */
+.page-variant-docs {
+  --primary-color: #22d3ee;
+  --accent-color: #22d3ee;
+  --accent-teal: #22d3ee;
+  --accent-cyan: #22d3ee;
+  --border-color: rgba(34, 211, 238, 0.15);
+  --border-hover: rgba(34, 211, 238, 0.35);
+  --card-border: rgba(34, 211, 238, 0.15);
+  --card-border-hover: rgba(34, 211, 238, 0.35);
+  --glow-cyan: rgba(34, 211, 238, 0.2);
+  --glow-cyan-soft: rgba(34, 211, 238, 0.1);
+  --accent-cyan-bg: rgba(34, 211, 238, 0.08);
+  --secondary-bg: rgba(34, 211, 238, 0.06);
+  --btn-primary-gradient: linear-gradient(135deg, #22d3ee, var(--finance-green-mid));
+}
+
+/* landing: keep default cyan/green (handled by page-landing styles) */
+.page-variant-landing { /* base */ }

@@ -1,2 +1,9 @@
 node_modules
 backend/.wrangler/tmp/
+
+# Frontend build outputs (Vite → dist; legacy CRA → build)
+frontend/dist/
+frontend/build/
+
+# Windows accidental reserved-name file
+nul

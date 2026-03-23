@@ -3,7 +3,7 @@
 // IMPORTANT: Update CACHE_VERSION on each deployment to force cache invalidation
 // This ensures users get the latest version after deployment
 
-const CACHE_VERSION = 'v1771181551183'; // Update this version number on each deployment
+const CACHE_VERSION = 'v1774244918839'; // Update this version number on each deployment
 const CACHE_NAME = 'boing-finance-' + CACHE_VERSION;
 const RUNTIME_CACHE = 'boing-finance-runtime-' + CACHE_VERSION;
 
@@ -24,14 +24,13 @@ const deleteAllOldCaches = async () => {
 };
 
 // Assets to cache on install
+// Vite emits hashed chunks under /assets/; precache shell + icons only (chunks use runtime caching below).
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/static/js/bundle.js',
-  '/static/css/main.css',
   '/favicon.ico',
   '/favicon.svg',
-  '/manifest.json'
+  '/manifest.json',
 ];
 
 // Install event - cache static assets
@@ -145,7 +144,7 @@ self.addEventListener('fetch', (event) => {
 
   // Handle JavaScript files with network-first strategy (always get fresh JS)
   // Add cache-busting query parameter to ensure fresh fetch
-  if (url.pathname.endsWith('.js') && url.pathname.startsWith('/static/')) {
+  if (url.pathname.endsWith('.js') && url.pathname.startsWith('/assets/')) {
     // Add cache-busting query parameter
     const cacheBustUrl = new URL(request.url);
     cacheBustUrl.searchParams.set('v', CACHE_VERSION);

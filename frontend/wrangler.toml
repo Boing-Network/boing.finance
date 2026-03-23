@@ -1,6 +1,6 @@
 name = "boing-finance"
 compatibility_date = "2024-01-01"
-pages_build_output_dir = "build"
+pages_build_output_dir = "dist"
 
 [env.production]
 name = "boing-finance-prod"
@@ -9,11 +9,11 @@ name = "boing-finance-prod"
 # NOTE: These are exposed in the frontend bundle (REACT_APP_* variables are public)
 # For production, use Cloudflare Pages environment variables instead of hardcoding here
 [vars]
-REACT_APP_ENVIRONMENT = "development"
+REACT_APP_ENV = "development"
 REACT_APP_BACKEND_URL = "https://boing-api-staging.nico-chikuji.workers.dev"
 
 # Production Environment Variables
 # NOTE: For production, use Cloudflare Pages environment variables instead of hardcoding here
 [env.production.vars]
-REACT_APP_ENVIRONMENT = "production"
+REACT_APP_ENV = "production"
 REACT_APP_BACKEND_URL = "https://boing-api-prod.nico-chikuji.workers.dev" 

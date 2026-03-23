@@ -42,11 +42,11 @@ fi
 # Deploy to Cloudflare Pages
 echo "☁️ Deploying to Cloudflare Pages..."
 if [ "$ENVIRONMENT" = "staging" ]; then
-    wrangler pages deploy build --project-name=$PROJECT_NAME --branch=staging
+    wrangler pages deploy dist --project-name=$PROJECT_NAME --branch=staging
     echo "✅ Frontend deployed successfully to staging!"
     echo "🌐 Staging URL: https://boing-finance.pages.dev"
 else
-    wrangler pages deploy build --project-name=$PROJECT_NAME --branch=main
+    wrangler pages deploy dist --project-name=$PROJECT_NAME --branch=main
     echo "✅ Frontend deployed successfully to production!"
     echo "🌐 Production URL: https://boing-finance-prod.pages.dev"
 fi 
