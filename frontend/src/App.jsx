@@ -34,6 +34,7 @@ import BoingAnimatedBackground, { getFinanceBackgroundVariant } from './componen
 import CinematicIntro, { shouldShowCinematicIntro } from './components/CinematicIntro';
 import { getPageVariant } from './utils/pageVariant';
 import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion';
+import { useCloseOnPointerOutside } from './hooks/useCloseOnPointerOutside';
 import priceAlertService from './services/priceAlertService';
 
 // Lazy load all page components for code splitting
@@ -246,7 +247,14 @@ function AppContent() {
   const [boingDropdownOpen, setBoingDropdownOpen] = useState(false);
   const [toolsDropdownOpen, setToolsDropdownOpen] = useState(false);
   const [isMediumNavOpen, setIsMediumNavOpen] = useState(false);
+  const mediumNavRef = useRef(null);
   const { account } = useWalletConnection();
+
+  useCloseOnPointerOutside(
+    isMediumNavOpen,
+    (node) => Boolean(mediumNavRef.current?.contains(node)),
+    () => setIsMediumNavOpen(false)
+  );
 
   const closeAllDropdowns = () => {
     setTradeAndDeployDropdownOpen(false);
@@ -320,7 +328,7 @@ function AppContent() {
         <div className="w-full max-w-7xl mx-auto pl-2 pr-3 sm:pl-3 sm:pr-4 md:pl-4 md:pr-6 lg:pl-4 lg:pr-8 xl:pl-6 xl:pr-8 min-w-0">
           <div className="flex items-center justify-between gap-x-2 sm:gap-x-3 lg:gap-x-4 xl:gap-x-6 h-14 sm:h-16 min-w-0">
             {/* Hamburger for nav items: 768px–1149px only (left side); hidden on mobile and desktop */}
-            <div className="hidden md:flex min-[1150px]:hidden items-center flex-shrink-0 relative">
+            <div ref={mediumNavRef} className="hidden md:flex min-[1150px]:hidden items-center flex-shrink-0 relative">
               <button
                 onClick={() => setIsMediumNavOpen(!isMediumNavOpen)}
                 className="flex items-center justify-center w-10 h-10 rounded-lg transition-colors"
@@ -340,12 +348,9 @@ function AppContent() {
                 </svg>
               </button>
               {isMediumNavOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" aria-hidden="true" onClick={() => setIsMediumNavOpen(false)} />
                   <div className="dropdown-menu-glass-gradient-v absolute left-0 top-full mt-1 z-50 w-72 max-h-[80vh] overflow-y-auto rounded-lg">
                     <MediumNavPanel navigation={memoizedNavigation} onNavigate={() => setIsMediumNavOpen(false)} comingSoon={comingSoon} />
                   </div>
-                </>
               )}
             </div>
 
@@ -1461,6 +1466,7 @@ function FeatureCard({ title, icon, description, comingSoon }) {
 // Renders panel via portal so it is not clipped by overflow-x-hidden on the app wrapper.
 function ToolsDropdown({ isOpen, onToggle, onClose, onOpenHistory, onOpenDefi101 }) {
   const buttonRef = useRef(null);
+  const panelRef = useRef(null);
   const [position, setPosition] = useState({ top: 0, right: 0 });
 
   useEffect(() => {
@@ -1469,11 +1475,17 @@ function ToolsDropdown({ isOpen, onToggle, onClose, onOpenHistory, onOpenDefi101
     setPosition({ top: rect.bottom + 8, right: Math.max(8, window.innerWidth - rect.right) });
   }, [isOpen]);
 
+  useCloseOnPointerOutside(
+    isOpen,
+    (node) =>
+      Boolean(buttonRef.current?.contains(node) || panelRef.current?.contains(node)),
+    onClose
+  );
+
   const dropdownContent = isOpen && (
-    <>
-      <div className="fixed inset-0 z-[45]" aria-hidden="true" onClick={onClose} />
       <div
-        className="dropdown-menu-glass fixed w-52 rounded-xl z-[50]"
+        ref={panelRef}
+        className="dropdown-menu-glass fixed w-52 rounded-xl z-[120]"
         style={{
           top: position.top,
           right: position.right,
@@ -1498,7 +1510,6 @@ function ToolsDropdown({ isOpen, onToggle, onClose, onOpenHistory, onOpenDefi101
           </button>
         </div>
       </div>
-    </>
   );
 
   return (
@@ -1585,8 +1596,15 @@ function MediumNavPanel({ navigation, onNavigate, comingSoon }) {
 
 // Modified DropdownMenu to support coming soon
 function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
+  const rootRef = useRef(null);
+  useCloseOnPointerOutside(
+    isOpen,
+    (node) => Boolean(rootRef.current?.contains(node)),
+    onClose
+  );
+
   return (
-    <div className="relative flex-shrink-0">
+    <div ref={rootRef} className="relative flex-shrink-0">
       <button
         type="button"
         onClick={onToggle}
@@ -1608,9 +1626,7 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
         </svg>
       </button>
       {isOpen && (
-        <>
-          <div className="fixed inset-0 z-[45]" aria-hidden="true" onClick={onClose} />
-          <div className="dropdown-menu-glass absolute top-full left-0 mt-2 w-52 rounded-xl z-[50]">
+          <div className="dropdown-menu-glass absolute top-full left-0 mt-2 w-52 rounded-xl z-[120]">
           <div className="py-1.5">
             {items.map((item) => {
               // Explicit boolean checks with logging
@@ -1667,7 +1683,6 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
             })}
           </div>
         </div>
-        </>
       )}
     </div>
   );

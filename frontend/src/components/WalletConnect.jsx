@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { useCloseOnPointerOutside } from '../hooks/useCloseOnPointerOutside';
 import { useWallet } from '../contexts/WalletContext';
 import { useSolanaWallet, useChainType, CHAIN_TYPE_SOLANA } from '../contexts/SolanaWalletContext';
 import { ChevronDownIcon, WalletIcon, XMarkIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
@@ -14,6 +15,7 @@ const WalletConnect = () => {
 
   const [showDropdown, setShowDropdown] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
+  const walletDropdownRootRef = useRef(null);
   const [evmBalance, setEvmBalance] = useState(null);
   const [evmBalanceLoading, setEvmBalanceLoading] = useState(false);
 
@@ -80,6 +82,12 @@ const WalletConnect = () => {
 
   const currentNetwork = isSolana ? { name: 'Solana', nativeCurrency: { symbol: 'SOL' } } : evmWallet.getCurrentNetwork?.();
 
+  useCloseOnPointerOutside(
+    showDropdown,
+    (node) => Boolean(walletDropdownRootRef.current?.contains(node)),
+    () => setShowDropdown(false)
+  );
+
   if (isConnecting) {
     return (
       <button type="button" className="btn-wallet-connect px-4 py-2 rounded-lg flex items-center space-x-2">
@@ -91,8 +99,9 @@ const WalletConnect = () => {
 
   if (isConnected) {
     return (
-      <div className="relative">
+      <div ref={walletDropdownRootRef} className="relative">
         <button
+          type="button"
           onClick={() => setShowDropdown(!showDropdown)}
           className="bg-theme-secondary hover:bg-theme-tertiary text-theme-primary px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2 border border-theme"
         >
@@ -102,7 +111,7 @@ const WalletConnect = () => {
         </button>
 
         {showDropdown && (
-          <div className="dropdown-menu-glass absolute right-0 mt-2 w-64 rounded-lg z-50">
+          <div className="dropdown-menu-glass absolute right-0 mt-2 w-64 rounded-lg z-[120]">
             <div className="p-4">
               {/* Account Info */}
               <div className="mb-4">
@@ -175,14 +184,6 @@ const WalletConnect = () => {
               </button>
             </div>
           </div>
-        )}
-
-        {/* Click outside to close dropdown */}
-        {showDropdown && (
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setShowDropdown(false)}
-          />
         )}
       </div>
     );

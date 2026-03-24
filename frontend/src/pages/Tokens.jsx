@@ -383,10 +383,6 @@ const Tokens = () => {
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
       </Helmet>
       <div className="relative min-h-screen">
-        {/* Animated Background */}
-        <div className="absolute inset-0 z-0"></div>
-
-        {/* Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           {/* Header */}
           <div className="mb-6 sm:mb-8">
@@ -400,13 +396,13 @@ const Tokens = () => {
 
           {/* Network Selection and Controls */}
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 border border-gray-700">
-            <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 sm:gap-4 mb-4">
-              <div className="flex items-center gap-2 w-full sm:w-auto">
-                <span className="text-gray-300 text-sm sm:text-base">Network:</span>
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 min-w-0 w-full md:flex-1 md:max-w-xl">
+                <span className="text-gray-300 text-sm sm:text-base shrink-0">Network:</span>
                 <select
                   value={selectedChain}
                   onChange={(e) => handleNetworkChange(parseInt(e.target.value))}
-                  className="flex-1 sm:flex-none bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+                  className="w-full sm:min-w-[12rem] sm:max-w-md bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
                 >
                   {Object.entries(NETWORKS).map(([id, network]) => (
                     <option key={id} value={id}>
@@ -415,19 +411,20 @@ const Tokens = () => {
                   ))}
                 </select>
               </div>
-              
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+
+              <div className="flex flex-wrap items-stretch sm:items-center gap-2 w-full md:w-auto md:justify-end md:shrink-0">
                 <button
+                  type="button"
                   onClick={syncWithWallet}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg transition-colors text-sm sm:text-base"
+                  className="flex-1 min-[400px]:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition-colors text-sm sm:text-base whitespace-nowrap"
                 >
                   Sync with Wallet
                 </button>
-                
                 <button
+                  type="button"
                   onClick={scanTokens}
                   disabled={isScanning}
-                  className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white px-4 sm:px-6 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
+                  className="flex-1 min-[400px]:flex-none bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white px-4 sm:px-6 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base whitespace-nowrap"
                 >
                   {isScanning ? (
                     <>
@@ -465,8 +462,8 @@ const Tokens = () => {
             </div>
 
             {/* Quick Search */}
-            <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 sm:gap-4 mb-4">
-              <div className="flex-1 min-w-0 w-full sm:w-auto">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch sm:gap-4 mb-4">
+              <div className="flex-1 min-w-0 w-full">
                 <label htmlFor="tokens-search" className="sr-only">Search by name, symbol, or address</label>
                 <input
                   id="tokens-search"
@@ -480,15 +477,16 @@ const Tokens = () => {
                   }}
                   onKeyPress={handleSearchKeyPress}
                   placeholder="Search by name, symbol, or address..."
-                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 sm:px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 sm:px-4 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
                 />
               </div>
-              
-              <div className="flex gap-2 w-full sm:w-auto">
+
+              <div className="flex flex-row flex-wrap items-stretch gap-2 w-full sm:w-auto sm:shrink-0">
                 <button
+                  type="button"
                   onClick={searchToken}
                   disabled={searching || !searchAddress.trim()}
-                  className="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white px-4 sm:px-6 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
+                  className="flex-1 min-w-[8rem] sm:flex-none sm:min-w-[10rem] bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white px-4 sm:px-6 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
                 >
                   {searching ? (
                     <>
@@ -499,11 +497,11 @@ const Tokens = () => {
                     'Search Address'
                   )}
                 </button>
-                
                 {searchedToken && (
                   <button
+                    type="button"
                     onClick={clearSearch}
-                    className="bg-gray-600 hover:bg-gray-700 text-white px-3 sm:px-4 py-2 rounded-lg transition-colors text-sm sm:text-base"
+                    className="shrink-0 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2.5 rounded-lg transition-colors text-sm sm:text-base"
                   >
                     Clear
                   </button>
@@ -655,21 +653,22 @@ const Tokens = () => {
                 return (
                 <div
                   key={index}
-                  className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700 hover:border-purple-500 transition-all duration-200 cursor-pointer group relative"
+                  className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 pt-12 sm:pt-14 pr-12 sm:pr-14 border border-gray-700 hover:border-purple-500 transition-all duration-200 cursor-pointer group relative"
                   onClick={() => openTokenDetails(token)}
                 >
-                  {/* Favorite & Watchlist Badges */}
-                  <div className="absolute top-2 right-2 flex space-x-2">
+                  {/* Favorite & watchlist — top-right, clear of title/score */}
+                  <div className="absolute top-3 right-3 flex items-center gap-1 z-10">
                     {isFavorite && (
-                      <div className="p-1">
+                      <div className="p-1" aria-hidden>
                         <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                         </svg>
                       </div>
                     )}
                     <button
+                      type="button"
                       onClick={handleWatchlistToggle}
-                      className={`p-1 rounded transition-colors ${isWatched ? 'bg-blue-500/20' : 'hover:bg-gray-700'}`}
+                      className={`p-1.5 rounded-md transition-colors ${isWatched ? 'bg-blue-500/20' : 'hover:bg-gray-700'}`}
                       title={isWatched ? 'Remove from watchlist' : 'Add to watchlist'}
                     >
                       <svg className={`w-5 h-5 ${isWatched ? 'text-blue-400 fill-current' : 'text-gray-400'}`} fill={isWatched ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
@@ -678,20 +677,18 @@ const Tokens = () => {
                       </svg>
                     </button>
                   </div>
-                  <div className="flex items-start justify-between mb-3 sm:mb-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 sm:w-10 h-8 sm:h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base">
-                        {token.symbol?.charAt(0) || 'T'}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h3 className="text-white font-semibold text-sm sm:text-base truncate">{token.name}</h3>
-                        <p className="text-purple-400 font-mono text-xs sm:text-sm">{token.symbol}</p>
-                      </div>
+                  <div className="flex items-start gap-3 mb-3 sm:mb-4 min-w-0">
+                    <div className="w-8 sm:w-10 h-8 sm:h-10 shrink-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base">
+                      {token.symbol?.charAt(0) || 'T'}
                     </div>
-                    <div className="text-right">
-                      <span className="inline-block bg-green-600 text-white text-xs px-2 py-1 rounded-full">
-                        {token.trendingScore}
-                      </span>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-white font-semibold text-sm sm:text-base truncate pr-1">{token.name}</h3>
+                      <p className="text-purple-400 font-mono text-xs sm:text-sm truncate">{token.symbol}</p>
+                      <div className="mt-2">
+                        <span className="inline-block bg-green-600 text-white text-xs px-2 py-1 rounded-full tabular-nums">
+                          Score {token.trendingScore}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -744,6 +741,7 @@ const Tokens = () => {
                 Try scanning for tokens or searching for a specific token address.
               </p>
               <button
+                type="button"
                 onClick={scanTokens}
                 className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors text-sm sm:text-base"
               >
@@ -761,6 +759,7 @@ const Tokens = () => {
                 Try adjusting your filters or clearing them to see all tokens.
               </p>
               <button
+                type="button"
                 onClick={clearFilters}
                 className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors text-sm sm:text-base"
               >
