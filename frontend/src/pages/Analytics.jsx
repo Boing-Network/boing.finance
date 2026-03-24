@@ -1335,22 +1335,22 @@ export default function Analytics() {
                 {activeSection === 'trending' && (
                   <div id="analytics-panel-trending" role="tabpanel" aria-labelledby="tab-trending" className="space-y-6">
                     <div
-                    className="rounded-2xl shadow-xl p-6"
-                    style={{
-                      backgroundColor: 'var(--bg-card)',
-                      border: '1px solid var(--border-color)',
-                    }}
-                  >
-                      <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-bold text-white">Trending Tokens</h2>
-                        <div className="flex items-center gap-3">
-                          <label htmlFor="network-selector" className="text-sm text-gray-300">Network:</label>
+                      className="rounded-2xl shadow-xl p-4 sm:p-6"
+                      style={{
+                        backgroundColor: 'var(--bg-card)',
+                        border: '1px solid var(--border-color)',
+                      }}
+                    >
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+                        <h2 className="text-xl sm:text-2xl font-bold text-white shrink-0">Trending Tokens</h2>
+                        <div className="flex flex-col min-[480px]:flex-row min-[480px]:items-center gap-2 sm:gap-3 w-full sm:w-auto min-w-0">
+                          <label htmlFor="network-selector" className="text-sm text-gray-300 shrink-0">Network:</label>
                           <select
                             id="network-selector"
                             name="network-selector"
                             value={selectedNetwork}
                             onChange={(e) => setSelectedNetwork(e.target.value)}
-                            className="px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500"
+                            className="w-full sm:w-auto sm:min-w-[14rem] px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500 text-sm"
                           >
                             <option value="all">All Networks (CoinGecko)</option>
                             <option value="1">Ethereum</option>

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { useCloseOnPointerOutside } from '../hooks/useCloseOnPointerOutside';
 import { useWallet } from '../contexts/WalletContext';
 import { getMainnetNetworks, getTestnetNetworks } from '../config/networks';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
@@ -6,10 +7,17 @@ import { ChevronDownIcon } from '@heroicons/react/24/outline';
 const NetworkSelector = () => {
   const { isConnected, chainId, switchNetwork, getCurrentNetwork } = useWallet();
   const [showDropdown, setShowDropdown] = useState(false);
+  const networkDropdownRootRef = useRef(null);
 
   const currentNetwork = getCurrentNetwork();
   const mainnetNetworks = getMainnetNetworks();
   const testnetNetworks = getTestnetNetworks();
+
+  useCloseOnPointerOutside(
+    showDropdown,
+    (node) => Boolean(networkDropdownRootRef.current?.contains(node)),
+    () => setShowDropdown(false)
+  );
 
   const handleNetworkSwitch = async (networkChainId) => {
     if (!isConnected) {
@@ -53,8 +61,9 @@ const NetworkSelector = () => {
   }
 
   return (
-    <div className="relative">
+    <div ref={networkDropdownRootRef} className="relative">
       <button
+        type="button"
         onClick={() => setShowDropdown(!showDropdown)}
         className="bg-theme-secondary hover:bg-theme-tertiary text-theme-primary px-3 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2 border border-theme"
       >
@@ -64,7 +73,7 @@ const NetworkSelector = () => {
       </button>
 
       {showDropdown && (
-        <div className="dropdown-menu-glass absolute left-0 mt-2 w-72 rounded-lg z-50 max-h-96 overflow-y-auto">
+        <div className="dropdown-menu-glass absolute left-0 mt-2 w-72 rounded-lg z-[120] max-h-96 overflow-y-auto">
           <div className="p-2">
             {/* Mainnet Networks */}
             {mainnetNetworks.length > 0 && (
@@ -129,14 +138,6 @@ const NetworkSelector = () => {
             )}
           </div>
         </div>
-      )}
-
-      {/* Click outside to close dropdown */}
-      {showDropdown && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setShowDropdown(false)}
-        />
       )}
     </div>
   );
