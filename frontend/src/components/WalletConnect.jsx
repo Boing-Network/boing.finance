@@ -82,8 +82,8 @@ const WalletConnect = () => {
 
   if (isConnecting) {
     return (
-      <button className="btn-primary px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
-        <div className="w-4 h-4 border-2 border-[var(--bg-primary)] border-t-transparent rounded-full animate-spin"></div>
+      <button type="button" className="btn-wallet-connect px-4 py-2 rounded-lg flex items-center space-x-2">
+        <div className="w-4 h-4 border-2 border-[var(--bg-primary)] border-t-transparent rounded-full animate-spin" />
         <span>Connecting...</span>
       </button>
     );
@@ -102,7 +102,7 @@ const WalletConnect = () => {
         </button>
 
         {showDropdown && (
-          <div className="absolute right-0 mt-2 w-64 bg-theme-card rounded-lg shadow-lg border border-theme z-50">
+          <div className="dropdown-menu-glass absolute right-0 mt-2 w-64 rounded-lg z-50">
             <div className="p-4">
               {/* Account Info */}
               <div className="mb-4">
@@ -191,8 +191,9 @@ const WalletConnect = () => {
   return (
     <>
       <button
+        type="button"
         onClick={handleConnect}
-        className="btn-primary px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+        className="btn-wallet-connect px-4 py-2 rounded-lg flex items-center space-x-2"
       >
         <WalletIcon className="w-4 h-4" />
         <span>Connect Wallet</span>

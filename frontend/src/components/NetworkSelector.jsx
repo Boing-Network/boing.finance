@@ -64,7 +64,7 @@ const NetworkSelector = () => {
       </button>
 
       {showDropdown && (
-        <div className="absolute left-0 mt-2 w-72 bg-theme-card rounded-lg shadow-lg border border-theme z-50 max-h-96 overflow-y-auto">
+        <div className="dropdown-menu-glass absolute left-0 mt-2 w-72 rounded-lg z-50 max-h-96 overflow-y-auto">
           <div className="p-2">
             {/* Mainnet Networks */}
             {mainnetNetworks.length > 0 && (

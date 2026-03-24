@@ -342,13 +342,7 @@ function AppContent() {
               {isMediumNavOpen && (
                 <>
                   <div className="fixed inset-0 z-40" aria-hidden="true" onClick={() => setIsMediumNavOpen(false)} />
-                  <div
-                    className="absolute left-0 top-full mt-1 z-50 w-72 max-h-[80vh] overflow-y-auto rounded-lg border shadow-xl"
-                    style={{
-                      background: 'linear-gradient(to bottom, var(--bg-secondary), var(--bg-tertiary))',
-                      borderColor: 'var(--border-color)'
-                    }}
-                  >
+                  <div className="dropdown-menu-glass-gradient-v absolute left-0 top-full mt-1 z-50 w-72 max-h-[80vh] overflow-y-auto rounded-lg">
                     <MediumNavPanel navigation={memoizedNavigation} onNavigate={() => setIsMediumNavOpen(false)} comingSoon={comingSoon} />
                   </div>
                 </>
@@ -437,14 +431,10 @@ function AppContent() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-border backdrop-blur-sm shadow-lg" style={{
-            background: 'linear-gradient(to right, var(--bg-secondary), var(--bg-tertiary), var(--bg-secondary))'
-          }}>
+          <div className="dropdown-menu-glass-gradient-h md:hidden border-t border-border shadow-lg">
             <div className="px-4 py-3 space-y-3">
               {/* Trade & Deploy Section (merged Trading + Deployment) */}
-              <div className="rounded-lg p-3 border border-border" style={{
-                background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))'
-              }}>
+              <div className="dropdown-menu-glass-gradient-strip rounded-lg p-3 border border-border">
                 <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>Trade & Deploy</h3>
                 <div className="space-y-1">
                   {memoizedNavigation.tradeAndDeploy.map((item) => (
@@ -494,9 +484,7 @@ function AppContent() {
               </div>
 
               {/* Analytics Section */}
-              <div className="rounded-lg p-3 border border-border" style={{
-                background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))'
-              }}>
+              <div className="dropdown-menu-glass-gradient-strip rounded-lg p-3 border border-border">
                 <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>Analytics</h3>
                 <div className="space-y-1">
                   {memoizedNavigation.analytics.map((item) => (
@@ -546,9 +534,7 @@ function AppContent() {
               </div>
 
               {/* Governance Section */}
-              <div className="rounded-lg p-3 border border-border" style={{
-                background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))'
-              }}>
+              <div className="dropdown-menu-glass-gradient-strip rounded-lg p-3 border border-border">
                 <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>Governance</h3>
                 <div className="space-y-1">
                   {memoizedNavigation.governance.map((item) => (
@@ -570,9 +556,7 @@ function AppContent() {
               </div>
 
               {/* BOING Section */}
-              <div className="rounded-lg p-3 border border-border" style={{
-                background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))'
-              }}>
+              <div className="dropdown-menu-glass-gradient-strip rounded-lg p-3 border border-border">
                 <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>BOING</h3>
                 <div className="space-y-1">
                   {memoizedNavigation.boing.map((item) => (
@@ -600,14 +584,10 @@ function AppContent() {
                     setAiChatOpen(true);
                     closeMenu();
                   }}
-                  className="w-full text-left px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 border border-border"
-                  style={{
-                    color: 'var(--text-secondary)',
-                    background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
-                    borderColor: 'var(--border-color)'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
-                  onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+                  className="dropdown-menu-glass-gradient-strip w-full text-left px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 border border-border"
+                  style={{ color: 'var(--text-secondary)', borderColor: 'var(--border-color)' }}
+                  onMouseEnter={(e) => { e.target.style.color = 'var(--text-primary)'; }}
+                  onMouseLeave={(e) => { e.target.style.color = 'var(--text-secondary)'; }}
                 >
                   <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -619,35 +599,29 @@ function AppContent() {
                     setHistoryModalOpen(true);
                     closeMenu();
                   }}
-                  className="w-full text-left px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 border border-border"
-                  style={{
-                    color: 'var(--text-secondary)',
-                    background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
-                    borderColor: 'var(--border-color)'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
-                  onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+                  className="dropdown-menu-glass-gradient-strip w-full text-left px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 border border-border"
+                  style={{ color: 'var(--text-secondary)', borderColor: 'var(--border-color)' }}
+                  onMouseEnter={(e) => { e.target.style.color = 'var(--text-primary)'; }}
+                  onMouseLeave={(e) => { e.target.style.color = 'var(--text-secondary)'; }}
                 >
                   <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <span>Transaction History</span>
                 </button>
-                <div className="w-full text-left px-3 py-3 rounded-lg text-base font-medium flex items-center space-x-3 border border-border" style={{
-                  color: 'var(--text-secondary)',
-                  background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
-                  borderColor: 'var(--border-color)'
-                }}>
+                <div
+                  className="dropdown-menu-glass-gradient-strip w-full text-left px-3 py-3 rounded-lg text-base font-medium flex items-center space-x-3 border border-border"
+                  style={{ color: 'var(--text-secondary)', borderColor: 'var(--border-color)' }}
+                >
                   <span>Language</span>
                   <div className="ml-auto">
                     <LanguageSelector />
                   </div>
                 </div>
-                <div className="w-full text-left px-3 py-3 rounded-lg text-base font-medium flex items-center space-x-3 border border-border" style={{
-                  color: 'var(--text-secondary)',
-                  background: 'linear-gradient(to right, var(--bg-tertiary), var(--bg-secondary), var(--bg-tertiary))',
-                  borderColor: 'var(--border-color)'
-                }}>
+                <div
+                  className="dropdown-menu-glass-gradient-strip w-full text-left px-3 py-3 rounded-lg text-base font-medium flex items-center space-x-3 border border-border"
+                  style={{ color: 'var(--text-secondary)', borderColor: 'var(--border-color)' }}
+                >
                   <span>Theme</span>
                   <div className="ml-auto">
                     <ThemeToggle />
@@ -1499,12 +1473,10 @@ function ToolsDropdown({ isOpen, onToggle, onClose, onOpenHistory, onOpenDefi101
     <>
       <div className="fixed inset-0 z-[45]" aria-hidden="true" onClick={onClose} />
       <div
-        className="fixed w-52 backdrop-blur-sm rounded-xl shadow-xl z-[50]"
+        className="dropdown-menu-glass fixed w-52 rounded-xl z-[50]"
         style={{
           top: position.top,
           right: position.right,
-          backgroundColor: 'var(--bg-card)',
-          border: '1px solid var(--border-color)'
         }}
       >
         <div className="py-2 px-2">
@@ -1638,11 +1610,7 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
       {isOpen && (
         <>
           <div className="fixed inset-0 z-[45]" aria-hidden="true" onClick={onClose} />
-          <div className="absolute top-full left-0 mt-2 w-52 backdrop-blur-sm rounded-xl shadow-xl z-[50]" style={{
-          backgroundColor: 'var(--bg-card)',
-          border: '1px solid var(--border-color)',
-          boxShadow: '0 10px 25px -5px var(--shadow), 0 10px 10px -5px var(--shadow)'
-        }}>
+          <div className="dropdown-menu-glass absolute top-full left-0 mt-2 w-52 rounded-xl z-[50]">
           <div className="py-1.5">
             {items.map((item) => {
               // Explicit boolean checks with logging
