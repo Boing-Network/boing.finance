@@ -324,10 +324,10 @@ function AppContent() {
       
       {/* Header: nav + ticker (sticky so ticker sits in flow directly under nav) */}
       <header className="sticky top-0 z-30 flex flex-col flex-shrink-0 w-full min-w-0 bg-[var(--bg-primary)]">
-        <nav className="relative flex-shrink-0 w-full min-w-0 border-b border-border shadow-lg">
+        <nav className="relative flex-shrink-0 w-full min-w-0 border-b border-border shadow-lg" aria-label="Primary navigation">
           <ShootingStars dense />
-        <div className="w-full max-w-7xl mx-auto min-w-0 pl-2 pr-3 sm:pl-3 sm:pr-4 md:pl-4 md:pr-6 lg:max-[1149px]:pl-4 lg:max-[1149px]:pr-8 min-[1150px]:ps-[max(0px,env(safe-area-inset-left,0px))] min-[1150px]:pr-3 xl:pr-6 2xl:pr-8">
-          <div className="flex items-center justify-between gap-x-2 sm:gap-x-3 lg:gap-x-4 xl:gap-x-6 h-14 sm:h-16 min-w-0 min-[1150px]:flex-nowrap min-[1150px]:gap-x-2 min-[1150px]:max-xl:gap-x-1.5 xl:gap-x-4 2xl:gap-x-6">
+          {/* Full-width row (no max-w-7xl/mx-auto — avoids centering inset on logo) */}
+          <div className="flex w-full min-w-0 items-center justify-between gap-x-2 sm:gap-x-3 lg:gap-x-4 xl:gap-x-6 h-14 sm:h-16 min-[1150px]:flex-nowrap min-[1150px]:gap-x-2 min-[1150px]:max-xl:gap-x-1.5 xl:gap-x-4 2xl:gap-x-6 max-[1149px]:pl-2 max-[1149px]:pr-3 sm:max-[1149px]:pl-3 sm:max-[1149px]:pr-4 md:max-[1149px]:pl-4 md:max-[1149px]:pr-6 lg:max-[1149px]:pl-4 lg:max-[1149px]:pr-8 min-[1150px]:pl-[max(0px,env(safe-area-inset-left,0px))] min-[1150px]:pr-[max(0.75rem,env(safe-area-inset-right,0px))] xl:pr-[max(1.5rem,env(safe-area-inset-right,0px))] 2xl:pr-[max(2rem,env(safe-area-inset-right,0px))]">
             {/* Hamburger for nav items: 768px–1149px only (left side); hidden on mobile and desktop */}
             <div ref={mediumNavRef} className="hidden md:flex min-[1150px]:hidden items-center flex-shrink-0 relative">
               <button
@@ -355,7 +355,7 @@ function AppContent() {
               )}
             </div>
 
-            {/* Logo + wordmark — flush to content left edge at ≥1150px (pl-0 on shell) */}
+            {/* Logo + wordmark — first in row; shell has no mx-auto / max-w cap */}
             <div className="shrink-0 max-md:-ml-1 min-[1150px]:mr-1 min-[1150px]:max-xl:mr-0.5 xl:mr-2">
               <button
                 type="button"
@@ -369,7 +369,7 @@ function AppContent() {
 
             {/* Desktop: single-row nav (starts after logo) + right rail — flex-1 so nav never wraps to a second row */}
             <div className="hidden min-[1150px]:flex min-[1150px]:flex-1 min-[1150px]:min-w-0 min-[1150px]:items-center min-[1150px]:justify-between min-[1150px]:gap-1 min-[1150px]:max-xl:gap-1 xl:gap-3 2xl:gap-4 overflow-visible">
-              <nav className="flex flex-nowrap items-center justify-start gap-x-0.5 min-[1150px]:max-xl:gap-x-0.5 xl:gap-x-2 2xl:gap-x-3 min-w-0 flex-1 overflow-visible pr-1 min-[1150px]:max-xl:pr-1 xl:pr-2">
+              <div role="navigation" aria-label="Site sections" className="flex flex-nowrap items-center justify-start gap-x-0.5 min-[1150px]:max-xl:gap-x-0.5 xl:gap-x-2 2xl:gap-x-3 min-w-0 flex-1 overflow-visible pr-1 min-[1150px]:max-xl:pr-1 xl:pr-2">
                 <DropdownMenu label="Trade & Deploy" items={memoizedNavigation.tradeAndDeploy} isOpen={tradeAndDeployDropdownOpen}
                   onToggle={() => { const next = !tradeAndDeployDropdownOpen; setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setTradeAndDeployDropdownOpen(next); }}
                   onClose={() => setTradeAndDeployDropdownOpen(false)}
@@ -386,7 +386,7 @@ function AppContent() {
                   onToggle={() => { const next = !boingDropdownOpen; setTradeAndDeployDropdownOpen(false); setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setToolsDropdownOpen(false); setBoingDropdownOpen(next); }}
                   onClose={() => setBoingDropdownOpen(false)}
                 />
-              </nav>
+              </div>
               <div className="flex min-[1150px]:flex-nowrap min-[1150px]:items-center shrink-0 min-w-0 gap-1 min-[1150px]:max-xl:gap-1.5 xl:gap-2 2xl:gap-3 overflow-visible">
                 <div className="flex-shrink-0 relative">
                   <ToolsDropdown
@@ -432,7 +432,6 @@ function AppContent() {
               </button>
             </div>
           </div>
-        </div>
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
