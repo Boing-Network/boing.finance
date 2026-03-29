@@ -347,6 +347,17 @@ code, pre, .monospace {
   -webkit-backdrop-filter: none;
 }
 
+/* Navbar section menus (Trade, Analytics, …) + Tools — opaque secondary surface so labels/readouts aren’t lost on busy backgrounds */
+.dropdown-menu-glass-solid-nav {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  box-shadow:
+    0 16px 48px -14px color-mix(in srgb, black 58%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--border-color) 35%, transparent);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
 /* Muted primary action inside header dropdowns (not full neon .btn-primary) */
 .btn-dropdown-action {
   background: linear-gradient(

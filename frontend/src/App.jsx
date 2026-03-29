@@ -1486,7 +1486,7 @@ function ToolsDropdown({ isOpen, onToggle, onClose, onOpenHistory, onOpenDefi101
   const dropdownContent = isOpen && (
       <div
         ref={panelRef}
-        className="dropdown-menu-glass fixed w-52 rounded-xl z-[120]"
+        className="dropdown-menu-glass-solid-nav fixed w-52 rounded-xl z-[120]"
         style={{
           top: position.top,
           right: position.right,
@@ -1627,7 +1627,7 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
         </svg>
       </button>
       {isOpen && (
-          <div className="dropdown-menu-glass absolute top-full left-0 mt-2 w-52 rounded-xl z-[120]">
+          <div className="dropdown-menu-glass-solid-nav absolute top-full left-0 mt-2 w-52 rounded-xl z-[120]">
           <div className="py-1.5">
             {items.map((item) => {
               // Explicit boolean checks with logging
