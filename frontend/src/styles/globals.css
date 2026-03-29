@@ -392,6 +392,28 @@ code, pre, .monospace {
   filter: brightness(0.94);
 }
 
+/* Wallet modal primary CTA — dimmer than .btn-primary / header connect so “Connect with …” stays readable */
+.btn-wallet-modal-connect {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent-teal) 36%, var(--bg-card, var(--bg-secondary))),
+    color-mix(in srgb, var(--accent-cyan) 30%, var(--bg-card, var(--bg-secondary)))
+  );
+  color: var(--text-primary);
+  border: 1px solid color-mix(in srgb, var(--border-color) 80%, transparent);
+  box-shadow: 0 1px 8px color-mix(in srgb, var(--glow-cyan) 14%, transparent);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  transition: filter 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-wallet-modal-connect:hover:not(:disabled) {
+  filter: brightness(1.06);
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--glow-cyan) 22%, transparent);
+}
+.btn-wallet-modal-connect:active:not(:disabled) {
+  filter: brightness(0.96);
+}
+
 /* Gradient Text */
 .gradient-text {
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));

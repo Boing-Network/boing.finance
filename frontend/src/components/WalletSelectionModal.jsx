@@ -316,11 +316,11 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
             <button
               onClick={handleConnectSolana}
               disabled={isConnecting}
-              className="w-full btn-primary disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+              className="w-full btn-wallet-modal-connect disabled:!bg-neutral-700/90 disabled:!text-neutral-300 disabled:!shadow-none disabled:!border-neutral-600 disabled:cursor-not-allowed px-4 py-3 rounded-lg flex items-center justify-center space-x-2"
             >
               {isConnecting ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin opacity-80" />
                   <span>Connecting...</span>
                 </>
               ) : (
@@ -331,11 +331,11 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
             <button
               onClick={handleConnectEVM}
               disabled={isConnecting}
-              className="w-full btn-primary disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+              className="w-full btn-wallet-modal-connect disabled:!bg-neutral-700/90 disabled:!text-neutral-300 disabled:!shadow-none disabled:!border-neutral-600 disabled:cursor-not-allowed px-4 py-3 rounded-lg flex items-center justify-center space-x-2"
             >
               {isConnecting ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin opacity-80" />
                   <span>Connecting...</span>
                 </>
               ) : (
