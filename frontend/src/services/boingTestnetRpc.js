@@ -17,15 +17,27 @@ export function getBoingTestnetRpcUrl() {
   return normalizeRpcBaseUrl(fromConfig) || 'https://testnet-rpc.boing.network';
 }
 
+function boingRpcPostUrl() {
+  if (typeof window === 'undefined') {
+    return `${getBoingTestnetRpcUrl()}/`;
+  }
+  if (process.env.REACT_APP_BOING_TESTNET_RPC_DIRECT === '1') {
+    return `${getBoingTestnetRpcUrl()}/`;
+  }
+  return `${window.location.origin}/api/boing-rpc`;
+}
+
 /**
  * Low-level Boing JSON-RPC POST. See boing.network RPC-API-SPEC.md.
+ * In the browser, posts to same-origin `/api/boing-rpc` (Vite proxy in dev, Pages Function in prod)
+ * so CORS on the public node is not required.
  * @param {string} method
  * @param {unknown[]} [params]
  * @param {{ signal?: AbortSignal }} [options]
  * @returns {Promise<unknown>}
  */
 export async function boingJsonRpc(method, params = [], options = {}) {
-  const url = getBoingTestnetRpcUrl();
+  const url = boingRpcPostUrl();
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

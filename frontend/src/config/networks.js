@@ -170,7 +170,7 @@ export const NETWORKS = {
     ].filter(Boolean),
     explorer: 'https://boing.observer',
     chainId: 6913,
-    nativeCurrency: { name: 'Boing', symbol: 'BOING', decimals: 18 },
+    nativeCurrency: { name: 'Boing', symbol: 'BOING', decimals: 0 },
     blockTime: 2,
     gasLimit: 30000000,
     isTestnet: true,

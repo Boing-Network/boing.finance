@@ -42,6 +42,7 @@ const REACT_APP_DEFAULTS = [
   'REACT_APP_BLAST_RPC_URL',
   'REACT_APP_OPBNB_RPC_URL',
   'REACT_APP_MODE_RPC_URL',
+  'REACT_APP_BOING_TESTNET_RPC_DIRECT',
   'REACT_APP_INFURA_PROJECT_ID',
   'REACT_APP_INFURA_PROJECT_SECRET',
   'REACT_APP_WEB3_STORAGE_API_KEY',
@@ -95,6 +96,12 @@ export default defineConfig(({ mode }) => ({
   server: {
     port: 3000,
     proxy: {
+      '/api/boing-rpc': {
+        target: 'https://testnet-rpc.boing.network',
+        changeOrigin: true,
+        secure: true,
+        rewrite: () => '/',
+      },
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true,

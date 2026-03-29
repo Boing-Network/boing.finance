@@ -1032,7 +1032,9 @@ export const WalletProvider = ({ children }) => {
       await new Promise(resolve => setTimeout(resolve, 100));
       
       const balance = await provider.getBalance(account);
-      return ethers.formatEther(balance);
+      const net = chainId != null ? getNetworkByChainId(chainId) : null;
+      const decimals = net?.nativeCurrency?.decimals ?? 18;
+      return ethers.formatUnits(balance, decimals);
     } catch (error) {
       console.error('Error getting balance:', error);
       // Don't show error toast for network change errors, just return null
@@ -1042,7 +1044,9 @@ export const WalletProvider = ({ children }) => {
         try {
           await new Promise(resolve => setTimeout(resolve, 1000));
           const balance = await provider.getBalance(account);
-          return ethers.formatEther(balance);
+          const net = chainId != null ? getNetworkByChainId(chainId) : null;
+          const decimals = net?.nativeCurrency?.decimals ?? 18;
+          return ethers.formatUnits(balance, decimals);
         } catch (retryError) {
           console.log('❌ Balance fetch retry failed:', retryError);
           return null;

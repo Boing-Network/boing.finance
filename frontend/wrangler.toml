@@ -16,4 +16,7 @@ REACT_APP_BACKEND_URL = "https://boing-api-staging.nico-chikuji.workers.dev"
 # NOTE: For production, use Cloudflare Pages environment variables instead of hardcoding here
 [env.production.vars]
 REACT_APP_ENV = "production"
-REACT_APP_BACKEND_URL = "https://boing-api-prod.nico-chikuji.workers.dev" 
+REACT_APP_BACKEND_URL = "https://boing-api-prod.nico-chikuji.workers.dev"
+
+# Optional: Pages Function `api/boing-rpc` upstream (bind as plain var / secret in dashboard if needed).
+# BOING_TESTNET_RPC_URL = "https://testnet-rpc.boing.network"
