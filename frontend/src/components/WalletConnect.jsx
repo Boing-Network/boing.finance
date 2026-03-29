@@ -111,7 +111,7 @@ const WalletConnect = () => {
         </button>
 
         {showDropdown && (
-          <div className="dropdown-menu-glass absolute right-0 mt-2 w-64 rounded-lg z-[120]">
+          <div className="dropdown-menu-glass-solid absolute right-0 mt-2 w-64 rounded-lg z-[120]">
             <div className="p-4">
               {/* Account Info */}
               <div className="mb-4">

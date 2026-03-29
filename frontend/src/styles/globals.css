@@ -336,6 +336,15 @@ code, pre, .monospace {
   box-shadow: 0 10px 28px -6px color-mix(in srgb, var(--shadow) 45%, transparent);
 }
 
+/* Account / wallet dropdown — opaque panel (readable over busy page backgrounds) */
+.dropdown-menu-glass-solid {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow:
+    0 14px 40px -12px color-mix(in srgb, black 50%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--border-color) 25%, transparent);
+}
+
 .dropdown-menu-glass-gradient-v {
   background: linear-gradient(
     to bottom,
