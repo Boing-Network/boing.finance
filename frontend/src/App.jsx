@@ -326,8 +326,8 @@ function AppContent() {
       <header className="sticky top-0 z-30 flex flex-col flex-shrink-0 w-full min-w-0 bg-[var(--bg-primary)]">
         <nav className="relative flex-shrink-0 w-full min-w-0 border-b border-border shadow-lg">
           <ShootingStars dense />
-        <div className="w-full max-w-7xl mx-auto pl-2 pr-3 sm:pl-3 sm:pr-4 md:pl-4 md:pr-6 lg:pl-4 lg:pr-8 xl:pl-6 xl:pr-8 min-w-0 min-[1150px]:px-3 xl:px-8">
-          <div className="flex items-center justify-between gap-x-2 sm:gap-x-3 lg:gap-x-4 xl:gap-x-6 h-14 sm:h-16 min-w-0 min-[1150px]:grid min-[1150px]:grid-cols-[auto_minmax(0,1fr)_auto] min-[1150px]:items-center min-[1150px]:gap-x-2 xl:gap-x-4 2xl:gap-x-6 min-[1150px]:justify-items-stretch">
+        <div className="w-full max-w-7xl mx-auto pl-2 pr-3 sm:pl-3 sm:pr-4 md:pl-4 md:pr-6 lg:pl-4 lg:pr-8 xl:pl-6 xl:pr-8 min-w-0 min-[1150px]:pl-3 min-[1150px]:pr-3 xl:pl-6 xl:pr-8">
+          <div className="flex items-center justify-between gap-x-2 sm:gap-x-3 lg:gap-x-4 xl:gap-x-6 h-14 sm:h-16 min-w-0 min-[1150px]:flex-nowrap min-[1150px]:gap-x-2 xl:gap-x-4 2xl:gap-x-6">
             {/* Hamburger for nav items: 768px–1149px only (left side); hidden on mobile and desktop */}
             <div ref={mediumNavRef} className="hidden md:flex min-[1150px]:hidden items-center flex-shrink-0 relative">
               <button
@@ -355,20 +355,21 @@ function AppContent() {
               )}
             </div>
 
-            {/* Logo - tight to left edge; grid col 1 at 1150+ */}
-            <div className="flex-shrink-0 -ml-1 min-[1150px]:-ml-0 min-[1150px]:justify-self-start min-[1150px]:z-10">
+            {/* Logo + wordmark — pinned to the start of the bar (desktop: true left cluster) */}
+            <div className="flex-shrink-0 -ml-1 min-[1150px]:ml-0 min-[1150px]:mr-1 xl:mr-2">
               <button
-                onClick={() => window.location.href = '/'}
-                className="flex items-center gap-1.5 font-bold text-xl whitespace-nowrap"
+                type="button"
+                onClick={() => { window.location.href = '/'; }}
+                className="flex items-center gap-1.5 font-bold text-xl whitespace-nowrap text-left"
                 style={{ color: 'var(--text-primary)' }}
               >
                 <Logo size={36} showText={true} showComic={false} className="shrink-0" style={{ filter: 'drop-shadow(0 0 8px var(--glow-cyan))' }} />
               </button>
             </div>
 
-            {/* Desktop Navigation — grid col 2: minmax(0,1fr) + wrap so center never smushes logo */}
-            <div className="hidden min-[1150px]:flex min-[1150px]:items-center min-[1150px]:justify-center min-[1150px]:w-full min-[1150px]:min-w-0 min-[1150px]:max-w-full min-[1150px]:justify-self-center overflow-visible">
-              <nav className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1 min-[1150px]:max-xl:gap-x-1 xl:gap-x-2 2xl:gap-x-3 min-w-0 max-w-full">
+            {/* Desktop: single-row nav (starts after logo) + right rail — flex-1 so nav never wraps to a second row */}
+            <div className="hidden min-[1150px]:flex min-[1150px]:flex-1 min-[1150px]:min-w-0 min-[1150px]:items-center min-[1150px]:justify-between min-[1150px]:gap-2 xl:gap-4 overflow-visible">
+              <nav className="flex flex-nowrap items-center justify-start gap-x-1 min-[1150px]:max-xl:gap-x-1 xl:gap-x-2 2xl:gap-x-3 min-w-0 flex-1 overflow-visible pr-2">
                 <DropdownMenu label="Trade & Deploy" items={memoizedNavigation.tradeAndDeploy} isOpen={tradeAndDeployDropdownOpen}
                   onToggle={() => { const next = !tradeAndDeployDropdownOpen; setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setTradeAndDeployDropdownOpen(next); }}
                   onClose={() => setTradeAndDeployDropdownOpen(false)}
@@ -386,23 +387,21 @@ function AppContent() {
                   onClose={() => setBoingDropdownOpen(false)}
                 />
               </nav>
-            </div>
-
-            {/* Desktop Right — grid col 3; compact gaps on mid-width desktop */}
-            <div className="hidden min-[1150px]:flex min-[1150px]:flex-nowrap min-[1150px]:items-center min-[1150px]:justify-self-end min-[1150px]:shrink-0 min-[1150px]:min-w-0 gap-1 min-[1150px]:max-xl:gap-1.5 xl:gap-2 2xl:gap-3 overflow-visible">
-              <div className="flex-shrink-0 relative">
-                <ToolsDropdown
-                isOpen={toolsDropdownOpen}
-                onToggle={() => { const next = !toolsDropdownOpen; setTradeAndDeployDropdownOpen(false); setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(next); }}
-                onClose={() => setToolsDropdownOpen(false)}
-                onOpenHistory={() => { setHistoryModalOpen(true); setToolsDropdownOpen(false); }}
-                onOpenDefi101={() => { setDefi101Open(true); setToolsDropdownOpen(false); }}
-              />
-              </div>
-              <div className="flex items-center gap-1 min-[1150px]:max-xl:gap-1.5 xl:gap-2 2xl:gap-3 border-l pl-1.5 min-[1150px]:max-xl:pl-2 xl:pl-3 shrink-0 min-w-0" style={{ borderColor: 'var(--border-color)' }}>
-                <div className="flex-shrink-0"><ChainTypeSelector /></div>
-                <div className="flex-shrink-0"><NetworkSelector /></div>
-                <div className="flex-shrink-0"><WalletConnect /></div>
+              <div className="flex min-[1150px]:flex-nowrap min-[1150px]:items-center shrink-0 min-w-0 gap-1 min-[1150px]:max-xl:gap-1.5 xl:gap-2 2xl:gap-3 overflow-visible">
+                <div className="flex-shrink-0 relative">
+                  <ToolsDropdown
+                    isOpen={toolsDropdownOpen}
+                    onToggle={() => { const next = !toolsDropdownOpen; setTradeAndDeployDropdownOpen(false); setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(next); }}
+                    onClose={() => setToolsDropdownOpen(false)}
+                    onOpenHistory={() => { setHistoryModalOpen(true); setToolsDropdownOpen(false); }}
+                    onOpenDefi101={() => { setDefi101Open(true); setToolsDropdownOpen(false); }}
+                  />
+                </div>
+                <div className="flex items-center gap-1 min-[1150px]:max-xl:gap-1.5 xl:gap-2 2xl:gap-3 border-l pl-1.5 min-[1150px]:max-xl:pl-2 xl:pl-3 shrink-0 min-w-0" style={{ borderColor: 'var(--border-color)' }}>
+                  <div className="flex-shrink-0"><ChainTypeSelector /></div>
+                  <div className="flex-shrink-0"><NetworkSelector /></div>
+                  <div className="flex-shrink-0"><WalletConnect /></div>
+                </div>
               </div>
             </div>
 
