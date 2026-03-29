@@ -66,10 +66,10 @@ const NetworkSelector = () => {
       <button
         type="button"
         onClick={() => setShowDropdown(!showDropdown)}
-        className="bg-theme-secondary hover:bg-theme-tertiary text-theme-primary px-3 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2 border border-theme"
+        className="bg-theme-secondary hover:bg-theme-tertiary text-theme-primary px-2 py-2 min-[1150px]:max-xl:px-2 xl:px-3 rounded-lg font-medium transition-colors flex items-center gap-1.5 xl:gap-2 border border-theme max-w-[min(100%,11rem)] min-[1150px]:max-xl:max-w-[9.5rem] xl:max-w-[14rem] 2xl:max-w-none min-w-0"
       >
-        <span className="text-lg">{getNetworkIcon(currentNetwork)}</span>
-        <span className="text-sm">{currentNetwork?.name || 'Unknown Network'}</span>
+        <span className="text-lg shrink-0">{getNetworkIcon(currentNetwork)}</span>
+        <span className="text-xs min-[1150px]:max-xl:text-xs xl:text-sm truncate min-w-0">{currentNetwork?.name || 'Unknown Network'}</span>
         <ChevronDownIcon className="w-3 h-3" />
       </button>
 

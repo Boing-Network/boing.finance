@@ -20,7 +20,7 @@ export default function ChainTypeSelector() {
           <button
             key={ct.id}
             onClick={() => setChainType(ct.id)}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+            className={`px-2 py-1.5 min-[1150px]:max-xl:px-2 xl:px-3 rounded-md text-xs min-[1150px]:max-xl:text-xs xl:text-sm font-medium transition-colors ${
               chainType === ct.id
                 ? 'bg-[var(--secondary-bg)] text-primary'
                 : 'hover:bg-white/5'
@@ -28,10 +28,10 @@ export default function ChainTypeSelector() {
             style={{
               color: chainType === ct.id ? 'var(--primary-color)' : 'var(--text-secondary)',
             }}
-            title={ct.networks}
+            title={`${ct.label} — ${ct.networks}`}
           >
-            <span className="mr-1">{ct.icon}</span>
-            {ct.label}
+            <span>{ct.icon}</span>
+            <span className="inline min-[1150px]:max-xl:hidden xl:inline">{ct.label}</span>
           </button>
         ))}
       </div>

@@ -103,11 +103,12 @@ const WalletConnect = () => {
         <button
           type="button"
           onClick={() => setShowDropdown(!showDropdown)}
-          className="bg-theme-secondary hover:bg-theme-tertiary text-theme-primary px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2 border border-theme"
+          className="bg-theme-secondary hover:bg-theme-tertiary text-theme-primary px-2.5 py-2 min-[1150px]:max-xl:px-2 xl:px-4 rounded-lg text-xs min-[1150px]:max-xl:text-xs xl:text-sm font-medium transition-colors flex items-center gap-1.5 xl:gap-2 border border-theme max-w-[min(100%,11rem)] min-[1150px]:max-xl:max-w-[9rem] xl:max-w-[13rem] 2xl:max-w-none min-w-0"
+          title={account || undefined}
         >
-          <WalletIcon className="w-4 h-4" />
-          <span>{formatAddress(account)}</span>
-          <ChevronDownIcon className="w-4 h-4" />
+          <WalletIcon className="w-4 h-4 shrink-0" />
+          <span className="truncate min-w-0">{formatAddress(account)}</span>
+          <ChevronDownIcon className="w-3.5 h-3.5 xl:w-4 xl:h-4 shrink-0" />
         </button>
 
         {showDropdown && (
