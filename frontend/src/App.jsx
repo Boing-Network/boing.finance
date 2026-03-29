@@ -31,6 +31,7 @@ import ProactiveTipsBanner from './components/ProactiveTipsBanner';
 import DeFi101Modal from './components/DeFi101Modal';
 import TickerBar from './components/TickerBar';
 import BoingTestnetStatusStrip from './components/BoingTestnetStatusStrip';
+import BoingNativeTokenPanel from './components/BoingNativeTokenPanel';
 import BoingAnimatedBackground, { getFinanceBackgroundVariant } from './components/BoingAnimatedBackground';
 import CinematicIntro, { shouldShowCinematicIntro } from './components/CinematicIntro';
 import { getPageVariant } from './utils/pageVariant';
@@ -651,6 +652,7 @@ function AppContent() {
         {/* Page Content with Error Boundary and Suspense — scroll container so Pillars/Tokenomics etc. are reachable */}
         <ErrorBoundary>
           <div className="relative z-10 flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden">
+            <BoingNativeTokenPanel />
             <Suspense fallback={<LoadingSpinner />}>
               <PageTransitionRoutes />
             </Suspense>
