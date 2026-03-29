@@ -49,6 +49,7 @@ const NetworkSelector = () => {
       81457: '💛', // Blast
       204: '🟡', // opBNB
       34443: '🟣', // Mode
+      6913: '🌀', // Boing Testnet
       11155111: '🧪', // Sepolia
       80001: '🧪', // Mumbai
       97: '🧪', // BSC Testnet

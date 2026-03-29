@@ -1,7 +1,14 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { ethers } from 'ethers';
 import { getNetworkByChainId, getWalletAddChainParams } from '../config/networks';
 import toast from 'react-hot-toast';
+import {
+  getWindowBoingProvider,
+  isBoingNamedProvider,
+  requestAccountsFromBoingCompatibleProvider,
+  getChainIdFromBoingCompatibleProvider,
+  switchToBoingTestnetInWallet
+} from '../utils/boingWalletDiscovery';
 
 const WalletContext = createContext();
 
@@ -16,6 +23,7 @@ export const useWallet = () => {
 };
 
 export const WalletProvider = ({ children }) => {
+  const activeEip1193ProviderRef = useRef(null);
   const [account, setAccount] = useState(null);
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
@@ -26,6 +34,11 @@ export const WalletProvider = ({ children }) => {
   const [lastErrorTime, setLastErrorTime] = useState(0);
   const [userDisconnected, setUserDisconnected] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+
+  const getActiveRawEip1193 = useCallback(() => {
+    if (typeof window === 'undefined') return null;
+    return activeEip1193ProviderRef.current || window.ethereum;
+  }, []);
 
   // Debounce error messages to prevent spam
   const showErrorWithDebounce = useCallback((message) => {
@@ -69,6 +82,7 @@ export const WalletProvider = ({ children }) => {
   // Define disconnectWallet first
   const disconnectWallet = useCallback(async () => {
     try {
+      activeEip1193ProviderRef.current = null;
       setAccount(null);
       setProvider(null);
       setSigner(null);
@@ -93,13 +107,16 @@ export const WalletProvider = ({ children }) => {
   }, [disconnectWallet]);
 
   const setupEventListeners = useCallback(() => {
-    if (typeof window !== 'undefined' && window.ethereum) {
-      window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-      window.ethereum.removeListener('chainChanged', handleChainChanged);
-      window.ethereum.removeListener('disconnect', handleDisconnect);
-      window.ethereum.on('accountsChanged', handleAccountsChanged);
-      window.ethereum.on('chainChanged', handleChainChanged);
-      window.ethereum.on('disconnect', handleDisconnect);
+    const raw = typeof window !== 'undefined'
+      ? (activeEip1193ProviderRef.current || window.ethereum)
+      : null;
+    if (raw && typeof raw.removeListener === 'function') {
+      raw.removeListener('accountsChanged', handleAccountsChanged);
+      raw.removeListener('chainChanged', handleChainChanged);
+      raw.removeListener('disconnect', handleDisconnect);
+      raw.on('accountsChanged', handleAccountsChanged);
+      raw.on('chainChanged', handleChainChanged);
+      raw.on('disconnect', handleDisconnect);
     }
   }, [handleAccountsChanged, handleChainChanged, handleDisconnect]);
 
@@ -135,61 +152,65 @@ export const WalletProvider = ({ children }) => {
         await new Promise(resolve => setTimeout(resolve, 100));
       }
 
+      const isBoingWallet =
+        provider === getWindowBoingProvider() ||
+        isBoingNamedProvider(provider);
+
       let detectedWalletType = 'unknown';
-      if (provider.isCoinbaseWallet) {
+      if (isBoingWallet) {
+        detectedWalletType = 'boingExpress';
+      } else if (provider.isCoinbaseWallet) {
         detectedWalletType = 'coinbase';
       } else if (provider.isMetaMask) {
         detectedWalletType = 'metamask';
       }
 
-      // Use eth_accounts for silent connection (doesn't prompt)
-      const accounts = await provider.request({
-        method: 'eth_accounts'
-      });
+      let accounts = await provider.request({ method: 'eth_accounts' });
 
       if (accounts.length === 0) {
-        // If no accounts, try requesting (will prompt)
-        const requestedAccounts = await provider.request({
-          method: 'eth_requestAccounts'
-        });
-        if (requestedAccounts.length === 0) {
-          throw new Error('No accounts found');
+        if (isBoingWallet) {
+          try {
+            accounts = await requestAccountsFromBoingCompatibleProvider(provider);
+          } catch {
+            accounts = [];
+          }
+        } else {
+          const requestedAccounts = await provider.request({
+            method: 'eth_requestAccounts'
+          });
+          if (requestedAccounts.length === 0) {
+            throw new Error('No accounts found');
+          }
+          accounts = requestedAccounts;
         }
-        const account = accountAddress || requestedAccounts[0];
-        const chainId = networkChainId || parseInt(await provider.request({ method: 'eth_chainId' }), 16);
-        const ethersProvider = new ethers.BrowserProvider(provider);
-        const signer = await ethersProvider.getSigner();
+      }
 
-        const network = getNetworkByChainId(chainId);
-        if (!network) {
-          showErrorWithDebounce(`Network with chain ID ${chainId} is not supported. Please switch to a supported network.`);
-          setIsConnecting(false);
-          return false;
-        }
-
-        setAccount(account);
-        setProvider(ethersProvider);
-        setSigner(signer);
-        setChainId(chainId);
-        setIsConnected(true);
-        setWalletType(detectedWalletType);
-
-        localStorage.setItem('walletConnected', 'true');
-        localStorage.setItem('walletType', detectedWalletType);
-        localStorage.removeItem('userDisconnected');
-
-        return true;
+      if (accounts.length === 0) {
+        throw new Error('No accounts found');
       }
 
       const account = accountAddress || accounts[0];
-      const chainId = networkChainId || parseInt(await provider.request({ method: 'eth_chainId' }), 16);
+      const chainId =
+        networkChainId ??
+        (isBoingWallet
+          ? await getChainIdFromBoingCompatibleProvider(provider)
+          : parseInt(await provider.request({ method: 'eth_chainId' }), 16));
 
-      const ethersProvider = new ethers.BrowserProvider(provider);
-      const signer = await ethersProvider.getSigner();
+      activeEip1193ProviderRef.current = provider;
+
+      let ethersProvider = null;
+      let signer = null;
+      try {
+        ethersProvider = new ethers.BrowserProvider(provider);
+        signer = await ethersProvider.getSigner();
+      } catch (e) {
+        console.warn('[WalletContext] Ethers BrowserProvider/getSigner unavailable:', e);
+      }
 
       const network = getNetworkByChainId(chainId);
       if (!network) {
         showErrorWithDebounce(`Network with chain ID ${chainId} is not supported. Please switch to a supported network.`);
+        activeEip1193ProviderRef.current = null;
         setIsConnecting(false);
         return false;
       }
@@ -205,6 +226,8 @@ export const WalletProvider = ({ children }) => {
       localStorage.setItem('walletType', detectedWalletType);
       localStorage.removeItem('userDisconnected');
 
+      setupEventListeners();
+
       return true;
 
     } catch (error) {
@@ -214,7 +237,7 @@ export const WalletProvider = ({ children }) => {
     } finally {
       setIsConnecting(false);
     }
-  }, [showErrorWithDebounce]);
+  }, [showErrorWithDebounce, setupEventListeners]);
 
   const checkWalletConnection = useCallback(async () => {
     // Don't check if already connected
@@ -251,6 +274,8 @@ export const WalletProvider = ({ children }) => {
       lastProvider = providers.metamask;
     } else if (lastWalletType === 'coinbase' && providers.coinbase) {
       lastProvider = providers.coinbase;
+    } else if (lastWalletType === 'boingExpress' && providers.boingExpress) {
+      lastProvider = providers.boingExpress;
     } else {
       // If we don't have a specific provider match, don't try to reconnect
       // This prevents Phantom from intercepting
@@ -319,10 +344,13 @@ export const WalletProvider = ({ children }) => {
     initWallet();
     
     return () => {
-      if (typeof window !== 'undefined' && window.ethereum) {
-        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-        window.ethereum.removeListener('chainChanged', handleChainChanged);
-        window.ethereum.removeListener('disconnect', handleDisconnect);
+      if (typeof window !== 'undefined') {
+        const raw = activeEip1193ProviderRef.current || window.ethereum;
+        if (raw && typeof raw.removeListener === 'function') {
+          raw.removeListener('accountsChanged', handleAccountsChanged);
+          raw.removeListener('chainChanged', handleChainChanged);
+          raw.removeListener('disconnect', handleDisconnect);
+        }
       }
     };
   }, [isInitialized, checkWalletConnection, handleAccountsChanged, handleChainChanged, handleDisconnect, setupEventListeners]);
@@ -331,8 +359,14 @@ export const WalletProvider = ({ children }) => {
     const providers = {
       metamask: null,
       coinbase: null,
-      phantom: null
+      phantom: null,
+      boingExpress: null
     };
+
+    const winBoing = getWindowBoingProvider();
+    if (winBoing) {
+      providers.boingExpress = winBoing;
+    }
 
     // Check if Phantom is installed (Phantom can inject into window.ethereum)
     const _isPhantomInstalled = typeof window !== 'undefined' && (
@@ -343,6 +377,9 @@ export const WalletProvider = ({ children }) => {
     // Check for multiple providers first
     if (typeof window !== 'undefined' && window.ethereum && window.ethereum.providers) {
       window.ethereum.providers.forEach(provider => {
+        if (isBoingNamedProvider(provider) && !providers.boingExpress) {
+          providers.boingExpress = provider;
+        }
         if (provider.isMetaMask && !provider.isCoinbaseWallet && !provider.isPhantom) {
           providers.metamask = provider;
         }
@@ -366,6 +403,9 @@ export const WalletProvider = ({ children }) => {
       }
       if (window.ethereum.isPhantom) {
         providers.phantom = window.ethereum;
+      }
+      if (isBoingNamedProvider(window.ethereum) && !providers.boingExpress) {
+        providers.boingExpress = window.ethereum;
       }
     }
 
@@ -435,6 +475,8 @@ export const WalletProvider = ({ children }) => {
       return providers.metamask;
     } else if (targetWalletType === 'coinbase') {
       return providers.coinbase;
+    } else if (targetWalletType === 'boingExpress') {
+      return providers.boingExpress || getWindowBoingProvider();
     }
     
     // Fallback to current ethereum provider
@@ -449,20 +491,23 @@ export const WalletProvider = ({ children }) => {
         throw new Error('No wallet provider provided');
       }
 
-      // Detect wallet type if not provided
+      const isBoingWallet =
+        ethereumProvider === getWindowBoingProvider() ||
+        isBoingNamedProvider(ethereumProvider) ||
+        walletType === 'boingExpress';
+
       let detectedWalletType = walletType || 'unknown';
-      if (!walletType) {
-        if (ethereumProvider.isCoinbaseWallet) {
+      if (!walletType || detectedWalletType === 'unknown') {
+        if (isBoingWallet) {
+          detectedWalletType = 'boingExpress';
+        } else if (ethereumProvider.isCoinbaseWallet) {
           detectedWalletType = 'coinbase';
         } else if (ethereumProvider.isMetaMask) {
           detectedWalletType = 'metamask';
         }
       }
 
-      // Request account access
-      const accounts = await ethereumProvider.request({
-        method: 'eth_requestAccounts'
-      });
+      const accounts = await requestAccountsFromBoingCompatibleProvider(ethereumProvider);
 
       if (accounts.length === 0) {
         throw new Error('No accounts found');
@@ -470,47 +515,62 @@ export const WalletProvider = ({ children }) => {
 
       const account = accounts[0];
       let chainId = targetChainId;
-      
+
       if (!chainId) {
-        chainId = parseInt(await ethereumProvider.request({ method: 'eth_chainId' }), 16);
+        chainId = await getChainIdFromBoingCompatibleProvider(ethereumProvider);
       } else {
-        // Switch to target network if different
-        const currentChainId = parseInt(await ethereumProvider.request({ method: 'eth_chainId' }), 16);
+        const currentChainId = await getChainIdFromBoingCompatibleProvider(ethereumProvider);
         if (currentChainId !== chainId) {
-          try {
-            await ethereumProvider.request({
-              method: 'wallet_switchEthereumChain',
-              params: [{ chainId: `0x${chainId.toString(16)}` }],
-            });
-          } catch (switchError) {
-            if (switchError.code === 4902) {
-              const addParams = getWalletAddChainParams(chainId);
-              if (addParams) {
-                await ethereumProvider.request({
-                  method: 'wallet_addEthereumChain',
-                  params: [addParams],
-                });
+          let switchedViaBoing = false;
+          if (chainId === 6913 && isBoingWallet) {
+            switchedViaBoing = await switchToBoingTestnetInWallet(ethereumProvider);
+          }
+          if (!switchedViaBoing) {
+            try {
+              await ethereumProvider.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: `0x${chainId.toString(16)}` }],
+              });
+            } catch (switchError) {
+              if (switchError.code === 4902) {
+                const addParams = getWalletAddChainParams(chainId);
+                if (addParams) {
+                  await ethereumProvider.request({
+                    method: 'wallet_addEthereumChain',
+                    params: [addParams],
+                  });
+                }
+              } else {
+                throw switchError;
               }
-            } else {
-              throw switchError;
             }
           }
+          chainId = await getChainIdFromBoingCompatibleProvider(ethereumProvider);
         }
       }
 
-      const provider = new ethers.BrowserProvider(ethereumProvider);
-      const signer = await provider.getSigner();
+      activeEip1193ProviderRef.current = ethereumProvider;
+
+      let ethersBrowserProvider = null;
+      let evmSigner = null;
+      try {
+        ethersBrowserProvider = new ethers.BrowserProvider(ethereumProvider);
+        evmSigner = await ethersBrowserProvider.getSigner();
+      } catch (e) {
+        console.warn('[WalletContext] Ethers BrowserProvider/getSigner unavailable:', e);
+      }
 
       const network = getNetworkByChainId(chainId);
       if (!network) {
         showErrorWithDebounce(`Network with chain ID ${chainId} is not supported. Please switch to a supported network.`);
+        activeEip1193ProviderRef.current = null;
         setIsConnecting(false);
         return false;
       }
 
       setAccount(account);
-      setProvider(provider);
-      setSigner(signer);
+      setProvider(ethersBrowserProvider);
+      setSigner(evmSigner);
       setChainId(chainId);
       setIsConnected(true);
       setWalletType(detectedWalletType);
@@ -519,6 +579,8 @@ export const WalletProvider = ({ children }) => {
       localStorage.setItem('walletConnected', 'true');
       localStorage.setItem('walletType', detectedWalletType);
       localStorage.removeItem('userDisconnected');
+
+      setupEventListeners();
 
       return true;
 
@@ -529,7 +591,7 @@ export const WalletProvider = ({ children }) => {
     } finally {
       setIsConnecting(false);
     }
-  }, [showErrorWithDebounce]);
+  }, [showErrorWithDebounce, setupEventListeners]);
 
   const connectWallet = async (accountAddress = null, networkChainId = null, forceReconnect = false) => {
     setIsConnecting(true);
@@ -567,42 +629,58 @@ export const WalletProvider = ({ children }) => {
         await new Promise(resolve => setTimeout(resolve, 100));
       }
 
-      // Detect wallet type from the provider
+      const isBoingWallet = isBoingNamedProvider(ethereumProvider);
+
       let detectedWalletType = 'unknown';
-      if (ethereumProvider.isCoinbaseWallet) {
+      if (isBoingWallet) {
+        detectedWalletType = 'boingExpress';
+      } else if (ethereumProvider.isCoinbaseWallet) {
         detectedWalletType = 'coinbase';
       } else if (ethereumProvider.isMetaMask) {
         detectedWalletType = 'metamask';
       }
 
-      // Request account access - this will show the approval dialog
-      const accounts = await ethereumProvider.request({
-        method: 'eth_requestAccounts'
-      });
+      const accounts = isBoingWallet
+        ? await requestAccountsFromBoingCompatibleProvider(ethereumProvider)
+        : await ethereumProvider.request({
+            method: 'eth_requestAccounts'
+          });
 
       if (accounts.length === 0) {
         throw new Error('No accounts found');
       }
 
       const account = accountAddress || accounts[0];
-      const chainId = networkChainId || parseInt(await ethereumProvider.request({ method: 'eth_chainId' }), 16);
+      const chainId =
+        networkChainId ??
+        (isBoingWallet
+          ? await getChainIdFromBoingCompatibleProvider(ethereumProvider)
+          : parseInt(await ethereumProvider.request({ method: 'eth_chainId' }), 16));
 
-      // Create provider and signer
-      const provider = new ethers.BrowserProvider(ethereumProvider);
-      const signer = await provider.getSigner();
+      activeEip1193ProviderRef.current = ethereumProvider;
+
+      let ethersBrowserProvider = null;
+      let evmSigner = null;
+      try {
+        ethersBrowserProvider = new ethers.BrowserProvider(ethereumProvider);
+        evmSigner = await ethersBrowserProvider.getSigner();
+      } catch (e) {
+        console.warn('[WalletContext] Ethers BrowserProvider/getSigner unavailable:', e);
+      }
 
       // Check if network is supported
       const network = getNetworkByChainId(chainId);
       if (!network) {
         showErrorWithDebounce(`Network with chain ID ${chainId} is not supported. Please switch to a supported network.`);
+        activeEip1193ProviderRef.current = null;
         setIsConnecting(false);
         return false;
       }
 
       // Update state
       setAccount(account);
-      setProvider(provider);
-      setSigner(signer);
+      setProvider(ethersBrowserProvider);
+      setSigner(evmSigner);
       setChainId(chainId);
       setIsConnected(true);
       setWalletType(detectedWalletType);
@@ -612,7 +690,14 @@ export const WalletProvider = ({ children }) => {
       localStorage.setItem('walletType', detectedWalletType);
       localStorage.removeItem('userDisconnected'); // Clear disconnection flag
 
-      const walletName = detectedWalletType === 'coinbase' ? 'Coinbase Wallet' : 'MetaMask';
+      setupEventListeners();
+
+      const walletName =
+        detectedWalletType === 'coinbase'
+          ? 'Coinbase Wallet'
+          : detectedWalletType === 'boingExpress'
+            ? 'Boing Express'
+            : 'MetaMask';
       toast.success(`Connected to ${network.name} via ${walletName}`);
       return true;
 
@@ -676,12 +761,16 @@ export const WalletProvider = ({ children }) => {
         // Silent error handling
       }
 
+      const isBoingWallet = isBoingNamedProvider(ethereumProvider);
+
       // Method 2: Force new account request
       let accounts;
       try {
-        accounts = await ethereumProvider.request({
-          method: 'eth_requestAccounts'
-        });
+        accounts = isBoingWallet
+          ? await requestAccountsFromBoingCompatibleProvider(ethereumProvider)
+          : await ethereumProvider.request({
+              method: 'eth_requestAccounts'
+            });
       } catch (requestError) {
         // If eth_requestAccounts fails, try a different approach
         if (requestError.code === 4001) {
@@ -696,23 +785,35 @@ export const WalletProvider = ({ children }) => {
       }
 
       const account = accounts[0];
-      const chainId = parseInt(await ethereumProvider.request({ method: 'eth_chainId' }), 16);
+      const chainId = isBoingWallet
+        ? await getChainIdFromBoingCompatibleProvider(ethereumProvider)
+        : parseInt(await ethereumProvider.request({ method: 'eth_chainId' }), 16);
 
-      // Create provider and signer
-      const provider = new ethers.BrowserProvider(ethereumProvider);
-      const signer = await provider.getSigner();
+      activeEip1193ProviderRef.current = ethereumProvider;
+
+      let ethersBrowserProvider = null;
+      let evmSigner = null;
+      try {
+        ethersBrowserProvider = new ethers.BrowserProvider(ethereumProvider);
+        evmSigner = await ethersBrowserProvider.getSigner();
+      } catch (e) {
+        console.warn('[WalletContext] Ethers BrowserProvider/getSigner unavailable:', e);
+      }
 
       // Check if network is supported
       const network = getNetworkByChainId(chainId);
       if (!network) {
         showErrorWithDebounce(`Network with chain ID ${chainId} is not supported. Please switch to a supported network.`);
+        activeEip1193ProviderRef.current = null;
         setIsConnecting(false);
         return false;
       }
 
       // Detect wallet type
       let detectedWalletType = 'unknown';
-      if (ethereumProvider.isCoinbaseWallet) {
+      if (isBoingWallet) {
+        detectedWalletType = 'boingExpress';
+      } else if (ethereumProvider.isCoinbaseWallet) {
         detectedWalletType = 'coinbase';
       } else if (ethereumProvider.isMetaMask) {
         detectedWalletType = 'metamask';
@@ -720,8 +821,8 @@ export const WalletProvider = ({ children }) => {
 
       // Update state
       setAccount(account);
-      setProvider(provider);
-      setSigner(signer);
+      setProvider(ethersBrowserProvider);
+      setSigner(evmSigner);
       setChainId(chainId);
       setIsConnected(true);
       setWalletType(detectedWalletType);
@@ -732,7 +833,14 @@ export const WalletProvider = ({ children }) => {
       localStorage.setItem('walletType', detectedWalletType);
       localStorage.removeItem('userDisconnected');
 
-      const walletName = detectedWalletType === 'coinbase' ? 'Coinbase Wallet' : 'MetaMask';
+      setupEventListeners();
+
+      const walletName =
+        detectedWalletType === 'coinbase'
+          ? 'Coinbase Wallet'
+          : detectedWalletType === 'boingExpress'
+            ? 'Boing Express'
+            : 'MetaMask';
       toast.success(`Fresh connection established with ${network.name} via ${walletName}`);
       return true;
 
@@ -780,7 +888,8 @@ export const WalletProvider = ({ children }) => {
 
   const switchNetwork = async (targetChainId) => {
     console.log('🔄 Attempting to switch to network:', targetChainId);
-    if (!isConnected || !window.ethereum) {
+    const raw = getActiveRawEip1193();
+    if (!isConnected || !raw) {
       console.log('❌ Cannot switch network: wallet not connected or no ethereum provider');
       toast.error('Please connect your wallet first');
       return false;
@@ -794,9 +903,34 @@ export const WalletProvider = ({ children }) => {
         throw new Error(`Network with chain ID ${targetChainId} is not supported`);
       }
 
+      const isBoingWallet =
+        raw === getWindowBoingProvider() ||
+        isBoingNamedProvider(raw) ||
+        walletType === 'boingExpress';
+
       console.log('📡 Requesting network switch to:', targetNetwork.name);
-      // Try to switch network
-      await window.ethereum.request({
+
+      if (targetChainId === 6913 && isBoingWallet) {
+        const switched = await switchToBoingTestnetInWallet(raw);
+        if (switched) {
+          await new Promise(resolve => setTimeout(resolve, 600));
+          const newId = await getChainIdFromBoingCompatibleProvider(raw);
+          setChainId(newId);
+          try {
+            const newProvider = new ethers.BrowserProvider(raw);
+            const newSigner = await newProvider.getSigner();
+            setProvider(newProvider);
+            setSigner(newSigner);
+          } catch (e) {
+            console.warn('[WalletContext] Ethers refresh after boing_switchChain:', e);
+          }
+          toast.success(`Switched to ${targetNetwork.name}`);
+          setupEventListeners();
+          return true;
+        }
+      }
+
+      await raw.request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: `0x${targetChainId.toString(16)}` }],
       });
@@ -808,7 +942,7 @@ export const WalletProvider = ({ children }) => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Verify the network has actually changed
-      const currentChainId = parseInt(await window.ethereum.request({ method: 'eth_chainId' }), 16);
+      const currentChainId = await getChainIdFromBoingCompatibleProvider(raw);
       if (currentChainId !== targetChainId) {
         console.log('⚠️ Network change not confirmed, waiting longer...');
         await new Promise(resolve => setTimeout(resolve, 2000));
@@ -820,13 +954,14 @@ export const WalletProvider = ({ children }) => {
       
       // Update provider and signer for the new network
       console.log('🔄 Updating provider and signer for new network...');
-      const newProvider = new ethers.BrowserProvider(window.ethereum);
+      const newProvider = new ethers.BrowserProvider(raw);
       const newSigner = await newProvider.getSigner();
       setProvider(newProvider);
       setSigner(newSigner);
       console.log('✅ Provider and signer updated for new network');
       
       toast.success(`Switched to ${targetNetwork.name}`);
+      setupEventListeners();
       return true;
 
     } catch (switchError) {
@@ -840,7 +975,7 @@ export const WalletProvider = ({ children }) => {
           }
           const targetNetwork = getNetworkByChainId(targetChainId);
           console.log('📡 Adding network to wallet:', targetNetwork.name);
-          await window.ethereum.request({
+          await raw.request({
             method: 'wallet_addEthereumChain',
             params: [addParams],
           });
@@ -856,13 +991,14 @@ export const WalletProvider = ({ children }) => {
           
           // Update provider and signer for the new network
           console.log('🔄 Updating provider and signer for new network...');
-          const newProvider = new ethers.BrowserProvider(window.ethereum);
+          const newProvider = new ethers.BrowserProvider(raw);
           const newSigner = await newProvider.getSigner();
           setProvider(newProvider);
           setSigner(newSigner);
           console.log('✅ Provider and signer updated for new network');
           
           toast.success(`Added and switched to ${targetNetwork.name}`);
+          setupEventListeners();
           return true;
         } catch (addError) {
           console.log('❌ Failed to add network:', addError);

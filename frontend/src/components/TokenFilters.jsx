@@ -73,6 +73,7 @@ const TokenFilters = ({ filters, onFilterChange, onClearFilters }) => {
             <option value="10">Optimism</option>
             <option value="8453">Base</option>
             <option value="11155111">Sepolia</option>
+            <option value="6913">Boing Testnet</option>
           </select>
         </div>
 

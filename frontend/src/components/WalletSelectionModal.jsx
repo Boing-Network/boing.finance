@@ -4,6 +4,7 @@ import { useWallet } from '../contexts/WalletContext';
 import { useChainType, useSolanaWallet, CHAIN_TYPE_SOLANA } from '../contexts/SolanaWalletContext';
 import { XMarkIcon, CheckIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import { discoverBoingEip6963Providers } from '../utils/boingWalletDiscovery';
 
 const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
   const { detectWalletProviders, connectWalletWithProvider } = useWallet();
@@ -15,13 +16,52 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
   const [isConnecting, setIsConnecting] = useState(false);
 
   useEffect(() => {
-    if (isOpen && !isSolana) {
+    if (!isOpen || isSolana) return undefined;
+
+    let cancelled = false;
+
+    (async () => {
       const providers = detectWalletProviders();
       const wallets = [];
+      const seenProviders = new Set();
+
+      const add = (entry) => {
+        if (!entry.provider || seenProviders.has(entry.provider)) return;
+        seenProviders.add(entry.provider);
+        wallets.push(entry);
+      };
+
+      if (providers.boingExpress) {
+        add({
+          id: 'boing-express',
+          walletType: 'boingExpress',
+          name: 'Boing Express',
+          icon: '🌀',
+          provider: providers.boingExpress,
+          available: true
+        });
+      }
+
+      try {
+        const announced = await discoverBoingEip6963Providers();
+        for (const { provider, info } of announced) {
+          add({
+            id: `boing-eip6963-${info.uuid || info.name || wallets.length}`,
+            walletType: 'boingExpress',
+            name: info.name || 'Boing Express',
+            icon: '🌀',
+            provider,
+            available: true
+          });
+        }
+      } catch {
+        /* ignore discovery errors */
+      }
 
       if (providers.metamask) {
-        wallets.push({
+        add({
           id: 'metamask',
+          walletType: 'metamask',
           name: 'MetaMask',
           icon: '🦊',
           provider: providers.metamask,
@@ -30,8 +70,9 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
       }
 
       if (providers.coinbase) {
-        wallets.push({
+        add({
           id: 'coinbase',
+          walletType: 'coinbase',
           name: 'Coinbase Wallet',
           icon: '🔷',
           provider: providers.coinbase,
@@ -39,12 +80,12 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
         });
       }
 
-      // Check for other common wallets
       if (typeof window !== 'undefined' && window.ethereum) {
-        if (!providers.metamask && !providers.coinbase) {
-          wallets.push({
+        if (!providers.metamask && !providers.coinbase && !providers.boingExpress) {
+          add({
             id: 'other',
-            name: 'Other Wallet',
+            walletType: 'other',
+            name: 'Browser Wallet',
             icon: '💼',
             provider: window.ethereum,
             available: true
@@ -55,17 +96,26 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
       if (wallets.length === 0) {
         wallets.push({
           id: 'none',
+          walletType: 'none',
           name: 'No Wallet Detected',
           icon: '❌',
           provider: null,
           available: false,
-          message: 'Please install MetaMask or Coinbase Wallet'
+          message: 'Install Boing Express, MetaMask, or Coinbase Wallet'
         });
       }
 
-      setAvailableWallets(wallets);
-    }
-  }, [isOpen, isSolana, detectWalletProviders]);
+      if (!cancelled) {
+        setAvailableWallets(wallets);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // detectWalletProviders is recreated each render; only re-run when modal opens
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional
+  }, [isOpen, isSolana]);
 
   const handleWalletSelect = (wallet) => {
     if (!wallet.available) {
@@ -85,7 +135,7 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
     try {
       const success = await connectWalletWithProvider(
         selectedWallet.provider,
-        selectedWallet.id,
+        selectedWallet.walletType ?? selectedWallet.id,
         null
       );
 
