@@ -73,6 +73,7 @@ const BoingStaking = lazy(() => import('./pages/boing/BoingStaking'));
 const BoingPoints = lazy(() => import('./pages/boing/BoingPoints'));
 const BoingRoadmap = lazy(() => import('./pages/boing/BoingRoadmap'));
 const BoingActivities = lazy(() => import('./pages/boing/BoingActivities'));
+const BoingNativeVm = lazy(() => import('./pages/boing/BoingNativeVm'));
 
 // QueryClient singleton at module top to avoid "Cannot access before initialization"
 // (production bundle evaluation order can cause TDZ if this is declared after App)
@@ -150,7 +151,8 @@ const createNavigation = () => {
     Object.freeze({ name: 'NFT Staking', href: '/boing/staking', icon: '🎴', description: 'Stake Boing NFTs for rewards', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Points', href: '/boing/points', icon: '⭐', description: 'Boing points & rewards', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Roadmap', href: '/boing/roadmap', icon: '🚀', description: 'Boing community roadmap', isAvailable: true, comingSoon: false, testnetOnly: false }),
-    Object.freeze({ name: 'Activities', href: '/boing/activities', icon: '🎯', description: 'Community activities & events', isAvailable: true, comingSoon: false, testnetOnly: false })
+    Object.freeze({ name: 'Activities', href: '/boing/activities', icon: '🎯', description: 'Community activities & events', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Native VM (RPC)', href: '/boing/native-vm', icon: '⚙️', description: 'Boing JSON-RPC: account, QA, simulate & submit', isAvailable: true, comingSoon: false, testnetOnly: false })
   ])
   });
 };
@@ -231,6 +233,7 @@ function PageTransitionRoutes() {
         <Route path="/boing/points" element={<BoingPoints />} />
         <Route path="/boing/roadmap" element={<BoingRoadmap />} />
         <Route path="/boing/activities" element={<BoingActivities />} />
+        <Route path="/boing/native-vm" element={<BoingNativeVm />} />
       </Routes>
     </div>
   );
