@@ -30,7 +30,6 @@ import ForYouSection from './components/ForYouSection';
 import ProactiveTipsBanner from './components/ProactiveTipsBanner';
 import DeFi101Modal from './components/DeFi101Modal';
 import TickerBar from './components/TickerBar';
-import BoingTestnetStatusStrip from './components/BoingTestnetStatusStrip';
 import BoingNativeTokenPanel from './components/BoingNativeTokenPanel';
 import BoingAnimatedBackground, { getFinanceBackgroundVariant } from './components/BoingAnimatedBackground';
 import CinematicIntro, { shouldShowCinematicIntro } from './components/CinematicIntro';
@@ -645,8 +644,6 @@ function AppContent() {
         {/* Deep Trade: scrolling ticker on landing only — in flow directly under nav */}
         {isLandingPage && <TickerBar />}
       </header>
-
-      <BoingTestnetStatusStrip />
 
       <main className="flex-1 flex flex-col relative min-h-0">
         {/* Page Content with Error Boundary and Suspense — scroll container so Pillars/Tokenomics etc. are reachable */}
