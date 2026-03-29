@@ -153,7 +153,8 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network, onSetPriceAlert })
       42161: `https://arbiscan.io/token/${address}`,
       10: `https://optimistic.etherscan.io/token/${address}`,
       8453: `https://basescan.org/token/${address}`,
-      11155111: `https://sepolia.etherscan.io/token/${address}`
+      11155111: `https://sepolia.etherscan.io/token/${address}`,
+      6913: `https://boing.observer/account/${address}`
     };
     return explorerMap[chainId] || `https://etherscan.io/token/${address}`;
   };

@@ -34,15 +34,18 @@ export default function Bridge() {
   const [recentBridgesExpanded, setRecentBridgesExpanded] = useState(true);
   const [howItWorksExpanded, setHowItWorksExpanded] = useState(false);
 
-  // Supported networks from central config (config/networks.js) – add new chains there
+  // Supported networks from central config (config/networks.js) – add new chains there.
+  // Exclude Boing L1: not an EVM bridge route for LiFi / aggregators.
   const supportedNetworks = useMemo(() =>
-    getSupportedNetworks().map((n) => ({
-      id: n.chainId,
-      name: n.name,
-      symbol: n.symbol,
-      icon: '🔗',
-      rpcUrl: n.rpcUrl
-    })),
+    getSupportedNetworks()
+      .filter((n) => !n.features?.includes('boingNativeL1'))
+      .map((n) => ({
+        id: n.chainId,
+        name: n.name,
+        symbol: n.symbol,
+        icon: '🔗',
+        rpcUrl: n.rpcUrl
+      })),
     []
   );
 

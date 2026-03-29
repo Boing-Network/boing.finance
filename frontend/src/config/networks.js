@@ -128,7 +128,7 @@ export const NETWORKS = {
     blockTime: 12,
     gasLimit: 30000000,
     isTestnet: true,
-    priority: 7,
+    priority: 8,
     features: ['dexDeployed', 'bridgeDeployed', 'mockTokens']
   },
   80001: {
@@ -141,7 +141,7 @@ export const NETWORKS = {
     blockTime: 2,
     gasLimit: 30000000,
     isTestnet: true,
-    priority: 8
+    priority: 9
   },
   97: {
     name: 'BSC Testnet',
@@ -153,7 +153,29 @@ export const NETWORKS = {
     blockTime: 3,
     gasLimit: 30000000,
     isTestnet: true,
-    priority: 9
+    priority: 10
+  },
+
+  // Boing Network L1 testnet (EIP-155 chain id 0x1b01). RPC uses boing_* JSON-RPC; use Boing Express wallet.
+  // See boing.network docs: THREE-CODEBASE-ALIGNMENT.md, RPC-API-SPEC.md
+  6913: {
+    name: 'Boing Testnet',
+    symbol: 'BOING',
+    rpcUrl:
+      process.env.REACT_APP_BOING_TESTNET_RPC_URL || 'https://testnet-rpc.boing.network/',
+    rpcUrls: [
+      process.env.REACT_APP_BOING_TESTNET_RPC_URL,
+      'https://testnet-rpc.boing.network/',
+      'https://testnet-rpc.boing.network'
+    ].filter(Boolean),
+    explorer: 'https://boing.observer',
+    chainId: 6913,
+    nativeCurrency: { name: 'Boing', symbol: 'BOING', decimals: 18 },
+    blockTime: 2,
+    gasLimit: 30000000,
+    isTestnet: true,
+    priority: 7,
+    features: ['boingNativeL1']
   },
 
   // Additional networks (e.g. for Bridge) – add any new chain here for a single source of truth
@@ -379,7 +401,7 @@ export const getNetworkFeatures = (chainId) => {
 export const NETWORK_CATEGORIES = {
   major: [1, 137, 56], // Ethereum, Polygon, BSC
   layer2: [42161, 10, 8453], // Arbitrum, Optimism, Base
-  testnets: [11155111, 80001, 97] // All testnets
+  testnets: [6913, 11155111, 80001, 97] // Boing + EVM testnets
 };
 
 /**

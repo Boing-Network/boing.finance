@@ -1,5 +1,24 @@
 // Contract addresses configuration for different networks
 export const CONTRACTS = {
+  // Boing Network L1 testnet — native chain; EVM-style contracts not used on-chain yet.
+  6913: {
+    governor: '0x0000000000000000000000000000000000000000',
+    boingToken: '0x0000000000000000000000000000000000000000',
+    treasury: '0x0000000000000000000000000000000000000000',
+    nftStaking: '0x0000000000000000000000000000000000000000',
+    dexFactory: '0x0000000000000000000000000000000000000000',
+    dexRouter: '0x0000000000000000000000000000000000000000',
+    weth: '0x0000000000000000000000000000000000000000',
+    liquidityLocker: '0x0000000000000000000000000000000000000000',
+    crossChainBridge: '0x0000000000000000000000000000000000000000',
+    priceOracle: '0x0000000000000000000000000000000000000000',
+    advancedERC20: '0x0000000000000000000000000000000000000000',
+    tokenFactory: '0x0000000000000000000000000000000000000000',
+    tokenImplementation: '0x0000000000000000000000000000000000000000',
+    tokens: {},
+    pairs: {}
+  },
+
   // Sepolia Testnet (UPDATED - DEXFactoryV2 with createPairWithLiquidity function)
   11155111: {
     // Governance & BOING (placeholders - set after deployment)
