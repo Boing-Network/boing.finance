@@ -363,6 +363,18 @@ export const NETWORKS = {
   }
 };
 
+/** Boing Network L1 (native BOING) testnet chain id — single source of truth for UI + RPC helpers */
+export const BOING_NATIVE_L1_CHAIN_ID = 6913;
+
+export function isBoingNativeL1Chain(chainId) {
+  if (chainId == null || chainId === '') return false;
+  const n = typeof chainId === 'string' && chainId.startsWith('0x')
+    ? parseInt(chainId, 16)
+    : parseInt(chainId, 10);
+  if (Number.isNaN(n)) return false;
+  return n === BOING_NATIVE_L1_CHAIN_ID;
+}
+
 // Helper functions
 export const getNetworkByChainId = (chainId) => {
   // Convert chainId to number for comparison
