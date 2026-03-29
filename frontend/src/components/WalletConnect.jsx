@@ -163,21 +163,23 @@ const WalletConnect = () => {
 
               {/* Switch Wallet / Network - opens modal (EVM: wallet list; Solana: network toggle + reconnect) */}
               <button
+                type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowDropdown(false);
                   setTimeout(() => setShowWalletModal(true), 100);
                 }}
-                className="w-full btn-primary px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2 mb-2"
+                className="w-full btn-dropdown-action px-3 py-2 rounded-lg text-sm flex items-center justify-center gap-2 mb-2"
               >
-                <ArrowPathIcon className="w-4 h-4" />
+                <ArrowPathIcon className="w-4 h-4 shrink-0 opacity-90" />
                 <span>{isSolana ? 'Network / Wallet' : 'Switch Wallet'}</span>
               </button>
 
               {/* Disconnect Button */}
               <button
+                type="button"
                 onClick={handleDisconnect}
-                className="w-full bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2"
+                className="w-full btn-dropdown-danger px-3 py-2 rounded-lg text-sm flex items-center justify-center gap-2"
               >
                 <XMarkIcon className="w-4 h-4" />
                 <span>Disconnect</span>

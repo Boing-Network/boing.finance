@@ -74,7 +74,7 @@ const NetworkSelector = () => {
       </button>
 
       {showDropdown && (
-        <div className="dropdown-menu-glass absolute left-0 mt-2 w-72 rounded-lg z-[120] max-h-96 overflow-y-auto">
+        <div className="dropdown-menu-glass-solid absolute left-0 mt-2 w-72 rounded-lg z-[120] max-h-96 overflow-y-auto">
           <div className="p-2">
             {/* Mainnet Networks */}
             {mainnetNetworks.length > 0 && (
@@ -84,23 +84,24 @@ const NetworkSelector = () => {
                 </div>
                 {mainnetNetworks.map((network) => (
                   <button
+                    type="button"
                     key={network.chainId}
                     onClick={() => handleNetworkSwitch(network.chainId)}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center space-x-3 ${
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center space-x-3 border ${
                       chainId === network.chainId
-                        ? 'bg-blue-600 text-white'
-                        : 'text-theme-secondary hover:text-theme-primary hover:bg-theme-secondary'
+                        ? 'dropdown-network-row-selected'
+                        : 'border-transparent text-theme-secondary hover:text-theme-primary hover:bg-theme-secondary'
                     }`}
                   >
                     <span className="text-lg">{getNetworkIcon(network)}</span>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className="font-medium text-sm">{network.name}</div>
                       <div className="text-xs text-theme-tertiary">
                         {network.nativeCurrency.symbol}
                       </div>
                     </div>
                     {chainId === network.chainId && (
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                      <div className="w-2 h-2 rounded-full shrink-0 dropdown-network-row-dot" aria-hidden />
                     )}
                   </button>
                 ))}
@@ -115,23 +116,24 @@ const NetworkSelector = () => {
                 </div>
                 {testnetNetworks.map((network) => (
                   <button
+                    type="button"
                     key={network.chainId}
                     onClick={() => handleNetworkSwitch(network.chainId)}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center space-x-3 ${
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center space-x-3 border ${
                       chainId === network.chainId
-                        ? 'bg-blue-600 text-white'
-                        : 'text-theme-secondary hover:text-theme-primary hover:bg-theme-secondary'
+                        ? 'dropdown-network-row-selected'
+                        : 'border-transparent text-theme-secondary hover:text-theme-primary hover:bg-theme-secondary'
                     }`}
                   >
                     <span className="text-lg">{getNetworkIcon(network)}</span>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className="font-medium text-sm">{network.name}</div>
                       <div className="text-xs text-theme-tertiary">
                         {network.nativeCurrency.symbol} {network.features?.includes('dexDeployed') && '• DEX Deployed'}
                       </div>
                     </div>
                     {chainId === network.chainId && (
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                      <div className="w-2 h-2 rounded-full shrink-0 dropdown-network-row-dot" aria-hidden />
                     )}
                   </button>
                 ))}
