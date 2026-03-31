@@ -210,6 +210,7 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {
 
   return (
     <section
+      data-testid="native-amm-panel"
       className="mb-6 rounded-xl border p-5 text-left"
       style={{
         backgroundColor: 'var(--bg-card)',
@@ -241,6 +242,7 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {
         </span>
         <button
           type="button"
+          data-testid="native-amm-refresh-reserves"
           onClick={() => loadReserves()}
           className="ml-auto text-blue-400 underline"
         >
@@ -277,6 +279,7 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {
           <input
             type="text"
             inputMode="numeric"
+            data-testid="native-amm-amount-in"
             value={amountIn}
             onChange={(e) => setAmountIn(e.target.value.replace(/\D/g, ''))}
             placeholder="e.g. 1000"
@@ -299,6 +302,7 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {
 
       <button
         type="button"
+        data-testid="native-amm-swap-submit"
         onClick={onSwap}
         disabled={
           busy ||
