@@ -23,8 +23,10 @@ import FairLaunchChecklist from '../components/FairLaunchChecklist';
 import { deploymentHistory as deploymentHistoryUtil } from '../utils/deploymentHistory';
 import { notificationService } from '../utils/notifications';
 import ShareCardModal from '../components/ShareCardModal';
+import NativeBoingDeployPanel from '../components/NativeBoingDeployPanel';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { getBoingNativeFeeUsd, formatUsdReferenceLabel, isBoingNativeFeeChain } from '../config/boingEconomics';
+import { isBoingNativeAccountIdHex } from '../utils/boingWalletDiscovery';
 
 // Import ABI and bytecode from the artifacts
 const ERC20_ABI = AdvancedERC20Artifact.abi;
@@ -34,6 +36,10 @@ const _TOKEN_IMPLEMENTATION_ABI = TokenImplementationArtifact.abi;
 
 /** Boing logo URL (design system) — used as default when token has no custom logo. */
 const BOING_LOGO_URL = 'https://boing.finance/assets/icon-only-transparent.png';
+
+/** Canonical native Boing deploy / partner integration (boing.network E2 roadmap). */
+const NATIVE_BOING_PARTNER_GUIDE_URL =
+  'https://github.com/boing-network/boing.network/blob/main/docs/E2-PARTNER-APP-NATIVE-BOING.md';
 
 // MochiAstronaut component
 
@@ -1605,8 +1611,25 @@ export default function DeployToken() {
               </p>
               {!isSolana && (
                 <p className="text-sm max-w-2xl mx-auto mt-3 rounded-lg border px-3 py-2" style={{ borderColor: 'var(--border-color)', color: 'var(--text-tertiary)' }}>
-                  ERC-20 deployment uses <strong style={{ color: 'var(--text-secondary)' }}>EVM</strong> in the app chain toggle (header). If the header shows Solana, switch to EVM and connect MetaMask, Boing Express, or another Ethereum wallet.
+                  ERC-20 deployment uses <strong style={{ color: 'var(--text-secondary)' }}>EVM</strong> in the app chain toggle (header). If the header shows Solana, switch to EVM and connect MetaMask or another Ethereum wallet. Boing Express can expose a native Boing account (32-byte)—that account cannot sign EVM deploys here; use an EVM wallet for this flow or Boing Native VM for native tooling.
                 </p>
+              )}
+              {!isSolana && isConnected && account && isBoingNativeAccountIdHex(account) && (
+                <p className="text-sm max-w-2xl mx-auto mt-3 rounded-lg border px-3 py-2" style={{ borderColor: 'rgba(251, 191, 36, 0.45)', color: 'var(--text-secondary)' }}>
+                  You are connected with a <strong>native Boing</strong> account. ERC-20 deploy on this page needs a standard <strong>20-byte Ethereum</strong> address—switch the header to <strong>EVM</strong> and connect MetaMask (e.g. Sepolia), use <strong>Boing Native VM</strong> in this app for tooling, or follow the{' '}
+                  <a
+                    href={NATIVE_BOING_PARTNER_GUIDE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-amber-300 underline hover:text-amber-200"
+                  >
+                    native Boing token deploy guide
+                  </a>
+                  {' '}(Boing Express + <code className="text-xs">boing_sendTransaction</code>) on the Boing repo.
+                </p>
+              )}
+              {!isSolana && (
+                <NativeBoingDeployPanel tokenName={name} tokenSymbol={symbol} />
               )}
               
               {/* Quick Actions */}
