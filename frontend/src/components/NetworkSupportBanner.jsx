@@ -1,5 +1,5 @@
 import React from 'react';
-import { getNetworkByChainId } from '../config/networks';
+import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { getChainsWithDex } from '../config/featureSupport';
 import { getExternalSwapUrl } from '../config/networkExternalLinks';
 
@@ -32,6 +32,12 @@ export default function NetworkSupportBanner({ featureLabel, chainIdsSupported, 
       <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
         <strong style={{ color: 'var(--text-primary)' }}>{featureLabel}</strong> is available on{' '}
         {chainNames.length > 1 ? chainNames.join(', ') : primaryName}. Switch network or use external DEX.
+        {Number(currentChainId) === BOING_NATIVE_L1_CHAIN_ID && (
+          <span className="block mt-2 text-xs opacity-90">
+            On Boing testnet, native BOING pays fees; this in-app EVM DEX is wired to Sepolia until factory/router
+            deploy on Boing.
+          </span>
+        )}
       </p>
       <div className="flex flex-wrap gap-2">
         {externalUrl && (

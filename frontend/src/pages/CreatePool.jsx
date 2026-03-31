@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import { ethers } from 'ethers';
 import DEXFactoryABI from '../artifacts/DEXFactory.json';
 import { getContractAddress, CONTRACTS } from '../config/contracts';
-import { getNetworkByChainId } from '../config/networks';
+import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { DexFeatureBanner } from '../components/NetworkSupportBanner';
 import { useAchievements } from '../contexts/AchievementContext';
 import ShareCardModal from '../components/ShareCardModal';
@@ -231,7 +231,13 @@ function CreatePool() {
     if (!window.ethereum || !chainId) return null;
     // Check if we're on Sepolia (for testing)
     if (chainId !== 11155111) {
-      toast.error('Please switch to Sepolia testnet to test pool creation');
+      if (chainId === BOING_NATIVE_L1_CHAIN_ID) {
+        toast.error(
+          'Boing testnet: pool creation uses our Sepolia DEX for now. Switch to Sepolia, or use token deploy / native tools on Boing.'
+        );
+      } else {
+        toast.error('Please switch to Sepolia testnet to test pool creation');
+      }
       return null;
     }
     const factoryAddress = getContractAddress(chainId, 'dexFactory');

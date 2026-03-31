@@ -23,6 +23,8 @@ import FairLaunchChecklist from '../components/FairLaunchChecklist';
 import { deploymentHistory as deploymentHistoryUtil } from '../utils/deploymentHistory';
 import { notificationService } from '../utils/notifications';
 import ShareCardModal from '../components/ShareCardModal';
+import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
+import { getBoingNativeFeeUsd, formatUsdReferenceLabel, isBoingNativeFeeChain } from '../config/boingEconomics';
 
 // Import ABI and bytecode from the artifacts
 const ERC20_ABI = AdvancedERC20Artifact.abi;
@@ -448,6 +450,7 @@ const SERVICE_CHARGES = {
       11155111: { amount: 0.001, currency: 'ETH' }, // Sepolia ~$2-3
       80001: { amount: 2, currency: 'MATIC' }, // Mumbai ~$1.60-2.40
       97: { amount: 0.005, currency: 'tBNB' }, // BSC Testnet ~$1.50-2.50
+      6913: { amount: 1, currency: 'BOING' }, // Boing L1 testnet (native BOING, 0 decimals in wallet)
     },
     features: [
       "Standard ERC-20 deployment",
@@ -482,6 +485,7 @@ const SERVICE_CHARGES = {
       11155111: { amount: 0.003, currency: 'ETH' }, // Sepolia ~$6-9
       80001: { amount: 6, currency: 'MATIC' }, // Mumbai ~$4.80-7.20
       97: { amount: 0.015, currency: 'tBNB' }, // BSC Testnet ~$4.50-7.50
+      6913: { amount: 3, currency: 'BOING' },
     },
     features: [
       "Advanced security features",
@@ -525,6 +529,7 @@ const SERVICE_CHARGES = {
       11155111: { amount: 0.006, currency: 'ETH' }, // Sepolia ~$12-18
       80001: { amount: 12, currency: 'MATIC' }, // Mumbai ~$9.60-14.40
       97: { amount: 0.03, currency: 'tBNB' }, // BSC Testnet ~$9-15
+      6913: { amount: 6, currency: 'BOING' },
     },
     features: [
       "All Professional features",
@@ -554,6 +559,16 @@ const SERVICE_CHARGES = {
     color: "green"
   }
 };
+
+function deployCtaLabel(selectedPlan, network) {
+  const row =
+    SERVICE_CHARGES[selectedPlan]?.prices?.[network?.chainId] ||
+    SERVICE_CHARGES[selectedPlan]?.prices?.[1];
+  if (!row) return 'Deploy Token';
+  const usd = isBoingNativeFeeChain(network?.chainId) ? getBoingNativeFeeUsd(row.amount) : null;
+  const usdStr = usd != null ? ` ${formatUsdReferenceLabel(usd)}` : '';
+  return `Deploy Token (${row.amount} ${row.currency}${usdStr})`;
+}
 
 // Deployment Tips
 const DEPLOYMENT_TIPS = [
@@ -733,8 +748,7 @@ export default function DeployToken() {
     
     if (!pricing) {
       console.error('No pricing found for:', { planKey, chainId });
-      // Return a default pricing to prevent NaN
-      return { amount: 0.001, currency: 'ETH' };
+      return { amount: 0.001, currency: network?.nativeCurrency?.symbol ?? 'ETH' };
     }
     
     return pricing;
@@ -985,7 +999,7 @@ export default function DeployToken() {
       return;
     }
     // Check if the network is supported
-    const supportedChainIds = [1, 137, 56, 42161, 10, 8453, 11155111, 80001, 97];
+    const supportedChainIds = [1, 137, 56, 42161, 10, 8453, 11155111, 80001, 97, 6913];
     if (!supportedChainIds.includes(network.chainId)) {
       toast.error(`Network ${network.name} (${network.chainId}) is not supported. Please switch to a supported network.`);
       return;
@@ -1075,7 +1089,8 @@ export default function DeployToken() {
         setDeploying(false);
         return;
       }
-      const serviceChargeWei = ethers.parseEther(serviceCharge.toString());
+      const nativeDecimals = network?.nativeCurrency?.decimals ?? 18;
+      const serviceChargeWei = ethers.parseUnits(serviceCharge.toString(), nativeDecimals);
       // Check user balance
       const balance = await signer.provider.getBalance(await signer.getAddress());
       if (balance < serviceChargeWei) {
@@ -1558,9 +1573,11 @@ export default function DeployToken() {
             },
             "offers": {
               "@type": "Offer",
-              "price": "0.01",
-              "priceCurrency": "ETH",
-              "description": "Deploy your own ERC20 token with advanced security features"
+              "price": network?.chainId === BOING_NATIVE_L1_CHAIN_ID ? "1" : "0.01",
+              "priceCurrency": network?.chainId === BOING_NATIVE_L1_CHAIN_ID ? "BOING" : "ETH",
+              "description": network?.chainId === BOING_NATIVE_L1_CHAIN_ID
+                ? "Deploy on Boing testnet; service fee in native BOING (reference ~$5/BOING in app UI)"
+                : "Deploy your own ERC20 token with advanced security features"
             }
           }
         })}
@@ -1756,7 +1773,20 @@ export default function DeployToken() {
                     <div className="text-center">
                       <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>{plan.name}</h3>
                       <div className="text-3xl font-bold text-blue-400 mb-4">
-                        {(plan.prices[network?.chainId] || plan.prices[1])?.amount} {(plan.prices[network?.chainId] || plan.prices[1])?.currency}
+                        {(() => {
+                          const row = plan.prices[network?.chainId] || plan.prices[1];
+                          const feeUsd = isBoingNativeFeeChain(network?.chainId) ? getBoingNativeFeeUsd(row?.amount) : null;
+                          return (
+                            <>
+                              {row?.amount} {row?.currency}
+                              {feeUsd != null && (
+                                <span className="block text-sm font-semibold text-gray-400 mt-1">
+                                  {formatUsdReferenceLabel(feeUsd)}
+                                </span>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                       
                       {showPricing && (
@@ -2254,7 +2284,7 @@ export default function DeployToken() {
                         Deploying Token...
                       </div>
                     ) : (
-                      `Deploy Token (${(SERVICE_CHARGES[selectedPlan].prices[network?.chainId] || SERVICE_CHARGES[selectedPlan].prices[1])?.amount} ${(SERVICE_CHARGES[selectedPlan].prices[network?.chainId] || SERVICE_CHARGES[selectedPlan].prices[1])?.currency})`
+                      deployCtaLabel(selectedPlan, network)
                     )}
                   </button>
                 </div>

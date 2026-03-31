@@ -10,6 +10,8 @@ import EmptyState from '../components/EmptyState';
 import { uploadToIPFS, validateFile } from '../utils/ipfsUpload';
 import { SOLANA_NETWORKS } from '../config/solanaConfig';
 import toast from 'react-hot-toast';
+import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
+import { getBoingNativeFeeUsd, formatUsdReferenceLabel, isBoingNativeFeeChain } from '../config/boingEconomics';
 
 const SOLANA_NFT_STEPS = [
   { id: 'upload', label: 'Image & Details', icon: '🖼️' },
@@ -34,6 +36,28 @@ const DYNAMIC_SIZES = [
   { value: 5000, label: '5,000 NFTs', feeEth: '0.03' },
   { value: 10000, label: '10,000 NFTs', feeEth: '0.05' }
 ];
+
+/** Whole BOING amounts for Boing L1 testnet (native currency uses 0 decimals in app config). */
+const NFT_DYNAMIC_FEES_BOING = {
+  100: '1',
+  500: '2',
+  1000: '5',
+  5000: '15',
+  10000: '50',
+};
+
+function getNftDynamicFeeAmount(chainId, collectionSize) {
+  if (chainId === BOING_NATIVE_L1_CHAIN_ID) {
+    return NFT_DYNAMIC_FEES_BOING[collectionSize] ?? '1';
+  }
+  return DYNAMIC_SIZES.find((s) => s.value === collectionSize)?.feeEth ?? '0.01';
+}
+
+function formatNftServiceFeeLine(chainId, collectionSize, nativeSymbol) {
+  const amt = getNftDynamicFeeAmount(chainId, collectionSize);
+  const usd = isBoingNativeFeeChain(chainId) ? getBoingNativeFeeUsd(amt) : null;
+  return `${amt} ${nativeSymbol}${usd != null ? ` ${formatUsdReferenceLabel(usd)}` : ''}`;
+}
 
 const DYNAMIC_STEPS = [
   { id: 'collection', label: 'Collection & size', icon: '📦' },
@@ -327,6 +351,8 @@ export default function CreateNFT() {
   const [previewTokenIndex, setPreviewTokenIndex] = useState(null);
 
   const network = getCurrentNetwork?.();
+  const nativeSymbol = network?.nativeCurrency?.symbol ?? 'ETH';
+  const dynamicFeeDisplayLine = formatNftServiceFeeLine(network?.chainId, dynamicSize, nativeSymbol);
 
   const addFiles = useCallback((newFiles) => {
     const fileList = Array.from(newFiles || []);
@@ -495,8 +521,6 @@ export default function CreateNFT() {
     URL.revokeObjectURL(a.href);
     toast.success('Metadata JSON downloaded');
   };
-
-  const dynamicFee = DYNAMIC_SIZES.find((s) => s.value === dynamicSize)?.feeEth || '0.01';
 
   const updateTraitLayer = (layerIndex, field, value) => {
     setTraitLayers((prev) => {
@@ -730,12 +754,14 @@ export default function CreateNFT() {
                         className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-cyan-500"
                       >
                         {DYNAMIC_SIZES.map((s) => (
-                          <option key={s.value} value={s.value}>{s.label} — Service fee: {s.feeEth} ETH</option>
+                          <option key={s.value} value={s.value}>
+                            {s.label} — Service fee: {formatNftServiceFeeLine(network?.chainId, s.value, nativeSymbol)}
+                          </option>
                         ))}
                       </select>
                     </div>
                     <div className="p-4 rounded-lg bg-cyan-900/20 border border-cyan-500/30">
-                      <p className="text-cyan-200 font-medium">Platform service fee: {dynamicFee} ETH</p>
+                      <p className="text-cyan-200 font-medium">Platform service fee: {dynamicFeeDisplayLine}</p>
                       <p className="text-cyan-200/80 text-sm mt-1">Charged when you deploy or mint the collection. Fee supports infrastructure and ongoing development.</p>
                     </div>
                     <div>
@@ -797,7 +823,7 @@ export default function CreateNFT() {
                   <div className="space-y-6">
                     <div className="p-4 rounded-lg bg-gray-700/50 border border-gray-600">
                       <p className="text-gray-300 font-medium">{collectionName || 'Collection'}</p>
-                      <p className="text-gray-500 text-sm">{collectionSymbol} · {dynamicSize} NFTs · Service fee: {dynamicFee} ETH</p>
+                      <p className="text-gray-500 text-sm">{collectionSymbol} · {dynamicSize} NFTs · Service fee: {dynamicFeeDisplayLine}</p>
                     </div>
                     {generatedDynamicMetadata.length === 0 ? (
                       <div className="space-y-4">
@@ -846,7 +872,7 @@ export default function CreateNFT() {
                           ))}
                         </div>
                         <p className="text-amber-200/90 text-sm">
-                          Service fee ({dynamicFee} ETH) will be charged when you deploy this collection. Export the JSON for use with minting platforms or our contract when available.
+                          Service fee ({dynamicFeeDisplayLine}) will be charged when you deploy this collection. Export the JSON for use with minting platforms or our contract when available.
                         </p>
                       </>
                     )}

@@ -31,6 +31,7 @@ import ProactiveTipsBanner from './components/ProactiveTipsBanner';
 import DeFi101Modal from './components/DeFi101Modal';
 import TickerBar from './components/TickerBar';
 import BoingNativeTokenPanel from './components/BoingNativeTokenPanel';
+import DevnetCurrencyDisclaimer from './components/DevnetCurrencyDisclaimer';
 import BoingAnimatedBackground, { getFinanceBackgroundVariant } from './components/BoingAnimatedBackground';
 import CinematicIntro, { shouldShowCinematicIntro } from './components/CinematicIntro';
 import { getPageVariant } from './utils/pageVariant';
@@ -653,6 +654,7 @@ function AppContent() {
         <ErrorBoundary>
           <div className="relative z-10 flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden">
             <BoingNativeTokenPanel />
+            <DevnetCurrencyDisclaimer />
             <Suspense fallback={<LoadingSpinner />}>
               <PageTransitionRoutes />
             </Suspense>
@@ -990,7 +992,7 @@ function Home() {
               "name": "How much does it cost to deploy a token?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Token deployment costs vary by network. Basic deployment starts at 0.01 ETH on Ethereum, with different pricing for other networks. Check our Deploy Token page for current pricing."
+                "text": "Token deployment costs vary by network (e.g. ETH on Ethereum, BOING on Boing testnet). The app uses a $5 reference value per BOING for fee estimates on Boing. Check the Deploy Token page for current pricing on your connected chain."
               }
             }
           ]

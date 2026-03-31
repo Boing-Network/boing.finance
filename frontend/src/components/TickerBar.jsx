@@ -1,15 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import coingeckoService from '../services/coingeckoService';
+import { BOING_USD_REFERENCE_PRICE } from '../config/boingEconomics';
 
 /**
  * Deep Trade — scrolling price ticker bar.
  * Renders in flow directly under the nav (landing only). Live prices from CoinGecko with static fallback.
  */
-const TICKER_COIN_IDS = ['bitcoin', 'ethereum', 'solana', 'usd-coin'];
-const TICKER_LABELS = { bitcoin: 'BTC', ethereum: 'ETH', solana: 'SOL', 'usd-coin': 'USDC' };
+const BOING_TICKER_ID = 'boing-native-reference';
+const TICKER_COIN_IDS = ['bitcoin', 'ethereum', BOING_TICKER_ID, 'solana', 'usd-coin'];
+const TICKER_LABELS = {
+  bitcoin: 'BTC',
+  ethereum: 'ETH',
+  [BOING_TICKER_ID]: 'BOING',
+  solana: 'SOL',
+  'usd-coin': 'USDC',
+};
 const FALLBACK_PRICES = {
   bitcoin: { usd: 94210, usd_24h_change: 1.5 },
   ethereum: { usd: 2841.2, usd_24h_change: 2.1 },
+  [BOING_TICKER_ID]: { usd: BOING_USD_REFERENCE_PRICE, usd_24h_change: 0 },
   solana: { usd: 142.88, usd_24h_change: -0.8 },
   'usd-coin': { usd: 1.0001, usd_24h_change: 0.01 },
 };
@@ -28,10 +37,15 @@ function TickerBar() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const data = await coingeckoService.getSimplePrices(TICKER_COIN_IDS);
+      const idsForApi = TICKER_COIN_IDS.filter((id) => id !== BOING_TICKER_ID);
+      const data = await coingeckoService.getSimplePrices(idsForApi);
       if (cancelled || !data) return;
       const next = {};
       TICKER_COIN_IDS.forEach((id) => {
+        if (id === BOING_TICKER_ID) {
+          next[id] = FALLBACK_PRICES[BOING_TICKER_ID];
+          return;
+        }
         const p = data[id];
         if (p && typeof p.usd === 'number') {
           next[id] = { usd: p.usd, usd_24h_change: p.usd_24h_change != null ? p.usd_24h_change : 0 };
@@ -54,6 +68,7 @@ function TickerBar() {
       price: formatPrice(p?.usd),
       change: change.toFixed(2),
       up,
+      isBoingReference: id === BOING_TICKER_ID,
     };
   });
 
@@ -70,10 +85,13 @@ function TickerBar() {
       <span
         className="font-semibold"
         style={{
-          color: item.up ? 'var(--finance-green)' : 'var(--finance-red)',
+          color: item.isBoingReference ? 'var(--text-tertiary)' : item.up ? 'var(--finance-green)' : 'var(--finance-red)',
         }}
+        title={item.isBoingReference ? 'In-app reference for Boing native (not a live market feed)' : undefined}
       >
-        {item.up ? '▲' : '▼'} {item.up ? '+' : ''}{item.change}%
+        {item.isBoingReference ? '◇ ref' : (
+          <>{item.up ? '▲' : '▼'} {item.up ? '+' : ''}{item.change}%</>
+        )}
       </span>
     </div>
   ));

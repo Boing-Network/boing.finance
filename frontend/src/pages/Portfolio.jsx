@@ -98,7 +98,8 @@ export default function Portfolio() {
             42161: 'arbitrum',
             10: 'optimism',
             8453: 'base',
-            11155111: 'ethereum'
+            11155111: 'ethereum',
+            6913: 'ethereum',
           };
           const network = networkMap[chainId] || 'ethereum';
           const graphPositions = await theGraphService.getUserPositions(account, network);
@@ -373,6 +374,7 @@ export default function Portfolio() {
     { id: '42161', name: 'Arbitrum', color: 'bg-blue-600' },
     { id: '10', name: 'Optimism', color: 'bg-red-500' },
     { id: '11155111', name: 'Sepolia', color: 'bg-gray-500' },
+    { id: '6913', name: 'Boing Testnet', color: 'bg-teal-500' },
   ];
 
   // Persist view preferences

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { useWallet } from '../contexts/WalletContext';
-import { NETWORKS } from '../config/networks';
+import { NETWORKS, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import TokenScanner from '../services/tokenScanner';
 import alchemyService from '../services/alchemyService';
 import theGraphService from '../services/theGraphService';
@@ -111,7 +111,7 @@ const Tokens = () => {
               if (!token) token = await tokenScanner.searchToken(address, targetChain);
               if (token) {
                 try {
-                  const networkMap = { 1: 'ethereum', 137: 'polygon', 56: 'binance-smart-chain', 42161: 'arbitrum', 10: 'optimism', 8453: 'base', 11155111: 'ethereum' };
+                  const networkMap = { 1: 'ethereum', 137: 'polygon', 56: 'binance-smart-chain', 42161: 'arbitrum', 10: 'optimism', 8453: 'base', 11155111: 'ethereum', 6913: 'ethereum' };
                   const poolData = await theGraphService.getTokenPrice(address, networkMap[targetChain] || 'ethereum');
                   if (poolData?.token) token.poolData = poolData.token;
                 } catch (_) {}
@@ -392,6 +392,12 @@ const Tokens = () => {
             <p className="text-gray-300 text-base sm:text-lg">
               Discover recently deployed tokens across different networks
             </p>
+            {selectedChain === BOING_NATIVE_L1_CHAIN_ID && (
+              <p className="mt-3 text-sm text-teal-200/95 rounded-lg border border-teal-500/35 bg-teal-950/40 px-3 py-2">
+                Boing testnet: explorer scans use RPC. CoinGecko does not price BOING; the app uses a{' '}
+                <span className="font-semibold">$5</span> reference per BOING for portfolio and fee estimates.
+              </p>
+            )}
           </div>
 
           {/* Network Selection and Controls */}

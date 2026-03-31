@@ -8,6 +8,7 @@ import {
   requestBoingTestnetFaucet,
   normalizeBoingFaucetAccountHex
 } from '../services/boingTestnetRpc';
+import { getBoingNativeFeeUsd, BOING_USD_REFERENCE_PRICE } from '../config/boingEconomics';
 
 const WEB_FAUCET = 'https://boing.network/faucet';
 const TESTNET_JOIN = 'https://boing.network/testnet/join';
@@ -63,6 +64,15 @@ export default function BoingNativeTokenPanel() {
     : heightQuery.isError
       ? 'RPC unavailable'
       : `Height ${heightQuery.data}`;
+
+  const balanceUsdLabel = useMemo(() => {
+    if (!onBoing || balanceQuery.data == null || balanceQuery.isLoading) return null;
+    const n = parseFloat(String(balanceQuery.data).replace(/,/g, ''));
+    if (Number.isNaN(n)) return null;
+    const usd = getBoingNativeFeeUsd(n);
+    if (usd == null) return null;
+    return usd.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  }, [onBoing, balanceQuery.data, balanceQuery.isLoading]);
 
   const onRpcFaucet = async () => {
     if (!boingAccountHex) {
@@ -179,6 +189,11 @@ export default function BoingNativeTokenPanel() {
                 >
                   Refresh
                 </button>
+              )}
+              {balanceUsdLabel && (
+                <span className="block sm:inline sm:ml-2 text-xs opacity-80">
+                  {`≈ $${balanceUsdLabel} USD (reference @ $${BOING_USD_REFERENCE_PRICE}/BOING)`}
+                </span>
               )}
             </span>
           </div>

@@ -3,7 +3,8 @@
 // Enhanced with The Graph and Alchemy APIs for better performance
 
 import { ethers } from 'ethers';
-import { NETWORKS } from '../config/networks';
+import { NETWORKS, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
+import { getBoingNativePriceDatum } from '../config/boingEconomics';
 import coingeckoService from './coingeckoService';
 import theGraphService from './theGraphService';
 import alchemyService from './alchemyService';
@@ -29,14 +30,15 @@ class PortfolioService {
 
       const balance = await provider.getBalance(address);
       const network = NETWORKS[chainId];
-      
+      const decimals = network?.nativeCurrency?.decimals ?? 18;
+
       return {
         address: 'native',
         symbol: network?.nativeCurrency?.symbol || 'ETH',
         name: network?.nativeCurrency?.name || 'Ethereum',
-        balance: ethers.formatEther(balance),
+        balance: ethers.formatUnits(balance, decimals),
         balanceRaw: balance.toString(),
-        decimals: 18,
+        decimals,
         chainId,
         isNative: true
       };
@@ -108,6 +110,11 @@ class PortfolioService {
       
       // For native tokens, use coin ID endpoint
       if (token.isNative) {
+        if (chainId === BOING_NATIVE_L1_CHAIN_ID) {
+          const priceData = getBoingNativePriceDatum();
+          this.cache.set(cacheKey, { data: priceData, timestamp: Date.now() });
+          return priceData;
+        }
         const nativeMap = {
           1: 'ethereum',
           137: 'matic-network',

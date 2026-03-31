@@ -7,7 +7,7 @@ import { useChainType } from '../contexts/SolanaWalletContext';
 import { SwapSolanaContent } from '../components/SolanaFeaturePlaceholder';
 import { useAchievements } from '../contexts/AchievementContext';
 import { getContractAddress, getContractAddresses } from '../config/contracts';
-import { getNetworkByChainId } from '../config/networks';
+import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import SettingsModal from '../components/SettingsModal';
 import toast from 'react-hot-toast';
 import { InfoTooltip, WarningTooltip } from '../components/Tooltip';
@@ -388,9 +388,12 @@ const Swap = () => {
     }
     
     if (!isSwapSupported()) {
-      return { 
-        type: 'error', 
-        message: 'DEX swapping is not yet available on this network. Currently only supported on Sepolia testnet.' 
+      return {
+        type: 'error',
+        message:
+          chainId === BOING_NATIVE_L1_CHAIN_ID
+            ? 'On Boing testnet, use native BOING tools or switch to Sepolia for in-app DEX swap.'
+            : 'DEX swapping is not yet available on this network. Currently only supported on Sepolia testnet.',
       };
     }
     
@@ -446,7 +449,11 @@ const Swap = () => {
     });
     
     if (!swapRouterAddress || swapRouterAddress === '0x0000000000000000000000000000000000000000') {
-      toast.error(`DEX swapping is not yet available on this network. Currently only supported on Sepolia testnet.`);
+      toast.error(
+        chainId === BOING_NATIVE_L1_CHAIN_ID
+          ? 'On Boing testnet, use native BOING tools or switch to Sepolia for in-app DEX swap.'
+          : 'DEX swapping is not yet available on this network. Currently only supported on Sepolia testnet.'
+      );
       return;
     }
 

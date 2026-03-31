@@ -4,6 +4,7 @@
  * "Create Pool (Sepolia only)", etc., and gate actions when contracts aren't deployed.
  */
 import CONTRACTS, { getContractAddresses } from './contracts';
+import { BOING_NATIVE_L1_CHAIN_ID } from './networks';
 
 const ZERO = '0x0000000000000000000000000000000000000000';
 
@@ -45,11 +46,14 @@ export function getFeatureSupport(chainId) {
   const hasTokenFactory = hasDeployed(c.tokenFactory);
   const hasBridge = hasDeployed(c.crossChainBridge);
 
+  const onBoingNativeL1 = chainId === BOING_NATIVE_L1_CHAIN_ID;
+
   return {
     swap: hasDex ? 'boing' : 'external',
     liquidity: hasDex,
     createPool: hasDex,
-    deployToken: hasTokenFactory,
+    // Boing L1 uses direct bytecode deploy when TokenFactory is not deployed on-chain.
+    deployToken: hasTokenFactory || onBoingNativeL1,
     bridge: hasBridge ? 'boing' : 'external',
     hasDex,
     hasTokenFactory
