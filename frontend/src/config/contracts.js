@@ -6,6 +6,8 @@ export const CONTRACTS = {
     boingToken: '0x0000000000000000000000000000000000000000',
     treasury: '0x0000000000000000000000000000000000000000',
     nftStaking: '0x0000000000000000000000000000000000000000',
+    /** 32-byte Boing `AccountId` of deployed `constant_product_pool_bytecode` (see boing.network `dump_native_amm_pool` example). Overridden by `REACT_APP_BOING_NATIVE_AMM_POOL`. */
+    nativeConstantProductPool: '0x0000000000000000000000000000000000000000000000000000000000000000',
     dexFactory: '0x0000000000000000000000000000000000000000',
     dexRouter: '0x0000000000000000000000000000000000000000',
     weth: '0x0000000000000000000000000000000000000000',
@@ -348,6 +350,21 @@ export const CONTRACTS = {
     tokenImplementation: '0x92524Eb972d70005Eea9Ff8e89307D1e03005cF3'
   }
 };
+
+// Optional: enable in-app native CP pool swap on Boing L1 (32-byte hex AccountId).
+(function applyBoingNativeAmmPoolFromEnv() {
+  try {
+    const v =
+      typeof process !== 'undefined' && process.env && process.env.REACT_APP_BOING_NATIVE_AMM_POOL;
+    if (!v || typeof v !== 'string' || !CONTRACTS[6913]) return;
+    const t = v.trim();
+    if (/^0x[0-9a-fA-F]{64}$/i.test(t)) {
+      CONTRACTS[6913].nativeConstantProductPool = `0x${t.slice(2).toLowerCase()}`;
+    }
+  } catch {
+    /* ignore */
+  }
+})();
 
 // Helper function to get contract addresses for a specific network
 export const getContractAddresses = (chainId) => {

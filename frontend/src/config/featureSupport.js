@@ -8,23 +8,32 @@ import { BOING_NATIVE_L1_CHAIN_ID } from './networks';
 
 const ZERO = '0x0000000000000000000000000000000000000000';
 
+/** True if hex is non-empty and not all-zero (supports 20-byte EVM or 32-byte Boing AccountId). */
+function hasDeployedAddress(addr) {
+  if (!addr || typeof addr !== 'string') return false;
+  const h = addr.startsWith('0x') || addr.startsWith('0X') ? addr.slice(2) : addr;
+  if (!/^[0-9a-fA-F]+$/i.test(h)) return false;
+  return !/^0+$/i.test(h);
+}
+
 /** All EVM chain IDs we have config for (numeric keys in CONTRACTS). */
 const EVM_CHAIN_IDS = Object.keys(CONTRACTS)
   .filter((k) => /^\d+$/.test(k))
   .map(Number);
 
-const hasDeployed = (addr) => addr && addr !== ZERO;
+const hasDeployed = (addr) => hasDeployedAddress(addr) && addr !== ZERO;
 
 /**
  * Get feature support for a chain.
  * @param {number} chainId
  * @returns {{
- *   swap: 'boing' | 'external' | false,
+ *   swap: 'boing' | 'native_amm' | 'external' | false,
  *   liquidity: boolean,
  *   createPool: boolean,
  *   deployToken: boolean,
  *   bridge: 'boing' | 'external' | false,
  *   hasDex: boolean,
+ *   hasNativeAmm: boolean,
  *   hasTokenFactory: boolean,
  * }}
  */
@@ -38,6 +47,7 @@ export function getFeatureSupport(chainId) {
       deployToken: false,
       bridge: 'external',
       hasDex: false,
+      hasNativeAmm: false,
       hasTokenFactory: false
     };
   }
@@ -47,15 +57,18 @@ export function getFeatureSupport(chainId) {
   const hasBridge = hasDeployed(c.crossChainBridge);
 
   const onBoingNativeL1 = chainId === BOING_NATIVE_L1_CHAIN_ID;
+  const nativePool = c.nativeConstantProductPool;
+  const hasNativeAmm = Boolean(onBoingNativeL1 && hasDeployedAddress(nativePool));
 
   return {
-    swap: hasDex ? 'boing' : 'external',
+    swap: hasDex ? 'boing' : hasNativeAmm ? 'native_amm' : 'external',
     liquidity: hasDex,
     createPool: hasDex,
     // Boing L1 uses direct bytecode deploy when TokenFactory is not deployed on-chain.
     deployToken: hasTokenFactory || onBoingNativeL1,
     bridge: hasBridge ? 'boing' : 'external',
     hasDex,
+    hasNativeAmm,
     hasTokenFactory
   };
 }

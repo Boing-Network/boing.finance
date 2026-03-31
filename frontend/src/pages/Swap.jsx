@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { ethers } from 'ethers';
 import { useWallet } from '../contexts/WalletContext';
@@ -18,12 +18,18 @@ import ShareCardModal from '../components/ShareCardModal';
 import ProactiveTipsBanner from '../components/ProactiveTipsBanner';
 import TrendingPairs from '../components/TrendingPairs';
 import NativeBoingL1IntegratedHub from '../components/NativeBoingL1IntegratedHub';
+import NativeAmmSwapPanel from '../components/NativeAmmSwapPanel';
+import getFeatureSupport from '../config/featureSupport';
 
 
 const Swap = () => {
   const { isSolana } = useChainType();
   const { isConnected, account } = useWalletConnection();
   const { chainId } = useWallet();
+  const featureSupport = useMemo(
+    () => getFeatureSupport(Number(chainId) || 0),
+    [chainId]
+  );
   const { record: recordAchievement } = useAchievements() || {};
   
   // Swap state
@@ -375,12 +381,9 @@ const Swap = () => {
     return labels[settings.gasPriority] || 'Medium Priority';
   };
 
-  // Check if DEX swapping is supported on current network
-  const isSwapSupported = () => {
-    const routerAddress = getContractAddress(chainId, 'dexRouter');
-    console.log('Checking swap support - chainId:', chainId, 'routerAddress:', routerAddress);
-    return routerAddress && routerAddress !== '0x0000000000000000000000000000000000000000';
-  };
+  // Check if DEX or native AMM swap is supported on current network
+  const isSwapSupported = () =>
+    featureSupport.swap === 'boing' || featureSupport.swap === 'native_amm';
 
   // Get network status message
   const getNetworkStatusMessage = () => {
@@ -393,11 +396,18 @@ const Swap = () => {
         type: 'error',
         message:
           chainId === BOING_NATIVE_L1_CHAIN_ID
-            ? 'On Boing testnet, use native BOING tools or switch to Sepolia for in-app DEX swap.'
+            ? 'On Boing testnet, set REACT_APP_BOING_NATIVE_AMM_POOL, use native tools, or switch to Sepolia for EVM DEX swap.'
             : 'DEX swapping is not yet available on this network. Currently only supported on Sepolia testnet.',
       };
     }
-    
+
+    if (featureSupport.swap === 'native_amm') {
+      return {
+        type: 'success',
+        message: 'Native pool swap — use the Boing VM panel below with Boing Express.',
+      };
+    }
+
     return { type: 'success', message: 'Swapping is supported on this network' };
   };
 
@@ -435,6 +445,11 @@ const Swap = () => {
     // Check if we have a selected external quote
     if (selectedExternalQuote) {
       await handleExternalSwap();
+      return;
+    }
+
+    if (featureSupport.swap === 'native_amm') {
+      toast.error('Use the native pool panel for Boing VM swaps, or select an external quote.');
       return;
     }
 
@@ -1820,7 +1835,12 @@ const Swap = () => {
             <ProactiveTipsBanner />
           </div>
 
-          {chainId === BOING_NATIVE_L1_CHAIN_ID && <NativeBoingL1IntegratedHub feature="swap" />}
+          {chainId === BOING_NATIVE_L1_CHAIN_ID && !featureSupport.hasNativeAmm && (
+            <NativeBoingL1IntegratedHub feature="swap" />
+          )}
+          {featureSupport.swap === 'native_amm' && (
+            <NativeAmmSwapPanel slippagePercent={settings.slippage} />
+          )}
 
           {/* Swap Interface + Sidebar */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1828,7 +1848,7 @@ const Swap = () => {
 
           {/* Swap Interface - Unified flow */}
           <div
-            className="rounded-2xl p-4 sm:p-6 shadow-xl mb-4 sm:mb-6"
+            className={`rounded-2xl p-4 sm:p-6 shadow-xl mb-4 sm:mb-6 ${featureSupport.swap === 'native_amm' ? 'hidden' : ''}`}
             style={{
               backgroundColor: 'var(--bg-card)',
               border: '1px solid var(--border-color)',
