@@ -12,6 +12,7 @@ import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/network
 import { DexFeatureBanner } from '../components/NetworkSupportBanner';
 import { useAchievements } from '../contexts/AchievementContext';
 import ShareCardModal from '../components/ShareCardModal';
+import NativeBoingL1IntegratedHub from '../components/NativeBoingL1IntegratedHub';
 
 
 
@@ -1299,6 +1300,7 @@ function CreatePool() {
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">
             <DexFeatureBanner featureLabel="Create Pool" currentChainId={chainId} onSwitchNetwork={switchNetwork} />
+            {chainId === BOING_NATIVE_L1_CHAIN_ID && <NativeBoingL1IntegratedHub feature="createPool" />}
             {/* Header */}
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold text-white mb-4">Create Liquidity Pool</h1>

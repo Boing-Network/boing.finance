@@ -17,6 +17,7 @@ import ExternalDEXQuotes from '../components/ExternalDEXQuotes';
 import ShareCardModal from '../components/ShareCardModal';
 import ProactiveTipsBanner from '../components/ProactiveTipsBanner';
 import TrendingPairs from '../components/TrendingPairs';
+import NativeBoingL1IntegratedHub from '../components/NativeBoingL1IntegratedHub';
 
 
 const Swap = () => {
@@ -1818,6 +1819,8 @@ const Swap = () => {
             </div>
             <ProactiveTipsBanner />
           </div>
+
+          {chainId === BOING_NATIVE_L1_CHAIN_ID && <NativeBoingL1IntegratedHub feature="swap" />}
 
           {/* Swap Interface + Sidebar */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

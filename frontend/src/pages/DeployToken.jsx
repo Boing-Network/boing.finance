@@ -24,6 +24,7 @@ import { deploymentHistory as deploymentHistoryUtil } from '../utils/deploymentH
 import { notificationService } from '../utils/notifications';
 import ShareCardModal from '../components/ShareCardModal';
 import NativeBoingDeployPanel from '../components/NativeBoingDeployPanel';
+import NativeBoingTokenDeploySection from '../components/NativeBoingTokenDeploySection';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { getBoingNativeFeeUsd, formatUsdReferenceLabel, isBoingNativeFeeChain } from '../config/boingEconomics';
 import { isBoingNativeAccountIdHex } from '../utils/boingWalletDiscovery';
@@ -1628,9 +1629,18 @@ export default function DeployToken() {
                   {' '}(Boing Express + <code className="text-xs">boing_sendTransaction</code>) on the Boing repo.
                 </p>
               )}
-              {!isSolana && (
-                <NativeBoingDeployPanel tokenName={name} tokenSymbol={symbol} />
-              )}
+              {!isSolana &&
+                chainId === BOING_NATIVE_L1_CHAIN_ID &&
+                walletType === 'boingExpress' &&
+                isConnected && (
+                  <NativeBoingTokenDeploySection tokenName={name} tokenSymbol={symbol} />
+                )}
+              {!isSolana &&
+                !(
+                  chainId === BOING_NATIVE_L1_CHAIN_ID &&
+                  walletType === 'boingExpress' &&
+                  isConnected
+                ) && <NativeBoingDeployPanel tokenName={name} tokenSymbol={symbol} />}
               
               {/* Quick Actions */}
               <div className="flex flex-wrap items-center justify-center gap-3 mt-4">

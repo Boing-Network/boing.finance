@@ -15,9 +15,10 @@ import {
   getPoolAnalytics
 } from '../services/poolService';
 import { useBlockchainPools } from '../hooks/useBlockchainPools';
-import { getNetworkByChainId } from '../config/networks';
+import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { useAchievements } from '../contexts/AchievementContext';
 import ShareCardModal from '../components/ShareCardModal';
+import NativeBoingL1IntegratedHub from '../components/NativeBoingL1IntegratedHub';
 
 // Pool Card Component
 const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveLiquidity }) => {
@@ -1033,6 +1034,8 @@ const Pools = () => {
                 Manage your liquidity positions and explore available pools
               </p>
             </div>
+
+            {chainId === BOING_NATIVE_L1_CHAIN_ID && <NativeBoingL1IntegratedHub feature="pools" />}
 
             {/* Tabs */}
             <div className="bg-gray-800 rounded-xl p-2 mb-8 border border-gray-700">
