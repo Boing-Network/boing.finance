@@ -9,9 +9,11 @@ import {
   NATIVE_AMM_RESERVE_A_KEY,
   NATIVE_AMM_RESERVE_B_KEY,
   encodeNativeAmmSwapCalldataHex,
+  encodeNativeAmmAddLiquidityCalldataHex,
   constantProductAmountOut,
   parseNativeAmmReserveU128,
 } from '../services/nativeAmmCalldata';
+import { nativeConstantProductPoolAccessListJson } from '../services/nativeAmmAccessList';
 import { boingExpressSendTransaction } from '../services/boingExpressNativeTx';
 import { getWindowBoingProvider } from '../utils/boingWalletDiscovery';
 
@@ -25,12 +27,23 @@ function pickExpressProvider(getWalletProvider) {
   return getWindowBoingProvider();
 }
 
+function parsePositiveBigInt(raw) {
+  try {
+    const t = (raw || '').trim();
+    if (!t) return null;
+    const n = BigInt(t);
+    return n > 0n ? n : null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * In-app swap against configured native CP pool (`REACT_APP_BOING_NATIVE_AMM_POOL`).
  * Requires Boing Express on chain 6913. Reserves are ledger units (u64-safe); no ERC-20 legs.
  */
 export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {
-  const { chainId, walletType, isConnected, getWalletProvider } = useWallet();
+  const { chainId, walletType, isConnected, getWalletProvider, account } = useWallet();
   const pool = getContractAddress(BOING_NATIVE_L1_CHAIN_ID, 'nativeConstantProductPool');
 
   const [reserveA, setReserveA] = useState(null);
@@ -38,6 +51,8 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {
   const [loadError, setLoadError] = useState(null);
   const [direction, setDirection] = useState('a_to_b');
   const [amountIn, setAmountIn] = useState('');
+  const [addAmountA, setAddAmountA] = useState('');
+  const [addAmountB, setAddAmountB] = useState('');
   const [busy, setBusy] = useState(false);
 
   const loadReserves = useCallback(async () => {
@@ -87,6 +102,14 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {
     return (amountOutEst * num) / 10_000n;
   }, [amountOutEst, slippagePercent]);
 
+  const addAmountABn = useMemo(() => parsePositiveBigInt(addAmountA), [addAmountA]);
+  const addAmountBBn = useMemo(() => parsePositiveBigInt(addAmountB), [addAmountB]);
+
+  const expressTxBase = useCallback(() => {
+    const accessList = nativeConstantProductPoolAccessListJson(account, pool);
+    return accessList ? { access_list: accessList } : {};
+  }, [account, pool]);
+
   const onSwap = async () => {
     if (chainId !== BOING_NATIVE_L1_CHAIN_ID || walletType !== 'boingExpress' || !isConnected) {
       toast.error('Connect with Boing Express on Boing testnet (6913).');
@@ -123,10 +146,58 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {
         type: 'contract_call',
         contract: pool,
         calldata,
+        ...expressTxBase(),
       });
       toast.success(typeof hash === 'string' ? `Submitted: ${hash.slice(0, 18)}…` : 'Submitted');
       await loadReserves();
       setAmountIn('');
+    } catch (e) {
+      toast.error(e?.message || 'boing_sendTransaction failed');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onAddLiquidity = async () => {
+    if (chainId !== BOING_NATIVE_L1_CHAIN_ID || walletType !== 'boingExpress' || !isConnected) {
+      toast.error('Connect with Boing Express on Boing testnet (6913).');
+      return;
+    }
+    if (!pool) {
+      toast.error('Pool address not configured.');
+      return;
+    }
+    if (addAmountABn == null || addAmountBBn == null) {
+      toast.error('Enter positive integer amounts for both reserves.');
+      return;
+    }
+    const p = pickExpressProvider(getWalletProvider);
+    if (!p) {
+      toast.error('Boing Express provider not found.');
+      return;
+    }
+
+    const calldata = encodeNativeAmmAddLiquidityCalldataHex(addAmountABn, addAmountBBn, 0n);
+    if (
+      !window.confirm(
+        `Add liquidity to native pool?\n+Reserve A: ${addAmountABn.toString()}\n+Reserve B: ${addAmountBBn.toString()}`
+      )
+    ) {
+      return;
+    }
+
+    setBusy(true);
+    try {
+      const hash = await boingExpressSendTransaction(p, {
+        type: 'contract_call',
+        contract: pool,
+        calldata,
+        ...expressTxBase(),
+      });
+      toast.success(typeof hash === 'string' ? `Submitted: ${hash.slice(0, 18)}…` : 'Submitted');
+      await loadReserves();
+      setAddAmountA('');
+      setAddAmountB('');
     } catch (e) {
       toast.error(e?.message || 'boing_sendTransaction failed');
     } finally {
@@ -239,6 +310,72 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {
       >
         {busy ? 'Signing…' : 'Swap via Boing Express'}
       </button>
+
+      <details className="mt-5 border-t pt-4" style={{ borderColor: 'var(--border-color)' }}>
+        <summary
+          className="text-sm font-medium cursor-pointer"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          Add liquidity (reserve A + B)
+        </summary>
+        <p className="text-xs mt-2 mb-3" style={{ color: 'var(--text-tertiary)' }}>
+          Increments on-chain ledger reserves (selector <code className="text-[10px]">0x11</code>). No LP
+          shares in this MVP pool.
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2 mb-3">
+          <div>
+            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+              Add reserve A (integer)
+            </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={addAmountA}
+              onChange={(e) => setAddAmountA(e.target.value.replace(/\D/g, ''))}
+              className="w-full text-sm p-2 rounded-lg border font-mono"
+              style={{
+                backgroundColor: 'var(--bg-secondary)',
+                borderColor: 'var(--border-color)',
+                color: 'var(--text-primary)',
+              }}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+              Add reserve B (integer)
+            </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={addAmountB}
+              onChange={(e) => setAddAmountB(e.target.value.replace(/\D/g, ''))}
+              className="w-full text-sm p-2 rounded-lg border font-mono"
+              style={{
+                backgroundColor: 'var(--bg-secondary)',
+                borderColor: 'var(--border-color)',
+                color: 'var(--text-primary)',
+              }}
+            />
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onAddLiquidity}
+          disabled={
+            busy ||
+            chainId !== BOING_NATIVE_L1_CHAIN_ID ||
+            walletType !== 'boingExpress' ||
+            !isConnected ||
+            addAmountABn == null ||
+            addAmountBBn == null
+          }
+          className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
+          style={{ backgroundColor: '#059669' }}
+        >
+          {busy ? 'Signing…' : 'Add liquidity via Boing Express'}
+        </button>
+      </details>
+
       {(chainId !== BOING_NATIVE_L1_CHAIN_ID || walletType !== 'boingExpress' || !isConnected) && (
         <p className="text-xs mt-2" style={{ color: 'var(--text-tertiary)' }}>
           Switch to Boing testnet and connect Boing Express to enable this button.
