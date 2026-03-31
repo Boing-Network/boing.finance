@@ -668,7 +668,14 @@ export default function DeployToken() {
       }
     }
   }, [location]);
-  const { signer, account, isConnected, getCurrentNetwork } = useWallet();
+  const {
+    signer,
+    account,
+    isConnected,
+    getCurrentNetwork,
+    chainId,
+    walletType,
+  } = useWallet();
   const { record: recordAchievement } = useAchievements() || {};
   const [name, setName] = useState('');
   const [symbol, setSymbol] = useState('');

@@ -11,6 +11,7 @@ import {
   isValidBoingQaPurpose,
 } from '../config/boingQa';
 import { getWindowBoingProvider } from '../utils/boingWalletDiscovery';
+import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
 
 function pickExpressProvider(getWalletProvider) {
   try {
@@ -20,21 +21,6 @@ function pickExpressProvider(getWalletProvider) {
     /* ignore */
   }
   return getWindowBoingProvider();
-}
-
-function formatExpressError(e) {
-  if (e && typeof e === 'object' && 'message' in e) {
-    const err = e;
-    const rpcData = err.data?.rpc?.data ?? err.data;
-    if (rpcData && typeof rpcData === 'object') {
-      const bits = [];
-      if (rpcData.rule_id) bits.push(`rule_id: ${rpcData.rule_id}`);
-      if (rpcData.doc_url) bits.push(String(rpcData.doc_url));
-      if (bits.length) return `${err.message} — ${bits.join(' | ')}`;
-    }
-    if (typeof err.code === 'number') return `${err.message} (code ${err.code})`;
-  }
-  return e?.message || String(e);
 }
 
 /**
@@ -150,7 +136,7 @@ export default function NativeBoingTokenDeploySection({ tokenName, tokenSymbol }
       setLastTx(out);
       toast.success('Submitted — check explorer or Native VM page for receipt.');
     } catch (e) {
-      toast.error(formatExpressError(e));
+      toast.error(formatBoingExpressRpcError(e));
     } finally {
       setDeployBusy(false);
     }
