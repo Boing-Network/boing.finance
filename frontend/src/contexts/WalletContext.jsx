@@ -5,31 +5,60 @@ import toast from 'react-hot-toast';
 import {
   getWindowBoingProvider,
   isBoingNamedProvider,
+  isBoingNativeAccountIdHex,
   requestAccountsFromBoingCompatibleProvider,
   getChainIdFromBoingCompatibleProvider,
   switchToBoingTestnetInWallet
 } from '../utils/boingWalletDiscovery';
 
 /**
- * ethers v6: some EIP-1193 wallets (e.g. Boing Express) fail default getSigner(); passing the
- * connected account address usually resolves it.
+ * ethers v6 BrowserProvider expects EVM 20-byte addresses. Boing Express exposes 32-byte
+ * native AccountIds (see BOING-EXPRESS-WALLET.md)—getSigner cannot wrap those for Solidity deploys.
+ * @returns {{ browserProvider: import('ethers').BrowserProvider, signer: import('ethers').JsonRpcSigner | null, evmSignerUnavailableReason: 'boing_native_account' | null }}
  */
 async function createBrowserProviderAndSigner(eip1193Provider, accountAddress) {
   const browserProvider = new ethers.BrowserProvider(eip1193Provider);
+
   let signer = null;
   try {
     signer = await browserProvider.getSigner();
   } catch (e) {
     console.warn('[WalletContext] getSigner() failed, will retry with address if available:', e?.message || e);
   }
-  if (!signer && accountAddress) {
+  // ethers rejects 32-byte Boing AccountIds as EVM addresses—skip getSigner(account) for those
+  if (!signer && accountAddress && !isBoingNativeAccountIdHex(accountAddress)) {
     try {
       signer = await browserProvider.getSigner(accountAddress);
     } catch (e2) {
       console.warn('[WalletContext] getSigner(account) failed:', e2?.message || e2);
     }
   }
-  return { browserProvider, signer };
+
+  const evmSignerUnavailableReason =
+    !signer && isBoingNativeAccountIdHex(accountAddress) ? 'boing_native_account' : null;
+
+  return { browserProvider, signer, evmSignerUnavailableReason };
+}
+
+/**
+ * @param {import('ethers').JsonRpcSigner | null} signer
+ * @param {'boing_native_account' | null} evmSignerUnavailableReason
+ * @param {{ reconnectHint?: boolean }} [opts]
+ */
+function toastIfNoEvmSigner(signer, evmSignerUnavailableReason, opts = {}) {
+  if (signer) return;
+  if (evmSignerUnavailableReason === 'boing_native_account') {
+    toast(
+      'Boing Express is connected with a native Boing account (32-byte). This app’s ERC-20 deploy and EVM transactions need a 20-byte Ethereum address—use MetaMask or another EVM wallet with “EVM” selected (e.g. Sepolia), or use Boing Native VM for native Boing tools.',
+      { duration: 10000 }
+    );
+    return;
+  }
+  toast.error(
+    opts.reconnectHint
+      ? 'Transaction signing is not ready. Try opening your wallet extension or connect again.'
+      : 'Wallet connected, but transaction signing is not ready. Try disconnect and connect again.'
+  );
 }
 
 const WalletContext = createContext();
@@ -220,7 +249,8 @@ export const WalletProvider = ({ children }) => {
 
       activeEip1193ProviderRef.current = provider;
 
-      const { browserProvider: ethersProvider, signer } = await createBrowserProviderAndSigner(provider, account);
+      const { browserProvider: ethersProvider, signer, evmSignerUnavailableReason } =
+        await createBrowserProviderAndSigner(provider, account);
 
       const network = getNetworkByChainId(chainId);
       if (!network) {
@@ -243,9 +273,7 @@ export const WalletProvider = ({ children }) => {
 
       setupEventListeners();
 
-      if (!signer) {
-        toast.error('Wallet connected, but transaction signing is not ready. Try disconnect and connect again.');
-      }
+      toastIfNoEvmSigner(signer, evmSignerUnavailableReason);
 
       return true;
 
@@ -587,7 +615,7 @@ export const WalletProvider = ({ children }) => {
 
       activeEip1193ProviderRef.current = ethereumProvider;
 
-      const { browserProvider: ethersBrowserProvider, signer: evmSigner } =
+      const { browserProvider: ethersBrowserProvider, signer: evmSigner, evmSignerUnavailableReason } =
         await createBrowserProviderAndSigner(ethereumProvider, account);
 
       const network = getNetworkByChainId(chainId);
@@ -612,9 +640,7 @@ export const WalletProvider = ({ children }) => {
 
       setupEventListeners();
 
-      if (!evmSigner) {
-        toast.error('Wallet connected, but transaction signing is not ready. Try disconnect and connect again.');
-      }
+      toastIfNoEvmSigner(evmSigner, evmSignerUnavailableReason);
 
       return true;
 
@@ -693,7 +719,7 @@ export const WalletProvider = ({ children }) => {
 
       activeEip1193ProviderRef.current = ethereumProvider;
 
-      const { browserProvider: ethersBrowserProvider, signer: evmSigner } =
+      const { browserProvider: ethersBrowserProvider, signer: evmSigner, evmSignerUnavailableReason } =
         await createBrowserProviderAndSigner(ethereumProvider, account);
 
       // Check if network is supported
@@ -720,10 +746,6 @@ export const WalletProvider = ({ children }) => {
 
       setupEventListeners();
 
-      if (!evmSigner) {
-        toast.error('Wallet connected, but transaction signing is not ready. Try disconnect and connect again.');
-      }
-
       const walletName =
         detectedWalletType === 'coinbase'
           ? 'Coinbase Wallet'
@@ -731,6 +753,7 @@ export const WalletProvider = ({ children }) => {
             ? 'Boing Express'
             : 'MetaMask';
       toast.success(`Connected to ${network.name} via ${walletName}`);
+      toastIfNoEvmSigner(evmSigner, evmSignerUnavailableReason);
       return true;
 
     } catch (error) {
@@ -823,7 +846,7 @@ export const WalletProvider = ({ children }) => {
 
       activeEip1193ProviderRef.current = ethereumProvider;
 
-      const { browserProvider: ethersBrowserProvider, signer: evmSigner } =
+      const { browserProvider: ethersBrowserProvider, signer: evmSigner, evmSignerUnavailableReason } =
         await createBrowserProviderAndSigner(ethereumProvider, account);
 
       // Check if network is supported
@@ -868,9 +891,7 @@ export const WalletProvider = ({ children }) => {
             ? 'Boing Express'
             : 'MetaMask';
       toast.success(`Fresh connection established with ${network.name} via ${walletName}`);
-      if (!evmSigner) {
-        toast.error('Transaction signing is not ready. Try opening your wallet extension or connect again.');
-      }
+      toastIfNoEvmSigner(evmSigner, evmSignerUnavailableReason, { reconnectHint: true });
       return true;
 
     } catch (error) {
@@ -946,10 +967,9 @@ export const WalletProvider = ({ children }) => {
           const newId = await getChainIdFromBoingCompatibleProvider(raw);
           setChainId(newId);
           try {
-            const newProvider = new ethers.BrowserProvider(raw);
-            const newSigner = await newProvider.getSigner();
-            setProvider(newProvider);
-            setSigner(newSigner);
+            const { browserProvider: bp, signer: sig } = await createBrowserProviderAndSigner(raw, account);
+            setProvider(bp);
+            setSigner(sig);
           } catch (e) {
             console.warn('[WalletContext] Ethers refresh after boing_switchChain:', e);
           }
@@ -983,10 +1003,9 @@ export const WalletProvider = ({ children }) => {
       
       // Update provider and signer for the new network
       console.log('🔄 Updating provider and signer for new network...');
-      const newProvider = new ethers.BrowserProvider(raw);
-      const newSigner = await newProvider.getSigner();
-      setProvider(newProvider);
-      setSigner(newSigner);
+      const { browserProvider: bp, signer: sig } = await createBrowserProviderAndSigner(raw, account);
+      setProvider(bp);
+      setSigner(sig);
       console.log('✅ Provider and signer updated for new network');
       
       toast.success(`Switched to ${targetNetwork.name}`);
@@ -1020,10 +1039,9 @@ export const WalletProvider = ({ children }) => {
           
           // Update provider and signer for the new network
           console.log('🔄 Updating provider and signer for new network...');
-          const newProvider = new ethers.BrowserProvider(raw);
-          const newSigner = await newProvider.getSigner();
-          setProvider(newProvider);
-          setSigner(newSigner);
+          const { browserProvider: bp, signer: sig } = await createBrowserProviderAndSigner(raw, account);
+          setProvider(bp);
+          setSigner(sig);
           console.log('✅ Provider and signer updated for new network');
           
           toast.success(`Added and switched to ${targetNetwork.name}`);
