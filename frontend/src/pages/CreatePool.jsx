@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useWallet } from '../contexts/WalletContext';
@@ -13,6 +13,8 @@ import { DexFeatureBanner } from '../components/NetworkSupportBanner';
 import { useAchievements } from '../contexts/AchievementContext';
 import ShareCardModal from '../components/ShareCardModal';
 import NativeBoingL1IntegratedHub from '../components/NativeBoingL1IntegratedHub';
+import NativeAmmLiquidityRoutesHint from '../components/NativeAmmLiquidityRoutesHint';
+import getFeatureSupport from '../config/featureSupport';
 
 
 
@@ -62,7 +64,8 @@ function CreatePool() {
   const { isConnected, account, connectWallet } = useWalletConnection();
   const { chainId, switchNetwork } = useWallet();
   const { record: recordAchievement } = useAchievements() || {};
-  
+  const featureSupport = useMemo(() => getFeatureSupport(Number(chainId) || 0), [chainId]);
+
   // Add CSS for range slider
   useEffect(() => {
     const style = document.createElement('style');
@@ -1300,7 +1303,10 @@ function CreatePool() {
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">
             <DexFeatureBanner featureLabel="Create Pool" currentChainId={chainId} onSwitchNetwork={switchNetwork} />
-            {chainId === BOING_NATIVE_L1_CHAIN_ID && <NativeBoingL1IntegratedHub feature="createPool" />}
+            {chainId === BOING_NATIVE_L1_CHAIN_ID && !featureSupport.hasNativeAmm && (
+              <NativeBoingL1IntegratedHub feature="createPool" />
+            )}
+            <NativeAmmLiquidityRoutesHint />
             {/* Header */}
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold text-white mb-4">Create Liquidity Pool</h1>

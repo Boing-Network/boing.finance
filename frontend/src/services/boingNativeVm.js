@@ -94,7 +94,15 @@ export async function qaCheckBoingDeploy(bytecodeHex, fields = {}, options = {})
 /**
  * @param {string} hexSignedTx — hex-encoded signed Boing transaction (bincode)
  * @param {{ signal?: AbortSignal }} [options]
- * @returns {Promise<{ gas_used: number; success: boolean; error?: string }>}
+ * @returns {Promise<{
+ *   gas_used: number,
+ *   success: boolean,
+ *   return_data?: string,
+ *   logs?: unknown[],
+ *   error?: string,
+ *   suggested_access_list?: { read: string[], write: string[] },
+ *   access_list_covers_suggestion?: boolean
+ * }>}
  */
 export async function simulateBoingSignedTransaction(hexSignedTx, options = {}) {
   const hex = normalizeBoingRpcHex(hexSignedTx);

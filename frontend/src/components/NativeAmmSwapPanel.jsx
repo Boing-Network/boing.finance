@@ -14,8 +14,9 @@ import {
   parseNativeAmmReserveU128,
 } from '../services/nativeAmmCalldata';
 import { nativeConstantProductPoolAccessListJson } from '../services/nativeAmmAccessList';
-import { boingExpressSendTransaction } from '../services/boingExpressNativeTx';
+import { boingExpressContractCallSignSimulateSubmit } from '../services/boingExpressNativeTx';
 import { getWindowBoingProvider } from '../utils/boingWalletDiscovery';
+import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
 
 function pickExpressProvider(getWalletProvider) {
   try {
@@ -142,7 +143,7 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {
 
     setBusy(true);
     try {
-      const hash = await boingExpressSendTransaction(p, {
+      const hash = await boingExpressContractCallSignSimulateSubmit(p, {
         type: 'contract_call',
         contract: pool,
         calldata,
@@ -152,7 +153,7 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {
       await loadReserves();
       setAmountIn('');
     } catch (e) {
-      toast.error(e?.message || 'boing_sendTransaction failed');
+      toast.error(formatBoingExpressRpcError(e));
     } finally {
       setBusy(false);
     }
@@ -188,7 +189,7 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {
 
     setBusy(true);
     try {
-      const hash = await boingExpressSendTransaction(p, {
+      const hash = await boingExpressContractCallSignSimulateSubmit(p, {
         type: 'contract_call',
         contract: pool,
         calldata,
@@ -199,7 +200,7 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {
       setAddAmountA('');
       setAddAmountB('');
     } catch (e) {
-      toast.error(e?.message || 'boing_sendTransaction failed');
+      toast.error(formatBoingExpressRpcError(e));
     } finally {
       setBusy(false);
     }
@@ -220,8 +221,9 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {
       </h2>
       <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
         Configured via <code className="text-xs">REACT_APP_BOING_NATIVE_AMM_POOL</code> (32-byte pool id). Integer
-        ledger units only (≤ u64 for correct VM math). Requires{' '}
-        <strong>Boing Express</strong> —{' '}
+        ledger units only (≤ u64 for correct VM math). Submits run <strong>simulate</strong> on the RPC after you sign;
+        if the node widens the access list you may be asked to <strong>sign again</strong>. Pool bytecode is{' '}
+        <strong>immutable</strong> (no admin pause) in this MVP. Requires <strong>Boing Express</strong> —{' '}
         <Link to="/boing/native-vm" className="text-blue-400 underline text-sm">
           Native VM tools
         </Link>

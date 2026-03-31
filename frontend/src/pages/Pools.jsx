@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useWallet } from '../contexts/WalletContext';
@@ -19,6 +19,8 @@ import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/network
 import { useAchievements } from '../contexts/AchievementContext';
 import ShareCardModal from '../components/ShareCardModal';
 import NativeBoingL1IntegratedHub from '../components/NativeBoingL1IntegratedHub';
+import NativeAmmLiquidityRoutesHint from '../components/NativeAmmLiquidityRoutesHint';
+import getFeatureSupport from '../config/featureSupport';
 
 // Pool Card Component
 const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveLiquidity }) => {
@@ -692,6 +694,7 @@ const Pools = () => {
   const { isConnected, account } = useWalletConnection();
   const { chainId } = useWallet();
   const { record: recordAchievement } = useAchievements() || {};
+  const featureSupport = useMemo(() => getFeatureSupport(Number(chainId) || 0), [chainId]);
   // Wallet state initialized
   const [activeTab, setActiveTab] = useState('all-pools');
   const [selectedPool, setSelectedPool] = useState(null);
@@ -1035,7 +1038,10 @@ const Pools = () => {
               </p>
             </div>
 
-            {chainId === BOING_NATIVE_L1_CHAIN_ID && <NativeBoingL1IntegratedHub feature="pools" />}
+            {chainId === BOING_NATIVE_L1_CHAIN_ID && !featureSupport.hasNativeAmm && (
+              <NativeBoingL1IntegratedHub feature="pools" />
+            )}
+            <NativeAmmLiquidityRoutesHint />
 
             {/* Tabs */}
             <div className="bg-gray-800 rounded-xl p-2 mb-8 border border-gray-700">

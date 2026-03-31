@@ -10,6 +10,7 @@ import {
   getChainIdFromBoingCompatibleProvider,
   switchToBoingTestnetInWallet
 } from '../utils/boingWalletDiscovery';
+import { requestBoingExpressConnectionProof } from '../utils/boingExpressConnectionProof';
 
 /**
  * ethers v6 BrowserProvider expects EVM 20-byte addresses. Boing Express exposes 32-byte
@@ -258,6 +259,17 @@ export const WalletProvider = ({ children }) => {
         activeEip1193ProviderRef.current = null;
         setIsConnecting(false);
         return false;
+      }
+
+      if (isBoingWallet) {
+        const proof = await requestBoingExpressConnectionProof(provider, account);
+        if (!proof.ok) {
+          activeEip1193ProviderRef.current = null;
+          localStorage.removeItem('walletConnected');
+          localStorage.removeItem('walletType');
+          setIsConnecting(false);
+          return false;
+        }
       }
 
       setAccount(account);
@@ -626,6 +638,22 @@ export const WalletProvider = ({ children }) => {
         return false;
       }
 
+      if (isBoingWallet) {
+        const proof = await requestBoingExpressConnectionProof(ethereumProvider, account);
+        if (!proof.ok) {
+          activeEip1193ProviderRef.current = null;
+          if (proof.reason === 'user_rejected') {
+            toast.error('Sign the connection message in Boing Express to continue.');
+          } else {
+            toast.error(
+              'Boing Express must sign the connection message. Update the extension or use boing_signMessage / personal_sign support.'
+            );
+          }
+          setIsConnecting(false);
+          return false;
+        }
+      }
+
       setAccount(account);
       setProvider(ethersBrowserProvider);
       setSigner(evmSigner);
@@ -729,6 +757,22 @@ export const WalletProvider = ({ children }) => {
         activeEip1193ProviderRef.current = null;
         setIsConnecting(false);
         return false;
+      }
+
+      if (isBoingWallet) {
+        const proof = await requestBoingExpressConnectionProof(ethereumProvider, account);
+        if (!proof.ok) {
+          activeEip1193ProviderRef.current = null;
+          if (proof.reason === 'user_rejected') {
+            toast.error('Sign the connection message in Boing Express to continue.');
+          } else {
+            toast.error(
+              'Boing Express must sign the connection message. Update the extension or use boing_signMessage / personal_sign support.'
+            );
+          }
+          setIsConnecting(false);
+          return false;
+        }
       }
 
       // Update state
@@ -856,6 +900,22 @@ export const WalletProvider = ({ children }) => {
         activeEip1193ProviderRef.current = null;
         setIsConnecting(false);
         return false;
+      }
+
+      if (isBoingWallet) {
+        const proof = await requestBoingExpressConnectionProof(ethereumProvider, account);
+        if (!proof.ok) {
+          activeEip1193ProviderRef.current = null;
+          if (proof.reason === 'user_rejected') {
+            toast.error('Sign the connection message in Boing Express to continue.');
+          } else {
+            toast.error(
+              'Boing Express must sign the connection message. Update the extension or use boing_signMessage / personal_sign support.'
+            );
+          }
+          setIsConnecting(false);
+          return false;
+        }
       }
 
       // Detect wallet type
