@@ -10,6 +10,28 @@ import {
   switchToBoingTestnetInWallet
 } from '../utils/boingWalletDiscovery';
 
+/**
+ * ethers v6: some EIP-1193 wallets (e.g. Boing Express) fail default getSigner(); passing the
+ * connected account address usually resolves it.
+ */
+async function createBrowserProviderAndSigner(eip1193Provider, accountAddress) {
+  const browserProvider = new ethers.BrowserProvider(eip1193Provider);
+  let signer = null;
+  try {
+    signer = await browserProvider.getSigner();
+  } catch (e) {
+    console.warn('[WalletContext] getSigner() failed, will retry with address if available:', e?.message || e);
+  }
+  if (!signer && accountAddress) {
+    try {
+      signer = await browserProvider.getSigner(accountAddress);
+    } catch (e2) {
+      console.warn('[WalletContext] getSigner(account) failed:', e2?.message || e2);
+    }
+  }
+  return { browserProvider, signer };
+}
+
 const WalletContext = createContext();
 
 export { WalletContext };
@@ -198,14 +220,7 @@ export const WalletProvider = ({ children }) => {
 
       activeEip1193ProviderRef.current = provider;
 
-      let ethersProvider = null;
-      let signer = null;
-      try {
-        ethersProvider = new ethers.BrowserProvider(provider);
-        signer = await ethersProvider.getSigner();
-      } catch (e) {
-        console.warn('[WalletContext] Ethers BrowserProvider/getSigner unavailable:', e);
-      }
+      const { browserProvider: ethersProvider, signer } = await createBrowserProviderAndSigner(provider, account);
 
       const network = getNetworkByChainId(chainId);
       if (!network) {
@@ -227,6 +242,10 @@ export const WalletProvider = ({ children }) => {
       localStorage.removeItem('userDisconnected');
 
       setupEventListeners();
+
+      if (!signer) {
+        toast.error('Wallet connected, but transaction signing is not ready. Try disconnect and connect again.');
+      }
 
       return true;
 
@@ -299,9 +318,26 @@ export const WalletProvider = ({ children }) => {
       // This avoids Phantom interception since we're using the direct provider reference
       const accounts = await lastProvider.request({ method: 'eth_accounts' });
       if (accounts.length > 0 && !userDisconnected) {
-        const chainId = await lastProvider.request({ method: 'eth_chainId' });
-        // Reconnecting to wallet silently
-        await connectWalletSilently(accounts[0], parseInt(chainId, 16), lastProvider);
+        let chainIdNum;
+        if (lastWalletType === 'boingExpress') {
+          chainIdNum = await getChainIdFromBoingCompatibleProvider(lastProvider);
+        } else {
+          const hex = await lastProvider.request({ method: 'eth_chainId' });
+          chainIdNum = parseInt(hex, 16);
+        }
+        if (Number.isNaN(chainIdNum)) {
+          try {
+            chainIdNum = await getChainIdFromBoingCompatibleProvider(lastProvider);
+          } catch {
+            chainIdNum = NaN;
+          }
+        }
+        if (Number.isNaN(chainIdNum)) {
+          localStorage.removeItem('walletConnected');
+          localStorage.removeItem('walletType');
+          return;
+        }
+        await connectWalletSilently(accounts[0], chainIdNum, lastProvider);
       } else {
         // No accounts available - clearing connection state
         // Clear connection state if no accounts
@@ -551,14 +587,8 @@ export const WalletProvider = ({ children }) => {
 
       activeEip1193ProviderRef.current = ethereumProvider;
 
-      let ethersBrowserProvider = null;
-      let evmSigner = null;
-      try {
-        ethersBrowserProvider = new ethers.BrowserProvider(ethereumProvider);
-        evmSigner = await ethersBrowserProvider.getSigner();
-      } catch (e) {
-        console.warn('[WalletContext] Ethers BrowserProvider/getSigner unavailable:', e);
-      }
+      const { browserProvider: ethersBrowserProvider, signer: evmSigner } =
+        await createBrowserProviderAndSigner(ethereumProvider, account);
 
       const network = getNetworkByChainId(chainId);
       if (!network) {
@@ -581,6 +611,10 @@ export const WalletProvider = ({ children }) => {
       localStorage.removeItem('userDisconnected');
 
       setupEventListeners();
+
+      if (!evmSigner) {
+        toast.error('Wallet connected, but transaction signing is not ready. Try disconnect and connect again.');
+      }
 
       return true;
 
@@ -659,14 +693,8 @@ export const WalletProvider = ({ children }) => {
 
       activeEip1193ProviderRef.current = ethereumProvider;
 
-      let ethersBrowserProvider = null;
-      let evmSigner = null;
-      try {
-        ethersBrowserProvider = new ethers.BrowserProvider(ethereumProvider);
-        evmSigner = await ethersBrowserProvider.getSigner();
-      } catch (e) {
-        console.warn('[WalletContext] Ethers BrowserProvider/getSigner unavailable:', e);
-      }
+      const { browserProvider: ethersBrowserProvider, signer: evmSigner } =
+        await createBrowserProviderAndSigner(ethereumProvider, account);
 
       // Check if network is supported
       const network = getNetworkByChainId(chainId);
@@ -691,6 +719,10 @@ export const WalletProvider = ({ children }) => {
       localStorage.removeItem('userDisconnected'); // Clear disconnection flag
 
       setupEventListeners();
+
+      if (!evmSigner) {
+        toast.error('Wallet connected, but transaction signing is not ready. Try disconnect and connect again.');
+      }
 
       const walletName =
         detectedWalletType === 'coinbase'
@@ -791,14 +823,8 @@ export const WalletProvider = ({ children }) => {
 
       activeEip1193ProviderRef.current = ethereumProvider;
 
-      let ethersBrowserProvider = null;
-      let evmSigner = null;
-      try {
-        ethersBrowserProvider = new ethers.BrowserProvider(ethereumProvider);
-        evmSigner = await ethersBrowserProvider.getSigner();
-      } catch (e) {
-        console.warn('[WalletContext] Ethers BrowserProvider/getSigner unavailable:', e);
-      }
+      const { browserProvider: ethersBrowserProvider, signer: evmSigner } =
+        await createBrowserProviderAndSigner(ethereumProvider, account);
 
       // Check if network is supported
       const network = getNetworkByChainId(chainId);
@@ -842,6 +868,9 @@ export const WalletProvider = ({ children }) => {
             ? 'Boing Express'
             : 'MetaMask';
       toast.success(`Fresh connection established with ${network.name} via ${walletName}`);
+      if (!evmSigner) {
+        toast.error('Transaction signing is not ready. Try opening your wallet extension or connect again.');
+      }
       return true;
 
     } catch (error) {

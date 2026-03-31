@@ -986,12 +986,20 @@ export default function DeployToken() {
 
   const handleDeploy = async (e) => {
     e.preventDefault();
-    if (!isConnected || !signer) {
+    if (!isConnected) {
       toast.error('Please connect your wallet');
       return;
     }
+    if (!signer) {
+      toast.error(
+        'Your wallet is connected but signing is not available. Disconnect and reconnect, or pick your wallet again from the wallet menu.'
+      );
+      return;
+    }
     if (!network) {
-      toast.error('Please connect to a supported network. Try refreshing the page or reconnecting your wallet.');
+      toast.error(
+        'Could not detect a supported network from your wallet. Switch to a supported chain (e.g. Boing Testnet or Sepolia) or reconnect.'
+      );
       return;
     }
     if (!name || !symbol || !initialSupply || !website) {
@@ -1595,6 +1603,11 @@ export default function DeployToken() {
                 Create and deploy your own ERC-20 token with advanced security features, 
                 comprehensive documentation, and professional-grade infrastructure.
               </p>
+              {!isSolana && (
+                <p className="text-sm max-w-2xl mx-auto mt-3 rounded-lg border px-3 py-2" style={{ borderColor: 'var(--border-color)', color: 'var(--text-tertiary)' }}>
+                  ERC-20 deployment uses <strong style={{ color: 'var(--text-secondary)' }}>EVM</strong> in the app chain toggle (header). If the header shows Solana, switch to EVM and connect MetaMask, Boing Express, or another Ethereum wallet.
+                </p>
+              )}
               
               {/* Quick Actions */}
               <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
@@ -1707,9 +1720,14 @@ export default function DeployToken() {
                       Pricing for <span className="text-blue-400 font-medium">{network.name}</span> network
                     </p>
                   )}
-                  {!network && (
+                  {!network && !isConnected && (
                     <p className="text-sm mt-1" style={{ color: 'var(--text-tertiary)' }}>
-                      Connect wallet to see network-specific pricing
+                      Connect your EVM wallet to see network-specific pricing
+                    </p>
+                  )}
+                  {!network && isConnected && (
+                    <p className="text-sm mt-1 text-amber-400/90">
+                      Wallet connected{account ? ` (${account.slice(0, 6)}…${account.slice(-4)})` : ''}, but the chain could not be read. Switch to a supported network in your wallet or reconnect.
                     </p>
                   )}
                   {/* Deployment Method Indicator */}
@@ -2275,7 +2293,7 @@ export default function DeployToken() {
                 <div className="text-center pt-4 sm:pt-6">
                   <button
                     type="submit"
-                    disabled={deploying || !isConnected}
+                    disabled={deploying || !isConnected || !signer}
                     className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-lg transition-colors text-base sm:text-lg"
                   >
                     {deploying ? (
