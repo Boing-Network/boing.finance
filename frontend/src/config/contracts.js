@@ -354,8 +354,9 @@ export const CONTRACTS = {
 // Optional: enable in-app native CP pool swap on Boing L1 (32-byte hex AccountId).
 (function applyBoingNativeAmmPoolFromEnv() {
   try {
-    const v =
-      typeof process !== 'undefined' && process.env && process.env.REACT_APP_BOING_NATIVE_AMM_POOL;
+    // Vite replaces `process.env.REACT_APP_*` with string literals at build time. Do not guard with
+    // `typeof process` / `process.env` — some minifiers rewrite that to broken comparisons and the pool never applies.
+    const v = process.env.REACT_APP_BOING_NATIVE_AMM_POOL;
     if (!v || typeof v !== 'string' || !CONTRACTS[6913]) return;
     const t = v.trim();
     if (/^0x[0-9a-fA-F]{64}$/i.test(t)) {

@@ -1,4 +1,10 @@
 /**
+ * Default QA category for fungible-style deploys with `contract_deploy_meta` asset fields.
+ * Boing Express also defaults to this when `purpose_category` is omitted but metadata is present.
+ */
+export const BOING_QA_PURPOSE_TOKEN = 'token';
+
+/**
  * Purpose categories accepted by protocol QA (boing_qa / mempool).
  * Align with crates/boing-qa VALID_PURPOSE_CATEGORIES (lowercase comparison).
  */

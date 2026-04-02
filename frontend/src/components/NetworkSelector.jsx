@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useCloseOnPointerOutside } from '../hooks/useCloseOnPointerOutside';
 import { useWallet } from '../contexts/WalletContext';
 import { getMainnetNetworks, getTestnetNetworks } from '../config/networks';
+import { formatEip155ChainId } from '../config/boingChainIds';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 const NetworkSelector = () => {
@@ -66,11 +67,21 @@ const NetworkSelector = () => {
       <button
         type="button"
         onClick={() => setShowDropdown(!showDropdown)}
-        className="bg-theme-secondary hover:bg-theme-tertiary text-theme-primary px-2 py-2 min-[1150px]:max-xl:px-2 xl:px-3 rounded-lg font-medium transition-colors flex items-center gap-1.5 xl:gap-2 border border-theme max-w-[min(100%,11rem)] min-[1150px]:max-xl:max-w-[9.5rem] xl:max-w-[14rem] 2xl:max-w-none min-w-0"
+        title="EIP-155 chain ID from your wallet (Boing L1 testnet is 6913 · 0x1b01)"
+        className="bg-theme-secondary hover:bg-theme-tertiary text-theme-primary px-2 py-2 min-[1150px]:max-xl:px-2 xl:px-3 rounded-lg font-medium transition-colors flex items-center gap-1.5 xl:gap-2 border border-theme max-w-[min(100%,11rem)] min-[1150px]:max-xl:max-w-[9.5rem] xl:max-w-[16rem] 2xl:max-w-none min-w-0"
       >
         <span className="text-lg shrink-0">{getNetworkIcon(currentNetwork)}</span>
-        <span className="text-xs min-[1150px]:max-xl:text-xs xl:text-sm truncate min-w-0">{currentNetwork?.name || 'Unknown Network'}</span>
-        <ChevronDownIcon className="w-3 h-3" />
+        <span className="flex min-w-0 flex-col items-start text-left">
+          <span className="text-xs min-[1150px]:max-xl:text-xs xl:text-sm truncate max-w-full">
+            {currentNetwork?.name || 'Unknown Network'}
+          </span>
+          {chainId != null && (
+            <span className="text-[0.65rem] font-mono text-theme-tertiary tabular-nums truncate max-w-full">
+              {formatEip155ChainId(chainId)}
+            </span>
+          )}
+        </span>
+        <ChevronDownIcon className="w-3 h-3 shrink-0" />
       </button>
 
       {showDropdown && (
@@ -96,6 +107,9 @@ const NetworkSelector = () => {
                     <span className="text-lg">{getNetworkIcon(network)}</span>
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-sm">{network.name}</div>
+                      <div className="text-xs text-theme-tertiary font-mono tabular-nums">
+                        {formatEip155ChainId(network.chainId)}
+                      </div>
                       <div className="text-xs text-theme-tertiary">
                         {network.nativeCurrency.symbol}
                       </div>
@@ -128,6 +142,9 @@ const NetworkSelector = () => {
                     <span className="text-lg">{getNetworkIcon(network)}</span>
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-sm">{network.name}</div>
+                      <div className="text-xs text-theme-tertiary font-mono tabular-nums">
+                        {formatEip155ChainId(network.chainId)}
+                      </div>
                       <div className="text-xs text-theme-tertiary">
                         {network.nativeCurrency.symbol} {network.features?.includes('dexDeployed') && '• DEX Deployed'}
                       </div>
