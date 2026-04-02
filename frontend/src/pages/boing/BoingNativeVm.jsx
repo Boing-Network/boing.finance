@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
 import { PageHeader, PageCard } from '../../components/PageLayout';
@@ -90,6 +90,13 @@ export default function BoingNativeVm() {
   const [exCallContract, setExCallContract] = useState('');
   const [exCallCalldata, setExCallCalldata] = useState('');
   const [exStakeAmount, setExStakeAmount] = useState('');
+
+  const deployHasAssetMeta = exAssetName.trim() !== '' || exAssetSymbol.trim() !== '';
+  useEffect(() => {
+    if (deployHasAssetMeta) {
+      setExDeployPurpose('token');
+    }
+  }, [deployHasAssetMeta]);
 
   const loadAccount = async () => {
     if (!accountHex) {
@@ -450,10 +457,16 @@ export default function BoingNativeVm() {
                   <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
                     Purpose category (protocol QA)
                   </label>
+                  {deployHasAssetMeta && (
+                    <p className="text-[11px] mb-1" style={{ color: 'var(--text-tertiary)' }}>
+                      Locked to <strong className="text-[var(--text-primary)]">token</strong> while asset name or symbol is set (typical token deploy).
+                    </p>
+                  )}
                   <select
                     value={exDeployPurpose}
                     onChange={(e) => setExDeployPurpose(e.target.value)}
-                    className="w-full text-sm p-2 rounded-lg border"
+                    disabled={deployHasAssetMeta}
+                    className="w-full text-sm p-2 rounded-lg border disabled:opacity-70"
                     style={{
                       backgroundColor: 'var(--bg-tertiary)',
                       borderColor: 'var(--border-color)',

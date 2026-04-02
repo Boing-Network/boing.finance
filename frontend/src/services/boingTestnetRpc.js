@@ -1,6 +1,5 @@
+import { BOING_TESTNET_CHAIN_DECIMAL } from '../config/boingChainIds';
 import { getNetworkByChainId } from '../config/networks';
-
-const BOING_TESTNET_CHAIN_ID = 6913;
 
 function normalizeRpcBaseUrl(url) {
   if (!url || typeof url !== 'string') return '';
@@ -12,7 +11,7 @@ function normalizeRpcBaseUrl(url) {
  * @returns {string}
  */
 export function getBoingTestnetRpcUrl() {
-  const net = getNetworkByChainId(BOING_TESTNET_CHAIN_ID);
+  const net = getNetworkByChainId(BOING_TESTNET_CHAIN_DECIMAL);
   const fromConfig = net?.rpcUrls?.[0] || net?.rpcUrl;
   return normalizeRpcBaseUrl(fromConfig) || 'https://testnet-rpc.boing.network';
 }

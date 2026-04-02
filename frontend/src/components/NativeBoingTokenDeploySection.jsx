@@ -5,11 +5,7 @@ import { useWallet } from '../contexts/WalletContext';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { qaCheckBoingDeploy } from '../services/boingNativeVm';
 import { boingExpressSendTransaction } from '../services/boingExpressNativeTx';
-import {
-  BOING_QA_EMPTY_DESCRIPTION_HASH,
-  BOING_QA_PURPOSE_OPTIONS,
-  isValidBoingQaPurpose,
-} from '../config/boingQa';
+import { BOING_QA_EMPTY_DESCRIPTION_HASH, BOING_QA_PURPOSE_TOKEN, isValidBoingQaPurpose } from '../config/boingQa';
 import { getWindowBoingProvider } from '../utils/boingWalletDiscovery';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
 
@@ -179,26 +175,15 @@ export default function NativeBoingTokenDeploySection({ tokenName, tokenSymbol }
             }}
           />
         </div>
-        <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
-            purpose_category
-          </label>
-          <select
-            value={purpose}
-            onChange={(e) => setPurpose(e.target.value)}
-            className="w-full text-sm p-2 rounded-lg border"
-            style={{
-              backgroundColor: 'var(--bg-secondary)',
-              borderColor: 'var(--border-color)',
-              color: 'var(--text-primary)',
-            }}
-          >
-            {BOING_QA_PURPOSE_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+        <div className="sm:col-span-2">
+          <p className="text-xs rounded-lg px-2 py-2 border" style={{ borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}>
+            <strong style={{ color: 'var(--text-primary)' }}>QA purpose:</strong>{' '}
+            <code className="text-[11px]">{purpose}</code> — fixed for token deployment. For other categories, use{' '}
+            <Link to="/boing/native-vm" className="text-green-400 underline">
+              Native VM tools
+            </Link>
+            .
+          </p>
         </div>
         <div>
           <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>

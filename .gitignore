@@ -5,5 +5,9 @@ backend/.wrangler/tmp/
 frontend/dist/
 frontend/build/
 
+# Playwright
+frontend/test-results/
+frontend/playwright-report/
+
 # Windows accidental reserved-name file
 nul
