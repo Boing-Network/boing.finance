@@ -1,3 +1,5 @@
+import { getCanonicalBoingTestnetNativeAmmPoolHex } from './boingCanonicalTestnetPool';
+
 // Contract addresses configuration for different networks
 export const CONTRACTS = {
   // Boing Network L1 testnet — native chain; EVM-style contracts not used on-chain yet.
@@ -6,7 +8,7 @@ export const CONTRACTS = {
     boingToken: '0x0000000000000000000000000000000000000000',
     treasury: '0x0000000000000000000000000000000000000000',
     nftStaking: '0x0000000000000000000000000000000000000000',
-    /** 32-byte Boing `AccountId` of deployed `constant_product_pool_bytecode` (see boing.network `dump_native_amm_pool` example). Overridden by `REACT_APP_BOING_NATIVE_AMM_POOL`. */
+    /** 32-byte Boing `AccountId` of deployed `constant_product_pool_bytecode`. Set via `REACT_APP_BOING_NATIVE_AMM_POOL` or `boingCanonicalTestnetPool.js` when ops publishes the canonical id. */
     nativeConstantProductPool: '0x0000000000000000000000000000000000000000000000000000000000000000',
     dexFactory: '0x0000000000000000000000000000000000000000',
     dexRouter: '0x0000000000000000000000000000000000000000',
@@ -351,16 +353,25 @@ export const CONTRACTS = {
   }
 };
 
-// Optional: enable in-app native CP pool swap on Boing L1 (32-byte hex AccountId).
-(function applyBoingNativeAmmPoolFromEnv() {
+// Optional: enable in-app native CP pool swap on Boing L1 (32-byte hex AccountId). Env overrides canonical constant.
+(function applyBoingNativeAmmPoolFromConfig() {
   try {
     // Vite replaces `process.env.REACT_APP_*` with string literals at build time. Do not guard with
     // `typeof process` / `process.env` — some minifiers rewrite that to broken comparisons and the pool never applies.
-    const v = process.env.REACT_APP_BOING_NATIVE_AMM_POOL;
-    if (!v || typeof v !== 'string' || !CONTRACTS[6913]) return;
-    const t = v.trim();
-    if (/^0x[0-9a-fA-F]{64}$/i.test(t)) {
-      CONTRACTS[6913].nativeConstantProductPool = `0x${t.slice(2).toLowerCase()}`;
+    if (!CONTRACTS[6913]) return;
+    const envRaw = process.env.REACT_APP_BOING_NATIVE_AMM_POOL;
+    let t = '';
+    if (typeof envRaw === 'string' && envRaw.trim()) {
+      const e = envRaw.trim();
+      if (/^0x[0-9a-fA-F]{64}$/i.test(e)) {
+        t = `0x${e.slice(2).toLowerCase()}`;
+      }
+    }
+    if (!t) {
+      t = getCanonicalBoingTestnetNativeAmmPoolHex();
+    }
+    if (t) {
+      CONTRACTS[6913].nativeConstantProductPool = t;
     }
   } catch {
     /* ignore */

@@ -396,7 +396,7 @@ const Swap = () => {
         type: 'error',
         message:
           chainId === BOING_NATIVE_L1_CHAIN_ID
-            ? 'On Boing testnet, set REACT_APP_BOING_NATIVE_AMM_POOL, use native tools, or switch to Sepolia for EVM DEX swap.'
+            ? 'On Boing testnet: use the native pool panel below (Boing Express) when available, open Native VM tools, or switch to Sepolia for the classic EVM swap.'
             : 'DEX swapping is not yet available on this network. Currently only supported on Sepolia testnet.',
       };
     }
@@ -404,7 +404,7 @@ const Swap = () => {
     if (featureSupport.swap === 'native_amm') {
       return {
         type: 'success',
-        message: 'Native pool swap — use the Boing VM panel below with Boing Express.',
+        message: 'Native pool swap — confirm amounts below, then approve in Boing Express.',
       };
     }
 
@@ -449,7 +449,7 @@ const Swap = () => {
     }
 
     if (featureSupport.swap === 'native_amm') {
-      toast.error('Use the native pool panel for Boing VM swaps, or select an external quote.');
+      toast.error('On Boing testnet, use the Native constant-product pool section above (Boing Express), or choose an external quote.');
       return;
     }
 
@@ -467,7 +467,7 @@ const Swap = () => {
     if (!swapRouterAddress || swapRouterAddress === '0x0000000000000000000000000000000000000000') {
       toast.error(
         chainId === BOING_NATIVE_L1_CHAIN_ID
-          ? 'On Boing testnet, use native BOING tools or switch to Sepolia for in-app DEX swap.'
+          ? 'On Boing testnet, use the native pool panel or Native VM page with Boing Express—or switch to Sepolia for the EVM swap.'
           : 'DEX swapping is not yet available on this network. Currently only supported on Sepolia testnet.'
       );
       return;

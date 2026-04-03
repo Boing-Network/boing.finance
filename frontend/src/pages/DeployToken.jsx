@@ -1617,6 +1617,24 @@ export default function DeployToken() {
                 Create and deploy your own ERC-20 token with advanced security features, 
                 comprehensive documentation, and professional-grade infrastructure.
               </p>
+              {!isSolana &&
+                isConnected &&
+                chainId === BOING_NATIVE_L1_CHAIN_ID &&
+                walletType === 'boingExpress' && (
+                  <p
+                    className="text-sm max-w-2xl mx-auto mt-4 rounded-lg border px-4 py-3 text-left"
+                    style={{
+                      borderColor: 'rgba(45, 212, 191, 0.45)',
+                      backgroundColor: 'var(--bg-card)',
+                      color: 'var(--text-secondary)',
+                    }}
+                  >
+                    <strong style={{ color: 'var(--text-primary)' }}>Boing testnet + Boing Express:</strong> the green
+                    section below deploys a <strong>native VM</strong> contract (<code className="text-xs">contract_deploy_meta</code>
+                    ), not an ERC-20 through MetaMask. Use an <strong>EVM wallet on Sepolia</strong> in the header for the
+                    standard ERC-20 deploy form, or paste bytecode and run QA here.
+                  </p>
+                )}
               {!isSolana && (
                 <p className="text-sm max-w-2xl mx-auto mt-3 rounded-lg border px-3 py-2" style={{ borderColor: 'var(--border-color)', color: 'var(--text-tertiary)' }}>
                   ERC-20 deployment uses <strong style={{ color: 'var(--text-secondary)' }}>EVM</strong> in the app chain toggle (header). If the header shows Solana, switch to EVM and connect MetaMask or another Ethereum wallet. Boing Express can expose a native Boing account (32-byte)—that account cannot sign EVM deploys here; use an EVM wallet for this flow or Boing Native VM for native tooling.

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
-import { getExternalSwapUrl } from '../config/networkExternalLinks';
+import { BOING_EXPRESS_ORIGIN, getExternalSwapUrl } from '../config/networkExternalLinks';
 
 const SEPOLIA_CHAIN_ID = 11155111;
 const NATIVE_VM_PATH = '/boing/native-vm';
@@ -13,17 +13,17 @@ const FEATURE_COPY = {
   swap: {
     title: 'Swaps on Boing L1',
     body:
-      'This page’s swap engine talks to an EVM router (Uniswap-style). Boing testnet (chain 6913) does not have those contracts configured here yet—native trading needs Boing VM AMM bytecode deployed and wired like Sepolia.',
+      'The classic swap box below is built for EVM routers (like on Sepolia). On Boing testnet (6913), in-app swaps use the native pool panel once this app build includes the public pool id from operators—or use the Native VM tools for other flows.',
   },
   createPool: {
     title: 'Liquidity pools on Boing L1',
     body:
-      'Pool creation here uses an EVM DEXFactory. On Boing L1, liquidity lives in native VM contracts once they are deployed and exposed in this app (same pattern as EVM, different bytecode and calldata).',
+      'This form creates EVM factory pools (Sepolia). When a native AMM pool is configured for Boing testnet, add liquidity from the Swap page instead. Otherwise use Native VM tools or switch to Sepolia.',
   },
   pools: {
     title: 'Pool list on Boing L1',
     body:
-      'Positions below are loaded from EVM subgraph / RPC paths. On Boing L1, use native tools until indexer + factory addresses are integrated.',
+      'This list reflects EVM DEX positions. On Boing testnet, native pool activity uses the Swap page and explorer — not this EVM subgraph view.',
   },
   bridge: {
     title: 'Bridge on Boing L1',
@@ -88,6 +88,15 @@ export default function NativeBoingL1IntegratedHub({ feature = 'swap' }) {
         </li>
       </ul>
       <div className="flex flex-wrap gap-2">
+        <a
+          href={BOING_EXPRESS_ORIGIN}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium text-white"
+          style={{ backgroundColor: '#0f766e' }}
+        >
+          Get Boing Express
+        </a>
         <Link
           to={NATIVE_VM_PATH}
           className="inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium text-white"

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useWallet } from '../contexts/WalletContext';
@@ -25,12 +25,18 @@ function pickExpressProvider(getWalletProvider) {
 export default function NativeBoingTokenDeploySection({ tokenName, tokenSymbol }) {
   const { chainId, walletType, isConnected, getWalletProvider } = useWallet();
   const [bytecode, setBytecode] = useState('');
-  const [purpose, setPurpose] = useState('token');
+  const purpose = BOING_QA_PURPOSE_TOKEN;
   const [descriptionHash, setDescriptionHash] = useState('');
   const [qaBusy, setQaBusy] = useState(false);
   const [deployBusy, setDeployBusy] = useState(false);
   const [qaResult, setQaResult] = useState(null);
   const [lastTx, setLastTx] = useState(null);
+  /** Required when QA returns `unsure` (community pool) before submit */
+  const [qaPoolAcknowledged, setQaPoolAcknowledged] = useState(false);
+
+  useEffect(() => {
+    setQaPoolAcknowledged(false);
+  }, [bytecode, descriptionHash]);
 
   if (chainId !== BOING_NATIVE_L1_CHAIN_ID || walletType !== 'boingExpress' || !isConnected) {
     return null;
@@ -48,6 +54,7 @@ export default function NativeBoingTokenDeploySection({ tokenName, tokenSymbol }
     }
     setQaBusy(true);
     setQaResult(null);
+    setQaPoolAcknowledged(false);
     try {
       const name = tokenName?.trim() || '';
       const sym = tokenSymbol?.trim() || '';
@@ -107,11 +114,10 @@ export default function NativeBoingTokenDeploySection({ tokenName, tokenSymbol }
         setQaResult(pre);
         return;
       }
-      if (pre.result === 'unsure') {
-        const ok = window.confirm(
-          'Protocol QA: unsure — deploy may be routed to the community pool. Sign and submit anyway?'
-        );
-        if (!ok) return;
+      if (pre.result === 'unsure' && !qaPoolAcknowledged) {
+        toast.error('QA returned “unsure” — check the box below if you accept community QA pool routing, then deploy again.');
+        setQaResult(pre);
+        return;
       }
 
       const desc = descriptionHash.trim();
@@ -124,8 +130,6 @@ export default function NativeBoingTokenDeploySection({ tokenName, tokenSymbol }
         asset_symbol: sym,
         ...(desc ? { description_hash: desc } : {}),
       };
-
-      if (!window.confirm('Sign and submit this deploy via Boing Express?')) return;
 
       const hash = await boingExpressSendTransaction(p, tx);
       const out = typeof hash === 'string' ? hash : JSON.stringify(hash);
@@ -204,6 +208,24 @@ export default function NativeBoingTokenDeploySection({ tokenName, tokenSymbol }
         </div>
       </div>
 
+      {qaResult?.result === 'unsure' && (
+        <label
+          className="flex items-start gap-2 text-xs mb-3 cursor-pointer rounded-lg border px-3 py-2"
+          style={{ borderColor: 'rgba(251, 191, 36, 0.5)', color: 'var(--text-secondary)' }}
+        >
+          <input
+            type="checkbox"
+            className="mt-0.5 shrink-0"
+            checked={qaPoolAcknowledged}
+            onChange={(e) => setQaPoolAcknowledged(e.target.checked)}
+          />
+          <span>
+            I understand this deploy may be <strong style={{ color: 'var(--text-primary)' }}>queued for the community QA pool</strong>{' '}
+            (governance vote may be required before it lands on-chain).
+          </span>
+        </label>
+      )}
+
       <div className="flex flex-wrap gap-2 mb-3">
         <button
           type="button"
@@ -217,7 +239,10 @@ export default function NativeBoingTokenDeploySection({ tokenName, tokenSymbol }
         <button
           type="button"
           onClick={deploy}
-          disabled={deployBusy}
+          disabled={
+            deployBusy ||
+            (qaResult?.result === 'unsure' && !qaPoolAcknowledged)
+          }
           className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
           style={{ backgroundColor: '#059669' }}
         >

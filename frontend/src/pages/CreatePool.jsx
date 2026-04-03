@@ -236,9 +236,15 @@ function CreatePool() {
     // Check if we're on Sepolia (for testing)
     if (chainId !== 11155111) {
       if (chainId === BOING_NATIVE_L1_CHAIN_ID) {
-        toast.error(
-          'Boing testnet: pool creation uses our Sepolia DEX for now. Switch to Sepolia, or use token deploy / native tools on Boing.'
-        );
+        if (featureSupport.hasNativeAmm) {
+          toast.error(
+            'On Boing testnet, add native pool liquidity on the Swap page (expand “Add liquidity” under the native pool section with Boing Express). For EVM-style factory pools, switch to Sepolia.'
+          );
+        } else {
+          toast.error(
+            'Boing testnet: EVM factory pools are on Sepolia in this app. Switch to Sepolia, or use Deploy Token / Native VM on Boing.'
+          );
+        }
       } else {
         toast.error('Please switch to Sepolia testnet to test pool creation');
       }

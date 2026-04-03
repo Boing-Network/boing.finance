@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { ethers } from 'ethers';
-import { getNetworkByChainId, getWalletAddChainParams } from '../config/networks';
+import { getNetworkByChainId, getWalletAddChainParams, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import toast from 'react-hot-toast';
 import {
   getWindowBoingProvider,
@@ -597,8 +597,15 @@ export const WalletProvider = ({ children }) => {
       } else {
         const currentChainId = await getChainIdFromBoingCompatibleProvider(ethereumProvider);
         if (currentChainId !== chainId) {
+          if (chainId === BOING_NATIVE_L1_CHAIN_ID && !isBoingWallet) {
+            toast.error(
+              'Boing testnet needs Boing Express (EVM wallets cannot sign Boing VM transactions). Install from boing.express and connect with it.'
+            );
+            setIsConnecting(false);
+            return false;
+          }
           let switchedViaBoing = false;
-          if (chainId === 6913 && isBoingWallet) {
+          if (chainId === BOING_NATIVE_L1_CHAIN_ID && isBoingWallet) {
             switchedViaBoing = await switchToBoingTestnetInWallet(ethereumProvider);
           }
           if (!switchedViaBoing) {
@@ -1020,7 +1027,14 @@ export const WalletProvider = ({ children }) => {
 
       console.log('📡 Requesting network switch to:', targetNetwork.name);
 
-      if (targetChainId === 6913 && isBoingWallet) {
+      if (targetChainId === BOING_NATIVE_L1_CHAIN_ID && !isBoingWallet) {
+        toast.error(
+          'Boing testnet only works with Boing Express. Install from boing.express, connect here with Boing Express, then switch network.'
+        );
+        return false;
+      }
+
+      if (targetChainId === BOING_NATIVE_L1_CHAIN_ID && isBoingWallet) {
         const switched = await switchToBoingTestnetInWallet(raw);
         if (switched) {
           await new Promise(resolve => setTimeout(resolve, 600));

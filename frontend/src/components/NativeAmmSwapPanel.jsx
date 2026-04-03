@@ -133,14 +133,6 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {
     const dirWord = direction === 'a_to_b' ? 0n : 1n;
     const calldata = encodeNativeAmmSwapCalldataHex(dirWord, amountInBn, minOutBn);
 
-    if (
-      !window.confirm(
-        `Submit native pool swap?\nAmount in: ${amountInBn.toString()}\nMin out: ${minOutBn.toString()}\nCalldata length: ${(calldata.length - 2) / 2} bytes`
-      )
-    ) {
-      return;
-    }
-
     setBusy(true);
     try {
       const hash = await boingExpressContractCallSignSimulateSubmit(p, {
@@ -179,13 +171,6 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {
     }
 
     const calldata = encodeNativeAmmAddLiquidityCalldataHex(addAmountABn, addAmountBBn, 0n);
-    if (
-      !window.confirm(
-        `Add liquidity to native pool?\n+Reserve A: ${addAmountABn.toString()}\n+Reserve B: ${addAmountBBn.toString()}`
-      )
-    ) {
-      return;
-    }
 
     setBusy(true);
     try {
@@ -221,10 +206,10 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {
         Native constant-product pool (Boing VM)
       </h2>
       <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-        Configured via <code className="text-xs">REACT_APP_BOING_NATIVE_AMM_POOL</code> (32-byte pool id). Integer
-        ledger units only (≤ u64 for correct VM math). Submits run <strong>simulate</strong> on the RPC after you sign;
-        if the node widens the access list you may be asked to <strong>sign again</strong>. Pool bytecode is{' '}
-        <strong>immutable</strong> (no admin pause) in this MVP. Requires <strong>Boing Express</strong> —{' '}
+        Trade against the public native constant-product pool for this deployment. Use <strong>whole-number</strong> ledger
+        units only (≤ u64 for correct VM math). After you click swap, <strong>Boing Express</strong> will ask you to sign;
+        the node may request a <strong>second signature</strong> if it widens the access list. Pool bytecode is{' '}
+        <strong>immutable</strong> in this MVP. More flows:{' '}
         <Link to="/boing/native-vm" className="text-blue-400 underline text-sm">
           Native VM tools
         </Link>

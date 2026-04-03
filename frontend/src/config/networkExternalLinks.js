@@ -4,6 +4,9 @@
  * Mainnet-ready: verified URLs from official DEX/bridge aggregators.
  */
 
+/** Official Boing Express wallet (Boing VM signing). See boing.network THREE-CODEBASE-ALIGNMENT.md. */
+export const BOING_EXPRESS_ORIGIN = 'https://boing.express';
+
 export const EXTERNAL_SWAP_URLS = {
   1: 'https://app.1inch.io',
   137: 'https://app.uniswap.org',

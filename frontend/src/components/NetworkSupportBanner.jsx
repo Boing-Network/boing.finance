@@ -1,6 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
-import { getChainsWithDex } from '../config/featureSupport';
+import getFeatureSupport, { getChainsWithDex } from '../config/featureSupport';
 import { getExternalSwapUrl } from '../config/networkExternalLinks';
 
 /**
@@ -10,6 +11,9 @@ import { getExternalSwapUrl } from '../config/networkExternalLinks';
  */
 export default function NetworkSupportBanner({ featureLabel, chainIdsSupported, currentChainId, onSwitchNetwork, showExternalLink = true }) {
   const supported = chainIdsSupported.includes(Number(currentChainId));
+  const boingNativeAmm =
+    Number(currentChainId) === BOING_NATIVE_L1_CHAIN_ID &&
+    getFeatureSupport(Number(currentChainId) || 0).hasNativeAmm;
   if (supported || !currentChainId) return null;
 
   const chainNames = chainIdsSupported
@@ -34,8 +38,20 @@ export default function NetworkSupportBanner({ featureLabel, chainIdsSupported, 
         {chainNames.length > 1 ? chainNames.join(', ') : primaryName}. Switch network or use external DEX.
         {Number(currentChainId) === BOING_NATIVE_L1_CHAIN_ID && (
           <span className="block mt-2 text-xs opacity-90">
-            On Boing testnet, native BOING pays fees; this in-app EVM DEX is wired to Sepolia until factory/router
-            deploy on Boing.
+            {boingNativeAmm && (featureLabel === 'Create Pool' || featureLabel === 'Liquidity') ? (
+              <>
+                A native AMM pool is configured — add liquidity on the{' '}
+                <Link to="/swap" className="text-cyan-400 underline font-medium">
+                  Swap
+                </Link>{' '}
+                page with Boing Express. EVM factory flows stay on Sepolia.
+              </>
+            ) : (
+              <>
+                On Boing testnet, native BOING pays fees; this in-app EVM DEX is wired to Sepolia until factory/router
+                deploy on Boing.
+              </>
+            )}
           </span>
         )}
       </p>
