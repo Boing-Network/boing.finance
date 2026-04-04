@@ -40,7 +40,7 @@ function parsePositiveBigInt(raw) {
 }
 
 /**
- * In-app swap against configured native CP pool (`REACT_APP_BOING_NATIVE_AMM_POOL`).
+ * In-app swap against the configured native CP pool (`contracts` nativeConstantProductPool: env override or canonical testnet id).
  * Requires Boing Express on chain 6913. Reserves are ledger units (u64-safe); no ERC-20 legs.
  */
 export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {

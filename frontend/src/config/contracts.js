@@ -8,7 +8,7 @@ export const CONTRACTS = {
     boingToken: '0x0000000000000000000000000000000000000000',
     treasury: '0x0000000000000000000000000000000000000000',
     nftStaking: '0x0000000000000000000000000000000000000000',
-    /** 32-byte Boing `AccountId` of deployed `constant_product_pool_bytecode`. Set via `REACT_APP_BOING_NATIVE_AMM_POOL` or `boingCanonicalTestnetPool.js` when ops publishes the canonical id. */
+    /** 32-byte Boing `AccountId` — public testnet canonical pool (6913) from `boingCanonicalTestnetPool.js`, overridable by `REACT_APP_BOING_NATIVE_AMM_POOL`. Meaningful only on the shared testnet genesis/RPC, not arbitrary local nodes. */
     nativeConstantProductPool: '0x0000000000000000000000000000000000000000000000000000000000000000',
     dexFactory: '0x0000000000000000000000000000000000000000',
     dexRouter: '0x0000000000000000000000000000000000000000',
