@@ -44,7 +44,7 @@ jobs:
       - name: Checkout boing.network (file: boing-sdk)
         uses: actions/checkout@v4
         with:
-          repository: chiku524/boing.network
+          repository: Boing-Network/boing.network
           path: boing.network
 
       - name: Setup Node.js
@@ -72,7 +72,7 @@ jobs:
       - name: Checkout boing.network (file: boing-sdk)
         uses: actions/checkout@v4
         with:
-          repository: chiku524/boing.network
+          repository: Boing-Network/boing.network
           path: boing.network
 
       - name: Setup Node.js
@@ -105,7 +105,7 @@ jobs:
       - name: Checkout boing.network (file: boing-sdk)
         uses: actions/checkout@v4
         with:
-          repository: chiku524/boing.network
+          repository: Boing-Network/boing.network
           path: boing.network
 
       - name: Setup Node.js
