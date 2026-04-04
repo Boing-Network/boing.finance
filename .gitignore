@@ -1,4 +1,7 @@
 node_modules
+
+# Local link to sibling boing.network repo (file:../boing.network/boing-sdk in frontend/package.json)
+/boing.network
 backend/.wrangler/tmp/
 
 # Frontend build outputs (Vite → dist; legacy CRA → build)

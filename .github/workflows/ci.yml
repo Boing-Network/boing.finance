@@ -41,6 +41,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Checkout boing.network (file: boing-sdk)
+        uses: actions/checkout@v4
+        with:
+          repository: chiku524/boing.network
+          path: boing.network
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -63,6 +69,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Checkout boing.network (file: boing-sdk)
+        uses: actions/checkout@v4
+        with:
+          repository: chiku524/boing.network
+          path: boing.network
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -82,3 +94,37 @@ jobs:
           npm ci
           CI=false npm run build || echo "⚠️ Build completed with warnings (non-blocking)"
           echo "✅ Frontend build check passed"
+
+  e2e-frontend:
+    name: Playwright (native AMM smoke)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Checkout boing.network (file: boing-sdk)
+        uses: actions/checkout@v4
+        with:
+          repository: chiku524/boing.network
+          path: boing.network
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Playwright browser
+        working-directory: frontend
+        run: npx playwright install chromium --with-deps
+
+      - name: Run Playwright
+        working-directory: frontend
+        run: npm run test:e2e
+        env:
+          CI: true
