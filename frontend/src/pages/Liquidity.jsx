@@ -123,9 +123,9 @@ const Liquidity = () => {
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:title" content="Liquidity Pools - boing.finance" />
           <meta name="twitter:description" content="Provide liquidity to earn rewards." />
+          <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
+          <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
           <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
-        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
         </Helmet>
         <div className="relative max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 overflow-x-hidden"><div className="relative z-10"><div className="text-center py-12">
               <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">Connect Your Wallet</h1>
@@ -153,9 +153,9 @@ const Liquidity = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Add Liquidity | boing.finance" />
         <meta name="twitter:description" content="Earn fees by adding liquidity on EVM and Solana." />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
       </Helmet>
       <div className="relative min-h-screen">{/* Main Content Container */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">

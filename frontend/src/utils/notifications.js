@@ -45,8 +45,8 @@ class NotificationService {
     }
 
     const defaultOptions = {
-      icon: '/favicon-96x96.png',
-      badge: '/favicon-96x96.png',
+      icon: '/assets/boing-profile-twitter.png',
+      badge: '/assets/boing-profile-twitter.png',
       tag: 'boing-finance',
       requireInteraction: false,
       ...options
@@ -83,8 +83,8 @@ class NotificationService {
   async notifyDeploymentSuccess(tokenName, tokenAddress) {
     return this.showNotification('Token Deployed Successfully! 🎉', {
       body: `${tokenName} has been deployed at ${tokenAddress.substring(0, 6)}...${tokenAddress.substring(tokenAddress.length - 4)}`,
-      icon: '/favicon-96x96.png',
-      badge: '/favicon-96x96.png',
+      icon: '/assets/boing-profile-twitter.png',
+      badge: '/assets/boing-profile-twitter.png',
       tag: `deployment-${Date.now()}`,
       onClick: () => {
         window.location.href = `/tokens?address=${tokenAddress}`;
@@ -95,7 +95,7 @@ class NotificationService {
   async notifyTransactionConfirmed(txHash, network) {
     return this.showNotification('Transaction Confirmed ✅', {
       body: `Your transaction has been confirmed on ${network}`,
-      icon: '/favicon-96x96.png',
+      icon: '/assets/boing-profile-twitter.png',
       tag: `tx-${txHash}`,
       onClick: () => {
         // Open transaction in explorer
@@ -114,7 +114,7 @@ class NotificationService {
     
     return this.showNotification(`Price Alert: ${tokenSymbol}`, {
       body: message,
-      icon: '/favicon-96x96.png',
+      icon: '/assets/boing-profile-twitter.png',
       tag: `price-alert-${tokenSymbol}`,
       requireInteraction: true
     });
@@ -127,9 +127,9 @@ class NotificationService {
     
     return this.showNotification('Portfolio Update', {
       body: `Total Value: $${totalValue.toLocaleString()} (${changeText})`,
-      icon: '/favicon-96x96.png',
+      icon: '/assets/boing-profile-twitter.png',
       tag: 'portfolio-update',
-      badge: '/favicon-96x96.png'
+      badge: '/assets/boing-profile-twitter.png'
     });
   }
 

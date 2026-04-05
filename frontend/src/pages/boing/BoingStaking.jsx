@@ -5,8 +5,8 @@ import { PageHeader, PageCard } from '../../components/PageLayout';
 import { useWalletConnection } from '../../hooks/useWalletConnection';
 
 const MOCK_NFTS = [
-  { id: 1, name: 'Boing Astronaut #42', image: '/favicon.svg', staked: false, rewards: 0 },
-  { id: 2, name: 'Boing Astronaut #128', image: '/favicon.svg', staked: true, rewards: 125 },
+  { id: 1, name: 'Boing Astronaut #42', image: '/assets/boing-profile-twitter.png', staked: false, rewards: 0 },
+  { id: 2, name: 'Boing Astronaut #128', image: '/assets/boing-profile-twitter.png', staked: true, rewards: 125 },
 ];
 
 export default function BoingStaking() {

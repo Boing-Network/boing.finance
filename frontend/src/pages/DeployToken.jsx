@@ -36,7 +36,7 @@ const TOKEN_FACTORY_ABI = TokenFactoryArtifact.abi;
 const _TOKEN_IMPLEMENTATION_ABI = TokenImplementationArtifact.abi;
 
 /** Boing logo URL (design system) — used as default when token has no custom logo. */
-const BOING_LOGO_URL = 'https://boing.finance/assets/icon-only-transparent.png';
+const BOING_LOGO_URL = 'https://boing.finance/assets/boing-profile-twitter.png';
 
 /** Canonical native Boing deploy / partner integration (boing.network E2 roadmap). */
 const NATIVE_BOING_PARTNER_GUIDE_URL =
@@ -1625,9 +1625,9 @@ export default function DeployToken() {
         <meta name="twitter:description" content="Create your own token on EVM or Solana. No code required." />
         <meta name="twitter:site" content="@boingfinance" />
         <link rel="canonical" href="https://boing.finance/deploy-token" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         
         {/* Structured Data for DeployToken Page */}
         <script type="application/ld+json">
