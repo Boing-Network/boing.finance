@@ -27,6 +27,14 @@ function boingRpcPostUrl() {
 }
 
 /**
+ * Base URL for `createClient` from boing-sdk — same target as {@link boingJsonRpc} (proxy in browser unless direct RPC).
+ * @returns {string}
+ */
+export function getBoingRpcClientBaseUrl() {
+  return boingRpcPostUrl().replace(/\/$/, '');
+}
+
+/**
  * Low-level Boing JSON-RPC POST. See boing.network RPC-API-SPEC.md.
  * In the browser, posts to same-origin `/api/boing-rpc` (Vite proxy in dev, Pages Function in prod)
  * so CORS on the public node is not required.
