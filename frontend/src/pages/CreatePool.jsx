@@ -1272,7 +1272,7 @@ function CreatePool() {
           <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
           <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
         </Helmet>
-        <div className="relative min-h-screen">
+        <div className="relative w-full min-w-0">
           <div className="relative z-10 container mx-auto px-4 py-8">
             <div className="max-w-2xl mx-auto text-center">
               <h1 className="text-3xl font-bold text-white mb-4">Create Liquidity Pool</h1>
@@ -1304,7 +1304,7 @@ function CreatePool() {
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
       </Helmet>
-      <div className="relative min-h-screen">
+      <div className="relative w-full min-w-0">
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">
             <DexFeatureBanner featureLabel="Create Pool" currentChainId={chainId} onSwitchNetwork={switchNetwork} />

@@ -153,7 +153,7 @@ function DeployTokenSolanaContent() {
   };
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative w-full min-w-0">
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="max-w-xl mx-auto">
           <Helmet>
@@ -1656,7 +1656,7 @@ export default function DeployToken() {
         })}
         </script>
       </Helmet>
-      <div className="relative min-h-screen">
+      <div className="relative w-full min-w-0">
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">
             {/* Header */}

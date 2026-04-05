@@ -12,7 +12,7 @@ export default function Watchlist() {
         <title>Token Watchlist | boing.finance — Track Prices</title>
         <meta name="description" content="Track your favorite tokens with real-time prices on boing.finance. Watchlist for EVM and Solana." />
       </Helmet>
-      <div className="relative min-h-screen">
+      <div className="relative w-full min-w-0">
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-7xl mx-auto">
             <div className="mb-8">

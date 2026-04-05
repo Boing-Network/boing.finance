@@ -3,21 +3,18 @@ import { BoingBackground, BOING_BG_CONFIGS } from '../lib/boing-bg-engine';
 
 /**
  * Route → finance background config key.
- * Used to pick the right animated background per page.
+ * Home uses the richer landing preset; all other app routes share one calm “feature” preset.
  */
 function getFinanceBackgroundVariant(pathname) {
   if (pathname === '/') return 'landing';
-  if (pathname.startsWith('/analytics')) return 'analytics';
-  if (pathname.startsWith('/portfolio')) return 'portfolio';
-  if (pathname.startsWith('/governance')) return 'governance';
-  return 'trade'; // swap, liquidity, bridge, tokens, deploy-token, etc.
+  return 'feature';
 }
 
-const FINANCE_VARIANTS = ['landing', 'trade', 'analytics', 'governance', 'portfolio'];
+const FINANCE_VARIANTS = ['landing', 'feature', 'trade', 'analytics', 'governance', 'portfolio'];
 
 /**
  * Full-viewport Canvas animated background (Deep Trade).
- * Replaces the static boing-aquatic-space-bg.webp; config switches by route.
+ * Replaces the static boing-aquatic-space-bg.webp. Home uses `landing`; all other routes use `feature`.
  * When prefers-reduced-motion is set, this component is not rendered and the
  * app falls back to the static .webp (landing) / hex-grid (app pages).
  */

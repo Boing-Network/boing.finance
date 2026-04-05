@@ -155,7 +155,7 @@ const Liquidity = () => {
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
       </Helmet>
-      <div className="relative min-h-screen">{/* Main Content Container */}
+      <div className="relative w-full min-w-0">{/* Main Content Container */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <DexFeatureBanner featureLabel="Liquidity" currentChainId={chainId} onSwitchNetwork={switchNetwork} />
           {featureSupport.swap === 'native_amm' && Number(chainId) === BOING_NATIVE_L1_CHAIN_ID && (

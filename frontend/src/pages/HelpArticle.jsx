@@ -875,14 +875,14 @@ const HelpArticle = () => {
         <Helmet>
           <title>Article Not Found - boing.finance Help Center</title>
         </Helmet>
-        <div className="min-h-screen bg-gray-900 style={{ color: 'var(--text-primary)' }}">
+        <div className="relative w-full min-w-0" style={{ color: 'var(--text-primary)' }}>
           <div className="container mx-auto px-4 py-8">
             <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-4xl font-bold mb-4">Article Not Found</h1>
-              <p className="text-xl style={{ color: 'var(--text-secondary)' }} mb-8">The requested help article could not be found.</p>
-              <Link 
-                to="/help-center" 
-                className="bg-blue-600 hover:bg-blue-700 style={{ color: 'var(--text-primary)' }} px-6 py-3 rounded-lg transition-colors"
+              <h1 className="text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Article Not Found</h1>
+              <p className="text-xl mb-8" style={{ color: 'var(--text-secondary)' }}>The requested help article could not be found.</p>
+              <Link
+                to="/help-center"
+                className="inline-block px-6 py-3 rounded-lg transition-colors bg-cyan-600 hover:bg-cyan-500 text-white font-medium"
               >
                 Return to Help Center
               </Link>
@@ -900,26 +900,26 @@ const HelpArticle = () => {
         <meta name="description" content={`${article.title} - Help article for boing.finance ${article.category.toLowerCase()}`} />
       </Helmet>
       
-      <div className="min-h-screen bg-gray-900 style={{ color: 'var(--text-primary)' }}">
+      <div className="relative w-full min-w-0" style={{ color: 'var(--text-primary)' }}>
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
             {/* Breadcrumb */}
             <nav className="mb-8">
-              <div className="flex items-center space-x-2 text-sm style={{ color: 'var(--text-tertiary)' }}">
-                <Link to="/" className="hover:style={{ color: 'var(--text-primary)' }} transition-colors">Home</Link>
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm" style={{ color: 'var(--text-tertiary)' }}>
+                <Link to="/" className="hover:text-cyan-300 transition-colors">Home</Link>
                 <span>›</span>
-                <Link to="/help-center" className="hover:style={{ color: 'var(--text-primary)' }} transition-colors">Help Center</Link>
+                <Link to="/help-center" className="hover:text-cyan-300 transition-colors">Help Center</Link>
                 <span>›</span>
-                <span className="style={{ color: 'var(--text-primary)' }}">{article.category}</span>
+                <span style={{ color: 'var(--text-secondary)' }}>{article.category}</span>
                 <span>›</span>
-                <span className="style={{ color: 'var(--text-primary)' }}">{article.title}</span>
+                <span style={{ color: 'var(--text-primary)' }}>{article.title}</span>
               </div>
             </nav>
 
             {/* Article Header */}
             <div className="mb-8">
-              <div className="text-sm text-blue-400 mb-2">{article.category}</div>
-              <h1 className="text-4xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">{article.title}</h1>
+              <div className="text-sm text-cyan-400 mb-2">{article.category}</div>
+              <h1 className="text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>{article.title}</h1>
             </div>
 
             {/* Article Content */}
@@ -931,16 +931,17 @@ const HelpArticle = () => {
             </div>
 
             {/* Navigation */}
-            <div className="flex justify-between items-center">
-              <Link 
-                to="/help-center" 
-                className="bg-gray-700 hover:bg-gray-600 style={{ color: 'var(--text-primary)' }} px-6 py-3 rounded-lg transition-colors"
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+              <Link
+                to="/help-center"
+                className="text-center px-6 py-3 rounded-lg transition-colors border border-border hover:bg-[var(--bg-tertiary)]"
+                style={{ color: 'var(--text-primary)' }}
               >
                 ← Back to Help Center
               </Link>
-              <Link 
-                to="/contact-us" 
-                className="bg-blue-600 hover:bg-blue-700 style={{ color: 'var(--text-primary)' }} px-6 py-3 rounded-lg transition-colors"
+              <Link
+                to="/contact-us"
+                className="text-center px-6 py-3 rounded-lg transition-colors bg-cyan-600 hover:bg-cyan-500 text-white font-medium"
               >
                 Contact Support →
               </Link>

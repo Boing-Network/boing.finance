@@ -652,7 +652,7 @@ function AppContent() {
       <main className="flex-1 flex flex-col relative min-h-0">
         {/* Page Content with Error Boundary and Suspense — scroll container so Pillars/Tokenomics etc. are reachable */}
         <ErrorBoundary>
-          <div className="relative z-10 flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden">
+          <div className="relative z-10 flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden pb-6 sm:pb-8">
             <BoingNativeTokenPanel />
             <DevnetCurrencyDisclaimer />
             <Suspense fallback={<LoadingSpinner />}>
@@ -693,11 +693,9 @@ function AppContent() {
       </button>
       <DeFi101Modal isOpen={defi101Open} onClose={() => setDefi101Open(false)} />
       
-      <footer className="w-full flex-shrink-0 mt-auto border-t border-border shadow-lg relative z-20" style={{
-        backgroundColor: 'var(--bg-primary)'
-      }}>
+      <footer className="site-footer w-full flex-shrink-0 mt-auto relative z-20">
         <ShootingStars dense />
-        <div className="max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto py-8 sm:py-10 px-4 sm:px-6 lg:px-8 min-[1150px]:pl-[max(1rem,env(safe-area-inset-left,0px))] min-[1150px]:pr-[max(1rem,env(safe-area-inset-right,0px))]">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 sm:gap-10">
             {/* Brand Section - Full width on mobile, spans 5 columns on larger screens */}
             <div className="lg:col-span-5 relative">

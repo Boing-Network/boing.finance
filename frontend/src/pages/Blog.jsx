@@ -4,7 +4,6 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import EnhancedAnimatedBackground from '../components/EnhancedAnimatedBackground';
 import LoadingSpinner from '../components/LoadingSpinner';
 import OptimizedImage from '../components/OptimizedImage';
 
@@ -59,17 +58,14 @@ const Blog = () => {
 
   if (loading) {
     return (
-      <div className="relative min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
-        <EnhancedAnimatedBackground />
-        <div className="relative z-10 flex justify-center items-center min-h-screen">
-          <LoadingSpinner size="lg" />
-        </div>
+      <div className="relative w-full min-w-0 flex justify-center items-center py-24">
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
+    <div className="relative w-full min-w-0">
       <Helmet>
         <title>Blog & News | boing.finance — Updates & Announcements</title>
         <meta name="description" content="Latest news, updates, and announcements from boing.finance. The DeFi that always bounces back." />
@@ -77,8 +73,7 @@ const Blog = () => {
         <meta property="og:image:alt" content="Boing Finance — DeFi That Bounces Back brand banner" />
         <meta name="twitter:image" content="https://boing.finance/preview-image.png" />
       </Helmet>
-      <EnhancedAnimatedBackground />
-      
+
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>

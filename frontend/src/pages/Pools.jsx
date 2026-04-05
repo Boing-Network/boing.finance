@@ -996,7 +996,7 @@ const Pools = () => {
           <title>Liquidity Pools | boing.finance — View & Manage Pools</title>
           <meta name="description" content="View and manage your liquidity pools on EVM and Solana. Track positions and earn fees with boing.finance." />
         </Helmet>
-        <div className="relative min-h-screen">
+        <div className="relative w-full min-w-0">
           <div className="relative z-10 container mx-auto px-4 py-8">
             <div className="max-w-2xl mx-auto text-center">
               <h1 className="text-3xl font-bold text-white mb-4">Liquidity Pools</h1>
@@ -1023,7 +1023,7 @@ const Pools = () => {
         <meta name="description" content="View and manage your liquidity pools on boing.finance" />
       </Helmet>
 
-      <div className="relative min-h-screen">
+      <div className="relative w-full min-w-0">
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-7xl mx-auto">
             {/* Header */}

@@ -456,10 +456,7 @@ export default function Portfolio() {
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
       </Helmet>
-      <div
-        className="relative min-h-screen"
-        style={{ backgroundColor: 'var(--bg-primary)' }}
-      >
+      <div className="relative w-full min-w-0">
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-7xl mx-auto">
             {/* Header - Compact */}

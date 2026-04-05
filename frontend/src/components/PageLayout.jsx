@@ -49,5 +49,16 @@ export function PageCard({ children, className = '', ...props }) {
   );
 }
 
-const PageLayout = { PageHeader, PageCard };
+/**
+ * Standard content width + horizontal padding for feature pages (matches footer shell).
+ */
+export function AppPageShell({ children, className = '' }) {
+  return (
+    <div className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-w-0 ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+const PageLayout = { PageHeader, PageCard, AppPageShell };
 export default PageLayout;

@@ -118,7 +118,7 @@ const ContactUs = () => {
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
       </Helmet>
       
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+      <div className="relative w-full min-w-0" style={{ color: 'var(--text-primary)' }}>
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">
             {/* Header */}

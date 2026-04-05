@@ -1774,7 +1774,7 @@ const Swap = () => {
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
       </Helmet>
-      <div className="relative min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
+      <div className="relative w-full min-w-0">
         {/* Settings Button */}
         <button
           className="absolute top-6 right-6 z-30 p-2 rounded-full shadow-lg"
