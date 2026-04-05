@@ -1,27 +1,22 @@
 import React from 'react';
-import { useTheme } from '../contexts/ThemeContext';
 
 const base = process.env.PUBLIC_URL || '';
-/** Dark / default UI: transparent nebula mark (navbar, footer). */
-const LOGO_DARK = `${base}/assets/icon-only-transparent.png`;
-/** Light theme: official sky / light-mode square mark. */
-const LOGO_LIGHT = `${base}/assets/boing-logo-light-mode.png`;
+/** Official circular Boing Finance mark (matches favicons / PWA / JSON-LD logo). */
+const LOGO_MARK = `${base}/assets/boing-profile-twitter.png`;
 
 /**
- * Logo: theme-aware Boing Finance mark with optional wordmark.
+ * Logo: official profile mark with optional wordmark.
  * showComic=true uses the official "BOING!" comic-style asset from the design system.
  */
 const Logo = ({ size = 40, className = '', showText = false, showComic = false }) => {
-  const { isDarkMode } = useTheme();
-  const logoSrc = isDarkMode ? LOGO_DARK : LOGO_LIGHT;
-
   return (
     <div className={`flex items-center ${className}`}>
       <img
-        src={logoSrc}
-        alt="Boing Finance logo: stylized 3D B with orbital star"
+        src={LOGO_MARK}
+        alt="Boing Finance"
         width={size}
         height={size}
+        className="rounded-full object-cover shrink-0"
         style={{
           display: 'inline-block',
           filter: 'drop-shadow(0 0 8px var(--glow-cyan))',

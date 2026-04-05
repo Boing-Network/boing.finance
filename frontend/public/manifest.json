@@ -4,22 +4,22 @@
   "description": "Swap, deploy tokens, pools, and bridge on EVM and Solana",
   "icons": [
     {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/assets/boing-profile-twitter.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/assets/boing-profile-twitter.png",
+      "src": "/favicon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/assets/icon-only-transparent.png",
+      "src": "/favicon.svg",
       "sizes": "any",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ],
   "start_url": "/",
@@ -43,14 +43,14 @@
       "short_name": "Deploy",
       "description": "Deploy a new token",
       "url": "/deploy-token",
-      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+      "icons": [{ "src": "/assets/boing-profile-twitter.png", "sizes": "512x512", "type": "image/png" }]
     },
     {
       "name": "Portfolio",
       "short_name": "Portfolio",
       "description": "View your portfolio",
       "url": "/portfolio",
-      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+      "icons": [{ "src": "/assets/boing-profile-twitter.png", "sizes": "512x512", "type": "image/png" }]
     }
   ]
 }

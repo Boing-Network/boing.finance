@@ -51,7 +51,7 @@ const NotificationSettings = ({ onClose }) => {
   const handleTestNotification = async () => {
     const success = await notificationService.showNotification('Test Notification', {
       body: 'This is a test notification from boing.finance',
-      icon: '/favicon-96x96.png'
+      icon: '/assets/boing-profile-twitter.png'
     });
     
     if (!success) {

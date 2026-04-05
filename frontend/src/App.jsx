@@ -828,9 +828,9 @@ function App() {
                 <Router>
                   <InitialAnimationGate>
                   <Helmet>
-                    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
                     <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
                     <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+                    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
                     
                     {/* Farcaster Mini App Embed Meta Tags */}
                     <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://boing.finance/preview-image.png","button":{"title":"Open boing.finance","action":{"type":"launch_miniapp","url":"https://boing.finance"}}}' />
@@ -903,9 +903,9 @@ function Home() {
         <meta name="twitter:image" content="https://boing.finance/preview-image.png" />
         <meta name="twitter:image:alt" content="Boing Finance — DeFi That Bounces Back; horizontal brand banner" />
         <link rel="canonical" href="https://boing.finance" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         
         {/* Structured Data for Homepage */}
         <script type="application/ld+json">
@@ -932,7 +932,7 @@ function Home() {
           "url": "https://boing.finance",
           "logo": {
             "@type": "ImageObject",
-            "url": "https://boing.finance/assets/icon-only-transparent.png"
+            "url": "https://boing.finance/assets/boing-profile-twitter.png"
           },
           "description": "The DeFi that always bounces back. Deploy tokens, create pools, and trade on EVM and Solana with boing.finance.",
           "sameAs": [
@@ -1087,18 +1087,6 @@ function Home() {
                   />
                 </div>
               </div>
-            </div>
-            <div className="mt-12 md:mt-16 w-full max-w-5xl mx-auto fade-in delay-100">
-              <img
-                src={`${process.env.PUBLIC_URL || ''}/preview-image.png`}
-                alt="Boing Finance logo and tagline: DeFi That Bounces Back, on a blue and purple nebula background"
-                width={1200}
-                height={630}
-                className="w-full h-auto rounded-2xl border object-cover max-h-[min(320px,45vw)] shadow-lg"
-                style={{ borderColor: 'var(--border-color)', boxShadow: '0 0 48px rgba(0, 229, 255, 0.08)' }}
-                loading="lazy"
-                decoding="async"
-              />
             </div>
           </section>
 

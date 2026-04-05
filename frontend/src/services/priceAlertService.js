@@ -113,7 +113,7 @@ class PriceAlertService {
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification(`Price Alert: ${alert.tokenSymbol}`, {
         body: `Price is now $${currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })} (${alert.condition === 'above' ? 'above' : 'below'} target of $${alert.targetPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })})`,
-        icon: '/favicon.png',
+        icon: '/assets/boing-profile-twitter.png',
         tag: `price-alert-${alert.id}`
       });
     }
