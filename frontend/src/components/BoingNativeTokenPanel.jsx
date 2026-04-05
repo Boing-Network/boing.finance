@@ -150,7 +150,7 @@ export default function BoingNativeTokenPanel() {
               <span
                 className="inline-block w-2 h-2 rounded-full shrink-0"
                 style={{
-                  backgroundColor: heightQuery.isError ? '#f87171' : '#34d399'
+                  backgroundColor: heightQuery.isError ? 'var(--error-color)' : 'var(--success-color)'
                 }}
                 aria-hidden
               />

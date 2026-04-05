@@ -1,8 +1,7 @@
 import React from 'react';
 
 /**
- * Outerspace-oceanic theme: shooting stars / drifting light in Boing teal (#00E5CC)
- * and electric blue (#00B4FF). Matches Boing Network promotional video and brand.
+ * Nebula theme: trails use CSS tokens (--accent-teal / --accent-cyan / --accent-purple).
  */
 const BOING_PRIMARY = 'var(--accent-teal)';
 const BOING_SECONDARY = 'var(--accent-cyan)';

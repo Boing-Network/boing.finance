@@ -23,6 +23,7 @@ import NFTDetailModal from '../components/NFTDetailModal';
 import EmptyState from '../components/EmptyState';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import toast from 'react-hot-toast';
+import { getNetworkBadgeBgClass, NETWORK_BADGE_FALLBACK } from '../utils/networkBadgeClasses';
 
 // MochiAstronaut component
 
@@ -367,14 +368,14 @@ export default function Portfolio() {
   }, [apiHistory]);
 
   const networks = [
-    { id: 'all', name: 'All Networks', color: 'bg-gray-500' },
-    { id: '1', name: 'Ethereum', color: 'bg-blue-500' },
-    { id: '137', name: 'Polygon', color: 'bg-purple-500' },
-    { id: '56', name: 'BSC', color: 'bg-yellow-500' },
-    { id: '42161', name: 'Arbitrum', color: 'bg-blue-600' },
-    { id: '10', name: 'Optimism', color: 'bg-red-500' },
-    { id: '11155111', name: 'Sepolia', color: 'bg-gray-500' },
-    { id: '6913', name: 'Boing Testnet', color: 'bg-teal-500' },
+    { id: 'all', name: 'All Networks', color: NETWORK_BADGE_FALLBACK },
+    { id: '1', name: 'Ethereum', color: getNetworkBadgeBgClass('1') },
+    { id: '137', name: 'Polygon', color: getNetworkBadgeBgClass('137') },
+    { id: '56', name: 'BSC', color: getNetworkBadgeBgClass('56') },
+    { id: '42161', name: 'Arbitrum', color: getNetworkBadgeBgClass('42161') },
+    { id: '10', name: 'Optimism', color: getNetworkBadgeBgClass('10') },
+    { id: '11155111', name: 'Sepolia', color: getNetworkBadgeBgClass('11155111') },
+    { id: '6913', name: 'Boing Testnet', color: getNetworkBadgeBgClass('6913') },
   ];
 
   // Persist view preferences
@@ -427,7 +428,7 @@ export default function Portfolio() {
               <p className="text-gray-400 mb-4">Connect your wallet to view balances, liquidity positions, and performance.</p>
               <button
                 onClick={() => connectWallet()}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors w-full"
+                className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-6 rounded-lg transition-colors w-full"
               >
                 Connect Wallet
               </button>
@@ -454,7 +455,6 @@ export default function Portfolio() {
         <meta name="twitter:description" content="Track your DeFi portfolio on EVM and Solana." />
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
       </Helmet>
       <div
         className="relative min-h-screen"
@@ -526,7 +526,7 @@ export default function Portfolio() {
                           exportPortfolio(portfolioData, 'json');
                           toast.success('Portfolio exported as JSON!');
                         }}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+                        className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
                       >
                         <span>📥</span> Export JSON
                       </button>
@@ -548,7 +548,7 @@ export default function Portfolio() {
                       </button>
                       <button
                         onClick={() => setShowShareModal(true)}
-                        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+                        className="px-4 py-2 bg-finance-purple hover:opacity-90 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
                       >
                         <span>🔗</span> Share
                       </button>
@@ -588,7 +588,7 @@ export default function Portfolio() {
               <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
                 <div>
                   <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Total Value</p>
-                  <p className="text-3xl sm:text-4xl font-bold text-blue-400">
+                  <p className="text-3xl sm:text-4xl font-bold text-cyan-400">
                     ${portfolioSummary?.totalValue ? parseFloat(portfolioSummary.totalValue).toLocaleString() : '0'}
                   </p>
                 </div>
@@ -679,7 +679,7 @@ export default function Portfolio() {
                     style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
                   >
                     <h3 className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Tokens</h3>
-                    <p className="text-xl font-bold text-purple-400">
+                    <p className="text-xl font-bold text-finance-purple">
                       {portfolioSummary?.totalTokens ? portfolioSummary.totalTokens.toLocaleString() : '0'}
                     </p>
                   </div>
@@ -749,7 +749,7 @@ export default function Portfolio() {
                             .map((token, index) => (
                               <div key={index} className="flex items-center justify-between p-2 bg-gray-700 rounded">
                                 <div className="flex items-center space-x-2">
-                                  <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                  <div className="w-6 h-6 bg-gradient-to-br from-finance-purple to-cyan-600 rounded-full flex items-center justify-center">
                                     <span className="text-white text-xs font-bold">{token.symbol?.charAt(0) || 'T'}</span>
                                   </div>
                                   <span className="text-white text-sm">{token.symbol}</span>
@@ -801,7 +801,7 @@ export default function Portfolio() {
                             type="checkbox"
                             checked={hideZeroBalances}
                             onChange={(e) => setHideZeroBalances(e.target.checked)}
-                            className="rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500"
+                            className="rounded bg-gray-700 border-gray-600 text-cyan-500 focus:ring-cyan-500"
                           />
                           Hide zero balances
                         </label>
@@ -812,7 +812,7 @@ export default function Portfolio() {
                             type="checkbox"
                             checked={groupByNetwork}
                             onChange={(e) => setGroupByNetwork(e.target.checked)}
-                            className="rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500"
+                            className="rounded bg-gray-700 border-gray-600 text-cyan-500 focus:ring-cyan-500"
                           />
                           Group by network
                         </label>
@@ -833,7 +833,7 @@ export default function Portfolio() {
                             const allNetworks = Object.keys(NETWORKS).map(Number);
                             setTrackedNetworks(allNetworks);
                           }}
-                          className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                          className="px-3 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-sm"
                         >
                           Track All Networks
                         </button>
@@ -842,7 +842,7 @@ export default function Portfolio() {
 
                     {balancesLoading ? (
                       <div className="text-center py-12">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mx-auto"></div>
                         <p className="text-gray-300 mt-4">Loading token balances...</p>
                       </div>
                     ) : tokenBalances && tokenBalances.balances && tokenBalances.balances.length > 0 ? (
@@ -880,7 +880,7 @@ export default function Portfolio() {
                                 <tr key={`${network}-${token.symbol}-${token.chainId}-${index}`} className="hover:bg-gray-700 transition-colors">
                                   <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="flex items-center">
-                                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mr-3">
+                                      <div className="w-8 h-8 bg-gradient-to-br from-finance-purple to-cyan-600 rounded-full flex items-center justify-center mr-3">
                                         <span className="text-white font-bold text-sm">
                                           {token.symbol?.charAt(0) || 'T'}
                                         </span>
@@ -917,7 +917,7 @@ export default function Portfolio() {
                                 <tr key={index} className="hover:bg-gray-700 transition-colors">
                                   <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="flex items-center">
-                                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mr-3">
+                                      <div className="w-8 h-8 bg-gradient-to-br from-finance-purple to-cyan-600 rounded-full flex items-center justify-center mr-3">
                                         <span className="text-white font-bold text-sm">
                                           {token.symbol?.charAt(0) || 'T'}
                                         </span>
@@ -956,7 +956,7 @@ export default function Portfolio() {
                               <td colSpan="4" className="px-6 py-4 text-right font-semibold text-white">
                                 Total Portfolio Value:
                               </td>
-                              <td colSpan="2" className="px-6 py-4 text-left font-bold text-blue-400">
+                              <td colSpan="2" className="px-6 py-4 text-left font-bold text-cyan-400">
                                 ${tokenBalances.totalValue ? tokenBalances.totalValue.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0.00'}
                               </td>
                             </tr>
@@ -987,7 +987,7 @@ export default function Portfolio() {
                     <div className="flex space-x-2">
                       <button 
                         onClick={() => window.location.href = '/pools'}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm"
+                        className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm"
                       >
                         View All Pools
                       </button>
@@ -1019,7 +1019,7 @@ export default function Portfolio() {
                           <div key={index} className="bg-gray-700 rounded-xl p-4 border border-gray-600">
                             <div className="flex items-center justify-between mb-3">
                               <div className="flex items-center space-x-2">
-                                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                                <div className="w-6 h-6 bg-cyan-600 rounded-full flex items-center justify-center">
                                   <span className="text-white font-bold text-xs">
                                     {pool.token0?.symbol?.charAt(0) || 'T'}
                                   </span>
@@ -1072,7 +1072,7 @@ export default function Portfolio() {
                             <div className="mt-3 flex space-x-2">
                               <button 
                                 onClick={() => window.location.href = `/pools`}
-                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium py-2 px-3 rounded transition-colors"
+                                className="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-medium py-2 px-3 rounded transition-colors"
                               >
                                 Manage
                               </button>
@@ -1110,7 +1110,7 @@ export default function Portfolio() {
                           <div key={index} className="bg-gray-700 rounded-xl p-4 border border-gray-600">
                             <div className="flex items-center justify-between mb-3">
                               <div className="flex items-center space-x-2">
-                                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                                <div className="w-6 h-6 bg-cyan-600 rounded-full flex items-center justify-center">
                                   <span className="text-white font-bold text-xs">
                                     {pool.token0?.symbol?.charAt(0) || 'T'}
                                   </span>
@@ -1124,7 +1124,7 @@ export default function Portfolio() {
                                   {pool.token0?.symbol}/{pool.token1?.symbol}
                                 </h4>
                               </div>
-                              <span className="text-xs text-purple-400 bg-purple-900 px-2 py-1 rounded">
+                              <span className="text-xs text-finance-purple bg-finance-purple/20 px-2 py-1 rounded">
                                 Created
                               </span>
                             </div>
@@ -1151,7 +1151,7 @@ export default function Portfolio() {
                             <div className="mt-3 flex space-x-2">
                               <button 
                                 onClick={() => window.location.href = `/pools`}
-                                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium py-2 px-3 rounded transition-colors"
+                                className="flex-1 bg-finance-purple hover:opacity-90 text-white text-xs font-medium py-2 px-3 rounded transition-colors"
                               >
                                 View Details
                               </button>
@@ -1183,14 +1183,14 @@ export default function Portfolio() {
                       </p>
                     </div>
                     {collectionFromUrl && (
-                      <div className="mb-4 rounded-lg p-3 bg-blue-900/20 border border-blue-500/30 flex items-center justify-between flex-wrap gap-2">
-                        <span className="text-sm text-blue-200">
-                          Deep link: showing collection <code className="px-1.5 py-0.5 rounded bg-gray-700 text-blue-300">{collectionFromUrl.slice(0, 10)}...{collectionFromUrl.slice(-8)}</code>
+                      <div className="mb-4 rounded-lg p-3 bg-cyan-950/30 border border-cyan-500/30 flex items-center justify-between flex-wrap gap-2">
+                        <span className="text-sm text-cyan-200">
+                          Deep link: showing collection <code className="px-1.5 py-0.5 rounded bg-gray-700 text-cyan-300">{collectionFromUrl.slice(0, 10)}...{collectionFromUrl.slice(-8)}</code>
                         </span>
                         <button
                           type="button"
                           onClick={() => setSearchParams({ tab: 'nfts' })}
-                          className="text-xs text-blue-300 hover:text-blue-200"
+                          className="text-xs text-cyan-300 hover:text-cyan-200"
                         >
                           Show all
                         </button>
@@ -1231,7 +1231,7 @@ export default function Portfolio() {
                               key={`${nft.contract?.address}-${nft.tokenId}-${idx}`}
                               type="button"
                               onClick={() => setSelectedNft(nftWithExplorer)}
-                              className="interactive-card group bg-gray-700 rounded-xl overflow-hidden border border-gray-600 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10 text-left w-full"
+                              className="interactive-card group bg-gray-700 rounded-xl overflow-hidden border border-gray-600 hover:border-cyan-500 hover:shadow-lg hover:shadow-cyan-500/10 text-left w-full"
                             >
                               <div className="aspect-square bg-gray-600 relative overflow-hidden">
                                 {img ? (

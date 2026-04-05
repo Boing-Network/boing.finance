@@ -1,10 +1,74 @@
 /** @type {import('tailwindcss').Config} */
+/**
+ * Nebula + logo palette: overrides default Tailwind cyan/teal/gray/blue scales so
+ * utilities like `text-cyan-400` / `bg-gray-800` match globals.css + deep-trade-tokens.
+ */
+const nebulaCyan = {
+  50: '#ecfeff',
+  100: '#cffafe',
+  200: '#a5f3fc',
+  300: '#67e8f9',
+  400: '#38bdf8',
+  500: '#00e5ff',
+  600: '#00b8d8',
+  700: '#0891b2',
+  800: '#0e7490',
+  900: '#155e75',
+  950: '#082f3a',
+};
+
+const nebulaTeal = {
+  50: '#f0fdfa',
+  100: '#ccfbf1',
+  200: '#99f6e4',
+  300: '#5eead4',
+  400: '#2dd4bf',
+  500: '#14b8a6',
+  600: '#0d9488',
+  700: '#0f766e',
+  800: '#115e59',
+  900: '#134e4a',
+  950: '#042f2e',
+};
+
+const nebulaGray = {
+  50: '#f8fafc',
+  100: '#f1f5f9',
+  200: '#e2e8f0',
+  300: '#cbd5e1',
+  400: '#94a3b8',
+  500: '#64748b',
+  600: '#475569',
+  700: '#243652',
+  800: '#1a2d48',
+  900: '#0f1a30',
+  950: '#020b26',
+};
+
+const nebulaBlue = {
+  50: '#eff6ff',
+  100: '#dbeafe',
+  200: '#bfdbfe',
+  300: '#7dd3fc',
+  400: '#38bdf8',
+  500: '#0ea5e9',
+  600: '#0284c7',
+  700: '#0369a1',
+  800: '#075985',
+  900: '#0c4a6e',
+  950: '#082f49',
+};
+
 module.exports = {
   content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
   darkMode: 'class', // Enable class-based dark mode
   theme: {
     extend: {
       colors: {
+        cyan: nebulaCyan,
+        teal: nebulaTeal,
+        gray: nebulaGray,
+        blue: nebulaBlue,
         // Theme-aware colors using CSS variables (Deep Trade when tokens loaded)
         background: 'var(--bg-primary)',
         'background-secondary': 'var(--bg-secondary)',

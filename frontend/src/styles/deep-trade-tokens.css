@@ -5,11 +5,11 @@
  */
 
 :root {
-  /* ── Core brand (shared) ───────────────────────────────────────── */
-  --boing-black: #030810;
-  --boing-navy: #060f1e;
-  --boing-navy-mid: #091828;
-  --boing-navy-light: #0d2040;
+  /* ── Core brand (nebula + logo accents) ───────────────────────── */
+  --boing-black: #020b26;
+  --boing-navy: #06122e;
+  --boing-navy-mid: #0c1a42;
+  --boing-navy-light: #122452;
 
   /* ── Finance accent palette ───────────────────────────────────── */
   --finance-primary: #00e5ff;
@@ -21,14 +21,14 @@
   --finance-gold-light: #fcd34d;
   --finance-red: #ef4444;
   --finance-red-light: #fca5a5;
-  --finance-purple: #8b5cf6;
-  --finance-purple-glow: rgba(139, 92, 246, 0.2);
+  --finance-purple: #5b21b6;
+  --finance-purple-glow: rgba(91, 33, 182, 0.22);
 
   /* Chart colors */
   --chart-1: #00e5ff;
   --chart-2: #00ff88;
   --chart-3: #f59e0b;
-  --chart-4: #8b5cf6;
+  --chart-4: #5b21b6;
   --chart-5: #ec4899;
 
   /* ── Semantic mapping (Deep Trade overrides) ────────────────────── */
@@ -36,9 +36,9 @@
   --bg-secondary: var(--boing-navy);
   --bg-tertiary: var(--boing-navy-mid);
   --bg-card: rgba(6, 15, 30, 0.8);
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-tertiary: #475569;
+  --text-primary: #f0f7ff;
+  --text-secondary: #b8d4f0;
+  --text-tertiary: #7a9bc8;
   --accent-teal: var(--finance-primary);
   --accent-cyan: var(--finance-primary);
   --primary-color: var(--finance-primary);
@@ -101,9 +101,9 @@
   --bg-secondary: var(--boing-navy);
   --bg-tertiary: var(--boing-navy-mid);
   --bg-card: rgba(6, 15, 30, 0.8);
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-tertiary: #475569;
+  --text-primary: #f0f7ff;
+  --text-secondary: #b8d4f0;
+  --text-tertiary: #7a9bc8;
   --border-color: rgba(0, 229, 255, 0.12);
   --border-hover: rgba(0, 229, 255, 0.35);
 }
@@ -169,15 +169,15 @@
   --accent-color: var(--finance-purple);
   --accent-teal: var(--finance-purple);
   --accent-cyan: var(--finance-purple);
-  --border-color: rgba(139, 92, 246, 0.2);
-  --border-hover: rgba(139, 92, 246, 0.4);
-  --card-border: rgba(139, 92, 246, 0.2);
-  --card-border-hover: rgba(139, 92, 246, 0.4);
+  --border-color: rgba(91, 33, 182, 0.22);
+  --border-hover: rgba(91, 33, 182, 0.42);
+  --card-border: rgba(91, 33, 182, 0.22);
+  --card-border-hover: rgba(91, 33, 182, 0.42);
   --glow-cyan: var(--finance-purple-glow);
-  --glow-cyan-soft: rgba(139, 92, 246, 0.15);
-  --accent-cyan-bg: rgba(139, 92, 246, 0.1);
-  --secondary-bg: rgba(139, 92, 246, 0.08);
-  --btn-primary-gradient: linear-gradient(135deg, var(--finance-purple), #a78bfa);
+  --glow-cyan-soft: rgba(91, 33, 182, 0.14);
+  --accent-cyan-bg: rgba(91, 33, 182, 0.1);
+  --secondary-bg: rgba(91, 33, 182, 0.08);
+  --btn-primary-gradient: linear-gradient(135deg, var(--finance-purple), #7c3aed);
 }
 
 /* boing (staking, points, roadmap, activities): green + gold */
@@ -199,19 +199,19 @@
 
 /* docs/blog/help/legal: softer cyan, readable */
 .page-variant-docs {
-  --primary-color: #22d3ee;
-  --accent-color: #22d3ee;
-  --accent-teal: #22d3ee;
-  --accent-cyan: #22d3ee;
-  --border-color: rgba(34, 211, 238, 0.15);
-  --border-hover: rgba(34, 211, 238, 0.35);
-  --card-border: rgba(34, 211, 238, 0.15);
-  --card-border-hover: rgba(34, 211, 238, 0.35);
-  --glow-cyan: rgba(34, 211, 238, 0.2);
-  --glow-cyan-soft: rgba(34, 211, 238, 0.1);
-  --accent-cyan-bg: rgba(34, 211, 238, 0.08);
-  --secondary-bg: rgba(34, 211, 238, 0.06);
-  --btn-primary-gradient: linear-gradient(135deg, #22d3ee, var(--finance-green-mid));
+  --primary-color: var(--finance-primary);
+  --accent-color: var(--finance-primary);
+  --accent-teal: var(--finance-primary);
+  --accent-cyan: var(--finance-primary);
+  --border-color: rgba(0, 229, 255, 0.14);
+  --border-hover: rgba(0, 229, 255, 0.32);
+  --card-border: rgba(0, 229, 255, 0.14);
+  --card-border-hover: rgba(0, 229, 255, 0.32);
+  --glow-cyan: rgba(0, 229, 255, 0.2);
+  --glow-cyan-soft: rgba(0, 229, 255, 0.1);
+  --accent-cyan-bg: rgba(0, 229, 255, 0.08);
+  --secondary-bg: rgba(0, 229, 255, 0.06);
+  --btn-primary-gradient: linear-gradient(135deg, var(--finance-primary), var(--finance-green-mid));
 }
 
 /* landing: keep default cyan/green (handled by page-landing styles) */

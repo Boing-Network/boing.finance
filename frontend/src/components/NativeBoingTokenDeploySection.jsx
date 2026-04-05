@@ -222,7 +222,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
             onClick={runDeployInternal}
             disabled={deployBlocked}
             className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
-            style={{ backgroundColor: '#059669' }}
+            style={{ backgroundColor: 'var(--finance-green-mid)' }}
           >
             Deploy token
           </button>
@@ -280,7 +280,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
             onClick={runQa}
             disabled={qaBusy || !effectiveBytecode}
             className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
-            style={{ backgroundColor: '#2563eb' }}
+            style={{ backgroundColor: 'var(--finance-primary)' }}
           >
             {qaBusy ? 'Running QA…' : 'Run QA check'}
           </button>

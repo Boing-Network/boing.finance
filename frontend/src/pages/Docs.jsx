@@ -57,7 +57,6 @@ const Docs = () => {
         <meta name="twitter:description" content="Learn how to use boing.finance." />
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
       </Helmet>
       <div className="relative min-h-screen">
         

@@ -129,12 +129,12 @@ function getCinematicStyles() {
     .cinematic-splash__bg {
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse 90% 70% at 50% 35%, #041018 0%, #020408 40%, #000 100%);
+      background: radial-gradient(ellipse 90% 70% at 50% 35%, #0a162f 0%, #020b26 40%, #000 100%);
       opacity: 0;
       animation: cinematic-bg-in 1.1s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.15s forwards;
     }
     .cinematic-splash[data-theme="light"] .cinematic-splash__bg {
-      background: radial-gradient(ellipse 90% 70% at 50% 35%, #061828 0%, #030810 45%, #020408 100%);
+      background: radial-gradient(ellipse 90% 70% at 50% 35%, #122448 0%, #0a162f 45%, #020b26 100%);
     }
     @keyframes cinematic-bg-in {
       to { opacity: 1; }

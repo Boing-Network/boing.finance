@@ -830,7 +830,6 @@ function App() {
                   <Helmet>
                     <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
                     <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
-                    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
                     
                     {/* Farcaster Mini App Embed Meta Tags */}
                     <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://boing.finance/preview-image.png","button":{"title":"Open boing.finance","action":{"type":"launch_miniapp","url":"https://boing.finance"}}}' />
@@ -905,7 +904,6 @@ function Home() {
         <link rel="canonical" href="https://boing.finance" />
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         
         {/* Structured Data for Homepage */}
         <script type="application/ld+json">

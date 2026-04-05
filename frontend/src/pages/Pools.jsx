@@ -22,6 +22,7 @@ import ShareCardModal from '../components/ShareCardModal';
 import NativeBoingL1IntegratedHub from '../components/NativeBoingL1IntegratedHub';
 import NativeAmmLiquidityRoutesHint from '../components/NativeAmmLiquidityRoutesHint';
 import getFeatureSupport from '../config/featureSupport';
+import { getNetworkBadgeBgClass } from '../utils/networkBadgeClasses';
 
 // Pool Card Component
 const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveLiquidity }) => {
@@ -72,10 +73,7 @@ const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveL
     return names[chainId] || `Chain ${chainId}`;
   };
 
-  const getChainColor = (chainId) => {
-    const colors = { 1: 'bg-blue-500', 137: 'bg-purple-500', 56: 'bg-yellow-500', 42161: 'bg-blue-600', 10: 'bg-red-500', 8453: 'bg-indigo-500', 11155111: 'bg-gray-500', 6913: 'bg-teal-500', 43114: 'bg-red-600', 250: 'bg-blue-700', 59144: 'bg-cyan-500', 324: 'bg-indigo-600', 534352: 'bg-amber-400', 1101: 'bg-purple-600', 5000: 'bg-stone-600', 81457: 'bg-yellow-400', 204: 'bg-yellow-600', 34443: 'bg-red-700' };
-    return colors[chainId] || 'bg-gray-500';
-  };
+  const getChainColor = (chainId) => getNetworkBadgeBgClass(chainId);
 
   return (
     <div className="rounded-xl p-6 border transition-colors hover:opacity-95" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
@@ -83,12 +81,12 @@ const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveL
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
           <div className="flex -space-x-2">
-            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-cyan-600 rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-sm">
                 {pool.token0?.symbol?.charAt(0) || 'T'}
               </span>
             </div>
-            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-finance-green rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-sm">
                 {pool.token1?.symbol?.charAt(0) || 'T'}
               </span>
@@ -104,13 +102,13 @@ const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveL
               </span>
               {pool.source && (
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  pool.isYourPool ? 'bg-green-500' : 'bg-blue-500'
+                  pool.isYourPool ? 'bg-finance-green' : 'bg-cyan-600'
                 } text-white`}>
                   {pool.source}
                 </span>
               )}
               {type === 'created' && (
-                <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-500 text-white">
+                <span className="px-2 py-1 rounded-full text-xs font-medium bg-finance-purple text-white">
                   Created
                 </span>
               )}
@@ -149,7 +147,7 @@ const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveL
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
           <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>APY</p>
-          <p className="text-green-600 dark:text-green-400 font-medium">
+          <p className="text-finance-green font-medium">
             {pool.apy && pool.apy > 0 ? `${pool.apy.toFixed(2)}%` : 'No data'}
           </p>
         </div>
@@ -181,7 +179,7 @@ const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveL
       <div className="flex space-x-2">
         <button
           onClick={() => onViewDetails(pool)}
-          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
+          className="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
         >
           View Details
         </button>
@@ -190,7 +188,7 @@ const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveL
             <button
               onClick={handleCollectFees}
               disabled={isLoading}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
+              className="bg-finance-green hover:opacity-90 disabled:bg-gray-600 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
             >
               {isLoading ? '...' : 'Collect Fees'}
             </button>
@@ -298,7 +296,7 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
             onClick={() => setActiveTab('details')}
             className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
               activeTab === 'details'
-                ? 'bg-blue-600 text-white'
+                ? 'bg-cyan-600 text-white'
                 : ''
             }`}
             style={activeTab !== 'details' ? { color: 'var(--text-secondary)' } : {}}
@@ -309,7 +307,7 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
             onClick={() => setActiveTab('add')}
             className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
               activeTab === 'add'
-                ? 'bg-green-600 text-white'
+                ? 'bg-finance-green text-white'
                 : ''
             }`}
             style={activeTab !== 'add' ? { color: 'var(--text-secondary)' } : {}}
@@ -421,7 +419,7 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
                   <button
                     onClick={handleCollectFees}
                     disabled={isLoading}
-                    className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                    className="bg-finance-green hover:opacity-90 disabled:bg-gray-600 text-white py-2 px-4 rounded-lg font-medium transition-colors"
                   >
                     {isLoading ? 'Collecting...' : 'Collect Fees'}
                   </button>
@@ -449,7 +447,7 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
                     value={token0Amount}
                     onChange={(e) => handleToken0AmountChange(e.target.value)}
                     placeholder="0.0"
-                    className="w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                     style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                   />
                 </div>
@@ -465,7 +463,7 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
                     value={token1Amount}
                     onChange={(e) => setToken1Amount(e.target.value)}
                     placeholder="0.0"
-                    className="w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                     style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                   />
                 </div>
@@ -473,7 +471,7 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
                 <button
                   onClick={handleAddLiquidity}
                   disabled={isLoading || !token0Amount || !token1Amount}
-                  className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium transition-colors"
+                  className="w-full bg-finance-green hover:opacity-90 disabled:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium transition-colors"
                 >
                   {isLoading ? 'Adding Liquidity...' : 'Add Liquidity'}
                 </button>
@@ -576,10 +574,7 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
   };
 
   const getChainNameForTable = (chainId) => getNetworkByChainId(chainId)?.name || `Chain ${chainId}`;
-  const getChainColorForTable = (chainId) => {
-    const colors = { 1: 'bg-blue-500', 137: 'bg-purple-500', 56: 'bg-yellow-500', 42161: 'bg-blue-600', 10: 'bg-red-500', 8453: 'bg-indigo-500', 11155111: 'bg-gray-500', 6913: 'bg-teal-500' };
-    return colors[chainId] || 'bg-gray-500';
-  };
+  const getChainColorForTable = (chainId) => getNetworkBadgeBgClass(chainId);
 
   if (!pools || pools.length === 0) {
     return (
@@ -607,33 +602,33 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
         {pools.map((pool, index) => (
           <div 
             key={`${pool.address}-${index}`} 
-            className="px-6 py-2 hover:shadow-lg hover:border-l-4 hover:border-l-blue-500 transition-all duration-200 cursor-pointer group relative"
+            className="px-6 py-2 hover:shadow-lg hover:border-l-4 hover:border-l-cyan-500 transition-all duration-200 cursor-pointer group relative"
             style={{ borderLeftColor: 'transparent' }}
             onClick={() => handleRowClick(pool)}
           >
             {/* Hover overlay for better visual feedback */}
-            <div className="absolute inset-0 bg-blue-500 opacity-0 group-hover:opacity-5 transition-opacity duration-200 pointer-events-none"></div>
+            <div className="absolute inset-0 bg-cyan-500 opacity-0 group-hover:opacity-5 transition-opacity duration-200 pointer-events-none"></div>
             
             <div className="grid grid-cols-11 gap-4 items-center relative z-10">
               {/* Pool Info */}
               <div className="col-span-3">
                 <div className="flex items-center space-x-3">
                   <div className="flex -space-x-2">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                    <div className="w-8 h-8 bg-cyan-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                       <span className="text-white font-bold text-sm">
                         {pool.token0?.symbol?.charAt(0) || 'T'}
                       </span>
                     </div>
-                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                    <div className="w-8 h-8 bg-finance-green rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                       <span className="text-white font-bold text-sm">
                         {pool.token1?.symbol?.charAt(0) || 'T'}
                       </span>
                     </div>
                   </div>
                   <div className="flex-1">
-                    <div className="font-medium flex items-center group-hover:text-blue-300 transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>
+                    <div className="font-medium flex items-center group-hover:text-cyan-300 transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>
                       {pool.token0?.symbol}/{pool.token1?.symbol}
-                      <span className="ml-2 group-hover:text-blue-400 group-hover:translate-x-1 transition-all duration-200" style={{ color: 'var(--text-tertiary)' }}>
+                      <span className="ml-2 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all duration-200" style={{ color: 'var(--text-tertiary)' }}>
                         →
                       </span>
                     </div>
@@ -643,7 +638,7 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
                       </span>
                       {pool.source && (
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          pool.isYourPool ? 'bg-green-500' : 'bg-blue-500'
+                          pool.isYourPool ? 'bg-finance-green' : 'bg-cyan-600'
                         } text-white group-hover:shadow-md transition-shadow duration-200`}>
                           {pool.source}
                         </span>
@@ -655,28 +650,28 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
 
               {/* TVL */}
               <div className="col-span-2">
-                <div className="text-white font-medium group-hover:text-blue-300 transition-colors duration-200">
+                <div className="text-white font-medium group-hover:text-cyan-300 transition-colors duration-200">
                   {pool.formattedTvl ? pool.formattedTvl : '$0'}
                 </div>
               </div>
 
               {/* APY */}
               <div className="col-span-2">
-                <div className="text-green-400 font-medium group-hover:text-green-300 transition-colors duration-200">
+                <div className="text-finance-green font-medium group-hover:text-cyan-300 transition-colors duration-200">
                   {pool.apy && pool.apy > 0 ? `${pool.apy.toFixed(2)}%` : 'No data'}
                 </div>
               </div>
 
               {/* 24h Volume */}
               <div className="col-span-2">
-                <div className="text-white font-medium group-hover:text-blue-300 transition-colors duration-200">
+                <div className="text-white font-medium group-hover:text-cyan-300 transition-colors duration-200">
                   {pool.formattedVolume24h && pool.volume24h > 0 ? pool.formattedVolume24h : 'No data'}
                 </div>
               </div>
 
               {/* Fee */}
               <div className="col-span-2">
-                <div className="text-white font-medium group-hover:text-blue-300 transition-colors duration-200">
+                <div className="text-white font-medium group-hover:text-cyan-300 transition-colors duration-200">
                   {pool.fee ? `${(pool.fee * 100).toFixed(2)}%` : '0.3%'}
                 </div>
               </div>
@@ -1010,7 +1005,7 @@ const Pools = () => {
                 <div className="text-6xl mb-4">🏊</div>
                 <h2 className="text-xl font-semibold text-white mb-2">Wallet Required</h2>
                 <p className="text-gray-400 mb-6">Connect your wallet to view your liquidity pools and earnings.</p>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200">
+                <button className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded-lg transition duration-200">
                   Connect Wallet
                 </button>
               </div>
@@ -1047,8 +1042,8 @@ const Pools = () => {
               <div
                 className="mb-6 rounded-xl border px-4 py-3 flex flex-wrap items-center gap-3 justify-between"
                 style={{
-                  borderColor: 'rgba(45, 212, 191, 0.45)',
-                  backgroundColor: 'rgba(15, 23, 42, 0.85)',
+                  borderColor: 'rgba(0, 229, 255, 0.35)',
+                  backgroundColor: 'rgba(2, 11, 38, 0.88)',
                 }}
               >
                 <p className="text-sm text-gray-300">
@@ -1057,13 +1052,13 @@ const Pools = () => {
                 <div className="flex flex-wrap gap-2">
                   <Link
                     to="/swap"
-                    className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium"
+                    className="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-medium"
                   >
                     Swap
                   </Link>
                   <Link
                     to="/create-pool"
-                    className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-sm font-medium"
+                    className="px-3 py-1.5 rounded-lg bg-finance-purple hover:opacity-90 text-white text-sm font-medium"
                   >
                     Add liquidity
                   </Link>
@@ -1080,7 +1075,7 @@ const Pools = () => {
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
                       activeTab === tab.id
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-cyan-600 text-white'
                         : 'text-gray-300 hover:text-white hover:bg-gray-700'
                     }`}
                   >
@@ -1111,7 +1106,7 @@ const Pools = () => {
                           onClick={() => setViewMode('list')}
                           className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                             viewMode === 'list'
-                              ? 'bg-blue-600 text-white'
+                              ? 'bg-cyan-600 text-white'
                               : 'text-gray-400 hover:text-white'
                           }`}
                         >
@@ -1121,7 +1116,7 @@ const Pools = () => {
                           onClick={() => setViewMode('cards')}
                           className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                             viewMode === 'cards'
-                              ? 'bg-blue-600 text-white'
+                              ? 'bg-cyan-600 text-white'
                               : 'text-gray-400 hover:text-white'
                           }`}
                         >
@@ -1173,7 +1168,7 @@ const Pools = () => {
                       </p>
                       <button
                         onClick={() => window.location.href = '/create-pool'}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200"
+                        className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded-lg transition duration-200"
                       >
                         Create Your First Pool
                       </button>
@@ -1196,7 +1191,7 @@ const Pools = () => {
                           onClick={() => setViewMode('list')}
                           className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                             viewMode === 'list'
-                              ? 'bg-blue-600 text-white'
+                              ? 'bg-cyan-600 text-white'
                               : 'text-gray-400 hover:text-white'
                           }`}
                         >
@@ -1206,7 +1201,7 @@ const Pools = () => {
                           onClick={() => setViewMode('cards')}
                           className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                             viewMode === 'cards'
-                              ? 'bg-blue-600 text-white'
+                              ? 'bg-cyan-600 text-white'
                               : 'text-gray-400 hover:text-white'
                           }`}
                         >
@@ -1254,7 +1249,7 @@ const Pools = () => {
                       </p>
                       <button
                         onClick={() => window.location.href = '/create-pool'}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200"
+                        className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded-lg transition duration-200"
                       >
                         Create Your First Pool
                       </button>
@@ -1283,7 +1278,7 @@ const Pools = () => {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onKeyDown={handleKeyPress}
-                        className="w-full bg-gray-700 text-white px-4 py-3 pl-12 pr-20 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500 placeholder-gray-400"
+                        className="w-full bg-gray-700 text-white px-4 py-3 pl-12 pr-20 rounded-lg border border-gray-600 focus:outline-none focus:border-cyan-500 placeholder-gray-400"
                       />
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1303,7 +1298,7 @@ const Pools = () => {
                         )}
                         <button
                           onClick={handleSearch}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm font-medium transition-colors"
+                          className="bg-cyan-600 hover:bg-cyan-500 text-white px-3 py-1 rounded-md text-sm font-medium transition-colors"
                         >
                           Search
                         </button>
@@ -1311,7 +1306,7 @@ const Pools = () => {
                     </div>
                     {isSearching && searchTerm && (
                       <p className="text-sm text-gray-400 mt-2">
-                        Searching for: <span className="text-blue-400">{searchTerm}</span>
+                        Searching for: <span className="text-cyan-400">{searchTerm}</span>
                         {searchTerm.trim() && allPoolsForSearch ? (
                           <span className="ml-2">
                             (Showing {Math.min(getSortedPools(allPools).length, searchLimit)} of {allPoolsForSearch.filter(pool => {
@@ -1347,7 +1342,7 @@ const Pools = () => {
                         <select
                           value={sortBy}
                           onChange={(e) => handleSortChange(e.target.value)}
-                          className="bg-gray-700 text-white px-3 py-2 rounded-lg text-sm border border-gray-600 focus:outline-none focus:border-blue-500"
+                          className="bg-gray-700 text-white px-3 py-2 rounded-lg text-sm border border-gray-600 focus:outline-none focus:border-cyan-500"
                         >
                           <option value="tvl">TVL</option>
                           <option value="apy">APY</option>
@@ -1372,7 +1367,7 @@ const Pools = () => {
                           onClick={() => setViewMode('list')}
                           className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                             viewMode === 'list'
-                              ? 'bg-blue-600 text-white'
+                              ? 'bg-cyan-600 text-white'
                               : 'text-gray-400 hover:text-white'
                           }`}
                         >
@@ -1382,7 +1377,7 @@ const Pools = () => {
                           onClick={() => setViewMode('cards')}
                           className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                             viewMode === 'cards'
-                              ? 'bg-blue-600 text-white'
+                              ? 'bg-cyan-600 text-white'
                               : 'text-gray-400 hover:text-white'
                           }`}
                         >
@@ -1466,7 +1461,7 @@ const Pools = () => {
                           <button
                             onClick={handleLoadMore}
                             disabled={searchPoolsLoading}
-                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-lg transition duration-200"
+                            className="bg-cyan-600 hover:bg-cyan-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-lg transition duration-200"
                           >
                             {searchPoolsLoading ? (
                               <span className="flex items-center justify-center">

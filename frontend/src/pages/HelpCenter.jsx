@@ -177,7 +177,6 @@ const HelpCenter = () => {
         <meta name="twitter:description" content="Get help with boing.finance - Support and guides." />
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
       </Helmet>
       
       <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>

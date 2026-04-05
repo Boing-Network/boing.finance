@@ -105,35 +105,35 @@
    Source: BOING_DESIGN_SYSTEM.md, Section 10
    ============================================================ */
 :root {
-  /* === BACKGROUNDS === */
-  --bg-primary: #0A0E1A;
-  --bg-secondary: #121829;
-  --bg-tertiary: #1A2235;
-  --bg-card: rgba(18, 24, 41, 0.7);
+  /* === BACKGROUNDS (nebula from brand mark) === */
+  --bg-primary: #020B26;
+  --bg-secondary: #0a162f;
+  --bg-tertiary: #122448;
+  --bg-card: rgba(10, 22, 48, 0.72);
   /* === TEXT === */
-  --text-primary: #F0FFFE;
-  --text-secondary: #B8E6E3;
-  --text-tertiary: #7EB8B5;
-  /* === ACCENTS === */
-  --accent-teal: #00E5CC;
-  --accent-cyan: #00B4FF;
-  --accent-gold: #FACC15;
-  --accent-gold-dim: #EAB308;
-  --accent-purple: #9B59B6;
-  --mascot-yellow: #FFE000;
+  --text-primary: #f0f7ff;
+  --text-secondary: #b8d4f0;
+  --text-tertiary: #7a9bc8;
+  /* === ACCENTS (cyan + indigo/violet from logo) === */
+  --accent-teal: #00e5ff;
+  --accent-cyan: #38bdf8;
+  --accent-gold: #facc15;
+  --accent-gold-dim: #eab308;
+  --accent-purple: #5b21b6;
+  --mascot-yellow: #ffe000;
   /* === BORDERS === */
-  --border-color: rgba(0, 229, 204, 0.2);
-  --border-hover: rgba(0, 229, 204, 0.5);
+  --border-color: rgba(0, 229, 255, 0.18);
+  --border-hover: rgba(0, 229, 255, 0.45);
   /* === GLOWS (for box-shadow / text-shadow) === */
-  --glow-cyan: rgba(0, 229, 204, 0.4);
-  --glow-cyan-soft: rgba(0, 229, 204, 0.15);
-  --glow-blue: rgba(0, 180, 255, 0.35);
+  --glow-cyan: rgba(0, 229, 255, 0.38);
+  --glow-cyan-soft: rgba(0, 229, 255, 0.14);
+  --glow-blue: rgba(56, 189, 248, 0.32);
   --glow-gold: rgba(250, 204, 21, 0.35);
-  --glow-purple: rgba(155, 89, 182, 0.35);
-  --bg-nav: rgba(10, 14, 26, 0.8);
-  --accent-cyan-bg: rgba(0, 180, 255, 0.1);
-  --overlay-gradient-start: rgba(10, 14, 26, 0.3);
-  --overlay-gradient-end: rgba(10, 14, 26, 0.6);
+  --glow-purple: rgba(91, 33, 182, 0.38);
+  --bg-nav: rgba(2, 11, 38, 0.88);
+  --accent-cyan-bg: rgba(0, 229, 255, 0.1);
+  --overlay-gradient-start: rgba(2, 11, 38, 0.35);
+  --overlay-gradient-end: rgba(2, 11, 38, 0.62);
   /* === SHADOWS === */
   --shadow: rgba(0, 0, 0, 0.35);
   --shadow-hover: rgba(0, 0, 0, 0.45);
@@ -167,22 +167,22 @@
   --error-bg: rgba(239, 68, 68, 0.2);
   --error-text: #fca5a5;
   --error-hover: #f87171;
-  --secondary-bg: rgba(0, 229, 204, 0.15);
+  --secondary-bg: rgba(0, 229, 255, 0.12);
   --secondary-text: var(--accent-teal);
   --secondary-hover: var(--accent-cyan);
 }
 
 /* Dark class: same as :root (single-theme design) */
 .dark {
-  --bg-primary: #0A0E1A;
-  --bg-secondary: #121829;
-  --bg-tertiary: #1A2235;
-  --bg-card: rgba(18, 24, 41, 0.7);
-  --text-primary: #F0FFFE;
-  --text-secondary: #B8E6E3;
-  --text-tertiary: #7EB8B5;
-  --border-color: rgba(0, 229, 204, 0.2);
-  --border-hover: rgba(0, 229, 204, 0.5);
+  --bg-primary: #020b26;
+  --bg-secondary: #0a162f;
+  --bg-tertiary: #122448;
+  --bg-card: rgba(10, 22, 48, 0.72);
+  --text-primary: #f0f7ff;
+  --text-secondary: #b8d4f0;
+  --text-tertiary: #7a9bc8;
+  --border-color: rgba(0, 229, 255, 0.18);
+  --border-hover: rgba(0, 229, 255, 0.45);
   --shadow: rgba(0, 0, 0, 0.35);
   --shadow-hover: rgba(0, 0, 0, 0.45);
 }

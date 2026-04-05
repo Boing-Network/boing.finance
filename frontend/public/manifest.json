@@ -14,18 +14,12 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
     }
   ],
   "start_url": "/",
   "display": "standalone",
-  "theme_color": "#0A0E1A",
-  "background_color": "#0A0E1A",
+  "theme_color": "#020B26",
+  "background_color": "#020B26",
   "orientation": "portrait-primary",
   "scope": "/",
   "categories": ["finance", "business"],

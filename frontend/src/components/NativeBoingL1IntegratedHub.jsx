@@ -93,14 +93,14 @@ export default function NativeBoingL1IntegratedHub({ feature = 'swap' }) {
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium text-white"
-          style={{ backgroundColor: '#0f766e' }}
+          style={{ backgroundColor: 'var(--finance-primary)' }}
         >
           Get Boing Express
         </a>
         <Link
           to={NATIVE_VM_PATH}
           className="inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium text-white"
-          style={{ backgroundColor: 'var(--accent-primary, #0d9488)' }}
+          style={{ backgroundColor: 'var(--finance-purple)' }}
         >
           Open native Boing tools
         </Link>

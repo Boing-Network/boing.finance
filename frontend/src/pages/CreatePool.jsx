@@ -1271,7 +1271,6 @@ function CreatePool() {
           <meta name="description" content="Create new liquidity pools on EVM and Solana. Deploy trading pairs and earn fees with boing.finance." />
           <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
           <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
-          <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         </Helmet>
         <div className="relative min-h-screen">
           <div className="relative z-10 container mx-auto px-4 py-8">
@@ -1304,7 +1303,6 @@ function CreatePool() {
         <meta name="keywords" content="liquidity pools, create pool, DeFi, AMM, trading pairs" />
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
       </Helmet>
       <div className="relative min-h-screen">
         <div className="relative z-10 container mx-auto px-4 py-8">

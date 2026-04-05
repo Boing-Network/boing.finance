@@ -13,7 +13,7 @@ import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 
 const CYAN = { r: 0, g: 229, b: 255 };
 const GREEN = { r: 0, g: 255, b: 136 };
-const DEEP_BG = '#020810';
+const DEEP_BG = '#020B26';
 
 const TOTAL_MS = 4500;
 const TOTAL_REDUCED_MS = 1800;
@@ -161,7 +161,7 @@ function drawSwapUI(ctx, W, H, opacity, scale) {
   const by = -bh / 2;
   const r = 16;
 
-  ctx.fillStyle = 'rgba(4,12,24,0.88)';
+  ctx.fillStyle = 'rgba(2,11,38,0.88)';
   ctx.shadowBlur = 40;
   ctx.shadowColor = `rgba(${CYAN.r},${CYAN.g},${CYAN.b},0.25)`;
   roundRect(ctx, bx, by, bw, bh, r);
@@ -199,7 +199,7 @@ function drawSwapUI(ctx, W, H, opacity, scale) {
   ctx.fillStyle = `rgba(${GREEN.r},${GREEN.g},${GREEN.b},0.8)`;
   ctx.font = '600 13px "JetBrains Mono", ui-monospace, monospace';
   ctx.fillText('◈ BOING', rowX + 12, by + 142);
-  ctx.fillStyle = '#f0f9ff';
+  ctx.fillStyle = '#f0f7ff';
   ctx.textAlign = 'right';
   ctx.fillText('67,567,567', rowX + rowW - 12, by + 142);
   ctx.textAlign = 'left';
@@ -212,7 +212,7 @@ function drawSwapUI(ctx, W, H, opacity, scale) {
   ctx.shadowColor = `rgba(${CYAN.r},${CYAN.g},${CYAN.b},0.4)`;
   roundRect(ctx, rowX, by + 170, rowW, 36, 8);
   ctx.fill();
-  ctx.fillStyle = '#020810';
+  ctx.fillStyle = '#020B26';
   ctx.font = '700 13px Orbitron, ui-sans-serif, sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText('Swap →', 0, by + 194);
@@ -385,7 +385,7 @@ function CinematicIntro({ onComplete }) {
           position: fixed;
           inset: 0;
           z-index: 99999;
-          background: #020810;
+          background: #020B26;
           overflow: hidden;
           transition: opacity 1s ease, visibility 1.1s ease;
         }
@@ -457,7 +457,7 @@ function CinematicIntro({ onComplete }) {
           font-family: Orbitron, ui-sans-serif, sans-serif;
           font-size: clamp(1.4rem, 3.5vw, 2.8rem);
           font-weight: 900;
-          color: #f0f9ff;
+          color: #f0f7ff;
           text-shadow: 0 0 30px rgba(0,229,255,0.6);
         }
         .cinematic-intro__scene-sub {

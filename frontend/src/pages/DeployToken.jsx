@@ -1627,7 +1627,6 @@ export default function DeployToken() {
         <link rel="canonical" href="https://boing.finance/deploy-token" />
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         
         {/* Structured Data for DeployToken Page */}
         <script type="application/ld+json">
