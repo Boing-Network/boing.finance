@@ -22,6 +22,7 @@ import {
 } from '../../services/boingExpressNativeTx';
 import { getWindowBoingProvider } from '../../utils/boingWalletDiscovery';
 import { buildContractDeployMetaTx } from 'boing-sdk';
+import NativeAmmLpVaultPanel from '../../components/NativeAmmLpVaultPanel';
 
 const RPC_SPEC = 'https://github.com/Boing-Network/boing.network/blob/main/docs/RPC-API-SPEC.md';
 
@@ -374,6 +375,8 @@ export default function BoingNativeVm() {
             <li>Paste a signed tx hex from the CLI here, or build and sign with Express using the section below.</li>
           </ul>
         </PageCard>
+
+        <NativeAmmLpVaultPanel />
 
         <PageCard className="mb-6">
           <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>

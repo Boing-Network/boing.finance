@@ -13,6 +13,7 @@ import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/network
 import { DexFeatureBanner } from '../components/NetworkSupportBanner';
 import getFeatureSupport from '../config/featureSupport';
 import NativeAmmSwapPanel from '../components/NativeAmmSwapPanel';
+import NativeAmmLpVaultPanel from '../components/NativeAmmLpVaultPanel';
 
 // Helper function to get API URL
 const getApiUrl = () => {
@@ -175,6 +176,7 @@ const Liquidity = () => {
                 page uses the same pool.
               </p>
               <NativeAmmSwapPanel defaultOpenAddLiquidity slippagePercent={_settings.slippage} />
+              <NativeAmmLpVaultPanel compact />
             </div>
           )}
           {/* Header */}
