@@ -2,8 +2,24 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
+
+/**
+ * Resolve a dependency as installed under frontend/node_modules.
+ * boing-sdk sources live under ../boing.network/boing-sdk/dist; Node's default
+ * walk hits repo root before frontend/, so Rollup cannot find @noble/* without this.
+ */
+function resolveFromFrontend(spec) {
+  return require.resolve(spec, { paths: [__dirname] });
+}
+
+const nobleAliases = {
+  '@noble/hashes/blake3': resolveFromFrontend('@noble/hashes/blake3'),
+  '@noble/ed25519': resolveFromFrontend('@noble/ed25519'),
+};
 
 /** Every REACT_APP_* referenced in src gets a static define so `process` is never needed at runtime. */
 const REACT_APP_DEFAULTS = [
@@ -87,6 +103,7 @@ export default defineConfig(({ mode }) => ({
   define: envDefine(mode),
   resolve: {
     alias: {
+      ...nobleAliases,
       '@solana/codecs': path.resolve(
         __dirname,
         'node_modules/@solana/codecs/dist/index.browser.mjs'
