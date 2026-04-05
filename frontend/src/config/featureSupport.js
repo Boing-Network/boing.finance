@@ -3,7 +3,7 @@
  * Derives from config/contracts.js so the app can show "Swap (via external DEX)",
  * "Create Pool (Sepolia only)", etc., and gate actions when contracts aren't deployed.
  */
-import CONTRACTS, { getContractAddresses } from './contracts';
+import CONTRACTS, { getContractAddresses, getBoingNativeVmModuleId } from './contracts';
 import { BOING_NATIVE_L1_CHAIN_ID } from './networks';
 
 const ZERO = '0x0000000000000000000000000000000000000000';
@@ -29,16 +29,31 @@ const hasDeployed = (addr) => hasDeployedAddress(addr) && addr !== ZERO;
  * @returns {{
  *   swap: 'boing' | 'native_amm' | 'external' | false,
  *   liquidity: boolean,
- *   createPool: boolean,
+ *   createPool: boolean, // true for EVM DEX or native AMM add-liquidity on Boing L1
  *   deployToken: boolean,
  *   bridge: 'boing' | 'external' | false,
  *   hasDex: boolean,
  *   hasNativeAmm: boolean,
  *   hasTokenFactory: boolean,
+ *   nativeVmDex: {
+ *     factoryId: string | null,
+ *     routerId: string | null,
+ *     lockerId: string | null,
+ *     swapParityMinimum: boolean,
+ *     fullyConfigured: boolean,
+ *   },
  * }}
  */
 export function getFeatureSupport(chainId) {
   const c = getContractAddresses(chainId);
+  const emptyVmDex = {
+    factoryId: null,
+    routerId: null,
+    lockerId: null,
+    swapParityMinimum: false,
+    fullyConfigured: false,
+  };
+
   if (!c) {
     return {
       swap: 'external',
@@ -48,10 +63,12 @@ export function getFeatureSupport(chainId) {
       bridge: 'external',
       hasDex: false,
       hasNativeAmm: false,
-      hasTokenFactory: false
+      hasTokenFactory: false,
+      nativeVmDex: emptyVmDex,
     };
   }
 
+  // EVM-only: Boing L1 (6913) has no `dexFactory` in config — use `nativeVm` + native RPC instead.
   const hasDex = hasDeployed(c.dexFactory) && hasDeployed(c.dexRouter);
   const hasTokenFactory = hasDeployed(c.tokenFactory);
   const hasBridge = hasDeployed(c.crossChainBridge);
@@ -60,16 +77,30 @@ export function getFeatureSupport(chainId) {
   const nativePool = c.nativeConstantProductPool;
   const hasNativeAmm = Boolean(onBoingNativeL1 && hasDeployedAddress(nativePool));
 
+  const factoryId = onBoingNativeL1 ? getBoingNativeVmModuleId(chainId, 'dexFactory') : null;
+  const routerId = onBoingNativeL1 ? getBoingNativeVmModuleId(chainId, 'swapRouter') : null;
+  const lockerId = onBoingNativeL1 ? getBoingNativeVmModuleId(chainId, 'liquidityLocker') : null;
+  const nativeVmDex = {
+    factoryId,
+    routerId,
+    lockerId,
+    swapParityMinimum: Boolean(factoryId && routerId),
+    fullyConfigured: Boolean(factoryId && routerId && lockerId),
+  };
+
   return {
     swap: hasDex ? 'boing' : hasNativeAmm ? 'native_amm' : 'external',
-    liquidity: hasDex,
-    createPool: hasDex,
+    /** EVM router/factory LP, or native CP pool add-liquidity on Boing L1. */
+    liquidity: hasDex || hasNativeAmm,
+    /** EVM factory pair creation, or native pool bootstrap via add-liquidity on Boing L1. */
+    createPool: hasDex || hasNativeAmm,
     // Boing L1 uses direct bytecode deploy when TokenFactory is not deployed on-chain.
     deployToken: hasTokenFactory || onBoingNativeL1,
     bridge: hasBridge ? 'boing' : 'external',
     hasDex,
     hasNativeAmm,
-    hasTokenFactory
+    hasTokenFactory,
+    nativeVmDex,
   };
 }
 

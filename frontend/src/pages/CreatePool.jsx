@@ -13,8 +13,9 @@ import { DexFeatureBanner } from '../components/NetworkSupportBanner';
 import { useAchievements } from '../contexts/AchievementContext';
 import ShareCardModal from '../components/ShareCardModal';
 import NativeBoingL1IntegratedHub from '../components/NativeBoingL1IntegratedHub';
-import NativeAmmLiquidityRoutesHint from '../components/NativeAmmLiquidityRoutesHint';
+import NativeAmmSwapPanel from '../components/NativeAmmSwapPanel';
 import getFeatureSupport from '../config/featureSupport';
+import BoingNativeDexStatusBanner from '../components/BoingNativeDexStatusBanner';
 
 
 
@@ -233,20 +234,20 @@ function CreatePool() {
   // Get DEXFactory contract instance
   const getDEXFactoryContract = async () => {
     if (!window.ethereum || !chainId) return null;
-    // Check if we're on Sepolia (for testing)
+    // EVM factory form is wired to Sepolia in this app; Boing L1 uses the Boing VM, not this ethers path.
     if (chainId !== 11155111) {
       if (chainId === BOING_NATIVE_L1_CHAIN_ID) {
         if (featureSupport.hasNativeAmm) {
           toast.error(
-            'On Boing testnet, add native pool liquidity on the Swap page (expand “Add liquidity” under the native pool section with Boing Express). For EVM-style factory pools, switch to Sepolia.'
+            'On Boing testnet, add liquidity via the native pool (Swap page, Boing Express). This page’s factory form is for EVM networks only (e.g. Sepolia in config).'
           );
         } else {
           toast.error(
-            'Boing testnet: EVM factory pools are on Sepolia in this app. Switch to Sepolia, or use Deploy Token / Native VM on Boing.'
+            'On Boing testnet, use Deploy Token / Native VM. This factory form requires an EVM-configured network such as Sepolia.'
           );
         }
       } else {
-        toast.error('Please switch to Sepolia testnet to test pool creation');
+        toast.error('Pool creation with this form requires an EVM network where a factory is configured (e.g. Sepolia).');
       }
       return null;
     }
@@ -1309,20 +1310,56 @@ function CreatePool() {
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">
             <DexFeatureBanner featureLabel="Create Pool" currentChainId={chainId} onSwitchNetwork={switchNetwork} />
+            {chainId === BOING_NATIVE_L1_CHAIN_ID && (
+              <BoingNativeDexStatusBanner chainId={chainId} featureSupport={featureSupport} />
+            )}
             {chainId === BOING_NATIVE_L1_CHAIN_ID && !featureSupport.hasNativeAmm && (
               <NativeBoingL1IntegratedHub feature="createPool" />
             )}
-            <NativeAmmLiquidityRoutesHint />
+            {chainId === BOING_NATIVE_L1_CHAIN_ID && featureSupport.hasNativeAmm && (
+              <div
+                className="mb-6 rounded-xl border p-5 text-left"
+                style={{
+                  borderColor: 'rgba(45, 212, 191, 0.45)',
+                  backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                }}
+              >
+                <h2 className="text-xl font-semibold text-white mb-2">Boing testnet — native AMM liquidity</h2>
+                <p className="text-sm text-gray-300 mb-4">
+                  This network uses the in-app <strong>constant-product pool</strong> (not an EVM factory). Add reserves below
+                  with Boing Express—the same flow as on <strong>Swap</strong>. There is no separate “create pair” contract
+                  step on L1 in this app.
+                </p>
+                <NativeAmmSwapPanel defaultOpenAddLiquidity slippagePercent={0.5} />
+                <p className="text-xs text-gray-500 mt-4">
+                  Optional: Uniswap-style <strong>new pair</strong> with the full EVM form is available on{' '}
+                  <button
+                    type="button"
+                    onClick={() => typeof switchNetwork === 'function' && switchNetwork(11155111)}
+                    className="text-cyan-400 underline font-medium"
+                  >
+                    Sepolia
+                  </button>{' '}
+                  in this app — not a requirement for Boing L1.
+                </p>
+              </div>
+            )}
             {/* Header */}
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold text-white mb-4">Create Liquidity Pool</h1>
               <p className="text-xl text-gray-300">
-                Deploy new trading pairs and earn fees from every trade
+                {chainId === BOING_NATIVE_L1_CHAIN_ID && featureSupport.hasNativeAmm
+                  ? 'Native pool: use the panel above. The factory form below is for EVM-configured networks (e.g. Sepolia).'
+                  : 'Deploy new trading pairs and earn fees from every trade'}
               </p>
             </div>
 
-            {/* Pool Configuration */}
-            <div className="bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+            {/* Pool Configuration — hidden on Boing when native AMM is the supported path */}
+            <div
+              className={`bg-gray-800 rounded-lg shadow-lg p-6 mb-6 ${
+                chainId === BOING_NATIVE_L1_CHAIN_ID && featureSupport.hasNativeAmm ? 'hidden' : ''
+              }`}
+            >
               <h3 className="text-xl font-semibold mb-4 text-white">Pool Configuration</h3>
               
               {/* Token Selection */}

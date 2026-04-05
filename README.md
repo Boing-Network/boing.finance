@@ -19,6 +19,10 @@ A modern decentralized exchange built with React, Cloudflare Workers, and D1 dat
 └── contracts/         # Smart contracts (Solidity)
 ```
 
+### Boing Network L1 (chain 6913)
+
+Boing L1 runs the **Boing VM**, not EVM application bytecode. The Solidity DEX in `contracts/` targets **EVM** networks (e.g. Sepolia). For how L1 differs, env vars for native modules, and the cross-repo roadmap, see **[docs/boing-l1-vs-evm-dex.md](./docs/boing-l1-vs-evm-dex.md)** and **[docs/boing-l1-dex-roadmap.md](./docs/boing-l1-dex-roadmap.md)**.
+
 ## 🛠️ Tech Stack
 
 ### Frontend

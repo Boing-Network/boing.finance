@@ -20,6 +20,7 @@ import TrendingPairs from '../components/TrendingPairs';
 import NativeBoingL1IntegratedHub from '../components/NativeBoingL1IntegratedHub';
 import NativeAmmSwapPanel from '../components/NativeAmmSwapPanel';
 import getFeatureSupport from '../config/featureSupport';
+import BoingNativeDexStatusBanner from '../components/BoingNativeDexStatusBanner';
 
 
 const Swap = () => {
@@ -467,8 +468,8 @@ const Swap = () => {
     if (!swapRouterAddress || swapRouterAddress === '0x0000000000000000000000000000000000000000') {
       toast.error(
         chainId === BOING_NATIVE_L1_CHAIN_ID
-          ? 'On Boing testnet, use the native pool panel or Native VM page with Boing Express—or switch to Sepolia for the EVM swap.'
-          : 'DEX swapping is not yet available on this network. Currently only supported on Sepolia testnet.'
+          ? 'On Boing testnet, use the native pool panel or Native VM with Boing Express. This swap box targets EVM routers on other configured networks only.'
+          : 'DEX swapping is not yet available on this network. Use a network where a router is configured in contracts, or an external DEX.'
       );
       return;
     }
@@ -1834,6 +1835,10 @@ const Swap = () => {
             </div>
             <ProactiveTipsBanner />
           </div>
+
+          {chainId === BOING_NATIVE_L1_CHAIN_ID && (
+            <BoingNativeDexStatusBanner chainId={chainId} featureSupport={featureSupport} />
+          )}
 
           {chainId === BOING_NATIVE_L1_CHAIN_ID && !featureSupport.hasNativeAmm && (
             <NativeBoingL1IntegratedHub feature="swap" />
