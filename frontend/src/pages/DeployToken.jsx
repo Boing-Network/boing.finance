@@ -23,6 +23,7 @@ import FairLaunchChecklist from '../components/FairLaunchChecklist';
 import { deploymentHistory as deploymentHistoryUtil } from '../utils/deploymentHistory';
 import { notificationService } from '../utils/notifications';
 import ShareCardModal from '../components/ShareCardModal';
+import { isBoingTestnetChainId } from 'boing-sdk';
 import NativeBoingDeployPanel from '../components/NativeBoingDeployPanel';
 import NativeBoingTokenDeploySection from '../components/NativeBoingTokenDeploySection';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
@@ -744,7 +745,8 @@ export default function DeployToken() {
   const isBoingNativeDeployPath =
     !isSolana &&
     isConnected &&
-    chainId === BOING_NATIVE_L1_CHAIN_ID &&
+    Boolean(account && isBoingNativeAccountIdHex(account)) &&
+    isBoingTestnetChainId(chainId) &&
     walletType === 'boingExpress';
 
   const nativeTokenDeployRef = useRef(null);
@@ -1646,9 +1648,9 @@ export default function DeployToken() {
             },
             "offers": {
               "@type": "Offer",
-              "price": network?.chainId === BOING_NATIVE_L1_CHAIN_ID ? "1" : "0.01",
-              "priceCurrency": network?.chainId === BOING_NATIVE_L1_CHAIN_ID ? "BOING" : "ETH",
-              "description": network?.chainId === BOING_NATIVE_L1_CHAIN_ID
+              "price": isBoingTestnetChainId(network?.chainId) ? "1" : "0.01",
+              "priceCurrency": isBoingTestnetChainId(network?.chainId) ? "BOING" : "ETH",
+              "description": isBoingTestnetChainId(network?.chainId)
                 ? "Deploy on Boing testnet; service fee in native BOING (reference ~$5/BOING in app UI)"
                 : "Deploy your own ERC20 token with advanced security features"
             }
@@ -1670,7 +1672,9 @@ export default function DeployToken() {
               </p>
               {!isSolana &&
                 isConnected &&
-                chainId === BOING_NATIVE_L1_CHAIN_ID &&
+                account &&
+                isBoingNativeAccountIdHex(account) &&
+                isBoingTestnetChainId(chainId) &&
                 walletType === 'boingExpress' && (
                   <p
                     className="text-sm max-w-2xl mx-auto mt-4 rounded-lg border px-4 py-3 text-left"
@@ -1692,7 +1696,11 @@ export default function DeployToken() {
                   ERC-20 deployment uses <strong style={{ color: 'var(--text-secondary)' }}>EVM</strong> in the app chain toggle (header). If the header shows Solana, switch to EVM and connect MetaMask or another Ethereum wallet. Boing Express can expose a native Boing account (32-byte)—that account cannot sign EVM deploys here; use an EVM wallet for this flow or Boing Native VM for native tooling.
                 </p>
               )}
-              {!isSolana && isConnected && account && isBoingNativeAccountIdHex(account) && (
+              {!isSolana &&
+                isConnected &&
+                account &&
+                isBoingNativeAccountIdHex(account) &&
+                !isBoingNativeDeployPath && (
                 <p className="text-sm max-w-2xl mx-auto mt-3 rounded-lg border px-3 py-2" style={{ borderColor: 'rgba(251, 191, 36, 0.45)', color: 'var(--text-secondary)' }}>
                   You are connected with a <strong>native Boing</strong> account. ERC-20 deploy on this page needs a standard <strong>20-byte Ethereum</strong> address—switch the header to <strong>EVM</strong> and connect MetaMask (e.g. Sepolia), use <strong>Boing Native VM</strong> in this app for tooling, or follow the{' '}
                   <a
@@ -1707,11 +1715,9 @@ export default function DeployToken() {
                 </p>
               )}
               {!isSolana &&
-                !(
-                  chainId === BOING_NATIVE_L1_CHAIN_ID &&
-                  walletType === 'boingExpress' &&
-                  isConnected
-                ) && <NativeBoingDeployPanel tokenName={name} tokenSymbol={symbol} />}
+                !(isBoingTestnetChainId(chainId) && walletType === 'boingExpress' && isConnected) && (
+                  <NativeBoingDeployPanel tokenName={name} tokenSymbol={symbol} />
+                )}
               
               {/* Quick Actions */}
               <div className="flex flex-wrap items-center justify-center gap-3 mt-4">

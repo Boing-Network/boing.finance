@@ -1,10 +1,12 @@
 import {
-  buildContractDeployMetaTx,
+  buildReferenceFungibleDeployMetaTx,
+  createClient,
+  preflightContractDeployMetaQa,
   resolveReferenceFungibleTemplateBytecodeHex,
 } from 'boing-sdk';
-import { qaCheckBoingDeploy } from './boingNativeVm';
+import { getBoingRpcClientBaseUrl } from './boingTestnetRpc';
 import { boingExpressSendTransaction } from './boingExpressNativeTx';
-import { BOING_QA_EMPTY_DESCRIPTION_HASH, BOING_QA_PURPOSE_TOKEN, isValidBoingQaPurpose } from '../config/boingQa';
+import { BOING_QA_PURPOSE_TOKEN, isValidBoingQaPurpose } from '../config/boingQa';
 import { getWindowBoingProvider } from '../utils/boingWalletDiscovery';
 import { tryParseEvenLengthDeployBytecodeHex } from '../utils/boingDeployBytecodeHex';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
@@ -35,6 +37,61 @@ export function computeEffectiveNativeDeployBytecode(customBytecodeRaw, bundledB
     return tryParseEvenLengthDeployBytecodeHex(c) ?? '';
   }
   return bundledBytecode || '';
+}
+
+/**
+ * Build the reference fungible `contract_deploy_meta` tx and run `boing_qaCheck` via BoingClient
+ * (same fields the node uses before sign — see boing-sdk `preflightContractDeployMetaQa`).
+ *
+ * @param {object} input
+ * @param {string} input.tokenName
+ * @param {string} input.tokenSymbol
+ * @param {string} [input.customBytecode]
+ * @param {string} [input.descriptionHash]
+ * @param {string} [input.purpose]
+ * @returns {Promise<{ result: string, message?: string, rule_id?: string }>}
+ */
+export async function preflightReferenceFungibleDeployQa({
+  tokenName,
+  tokenSymbol,
+  customBytecode = '',
+  descriptionHash = '',
+  purpose = BOING_QA_PURPOSE_TOKEN,
+}) {
+  const name = tokenName?.trim() || '';
+  const sym = (tokenSymbol?.trim() || '').toUpperCase();
+  if (!name || !sym) {
+    throw new Error('Token name and symbol are required.');
+  }
+  if (!isValidBoingQaPurpose(purpose)) {
+    throw new Error('Invalid QA purpose.');
+  }
+
+  const bundled = getBundledNativeFungibleBytecodeHex();
+  const bc = computeEffectiveNativeDeployBytecode(customBytecode, bundled);
+  if (!bc) {
+    throw new Error(
+      'No deploy bytecode — set REACT_APP_BOING_REFERENCE_FUNGIBLE_TEMPLATE_BYTECODE_HEX or paste hex under Advanced.',
+    );
+  }
+
+  const custom = (customBytecode || '').trim();
+  const bytecodeHexOverride = custom ? tryParseEvenLengthDeployBytecodeHex(customBytecode) || undefined : undefined;
+  if (custom && !bytecodeHexOverride) {
+    throw new Error('Invalid bytecode: use even-length hex (optional 0x prefix).');
+  }
+
+  const client = createClient(getBoingRpcClientBaseUrl());
+  const tx = buildReferenceFungibleDeployMetaTx({
+    assetName: name,
+    assetSymbol: sym,
+    purposeCategory: purpose,
+    descriptionHashHex: descriptionHash.trim() || undefined,
+    bytecodeHexOverride,
+    extraEnvKeys: [LEGACY_FUNGIBLE_BYTECODE_ENV],
+  });
+
+  return preflightContractDeployMetaQa(client, tx);
 }
 
 /**
@@ -83,13 +140,41 @@ export async function executeBoingNativeTokenDeploy({
     return { ok: false, code: 'no_provider', message: 'Boing Express provider not found.' };
   }
 
-  const pre = await qaCheckBoingDeploy(bc, {
-    purposeCategory: purpose,
-    descriptionHash: descriptionHash.trim() || undefined,
-    assetName: name,
-    assetSymbol: sym,
-    emptyDescriptionHash: BOING_QA_EMPTY_DESCRIPTION_HASH,
-  });
+  const custom = (customBytecode || '').trim();
+  const bytecodeHexOverride = custom ? tryParseEvenLengthDeployBytecodeHex(customBytecode) || undefined : undefined;
+  if (custom && !bytecodeHexOverride) {
+    return { ok: false, code: 'invalid_bytecode', message: 'Invalid bytecode hex under Advanced.' };
+  }
+
+  let tx;
+  try {
+    tx = buildReferenceFungibleDeployMetaTx({
+      assetName: name,
+      assetSymbol: sym,
+      purposeCategory: purpose,
+      descriptionHashHex: descriptionHash.trim() || undefined,
+      bytecodeHexOverride,
+      extraEnvKeys: [LEGACY_FUNGIBLE_BYTECODE_ENV],
+    });
+  } catch (e) {
+    return {
+      ok: false,
+      code: 'no_bytecode',
+      message: e?.message || 'Could not build deploy transaction.',
+    };
+  }
+
+  const client = createClient(getBoingRpcClientBaseUrl());
+  let pre;
+  try {
+    pre = await preflightContractDeployMetaQa(client, tx);
+  } catch (e) {
+    return {
+      ok: false,
+      code: 'qa_rpc_failed',
+      message: e?.message || 'QA preflight (boing_qaCheck) failed.',
+    };
+  }
 
   if (pre.result === 'reject') {
     return {
@@ -110,13 +195,6 @@ export async function executeBoingNativeTokenDeploy({
   }
 
   try {
-    const tx = buildContractDeployMetaTx({
-      bytecodeHex: bc,
-      assetName: name,
-      assetSymbol: sym,
-      purposeCategory: purpose,
-      descriptionHashHex: descriptionHash.trim() || undefined,
-    });
     const hash = await boingExpressSendTransaction(p, tx);
     const txHash = typeof hash === 'string' ? hash : JSON.stringify(hash);
     return { ok: true, txHash, qaResult: pre };

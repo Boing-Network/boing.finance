@@ -1,16 +1,15 @@
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { REFERENCE_FUNGIBLE_TEMPLATE_VERSION } from 'boing-sdk';
+import { isBoingTestnetChainId, REFERENCE_FUNGIBLE_TEMPLATE_VERSION } from 'boing-sdk';
 import { useWallet } from '../contexts/WalletContext';
-import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
-import { qaCheckBoingDeploy } from '../services/boingNativeVm';
 import {
   computeEffectiveNativeDeployBytecode,
   executeBoingNativeTokenDeploy,
   getBundledNativeFungibleBytecodeHex,
+  preflightReferenceFungibleDeployQa,
 } from '../services/boingNativeTokenDeploy';
-import { BOING_QA_EMPTY_DESCRIPTION_HASH, BOING_QA_PURPOSE_TOKEN, isValidBoingQaPurpose } from '../config/boingQa';
+import { BOING_QA_PURPOSE_TOKEN, isValidBoingQaPurpose } from '../config/boingQa';
 import { tryParseEvenLengthDeployBytecodeHex } from '../utils/boingDeployBytecodeHex';
 
 /**
@@ -68,14 +67,12 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
     setQaResult(null);
     setQaPoolAcknowledged(false);
     try {
-      const name = tokenName?.trim() || '';
-      const sym = tokenSymbol?.trim() || '';
-      const r = await qaCheckBoingDeploy(bc, {
-        purposeCategory: purpose,
-        descriptionHash: descriptionHash.trim() || undefined,
-        assetName: name || undefined,
-        assetSymbol: sym || undefined,
-        emptyDescriptionHash: BOING_QA_EMPTY_DESCRIPTION_HASH,
+      const r = await preflightReferenceFungibleDeployQa({
+        tokenName,
+        tokenSymbol,
+        customBytecode,
+        descriptionHash,
+        purpose,
       });
       setQaResult(r);
       if (r.result === 'allow') toast.success('QA: allow');
@@ -123,7 +120,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
     [deployBlocked, runDeployInternal]
   );
 
-  if (chainId !== BOING_NATIVE_L1_CHAIN_ID || walletType !== 'boingExpress' || !isConnected) {
+  if (!isBoingTestnetChainId(chainId) || walletType !== 'boingExpress' || !isConnected) {
     return null;
   }
 
