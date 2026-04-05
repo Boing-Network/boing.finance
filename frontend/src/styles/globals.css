@@ -572,7 +572,7 @@ code, pre, .monospace {
 }
 
 /* === NAVIGATION BAR (Step 5.3) === */
-nav, .navbar, header {
+nav:not(.site-nav-bar), .navbar, header:not(.site-header) {
   background: var(--bg-nav);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -581,6 +581,108 @@ nav, .navbar, header {
   position: sticky;
   top: 0;
   z-index: 1000;
+}
+
+/* Sticky site header + primary nav — nebula glass, cyan/purple edge glow */
+.site-header {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg-primary) 88%, transparent) 0%,
+    color-mix(in srgb, var(--bg-secondary) 82%, transparent) 100%
+  ) !important;
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--finance-primary) 22%, transparent),
+    0 12px 40px -16px color-mix(in srgb, var(--bg-primary) 75%, black);
+  border-bottom: none;
+  padding: 0 !important;
+}
+.site-header .site-nav-bar {
+  background: transparent !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: none;
+  box-shadow: none;
+  padding: 0 !important;
+  position: relative;
+}
+.site-header .site-nav-bar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--finance-primary) 45%, transparent) 20%,
+    color-mix(in srgb, var(--accent-purple) 40%, transparent) 50%,
+    color-mix(in srgb, var(--finance-primary) 45%, transparent) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Landing ticker — matches header; Comfortaa-friendly row */
+.boing-ticker-bar {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg-secondary) 90%, var(--finance-primary) 5%) 0%,
+    color-mix(in srgb, var(--bg-primary) 94%, transparent) 100%
+  );
+  border-bottom: 1px solid color-mix(in srgb, var(--finance-primary) 14%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 4%, transparent);
+}
+
+/* Feature / Boing info banners (swap, pools, network switch, native L1 hub) */
+.boing-feature-banner {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-xl, 1rem);
+  border: 1px solid color-mix(in srgb, var(--finance-primary) 26%, transparent);
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--bg-card) 88%, var(--finance-primary) 5%) 0%,
+    color-mix(in srgb, var(--bg-secondary) 92%, var(--accent-purple) 6%) 100%
+  );
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--border-color) 40%, transparent),
+    0 12px 40px -20px color-mix(in srgb, var(--finance-primary) 18%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.boing-feature-banner::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  border-radius: var(--radius-xl, 1rem) var(--radius-xl, 1rem) 0 0;
+  background: linear-gradient(
+    90deg,
+    var(--finance-primary),
+    color-mix(in srgb, var(--accent-purple) 85%, var(--finance-primary)),
+    var(--finance-green)
+  );
+  opacity: 0.9;
+  pointer-events: none;
+}
+.boing-feature-banner--amber {
+  border-color: color-mix(in srgb, var(--finance-gold) 40%, transparent);
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--bg-card) 90%, var(--finance-gold) 6%) 0%,
+    var(--bg-secondary) 100%
+  );
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--finance-gold) 20%, transparent),
+    0 12px 36px -18px color-mix(in srgb, var(--finance-gold) 14%, transparent);
+}
+.boing-feature-banner--amber::before {
+  background: linear-gradient(90deg, var(--finance-gold), var(--finance-primary));
 }
 nav a, .navbar a {
   color: var(--text-secondary);

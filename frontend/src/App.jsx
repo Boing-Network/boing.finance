@@ -327,8 +327,8 @@ function AppContent() {
       <BaseNetworkOptimizer />
       
       {/* Header: nav + ticker (sticky so ticker sits in flow directly under nav) */}
-      <header className="sticky top-0 z-30 flex flex-col flex-shrink-0 w-full min-w-0 bg-[var(--bg-primary)]">
-        <nav className="relative flex-shrink-0 w-full min-w-0 border-b border-border shadow-lg" aria-label="Primary navigation">
+      <header className="site-header sticky top-0 z-30 flex flex-col flex-shrink-0 w-full min-w-0">
+        <nav className="site-nav-bar relative flex-shrink-0 w-full min-w-0" aria-label="Primary navigation">
           <ShootingStars dense />
           {/* Full-width row (no max-w-7xl/mx-auto — avoids centering inset on logo) */}
           <div className="flex w-full min-w-0 items-center justify-between gap-x-2 sm:gap-x-3 lg:gap-x-4 xl:gap-x-6 h-14 sm:h-16 min-[1150px]:flex-nowrap min-[1150px]:gap-x-2 min-[1150px]:max-xl:gap-x-1.5 xl:gap-x-4 2xl:gap-x-6 max-[1149px]:pl-2 max-[1149px]:pr-3 sm:max-[1149px]:pl-3 sm:max-[1149px]:pr-4 md:max-[1149px]:pl-4 md:max-[1149px]:pr-6 lg:max-[1149px]:pl-4 lg:max-[1149px]:pr-8 min-[1150px]:pl-[max(0px,env(safe-area-inset-left,0px))] min-[1150px]:pr-[max(0.75rem,env(safe-area-inset-right,0px))] xl:pr-[max(1.5rem,env(safe-area-inset-right,0px))] 2xl:pr-[max(2rem,env(safe-area-inset-right,0px))]">
@@ -479,7 +479,7 @@ function AppContent() {
                             <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>
                           )}
                           {item.testnetOnly && item.isAvailable && !item.comingSoon && (
-                            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-400/30">Testnet Only</span>
+                            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-400/35">Testnet Only</span>
                           )}
                         </div>
                         {item.description && (
@@ -529,7 +529,7 @@ function AppContent() {
                             <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>
                           )}
                           {item.testnetOnly && item.isAvailable && !item.comingSoon && (
-                            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-400/30">Testnet Only</span>
+                            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-400/35">Testnet Only</span>
                           )}
                         </div>
                         {item.description && (

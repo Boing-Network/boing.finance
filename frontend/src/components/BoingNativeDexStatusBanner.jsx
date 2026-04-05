@@ -30,13 +30,9 @@ export function BoingNativeDexStatusBanner({ chainId, featureSupport }) {
   if (nativeVmDex?.swapParityMinimum) {
     return (
       <div
-        className="mb-4 rounded-xl border px-4 py-3 text-sm"
+        className="boing-feature-banner boing-feature-banner--amber mb-4 px-4 py-3 text-sm relative z-10"
         role="status"
-        style={{
-          borderColor: 'rgba(251, 191, 36, 0.45)',
-          backgroundColor: 'rgba(120, 53, 15, 0.2)',
-          color: 'var(--text-primary, #f0f7ff)',
-        }}
+        style={{ color: 'var(--text-primary, #f0f7ff)' }}
       >
         <strong className="text-amber-200">Boing VM DEX modules configured.</strong>{' '}
         Factory and router AccountIds are set in this build, but swap/router UI integration is still in progress.{' '}
@@ -48,15 +44,11 @@ export function BoingNativeDexStatusBanner({ chainId, featureSupport }) {
   if (!hasNativeAmm) {
     return (
       <div
-        className="mb-4 rounded-xl border px-4 py-3 text-sm"
+        className="boing-feature-banner mb-4 px-4 py-3 text-sm relative z-10"
         role="note"
-        style={{
-          borderColor: 'rgba(0, 229, 255, 0.28)',
-          backgroundColor: 'rgba(2, 11, 38, 0.88)',
-          color: 'var(--text-secondary, #b8d4f0)',
-        }}
+        style={{ color: 'var(--text-secondary, #b8d4f0)' }}
       >
-        <strong className="text-teal-300">Boing L1 uses the Boing VM</strong> — the Solidity DEX (DEXFactoryV2, DEXRouter,
+        <strong className="text-cyan-300">Boing L1 uses the Boing VM</strong> — the Solidity DEX (DEXFactoryV2, DEXRouter,
         LiquidityLocker) in this repo targets EVM chains only. A multi-pair DEX on L1 requires Boing VM bytecode, deployed
         AccountIds, and app wiring — not the same compiled Solidity. {link} ·{' '}
         <a
@@ -74,11 +66,8 @@ export function BoingNativeDexStatusBanner({ chainId, featureSupport }) {
 
   return (
     <div
-      className="mb-4 rounded-lg border px-3 py-2 text-xs"
-      style={{
-        borderColor: 'rgba(148, 163, 184, 0.25)',
-        color: 'var(--text-tertiary, #7a9bc8)',
-      }}
+      className="boing-feature-banner mb-4 px-3 py-2 text-xs relative z-10"
+      style={{ color: 'var(--text-tertiary, #7a9bc8)' }}
     >
       Native AMM pool is available on this network. For a Uniswap-style factory/router on L1, see {link}.
     </div>
