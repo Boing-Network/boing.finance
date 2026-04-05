@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * Generate farcaster.json manifest from minikit.config.ts
- * This script ensures the manifest is always in sync with the config
+ * Generate public/.well-known/farcaster.json from minikit.config.ts
+ * Parses string fields and tags so the manifest stays in sync with the TS source.
  */
 
 const fs = require('fs');
@@ -10,62 +10,105 @@ const path = require('path');
 
 console.log('🔄 Generating farcaster.json from minikit.config.ts...');
 
-// Import the config (we'll need to handle TypeScript)
 const configPath = path.join(__dirname, '..', 'minikit.config.ts');
 
+function extractBalanced(content, openBraceIndex) {
+  let depth = 0;
+  for (let i = openBraceIndex; i < content.length; i++) {
+    const c = content[i];
+    if (c === '{') depth++;
+    else if (c === '}') {
+      depth--;
+      if (depth === 0) return content.slice(openBraceIndex + 1, i);
+    }
+  }
+  return null;
+}
+
+function extractKeyedBlock(parent, key) {
+  const re = new RegExp(`\\b${key}:\\s*\\{`);
+  const m = parent.match(re);
+  if (!m) return null;
+  const openIdx = parent.indexOf(m[0]) + m[0].length - 1;
+  return extractBalanced(parent, openIdx);
+}
+
+function quotedField(block, key) {
+  const re = new RegExp(`\\b${key}:\\s*"([^"]*)"`, 'm');
+  const match = block.match(re);
+  return match ? match[1] : undefined;
+}
+
+function parseStringArray(block, key) {
+  const re = new RegExp(`\\b${key}:\\s*\\[([\\s\\S]*?)\\]`, 'm');
+  const m = block.match(re);
+  if (!m) return [];
+  return [...m[1].matchAll(/"([^"]*)"/g)].map((x) => x[1]);
+}
+
 try {
-  // Read the config file
   const configContent = fs.readFileSync(configPath, 'utf8');
-  
-  // Extract the ROOT_URL
-  const rootUrlMatch = configContent.match(/const ROOT_URL = process\.env\.REACT_APP_FRONTEND_URL \|\| '([^']+)';/);
-  const rootUrl = rootUrlMatch ? rootUrlMatch[1] : 'https://0ce87f2c.boing-finance.pages.dev';
-  
+
+  const rootUrlMatch = configContent.match(
+    /const ROOT_URL = process\.env\.REACT_APP_FRONTEND_URL \|\| '([^']+)';/,
+  );
+  const rootUrl = rootUrlMatch ? rootUrlMatch[1] : 'https://boing.finance';
   console.log(`📍 Using ROOT_URL: ${rootUrl}`);
-  
-    // Generate the manifest from the config structure (matching Farcaster requirements)
-    const manifest = {
-      accountAssociation: {
-        header: "eyJmaWQiOjEzOTc5MzcsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg1RTQ2MEQ2OWNjMThiYjBjOEU3MGVkNzVBM2E5QTk2QjdDZTRBMzcyIn0",
-        payload: "eyJkb21haW4iOiJib2luZy5maW5hbmNlIn0",
-        signature: "buQTkbWCkIjwXglpFMrM40rjUrVfEbfe00/rzyno2YMl8Xf7cLyZKfBZd9HAxaIzIaji7+M7/sIC2j7C2HtHIRw="
-      },
-      miniapp: {
-        version: "1",
-        name: "boing.finance",
-        iconUrl: "https://boing.finance/icon.png",
-        homeUrl: "https://boing.finance",
-        splashImageUrl: "https://boing.finance/splash.png",
-        splashBackgroundColor: "#0f172a",
-        heroImageUrl: "https://boing.finance/hero.png",
-        tagline: "Cross-Chain DeFi Made Easy",
-        primaryCategory: "finance",
-        tags: [
-          "defi",
-          "dex",
-          "tokens",
-          "swap",
-          "liquidity"
-        ]
-      }
-    };
-  
-  // Write the manifest to the .well-known directory
+
+  const cfgStart = configContent.indexOf('export const minikitConfig');
+  if (cfgStart < 0) throw new Error('minikitConfig export not found');
+  const open = configContent.indexOf('{', cfgStart);
+  const configBody = extractBalanced(configContent, open);
+  if (!configBody) throw new Error('Could not parse minikitConfig object');
+
+  const assocBlock = extractKeyedBlock(configBody, 'accountAssociation');
+  const miniBlock = extractKeyedBlock(configBody, 'miniapp');
+  if (!assocBlock || !miniBlock) {
+    throw new Error('Could not find accountAssociation or miniapp block');
+  }
+
+  const manifest = {
+    accountAssociation: {
+      header: quotedField(assocBlock, 'header'),
+      payload: quotedField(assocBlock, 'payload'),
+      signature: quotedField(assocBlock, 'signature'),
+    },
+    miniapp: {
+      version: quotedField(miniBlock, 'version'),
+      name: quotedField(miniBlock, 'name'),
+      iconUrl: quotedField(miniBlock, 'iconUrl'),
+      homeUrl: quotedField(miniBlock, 'homeUrl'),
+      splashImageUrl: quotedField(miniBlock, 'splashImageUrl'),
+      splashBackgroundColor: quotedField(miniBlock, 'splashBackgroundColor'),
+      heroImageUrl: quotedField(miniBlock, 'heroImageUrl'),
+      tagline: quotedField(miniBlock, 'tagline'),
+      primaryCategory: quotedField(miniBlock, 'primaryCategory'),
+      tags: parseStringArray(miniBlock, 'tags'),
+    },
+  };
+
+  const missing = [];
+  ['header', 'payload', 'signature'].forEach((k) => {
+    if (!manifest.accountAssociation[k]) missing.push(`accountAssociation.${k}`);
+  });
+  ['version', 'name', 'iconUrl', 'homeUrl'].forEach((k) => {
+    if (!manifest.miniapp[k]) missing.push(`miniapp.${k}`);
+  });
+  if (missing.length) {
+    throw new Error(`Missing fields: ${missing.join(', ')}`);
+  }
+
   const manifestPath = path.join(__dirname, '..', 'public', '.well-known', 'farcaster.json');
   const manifestDir = path.dirname(manifestPath);
-  
-  // Ensure the directory exists
   if (!fs.existsSync(manifestDir)) {
     fs.mkdirSync(manifestDir, { recursive: true });
   }
-  
-  // Write the manifest
-  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
-  
+
+  fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
   console.log('✅ Generated farcaster.json successfully');
   console.log(`📁 Location: ${manifestPath}`);
   console.log(`🌐 Manifest URL: ${rootUrl}/.well-known/farcaster.json`);
-  
 } catch (error) {
   console.error('❌ Error generating manifest:', error.message);
   process.exit(1);

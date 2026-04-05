@@ -833,20 +833,22 @@ function App() {
                     <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
                     
                     {/* Farcaster Mini App Embed Meta Tags */}
-                    <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://boing.finance/hero-image.png","button":{"title":"Open boing.finance","action":{"type":"launch_miniapp","url":"https://boing.finance"}}}' />
+                    <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://boing.finance/preview-image.png","button":{"title":"Open boing.finance","action":{"type":"launch_miniapp","url":"https://boing.finance"}}}' />
                     
                     {/* Open Graph Meta Tags for better sharing */}
-                    <meta property="og:title" content="boing.finance - DeFi Platform" />
-                    <meta property="og:description" content="Deploy tokens, create pools, and trade on EVM and Solana with ease." />
-                    <meta property="og:image" content="https://boing.finance/hero-image.png" />
+                    <meta property="og:title" content="Boing Finance — DeFi That Bounces Back" />
+                    <meta property="og:description" content="Deploy tokens, create pools, and trade on EVM and Solana. Swap, bridge, and launch with Boing Finance." />
+                    <meta property="og:image" content="https://boing.finance/preview-image.png" />
+                    <meta property="og:image:alt" content="Boing Finance logo and tagline DeFi That Bounces Back on a space nebula background" />
                     <meta property="og:url" content="https://boing.finance/" />
                     <meta property="og:type" content="website" />
                     
                     {/* Twitter Card Meta Tags */}
                     <meta name="twitter:card" content="summary_large_image" />
-                    <meta name="twitter:title" content="boing.finance - DeFi Platform" />
+                    <meta name="twitter:title" content="Boing Finance — DeFi That Bounces Back" />
                     <meta name="twitter:description" content="Deploy tokens, create pools, and trade on EVM and Solana with ease." />
-                    <meta name="twitter:image" content="https://boing.finance/hero-image.png" />
+                    <meta name="twitter:image" content="https://boing.finance/preview-image.png" />
+                    <meta name="twitter:image:alt" content="Boing Finance — DeFi That Bounces Back; horizontal brand banner" />
                   </Helmet>
                   <AppContent />
                   </InitialAnimationGate>
@@ -896,6 +898,10 @@ function Home() {
         <meta name="twitter:title" content="boing.finance | DeFi That Bounces Back" />
         <meta name="twitter:description" content="Swap, add liquidity, bridge, and deploy tokens on EVM and Solana. The DeFi that always bounces back." />
         <meta name="twitter:site" content="@boingfinance" />
+        <meta property="og:image" content="https://boing.finance/preview-image.png" />
+        <meta property="og:image:alt" content="Boing Finance logo and tagline DeFi That Bounces Back on a space nebula background" />
+        <meta name="twitter:image" content="https://boing.finance/preview-image.png" />
+        <meta name="twitter:image:alt" content="Boing Finance — DeFi That Bounces Back; horizontal brand banner" />
         <link rel="canonical" href="https://boing.finance" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
@@ -1081,6 +1087,18 @@ function Home() {
                   />
                 </div>
               </div>
+            </div>
+            <div className="mt-12 md:mt-16 w-full max-w-5xl mx-auto fade-in delay-100">
+              <img
+                src={`${process.env.PUBLIC_URL || ''}/preview-image.png`}
+                alt="Boing Finance logo and tagline: DeFi That Bounces Back, on a blue and purple nebula background"
+                width={1200}
+                height={630}
+                className="w-full h-auto rounded-2xl border object-cover max-h-[min(320px,45vw)] shadow-lg"
+                style={{ borderColor: 'var(--border-color)', boxShadow: '0 0 48px rgba(0, 229, 255, 0.08)' }}
+                loading="lazy"
+                decoding="async"
+              />
             </div>
           </section>
 

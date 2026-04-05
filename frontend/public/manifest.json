@@ -1,13 +1,19 @@
 {
   "short_name": "boing.finance",
-  "name": "boing.finance - DeFi Platform",
-  "description": "Deploy tokens, create liquidity pools, and trade across multiple blockchains",
+  "name": "Boing Finance — DeFi That Bounces Back",
+  "description": "Swap, deploy tokens, pools, and bridge on EVM and Solana",
   "icons": [
     {
       "src": "/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/boing-profile-twitter.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/assets/icon-only-transparent.png",
