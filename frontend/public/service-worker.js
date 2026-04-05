@@ -3,7 +3,7 @@
 // IMPORTANT: Update CACHE_VERSION on each deployment to force cache invalidation
 // This ensures users get the latest version after deployment
 
-const CACHE_VERSION = 'v1775400847755'; // Update this version number on each deployment
+const CACHE_VERSION = 'v1775403843846'; // Update this version number on each deployment
 const CACHE_NAME = 'boing-finance-' + CACHE_VERSION;
 const RUNTIME_CACHE = 'boing-finance-runtime-' + CACHE_VERSION;
 
@@ -82,6 +82,14 @@ self.addEventListener('fetch', (event) => {
 
   // Skip cross-origin requests
   if (url.origin !== location.origin) {
+    return;
+  }
+
+  // Same-origin Boing JSON-RPC proxy (Vite dev, Cloudflare Pages function).
+  // Do not call respondWith here: SW-mediated fetch() is not intercepted by Playwright's
+  // page.route, and vite preview has no /api handler (E2E mocks would see HTTP 403/404).
+  // POST RPC responses should not be cached by this SW anyway.
+  if (url.pathname === '/api/boing-rpc') {
     return;
   }
 
