@@ -10,6 +10,10 @@ export const CONTRACTS = {
    * Operators publish module ids under `nativeVm` (env-overridable). The CP AMM pool is `nativeConstantProductPool`.
    */
   6913: {
+    /** 32-byte native AMM LP vault (`deposit_add` / `configure`) — `REACT_APP_BOING_NATIVE_AMM_LP_VAULT`. */
+    nativeAmmLpVault: BOING_VM_ZERO_32,
+    /** 32-byte LP share token for vault flows — `REACT_APP_BOING_NATIVE_AMM_LP_SHARE_TOKEN`. */
+    nativeAmmLpShareToken: BOING_VM_ZERO_32,
     /** 32-byte pool contract `AccountId` — canonical testnet value from `boingCanonicalTestnetPool.js`, overridable by `REACT_APP_BOING_NATIVE_AMM_POOL`. */
     nativeConstantProductPool: BOING_VM_ZERO_32,
     /**
@@ -356,6 +360,25 @@ export const CONTRACTS = {
 };
 
 // Optional: enable in-app native CP pool swap on Boing L1 (32-byte hex AccountId). Env overrides canonical constant.
+(function applyBoingNativeAmmLpVaultFromEnv() {
+  try {
+    if (!CONTRACTS[6913]) return;
+    const entries = [
+      ['nativeAmmLpVault', process.env.REACT_APP_BOING_NATIVE_AMM_LP_VAULT],
+      ['nativeAmmLpShareToken', process.env.REACT_APP_BOING_NATIVE_AMM_LP_SHARE_TOKEN],
+    ];
+    for (const [key, envRaw] of entries) {
+      if (typeof envRaw !== 'string' || !envRaw.trim()) continue;
+      const e = envRaw.trim();
+      if (/^0x[0-9a-fA-F]{64}$/i.test(e)) {
+        CONTRACTS[6913][key] = `0x${e.slice(2).toLowerCase()}`;
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+})();
+
 (function applyBoingNativeAmmPoolFromConfig() {
   try {
     // Vite replaces `process.env.REACT_APP_*` with string literals at build time. Do not guard with
