@@ -17,14 +17,17 @@ Merged from Improvement Plan, UX & NFT Brainstorm, and Boing NFT Roadmap.
 ## 2. UX Ideas
 
 ### Analytics
+
 - Time-range-specific metrics, comparison view, saved views, sparklines on cards
 - AI market summary, CSV export, tooltips, dark/light chart themes
 
 ### Portfolio
+
 - PnL over time, group by network, hide zero balances
 - Cost basis / tax view, goals, share read-only link, notifications
 
 ### App-Wide
+
 - Onboarding checklist, global “Recent”, keyboard shortcuts
 - Network-specific defaults, unified transaction history, better error messages
 - Mobile bottom nav, status/maintenance banner

@@ -48,7 +48,7 @@ This document cross-references the official PDFs (boing_design_system.md, Boing_
 - Hover: 0.3s ease, translateY(-2px) / scale where specified
 
 ### 7. Hardcoded colors
-- Replaced with design tokens across App.js, shared components (mascot, background, ShootingStars, GlobalSearch, Wallet*, ThemeToggle, TokenDetailsModal, TokenFilters, ProactiveTipsBanner, AchievementPanel, AchievementToast, SuccessCheckmark, Confetti, LanguageSelector, EnhancedAnimatedBackground), and pages (Portfolio, DeployToken, Pools, CreatePool, Bridge, Analytics, BoingRoadmap, BoingStaking, GovernanceTreasury, GovernanceRoadmap).
+- Replaced with design tokens across App.js, shared components (background, ShootingStars, Wallet*, ThemeToggle, TokenDetailsModal, TokenFilters, ProactiveTipsBanner, AchievementToast, Confetti, LanguageSelector, BoingAnimatedBackground), and pages (Portfolio, DeployToken, Pools, CreatePool, Bridge, Analytics, BoingRoadmap, BoingStaking, GovernanceTreasury, GovernanceRoadmap).
 - Token definitions live only in `:root` / `.dark` in `globals.css`. Charts (Recharts) use `var(--accent-cyan)`, `var(--text-tertiary)`, `var(--border-color)`, and design-system hex palette where needed.
 
 ### 8. Principles (from PDFs)
@@ -108,7 +108,7 @@ All official assets are wired from **`frontend/public/assets/`**.
 *Merged from DESIGN_TAKEOVER_AUDIT.md. This section documents the initial audit that preceded the design system implementation.*
 
 - **Global stylesheet:** `frontend/src/styles/globals.css` is the single place for CSS custom properties and base styles (imported from `index.js`).
-- **Component library:** Buttons (AccessibleButton, `.btn-primary`/`.btn-secondary`/`.btn-outline`), cards (PageLayout, `.card`, `.glass`), nav in App.js, inputs via `.input-field`.
+- **Component library:** Buttons (`.btn-primary`/`.btn-secondary`/`.btn-outline`), cards (PageLayout, `.card`, `.glass`), nav in App.js, inputs via `.input-field`.
 - **Hardcoded colors:** Replaced with design tokens in globals.css; Tailwind config uses `var(--accent-teal)` and `var(--glow-cyan)`.
 - **Fonts:** Comfortaa, Orbitron, JetBrains Mono (Google Fonts + local Comfortaa); `--font-sans`, `--font-display`, `--font-mono`.
 - **Backgrounds:** `.page-landing` and `.page-app`; App.js applies by route. Hex grid and aquatic background as above.

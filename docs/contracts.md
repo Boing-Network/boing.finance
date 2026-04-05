@@ -11,16 +11,18 @@ Which features require smart contract deployments and which work with APIs only.
 
 ### Features Summary
 
-| Feature        | Contracts required     | Status                          |
-|----------------|------------------------|---------------------------------|
-| Deploy Token   | TokenFactory           | ✅ All mainnets                 |
-| Create Pool    | DEXFactory, DEXRouter  | ⚠️ Sepolia only                 |
-| Swap           | Optional (DEXRouter)   | ✅ Via external DEXs on all     |
-| Liquidity      | DEXFactory             | ⚠️ Sepolia only                 |
-| Bridge         | Optional               | ✅ Via external bridges         |
-| Portfolio      | No                     | ✅ API only                     |
-| Analytics      | No                     | ✅ API only                     |
-| Tokens (browse)| No                     | ✅ API only                     |
+
+| Feature         | Contracts required    | Status                     |
+| --------------- | --------------------- | -------------------------- |
+| Deploy Token    | TokenFactory          | ✅ All mainnets             |
+| Create Pool     | DEXFactory, DEXRouter | ⚠️ Sepolia only            |
+| Swap            | Optional (DEXRouter)  | ✅ Via external DEXs on all |
+| Liquidity       | DEXFactory            | ⚠️ Sepolia only            |
+| Bridge          | Optional              | ✅ Via external bridges     |
+| Portfolio       | No                    | ✅ API only                 |
+| Analytics       | No                    | ✅ API only                 |
+| Tokens (browse) | No                    | ✅ API only                 |
+
 
 ## Deployment Priority
 

@@ -55,7 +55,7 @@ const Tokens = () => {
     }
   }, [chainId]);
 
-  // Handle coinId from URL (from GlobalSearch CoinGecko results)
+  // Handle coinId from URL (e.g. deep links to CoinGecko-backed token detail)
   useEffect(() => {
     const coinId = searchParams.get('coinId');
     if (!coinId || coinIdProcessed.current) return;

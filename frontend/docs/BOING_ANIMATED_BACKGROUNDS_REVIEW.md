@@ -74,14 +74,14 @@ So you can switch config by route (e.g. `/` → landing, `/swap` → trade, `/an
   - `.page-landing` sets `background-image: url('../assets/boing-aquatic-space-bg.webp')` and a dark overlay `::before`.
 - **App.js**  
   - Landing page gets classes `page-landing deep-trade-bg`; app pages get `page-app` (hex grid from `hex-grid.svg`).
-- **EnhancedAnimatedBackground**  
-  - Used on some pages (e.g. DeployToken, Blog, DeveloperTools); separate from the landing background.
+- **BoingAnimatedBackground** (`boing-bg-engine.js`)  
+  - Drives canvas backgrounds on app routes; landing still uses `.page-landing` CSS where configured.
 
 To migrate:
 
 1. **Landing:** Replace the `.page-landing` background image with a full-screen canvas driven by `BoingBackground` and `BOING_BG_CONFIGS.finance.landing`.
 2. **App pages (Swap, Pools, etc.):** Use a canvas with the appropriate config (e.g. `BOING_BG_CONFIGS.finance.trade` for swap/trade, or a shared “app” config with particles + grid).
-3. Optionally unify or replace **EnhancedAnimatedBackground** with the same engine and a suitable config so one system drives both landing and in-app backgrounds.
+3. Extend **BoingAnimatedBackground** route→config mapping as new pages need distinct visuals.
 
 ---
 

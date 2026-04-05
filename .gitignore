@@ -1,5 +1,9 @@
 node_modules
 
+# Hardhat compile outputs (regenerate with `npx hardhat compile` in contracts/)
+contracts/artifacts/
+contracts/cache/
+
 # Local link to sibling boing.network repo (file:../boing.network/boing-sdk in frontend/package.json)
 /boing.network
 backend/.wrangler/tmp/

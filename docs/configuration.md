@@ -38,14 +38,14 @@ Copy `frontend/.env.example` to `frontend/.env.local` and fill in values. **Do n
 
 ## Security
 
-All `REACT_APP_*` variables are **public** (in the frontend bundle). Use only keys that are safe to expose. For secrets, use backend env (e.g. `wrangler secret put`).
+All `REACT_APP_`* variables are **public** (in the frontend bundle). Use only keys that are safe to expose. For secrets, use backend env (e.g. `wrangler secret put`).
 
 ---
 
 ## Verification
 
-1. Visit https://boing.finance  
-2. DevTools → Console: check for API errors  
-3. Test features that depend on the backend or optional APIs  
+1. Visit [https://boing.finance](https://boing.finance)
+2. DevTools → Console: check for API errors
+3. Test features that depend on the backend or optional APIs
 
 Related: `frontend/.env.example` lists all supported variables.
