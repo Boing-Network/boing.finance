@@ -1,18 +1,25 @@
 import React from 'react';
+import { useTheme } from '../contexts/ThemeContext';
 
-/** Boing logo (Official Visual Design System): icon-only transparent PNG — used throughout the app. */
-const LOGO_ICON = `${process.env.PUBLIC_URL || ''}/assets/icon-only-transparent.png`;
+const base = process.env.PUBLIC_URL || '';
+/** Dark / default UI: transparent nebula mark (navbar, footer). */
+const LOGO_DARK = `${base}/assets/icon-only-transparent.png`;
+/** Light theme: official sky / light-mode square mark. */
+const LOGO_LIGHT = `${base}/assets/boing-logo-light-mode.png`;
 
 /**
- * Logo: icon-only transparent PNG with optional wordmark.
+ * Logo: theme-aware Boing Finance mark with optional wordmark.
  * showComic=true uses the official "BOING!" comic-style asset from the design system.
  */
-const Logo = ({ size = 40, className = "", showText = false, showComic = false }) => {
+const Logo = ({ size = 40, className = '', showText = false, showComic = false }) => {
+  const { isDarkMode } = useTheme();
+  const logoSrc = isDarkMode ? LOGO_DARK : LOGO_LIGHT;
+
   return (
     <div className={`flex items-center ${className}`}>
       <img
-        src={LOGO_ICON}
-        alt="Boing"
+        src={logoSrc}
+        alt="Boing Finance logo: stylized 3D B with orbital star"
         width={size}
         height={size}
         style={{
@@ -27,7 +34,7 @@ const Logo = ({ size = 40, className = "", showText = false, showComic = false }
       )}
       {showText && showComic && (
         <img
-          src={`${process.env.PUBLIC_URL || ''}/assets/logo-boing-comic.png`}
+          src={`${base}/assets/logo-boing-comic.png`}
           alt="BOING!"
           className="ml-2 h-6 md:h-7 w-auto object-contain"
           style={{ filter: 'drop-shadow(0 0 6px var(--glow-cyan))' }}
@@ -37,4 +44,4 @@ const Logo = ({ size = 40, className = "", showText = false, showComic = false }
   );
 };
 
-export default Logo; 
+export default Logo;

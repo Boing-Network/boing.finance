@@ -12,12 +12,12 @@ export const minikitConfig = {
   miniapp: {
     version: "1",
     name: "boing.finance",
-    iconUrl: "https://boing.finance/icon.png",
+    iconUrl: "https://boing.finance/assets/boing-profile-twitter.png",
     homeUrl: "https://boing.finance",
     splashImageUrl: "https://boing.finance/splash.png",
-    splashBackgroundColor: "#0f172a",
-    heroImageUrl: "https://boing.finance/hero.png",
-    tagline: "Cross-Chain DeFi Made Easy",
+    splashBackgroundColor: "#020B26",
+    heroImageUrl: "https://boing.finance/preview-image.png",
+    tagline: "DeFi That Bounces Back",
     primaryCategory: "finance",
     tags: [
       "defi",

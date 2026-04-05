@@ -73,6 +73,9 @@ const Blog = () => {
       <Helmet>
         <title>Blog & News | boing.finance — Updates & Announcements</title>
         <meta name="description" content="Latest news, updates, and announcements from boing.finance. The DeFi that always bounces back." />
+        <meta property="og:image" content="https://boing.finance/preview-image.png" />
+        <meta property="og:image:alt" content="Boing Finance — DeFi That Bounces Back brand banner" />
+        <meta name="twitter:image" content="https://boing.finance/preview-image.png" />
       </Helmet>
       <EnhancedAnimatedBackground />
       

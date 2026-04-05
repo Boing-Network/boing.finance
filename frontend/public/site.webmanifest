@@ -1,1 +1,14 @@
-{"name":"boing.finance","short_name":"boing","icons":[{"src":"/favicon.svg","sizes":"any","type":"image/svg+xml","purpose":"maskable"},{"src":"/assets/icon-only-transparent.png","sizes":"any","type":"image/png","purpose":"maskable"}],"theme_color":"#0A0E1A","background_color":"#0A0E1A","display":"standalone","start_url":"/","scope":"/"}
+{
+  "name": "Boing Finance",
+  "short_name": "boing",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" },
+    { "src": "/assets/boing-profile-twitter.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icon-only-transparent.png", "sizes": "any", "type": "image/png", "purpose": "maskable" }
+  ],
+  "theme_color": "#0A0E1A",
+  "background_color": "#0A0E1A",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/"
+}
