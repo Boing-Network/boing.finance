@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { ethers } from 'ethers';
@@ -741,6 +741,18 @@ export default function DeployToken() {
   // Get current network (safe - may be null when wallet not connected)
   const network = (typeof getCurrentNetwork === 'function' ? getCurrentNetwork() : null);
 
+  const isBoingNativeDeployPath =
+    !isSolana &&
+    isConnected &&
+    chainId === BOING_NATIVE_L1_CHAIN_ID &&
+    walletType === 'boingExpress';
+
+  const nativeTokenDeployRef = useRef(null);
+  const [nativeWizardGate, setNativeWizardGate] = useState({ canSubmit: false });
+  const onNativeDeployGateChange = useCallback((g) => {
+    setNativeWizardGate(g);
+  }, []);
+
   // Helper function to get current pricing for selected network
   const getCurrentPricing = (planKey) => {
     console.log('getCurrentPricing called with planKey:', planKey);
@@ -1004,6 +1016,46 @@ export default function DeployToken() {
       toast.error('Please connect your wallet');
       return;
     }
+
+    if (isBoingNativeDeployPath) {
+      if (!name?.trim() || !symbol?.trim()) {
+        toast.error('Please enter token name and symbol.');
+        return;
+      }
+      if (!nativeWizardGate.canSubmit) {
+        toast.error(
+          'Configure fungible template bytecode (build env or Advanced) or acknowledge the QA pool if prompted.'
+        );
+        return;
+      }
+      setDeploying(true);
+      setTxHash('');
+      setTokenAddress('');
+      setDeploymentError(null);
+      const deploymentId = Date.now().toString();
+      try {
+        const hash = await nativeTokenDeployRef.current?.runDeploy();
+        if (hash) {
+          setTxHash(hash);
+          deploymentHistoryUtil.add({
+            id: deploymentId,
+            name,
+            symbol,
+            network: network || { name: 'Boing Testnet', chainId: BOING_NATIVE_L1_CHAIN_ID },
+            chainId: BOING_NATIVE_L1_CHAIN_ID,
+            status: 'submitted',
+            deployerAddress: account || '',
+            timestamp: Date.now(),
+            date: new Date().toISOString(),
+          });
+          recordAchievement?.(account, 'token_deploy', 'first_deploy');
+        }
+      } finally {
+        setDeploying(false);
+      }
+      return;
+    }
+
     if (!signer) {
       toast.error(
         'Your wallet is connected but signing is not available. Disconnect and reconnect, or pick your wallet again from the wallet menu.'
@@ -1629,10 +1681,11 @@ export default function DeployToken() {
                       color: 'var(--text-secondary)',
                     }}
                   >
-                    <strong style={{ color: 'var(--text-primary)' }}>Boing testnet + Boing Express:</strong> the green
-                    section below deploys a <strong>native VM</strong> contract (<code className="text-xs">contract_deploy_meta</code>
-                    ), not an ERC-20 through MetaMask. Use an <strong>EVM wallet on Sepolia</strong> in the header for the
-                    standard ERC-20 deploy form, or paste bytecode and run QA here.
+                    <strong style={{ color: 'var(--text-primary)' }}>Boing testnet + Boing Express:</strong> use the same
+                    launch wizard below (Token Basics → Network &amp; Plan → Security &amp; Info →{' '}
+                    <strong>Review &amp; Deploy</strong>). The final step runs a <strong>native VM</strong> deploy via Boing
+                    Express—not the ERC-20 factory. For classic ERC-20, switch the header to <strong>EVM</strong> and use
+                    Sepolia + MetaMask.
                   </p>
                 )}
               {!isSolana && (
@@ -1654,12 +1707,6 @@ export default function DeployToken() {
                   {' '}(Boing Express + <code className="text-xs">boing_sendTransaction</code>) on the Boing repo.
                 </p>
               )}
-              {!isSolana &&
-                chainId === BOING_NATIVE_L1_CHAIN_ID &&
-                walletType === 'boingExpress' &&
-                isConnected && (
-                  <NativeBoingTokenDeploySection tokenName={name} tokenSymbol={symbol} />
-                )}
               {!isSolana &&
                 !(
                   chainId === BOING_NATIVE_L1_CHAIN_ID &&
@@ -1900,7 +1947,11 @@ export default function DeployToken() {
               backgroundColor: 'var(--bg-card)',
               borderColor: 'var(--border-color)'
             }}>
-              <form onSubmit={handleDeploy} className="space-y-6 sm:space-y-8">
+              <form
+                onSubmit={handleDeploy}
+                noValidate={isBoingNativeDeployPath}
+                className="space-y-6 sm:space-y-8"
+              >
                 {/* Step 1: Basic Information + Logo */}
                 <div style={{ display: !useWizardMode || wizardStep === 1 ? 'block' : 'none' }}>
                   <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: 'var(--text-primary)' }}>Basic Token Information</h3>
@@ -2347,11 +2398,32 @@ export default function DeployToken() {
 
                 {/* Step 4: Deploy Button */}
                 <div style={{ display: !useWizardMode || wizardStep === 4 ? 'block' : 'none' }}>
+                {isBoingNativeDeployPath && (
+                  <>
+                    <p className="text-sm mb-3 rounded-lg border px-3 py-2" style={{ borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}>
+                      <strong style={{ color: 'var(--text-primary)' }}>Native deploy:</strong> the chain uses your{' '}
+                      <strong>name</strong> and <strong>symbol</strong> from this wizard. Initial supply, decimals, and ERC-20
+                      security toggles are not applied to the reference fungible program—use Advanced below only if you need a
+                      custom bytecode or <code className="text-xs">description_hash</code>.
+                    </p>
+                    <NativeBoingTokenDeploySection
+                      ref={nativeTokenDeployRef}
+                      embedInWizard
+                      tokenName={name}
+                      tokenSymbol={symbol}
+                      onDeployGateChange={onNativeDeployGateChange}
+                    />
+                  </>
+                )}
                 {/* Deploy Button */}
                 <div className="text-center pt-4 sm:pt-6">
                   <button
                     type="submit"
-                    disabled={deploying || !isConnected || !signer}
+                    disabled={
+                      deploying ||
+                      !isConnected ||
+                      (isBoingNativeDeployPath ? !nativeWizardGate.canSubmit : !signer)
+                    }
                     className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-lg transition-colors text-base sm:text-lg"
                   >
                     {deploying ? (

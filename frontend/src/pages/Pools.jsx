@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useWallet } from '../contexts/WalletContext';
@@ -1042,6 +1043,33 @@ const Pools = () => {
               <NativeBoingL1IntegratedHub feature="pools" />
             )}
             <NativeAmmLiquidityRoutesHint />
+            {chainId === BOING_NATIVE_L1_CHAIN_ID && featureSupport.hasNativeAmm && (
+              <div
+                className="mb-6 rounded-xl border px-4 py-3 flex flex-wrap items-center gap-3 justify-between"
+                style={{
+                  borderColor: 'rgba(45, 212, 191, 0.45)',
+                  backgroundColor: 'rgba(15, 23, 42, 0.85)',
+                }}
+              >
+                <p className="text-sm text-gray-300">
+                  <strong className="text-white">Native AMM</strong> — swap or add reserves with Boing Express.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    to="/swap"
+                    className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium"
+                  >
+                    Swap
+                  </Link>
+                  <Link
+                    to="/create-pool"
+                    className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-sm font-medium"
+                  >
+                    Add liquidity
+                  </Link>
+                </div>
+              </div>
+            )}
 
             {/* Tabs */}
             <div className="bg-gray-800 rounded-xl p-2 mb-8 border border-gray-700">

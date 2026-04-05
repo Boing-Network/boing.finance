@@ -10,7 +10,11 @@ import {
   getChainIdFromBoingCompatibleProvider,
   switchToBoingTestnetInWallet
 } from '../utils/boingWalletDiscovery';
-import { requestBoingExpressConnectionProof } from '../utils/boingExpressConnectionProof';
+import {
+  forgetBoingExpressConnectionProof,
+  notifyBoingExpressWalletAccountChanged,
+  requestBoingExpressConnectionProof
+} from '../utils/boingExpressConnectionProof';
 
 /**
  * ethers v6 BrowserProvider expects EVM 20-byte addresses. Boing Express exposes 32-byte
@@ -108,6 +112,7 @@ export const WalletProvider = ({ children }) => {
       disconnectWallet();
     } else {
       if (!userDisconnected) {
+        notifyBoingExpressWalletAccountChanged(accounts[0]);
         setAccount(accounts[0]);
       }
     }
@@ -147,7 +152,8 @@ export const WalletProvider = ({ children }) => {
       localStorage.setItem('userDisconnected', 'true');
       localStorage.removeItem('walletConnected');
       localStorage.removeItem('walletType');
-      
+      forgetBoingExpressConnectionProof();
+
       console.log('Wallet disconnected successfully');
     } catch (error) {
       console.error('Error disconnecting wallet:', error);
@@ -191,6 +197,7 @@ export const WalletProvider = ({ children }) => {
       if (forceReconnect) {
         setUserDisconnected(false);
         localStorage.removeItem('userDisconnected');
+        forgetBoingExpressConnectionProof();
       }
 
       const wasDisconnected = localStorage.getItem('userDisconnected') === 'true';
@@ -354,9 +361,20 @@ export const WalletProvider = ({ children }) => {
     }
 
     try {
-      // Use eth_accounts (silent, no prompt) on the specific provider
-      // This avoids Phantom interception since we're using the direct provider reference
-      const accounts = await lastProvider.request({ method: 'eth_accounts' });
+      // Prefer silent eth_accounts; if the extension is slow or permissions need re-activation,
+      // request accounts once (may prompt) before dropping a previously saved session.
+      let accounts = await lastProvider.request({ method: 'eth_accounts' });
+      if (accounts.length === 0 && wasConnected && !userDisconnected) {
+        try {
+          if (lastWalletType === 'boingExpress') {
+            accounts = await requestAccountsFromBoingCompatibleProvider(lastProvider);
+          } else {
+            accounts = await lastProvider.request({ method: 'eth_requestAccounts' });
+          }
+        } catch {
+          accounts = [];
+        }
+      }
       if (accounts.length > 0 && !userDisconnected) {
         let chainIdNum;
         if (lastWalletType === 'boingExpress') {
@@ -707,6 +725,7 @@ export const WalletProvider = ({ children }) => {
       if (forceReconnect) {
         setUserDisconnected(false);
         localStorage.removeItem('userDisconnected');
+        forgetBoingExpressConnectionProof();
       }
 
       // Check if user was previously disconnected
@@ -831,6 +850,7 @@ export const WalletProvider = ({ children }) => {
       localStorage.removeItem('userDisconnected');
       localStorage.removeItem('walletConnected');
       localStorage.removeItem('walletType');
+      forgetBoingExpressConnectionProof();
 
       // Use the default ethereum provider
       const ethereumProvider = window.ethereum;

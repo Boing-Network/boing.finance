@@ -40,16 +40,16 @@ export default function NetworkSupportBanner({ featureLabel, chainIdsSupported, 
           <span className="block mt-2 text-xs opacity-90">
             {boingNativeAmm && (featureLabel === 'Create Pool' || featureLabel === 'Liquidity') ? (
               <>
-                A native AMM pool is configured — add liquidity on the{' '}
+                A native constant-product pool is configured — add liquidity on the{' '}
                 <Link to="/swap" className="text-cyan-400 underline font-medium">
                   Swap
                 </Link>{' '}
-                page with Boing Express. EVM factory flows stay on Sepolia.
+                page with Boing Express (Boing VM, not an EVM factory).
               </>
             ) : (
               <>
-                On Boing testnet, native BOING pays fees; this in-app EVM DEX is wired to Sepolia until factory/router
-                deploy on Boing.
+                On Boing testnet, DEX-style flows use the Boing VM and operator-published pool/module ids — not Solidity
+                factories on this chain.
               </>
             )}
           </span>
@@ -81,14 +81,21 @@ export default function NetworkSupportBanner({ featureLabel, chainIdsSupported, 
 }
 
 /**
- * Convenience wrapper for DEX features (Create Pool, Liquidity) that are only on Sepolia for now.
+ * Convenience wrapper for DEX features (Create Pool, Liquidity).
+ * Boing L1 testnet counts as supported when a native constant-product pool id is configured (add liquidity / swap in-app).
  */
 export function DexFeatureBanner({ featureLabel, currentChainId, onSwitchNetwork }) {
   const chainsWithDex = getChainsWithDex();
+  const nativeAmmConfigured = getFeatureSupport(BOING_NATIVE_L1_CHAIN_ID).hasNativeAmm;
+  const chainIdsSupported =
+    nativeAmmConfigured && (featureLabel === 'Create Pool' || featureLabel === 'Liquidity')
+      ? Array.from(new Set([...chainsWithDex, BOING_NATIVE_L1_CHAIN_ID]))
+      : chainsWithDex;
+
   return (
     <NetworkSupportBanner
       featureLabel={featureLabel}
-      chainIdsSupported={chainsWithDex}
+      chainIdsSupported={chainIdsSupported}
       currentChainId={currentChainId}
       onSwitchNetwork={onSwitchNetwork}
     />

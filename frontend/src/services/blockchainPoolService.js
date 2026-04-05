@@ -1,5 +1,6 @@
 import { ethers } from 'ethers';
 import { getContractAddress } from '../config/contracts';
+import { isBoingNativeL1Chain } from '../config/networks';
 import apyCalculationService from './apyCalculationService';
 import externalPoolService from './externalPoolService';
 import simplePoolDataService from './simplePoolDataService';
@@ -195,7 +196,16 @@ class BlockchainPoolService {
   async initialize(provider, chainId) {
     this.provider = provider;
     this.chainId = chainId;
-    
+
+    if (isBoingNativeL1Chain(chainId)) {
+      this.dexFactory = null;
+      this.liquidityLocker = null;
+      if (this.debug) {
+        console.log('🔧 BlockchainPoolService: Boing L1 uses the Boing VM — skipping EVM DEXFactory/ethers wiring.');
+      }
+      return false;
+    }
+
     const factoryAddress = getContractAddress(chainId, 'dexFactory');
     const lockerAddress = getContractAddress(chainId, 'liquidityLocker');
     

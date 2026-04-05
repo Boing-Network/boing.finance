@@ -42,8 +42,9 @@ function parsePositiveBigInt(raw) {
 /**
  * In-app swap against the configured native CP pool (`contracts` nativeConstantProductPool: env override or canonical testnet id).
  * Requires Boing Express on chain 6913. Reserves are ledger units (u64-safe); no ERC-20 legs.
+ * @param {{ slippagePercent?: number, defaultOpenAddLiquidity?: boolean }} props
  */
-export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {
+export default function NativeAmmSwapPanel({ slippagePercent = 0.5, defaultOpenAddLiquidity = false }) {
   const { chainId, walletType, isConnected, getWalletProvider, account } = useWallet();
   const pool = getContractAddress(BOING_NATIVE_L1_CHAIN_ID, 'nativeConstantProductPool');
 
@@ -54,6 +55,7 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {
   const [amountIn, setAmountIn] = useState('');
   const [addAmountA, setAddAmountA] = useState('');
   const [addAmountB, setAddAmountB] = useState('');
+  const [addLiquiditySectionOpen, setAddLiquiditySectionOpen] = useState(defaultOpenAddLiquidity);
   const [busy, setBusy] = useState(false);
 
   const loadReserves = useCallback(async () => {
@@ -302,7 +304,12 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5 }) {
         {busy ? 'Signing…' : 'Swap via Boing Express'}
       </button>
 
-      <details className="mt-5 border-t pt-4" style={{ borderColor: 'var(--border-color)' }}>
+      <details
+        className="mt-5 border-t pt-4"
+        style={{ borderColor: 'var(--border-color)' }}
+        open={addLiquiditySectionOpen}
+        onToggle={(e) => setAddLiquiditySectionOpen(e.currentTarget.open)}
+      >
         <summary
           className="text-sm font-medium cursor-pointer"
           style={{ color: 'var(--text-primary)' }}

@@ -21,8 +21,9 @@ import {
   boingExpressSendTransaction
 } from '../../services/boingExpressNativeTx';
 import { getWindowBoingProvider } from '../../utils/boingWalletDiscovery';
+import { buildContractDeployMetaTx } from 'boing-sdk';
 
-const RPC_SPEC = 'https://github.com/boing-network/boing.network/blob/main/docs/RPC-API-SPEC.md';
+const RPC_SPEC = 'https://github.com/Boing-Network/boing.network/blob/main/docs/RPC-API-SPEC.md';
 
 function JsonBlock({ data, empty }) {
   if (data == null) {
@@ -233,15 +234,26 @@ export default function BoingNativeVm() {
         if (!isValidBoingQaPurpose(purpose)) {
           throw new Error('Invalid purpose category for protocol QA.');
         }
-        const hasMeta = exAssetName.trim() !== '' || exAssetSymbol.trim() !== '';
+        const name = exAssetName.trim();
+        const sym = exAssetSymbol.trim();
+        const hasMeta = name !== '' || sym !== '';
         if (hasMeta) {
+          if (name && sym) {
+            return buildContractDeployMetaTx({
+              bytecodeHex: bc,
+              assetName: name,
+              assetSymbol: sym,
+              purposeCategory: purpose,
+              descriptionHashHex: exDeployDescHash.trim() || undefined,
+            });
+          }
           return {
             type: 'contract_deploy_meta',
             bytecode: bc,
             purpose_category: purpose,
             ...(exDeployDescHash.trim() ? { description_hash: exDeployDescHash.trim() } : {}),
-            ...(exAssetName.trim() ? { asset_name: exAssetName.trim() } : {}),
-            ...(exAssetSymbol.trim() ? { asset_symbol: exAssetSymbol.trim() } : {})
+            ...(name ? { asset_name: name } : {}),
+            ...(sym ? { asset_symbol: sym } : {}),
           };
         }
         return {

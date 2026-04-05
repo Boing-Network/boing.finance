@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 
 const PARTNER_GUIDE_URL =
-  'https://github.com/boing-network/boing.network/blob/main/docs/E2-PARTNER-APP-NATIVE-BOING.md';
+  'https://github.com/Boing-Network/boing.network/blob/main/docs/E2-PARTNER-APP-NATIVE-BOING.md';
+const CANONICAL_ARTIFACTS_DOC =
+  'https://github.com/Boing-Network/boing.network/blob/main/docs/BOING-CANONICAL-DEPLOY-ARTIFACTS.md';
 const BOING_EXPRESS_URL = 'https://boing.express';
 const RPC_SPEC_URL =
-  'https://github.com/boing-network/boing.network/blob/main/docs/RPC-API-SPEC.md';
+  'https://github.com/Boing-Network/boing.network/blob/main/docs/RPC-API-SPEC.md';
 
 /**
  * Richer native Boing L1 deploy guidance for token creators (Express + boing_sendTransaction).
@@ -82,8 +84,10 @@ await window.boing.request({
           and connect <strong>this site</strong> (<code className="text-xs">boing_requestAccounts</code>).
         </li>
         <li>
-          Build and hex-encode <strong>Boing VM bytecode</strong> (not EVM); run <code className="text-xs">boing_qaCheck</code> on your RPC if
-          you want a pre-flight.
+          Pin fungible template bytecode via <code className="text-xs">REACT_APP_BOING_REFERENCE_FUNGIBLE_TEMPLATE_BYTECODE_HEX</code>{' '}
+          (or call <code className="text-xs">resolveReferenceFungibleTemplateBytecodeHex</code> /{' '}
+          <code className="text-xs">buildContractDeployMetaTx</code> from <code className="text-xs">boing-sdk</code>). Run{' '}
+          <code className="text-xs">boing_qaCheck</code> for a pre-flight when not using the in-app Deploy Token panel.
         </li>
         <li>
           Submit with <code className="text-xs">purpose_category: &apos;token&apos;</code> and metadata fields that match your asset (
@@ -114,6 +118,15 @@ await window.boing.request({
           style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
         >
           RPC API spec
+        </a>
+        <a
+          href={CANONICAL_ARTIFACTS_DOC}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm px-3 py-1.5 rounded-lg border"
+          style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+        >
+          Canonical deploy artifacts
         </a>
       </div>
 

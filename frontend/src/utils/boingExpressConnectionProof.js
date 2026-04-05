@@ -4,7 +4,75 @@
  * Aligns with BOING-EXPRESS-WALLET.md (`boing_signMessage` / `personal_sign`).
  *
  * On-chain deploys and txs still use `boing_signTransaction` / `boing_sendTransaction` separately.
+ *
+ * After a successful proof, we remember (per origin) that this account verified for this browser
+ * until the user disconnects in the app or switches accounts in the wallet—so refreshes do not
+ * prompt for another connection signature.
  */
+
+const BOING_FINANCE_EXPRESS_VERIFIED_KEY = 'boingFinance_boingExpressVerified_v1';
+
+/**
+ * @param {string} a
+ * @param {string} b
+ * @returns {boolean}
+ */
+function sameLinkedAccount(a, b) {
+  if (!a || !b || typeof a !== 'string' || typeof b !== 'string') return false;
+  if (a === b) return true;
+  const na = normalizeHexIdentity(a);
+  const nb = normalizeHexIdentity(b);
+  return Boolean(na && nb && na === nb);
+}
+
+/**
+ * @param {string} s
+ * @returns {string | null}
+ */
+function normalizeHexIdentity(s) {
+  const t = s.trim();
+  const body = t.startsWith('0x') || t.startsWith('0X') ? t.slice(2) : t;
+  if (!/^[0-9a-fA-F]+$/.test(body)) return null;
+  return body.toLowerCase();
+}
+
+/**
+ * Clear stored Boing Express connection verification (call on in-app disconnect).
+ */
+export function forgetBoingExpressConnectionProof() {
+  try {
+    localStorage.removeItem(BOING_FINANCE_EXPRESS_VERIFIED_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * If the wallet account changed, drop verification unless it still matches the cached account.
+ * @param {string} newAccount
+ */
+export function notifyBoingExpressWalletAccountChanged(newAccount) {
+  if (!newAccount || typeof newAccount !== 'string') return;
+  try {
+    const raw = localStorage.getItem(BOING_FINANCE_EXPRESS_VERIFIED_KEY);
+    if (!raw) return;
+    const o = JSON.parse(raw);
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    if (o?.origin !== origin || !o?.account) {
+      localStorage.removeItem(BOING_FINANCE_EXPRESS_VERIFIED_KEY);
+      return;
+    }
+    if (!sameLinkedAccount(o.account, newAccount)) {
+      localStorage.removeItem(BOING_FINANCE_EXPRESS_VERIFIED_KEY);
+    }
+  } catch {
+    try {
+      localStorage.removeItem(BOING_FINANCE_EXPRESS_VERIFIED_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+}
 
 /**
  * @param {string} messageUtf8
@@ -20,6 +88,39 @@ function utf8MessageToHex(messageUtf8) {
 }
 
 /**
+ * @param {string} account
+ * @returns {boolean}
+ */
+function isBoingExpressConnectionProofCachedForAccount(account) {
+  if (!account || typeof account !== 'string') return false;
+  try {
+    const raw = localStorage.getItem(BOING_FINANCE_EXPRESS_VERIFIED_KEY);
+    if (!raw) return false;
+    const o = JSON.parse(raw);
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    if (o?.origin !== origin || !o?.account) return false;
+    return sameLinkedAccount(o.account, account);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * @param {string} account
+ */
+function rememberBoingExpressConnectionProof(account) {
+  if (!account || typeof account !== 'string' || typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(
+      BOING_FINANCE_EXPRESS_VERIFIED_KEY,
+      JSON.stringify({ account, origin: window.location.origin })
+    );
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
  * @param {{ request: Function }} provider
  * @param {string} account — 32-byte Boing AccountId or EVM address from wallet
  * @returns {Promise<{ ok: true, method: string } | { ok: false, reason: 'user_rejected' | 'unsupported' | 'invalid_params' }>}
@@ -27,6 +128,10 @@ function utf8MessageToHex(messageUtf8) {
 export async function requestBoingExpressConnectionProof(provider, account) {
   if (!provider || typeof provider.request !== 'function' || !account || typeof account !== 'string') {
     return { ok: false, reason: 'invalid_params' };
+  }
+
+  if (isBoingExpressConnectionProofCachedForAccount(account)) {
+    return { ok: true, method: 'persisted_session' };
   }
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://boing.finance';
@@ -56,6 +161,7 @@ export async function requestBoingExpressConnectionProof(provider, account) {
       method: 'boing_signMessage',
       params: [message, account],
     });
+    rememberBoingExpressConnectionProof(account);
     return { ok: true, method: 'boing_signMessage' };
   } catch (e1) {
     if (isUserRejection(e1)) {
@@ -69,6 +175,7 @@ export async function requestBoingExpressConnectionProof(provider, account) {
       method: 'personal_sign',
       params: [msgHex, account],
     });
+    rememberBoingExpressConnectionProof(account);
     return { ok: true, method: 'personal_sign' };
   } catch (e2) {
     if (isUserRejection(e2)) {

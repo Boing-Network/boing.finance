@@ -3,7 +3,7 @@
 // IMPORTANT: Update CACHE_VERSION on each deployment to force cache invalidation
 // This ensures users get the latest version after deployment
 
-const CACHE_VERSION = 'v1775118825374'; // Update this version number on each deployment
+const CACHE_VERSION = 'v1775400847755'; // Update this version number on each deployment
 const CACHE_NAME = 'boing-finance-' + CACHE_VERSION;
 const RUNTIME_CACHE = 'boing-finance-runtime-' + CACHE_VERSION;
 

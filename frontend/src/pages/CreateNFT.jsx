@@ -4,6 +4,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
 import { useChainType, useSolanaWallet } from '../contexts/SolanaWalletContext';
 import EmptyState from '../components/EmptyState';
@@ -12,6 +13,9 @@ import { SOLANA_NETWORKS } from '../config/solanaConfig';
 import toast from 'react-hot-toast';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { getBoingNativeFeeUsd, formatUsdReferenceLabel, isBoingNativeFeeChain } from '../config/boingEconomics';
+
+const BOING_CANONICAL_DEPLOY_ARTIFACTS_DOC =
+  'https://github.com/Boing-Network/boing.network/blob/main/docs/BOING-CANONICAL-DEPLOY-ARTIFACTS.md';
 
 const SOLANA_NFT_STEPS = [
   { id: 'upload', label: 'Image & Details', icon: '🖼️' },
@@ -326,7 +330,7 @@ function CreateNFTSolanaContent() {
 
 export default function CreateNFT() {
   const { isSolana } = useChainType();
-  const { account: _account, isConnected, getCurrentNetwork, connectWallet } = useWallet();
+  const { account: _account, isConnected, getCurrentNetwork, connectWallet, chainId, walletType } = useWallet();
   const [step, setStep] = useState('collection');
   const [collectionName, setCollectionName] = useState('');
   const [collectionSymbol, setCollectionSymbol] = useState('');
@@ -353,6 +357,8 @@ export default function CreateNFT() {
   const network = getCurrentNetwork?.();
   const nativeSymbol = network?.nativeCurrency?.symbol ?? 'ETH';
   const dynamicFeeDisplayLine = formatNftServiceFeeLine(network?.chainId, dynamicSize, nativeSymbol);
+  const isBoingNativeNftWizard =
+    isConnected && chainId === BOING_NATIVE_L1_CHAIN_ID && walletType === 'boingExpress';
 
   const addFiles = useCallback((newFiles) => {
     const fileList = Array.from(newFiles || []);
@@ -666,6 +672,37 @@ export default function CreateNFT() {
             <p className="text-theme-tertiary">Upload images from your computer, add metadata, and mint. Supports single, bulk, and dynamic collections up to 10,000.</p>
           </div>
 
+          {chainId === BOING_NATIVE_L1_CHAIN_ID && (
+            <div
+              className="mb-6 rounded-xl border px-4 py-3 text-left text-sm"
+              style={{
+                borderColor: 'rgba(45, 212, 191, 0.45)',
+                backgroundColor: 'var(--bg-card)',
+                color: 'var(--text-secondary)',
+              }}
+            >
+              <strong style={{ color: 'var(--text-primary)' }}>Boing testnet (native L1):</strong> This wizard targets{' '}
+              <strong>EVM</strong> NFT contracts when you use an Ethereum-capable wallet in the header. A native Boing{' '}
+              <strong>NFT collection</strong> deploy uses <code className="text-xs">contract_deploy_meta</code> with{' '}
+              <code className="text-xs">purpose_category: &quot;nft&quot;</code> and operator-pinned collection bytecode—see
+              the NFT section in{' '}
+              <a
+                href={BOING_CANONICAL_DEPLOY_ARTIFACTS_DOC}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-400 underline hover:text-cyan-300"
+              >
+                BOING-CANONICAL-DEPLOY-ARTIFACTS.md
+              </a>
+              . The reference collection template is not bundled in-app until that artifact ships in the SDK; until then use
+              env-supplied hex or the low-level flow on{' '}
+              <Link to="/boing/native-vm" className="text-cyan-400 underline hover:text-cyan-300">
+                Native VM tools
+              </Link>
+              .
+            </div>
+          )}
+
           {/* Mode: Standard vs Dynamic collection */}
           <div className="flex justify-center gap-2 mb-6">
             <button
@@ -852,6 +889,14 @@ export default function CreateNFT() {
                             Replace with CSV
                             <input type="file" accept=".csv" onChange={handleCSVUpload} className="hidden" />
                           </label>
+                          {isBoingNativeNftWizard && (
+                            <Link
+                              to="/boing/native-vm"
+                              className="px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-medium inline-flex items-center"
+                            >
+                              Native VM — collection deploy
+                            </Link>
+                          )}
                         </div>
                         <h3 className="text-lg font-semibold text-white mt-4">Preview — what you’re minting</h3>
                         <p className="text-gray-400 text-sm">Showing first 24 of {generatedDynamicMetadata.length}. Click a card to see full metadata.</p>
@@ -872,7 +917,22 @@ export default function CreateNFT() {
                           ))}
                         </div>
                         <p className="text-amber-200/90 text-sm">
-                          Service fee ({dynamicFeeDisplayLine}) will be charged when you deploy this collection. Export the JSON for use with minting platforms or our contract when available.
+                          {isBoingNativeNftWizard
+                            ? 'On Boing L1, deploy the native collection via Native VM (contract_deploy_meta, purpose nft) when bytecode is configured—see '
+                            : `Service fee (${dynamicFeeDisplayLine}) will be charged when you deploy this collection. Export the JSON for use with minting platforms or our contract when available.`}
+                          {isBoingNativeNftWizard && (
+                            <>
+                              <a
+                                href={BOING_CANONICAL_DEPLOY_ARTIFACTS_DOC}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-cyan-400 underline"
+                              >
+                                BOING-CANONICAL-DEPLOY-ARTIFACTS.md
+                              </a>
+                              . Export JSON works with any toolchain.
+                            </>
+                          )}
                         </p>
                       </>
                     )}
@@ -1136,12 +1196,41 @@ export default function CreateNFT() {
                   <button type="button" onClick={exportMetadataJSON} className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium">
                     Export metadata JSON
                   </button>
-                  <button type="button" disabled className="px-4 py-2 rounded-lg bg-cyan-600/50 text-gray-400 font-medium cursor-not-allowed" title="Minting available when Boing NFT contracts launch">
-                    Mint on-chain (Coming soon)
-                  </button>
+                  {isBoingNativeNftWizard ? (
+                    <Link
+                      to="/boing/native-vm"
+                      className="px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-medium inline-flex items-center"
+                    >
+                      Native VM — collection deploy
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled
+                      className="px-4 py-2 rounded-lg bg-cyan-600/50 text-gray-400 font-medium cursor-not-allowed"
+                      title="Minting available when Boing NFT contracts launch"
+                    >
+                      Mint on-chain (Coming soon)
+                    </button>
+                  )}
                 </div>
                 <p className="text-amber-200/90 text-sm">
-                  Metadata follows ERC-721 / OpenSea standards. Export the JSON to use with other minting tools; on-chain minting will be enabled when Boing NFT contracts launch.
+                  {isBoingNativeNftWizard
+                    ? 'This wizard prepared your metadata the same way as for EVM. For a native Boing collection, open Native VM and submit contract_deploy_meta with purpose nft (see '
+                    : 'Metadata follows ERC-721 / OpenSea standards. Export the JSON to use with other minting tools; on-chain minting will be enabled when Boing NFT contracts launch.'}
+                  {isBoingNativeNftWizard && (
+                    <>
+                      <a
+                        href={BOING_CANONICAL_DEPLOY_ARTIFACTS_DOC}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-cyan-400 underline"
+                      >
+                        canonical deploy artifacts
+                      </a>
+                      ).
+                    </>
+                  )}
                 </p>
               </div>
             )}

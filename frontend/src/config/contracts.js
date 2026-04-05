@@ -1,26 +1,28 @@
 import { getCanonicalBoingTestnetNativeAmmPoolHex } from './boingCanonicalTestnetPool';
 
+const BOING_VM_ZERO_32 = '0x0000000000000000000000000000000000000000000000000000000000000000';
+
 // Contract addresses configuration for different networks
 export const CONTRACTS = {
-  // Boing Network L1 testnet — native chain; EVM-style contracts not used on-chain yet.
+  /**
+   * Boing Network L1 (6913) — **Boing VM only**. No EVM `dexFactory` / `tokenFactory` keys here:
+   * DeFi on Boing uses 32-byte ledger `AccountId`s and `boing_*` RPC + Boing Express, not ethers ABIs.
+   * Operators publish module ids under `nativeVm` (env-overridable). The CP AMM pool is `nativeConstantProductPool`.
+   */
   6913: {
-    governor: '0x0000000000000000000000000000000000000000',
-    boingToken: '0x0000000000000000000000000000000000000000',
-    treasury: '0x0000000000000000000000000000000000000000',
-    nftStaking: '0x0000000000000000000000000000000000000000',
-    /** 32-byte Boing `AccountId` — public testnet canonical pool (6913) from `boingCanonicalTestnetPool.js`, overridable by `REACT_APP_BOING_NATIVE_AMM_POOL`. Meaningful only on the shared testnet genesis/RPC, not arbitrary local nodes. */
-    nativeConstantProductPool: '0x0000000000000000000000000000000000000000000000000000000000000000',
-    dexFactory: '0x0000000000000000000000000000000000000000',
-    dexRouter: '0x0000000000000000000000000000000000000000',
-    weth: '0x0000000000000000000000000000000000000000',
-    liquidityLocker: '0x0000000000000000000000000000000000000000',
-    crossChainBridge: '0x0000000000000000000000000000000000000000',
-    priceOracle: '0x0000000000000000000000000000000000000000',
-    advancedERC20: '0x0000000000000000000000000000000000000000',
-    tokenFactory: '0x0000000000000000000000000000000000000000',
-    tokenImplementation: '0x0000000000000000000000000000000000000000',
+    /** 32-byte pool contract `AccountId` — canonical testnet value from `boingCanonicalTestnetPool.js`, overridable by `REACT_APP_BOING_NATIVE_AMM_POOL`. */
+    nativeConstantProductPool: BOING_VM_ZERO_32,
+    /**
+     * Future / operator-published Boing VM module account ids (same 32-byte hex shape as `AccountId`).
+     * Wired by build env: `REACT_APP_BOING_NATIVE_VM_DEX_FACTORY`, `_LIQUIDITY_LOCKER`, `_SWAP_ROUTER`.
+     */
+    nativeVm: {
+      dexFactory: BOING_VM_ZERO_32,
+      liquidityLocker: BOING_VM_ZERO_32,
+      swapRouter: BOING_VM_ZERO_32,
+    },
     tokens: {},
-    pairs: {}
+    pairs: {},
   },
 
   // Sepolia Testnet (UPDATED - DEXFactoryV2 with createPairWithLiquidity function)
@@ -378,6 +380,28 @@ export const CONTRACTS = {
   }
 })();
 
+// Optional: operator-published Boing VM module AccountIds (32-byte hex) for DEX / locker / router.
+(function applyBoingNativeVmFromEnv() {
+  try {
+    if (!CONTRACTS[6913]?.nativeVm) return;
+    const vm = CONTRACTS[6913].nativeVm;
+    const entries = [
+      ['dexFactory', process.env.REACT_APP_BOING_NATIVE_VM_DEX_FACTORY],
+      ['liquidityLocker', process.env.REACT_APP_BOING_NATIVE_VM_LIQUIDITY_LOCKER],
+      ['swapRouter', process.env.REACT_APP_BOING_NATIVE_VM_SWAP_ROUTER],
+    ];
+    for (const [key, envRaw] of entries) {
+      if (typeof envRaw !== 'string' || !envRaw.trim()) continue;
+      const e = envRaw.trim();
+      if (/^0x[0-9a-fA-F]{64}$/i.test(e)) {
+        vm[key] = `0x${e.slice(2).toLowerCase()}`;
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+})();
+
 // Helper function to get contract addresses for a specific network
 export const getContractAddresses = (chainId) => {
   return CONTRACTS[chainId] || null;
@@ -401,13 +425,27 @@ export const getContractAddress = (chainId, contractName) => {
   return result;
 };
 
+/**
+ * Non-zero Boing VM module id (32-byte AccountId hex) for chain 6913, or null.
+ * @param {'dexFactory'|'liquidityLocker'|'swapRouter'} moduleKey
+ */
+export function getBoingNativeVmModuleId(chainId, moduleKey) {
+  if (Number(chainId) !== 6913) return null;
+  const id = CONTRACTS[6913]?.nativeVm?.[moduleKey];
+  if (typeof id !== 'string' || !/^0x[0-9a-fA-F]{64}$/i.test(id)) return null;
+  const hex = id.slice(2).toLowerCase();
+  if (/^0+$/.test(hex)) return null;
+  return `0x${hex}`;
+}
+
 // Helper function to check if contracts are deployed for a network
 export const isNetworkSupported = (chainId) => {
   const contracts = getContractAddresses(chainId);
   if (!contracts) return false;
-  
-  // Check if core contracts are deployed (not zero addresses)
-  return contracts.dexFactory !== '0x0000000000000000000000000000000000000000';
+
+  const df = contracts.dexFactory;
+  if (typeof df !== 'string') return false;
+  return df !== '0x0000000000000000000000000000000000000000';
 };
 
 // Helper function to get supported networks

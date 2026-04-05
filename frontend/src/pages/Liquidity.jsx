@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useQuery } from '@tanstack/react-query';
@@ -8,8 +9,10 @@ import { useWallet } from '../contexts/WalletContext';
 import { useChainType } from '../contexts/SolanaWalletContext';
 import { LiquiditySolanaContent } from '../components/SolanaFeaturePlaceholder';
 import { Helmet } from 'react-helmet-async';
-import { getNetworkByChainId } from '../config/networks';
+import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { DexFeatureBanner } from '../components/NetworkSupportBanner';
+import getFeatureSupport from '../config/featureSupport';
+import NativeAmmSwapPanel from '../components/NativeAmmSwapPanel';
 
 // Helper function to get API URL
 const getApiUrl = () => {
@@ -20,6 +23,7 @@ const Liquidity = () => {
   const { isSolana } = useChainType();
   const { isConnected, account } = useWalletConnection();
   const { chainId, switchNetwork } = useWallet();
+  const featureSupport = useMemo(() => getFeatureSupport(Number(chainId) || 0), [chainId]);
   const [_settingsOpen, _setSettingsOpen] = useState(false);
   const [_settings, setSettings] = useState(() => {
     const saved = localStorage.getItem('swapSettings');
@@ -156,6 +160,25 @@ const Liquidity = () => {
       <div className="relative min-h-screen">{/* Main Content Container */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <DexFeatureBanner featureLabel="Liquidity" currentChainId={chainId} onSwitchNetwork={switchNetwork} />
+          {featureSupport.swap === 'native_amm' && Number(chainId) === BOING_NATIVE_L1_CHAIN_ID && (
+            <div
+              className="mb-6 rounded-xl border p-5 text-left"
+              style={{
+                borderColor: 'rgba(45, 212, 191, 0.45)',
+                backgroundColor: 'rgba(15, 23, 42, 0.9)',
+              }}
+            >
+              <h2 className="text-lg font-semibold text-white mb-2">Boing testnet — add native pool liquidity</h2>
+              <p className="text-sm text-gray-300 mb-4">
+                Use Boing Express below to add reserves to the configured constant-product pool. Swap from the{' '}
+                <Link to="/swap" className="text-cyan-400 underline font-medium">
+                  Swap
+                </Link>{' '}
+                page uses the same pool.
+              </p>
+              <NativeAmmSwapPanel defaultOpenAddLiquidity slippagePercent={_settings.slippage} />
+            </div>
+          )}
           {/* Header */}
           <div className="text-center mb-6 sm:mb-8">
             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 sm:mb-4">
@@ -298,24 +321,42 @@ const Liquidity = () => {
               <div className="bg-gray-800 rounded-xl p-4 sm:p-6 border border-gray-700">
                 <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Quick Actions</h3>
                 <div className="space-y-2 sm:space-y-3">
-                  <button
-                    disabled
-                    className="w-full bg-gray-600 text-gray-400 font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg cursor-not-allowed text-sm sm:text-base"
-                  >
-                    📊 Create New Pair
-                  </button>
+                  {featureSupport.swap === 'native_amm' && Number(chainId) === BOING_NATIVE_L1_CHAIN_ID ? (
+                    <Link
+                      to="/create-pool"
+                      className="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition duration-200 text-center block text-sm sm:text-base"
+                    >
+                      📊 Add pool liquidity
+                    </Link>
+                  ) : (
+                    <button
+                      disabled
+                      className="w-full bg-gray-600 text-gray-400 font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg cursor-not-allowed text-sm sm:text-base"
+                    >
+                      📊 Create New Pair
+                    </button>
+                  )}
                   <a
                     href="/deploy-token"
                     className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition duration-200 text-center block text-sm sm:text-base"
                   >
                     🪙 Create Token
                   </a>
-                  <button
-                    disabled
-                    className="w-full bg-gray-600 text-gray-400 font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg cursor-not-allowed text-center text-sm sm:text-base"
-                  >
-                    🔄 Start Trading
-                  </button>
+                  {featureSupport.swap === 'native_amm' && Number(chainId) === BOING_NATIVE_L1_CHAIN_ID ? (
+                    <Link
+                      to="/swap"
+                      className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition duration-200 text-center block text-sm sm:text-base"
+                    >
+                      🔄 Start Trading
+                    </Link>
+                  ) : (
+                    <button
+                      disabled
+                      className="w-full bg-gray-600 text-gray-400 font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg cursor-not-allowed text-center text-sm sm:text-base"
+                    >
+                      🔄 Start Trading
+                    </button>
+                  )}
                 </div>
               </div>
 
