@@ -402,7 +402,7 @@ function CinematicIntro({ onComplete }) {
           background: rgba(0,229,255,0.07);
           border: 1px solid rgba(0,229,255,0.2);
           color: rgba(0,229,255,0.6);
-          font-family: var(--font-body, Inter, system-ui, sans-serif);
+          font-family: var(--font-sans, 'Comfortaa', system-ui, sans-serif);
           font-size: 0.72rem;
           font-weight: 600;
           letter-spacing: 0.1em;

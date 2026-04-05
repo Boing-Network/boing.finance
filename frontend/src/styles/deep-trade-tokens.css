@@ -90,8 +90,8 @@
   --btn-primary-gradient: linear-gradient(135deg, var(--finance-primary), var(--finance-green-mid));
   --btn-green-gradient: linear-gradient(135deg, var(--finance-green), var(--finance-green-mid));
 
-  /* Typography (Deep Trade: Inter for body per design system) */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Typography — match globals (Comfortaa brand body) */
+  --font-sans: 'Comfortaa', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-family: var(--font-sans);
 }
 

@@ -56,11 +56,7 @@ export default function NativeBoingL1IntegratedHub({ feature = 'swap' }) {
 
   return (
     <section
-      className="mb-6 rounded-xl border p-5 text-left"
-      style={{
-        backgroundColor: 'var(--bg-card)',
-        borderColor: 'rgba(20, 184, 166, 0.45)',
-      }}
+      className="boing-feature-banner mb-6 p-5 text-left relative z-10"
       aria-labelledby="native-l1-hub-title"
     >
       <h2 id="native-l1-hub-title" className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
@@ -68,7 +64,7 @@ export default function NativeBoingL1IntegratedHub({ feature = 'swap' }) {
       </h2>
       <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
         {copy.body}{' '}
-        <a href={AMM_PATTERN_DOC} target="_blank" rel="noopener noreferrer" className="text-teal-400 underline hover:text-teal-300">
+        <a href={AMM_PATTERN_DOC} target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline hover:text-cyan-300">
           AMM pattern (docs)
         </a>
         .
@@ -77,7 +73,7 @@ export default function NativeBoingL1IntegratedHub({ feature = 'swap' }) {
         <li>
           <strong className="text-[var(--text-primary)]">Works in this app on 6913:</strong> Boing Express transfers, QA-gated deploys,
           contract calls, bond/unbond —{' '}
-          <Link to={NATIVE_VM_PATH} className="text-teal-400 underline font-medium">
+          <Link to={NATIVE_VM_PATH} className="text-cyan-400 underline font-medium">
             Native VM &amp; RPC
           </Link>
           .

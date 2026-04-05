@@ -75,8 +75,8 @@ function TickerBar() {
   const row = items.map((item) => (
     <div
       key={item.key}
-      className="flex items-center gap-2 shrink-0 text-sm font-mono"
-      style={{ fontFamily: 'var(--font-mono)' }}
+      className="flex items-center gap-2 shrink-0 text-sm tracking-tight"
+      style={{ fontFamily: 'var(--font-sans)' }}
     >
       <span className="font-bold" style={{ color: 'var(--text-primary)' }}>
         {item.symbol}
@@ -98,11 +98,7 @@ function TickerBar() {
 
   return (
     <div
-      className="overflow-hidden border-b py-1.5"
-      style={{
-        background: 'rgba(3, 8, 16, 0.95)',
-        borderColor: 'rgba(0, 229, 255, 0.08)',
-      }}
+      className="boing-ticker-bar overflow-hidden py-2"
       aria-hidden
     >
       <div

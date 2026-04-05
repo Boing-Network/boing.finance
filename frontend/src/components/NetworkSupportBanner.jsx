@@ -26,13 +26,7 @@ export default function NetworkSupportBanner({ featureLabel, chainIdsSupported, 
     : null;
 
   return (
-    <div
-      className="relative z-10 rounded-xl border p-4 mb-6 flex flex-wrap items-center justify-between gap-3"
-      style={{
-        backgroundColor: 'var(--bg-card)',
-        borderColor: 'var(--border-color)'
-      }}
-    >
+    <div className="boing-feature-banner relative z-10 p-4 mb-6 flex flex-wrap items-center justify-between gap-3">
       <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
         <strong style={{ color: 'var(--text-primary)' }}>{featureLabel}</strong> is available on{' '}
         {chainNames.length > 1 ? chainNames.join(', ') : primaryName}. Switch network or use external DEX.
