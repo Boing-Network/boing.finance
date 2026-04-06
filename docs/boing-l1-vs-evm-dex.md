@@ -35,6 +35,7 @@ The Solidity contracts in this repo remain a **reference design** and **Sepolia 
 ## Related repositories
 
 - **Boing node / VM / SDK:** [boing.network](https://github.com/Boing-Network/boing.network) — execution model, RPC, native AMM, reference token/NFT templates.
+- **Cross-repo handoff (Express, Observer, partner dApps):** [HANDOFF-DEPENDENT-PROJECTS.md](https://github.com/Boing-Network/boing.network/blob/main/docs/HANDOFF-DEPENDENT-PROJECTS.md) — backlog vs what ships in the network monorepo; URLs/RPC envs remain in [THREE-CODEBASE-ALIGNMENT.md](https://github.com/Boing-Network/boing.network/blob/main/docs/THREE-CODEBASE-ALIGNMENT.md).
 - **Engineering checklist (protocol):** [BOING-L1-DEX-ENGINEERING.md](https://github.com/Boing-Network/boing.network/blob/main/docs/BOING-L1-DEX-ENGINEERING.md) — VM deploy model, QA, checklist before app wiring.
 
 ## Configuration reference (frontend)

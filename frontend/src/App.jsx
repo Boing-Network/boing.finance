@@ -6,6 +6,7 @@ import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './i18n'; // Initialize i18n
 import { WalletProvider } from './contexts/WalletContext';
+import { BoingNativeDexIntegrationProvider } from './contexts/BoingNativeDexIntegrationContext';
 import { SolanaWalletProvider } from './contexts/SolanaWalletContext';
 import ChainTypeSelector from './components/ChainTypeSelector';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -819,6 +820,7 @@ function App() {
         <HelmetProvider>
           <ThemeProvider>
             <WalletProvider>
+              <BoingNativeDexIntegrationProvider>
               <SolanaWalletProvider>
               <AchievementProvider>
                 <AchievementOverlay />
@@ -864,6 +866,7 @@ function App() {
               </BaseMiniAppWrapper>
               </AchievementProvider>
               </SolanaWalletProvider>
+              </BoingNativeDexIntegrationProvider>
             </WalletProvider>
           </ThemeProvider>
         </HelmetProvider>

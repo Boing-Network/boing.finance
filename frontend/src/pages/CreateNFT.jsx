@@ -13,9 +13,10 @@ import { SOLANA_NETWORKS } from '../config/solanaConfig';
 import toast from 'react-hot-toast';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { getBoingNativeFeeUsd, formatUsdReferenceLabel, isBoingNativeFeeChain } from '../config/boingEconomics';
-
-const BOING_CANONICAL_DEPLOY_ARTIFACTS_DOC =
-  'https://github.com/Boing-Network/boing.network/blob/main/docs/BOING-CANONICAL-DEPLOY-ARTIFACTS.md';
+import {
+  BOING_NETWORK_BOING_CANONICAL_DEPLOY_ARTIFACTS_URL,
+  BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL,
+} from '../config/boingNetworkDocsUrls';
 
 const SOLANA_NFT_STEPS = [
   { id: 'upload', label: 'Image & Details', icon: '🖼️' },
@@ -687,12 +688,21 @@ export default function CreateNFT() {
               <code className="text-xs">purpose_category: &quot;nft&quot;</code> and operator-pinned collection bytecode—see
               the NFT section in{' '}
               <a
-                href={BOING_CANONICAL_DEPLOY_ARTIFACTS_DOC}
+                href={BOING_NETWORK_BOING_CANONICAL_DEPLOY_ARTIFACTS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-cyan-400 underline hover:text-cyan-300"
               >
                 BOING-CANONICAL-DEPLOY-ARTIFACTS.md
+              </a>
+              . Ecosystem backlog (wallet / explorer / partners):{' '}
+              <a
+                href={BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-400 underline hover:text-cyan-300"
+              >
+                HANDOFF-DEPENDENT-PROJECTS.md
               </a>
               . The reference collection template is not bundled in-app until that artifact ships in the SDK; until then use
               env-supplied hex or the low-level flow on{' '}
@@ -923,7 +933,7 @@ export default function CreateNFT() {
                           {isBoingNativeNftWizard && (
                             <>
                               <a
-                                href={BOING_CANONICAL_DEPLOY_ARTIFACTS_DOC}
+                                href={BOING_NETWORK_BOING_CANONICAL_DEPLOY_ARTIFACTS_URL}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-cyan-400 underline"
@@ -1221,7 +1231,7 @@ export default function CreateNFT() {
                   {isBoingNativeNftWizard && (
                     <>
                       <a
-                        href={BOING_CANONICAL_DEPLOY_ARTIFACTS_DOC}
+                        href={BOING_NETWORK_BOING_CANONICAL_DEPLOY_ARTIFACTS_URL}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-cyan-400 underline"

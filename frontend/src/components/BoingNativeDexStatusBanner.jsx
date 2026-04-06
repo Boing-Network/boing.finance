@@ -1,5 +1,9 @@
 import React from 'react';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
+import {
+  BOING_NETWORK_BOING_L1_DEX_ENGINEERING_URL,
+  BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL,
+} from '../config/boingNetworkDocsUrls';
 import { getBoingL1DexDocsUrl, isNativeVmDexUiEnabled } from '../services/boingNativeDexContracts';
 
 /**
@@ -52,13 +56,24 @@ export function BoingNativeDexStatusBanner({ chainId, featureSupport }) {
         LiquidityLocker) in this repo targets EVM chains only. A multi-pair DEX on L1 requires Boing VM bytecode, deployed
         AccountIds, and app wiring — not the same compiled Solidity. {link} ·{' '}
         <a
-          href="https://github.com/Boing-Network/boing.network/blob/main/docs/BOING-L1-DEX-ENGINEERING.md"
+          href={BOING_NETWORK_BOING_L1_DEX_ENGINEERING_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="underline font-medium"
           style={{ color: 'var(--accent-cyan, #38bdf8)' }}
         >
           Network engineering checklist
+        </a>
+        {' '}
+        ·{' '}
+        <a
+          href={BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline font-medium"
+          style={{ color: 'var(--accent-cyan, #38bdf8)' }}
+        >
+          Partner handoff
         </a>
       </div>
     );

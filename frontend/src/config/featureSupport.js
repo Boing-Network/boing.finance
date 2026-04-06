@@ -26,6 +26,7 @@ const hasDeployed = (addr) => hasDeployedAddress(addr) && addr !== ZERO;
 /**
  * Get feature support for a chain.
  * @param {number} chainId
+ * @param {{ nativeConstantProductPoolHex?: string | null }} [options] — optional pool from {@link fetchNativeDexIntegrationDefaults} when on 6913
  * @returns {{
  *   swap: 'boing' | 'native_amm' | 'external' | false,
  *   liquidity: boolean,
@@ -44,7 +45,7 @@ const hasDeployed = (addr) => hasDeployedAddress(addr) && addr !== ZERO;
  *   },
  * }}
  */
-export function getFeatureSupport(chainId) {
+export function getFeatureSupport(chainId, options) {
   const c = getContractAddresses(chainId);
   const emptyVmDex = {
     factoryId: null,
@@ -74,7 +75,11 @@ export function getFeatureSupport(chainId) {
   const hasBridge = hasDeployed(c.crossChainBridge);
 
   const onBoingNativeL1 = chainId === BOING_NATIVE_L1_CHAIN_ID;
-  const nativePool = c.nativeConstantProductPool;
+  const poolOverride =
+    onBoingNativeL1 && options?.nativeConstantProductPoolHex && hasDeployedAddress(options.nativeConstantProductPoolHex)
+      ? options.nativeConstantProductPoolHex
+      : null;
+  const nativePool = poolOverride || c.nativeConstantProductPool;
   const hasNativeAmm = Boolean(onBoingNativeL1 && hasDeployedAddress(nativePool));
 
   const factoryId = onBoingNativeL1 ? getBoingNativeVmModuleId(chainId, 'dexFactory') : null;

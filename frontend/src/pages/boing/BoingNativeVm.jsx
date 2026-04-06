@@ -23,8 +23,10 @@ import {
 import { getWindowBoingProvider } from '../../utils/boingWalletDiscovery';
 import { buildContractDeployMetaTx } from 'boing-sdk';
 import NativeAmmLpVaultPanel from '../../components/NativeAmmLpVaultPanel';
-
-const RPC_SPEC = 'https://github.com/Boing-Network/boing.network/blob/main/docs/RPC-API-SPEC.md';
+import {
+  BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL,
+  BOING_NETWORK_RPC_API_SPEC_URL,
+} from '../../config/boingNetworkDocsUrls';
 
 function JsonBlock({ data, empty }) {
   if (data == null) {
@@ -355,8 +357,22 @@ export default function BoingNativeVm() {
         <PageCard className="mb-6">
           <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
             RPC methods match{' '}
-            <a href={RPC_SPEC} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">
+            <a
+              href={BOING_NETWORK_RPC_API_SPEC_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:underline"
+            >
               RPC-API-SPEC.md
+            </a>
+            ; cross-repo handoff for Express / Observer / partners:{' '}
+            <a
+              href={BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:underline"
+            >
+              HANDOFF-DEPENDENT-PROJECTS.md
             </a>
             . With{' '}
             <strong className="text-[var(--text-primary)]">Boing Express</strong>, this site can call{' '}

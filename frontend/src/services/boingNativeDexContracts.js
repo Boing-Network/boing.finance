@@ -58,7 +58,7 @@ export function getNativeVmDexModuleSummary(chainId) {
 
 /**
  * Placeholder for future calldata builders (factory create-pair, router swap, etc.).
- * Wire after Boing VM ABI/spec is frozen — see boing.network docs/BOING-L1-DEX-ENGINEERING.md
+ * Wire after Boing VM ABI/spec is frozen — see BOING-L1-DEX-ENGINEERING.md and https://github.com/Boing-Network/boing.network/blob/main/docs/HANDOFF-DEPENDENT-PROJECTS.md §4 (partner dApps)
  */
 export const NativeVmDexCalldata = {
   /** @returns {never} */

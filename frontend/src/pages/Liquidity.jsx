@@ -12,6 +12,7 @@ import { Helmet } from 'react-helmet-async';
 import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { DexFeatureBanner } from '../components/NetworkSupportBanner';
 import getFeatureSupport from '../config/featureSupport';
+import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import NativeAmmSwapPanel from '../components/NativeAmmSwapPanel';
 import NativeAmmLpVaultPanel from '../components/NativeAmmLpVaultPanel';
 
@@ -24,7 +25,15 @@ const Liquidity = () => {
   const { isSolana } = useChainType();
   const { isConnected, account } = useWalletConnection();
   const { chainId, switchNetwork } = useWallet();
-  const featureSupport = useMemo(() => getFeatureSupport(Number(chainId) || 0), [chainId]);
+  const { effectivePoolHex } = useBoingNativeDexIntegration();
+  const featureSupport = useMemo(
+    () =>
+      getFeatureSupport(Number(chainId) || 0, {
+        nativeConstantProductPoolHex:
+          Number(chainId) === BOING_NATIVE_L1_CHAIN_ID ? effectivePoolHex : undefined,
+      }),
+    [chainId, effectivePoolHex]
+  );
   const [_settingsOpen, _setSettingsOpen] = useState(false);
   const [_settings, setSettings] = useState(() => {
     const saved = localStorage.getItem('swapSettings');

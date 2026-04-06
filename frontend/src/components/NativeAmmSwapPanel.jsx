@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { findBestCpRoute } from 'boing-sdk';
 import { useWallet } from '../contexts/WalletContext';
-import { getContractAddress } from '../config/contracts';
+import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { boingGetContractStorage } from '../services/boingTestnetRpc';
 import {
@@ -46,7 +47,13 @@ function parsePositiveBigInt(raw) {
  */
 export default function NativeAmmSwapPanel({ slippagePercent = 0.5, defaultOpenAddLiquidity = false }) {
   const { chainId, walletType, isConnected, getWalletProvider, account } = useWallet();
-  const pool = getContractAddress(BOING_NATIVE_L1_CHAIN_ID, 'nativeConstantProductPool');
+  const {
+    effectivePoolHex: pool,
+    venues,
+    loading: dexIntegrationLoading,
+    error: dexIntegrationError,
+    refresh: refreshDexIntegration,
+  } = useBoingNativeDexIntegration();
 
   const [reserveA, setReserveA] = useState(null);
   const [reserveB, setReserveB] = useState(null);
@@ -104,6 +111,14 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5, defaultOpenA
     const num = 10_000n - BigInt(bps);
     return (amountOutEst * num) / 10_000n;
   }, [amountOutEst, slippagePercent]);
+
+  const sdkRoute = useMemo(() => {
+    if (!venues?.length || amountInBn == null) return null;
+    const v0 = venues[0];
+    const tokenInHex = direction === 'a_to_b' ? v0.tokenAHex : v0.tokenBHex;
+    const tokenOutHex = direction === 'a_to_b' ? v0.tokenBHex : v0.tokenAHex;
+    return findBestCpRoute(venues, tokenInHex, tokenOutHex, amountInBn, { maxHops: 3, maxRoutes: 8 });
+  }, [venues, direction, amountInBn]);
 
   const addAmountABn = useMemo(() => parsePositiveBigInt(addAmountA), [addAmountA]);
   const addAmountBBn = useMemo(() => parsePositiveBigInt(addAmountB), [addAmountB]);
@@ -227,17 +242,39 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5, defaultOpenA
           Reserve B:{' '}
           <strong className="text-[var(--text-primary)]">{reserveB != null ? reserveB.toString() : '—'}</strong>
         </span>
-        <button
-          type="button"
-          data-testid="native-amm-refresh-reserves"
-          onClick={() => loadReserves()}
-          className="ml-auto text-blue-400 underline"
-        >
-          Refresh reserves
-        </button>
+        <span className="ml-auto flex flex-wrap gap-2 items-center">
+          <button
+            type="button"
+            data-testid="native-amm-refresh-reserves"
+            onClick={() => loadReserves()}
+            className="text-blue-400 underline"
+          >
+            Refresh reserves
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              void refreshDexIntegration().then(() => loadReserves());
+            }}
+            className="text-blue-400/90 underline text-[11px]"
+            title="Re-fetch boing_getNetworkInfo pool/factory hints and venues"
+          >
+            Sync RPC hints
+          </button>
+        </span>
       </div>
       {loadError && (
         <p className="text-xs text-amber-400 mb-2">{loadError}</p>
+      )}
+      {dexIntegrationError && (
+        <p className="text-xs text-amber-400/90 mb-2">
+          Could not refresh pool defaults from RPC (using build-time pool id). {dexIntegrationError.message}
+        </p>
+      )}
+      {dexIntegrationLoading && (
+        <p className="text-[10px] mb-2" style={{ color: 'var(--text-tertiary)' }}>
+          Syncing canonical pool from <code className="text-[10px]">boing_getNetworkInfo</code>…
+        </p>
       )}
 
       <div className="grid gap-3 sm:grid-cols-2 mb-3">
@@ -284,6 +321,15 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5, defaultOpenA
         <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
           Est. out: <strong>{amountOutEst.toString()}</strong> · Min out ({slippagePercent}% slip):{' '}
           <strong>{minOutBn != null ? minOutBn.toString() : '—'}</strong>
+          {sdkRoute != null && (
+            <span className="block text-xs mt-1.5" style={{ color: 'var(--text-tertiary)' }}>
+              <code className="text-[10px]">boing-sdk</code> routing: {sdkRoute.hops.length} hop
+              {sdkRoute.hops.length === 1 ? '' : 's'} · out {sdkRoute.amountOut.toString()}
+              {sdkRoute.amountOut !== amountOutEst ? (
+                <span className="text-amber-400"> (differs from panel formula — check pool / fee)</span>
+              ) : null}
+            </span>
+          )}
         </p>
       )}
 

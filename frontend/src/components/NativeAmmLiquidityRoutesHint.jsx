@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
 import getFeatureSupport from '../config/featureSupport';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
+import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 
 /**
  * When native CP pool is configured on Boing L1, EVM “Create pool” / factory flows stay unavailable;
@@ -10,7 +11,15 @@ import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
  */
 export default function NativeAmmLiquidityRoutesHint() {
   const { chainId } = useWallet();
-  const fs = useMemo(() => getFeatureSupport(Number(chainId) || 0), [chainId]);
+  const { effectivePoolHex } = useBoingNativeDexIntegration();
+  const fs = useMemo(
+    () =>
+      getFeatureSupport(Number(chainId) || 0, {
+        nativeConstantProductPoolHex:
+          Number(chainId) === BOING_NATIVE_L1_CHAIN_ID ? effectivePoolHex : undefined,
+      }),
+    [chainId, effectivePoolHex]
+  );
 
   if (Number(chainId) !== BOING_NATIVE_L1_CHAIN_ID || !fs.hasNativeAmm) {
     return null;

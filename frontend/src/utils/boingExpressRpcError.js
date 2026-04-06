@@ -2,7 +2,7 @@
  * Format Boing Express / JSON-RPC errors for toasts.
  * Delegates to `boing-sdk` `explainBoingRpcError` when a numeric RPC `code` is present; keeps a few wallet UX tweaks.
  */
-import { BoingRpcError, explainBoingRpcError } from 'boing-sdk';
+import { BoingRpcError, explainBoingRpcError, mapInjectedProviderErrorToUiMessage } from 'boing-sdk';
 
 /**
  * @param {unknown} raw
@@ -38,6 +38,11 @@ export function formatBoingExpressRpcError(e) {
     const br = tryBoingRpcError(e);
     if (br) {
       return explainBoingRpcError(br);
+    }
+
+    const injectedUi = mapInjectedProviderErrorToUiMessage(e);
+    if (injectedUi && injectedUi !== 'Wallet request failed. Try again or use a Boing-compatible wallet.') {
+      return injectedUi;
     }
 
     if ('message' in err) {

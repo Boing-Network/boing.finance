@@ -13,3 +13,26 @@ export function nativeConstantProductPoolAccessListJson(senderAccountHex, poolAc
   if (!s || !p) return null;
   return { read: [s, p], write: [s, p] };
 }
+
+/**
+ * Access list for multihop router `contract_call`: sender + router + every pool touched.
+ * @param {string} senderAccountHex
+ * @param {string} routerAccountHex
+ * @param {string[]} poolAccountHexes
+ * @returns {{ read: string[], write: string[] } | null}
+ */
+export function nativeDexRouterAndPoolsAccessListJson(senderAccountHex, routerAccountHex, poolAccountHexes) {
+  const s = normalizeBoingFaucetAccountHex(senderAccountHex);
+  const r = normalizeBoingFaucetAccountHex(routerAccountHex);
+  if (!s || !r) return null;
+  const read = new Set([s, r]);
+  const write = new Set([s, r]);
+  for (const p of poolAccountHexes) {
+    const n = normalizeBoingFaucetAccountHex(p);
+    if (n) {
+      read.add(n);
+      write.add(n);
+    }
+  }
+  return { read: [...read], write: [...write] };
+}
