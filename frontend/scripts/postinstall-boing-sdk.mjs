@@ -14,6 +14,9 @@ const distIndex = join(sdkRoot, 'dist', 'index.js');
 if (existsSync(sdkRoot) && !existsSync(distIndex)) {
   const r = spawnSync('npm', ['run', 'build'], { cwd: sdkRoot, stdio: 'inherit', shell: true });
   if (r.status !== 0) {
-    console.warn('[postinstall-boing-sdk] npm run build in boing-sdk failed; try `npm install` in node_modules/boing-sdk');
+    console.error(
+      '[postinstall-boing-sdk] npm run build in boing-sdk failed. From repo root: cd ../boing.network/boing-sdk && npm ci && npm run build',
+    );
+    process.exit(1);
   }
 }

@@ -54,6 +54,10 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
+      - name: Build boing-sdk (dist/ is not committed — required for file: dependency)
+        working-directory: boing.network/boing-sdk
+        run: npm ci && npm run build
+
       - name: Install dependencies
         working-directory: frontend
         run: npm ci
@@ -81,6 +85,10 @@ jobs:
           node-version: '22'
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
+
+      - name: Build boing-sdk (dist/ is not committed — required for file: dependency)
+        working-directory: boing.network/boing-sdk
+        run: npm ci && npm run build
 
       - name: Build Backend (check)
         working-directory: backend
@@ -114,6 +122,10 @@ jobs:
           node-version: '22'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
+
+      - name: Build boing-sdk (dist/ is not committed — required for file: dependency)
+        working-directory: boing.network/boing-sdk
+        run: npm ci && npm run build
 
       - name: Install dependencies
         working-directory: frontend
