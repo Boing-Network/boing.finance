@@ -5,8 +5,18 @@
 
 const BOING_TESTNET_CHAIN_HEX = '0x1b01';
 
-/** Re-export SDK helper so dApp + docs stay aligned with boing-sdk hex rules. */
-export { isBoingNativeAccountIdHex } from 'boing-sdk';
+/**
+ * Boing Network native AccountId: 32 bytes = 64 hex chars (optional `0x`).
+ * Ethers expects 20-byte addresses; keep this in-app so CI works with boing-sdk dists that
+ * do not yet export `isBoingNativeAccountIdHex` (matches boing-sdk `validateHex32` semantics for ids).
+ * @param {string | null | undefined} address
+ * @returns {boolean}
+ */
+export function isBoingNativeAccountIdHex(address) {
+  if (!address || typeof address !== 'string') return false;
+  const hex = address.startsWith('0x') || address.startsWith('0X') ? address.slice(2) : address;
+  return /^[0-9a-fA-F]{64}$/.test(hex);
+}
 
 /**
  * @param {{ request?: Function } | null | undefined} provider
