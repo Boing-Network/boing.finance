@@ -157,7 +157,7 @@ export const NETWORKS = {
   },
 
   // Boing Network L1 testnet (EIP-155 chain id 0x1b01). RPC uses boing_* JSON-RPC; use Boing Express wallet.
-  // See boing.network docs: THREE-CODEBASE-ALIGNMENT.md, RPC-API-SPEC.md
+  // See HANDOFF-DEPENDENT-PROJECTS.md, THREE-CODEBASE-ALIGNMENT.md, RPC-API-SPEC.md (https://github.com/Boing-Network/boing.network/blob/main/docs/HANDOFF-DEPENDENT-PROJECTS.md)
   6913: {
     name: 'Boing Testnet',
     symbol: 'BOING',

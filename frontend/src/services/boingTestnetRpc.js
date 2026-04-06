@@ -35,7 +35,7 @@ export function getBoingRpcClientBaseUrl() {
 }
 
 /**
- * Low-level Boing JSON-RPC POST. See boing.network RPC-API-SPEC.md.
+ * Low-level Boing JSON-RPC POST. See RPC-API-SPEC.md; partner coordination https://github.com/Boing-Network/boing.network/blob/main/docs/HANDOFF-DEPENDENT-PROJECTS.md
  * In the browser, posts to same-origin `/api/boing-rpc` (Vite proxy in dev, Pages Function in prod)
  * so CORS on the public node is not required.
  * @param {string} method

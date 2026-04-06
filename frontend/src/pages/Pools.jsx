@@ -22,6 +22,7 @@ import ShareCardModal from '../components/ShareCardModal';
 import NativeBoingL1IntegratedHub from '../components/NativeBoingL1IntegratedHub';
 import NativeAmmLiquidityRoutesHint from '../components/NativeAmmLiquidityRoutesHint';
 import getFeatureSupport from '../config/featureSupport';
+import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import { getNetworkBadgeBgClass } from '../utils/networkBadgeClasses';
 
 // Pool Card Component
@@ -690,7 +691,15 @@ const Pools = () => {
   const { isConnected, account } = useWalletConnection();
   const { chainId } = useWallet();
   const { record: recordAchievement } = useAchievements() || {};
-  const featureSupport = useMemo(() => getFeatureSupport(Number(chainId) || 0), [chainId]);
+  const { effectivePoolHex } = useBoingNativeDexIntegration();
+  const featureSupport = useMemo(
+    () =>
+      getFeatureSupport(Number(chainId) || 0, {
+        nativeConstantProductPoolHex:
+          Number(chainId) === BOING_NATIVE_L1_CHAIN_ID ? effectivePoolHex : undefined,
+      }),
+    [chainId, effectivePoolHex]
+  );
   // Wallet state initialized
   const [activeTab, setActiveTab] = useState('all-pools');
   const [selectedPool, setSelectedPool] = useState(null);

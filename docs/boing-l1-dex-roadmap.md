@@ -33,6 +33,19 @@ This is a **cross-repo** milestone list. The Solidity DEX in `contracts/` is **n
 - [ ] Error mapping (QA reject, rate limits) consistent with existing `boingExpress` helpers.
 - [ ] E2E smoke against public testnet RPC (optional CI).
 
+## Cross-repo handoff (Boing network)
+
+Upstream **[HANDOFF-DEPENDENT-PROJECTS.md](https://github.com/Boing-Network/boing.network/blob/main/docs/HANDOFF-DEPENDENT-PROJECTS.md)** lists partner dApp priorities. **boing.finance** status:
+
+| Priority | Item | Status in this repo |
+|----------|------|---------------------|
+| **P0** | Canonical pool / factory ids and env mirrors vs [OPS-CANONICAL-TESTNET-NATIVE-AMM-POOL.md](https://github.com/Boing-Network/boing.network/blob/main/docs/OPS-CANONICAL-TESTNET-NATIVE-AMM-POOL.md) and `boing_getNetworkInfo` `end_user` hints | **Ongoing** — `boingCanonicalTestnetPool.js`, `contracts.js`, build env, plus **`BoingNativeDexIntegrationContext`** (live `fetchNativeDexIntegrationDefaults` on 6913). Re-verify when the node publishes new canonical hints. |
+| **P1** | **`fetchNativeDexIntegrationDefaults`** / **`mergeNativeDexIntegrationDefaults`** | **Wired** — context + `buildNativeDexOverridesFromEnv()`; `effectivePoolHex` / `effectiveFactoryHex` feed native AMM UI and `getFeatureSupport(..., { nativeConstantProductPoolHex })`. |
+| **P1** | **`nativeDexRouting`** (quotes / best path) | **Wired** — `hydrateCpPoolVenuesFromRpc` + **`findBestCpRoute`** in **NativeAmmSwapPanel**; optional multi-pool list when **`REACT_APP_BOING_NATIVE_DEX_REGISTER_LOG_FROM_BLOCK`** is set (factory `register_pair` logs + hydrate). |
+| **P2** | **`providerSupportsBoingNativeRpc`** | **Wired** — **`WalletContext`** blocks connect / fresh reconnect on 6913 when the injected provider fails the SDK check (steer to Boing Express). |
+
+Verification on a `boing.network` clone: `npm run print-native-dex-routes` in `examples/native-boing-tutorial` (see that repo’s tutorial §7c3). Cross-repo smoke commands: [PRE-VIBEMINER-NODE-COMMANDS.md](https://github.com/Boing-Network/boing.network/blob/main/docs/PRE-VIBEMINER-NODE-COMMANDS.md).
+
 ## How to track progress
 
 1. Watch **nativeVm** env vars moving from zero to real ids on testnet builds.

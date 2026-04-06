@@ -1,5 +1,5 @@
 /**
- * Native constant-product pool calldata (Boing VM). Mirrors boing.network `boing-sdk/nativeAmm.ts` / `native_amm.rs`.
+ * Native constant-product pool calldata (Boing VM). Mirrors boing.network `boing-sdk/nativeAmm.ts` / `native_amm.rs`. Routing/backlog: https://github.com/Boing-Network/boing.network/blob/main/docs/HANDOFF-DEPENDENT-PROJECTS.md §4.
  * Amounts must stay in u64 range for on-chain `Mul` parity.
  */
 

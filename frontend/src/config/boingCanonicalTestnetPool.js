@@ -6,7 +6,7 @@
  * guaranteed to exist or match reserves on an isolated `localhost:8545` node or any fork with different chain
  * state — for those, set `REACT_APP_BOING_NATIVE_AMM_POOL` to your pool id instead.
  *
- * Cross-repo: mirror in boing.network `RPC-API-SPEC.md` / `TESTNET.md` per OPS-CANONICAL-TESTNET-NATIVE-AMM-POOL.md.
+ * Cross-repo: mirror in boing.network `RPC-API-SPEC.md` / `TESTNET.md` per OPS-CANONICAL-TESTNET-NATIVE-AMM-POOL.md; partner P0 https://github.com/Boing-Network/boing.network/blob/main/docs/HANDOFF-DEPENDENT-PROJECTS.md §4.
  * Deployed liquidity context (when this id was published): reserve A **1000** / reserve B **2000** (ledger units).
  *
  * `REACT_APP_BOING_NATIVE_AMM_POOL` in `.env` / Pages env **always wins** over this constant (CI, forks, staging).

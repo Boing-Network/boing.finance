@@ -4,7 +4,7 @@
  * Mainnet-ready: verified URLs from official DEX/bridge aggregators.
  */
 
-/** Official Boing Express wallet (Boing VM signing). See boing.network THREE-CODEBASE-ALIGNMENT.md. */
+/** Official Boing Express wallet (Boing VM signing). See HANDOFF-DEPENDENT-PROJECTS.md and THREE-CODEBASE-ALIGNMENT.md: https://github.com/Boing-Network/boing.network/blob/main/docs/HANDOFF-DEPENDENT-PROJECTS.md */
 export const BOING_EXPRESS_ORIGIN = 'https://boing.express';
 
 export const EXTERNAL_SWAP_URLS = {

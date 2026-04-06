@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { BOING_EXPRESS_ORIGIN, getExternalSwapUrl } from '../config/networkExternalLinks';
+import {
+  BOING_NETWORK_BOING_PATTERN_AMM_LIQUIDITY_URL,
+  BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL,
+} from '../config/boingNetworkDocsUrls';
 
 const SEPOLIA_CHAIN_ID = 11155111;
 const NATIVE_VM_PATH = '/boing/native-vm';
-const AMM_PATTERN_DOC =
-  'https://github.com/boing-network/boing.network/blob/main/docs/BOING-PATTERN-AMM-LIQUIDITY.md';
 
 const FEATURE_COPY = {
   swap: {
@@ -64,8 +66,23 @@ export default function NativeBoingL1IntegratedHub({ feature = 'swap' }) {
       </h2>
       <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
         {copy.body}{' '}
-        <a href={AMM_PATTERN_DOC} target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline hover:text-cyan-300">
+        <a
+          href={BOING_NETWORK_BOING_PATTERN_AMM_LIQUIDITY_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-cyan-400 underline hover:text-cyan-300"
+        >
           AMM pattern (docs)
+        </a>
+        {' '}
+        ·{' '}
+        <a
+          href={BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-cyan-400 underline hover:text-cyan-300"
+        >
+          Cross-repo handoff
         </a>
         .
       </p>

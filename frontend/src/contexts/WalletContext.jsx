@@ -1,12 +1,16 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { ethers } from 'ethers';
 import { getNetworkByChainId, getWalletAddChainParams, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
+import {
+  connectInjectedBoingWallet,
+  mapInjectedProviderErrorToUiMessage,
+  providerSupportsBoingNativeRpc,
+} from 'boing-sdk';
 import toast from 'react-hot-toast';
 import {
   getWindowBoingProvider,
   isBoingNamedProvider,
   isBoingNativeAccountIdHex,
-  requestAccountsFromBoingCompatibleProvider,
   getChainIdFromBoingCompatibleProvider,
   switchToBoingTestnetInWallet
 } from '../utils/boingWalletDiscovery';
@@ -18,7 +22,7 @@ import {
 
 /**
  * ethers v6 BrowserProvider expects EVM 20-byte addresses. Boing Express exposes 32-byte
- * native AccountIds (see BOING-EXPRESS-WALLET.md)—getSigner cannot wrap those for Solidity deploys.
+ * native AccountIds (see BOING-EXPRESS-WALLET.md; cross-repo handoff https://github.com/Boing-Network/boing.network/blob/main/docs/HANDOFF-DEPENDENT-PROJECTS.md)—getSigner cannot wrap those for Solidity deploys.
  * @returns {{ browserProvider: import('ethers').BrowserProvider, signer: import('ethers').JsonRpcSigner | null, evmSignerUnavailableReason: 'boing_native_account' | null }}
  */
 async function createBrowserProviderAndSigner(eip1193Provider, accountAddress) {
@@ -226,34 +230,62 @@ export const WalletProvider = ({ children }) => {
 
       let accounts = await provider.request({ method: 'eth_accounts' });
 
-      if (accounts.length === 0) {
-        if (isBoingWallet) {
+      let account;
+      let chainId;
+
+      if (isBoingWallet) {
+        if (accounts.length === 0) {
+          let snap;
           try {
-            accounts = await requestAccountsFromBoingCompatibleProvider(provider);
-          } catch {
-            accounts = [];
+            snap = await connectInjectedBoingWallet(provider);
+          } catch (e) {
+            console.warn('[WalletContext] connectWalletSilently: connectInjectedBoingWallet failed', e);
+            return false;
+          }
+          if (!snap.accounts.length) {
+            return false;
+          }
+          account = accountAddress || snap.accounts[0];
+          chainId = networkChainId ?? parseInt(snap.chainIdHex, 16);
+          if (chainId === BOING_NATIVE_L1_CHAIN_ID && !snap.supportsBoingNativeRpc) {
+            console.warn(
+              '[WalletContext] connectWalletSilently: wallet lacks Boing native RPC; clearing saved session'
+            );
+            localStorage.removeItem('walletConnected');
+            localStorage.removeItem('walletType');
+            return false;
           }
         } else {
+          account = accountAddress || accounts[0];
+          chainId =
+            networkChainId ?? (await getChainIdFromBoingCompatibleProvider(provider));
+          if (chainId === BOING_NATIVE_L1_CHAIN_ID) {
+            const supports = await providerSupportsBoingNativeRpc(provider);
+            if (!supports) {
+              console.warn(
+                '[WalletContext] connectWalletSilently: wallet lacks Boing native RPC; clearing saved session'
+              );
+              localStorage.removeItem('walletConnected');
+              localStorage.removeItem('walletType');
+              return false;
+            }
+          }
+        }
+      } else {
+        if (accounts.length === 0) {
           const requestedAccounts = await provider.request({
-            method: 'eth_requestAccounts'
+            method: 'eth_requestAccounts',
           });
           if (requestedAccounts.length === 0) {
             throw new Error('No accounts found');
           }
           accounts = requestedAccounts;
         }
+        account = accountAddress || accounts[0];
+        chainId =
+          networkChainId ??
+          parseInt(await provider.request({ method: 'eth_chainId' }), 16);
       }
-
-      if (accounts.length === 0) {
-        throw new Error('No accounts found');
-      }
-
-      const account = accountAddress || accounts[0];
-      const chainId =
-        networkChainId ??
-        (isBoingWallet
-          ? await getChainIdFromBoingCompatibleProvider(provider)
-          : parseInt(await provider.request({ method: 'eth_chainId' }), 16));
 
       activeEip1193ProviderRef.current = provider;
 
@@ -364,10 +396,25 @@ export const WalletProvider = ({ children }) => {
       // Prefer silent eth_accounts; if the extension is slow or permissions need re-activation,
       // request accounts once (may prompt) before dropping a previously saved session.
       let accounts = await lastProvider.request({ method: 'eth_accounts' });
+      /** Reuse chain id from {@link connectInjectedBoingWallet} when Boing reconnect used it. */
+      let boingReconnectChainIdNum = null;
       if (accounts.length === 0 && wasConnected && !userDisconnected) {
         try {
           if (lastWalletType === 'boingExpress') {
-            accounts = await requestAccountsFromBoingCompatibleProvider(lastProvider);
+            const snap = await connectInjectedBoingWallet(lastProvider);
+            accounts = snap.accounts;
+            const cid = parseInt(snap.chainIdHex, 16);
+            if (
+              accounts.length > 0 &&
+              cid === BOING_NATIVE_L1_CHAIN_ID &&
+              !snap.supportsBoingNativeRpc
+            ) {
+              accounts = [];
+              localStorage.removeItem('walletConnected');
+              localStorage.removeItem('walletType');
+            } else if (accounts.length > 0) {
+              boingReconnectChainIdNum = cid;
+            }
           } else {
             accounts = await lastProvider.request({ method: 'eth_requestAccounts' });
           }
@@ -378,7 +425,10 @@ export const WalletProvider = ({ children }) => {
       if (accounts.length > 0 && !userDisconnected) {
         let chainIdNum;
         if (lastWalletType === 'boingExpress') {
-          chainIdNum = await getChainIdFromBoingCompatibleProvider(lastProvider);
+          chainIdNum =
+            boingReconnectChainIdNum != null
+              ? boingReconnectChainIdNum
+              : await getChainIdFromBoingCompatibleProvider(lastProvider);
         } else {
           const hex = await lastProvider.request({ method: 'eth_chainId' });
           chainIdNum = parseInt(hex, 16);
@@ -601,27 +651,25 @@ export const WalletProvider = ({ children }) => {
         }
       }
 
-      const accounts = await requestAccountsFromBoingCompatibleProvider(ethereumProvider);
+      let account;
+      let chainId;
 
-      if (accounts.length === 0) {
-        throw new Error('No accounts found');
-      }
+      if (isBoingWallet) {
+        let snap;
+        try {
+          snap = await connectInjectedBoingWallet(ethereumProvider);
+        } catch (e) {
+          toast.error(mapInjectedProviderErrorToUiMessage(e));
+          setIsConnecting(false);
+          return false;
+        }
+        account = snap.accounts[0];
+        const resolvedChain = parseInt(snap.chainIdHex, 16);
+        chainId = targetChainId;
 
-      const account = accounts[0];
-      let chainId = targetChainId;
-
-      if (!chainId) {
-        chainId = await getChainIdFromBoingCompatibleProvider(ethereumProvider);
-      } else {
-        const currentChainId = await getChainIdFromBoingCompatibleProvider(ethereumProvider);
-        if (currentChainId !== chainId) {
-          if (chainId === BOING_NATIVE_L1_CHAIN_ID && !isBoingWallet) {
-            toast.error(
-              'Boing testnet needs Boing Express (EVM wallets cannot sign Boing VM transactions). Install from boing.express and connect with it.'
-            );
-            setIsConnecting(false);
-            return false;
-          }
+        if (!chainId) {
+          chainId = resolvedChain;
+        } else if (resolvedChain !== chainId) {
           let switchedViaBoing = false;
           if (chainId === BOING_NATIVE_L1_CHAIN_ID && isBoingWallet) {
             switchedViaBoing = await switchToBoingTestnetInWallet(ethereumProvider);
@@ -646,7 +694,76 @@ export const WalletProvider = ({ children }) => {
               }
             }
           }
-          chainId = await getChainIdFromBoingCompatibleProvider(ethereumProvider);
+          try {
+            snap = await connectInjectedBoingWallet(ethereumProvider);
+          } catch (e) {
+            toast.error(mapInjectedProviderErrorToUiMessage(e));
+            setIsConnecting(false);
+            return false;
+          }
+          account = snap.accounts[0];
+          chainId = parseInt(snap.chainIdHex, 16);
+        } else {
+          chainId = resolvedChain;
+        }
+
+        if (chainId === BOING_NATIVE_L1_CHAIN_ID && !snap.supportsBoingNativeRpc) {
+          toast.error(
+            'This wallet does not expose Boing native RPC (boing_chainId / boing_* methods). Install or update Boing Express: https://boing.express'
+          );
+          setIsConnecting(false);
+          return false;
+        }
+      } else {
+        const accounts = await ethereumProvider.request({
+          method: 'eth_requestAccounts',
+        });
+
+        if (accounts.length === 0) {
+          throw new Error('No accounts found');
+        }
+
+        account = accounts[0];
+        chainId = targetChainId;
+
+        if (!chainId) {
+          chainId = parseInt(await ethereumProvider.request({ method: 'eth_chainId' }), 16);
+        } else {
+          const currentChainId = parseInt(await ethereumProvider.request({ method: 'eth_chainId' }), 16);
+          if (currentChainId !== chainId) {
+            if (chainId === BOING_NATIVE_L1_CHAIN_ID && !isBoingWallet) {
+              toast.error(
+                'Boing testnet needs Boing Express (EVM wallets cannot sign Boing VM transactions). Install from boing.express and connect with it.'
+              );
+              setIsConnecting(false);
+              return false;
+            }
+            let switchedViaBoing = false;
+            if (chainId === BOING_NATIVE_L1_CHAIN_ID) {
+              switchedViaBoing = await switchToBoingTestnetInWallet(ethereumProvider);
+            }
+            if (!switchedViaBoing) {
+              try {
+                await ethereumProvider.request({
+                  method: 'wallet_switchEthereumChain',
+                  params: [{ chainId: `0x${chainId.toString(16)}` }],
+                });
+              } catch (switchError) {
+                if (switchError.code === 4902) {
+                  const addParams = getWalletAddChainParams(chainId);
+                  if (addParams) {
+                    await ethereumProvider.request({
+                      method: 'wallet_addEthereumChain',
+                      params: [addParams],
+                    });
+                  }
+                } else {
+                  throw switchError;
+                }
+              }
+            }
+            chainId = parseInt(await ethereumProvider.request({ method: 'eth_chainId' }), 16);
+          }
         }
       }
 
@@ -754,22 +871,44 @@ export const WalletProvider = ({ children }) => {
         detectedWalletType = 'metamask';
       }
 
-      const accounts = isBoingWallet
-        ? await requestAccountsFromBoingCompatibleProvider(ethereumProvider)
-        : await ethereumProvider.request({
-            method: 'eth_requestAccounts'
-          });
+      let account;
+      let chainId;
 
-      if (accounts.length === 0) {
-        throw new Error('No accounts found');
+      if (isBoingWallet) {
+        let snap;
+        try {
+          snap = await connectInjectedBoingWallet(ethereumProvider);
+        } catch (e) {
+          toast.error(mapInjectedProviderErrorToUiMessage(e));
+          setIsConnecting(false);
+          return false;
+        }
+        if (!snap.accounts.length) {
+          throw new Error('No accounts found');
+        }
+        account = accountAddress || snap.accounts[0];
+        chainId = networkChainId ?? parseInt(snap.chainIdHex, 16);
+
+        if (chainId === BOING_NATIVE_L1_CHAIN_ID && !snap.supportsBoingNativeRpc) {
+          toast.error(
+            'This wallet does not expose Boing native RPC (boing_chainId / boing_* methods). Install or update Boing Express: https://boing.express'
+          );
+          setIsConnecting(false);
+          return false;
+        }
+      } else {
+        const accounts = await ethereumProvider.request({
+          method: 'eth_requestAccounts',
+        });
+
+        if (accounts.length === 0) {
+          throw new Error('No accounts found');
+        }
+
+        account = accountAddress || accounts[0];
+        chainId =
+          networkChainId ?? parseInt(await ethereumProvider.request({ method: 'eth_chainId' }), 16);
       }
-
-      const account = accountAddress || accounts[0];
-      const chainId =
-        networkChainId ??
-        (isBoingWallet
-          ? await getChainIdFromBoingCompatibleProvider(ethereumProvider)
-          : parseInt(await ethereumProvider.request({ method: 'eth_chainId' }), 16));
 
       activeEip1193ProviderRef.current = ethereumProvider;
 
@@ -889,31 +1028,50 @@ export const WalletProvider = ({ children }) => {
 
       const isBoingWallet = isBoingNamedProvider(ethereumProvider);
 
-      // Method 2: Force new account request
-      let accounts;
-      try {
-        accounts = isBoingWallet
-          ? await requestAccountsFromBoingCompatibleProvider(ethereumProvider)
-          : await ethereumProvider.request({
-              method: 'eth_requestAccounts'
-            });
-      } catch (requestError) {
-        // If eth_requestAccounts fails, try a different approach
-        if (requestError.code === 4001) {
-          throw new Error('Wallet connection was cancelled');
-        } else {
+      let account;
+      let chainId;
+
+      if (isBoingWallet) {
+        let snap;
+        try {
+          snap = await connectInjectedBoingWallet(ethereumProvider);
+        } catch (e) {
+          toast.error(mapInjectedProviderErrorToUiMessage(e));
+          setIsConnecting(false);
+          return false;
+        }
+        if (!snap.accounts.length) {
+          throw new Error('No accounts found');
+        }
+        account = snap.accounts[0];
+        chainId = parseInt(snap.chainIdHex, 16);
+        if (chainId === BOING_NATIVE_L1_CHAIN_ID && !snap.supportsBoingNativeRpc) {
+          toast.error(
+            'This wallet does not expose Boing native RPC (boing_chainId / boing_* methods). Install or update Boing Express: https://boing.express'
+          );
+          setIsConnecting(false);
+          return false;
+        }
+      } else {
+        let accounts;
+        try {
+          accounts = await ethereumProvider.request({
+            method: 'eth_requestAccounts',
+          });
+        } catch (requestError) {
+          if (requestError.code === 4001) {
+            throw new Error('Wallet connection was cancelled');
+          }
           throw new Error('Failed to request account access: ' + requestError.message);
         }
-      }
 
-      if (accounts.length === 0) {
-        throw new Error('No accounts found');
-      }
+        if (accounts.length === 0) {
+          throw new Error('No accounts found');
+        }
 
-      const account = accounts[0];
-      const chainId = isBoingWallet
-        ? await getChainIdFromBoingCompatibleProvider(ethereumProvider)
-        : parseInt(await ethereumProvider.request({ method: 'eth_chainId' }), 16);
+        account = accounts[0];
+        chainId = parseInt(await ethereumProvider.request({ method: 'eth_chainId' }), 16);
+      }
 
       activeEip1193ProviderRef.current = ethereumProvider;
 
@@ -1066,6 +1224,21 @@ export const WalletProvider = ({ children }) => {
             setSigner(sig);
           } catch (e) {
             console.warn('[WalletContext] Ethers refresh after boing_switchChain:', e);
+          }
+          let snap;
+          try {
+            snap = await connectInjectedBoingWallet(raw);
+          } catch (e) {
+            toast.error(mapInjectedProviderErrorToUiMessage(e));
+            setupEventListeners();
+            return false;
+          }
+          if (!snap.supportsBoingNativeRpc) {
+            toast.error(
+              'This wallet does not expose Boing native RPC (boing_*). Update Boing Express from https://boing.express'
+            );
+            setupEventListeners();
+            return true;
           }
           toast.success(`Switched to ${targetNetwork.name}`);
           setupEventListeners();

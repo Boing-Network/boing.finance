@@ -11,17 +11,18 @@ import {
   encodeNativeAmmLpVaultDepositAddCalldataHex,
 } from 'boing-sdk';
 import { useWallet } from '../contexts/WalletContext';
+import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import { getContractAddress } from '../config/contracts';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { normalizeBoingFaucetAccountHex } from '../services/boingTestnetRpc';
 import { boingExpressContractCallSignSimulateSubmit } from '../services/boingExpressNativeTx';
 import { getWindowBoingProvider } from '../utils/boingWalletDiscovery';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
-
-const DOCS_VAULT =
-  'https://github.com/Boing-Network/boing.network/blob/main/docs/NATIVE-AMM-LP-VAULT.md';
-const DOCS_SHARE =
-  'https://github.com/Boing-Network/boing.network/blob/main/docs/NATIVE-LP-SHARE-TOKEN.md';
+import {
+  BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL,
+  BOING_NETWORK_NATIVE_AMM_LP_VAULT_URL,
+  BOING_NETWORK_NATIVE_LP_SHARE_TOKEN_URL,
+} from '../config/boingNetworkDocsUrls';
 
 function pickExpressProvider(getWalletProvider) {
   try {
@@ -64,8 +65,10 @@ function parsePositiveBigInt(raw) {
  */
 export default function NativeAmmLpVaultPanel({ compact = false }) {
   const { chainId, walletType, isConnected, getWalletProvider, account } = useWallet();
+  const { effectivePoolHex } = useBoingNativeDexIntegration();
 
-  const defaultPool = getContractAddress(BOING_NATIVE_L1_CHAIN_ID, 'nativeConstantProductPool') || '';
+  const defaultPool =
+    effectivePoolHex || getContractAddress(BOING_NATIVE_L1_CHAIN_ID, 'nativeConstantProductPool') || '';
   const defaultVault = getContractAddress(BOING_NATIVE_L1_CHAIN_ID, 'nativeAmmLpVault') || '';
   const defaultShare = getContractAddress(BOING_NATIVE_L1_CHAIN_ID, 'nativeAmmLpShareToken') || '';
 
@@ -172,15 +175,19 @@ export default function NativeAmmLpVaultPanel({ compact = false }) {
 
   const hint = compact ? null : (
     <p className="text-xs mb-3" style={{ color: 'var(--text-tertiary)' }}>
-      Matches <code className="text-[10px]">boing-sdk</code> tutorial §7f–§7i (
-      <a href={DOCS_VAULT} target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline">
+      Matches <code className="text-[10px]">boing-sdk</code> tutorial §7f–§7i —{' '}
+      <a href={BOING_NETWORK_NATIVE_AMM_LP_VAULT_URL} target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline">
         LP vault
       </a>
       ,{' '}
-      <a href={DOCS_SHARE} target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline">
+      <a href={BOING_NETWORK_NATIVE_LP_SHARE_TOKEN_URL} target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline">
         share token
       </a>
-      ). Set <code className="text-[10px]">REACT_APP_BOING_NATIVE_AMM_LP_VAULT</code> and{' '}
+      ; ecosystem backlog:{' '}
+      <a href={BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL} target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline">
+        HANDOFF-DEPENDENT-PROJECTS.md
+      </a>
+      . Set <code className="text-[10px]">REACT_APP_BOING_NATIVE_AMM_LP_VAULT</code> and{' '}
       <code className="text-[10px]">REACT_APP_BOING_NATIVE_AMM_LP_SHARE_TOKEN</code> at build time to prefill.
     </p>
   );

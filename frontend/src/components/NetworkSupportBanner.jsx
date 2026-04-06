@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import getFeatureSupport, { getChainsWithDex } from '../config/featureSupport';
 import { getExternalSwapUrl } from '../config/networkExternalLinks';
+import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 
 /**
  * Shows a banner when the current chain doesn't support the feature (e.g. Create Pool / Liquidity).
@@ -10,10 +11,13 @@ import { getExternalSwapUrl } from '../config/networkExternalLinks';
  * For Swap/Liquidity/Pools: offers Switch to Boing network OR use external DEX (mainnet-ready).
  */
 export default function NetworkSupportBanner({ featureLabel, chainIdsSupported, currentChainId, onSwitchNetwork, showExternalLink = true }) {
+  const { effectivePoolHex } = useBoingNativeDexIntegration();
   const supported = chainIdsSupported.includes(Number(currentChainId));
   const boingNativeAmm =
     Number(currentChainId) === BOING_NATIVE_L1_CHAIN_ID &&
-    getFeatureSupport(Number(currentChainId) || 0).hasNativeAmm;
+    getFeatureSupport(Number(currentChainId) || 0, {
+      nativeConstantProductPoolHex: effectivePoolHex,
+    }).hasNativeAmm;
   if (supported || !currentChainId) return null;
 
   const chainNames = chainIdsSupported
@@ -79,8 +83,11 @@ export default function NetworkSupportBanner({ featureLabel, chainIdsSupported, 
  * Boing L1 testnet counts as supported when a native constant-product pool id is configured (add liquidity / swap in-app).
  */
 export function DexFeatureBanner({ featureLabel, currentChainId, onSwitchNetwork }) {
+  const { effectivePoolHex } = useBoingNativeDexIntegration();
   const chainsWithDex = getChainsWithDex();
-  const nativeAmmConfigured = getFeatureSupport(BOING_NATIVE_L1_CHAIN_ID).hasNativeAmm;
+  const nativeAmmConfigured = getFeatureSupport(BOING_NATIVE_L1_CHAIN_ID, {
+    nativeConstantProductPoolHex: effectivePoolHex,
+  }).hasNativeAmm;
   const chainIdsSupported =
     nativeAmmConfigured && (featureLabel === 'Create Pool' || featureLabel === 'Liquidity')
       ? Array.from(new Set([...chainsWithDex, BOING_NATIVE_L1_CHAIN_ID]))

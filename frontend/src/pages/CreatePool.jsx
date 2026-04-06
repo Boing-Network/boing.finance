@@ -16,6 +16,7 @@ import NativeBoingL1IntegratedHub from '../components/NativeBoingL1IntegratedHub
 import NativeAmmSwapPanel from '../components/NativeAmmSwapPanel';
 import getFeatureSupport from '../config/featureSupport';
 import BoingNativeDexStatusBanner from '../components/BoingNativeDexStatusBanner';
+import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 
 
 
@@ -65,7 +66,15 @@ function CreatePool() {
   const { isConnected, account, connectWallet } = useWalletConnection();
   const { chainId, switchNetwork } = useWallet();
   const { record: recordAchievement } = useAchievements() || {};
-  const featureSupport = useMemo(() => getFeatureSupport(Number(chainId) || 0), [chainId]);
+  const { effectivePoolHex } = useBoingNativeDexIntegration();
+  const featureSupport = useMemo(
+    () =>
+      getFeatureSupport(Number(chainId) || 0, {
+        nativeConstantProductPoolHex:
+          Number(chainId) === BOING_NATIVE_L1_CHAIN_ID ? effectivePoolHex : undefined,
+      }),
+    [chainId, effectivePoolHex]
+  );
 
   // Add CSS for range slider
   useEffect(() => {

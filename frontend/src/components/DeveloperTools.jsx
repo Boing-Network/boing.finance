@@ -4,9 +4,15 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import config from '../config';
+import { useWallet } from '../contexts/WalletContext';
+import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
+import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
+import { BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL } from '../config/boingNetworkDocsUrls';
 
 const DeveloperTools = () => {
   const [activeTab, setActiveTab] = useState('api');
+  const { chainId } = useWallet();
+  const dexInt = useBoingNativeDexIntegration();
 
   const apiEndpoints = [
     {
@@ -349,7 +355,7 @@ curl -X POST "${config.apiUrl}/r2/upload" \\
                 SDK & Libraries
               </h2>
               <p className="mb-6" style={{ color: 'var(--text-secondary)' }}>
-                Official SDKs and libraries for integrating with boing.finance API.
+                API clients for this app and the upstream Boing L1 stack.
               </p>
 
               <div className="space-y-4">
@@ -358,14 +364,80 @@ curl -X POST "${config.apiUrl}/r2/upload" \\
                   borderColor: 'var(--border-color)'
                 }}>
                   <h3 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-                    JavaScript SDK (Coming Soon)
+                    Boing Network — <code className="text-sm">boing-sdk</code>
                   </h3>
                   <p className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
-                    npm install @boing-finance/sdk
+                    Typed JSON-RPC client, native AMM calldata, DEX defaults from <code className="text-xs">boing_getNetworkInfo</code>, routing helpers, and wallet glue. Consumed by this frontend as a local / git dependency next to the{' '}
+                    <a
+                      href="https://github.com/Boing-Network/boing.network"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-cyan-400 underline"
+                    >
+                      boing.network
+                    </a>{' '}
+                    monorepo.
+                  </p>
+                  <p className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
+                    Cross-repo backlog:{' '}
+                    <a href={BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL} target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline">
+                      HANDOFF-DEPENDENT-PROJECTS.md
+                    </a>
+                    .
+                  </p>
+                </div>
+
+                {Number(chainId) === BOING_NATIVE_L1_CHAIN_ID && (
+                  <div className="p-4 rounded border" style={{
+                    backgroundColor: 'var(--bg-secondary)',
+                    borderColor: 'var(--border-color)'
+                  }}>
+                    <h3 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+                      Live native DEX integration (this session)
+                    </h3>
+                    <p className="text-xs font-mono break-all mb-2" style={{ color: 'var(--text-tertiary)' }}>
+                      Pool: {dexInt.effectivePoolHex || '—'}
+                    </p>
+                    <p className="text-xs font-mono break-all mb-2" style={{ color: 'var(--text-tertiary)' }}>
+                      Factory: {dexInt.effectiveFactoryHex || '—'}
+                    </p>
+                    <p className="text-xs mb-2" style={{ color: 'var(--text-tertiary)' }}>
+                      Sources — pool: {dexInt.poolSource ?? '—'}, factory: {dexInt.factorySource ?? '—'} · venues:{' '}
+                      {dexInt.venues?.length ?? 0}
+                      {dexInt.loading ? ' (loading…)' : ''}
+                    </p>
+                    {dexInt.error && (
+                      <p className="text-xs text-amber-400 mb-2">{dexInt.error.message}</p>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => void dexInt.refresh()}
+                      className="text-sm px-3 py-1.5 rounded-lg border"
+                      style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                    >
+                      Refresh integration
+                    </button>
+                  </div>
+                )}
+
+                {Number(chainId) !== BOING_NATIVE_L1_CHAIN_ID && (
+                  <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
+                    Switch the header wallet to Boing testnet (chain {BOING_NATIVE_L1_CHAIN_ID}) to see live pool/factory hints from RPC.
+                  </p>
+                )}
+
+                <div className="p-4 rounded border" style={{
+                  backgroundColor: 'var(--bg-secondary)',
+                  borderColor: 'var(--border-color)'
+                }}>
+                  <h3 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+                    boing.finance API (REST)
+                  </h3>
+                  <p className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
+                    Optional REST helpers — not yet published as <code className="text-xs">@boing-finance/sdk</code>.
                   </p>
                   <code className="block p-2 rounded bg-gray-800 text-sm">
-                    {`import { BoingSDK } from '@boing-finance/sdk';
-const sdk = new BoingSDK({ apiUrl: '${config.apiUrl}' });`}
+                    {`const response = await fetch('${config.apiUrl}/tokens?chainId=1&limit=10');`}
                   </code>
                 </div>
 

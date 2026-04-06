@@ -1,7 +1,7 @@
 /**
  * Boing Express: require an explicit cryptographic signature after account access so
  * "connect" on boing.finance proves key control, not only address disclosure.
- * Aligns with BOING-EXPRESS-WALLET.md (`boing_signMessage` / `personal_sign`).
+ * Aligns with BOING-EXPRESS-WALLET.md (`boing_signMessage` / `personal_sign`). Ecosystem handoff: https://github.com/Boing-Network/boing.network/blob/main/docs/HANDOFF-DEPENDENT-PROJECTS.md
  *
  * On-chain deploys and txs still use `boing_signTransaction` / `boing_sendTransaction` separately.
  *

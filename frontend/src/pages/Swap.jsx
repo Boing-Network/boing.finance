@@ -19,17 +19,24 @@ import ProactiveTipsBanner from '../components/ProactiveTipsBanner';
 import TrendingPairs from '../components/TrendingPairs';
 import NativeBoingL1IntegratedHub from '../components/NativeBoingL1IntegratedHub';
 import NativeAmmSwapPanel from '../components/NativeAmmSwapPanel';
+import NativeDexDirectoryRoutePanel from '../components/NativeDexDirectoryRoutePanel';
 import getFeatureSupport from '../config/featureSupport';
 import BoingNativeDexStatusBanner from '../components/BoingNativeDexStatusBanner';
+import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 
 
 const Swap = () => {
   const { isSolana } = useChainType();
   const { isConnected, account } = useWalletConnection();
   const { chainId } = useWallet();
+  const { effectivePoolHex } = useBoingNativeDexIntegration();
   const featureSupport = useMemo(
-    () => getFeatureSupport(Number(chainId) || 0),
-    [chainId]
+    () =>
+      getFeatureSupport(Number(chainId) || 0, {
+        nativeConstantProductPoolHex:
+          Number(chainId) === BOING_NATIVE_L1_CHAIN_ID ? effectivePoolHex : undefined,
+      }),
+    [chainId, effectivePoolHex]
   );
   const { record: recordAchievement } = useAchievements() || {};
   
@@ -1843,7 +1850,10 @@ const Swap = () => {
             <NativeBoingL1IntegratedHub feature="swap" />
           )}
           {featureSupport.swap === 'native_amm' && (
-            <NativeAmmSwapPanel slippagePercent={settings.slippage} />
+            <>
+              <NativeAmmSwapPanel slippagePercent={settings.slippage} />
+              <NativeDexDirectoryRoutePanel slippagePercent={settings.slippage} />
+            </>
           )}
 
           {/* Swap Interface + Sidebar */}

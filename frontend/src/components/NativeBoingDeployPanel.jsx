@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import {
+  BOING_NETWORK_BOING_CANONICAL_DEPLOY_ARTIFACTS_URL,
+  BOING_NETWORK_E2_PARTNER_APP_NATIVE_BOING_URL,
+  BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL,
+  BOING_NETWORK_RPC_API_SPEC_URL,
+} from '../config/boingNetworkDocsUrls';
 
-const PARTNER_GUIDE_URL =
-  'https://github.com/Boing-Network/boing.network/blob/main/docs/E2-PARTNER-APP-NATIVE-BOING.md';
-const CANONICAL_ARTIFACTS_DOC =
-  'https://github.com/Boing-Network/boing.network/blob/main/docs/BOING-CANONICAL-DEPLOY-ARTIFACTS.md';
 const BOING_EXPRESS_URL = 'https://boing.express';
-const RPC_SPEC_URL =
-  'https://github.com/Boing-Network/boing.network/blob/main/docs/RPC-API-SPEC.md';
 
 /**
  * Richer native Boing L1 deploy guidance for token creators (Express + boing_sendTransaction).
@@ -102,7 +102,16 @@ await window.boing.request({
 
       <div className="flex flex-wrap gap-2 mb-4">
         <a
-          href={PARTNER_GUIDE_URL}
+          href={BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm px-3 py-1.5 rounded-lg font-medium border-2"
+          style={{ borderColor: 'var(--accent-primary)', color: 'var(--accent-primary)' }}
+        >
+          Handoff: Express, Observer &amp; partners
+        </a>
+        <a
+          href={BOING_NETWORK_E2_PARTNER_APP_NATIVE_BOING_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="text-sm px-3 py-1.5 rounded-lg font-medium"
@@ -111,7 +120,7 @@ await window.boing.request({
           Partner integration guide
         </a>
         <a
-          href={RPC_SPEC_URL}
+          href={BOING_NETWORK_RPC_API_SPEC_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="text-sm px-3 py-1.5 rounded-lg border"
@@ -120,7 +129,7 @@ await window.boing.request({
           RPC API spec
         </a>
         <a
-          href={CANONICAL_ARTIFACTS_DOC}
+          href={BOING_NETWORK_BOING_CANONICAL_DEPLOY_ARTIFACTS_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="text-sm px-3 py-1.5 rounded-lg border"
