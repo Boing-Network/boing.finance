@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useWalletConnection } from '../hooks/useWalletConnection';
+import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
+import AppShellVisualLayer from './AppShellVisualLayer';
 
 // Farcaster MiniApp SDK integration wrapper
 const BaseMiniAppWrapper = ({ children }) => {
@@ -7,6 +9,7 @@ const BaseMiniAppWrapper = ({ children }) => {
   const [isFarcasterApp, setIsFarcasterApp] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { account, switchNetwork } = useWalletConnection();
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
     const initializeMiniApp = async () => {
@@ -130,10 +133,13 @@ const BaseMiniAppWrapper = ({ children }) => {
   // Show loading state while initializing
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mx-auto mb-4"></div>
-          <p style={{ color: 'var(--text-secondary)' }}>Initializing Boing Finance...</p>
+      <div className="relative flex min-h-screen min-w-0 flex-col overflow-hidden page-app deep-trade-bg page-variant-trade">
+        <AppShellVisualLayer reducedMotion={prefersReducedMotion} />
+        <div className="relative z-10 flex flex-1 items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mx-auto mb-4" />
+            <p style={{ color: 'var(--text-secondary)' }}>Initializing Boing Finance...</p>
+          </div>
         </div>
       </div>
     );

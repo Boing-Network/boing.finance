@@ -409,7 +409,7 @@ export default function Portfolio() {
 
   if (!account) {
     return (
-      <div className="relative z-10 container mx-auto px-4 py-8" style={{ backgroundColor: 'var(--bg-primary)' }}>
+      <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center py-12">
             <h1 className="text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>

@@ -33,7 +33,7 @@ import DeFi101Modal from './components/DeFi101Modal';
 import TickerBar from './components/TickerBar';
 import BoingNativeTokenPanel from './components/BoingNativeTokenPanel';
 import DevnetCurrencyDisclaimer from './components/DevnetCurrencyDisclaimer';
-import BoingAnimatedBackground, { getFinanceBackgroundVariant } from './components/BoingAnimatedBackground';
+import AppShellVisualLayer from './components/AppShellVisualLayer';
 import CinematicIntro, { shouldShowCinematicIntro } from './components/CinematicIntro';
 import { getPageVariant } from './utils/pageVariant';
 import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion';
@@ -315,16 +315,14 @@ function AppContent() {
   const location = useLocation();
   const prefersReducedMotion = usePrefersReducedMotion();
   const isLandingPage = location.pathname === '/';
-  const useAnimatedBg = !prefersReducedMotion;
   const pageVariant = getPageVariant(location.pathname);
   const pageBackgroundClass = isLandingPage
-    ? `page-landing deep-trade-bg page-variant-${pageVariant}${useAnimatedBg ? ' animated-bg' : ''}`
-    : `page-app page-variant-${pageVariant}${useAnimatedBg ? ' animated-bg' : ''}`;
-  const bgVariant = getFinanceBackgroundVariant(location.pathname);
+    ? `page-landing deep-trade-bg page-variant-${pageVariant}`
+    : `page-app deep-trade-bg page-variant-${pageVariant}`;
 
   return (
     <div className={`relative flex flex-col min-h-screen min-w-0 overflow-x-hidden ${pageBackgroundClass}`}>
-      {useAnimatedBg && <BoingAnimatedBackground variant={bgVariant} />}
+      <AppShellVisualLayer reducedMotion={prefersReducedMotion} />
       <BaseNetworkOptimizer />
       
       {/* Header: nav + ticker (sticky so ticker sits in flow directly under nav) */}
