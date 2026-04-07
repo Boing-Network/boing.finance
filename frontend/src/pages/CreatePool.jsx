@@ -13,6 +13,7 @@ import { DexFeatureBanner } from '../components/NetworkSupportBanner';
 import { useAchievements } from '../contexts/AchievementContext';
 import ShareCardModal from '../components/ShareCardModal';
 import NativeBoingL1IntegratedHub from '../components/NativeBoingL1IntegratedHub';
+import NativeBoingPoolDeploySection from '../components/NativeBoingPoolDeploySection';
 import NativeAmmSwapPanel from '../components/NativeAmmSwapPanel';
 import getFeatureSupport from '../config/featureSupport';
 import BoingNativeDexStatusBanner from '../components/BoingNativeDexStatusBanner';
@@ -1321,7 +1322,10 @@ function CreatePool() {
               <BoingNativeDexStatusBanner chainId={chainId} featureSupport={featureSupport} />
             )}
             {chainId === BOING_NATIVE_L1_CHAIN_ID && !featureSupport.hasNativeAmm && (
-              <NativeBoingL1IntegratedHub feature="createPool" />
+              <>
+                <NativeBoingL1IntegratedHub feature="createPool" />
+                <NativeBoingPoolDeploySection />
+              </>
             )}
             {chainId === BOING_NATIVE_L1_CHAIN_ID && featureSupport.hasNativeAmm && (
               <div

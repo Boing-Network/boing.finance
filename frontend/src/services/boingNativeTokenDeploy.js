@@ -1,47 +1,16 @@
-import {
-  buildReferenceFungibleDeployMetaTx,
-  createClient,
-  preflightContractDeployMetaQa,
-  resolveReferenceFungibleTemplateBytecodeHex,
-} from 'boing-sdk';
-import { getBoingRpcClientBaseUrl } from './boingTestnetRpc';
-import { boingExpressSendTransaction } from './boingExpressNativeTx';
-import { BOING_QA_PURPOSE_TOKEN, isValidBoingQaPurpose } from '../config/boingQa';
-import { getWindowBoingProvider } from '../utils/boingWalletDiscovery';
-import { tryParseEvenLengthDeployBytecodeHex } from '../utils/boingDeployBytecodeHex';
-import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
+import { BOING_QA_PURPOSE_TOKEN } from '../config/boingQa';
+import { preflightBoingLaunchWizardByKind, executeBoingLaunchWizardDeploy } from './boingNativeLaunchWizardDeploy';
 
-const LEGACY_FUNGIBLE_BYTECODE_ENV = 'REACT_APP_BOING_REFERENCE_TOKEN_BYTECODE';
-
-export function pickExpressProviderForDeploy(getWalletProvider) {
-  try {
-    const p = typeof getWalletProvider === 'function' ? getWalletProvider('boingExpress') : null;
-    if (p && typeof p.request === 'function') return p;
-  } catch {
-    /* ignore */
-  }
-  return getWindowBoingProvider();
-}
-
-export function getBundledNativeFungibleBytecodeHex() {
-  return (
-    resolveReferenceFungibleTemplateBytecodeHex({
-      extraEnvKeys: [LEGACY_FUNGIBLE_BYTECODE_ENV],
-    }) ?? ''
-  );
-}
-
-export function computeEffectiveNativeDeployBytecode(customBytecodeRaw, bundledBytecode) {
-  const c = (customBytecodeRaw || '').trim();
-  if (c) {
-    return tryParseEvenLengthDeployBytecodeHex(c) ?? '';
-  }
-  return bundledBytecode || '';
-}
+export {
+  pickExpressProviderForDeploy,
+  getBundledNativeFungibleBytecodeHex,
+  computeEffectiveNativeDeployBytecode,
+  LEGACY_FUNGIBLE_BYTECODE_ENV,
+} from './boingNativeLaunchWizardDeploy';
 
 /**
  * Build the reference fungible `contract_deploy_meta` tx and run `boing_qaCheck` via BoingClient
- * (same fields the node uses before sign — see boing-sdk `preflightContractDeployMetaQa`).
+ * (unified launch path — see `boingNativeLaunchWizardDeploy.js`).
  *
  * @param {object} input
  * @param {string} input.tokenName
@@ -58,40 +27,14 @@ export async function preflightReferenceFungibleDeployQa({
   descriptionHash = '',
   purpose = BOING_QA_PURPOSE_TOKEN,
 }) {
-  const name = tokenName?.trim() || '';
-  const sym = (tokenSymbol?.trim() || '').toUpperCase();
-  if (!name || !sym) {
-    throw new Error('Token name and symbol are required.');
-  }
-  if (!isValidBoingQaPurpose(purpose)) {
-    throw new Error('Invalid QA purpose.');
-  }
-
-  const bundled = getBundledNativeFungibleBytecodeHex();
-  const bc = computeEffectiveNativeDeployBytecode(customBytecode, bundled);
-  if (!bc) {
-    throw new Error(
-      'No deploy bytecode — set REACT_APP_BOING_REFERENCE_FUNGIBLE_TEMPLATE_BYTECODE_HEX or paste hex under Advanced.',
-    );
-  }
-
-  const custom = (customBytecode || '').trim();
-  const bytecodeHexOverride = custom ? tryParseEvenLengthDeployBytecodeHex(customBytecode) || undefined : undefined;
-  if (custom && !bytecodeHexOverride) {
-    throw new Error('Invalid bytecode: use even-length hex (optional 0x prefix).');
-  }
-
-  const client = createClient(getBoingRpcClientBaseUrl());
-  const tx = buildReferenceFungibleDeployMetaTx({
-    assetName: name,
-    assetSymbol: sym,
-    purposeCategory: purpose,
-    descriptionHashHex: descriptionHash.trim() || undefined,
-    bytecodeHexOverride,
-    extraEnvKeys: [LEGACY_FUNGIBLE_BYTECODE_ENV],
+  const { qa } = await preflightBoingLaunchWizardByKind('token', {
+    tokenName,
+    tokenSymbol,
+    customBytecode,
+    descriptionHash,
+    purpose,
   });
-
-  return preflightContractDeployMetaQa(client, tx);
+  return qa;
 }
 
 /**
@@ -113,97 +56,14 @@ export async function executeBoingNativeTokenDeploy({
   descriptionHash = '',
   qaPoolAcknowledged = false,
 }) {
-  const purpose = BOING_QA_PURPOSE_TOKEN;
-  const bundled = getBundledNativeFungibleBytecodeHex();
-  const bc = computeEffectiveNativeDeployBytecode(customBytecode, bundled);
-
-  if (!bc) {
-    return {
-      ok: false,
-      code: 'no_bytecode',
-      message:
-        'No deploy bytecode — set REACT_APP_BOING_REFERENCE_FUNGIBLE_TEMPLATE_BYTECODE_HEX or paste hex under Advanced.',
-    };
-  }
-  if (!isValidBoingQaPurpose(purpose)) {
-    return { ok: false, code: 'invalid_purpose', message: 'Invalid QA purpose.' };
-  }
-
-  const name = tokenName?.trim() || '';
-  const sym = (tokenSymbol?.trim() || '').toUpperCase();
-  if (!name || !sym) {
-    return { ok: false, code: 'missing_meta', message: 'Token name and symbol are required.' };
-  }
-
-  const p = pickExpressProviderForDeploy(getWalletProvider);
-  if (!p) {
-    return { ok: false, code: 'no_provider', message: 'Boing Express provider not found.' };
-  }
-
-  const custom = (customBytecode || '').trim();
-  const bytecodeHexOverride = custom ? tryParseEvenLengthDeployBytecodeHex(customBytecode) || undefined : undefined;
-  if (custom && !bytecodeHexOverride) {
-    return { ok: false, code: 'invalid_bytecode', message: 'Invalid bytecode hex under Advanced.' };
-  }
-
-  let tx;
-  try {
-    tx = buildReferenceFungibleDeployMetaTx({
-      assetName: name,
-      assetSymbol: sym,
-      purposeCategory: purpose,
-      descriptionHashHex: descriptionHash.trim() || undefined,
-      bytecodeHexOverride,
-      extraEnvKeys: [LEGACY_FUNGIBLE_BYTECODE_ENV],
-    });
-  } catch (e) {
-    return {
-      ok: false,
-      code: 'no_bytecode',
-      message: e?.message || 'Could not build deploy transaction.',
-    };
-  }
-
-  const client = createClient(getBoingRpcClientBaseUrl());
-  let pre;
-  try {
-    pre = await preflightContractDeployMetaQa(client, tx);
-  } catch (e) {
-    return {
-      ok: false,
-      code: 'qa_rpc_failed',
-      message: e?.message || 'QA preflight (boing_qaCheck) failed.',
-    };
-  }
-
-  if (pre.result === 'reject') {
-    return {
-      ok: false,
-      code: 'qa_reject',
-      message: pre.message || 'QA rejected — fix bytecode or metadata.',
-      qaResult: pre,
-    };
-  }
-  if (pre.result === 'unsure' && !qaPoolAcknowledged) {
-    return {
-      ok: false,
-      code: 'qa_unsure_unack',
-      message:
-        'QA returned “unsure” — confirm the community QA pool checkbox, then deploy again.',
-      qaResult: pre,
-    };
-  }
-
-  try {
-    const hash = await boingExpressSendTransaction(p, tx);
-    const txHash = typeof hash === 'string' ? hash : JSON.stringify(hash);
-    return { ok: true, txHash, qaResult: pre };
-  } catch (e) {
-    return {
-      ok: false,
-      code: 'send_failed',
-      message: formatBoingExpressRpcError(e),
-      qaResult: pre,
-    };
-  }
+  return executeBoingLaunchWizardDeploy({
+    kind: 'token',
+    getWalletProvider,
+    qaPoolAcknowledged,
+    tokenName,
+    tokenSymbol,
+    customBytecode,
+    descriptionHash,
+    purpose: BOING_QA_PURPOSE_TOKEN,
+  });
 }
