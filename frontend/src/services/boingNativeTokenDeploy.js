@@ -17,6 +17,9 @@ export {
  * @param {string} input.tokenSymbol
  * @param {string} [input.customBytecode]
  * @param {string} [input.descriptionHash]
+ * @param {Record<string, unknown>} [input.nativeTokenSecurity]
+ * @param {string} [input.initialSupply] — human amount for `mintFirstTotalSupplyWei` when max-wallet % is on
+ * @param {number} [input.tokenDecimals]
  * @param {string} [input.purpose]
  * @returns {Promise<{ result: string, message?: string, rule_id?: string }>}
  */
@@ -25,6 +28,9 @@ export async function preflightReferenceFungibleDeployQa({
   tokenSymbol,
   customBytecode = '',
   descriptionHash = '',
+  nativeTokenSecurity,
+  initialSupply,
+  tokenDecimals,
   purpose = BOING_QA_PURPOSE_TOKEN,
 }) {
   const { qa } = await preflightBoingLaunchWizardByKind('token', {
@@ -32,6 +38,9 @@ export async function preflightReferenceFungibleDeployQa({
     tokenSymbol,
     customBytecode,
     descriptionHash,
+    nativeTokenSecurity,
+    initialSupply,
+    tokenDecimals,
     purpose,
   });
   return qa;
@@ -45,6 +54,9 @@ export async function preflightReferenceFungibleDeployQa({
  * @param {string} input.tokenSymbol
  * @param {string} [input.customBytecode]
  * @param {string} [input.descriptionHash]
+ * @param {Record<string, unknown>} [input.nativeTokenSecurity]
+ * @param {string} [input.initialSupply]
+ * @param {number} [input.tokenDecimals]
  * @param {boolean} [input.qaPoolAcknowledged]
  * @returns {Promise<{ ok: true, txHash: string, qaResult: object } | { ok: false, code: string, message: string, qaResult?: object }>}
  */
@@ -54,6 +66,9 @@ export async function executeBoingNativeTokenDeploy({
   tokenSymbol,
   customBytecode = '',
   descriptionHash = '',
+  nativeTokenSecurity,
+  initialSupply,
+  tokenDecimals,
   qaPoolAcknowledged = false,
 }) {
   return executeBoingLaunchWizardDeploy({
@@ -64,6 +79,9 @@ export async function executeBoingNativeTokenDeploy({
     tokenSymbol,
     customBytecode,
     descriptionHash,
+    nativeTokenSecurity,
+    initialSupply,
+    tokenDecimals,
     purpose: BOING_QA_PURPOSE_TOKEN,
   });
 }
