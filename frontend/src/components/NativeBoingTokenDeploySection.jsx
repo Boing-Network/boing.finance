@@ -18,7 +18,15 @@ import { tryParseEvenLengthDeployBytecodeHex } from '../utils/boingDeployBytecod
  */
 
 const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploySection(
-  { tokenName, tokenSymbol, embedInWizard = false, onDeployGateChange },
+  {
+    tokenName,
+    tokenSymbol,
+    embedInWizard = false,
+    nativeTokenSecurity,
+    initialSupply = '',
+    tokenDecimals = 18,
+    onDeployGateChange,
+  },
   ref
 ) {
   const { chainId, walletType, isConnected, getWalletProvider } = useWallet();
@@ -60,7 +68,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
 
   useEffect(() => {
     setQaPoolAcknowledged(false);
-  }, [effectiveBytecode, descriptionHash]);
+  }, [effectiveBytecode, descriptionHash, nativeTokenSecurity]);
 
   useEffect(() => {
     onDeployGateChange?.({
@@ -91,6 +99,9 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
         tokenSymbol,
         customBytecode,
         descriptionHash,
+        nativeTokenSecurity,
+        initialSupply,
+        tokenDecimals,
         purpose,
       });
       setQaResult(r);
@@ -111,6 +122,9 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
       tokenSymbol,
       customBytecode,
       descriptionHash,
+      nativeTokenSecurity,
+      initialSupply,
+      tokenDecimals,
       qaPoolAcknowledged,
     });
     if (result.qaResult) setQaResult(result.qaResult);
@@ -125,7 +139,10 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
     customBytecode,
     descriptionHash,
     getWalletProvider,
+    initialSupply,
+    nativeTokenSecurity,
     qaPoolAcknowledged,
+    tokenDecimals,
     tokenName,
     tokenSymbol,
   ]);
@@ -288,6 +305,10 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
             >
               description_hash (optional, 32-byte hex)
             </label>
+            <p className="text-[10px] mb-1" style={{ color: 'var(--text-tertiary)' }}>
+              Leave empty to let the SDK derive <code className="text-[10px]">description_hash</code> from your wizard security
+              toggles. Filling this field overrides that commitment.
+            </p>
             <input
               id="native-boing-token-description-hash"
               name="nativeBoingTokenDescriptionHash"

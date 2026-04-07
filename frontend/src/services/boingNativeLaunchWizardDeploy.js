@@ -1,3 +1,4 @@
+import { ethers } from 'ethers';
 import {
   preflightBoingIntegrationDeploy,
   resolveNativeConstantProductPoolBytecodeHex,
@@ -54,6 +55,42 @@ export function computeEffectiveNativeDeployBytecode(customBytecodeRaw, bundledB
 }
 
 /**
+ * Fetches `boing_chainHeight` for timelock unlock height and derives `mintFirstTotalSupplyWei` when
+ * max-wallet % needs supply (see `buildReferenceFungibleSecuredDeployMetaTx` in boing-sdk).
+ *
+ * @param {Record<string, unknown>} fields
+ * @returns {Promise<Record<string, unknown>>}
+ */
+export async function enrichBoingTokenLaunchFields(fields) {
+  const n = fields.nativeTokenSecurity;
+  const out = { ...fields };
+  if (!n || typeof n !== 'object') return out;
+
+  const client = createBoingBrowserRpcClient();
+  if (n.timelock) {
+    const h = await client.chainHeight();
+    out.chainContext = { chainHeight: BigInt(h) };
+  }
+
+  const wantPct =
+    (n.maxWallet || n.antiWhale) &&
+    typeof n.maxWalletPercentage === 'string' &&
+    n.maxWalletPercentage.trim() !== '';
+  if (wantPct) {
+    const rawSupply = fields.initialSupply;
+    const dec = fields.tokenDecimals;
+    if (rawSupply != null && String(rawSupply).trim() !== '' && dec != null && Number(dec) >= 0) {
+      try {
+        out.mintFirstTotalSupplyWei = ethers.parseUnits(String(rawSupply).trim() || '0', Number(dec));
+      } catch {
+        /* SDK may fall back to maxTxAmount for wallet cap */
+      }
+    }
+  }
+  return out;
+}
+
+/**
  * @param {'token' | 'nft' | 'liquidity_pool'} kind
  * @param {Record<string, unknown>} fields
  */
@@ -64,6 +101,7 @@ export function buildBoingLaunchIntegrationInput(kind, fields) {
       const tokenSymbol = fields.tokenSymbol;
       const customBytecode = fields.customBytecode ?? '';
       const descriptionHash = fields.descriptionHash ?? '';
+      const nativeTokenSecurity = fields.nativeTokenSecurity;
       const purpose = fields.purpose ?? BOING_QA_PURPOSE_TOKEN;
       const name = typeof tokenName === 'string' ? tokenName.trim() : '';
       const sym = typeof tokenSymbol === 'string' ? tokenSymbol.trim().toUpperCase() : '';
@@ -91,6 +129,10 @@ export function buildBoingLaunchIntegrationInput(kind, fields) {
         assetSymbol: sym,
         purposeCategory: purpose,
         descriptionHashHex: descriptionHash.trim() || undefined,
+        nativeTokenSecurity:
+          nativeTokenSecurity && typeof nativeTokenSecurity === 'object' ? nativeTokenSecurity : undefined,
+        chainContext: fields.chainContext,
+        mintFirstTotalSupplyWei: fields.mintFirstTotalSupplyWei,
         bytecodeHexOverride,
         extraEnvKeys: [LEGACY_FUNGIBLE_BYTECODE_ENV],
       };
@@ -181,7 +223,11 @@ export function buildBoingLaunchIntegrationInput(kind, fields) {
  */
 export async function preflightBoingLaunchWizardByKind(kind, fields) {
   const client = createBoingBrowserRpcClient();
-  const input = buildBoingLaunchIntegrationInput(kind, fields);
+  let merged = fields;
+  if (kind === 'token') {
+    merged = await enrichBoingTokenLaunchFields(fields);
+  }
+  const input = buildBoingLaunchIntegrationInput(kind, merged);
   return preflightBoingIntegrationDeploy(client, input);
 }
 
@@ -202,9 +248,22 @@ export async function preflightBoingLaunchWizard(client, input) {
  * @returns {Promise<{ ok: true, txHash: string, qaResult: object } | { ok: false, code: string, message: string, qaResult?: object }>}
  */
 export async function executeBoingLaunchWizardDeploy({ kind, getWalletProvider, qaPoolAcknowledged = false, ...fields }) {
+  let mergedFields = fields;
+  if (kind === 'token') {
+    try {
+      mergedFields = await enrichBoingTokenLaunchFields(fields);
+    } catch (e) {
+      return {
+        ok: false,
+        code: 'enrich_failed',
+        message: e?.message || 'Could not prepare deploy (chain height or supply).',
+      };
+    }
+  }
+
   let input;
   try {
-    input = buildBoingLaunchIntegrationInput(kind, fields);
+    input = buildBoingLaunchIntegrationInput(kind, mergedFields);
   } catch (e) {
     return {
       ok: false,

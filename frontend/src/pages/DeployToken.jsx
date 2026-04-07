@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { ethers } from 'ethers';
@@ -761,6 +761,40 @@ export default function DeployToken() {
       blockedReason: g?.blockedReason != null ? g.blockedReason : null,
     });
   }, []);
+
+  /** Committed on native Boing deploy via SDK `description_hash` (Blake3 over canonical JSON) when Advanced hash is empty. */
+  const nativeTokenSecurityForBoing = useMemo(
+    () => ({
+      renounceMint,
+      enableFreezing,
+      enableBlacklist,
+      maxTxAmount,
+      renounceOwnership,
+      antiBot: antiBotEnabled,
+      cooldownPeriod,
+      antiWhale: antiWhaleEnabled,
+      pauseFunction: pauseFunctionEnabled,
+      timelock: timelockEnabled,
+      timelockDelay,
+      maxWallet: maxWalletEnabled,
+      maxWalletPercentage,
+    }),
+    [
+      renounceMint,
+      enableFreezing,
+      enableBlacklist,
+      maxTxAmount,
+      renounceOwnership,
+      antiBotEnabled,
+      cooldownPeriod,
+      antiWhaleEnabled,
+      pauseFunctionEnabled,
+      timelockEnabled,
+      timelockDelay,
+      maxWalletEnabled,
+      maxWalletPercentage,
+    ],
+  );
 
   // Helper function to get current pricing for selected network
   const getCurrentPricing = (planKey) => {
@@ -2448,9 +2482,11 @@ export default function DeployToken() {
                   <>
                     <p className="text-sm mb-3 rounded-lg border px-3 py-2" style={{ borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}>
                       <strong style={{ color: 'var(--text-primary)' }}>Native deploy:</strong> the chain uses your{' '}
-                      <strong>name</strong> and <strong>symbol</strong> from this wizard. Initial supply, decimals, and ERC-20
-                      security toggles are not applied to the reference fungible program—use Advanced below only if you need a
-                      custom bytecode or <code className="text-xs">description_hash</code>.
+                      <strong>name</strong> and <strong>symbol</strong> from this wizard. Your <strong>security feature</strong>{' '}
+                      choices from this wizard are committed in <code className="text-xs">description_hash</code> (unless you
+                      override hex in Advanced). The default reference fungible bytecode is minimal—custom bytecode is required
+                      for on-chain enforcement of those policies; Boing VM now exposes block height and timestamp opcodes for
+                      time/block-gated rules.
                     </p>
                     {!nativeWizardGate.canSubmit && (
                       <div
@@ -2472,6 +2508,9 @@ export default function DeployToken() {
                       embedInWizard
                       tokenName={name}
                       tokenSymbol={symbol}
+                      initialSupply={initialSupply}
+                      tokenDecimals={decimals}
+                      nativeTokenSecurity={nativeTokenSecurityForBoing}
                       onDeployGateChange={onNativeDeployGateChange}
                     />
                   </>
