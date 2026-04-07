@@ -104,11 +104,18 @@
    Source: BOING_DESIGN_SYSTEM.md, Section 10
    ============================================================ */
 :root {
-  /* === BACKGROUNDS (nebula from brand mark) === */
-  --bg-primary: #020B26;
-  --bg-secondary: #0a162f;
-  --bg-tertiary: #122448;
-  --bg-card: rgba(10, 22, 48, 0.72);
+  /* === BACKGROUNDS (Colosseum-style stone base + legacy aliases) === */
+  --bg-primary: #06080c;
+  --bg-secondary: #0c1018;
+  --bg-tertiary: #0f1419;
+  --bg-card: rgba(15, 20, 25, 0.82);
+  /* Slab / engraving refresh (surfaces read as carved glass on stone) */
+  --surface-etched-rim: rgba(255, 255, 255, 0.055);
+  --surface-neon-ambient: color-mix(in srgb, var(--accent-teal) 12%, transparent);
+  /* Colosseum-style stone ramp (https://colloseum-hackathon.vercel.app/) */
+  --bf-stone-deep: #06080c;
+  --bf-stone-mid: #0c1018;
+  --bf-stone-vein: #121a24;
   /* === TEXT === */
   --text-primary: #f0f7ff;
   --text-secondary: #b8d4f0;
@@ -173,10 +180,10 @@
 
 /* Dark class: same as :root (single-theme design) */
 .dark {
-  --bg-primary: #020b26;
-  --bg-secondary: #0a162f;
-  --bg-tertiary: #122448;
-  --bg-card: rgba(10, 22, 48, 0.72);
+  --bg-primary: #06080c;
+  --bg-secondary: #0c1018;
+  --bg-tertiary: #0f1419;
+  --bg-card: rgba(15, 20, 25, 0.82);
   --text-primary: #f0f7ff;
   --text-secondary: #b8d4f0;
   --text-tertiary: #7a9bc8;
@@ -269,61 +276,351 @@ code, pre, .monospace {
   background: var(--primary-color);
 }
 
-/* === BACKGROUND STYLES (Step 6) === */
-/* Landing: when not using animated canvas, fallback to static .webp */
-.page-landing {
-  background-image: url('../assets/boing-aquatic-space-bg.webp');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  min-height: 100vh;
-}
-/* Migrated: animated Canvas background replaces static image and overlay */
-.page-landing.animated-bg {
-  background-image: none;
-}
-.page-landing::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    var(--overlay-gradient-start) 0%,
-    var(--overlay-gradient-end) 100%
-  );
-  z-index: 0;
-  pointer-events: none;
-}
-.page-landing.animated-bg::before {
-  display: none;
-}
-
+/* === BACKGROUND STYLES — Colosseum hackathon reference (stone + veins + neon) === */
+.page-landing,
 .page-app {
   background-color: var(--bg-primary);
-  background-image: url('../assets/hex-grid.svg');
-  background-repeat: repeat;
-  background-size: 60px 60px;
   min-height: 100vh;
 }
-/* Animated canvas draws its own background for app pages */
-.page-app.animated-bg {
-  background-image: none;
-  background-color: transparent;
+
+/* ── bf-* : ported from https://colloseum-hackathon.vercel.app/ (Creator Treasury shell) ── */
+.bf-engrave-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
 }
 
-/* Glass Morphism Effect */
+.bf-engrave-stone {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 100% 55% at 15% -5%, rgba(55, 68, 88, 0.22), transparent 52%),
+    radial-gradient(ellipse 80% 50% at 92% 12%, rgba(40, 48, 62, 0.18), transparent 48%),
+    radial-gradient(ellipse 70% 45% at 8% 88%, rgba(35, 42, 54, 0.2), transparent 50%),
+    radial-gradient(ellipse 90% 60% at 78% 96%, rgba(48, 58, 72, 0.15), transparent 55%),
+    linear-gradient(168deg, var(--bf-stone-deep, #06080c) 0%, var(--bf-stone-mid, #0c1018) 42%, var(--bf-stone-vein, #121a24) 100%);
+}
+
+.bf-engrave-stone::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  background-image: repeating-linear-gradient(
+    -18deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.045) 2px,
+    rgba(0, 0, 0, 0.045) 3px
+  );
+  mix-blend-mode: multiply;
+}
+
+.bf-engrave-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+.bf-engrave-vein {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.55;
+}
+
+.bf-engrave-vein__shadow {
+  transform: translate(0.18%, 0.12%);
+}
+
+.bf-engrave-vein__branch {
+  opacity: 0.92;
+}
+
+.bf-neon-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bf-neon {
+  position: absolute;
+  will-change: transform, opacity;
+}
+
+.bf-neon--orb {
+  border-radius: 50%;
+  width: min(28vw, 220px);
+  height: min(28vw, 220px);
+  background: radial-gradient(
+    circle at 35% 35%,
+    color-mix(in srgb, var(--neon-c) 22%, transparent) 0%,
+    color-mix(in srgb, var(--neon-c) 6%, transparent) 42%,
+    transparent 68%
+  );
+  box-shadow:
+    0 0 28px 12px color-mix(in srgb, var(--neon-c) 14%, transparent),
+    0 0 56px 28px color-mix(in srgb, var(--neon-c) 7%, transparent),
+    inset 0 0 22px color-mix(in srgb, var(--neon-c) 8%, transparent);
+  opacity: var(--neon-base-o, 0.55);
+  animation: bf-neon-pulse var(--neon-dur, 7s) ease-in-out infinite;
+  animation-delay: var(--neon-delay, 0s);
+}
+
+.bf-neon--a {
+  --neon-c: #4a9fe8;
+  left: 8%;
+  top: 6%;
+  --neon-dur: 8s;
+  --neon-delay: 0s;
+  --neon-base-o: 0.45;
+}
+
+.bf-neon--b {
+  --neon-c: #7c6cf0;
+  right: 4%;
+  top: 22%;
+  width: min(22vw, 160px);
+  height: min(22vw, 160px);
+  --neon-dur: 9.5s;
+  --neon-delay: -2s;
+  --neon-base-o: 0.38;
+}
+
+.bf-neon--c {
+  --neon-c: #5ecf9a;
+  left: 2%;
+  bottom: 12%;
+  width: min(32vw, 240px);
+  height: min(32vw, 240px);
+  --neon-dur: 10s;
+  --neon-delay: -4.5s;
+  --neon-base-o: 0.32;
+}
+
+.bf-neon--arc {
+  width: min(42vw, 320px);
+  height: min(42vw, 320px);
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--neon-c) 28%, transparent);
+  background: transparent;
+  box-shadow:
+    0 0 14px 2px color-mix(in srgb, var(--neon-c) 12%, transparent),
+    0 0 32px 8px color-mix(in srgb, var(--neon-c) 6%, transparent),
+    inset 0 0 12px color-mix(in srgb, var(--neon-c) 5%, transparent);
+  opacity: 0.4;
+  animation: bf-neon-drift var(--neon-dur, 14s) ease-in-out infinite;
+  animation-delay: var(--neon-delay, 0s);
+}
+
+.bf-neon--d {
+  --neon-c: #5ab0ff;
+  right: -8%;
+  top: 38%;
+  clip-path: inset(0 48% 48% 0);
+  --neon-dur: 16s;
+  --neon-delay: -1s;
+}
+
+.bf-neon--e {
+  --neon-c: #b894f5;
+  left: -12%;
+  bottom: 18%;
+  clip-path: inset(48% 0 0 42%);
+  width: min(48vw, 360px);
+  height: min(48vw, 360px);
+  --neon-dur: 18s;
+  --neon-delay: -7s;
+  opacity: 0.32;
+}
+
+.bf-neon--dash {
+  height: 2px;
+  width: min(36vw, 280px);
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--neon-c) 55%, transparent) 22%,
+    color-mix(in srgb, var(--neon-c) 35%, transparent) 78%,
+    transparent
+  );
+  box-shadow:
+    0 0 10px 3px color-mix(in srgb, var(--neon-c) 18%, transparent),
+    0 0 24px 8px color-mix(in srgb, var(--neon-c) 8%, transparent);
+  opacity: 0.5;
+  animation: bf-neon-shimmer var(--neon-dur, 6s) ease-in-out infinite;
+  animation-delay: var(--neon-delay, 0s);
+}
+
+.bf-neon--f {
+  --neon-c: #4a9fe8;
+  left: 18%;
+  top: 52%;
+  transform: rotate(-18deg);
+  --neon-dur: 5.5s;
+  --neon-delay: -0.8s;
+}
+
+.bf-neon--g {
+  --neon-c: #6ee0c0;
+  right: 12%;
+  bottom: 28%;
+  width: min(28vw, 200px);
+  transform: rotate(24deg);
+  --neon-dur: 7s;
+  --neon-delay: -3.2s;
+  opacity: 0.42;
+}
+
+.bf-neon--dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--neon-c) 75%, white);
+  box-shadow:
+    0 0 8px 3px color-mix(in srgb, var(--neon-c) 35%, transparent),
+    0 0 20px 6px color-mix(in srgb, var(--neon-c) 15%, transparent);
+  opacity: 0.65;
+  animation: bf-neon-blink var(--neon-dur, 3.2s) ease-in-out infinite;
+  animation-delay: var(--neon-delay, 0s);
+}
+
+.bf-neon--h {
+  --neon-c: #7eb8ff;
+  left: 72%;
+  top: 14%;
+  --neon-dur: 4s;
+  --neon-delay: -1.5s;
+}
+
+.bf-neon--i {
+  --neon-c: #9f8fff;
+  left: 42%;
+  bottom: 8%;
+  --neon-dur: 3.6s;
+  --neon-delay: -2.2s;
+}
+
+@keyframes bf-neon-pulse {
+  0%,
+  100% {
+    opacity: var(--neon-base-o, 0.5);
+    transform: scale(1) translate(0, 0);
+  }
+  50% {
+    opacity: calc(var(--neon-base-o, 0.5) * 1.35);
+    transform: scale(1.06) translate(1%, -0.8%);
+  }
+}
+
+@keyframes bf-neon-drift {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    opacity: 0.48;
+    transform: rotate(6deg) scale(1.03);
+  }
+}
+
+@keyframes bf-neon-shimmer {
+  0%,
+  100% {
+    opacity: 0.35;
+    filter: brightness(0.92);
+  }
+  50% {
+    opacity: 0.62;
+    filter: brightness(1.08);
+  }
+}
+
+@keyframes bf-neon-blink {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  45%,
+  55% {
+    opacity: 0.85;
+    transform: scale(1.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bf-neon-layer .bf-neon {
+    animation: none !important;
+  }
+
+  .bf-neon--orb {
+    opacity: calc(var(--neon-base-o, 0.5) * 0.85);
+  }
+
+  .bf-neon--arc {
+    opacity: 0.32;
+  }
+
+  .bf-neon--dash {
+    opacity: 0.42;
+  }
+
+  .bf-neon--dot {
+    opacity: 0.55;
+  }
+}
+
+.bf-engrave-bg--reduced .bf-neon-layer .bf-neon {
+  animation: none !important;
+}
+
+.bf-engrave-bg--reduced .bf-neon--orb {
+  opacity: calc(var(--neon-base-o, 0.5) * 0.85);
+}
+
+.bf-engrave-bg--reduced .bf-neon--arc {
+  opacity: 0.32;
+}
+
+.bf-engrave-bg--reduced .bf-neon--dash {
+  opacity: 0.42;
+}
+
+.bf-engrave-bg--reduced .bf-neon--dot {
+  opacity: 0.55;
+}
+
+/* Glass — etched slab panels + soft neon rim (full visual refresh) */
 .glass {
   background: var(--bg-card);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(14px) saturate(1.08);
+  -webkit-backdrop-filter: blur(14px) saturate(1.08);
   border: 1px solid var(--border-color);
-  box-shadow: 0 4px 6px var(--shadow);
+  box-shadow:
+    0 4px 6px var(--shadow),
+    0 0 28px var(--surface-neon-ambient),
+    inset 0 1px 0 var(--surface-etched-rim);
 }
 
 .glass-dark {
   background: var(--bg-card);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(14px) saturate(1.08);
+  -webkit-backdrop-filter: blur(14px) saturate(1.08);
   border: 1px solid var(--border-color);
-  box-shadow: 0 4px 6px var(--shadow);
+  box-shadow:
+    0 4px 6px var(--shadow),
+    0 0 22px var(--surface-neon-ambient),
+    inset 0 1px 0 var(--surface-etched-rim);
 }
 
 /* Navbar dropdowns — very light tint + strong blur so page reads through clearly */
@@ -593,7 +890,8 @@ nav:not(.site-nav-bar), .navbar, header:not(.site-header) {
   -webkit-backdrop-filter: blur(20px) saturate(1.2);
   box-shadow:
     0 1px 0 color-mix(in srgb, var(--finance-primary) 22%, transparent),
-    0 12px 40px -16px color-mix(in srgb, var(--bg-primary) 75%, black);
+    0 12px 40px -16px color-mix(in srgb, var(--bg-primary) 75%, black),
+    inset 0 -1px 0 color-mix(in srgb, #fff 4%, transparent);
   border-bottom: none;
   padding: 0 !important;
 }
@@ -647,7 +945,8 @@ nav:not(.site-nav-bar), .navbar, header:not(.site-header) {
   border-top: 1px solid color-mix(in srgb, var(--finance-primary) 12%, transparent);
   box-shadow:
     0 -1px 0 color-mix(in srgb, var(--border-color) 35%, transparent),
-    inset 0 1px 0 color-mix(in srgb, #fff 3%, transparent);
+    inset 0 1px 0 color-mix(in srgb, #fff 3%, transparent),
+    0 0 36px color-mix(in srgb, var(--finance-primary) 6%, transparent);
 }
 
 /* Feature / Boing info banners (swap, pools, network switch, native L1 hub) */

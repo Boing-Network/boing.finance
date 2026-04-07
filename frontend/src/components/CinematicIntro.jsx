@@ -13,7 +13,7 @@ import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 
 const CYAN = { r: 0, g: 229, b: 255 };
 const GREEN = { r: 0, g: 255, b: 136 };
-const DEEP_BG = '#020B26';
+const DEEP_BG = '#06080c';
 
 const TOTAL_MS = 4500;
 const TOTAL_REDUCED_MS = 1800;

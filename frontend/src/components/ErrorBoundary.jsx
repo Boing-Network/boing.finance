@@ -1,5 +1,11 @@
 import React from 'react';
 import logger from '../utils/logger';
+import AppShellVisualLayer from './AppShellVisualLayer';
+
+function readPrefersReducedMotion() {
+  if (typeof window === 'undefined' || !window.matchMedia) return false;
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
 
 /**
  * Error Boundary Component
@@ -56,15 +62,16 @@ class ErrorBoundary extends React.Component {
         return this.props.fallback(this.state.error, this.handleReset);
       }
 
-      // Default fallback UI
+      // Default fallback UI — same Colosseum-style shell as the main app
+      const reducedMotion = readPrefersReducedMotion();
       return (
-        <div className="min-h-screen flex items-center justify-center p-4" 
-             style={{ backgroundColor: 'var(--bg-primary)' }}>
-          <div className="max-w-md w-full rounded-xl border p-6 text-center"
-               style={{ 
-                 backgroundColor: 'var(--bg-card)',
-                 borderColor: 'var(--border-color)'
-               }}>
+        <div className="relative min-h-screen min-w-0 overflow-hidden page-app deep-trade-bg page-variant-trade">
+          <AppShellVisualLayer reducedMotion={reducedMotion} />
+          <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+            <div
+              className="max-w-md w-full rounded-xl border p-6 text-center glass"
+              style={{ borderColor: 'var(--border-color)' }}
+            >
             <div className="text-6xl mb-4">⚠️</div>
             <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
               Something went wrong
@@ -103,6 +110,7 @@ class ErrorBoundary extends React.Component {
               >
                 Reload Page
               </button>
+            </div>
             </div>
           </div>
         </div>

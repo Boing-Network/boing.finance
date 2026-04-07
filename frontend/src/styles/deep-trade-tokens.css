@@ -5,11 +5,14 @@
  */
 
 :root {
-  /* ── Core brand (nebula + logo accents) ───────────────────────── */
-  --boing-black: #020b26;
-  --boing-navy: #06122e;
-  --boing-navy-mid: #0c1a42;
-  --boing-navy-light: #122452;
+  /* ── Core surfaces — Colosseum hackathon stone ramp (fresh base) ───────── */
+  --boing-black: #06080c;
+  --boing-navy: #0c1018;
+  --boing-navy-mid: #0f1419;
+  --boing-navy-light: #121a24;
+  --bf-stone-deep: var(--boing-black);
+  --bf-stone-mid: var(--boing-navy);
+  --bf-stone-vein: var(--boing-navy-light);
 
   /* ── Finance accent palette ───────────────────────────────────── */
   --finance-primary: #00e5ff;
@@ -35,7 +38,7 @@
   --bg-primary: var(--boing-black);
   --bg-secondary: var(--boing-navy);
   --bg-tertiary: var(--boing-navy-mid);
-  --bg-card: rgba(6, 15, 30, 0.8);
+  --bg-card: rgba(15, 20, 25, 0.82);
   --text-primary: #f0f7ff;
   --text-secondary: #b8d4f0;
   --text-tertiary: #7a9bc8;
@@ -54,7 +57,7 @@
   --glow-blue: var(--finance-primary-glow);
   --glow-gold: rgba(245, 158, 11, 0.25);
   --glow-purple: var(--finance-purple-glow);
-  --bg-nav: rgba(3, 8, 16, 0.9);
+  --bg-nav: rgba(6, 8, 12, 0.92);
   --accent-cyan-bg: rgba(0, 229, 255, 0.1);
   --secondary-bg: rgba(0, 229, 255, 0.08);
   --success-bg: rgba(0, 255, 136, 0.15);
@@ -100,29 +103,12 @@
   --bg-primary: var(--boing-black);
   --bg-secondary: var(--boing-navy);
   --bg-tertiary: var(--boing-navy-mid);
-  --bg-card: rgba(6, 15, 30, 0.8);
+  --bg-card: rgba(15, 20, 25, 0.82);
   --text-primary: #f0f7ff;
   --text-secondary: #b8d4f0;
   --text-tertiary: #7a9bc8;
   --border-color: rgba(0, 229, 255, 0.12);
   --border-hover: rgba(0, 229, 255, 0.35);
-}
-
-/* Deep Trade landing: grid overlay when not using Canvas engine */
-.page-landing.deep-trade-bg::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  background-image:
-    linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
-  pointer-events: none;
-}
-/* Canvas engine draws grid; hide CSS grid to avoid double layer */
-.page-landing.deep-trade-bg.animated-bg::after {
-  display: none;
 }
 
 /* ── Page variants: per-route accent emphasis (Deep Trade palette) ─── */
