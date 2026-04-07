@@ -46,7 +46,7 @@ const BOING_LOGO_URL = 'https://boing.finance/assets/boing-profile-twitter.png';
 // MochiAstronaut component
 
 // Toggle Button Component
-function ToggleButton({ enabled, onToggle, disabled, size = "md" }) {
+function ToggleButton({ enabled, onToggle, disabled, size = "md", ariaLabel, ariaLabelledBy }) {
   const sizeClasses = {
     sm: "w-11 h-6",
     md: "w-14 h-7",
@@ -62,6 +62,10 @@ function ToggleButton({ enabled, onToggle, disabled, size = "md" }) {
   return (
     <button
       type="button"
+      role="switch"
+      aria-checked={enabled}
+      aria-label={ariaLabelledBy ? undefined : (ariaLabel ?? 'Toggle')}
+      aria-labelledby={ariaLabelledBy}
       onClick={onToggle}
       disabled={disabled}
       className={`
@@ -750,48 +754,59 @@ export default function DeployToken() {
     walletType === 'boingExpress';
 
   const nativeTokenDeployRef = useRef(null);
-  const [nativeWizardGate, setNativeWizardGate] = useState({ canSubmit: false });
+  const [nativeWizardGate, setNativeWizardGate] = useState({ canSubmit: false, blockedReason: null });
   const onNativeDeployGateChange = useCallback((g) => {
-    setNativeWizardGate(g);
+    setNativeWizardGate({
+      canSubmit: Boolean(g?.canSubmit),
+      blockedReason: g?.blockedReason != null ? g.blockedReason : null,
+    });
   }, []);
 
   // Helper function to get current pricing for selected network
   const getCurrentPricing = (planKey) => {
-    console.log('getCurrentPricing called with planKey:', planKey);
     const chainId = network?.chainId || 1;
-    console.log('getCurrentPricing Debug:', {
-      planKey,
-      chainId,
-      networkChainId: network?.chainId,
-      hasPlan: !!SERVICE_CHARGES[planKey],
-      hasPrices: !!SERVICE_CHARGES[planKey]?.prices,
-      hasChainId: !!SERVICE_CHARGES[planKey]?.prices?.[chainId],
-      availableChainIds: Object.keys(SERVICE_CHARGES[planKey]?.prices || {}),
-      SERVICE_CHARGES_keys: Object.keys(SERVICE_CHARGES)
-    });
-    
+    if (import.meta.env.DEV) {
+      console.log('getCurrentPricing called with planKey:', planKey);
+      console.log('getCurrentPricing Debug:', {
+        planKey,
+        chainId,
+        networkChainId: network?.chainId,
+        hasPlan: !!SERVICE_CHARGES[planKey],
+        hasPrices: !!SERVICE_CHARGES[planKey]?.prices,
+        hasChainId: !!SERVICE_CHARGES[planKey]?.prices?.[chainId],
+        availableChainIds: Object.keys(SERVICE_CHARGES[planKey]?.prices || {}),
+        SERVICE_CHARGES_keys: Object.keys(SERVICE_CHARGES),
+      });
+    }
+
     const pricing = SERVICE_CHARGES[planKey]?.prices?.[chainId] || SERVICE_CHARGES[planKey]?.prices?.[1];
-    
-    console.log('Pricing lookup result:', pricing);
-    
+
+    if (import.meta.env.DEV) {
+      console.log('Pricing lookup result:', pricing);
+    }
+
     if (!pricing) {
-      console.error('No pricing found for:', { planKey, chainId });
+      if (import.meta.env.DEV) {
+        console.error('No pricing found for:', { planKey, chainId });
+      }
       return { amount: 0.001, currency: network?.nativeCurrency?.symbol ?? 'ETH' };
     }
-    
+
     return pricing;
   };
 
   // Helper function to get current service charge
   const getCurrentServiceCharge = () => {
     const pricing = getCurrentPricing(selectedPlan);
-    console.log('getCurrentServiceCharge Debug:', {
-      selectedPlan,
-      pricing,
-      pricingType: typeof pricing,
-      amount: pricing?.amount,
-      amountType: typeof pricing?.amount
-    });
+    if (import.meta.env.DEV) {
+      console.log('getCurrentServiceCharge Debug:', {
+        selectedPlan,
+        pricing,
+        pricingType: typeof pricing,
+        amount: pricing?.amount,
+        amountType: typeof pricing?.amount,
+      });
+    }
     return pricing;
   };
 
@@ -891,21 +906,6 @@ export default function DeployToken() {
     // Force re-render of pricing display when network changes
     // This ensures the pricing cards show the correct currency for the current network
   }, [network?.chainId]);
-
-  // Debug logging
-  useEffect(() => {
-    console.log('DeployToken Debug State:', {
-      isConnected,
-      deploying,
-      network: network?.name,
-      chainId: network?.chainId,
-      name,
-      symbol,
-      initialSupply,
-      website,
-      selectedPlan
-    });
-  }, [isConnected, deploying, network, name, symbol, initialSupply, website, selectedPlan]);
 
   const handleSocialLinkChange = (platform, value) => {
     setSocialLinks(prev => ({
@@ -1014,6 +1014,9 @@ export default function DeployToken() {
 
   const handleDeploy = async (e) => {
     e.preventDefault();
+    if (deploying) {
+      return;
+    }
     if (!isConnected) {
       toast.error('Please connect your wallet');
       return;
@@ -1026,8 +1029,14 @@ export default function DeployToken() {
       }
       if (!nativeWizardGate.canSubmit) {
         toast.error(
-          'Configure fungible template bytecode (build env or Advanced) or acknowledge the QA pool if prompted.'
+          nativeWizardGate.blockedReason ||
+            'Configure fungible template bytecode (build env or Advanced) or acknowledge the QA pool if prompted.'
         );
+        return;
+      }
+      const runNative = nativeTokenDeployRef.current?.runDeploy;
+      if (typeof runNative !== 'function') {
+        toast.error('Native deploy is not ready. Stay on Review & Deploy with Boing Express on Boing testnet.');
         return;
       }
       setDeploying(true);
@@ -1036,7 +1045,7 @@ export default function DeployToken() {
       setDeploymentError(null);
       const deploymentId = Date.now().toString();
       try {
-        const hash = await nativeTokenDeployRef.current?.runDeploy();
+        const hash = await runNative();
         if (hash) {
           setTxHash(hash);
           deploymentHistoryUtil.add({
@@ -1884,11 +1893,14 @@ export default function DeployToken() {
                 </div>
               </div>
               
-              <div className="grid md:grid-cols-3 gap-6">
+              <fieldset className="border-0 p-0 m-0 min-w-0">
+                <legend className="sr-only">Deployment service plan</legend>
+                <div className="grid md:grid-cols-3 gap-6">
                 {Object.entries(SERVICE_CHARGES).map(([key, plan]) => (
-                  <div
+                  <label
                     key={key}
-                    className={`relative p-6 rounded-xl border-2 cursor-pointer transition-all ${
+                    htmlFor={`deploy-service-plan-${key}`}
+                    className={`relative block p-6 rounded-xl border-2 cursor-pointer transition-all ${
                       selectedPlan === key
                         ? 'border-blue-500'
                         : 'hover:border-gray-500'
@@ -1897,10 +1909,18 @@ export default function DeployToken() {
                       backgroundColor: 'var(--bg-card)',
                       borderColor: selectedPlan === key ? 'var(--accent-cyan)' : 'var(--border-color)'
                     }}
-                    onClick={() => setSelectedPlan(key)}
                   >
+                    <input
+                      type="radio"
+                      id={`deploy-service-plan-${key}`}
+                      name="deploy-service-plan"
+                      value={key}
+                      checked={selectedPlan === key}
+                      onChange={() => setSelectedPlan(key)}
+                      className="sr-only"
+                    />
                     {selectedPlan === key && (
-                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center pointer-events-none" aria-hidden="true">
                         <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
@@ -1939,9 +1959,10 @@ export default function DeployToken() {
                         </ul>
                       )}
                     </div>
-                  </div>
+                  </label>
                 ))}
-              </div>
+                </div>
+              </fieldset>
               {/* Wizard step 2 nav */}
               {useWizardMode && wizardStep === 2 && (
                 <div className="flex justify-between mt-6 pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
@@ -2145,7 +2166,7 @@ export default function DeployToken() {
                             <div className="flex items-start sm:items-center space-x-3">
                               <span className="text-xl sm:text-2xl flex-shrink-0">{feature.icon}</span>
                               <div className="min-w-0 flex-1">
-                                <h4 className="font-medium text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>{feature.name}</h4>
+                                <h4 id={`deploy-security-${feature.featureKey}`} className="font-medium text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>{feature.name}</h4>
                                 <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{feature.description}</p>
                                 <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-900 text-blue-200 rounded-full mt-1">
                                   {feature.risk} Risk
@@ -2163,6 +2184,7 @@ export default function DeployToken() {
                                   enabled={renounceMint}
                                   onToggle={() => setRenounceMint(!renounceMint)}
                                   disabled={!isAllowed}
+                                  ariaLabelledBy={`deploy-security-${feature.featureKey}`}
                                 />
                               )}
                               
@@ -2171,6 +2193,7 @@ export default function DeployToken() {
                                   enabled={enableFreezing}
                                   onToggle={() => setEnableFreezing(!enableFreezing)}
                                   disabled={!isAllowed}
+                                  ariaLabelledBy={`deploy-security-${feature.featureKey}`}
                                 />
                               )}
                               
@@ -2179,6 +2202,7 @@ export default function DeployToken() {
                                   enabled={enableBlacklist}
                                   onToggle={() => setEnableBlacklist(!enableBlacklist)}
                                   disabled={!isAllowed}
+                                  ariaLabelledBy={`deploy-security-${feature.featureKey}`}
                                 />
                               )}
                               
@@ -2187,6 +2211,7 @@ export default function DeployToken() {
                                   enabled={maxTxAmount !== ''}
                                   onToggle={() => setMaxTxAmount(maxTxAmount === '' ? '1' : '')}
                                   disabled={!isAllowed}
+                                  ariaLabelledBy={`deploy-security-${feature.featureKey}`}
                                 />
                               )}
                               
@@ -2201,6 +2226,7 @@ export default function DeployToken() {
                                     }
                                   }}
                                   disabled={!isAllowed}
+                                  ariaLabelledBy={`deploy-security-${feature.featureKey}`}
                                 />
                               )}
                               
@@ -2209,6 +2235,7 @@ export default function DeployToken() {
                                   enabled={antiBotEnabled}
                                   onToggle={() => setAntiBotEnabled(!antiBotEnabled)}
                                   disabled={!isAllowed}
+                                  ariaLabelledBy={`deploy-security-${feature.featureKey}`}
                                 />
                               )}
                               
@@ -2217,6 +2244,7 @@ export default function DeployToken() {
                                   enabled={cooldownPeriod !== ''}
                                   onToggle={() => setCooldownPeriod(cooldownPeriod === '' ? '30' : '')}
                                   disabled={!isAllowed}
+                                  ariaLabelledBy={`deploy-security-${feature.featureKey}`}
                                 />
                               )}
                               
@@ -2225,6 +2253,7 @@ export default function DeployToken() {
                                   enabled={antiWhaleEnabled}
                                   onToggle={() => setAntiWhaleEnabled(!antiWhaleEnabled)}
                                   disabled={!isAllowed}
+                                  ariaLabelledBy={`deploy-security-${feature.featureKey}`}
                                 />
                               )}
                               
@@ -2233,6 +2262,7 @@ export default function DeployToken() {
                                   enabled={pauseFunctionEnabled}
                                   onToggle={() => setPauseFunctionEnabled(!pauseFunctionEnabled)}
                                   disabled={!isAllowed}
+                                  ariaLabelledBy={`deploy-security-${feature.featureKey}`}
                                 />
                               )}
                               
@@ -2241,6 +2271,7 @@ export default function DeployToken() {
                                   enabled={timelockEnabled}
                                   onToggle={() => setTimelockEnabled(!timelockEnabled)}
                                   disabled={!isAllowed}
+                                  ariaLabelledBy={`deploy-security-${feature.featureKey}`}
                                 />
                               )}
                               
@@ -2249,6 +2280,7 @@ export default function DeployToken() {
                                   enabled={maxWalletEnabled}
                                   onToggle={() => setMaxWalletEnabled(!maxWalletEnabled)}
                                   disabled={!isAllowed}
+                                  ariaLabelledBy={`deploy-security-${feature.featureKey}`}
                                 />
                               )}
                             </div>
@@ -2420,6 +2452,21 @@ export default function DeployToken() {
                       security toggles are not applied to the reference fungible program—use Advanced below only if you need a
                       custom bytecode or <code className="text-xs">description_hash</code>.
                     </p>
+                    {!nativeWizardGate.canSubmit && (
+                      <div
+                        role="status"
+                        className="text-sm mb-3 rounded-lg border px-3 py-2"
+                        style={{
+                          borderColor: 'rgba(251, 191, 36, 0.55)',
+                          backgroundColor: 'rgba(251, 191, 36, 0.08)',
+                          color: 'var(--text-secondary)',
+                        }}
+                      >
+                        <strong style={{ color: 'var(--text-primary)' }}>Deploy not ready:</strong>{' '}
+                        {nativeWizardGate.blockedReason ||
+                          'Configure reference fungible bytecode (build env or Advanced) or complete QA steps below.'}
+                      </div>
+                    )}
                     <NativeBoingTokenDeploySection
                       ref={nativeTokenDeployRef}
                       embedInWizard

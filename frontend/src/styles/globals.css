@@ -1,5 +1,4 @@
-/* Step 3: Google Fonts — Comfortaa, Orbitron, JetBrains Mono */
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Comfortaa:wght@400;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;600;700;900&display=swap');
+/* Google Fonts are loaded via `<link>` in `index.html` (CSP-friendly; Comfortaa is local `@font-face` below). */
 
 @tailwind base;
 @tailwind components;
