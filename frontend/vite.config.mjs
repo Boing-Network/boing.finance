@@ -18,6 +18,7 @@ function resolveFromFrontend(spec) {
 
 const nobleAliases = {
   '@noble/hashes/blake3': resolveFromFrontend('@noble/hashes/blake3'),
+  '@noble/hashes/utils': resolveFromFrontend('@noble/hashes/utils'),
   '@noble/ed25519': resolveFromFrontend('@noble/ed25519'),
 };
 
