@@ -6,6 +6,7 @@
  * hex from `boingExpressSignTransaction` (user-approved Ed25519 signature in the extension).
  */
 
+import { BOING_QA_PLACEHOLDER_DESCRIPTION_HASH_HEX } from 'boing-sdk';
 import { simulateBoingSignedTransaction, submitBoingSignedTransaction } from './boingNativeVm';
 import { normalizeBoingFaucetAccountHex } from './boingTestnetRpc';
 
@@ -18,17 +19,50 @@ function normAccountHex32(addr) {
 }
 
 /**
- * Plain JSON object for the extension: drops non-enumerable fields and (for some wallets) supplies explicit
- * `create2_salt: null` so Option fields deserialize like `boing_signTransaction`, not a broken `boing_sendTransaction` path.
+ * Normalize wallet return value from **`boing_signTransaction`** (some builds return `{ hex: "0x…" }` etc.).
+ * Never use **`String(nonString)`** — that becomes **`[object Object]`** and breaks **`boing_submitTransaction`** (EOF decode).
+ * @param {unknown} raw
+ * @returns {string}
+ */
+export function coerceBoingSignedTxHex(raw) {
+  if (typeof raw === 'string') {
+    const t = raw.trim();
+    if (t.length === 0) {
+      throw new Error('Boing Express returned an empty signed transaction.');
+    }
+    return t.startsWith('0x') || t.startsWith('0X') ? `0x${t.slice(2).toLowerCase()}` : `0x${t.toLowerCase()}`;
+  }
+  if (raw && typeof raw === 'object') {
+    for (const k of ['signedTransaction', 'signed_tx', 'transactionHex', 'transaction', 'hex', 'result']) {
+      const v = /** @type {Record<string, unknown>} */ (raw)[k];
+      if (typeof v === 'string' && v.trim()) {
+        return coerceBoingSignedTxHex(v);
+      }
+    }
+  }
+  throw new Error(
+    'Boing Express did not return a signed transaction hex string from boing_signTransaction. Update Boing Express or report this to the wallet team.',
+  );
+}
+
+/**
+ * **`preflightContractDeployMetaQa`** passes **`BOING_QA_PLACEHOLDER_DESCRIPTION_HASH_HEX`** when the meta tx omits
+ * **`description_hash`**. If the wallet signs **`Option::None`** for that field while the node expects the same
+ * **`description_hash` bytes` as QA (or a consistent placeholder), decoding can fail with **`unexpected end of file`**.
+ * Always send the explicit placeholder so sign + submit match QA.
  * @param {Record<string, unknown>} tx
  * @returns {Record<string, unknown>}
  */
-function plainContractDeployMetaForExpress(tx) {
-  const o = JSON.parse(JSON.stringify(tx));
-  if (o && o.type === 'contract_deploy_meta' && !Object.prototype.hasOwnProperty.call(o, 'create2_salt')) {
-    o.create2_salt = null;
+function normalizeContractDeployMetaForSign(tx) {
+  if (!tx || tx.type !== 'contract_deploy_meta') {
+    return tx;
   }
-  return o;
+  const out = { ...tx };
+  const dh = typeof out.description_hash === 'string' ? out.description_hash.trim() : '';
+  if (!dh) {
+    out.description_hash = BOING_QA_PLACEHOLDER_DESCRIPTION_HASH_HEX;
+  }
+  return out;
 }
 
 /**
@@ -73,10 +107,11 @@ export async function boingExpressSignTransaction(provider, txObject) {
   if (!provider || typeof provider.request !== 'function') {
     throw new Error('Boing Express provider not available');
   }
-  return provider.request({
+  const raw = await provider.request({
     method: 'boing_signTransaction',
-    params: [txObject]
+    params: [txObject],
   });
+  return coerceBoingSignedTxHex(raw);
 }
 
 /**
@@ -94,12 +129,8 @@ export async function boingExpressSendTransaction(provider, txObject) {
     throw new Error('Boing Express provider not available');
   }
   if (txObject && txObject.type === 'contract_deploy_meta') {
-    const plain = plainContractDeployMetaForExpress(txObject);
-    const signed = await provider.request({
-      method: 'boing_signTransaction',
-      params: [plain],
-    });
-    const signedHex = typeof signed === 'string' ? signed : String(signed);
+    const forSign = normalizeContractDeployMetaForSign(txObject);
+    const signedHex = await boingExpressSignTransaction(provider, forSign);
     const sub = await submitBoingSignedTransaction(signedHex);
     if (sub && typeof sub === 'object' && sub.tx_hash) return sub.tx_hash;
     return String(sub);
