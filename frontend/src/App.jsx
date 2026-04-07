@@ -361,11 +361,11 @@ function AppContent() {
             </div>
 
             {/* Logo + wordmark — first in row; shell has no mx-auto / max-w cap */}
-            <div className="shrink-0 max-md:-ml-1 min-[1150px]:mr-1 min-[1150px]:max-xl:mr-0.5 xl:mr-2">
+            <div className="shrink-0 pl-3 sm:pl-4 md:pl-5 min-[1150px]:pl-5 xl:pl-6 min-[1150px]:mr-1 min-[1150px]:max-xl:mr-0.5 xl:mr-2">
               <button
                 type="button"
                 onClick={() => { window.location.href = '/'; }}
-                className="flex items-center gap-1.5 font-bold text-xl whitespace-nowrap text-left rounded-lg py-2 max-[1149px]:-ml-px max-[1149px]:pr-1 min-[1150px]:px-0 min-[1150px]:py-2"
+                className="flex items-center gap-1.5 font-bold text-xl whitespace-nowrap text-left rounded-lg py-2 max-[1149px]:pr-1 min-[1150px]:px-0 min-[1150px]:py-2"
                 style={{ color: 'var(--text-primary)' }}
               >
                 <Logo size={36} showText={true} showComic={false} className="shrink-0" style={{ filter: 'drop-shadow(0 0 8px var(--glow-cyan))' }} />
