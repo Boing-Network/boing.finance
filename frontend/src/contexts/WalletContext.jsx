@@ -3,6 +3,7 @@ import { ethers } from 'ethers';
 import { getNetworkByChainId, getWalletAddChainParams, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import {
   connectInjectedBoingWallet,
+  createClient,
   mapInjectedProviderErrorToUiMessage,
   providerSupportsBoingNativeRpc,
 } from 'boing-sdk';
@@ -19,6 +20,7 @@ import {
   notifyBoingExpressWalletAccountChanged,
   requestBoingExpressConnectionProof
 } from '../utils/boingExpressConnectionProof';
+import { getBoingRpcClientBaseUrl, normalizeBoingFaucetAccountHex } from '../services/boingTestnetRpc';
 
 /**
  * ethers v6 BrowserProvider expects EVM 20-byte addresses. Boing Express exposes 32-byte
@@ -1332,8 +1334,26 @@ export const WalletProvider = ({ children }) => {
   };
 
   const getAccountBalance = async () => {
-    if (!provider || !account) return null;
-    
+    if (!account) return null;
+
+    // Boing L1 uses 32-byte AccountIds; ethers treats the chain as "unknown" and may hit ENS paths on getBalance.
+    if (chainId === BOING_NATIVE_L1_CHAIN_ID && isBoingNativeAccountIdHex(account)) {
+      const normalized = normalizeBoingFaucetAccountHex(account);
+      if (!normalized) return null;
+      try {
+        const client = createClient(getBoingRpcClientBaseUrl());
+        const { balance } = await client.getBalance(normalized);
+        const net = getNetworkByChainId(chainId);
+        const decimals = net?.nativeCurrency?.decimals ?? 0;
+        return ethers.formatUnits(balance, decimals);
+      } catch (error) {
+        console.error('Error getting Boing native balance:', error);
+        return null;
+      }
+    }
+
+    if (!provider) return null;
+
     try {
       // Check if provider's network matches current chainId
       const providerNetwork = await provider.getNetwork();

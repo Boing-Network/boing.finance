@@ -42,13 +42,32 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
   const deployBlocked =
     !effectiveBytecode || (qaResult?.result === 'unsure' && !qaPoolAcknowledged);
 
+  const gateEligible =
+    isBoingTestnetChainId(chainId) && walletType === 'boingExpress' && isConnected;
+
+  const blockedReason = useMemo(() => {
+    if (!gateEligible) return null;
+    if (!effectiveBytecode) {
+      return hasBundled
+        ? 'Fix or clear the Advanced bytecode field (invalid hex).'
+        : 'Add bytecode: set REACT_APP_BOING_REFERENCE_FUNGIBLE_TEMPLATE_BYTECODE_HEX (or legacy REACT_APP_BOING_REFERENCE_TOKEN_BYTECODE), or paste template hex under Advanced.';
+    }
+    if (qaResult?.result === 'unsure' && !qaPoolAcknowledged) {
+      return 'Acknowledge the community QA pool checkbox below before deploying.';
+    }
+    return null;
+  }, [gateEligible, effectiveBytecode, hasBundled, qaResult, qaPoolAcknowledged]);
+
   useEffect(() => {
     setQaPoolAcknowledged(false);
   }, [effectiveBytecode, descriptionHash]);
 
   useEffect(() => {
-    onDeployGateChange?.({ canSubmit: !deployBlocked && isConnected });
-  }, [deployBlocked, isConnected, onDeployGateChange]);
+    onDeployGateChange?.({
+      canSubmit: gateEligible && !deployBlocked,
+      blockedReason: gateEligible && deployBlocked ? blockedReason : null,
+    });
+  }, [gateEligible, deployBlocked, blockedReason, onDeployGateChange]);
 
   const envHint =
     'Set REACT_APP_BOING_REFERENCE_FUNGIBLE_TEMPLATE_BYTECODE_HEX (or legacy REACT_APP_BOING_REFERENCE_TOKEN_BYTECODE), or paste hex under Advanced.';
@@ -236,10 +255,16 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
             purpose for this flow is <code className="text-[10px]">{purpose}</code>.
           </p>
           <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+            <label
+              htmlFor="native-boing-token-bytecode-override"
+              className="block text-xs font-medium mb-1"
+              style={{ color: 'var(--text-tertiary)' }}
+            >
               Override bytecode (hex)
             </label>
             <textarea
+              id="native-boing-token-bytecode-override"
+              name="nativeBoingTokenBytecodeOverride"
               value={customBytecode}
               onChange={(e) => setCustomBytecode(e.target.value)}
               rows={4}
@@ -256,10 +281,16 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
             )}
           </div>
           <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+            <label
+              htmlFor="native-boing-token-description-hash"
+              className="block text-xs font-medium mb-1"
+              style={{ color: 'var(--text-tertiary)' }}
+            >
               description_hash (optional, 32-byte hex)
             </label>
             <input
+              id="native-boing-token-description-hash"
+              name="nativeBoingTokenDescriptionHash"
               type="text"
               value={descriptionHash}
               onChange={(e) => setDescriptionHash(e.target.value)}
