@@ -3,7 +3,6 @@ import { ethers } from 'ethers';
 import { getNetworkByChainId, getWalletAddChainParams, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import {
   connectInjectedBoingWallet,
-  createClient,
   mapInjectedProviderErrorToUiMessage,
   providerSupportsBoingNativeRpc,
 } from 'boing-sdk';
@@ -20,7 +19,7 @@ import {
   notifyBoingExpressWalletAccountChanged,
   requestBoingExpressConnectionProof
 } from '../utils/boingExpressConnectionProof';
-import { getBoingRpcClientBaseUrl, normalizeBoingFaucetAccountHex } from '../services/boingTestnetRpc';
+import { createBoingBrowserRpcClient, normalizeBoingFaucetAccountHex } from '../services/boingTestnetRpc';
 
 /**
  * ethers v6 BrowserProvider expects EVM 20-byte addresses. Boing Express exposes 32-byte
@@ -31,10 +30,13 @@ async function createBrowserProviderAndSigner(eip1193Provider, accountAddress) {
   const browserProvider = new ethers.BrowserProvider(eip1193Provider);
 
   let signer = null;
-  try {
-    signer = await browserProvider.getSigner();
-  } catch (e) {
-    console.warn('[WalletContext] getSigner() failed, will retry with address if available:', e?.message || e);
+  // Default getSigner() throws on 32-byte Boing AccountIds; skip to avoid noisy INVALID_ARGUMENT logs.
+  if (!(accountAddress && isBoingNativeAccountIdHex(accountAddress))) {
+    try {
+      signer = await browserProvider.getSigner();
+    } catch (e) {
+      console.warn('[WalletContext] getSigner() failed, will retry with address if available:', e?.message || e);
+    }
   }
   // ethers rejects 32-byte Boing AccountIds as EVM addresses—skip getSigner(account) for those
   if (!signer && accountAddress && !isBoingNativeAccountIdHex(accountAddress)) {
@@ -1341,7 +1343,7 @@ export const WalletProvider = ({ children }) => {
       const normalized = normalizeBoingFaucetAccountHex(account);
       if (!normalized) return null;
       try {
-        const client = createClient(getBoingRpcClientBaseUrl());
+        const client = createBoingBrowserRpcClient();
         const { balance } = await client.getBalance(normalized);
         const net = getNetworkByChainId(chainId);
         const decimals = net?.nativeCurrency?.decimals ?? 0;

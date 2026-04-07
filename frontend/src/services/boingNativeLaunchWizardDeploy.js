@@ -1,11 +1,10 @@
 import {
-  createClient,
   preflightBoingIntegrationDeploy,
   resolveNativeConstantProductPoolBytecodeHex,
   resolveReferenceFungibleTemplateBytecodeHex,
   resolveReferenceNftCollectionTemplateBytecodeHex,
 } from 'boing-sdk';
-import { getBoingRpcClientBaseUrl } from './boingTestnetRpc';
+import { createBoingBrowserRpcClient } from './boingTestnetRpc';
 import { boingExpressSendTransaction } from './boingExpressNativeTx';
 import { BOING_QA_PURPOSE_TOKEN, isValidBoingQaPurpose } from '../config/boingQa';
 import { getWindowBoingProvider } from '../utils/boingWalletDiscovery';
@@ -181,7 +180,7 @@ export function buildBoingLaunchIntegrationInput(kind, fields) {
  * @param {Record<string, unknown>} fields
  */
 export async function preflightBoingLaunchWizardByKind(kind, fields) {
-  const client = createClient(getBoingRpcClientBaseUrl());
+  const client = createBoingBrowserRpcClient();
   const input = buildBoingLaunchIntegrationInput(kind, fields);
   return preflightBoingIntegrationDeploy(client, input);
 }
@@ -219,7 +218,7 @@ export async function executeBoingLaunchWizardDeploy({ kind, getWalletProvider, 
     return { ok: false, code: 'no_provider', message: 'Boing Express provider not found.' };
   }
 
-  const client = createClient(getBoingRpcClientBaseUrl());
+  const client = createBoingBrowserRpcClient();
   let pre;
   let tx;
   try {

@@ -1,5 +1,4 @@
-import { BoingClient } from 'boing-sdk';
-import { getBoingRpcClientBaseUrl } from './boingTestnetRpc';
+import { createBoingBrowserRpcClient } from './boingTestnetRpc';
 
 let sharedClient = null;
 
@@ -9,7 +8,7 @@ let sharedClient = null;
  */
 export function getSharedBoingClient() {
   if (!sharedClient) {
-    sharedClient = new BoingClient({ baseUrl: getBoingRpcClientBaseUrl() });
+    sharedClient = createBoingBrowserRpcClient();
   }
   return sharedClient;
 }
