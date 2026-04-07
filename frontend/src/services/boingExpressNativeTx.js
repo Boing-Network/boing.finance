@@ -18,6 +18,20 @@ function normAccountHex32(addr) {
 }
 
 /**
+ * Plain JSON object for the extension: drops non-enumerable fields and (for some wallets) supplies explicit
+ * `create2_salt: null` so Option fields deserialize like `boing_signTransaction`, not a broken `boing_sendTransaction` path.
+ * @param {Record<string, unknown>} tx
+ * @returns {Record<string, unknown>}
+ */
+function plainContractDeployMetaForExpress(tx) {
+  const o = JSON.parse(JSON.stringify(tx));
+  if (o && o.type === 'contract_deploy_meta' && !Object.prototype.hasOwnProperty.call(o, 'create2_salt')) {
+    o.create2_salt = null;
+  }
+  return o;
+}
+
+/**
  * Union explicit read/write with `boing_simulateTransaction` `suggested_access_list` (matches boing-sdk `mergeAccessListWithSimulation`).
  * @param {string[]} read
  * @param {string[]} write
@@ -66,7 +80,11 @@ export async function boingExpressSignTransaction(provider, txObject) {
 }
 
 /**
- * Sign, simulate when available, and submit via the wallet’s configured RPC.
+ * Sign and broadcast. For **`contract_deploy_meta`** (token / NFT / pool wizards), uses **`boing_signTransaction`**
+ * then **`boing_submitTransaction`** via the app’s Boing JSON-RPC proxy — avoids wallet **`boing_sendTransaction`**
+ * bugs that surface as `Invalid transaction: io error: unexpected end of file` after approval.
+ * Other kinds still use **`boing_sendTransaction`**.
+ *
  * @param {{ request: Function }} provider
  * @param {Record<string, unknown>} txObject
  * @returns {Promise<string>} Transaction hash from the node
@@ -75,9 +93,20 @@ export async function boingExpressSendTransaction(provider, txObject) {
   if (!provider || typeof provider.request !== 'function') {
     throw new Error('Boing Express provider not available');
   }
+  if (txObject && txObject.type === 'contract_deploy_meta') {
+    const plain = plainContractDeployMetaForExpress(txObject);
+    const signed = await provider.request({
+      method: 'boing_signTransaction',
+      params: [plain],
+    });
+    const signedHex = typeof signed === 'string' ? signed : String(signed);
+    const sub = await submitBoingSignedTransaction(signedHex);
+    if (sub && typeof sub === 'object' && sub.tx_hash) return sub.tx_hash;
+    return String(sub);
+  }
   return provider.request({
     method: 'boing_sendTransaction',
-    params: [txObject]
+    params: [txObject],
   });
 }
 
