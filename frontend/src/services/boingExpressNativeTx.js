@@ -6,7 +6,7 @@
  * hex from `boingExpressSignTransaction` (user-approved Ed25519 signature in the extension).
  */
 
-import { BOING_QA_PLACEHOLDER_DESCRIPTION_HASH_HEX } from 'boing-sdk';
+import { BOING_QA_PLACEHOLDER_DESCRIPTION_HASH_HEX, bytesToHex } from 'boing-sdk';
 import { simulateBoingSignedTransaction, submitBoingSignedTransaction } from './boingNativeVm';
 import { normalizeBoingFaucetAccountHex } from './boingTestnetRpc';
 
@@ -32,10 +32,19 @@ export function coerceBoingSignedTxHex(raw) {
     }
     return t.startsWith('0x') || t.startsWith('0X') ? `0x${t.slice(2).toLowerCase()}` : `0x${t.toLowerCase()}`;
   }
+  if (raw instanceof Uint8Array) {
+    return bytesToHex(raw);
+  }
+  if (Array.isArray(raw) && raw.length > 0 && raw.every((x) => typeof x === 'number' && x >= 0 && x <= 255)) {
+    return bytesToHex(new Uint8Array(raw));
+  }
   if (raw && typeof raw === 'object') {
     for (const k of ['signedTransaction', 'signed_tx', 'transactionHex', 'transaction', 'hex', 'result']) {
       const v = /** @type {Record<string, unknown>} */ (raw)[k];
       if (typeof v === 'string' && v.trim()) {
+        return coerceBoingSignedTxHex(v);
+      }
+      if (v instanceof Uint8Array) {
         return coerceBoingSignedTxHex(v);
       }
     }
@@ -57,13 +66,24 @@ function normalizeContractDeployMetaForSign(tx) {
   if (!tx || tx.type !== 'contract_deploy_meta') {
     return tx;
   }
-  const out = { ...tx };
+  // Deep plain object for the extension (structured clone / postMessage safe; drops undefined).
+  const out = JSON.parse(JSON.stringify(tx));
   const dh = typeof out.description_hash === 'string' ? out.description_hash.trim() : '';
   if (!dh) {
     out.description_hash = BOING_QA_PLACEHOLDER_DESCRIPTION_HASH_HEX;
   }
+  // Some wallet builds expect explicit empty access lists + CREATE2 option for bincode parity with the node.
+  out.access_list = {
+    read: Array.isArray(out.access_list?.read) ? out.access_list.read : [],
+    write: Array.isArray(out.access_list?.write) ? out.access_list.write : [],
+  };
+  if (!Object.prototype.hasOwnProperty.call(out, 'create2_salt')) {
+    out.create2_salt = null;
+  }
   return out;
 }
+
+const TX_DECODE_ERR_RE = /unexpected end of file|Invalid transaction:\s*io error:/i;
 
 /**
  * Union explicit read/write with `boing_simulateTransaction` `suggested_access_list` (matches boing-sdk `mergeAccessListWithSimulation`).
@@ -131,9 +151,25 @@ export async function boingExpressSendTransaction(provider, txObject) {
   if (txObject && txObject.type === 'contract_deploy_meta') {
     const forSign = normalizeContractDeployMetaForSign(txObject);
     const signedHex = await boingExpressSignTransaction(provider, forSign);
-    const sub = await submitBoingSignedTransaction(signedHex);
-    if (sub && typeof sub === 'object' && sub.tx_hash) return sub.tx_hash;
-    return String(sub);
+    try {
+      const sub = await submitBoingSignedTransaction(signedHex);
+      if (sub && typeof sub === 'object' && sub.tx_hash) return sub.tx_hash;
+      return String(sub);
+    } catch (subErr) {
+      const m = subErr instanceof Error ? subErr.message : String(subErr);
+      if (TX_DECODE_ERR_RE.test(m)) {
+        try {
+          const hash = await provider.request({
+            method: 'boing_sendTransaction',
+            params: [forSign],
+          });
+          if (typeof hash === 'string') return hash;
+        } catch {
+          /* fall through to original error */
+        }
+      }
+      throw subErr;
+    }
   }
   return provider.request({
     method: 'boing_sendTransaction',
