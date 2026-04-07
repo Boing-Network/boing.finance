@@ -35,6 +35,14 @@ export function formatBoingExpressRpcError(e) {
       return 'Rate limited — wait a minute and try again.';
     }
 
+    // Returned by the node when `boing_submitTransaction` / `boing_simulateTransaction` cannot bincode-decode the signed tx hex.
+    if (/unexpected end of file/i.test(msg) || /Invalid transaction:\s*io error:/i.test(msg)) {
+      return (
+        `${msg.trim()} ` +
+        'The network could not read the signed transaction (decode failed). That almost always comes from the wallet’s signed payload, not from your form: update Boing Express, retry after a hard refresh, or try signing from the Native VM page. If it persists, the wallet build may not match this testnet node.'
+      );
+    }
+
     const br = tryBoingRpcError(e);
     if (br) {
       return explainBoingRpcError(br);
@@ -60,6 +68,15 @@ export function formatBoingExpressRpcError(e) {
       if (msg) return msg;
     }
   }
-  if (e && typeof e === 'object' && typeof e.message === 'string') return e.message;
+  if (e && typeof e === 'object' && typeof e.message === 'string') {
+    const m = e.message;
+    if (/unexpected end of file/i.test(m) || /Invalid transaction:\s*io error:/i.test(m)) {
+      return (
+        `${m.trim()} ` +
+        'The network could not read the signed transaction (decode failed). Update Boing Express and retry; if it still fails, the extension may not match this testnet node.'
+      );
+    }
+    return m;
+  }
   return String(e);
 }
