@@ -1,8 +1,9 @@
 /**
- * Build public/favicon.ico from the circular Boing profile PNG.
+ * Build public/favicon.ico from the canonical mark PNG (generated from boing-logo-mark.svg).
  * Renders multiple square PNG layers (default 16–128px) with sharp, then packs them with to-ico.
  *
- * Usage: node scripts/generate-favicon.mjs
+ * Usage: npm run generate-favicon
+ * Prerequisite: npm run generate-brand-assets (creates assets/boing-logo-mark.png)
  * Optional: FAVICON_SOURCE=/path/to.png node scripts/generate-favicon.mjs
  */
 
@@ -18,7 +19,7 @@ const toIco = require('to-ico');
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(__dirname, '..', 'public');
 
-const DEFAULT_SOURCE = path.join(publicDir, 'assets', 'boing-profile-twitter.png');
+const DEFAULT_SOURCE = path.join(publicDir, 'assets', 'boing-logo-mark.png');
 const SOURCE = process.env.FAVICON_SOURCE
   ? path.resolve(process.env.FAVICON_SOURCE)
   : DEFAULT_SOURCE;

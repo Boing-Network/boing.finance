@@ -2,6 +2,7 @@
 // Checks and triggers price alerts periodically
 
 import { getPriceAlerts, checkPriceAlerts, updatePriceAlert } from '../utils/priceAlerts';
+import { BRAND_LOGO_MARK_PNG } from '../config/brandAssets';
 import coingeckoService from './coingeckoService';
 
 class PriceAlertService {
@@ -113,7 +114,7 @@ class PriceAlertService {
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification(`Price Alert: ${alert.tokenSymbol}`, {
         body: `Price is now $${currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })} (${alert.condition === 'above' ? 'above' : 'below'} target of $${alert.targetPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })})`,
-        icon: '/assets/boing-profile-twitter.png',
+        icon: BRAND_LOGO_MARK_PNG,
         tag: `price-alert-${alert.id}`
       });
     }

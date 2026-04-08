@@ -39,6 +39,7 @@ import { getPageVariant } from './utils/pageVariant';
 import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion';
 import { useCloseOnPointerOutside } from './hooks/useCloseOnPointerOutside';
 import priceAlertService from './services/priceAlertService';
+import { brandLogoPngAbsolute, brandShareImageAbsolute } from './config/brandAssets';
 
 // Lazy load all page components for code splitting
 const Swap = lazy(() => import('./pages/Swap'));
@@ -366,7 +367,7 @@ function AppContent() {
                 className="flex items-center gap-1.5 font-bold text-xl whitespace-nowrap text-left rounded-lg py-2 max-[1149px]:pr-1 min-[1150px]:px-0 min-[1150px]:py-2"
                 style={{ color: 'var(--text-primary)' }}
               >
-                <Logo size={36} showText={true} showComic={false} className="shrink-0" style={{ filter: 'drop-shadow(0 0 8px var(--glow-cyan))' }} />
+                <Logo size={36} showText={true} showComic={false} className="shrink-0" />
               </button>
             </div>
 
@@ -830,13 +831,20 @@ function App() {
                     <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
                     
                     {/* Farcaster Mini App Embed Meta Tags */}
-                    <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://boing.finance/preview-image.png","button":{"title":"Open boing.finance","action":{"type":"launch_miniapp","url":"https://boing.finance"}}}' />
+                    <meta name="fc:miniapp" content={JSON.stringify({
+                      version: '1',
+                      imageUrl: brandShareImageAbsolute(),
+                      button: {
+                        title: 'Open boing.finance',
+                        action: { type: 'launch_miniapp', url: 'https://boing.finance' },
+                      },
+                    })} />
                     
                     {/* Open Graph Meta Tags for better sharing */}
                     <meta property="og:title" content="Boing Finance — DeFi That Bounces Back" />
                     <meta property="og:description" content="Deploy tokens, create pools, and trade on EVM and Solana. Swap, bridge, and launch with Boing Finance." />
-                    <meta property="og:image" content="https://boing.finance/preview-image.png" />
-                    <meta property="og:image:alt" content="Boing Finance logo and tagline DeFi That Bounces Back on a space nebula background" />
+                    <meta property="og:image" content={brandShareImageAbsolute()} />
+                    <meta property="og:image:alt" content="Boing Finance — DeFi That Bounces Back; brand mark on stone-dark background" />
                     <meta property="og:url" content="https://boing.finance/" />
                     <meta property="og:type" content="website" />
                     
@@ -844,8 +852,8 @@ function App() {
                     <meta name="twitter:card" content="summary_large_image" />
                     <meta name="twitter:title" content="Boing Finance — DeFi That Bounces Back" />
                     <meta name="twitter:description" content="Deploy tokens, create pools, and trade on EVM and Solana with ease." />
-                    <meta name="twitter:image" content="https://boing.finance/preview-image.png" />
-                    <meta name="twitter:image:alt" content="Boing Finance — DeFi That Bounces Back; horizontal brand banner" />
+                    <meta name="twitter:image" content={brandShareImageAbsolute()} />
+                    <meta name="twitter:image:alt" content="Boing Finance — DeFi That Bounces Back; brand preview with medallion mark" />
                   </Helmet>
                   <AppContent />
                   </InitialAnimationGate>
@@ -896,11 +904,12 @@ function Home() {
         <meta name="twitter:title" content="boing.finance | DeFi That Bounces Back" />
         <meta name="twitter:description" content="Swap, add liquidity, bridge, and deploy tokens on EVM and Solana. The DeFi that always bounces back." />
         <meta name="twitter:site" content="@boingfinance" />
-        <meta property="og:image" content="https://boing.finance/preview-image.png" />
-        <meta property="og:image:alt" content="Boing Finance logo and tagline DeFi That Bounces Back on a space nebula background" />
-        <meta name="twitter:image" content="https://boing.finance/preview-image.png" />
-        <meta name="twitter:image:alt" content="Boing Finance — DeFi That Bounces Back; horizontal brand banner" />
+        <meta property="og:image" content={brandShareImageAbsolute()} />
+        <meta property="og:image:alt" content="Boing Finance — DeFi That Bounces Back; brand mark on stone-dark background" />
+        <meta name="twitter:image" content={brandShareImageAbsolute()} />
+        <meta name="twitter:image:alt" content="Boing Finance — DeFi That Bounces Back; brand preview with medallion mark" />
         <link rel="canonical" href="https://boing.finance" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
         
@@ -929,7 +938,7 @@ function Home() {
           "url": "https://boing.finance",
           "logo": {
             "@type": "ImageObject",
-            "url": "https://boing.finance/assets/boing-profile-twitter.png"
+            "url": brandLogoPngAbsolute()
           },
           "description": "The DeFi that always bounces back. Deploy tokens, create pools, and trade on EVM and Solana with boing.finance.",
           "sameAs": [

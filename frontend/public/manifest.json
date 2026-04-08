@@ -4,10 +4,16 @@
   "description": "Swap, deploy tokens, pools, and bridge on EVM and Solana",
   "icons": [
     {
-      "src": "/assets/boing-profile-twitter.png",
+      "src": "/assets/boing-logo-mark.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/boing-logo-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     },
     {
       "src": "/favicon.png",
@@ -18,8 +24,8 @@
   ],
   "start_url": "/",
   "display": "standalone",
-  "theme_color": "#020B26",
-  "background_color": "#020B26",
+  "theme_color": "#06080c",
+  "background_color": "#06080c",
   "orientation": "portrait-primary",
   "scope": "/",
   "categories": ["finance", "business"],
@@ -37,14 +43,14 @@
       "short_name": "Deploy",
       "description": "Deploy a new token",
       "url": "/deploy-token",
-      "icons": [{ "src": "/assets/boing-profile-twitter.png", "sizes": "512x512", "type": "image/png" }]
+      "icons": [{ "src": "/assets/boing-logo-mark.png", "sizes": "512x512", "type": "image/png" }]
     },
     {
       "name": "Portfolio",
       "short_name": "Portfolio",
       "description": "View your portfolio",
       "url": "/portfolio",
-      "icons": [{ "src": "/assets/boing-profile-twitter.png", "sizes": "512x512", "type": "image/png" }]
+      "icons": [{ "src": "/assets/boing-logo-mark.png", "sizes": "512x512", "type": "image/png" }]
     }
   ]
 }
