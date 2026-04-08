@@ -39,7 +39,11 @@ import { getPageVariant } from './utils/pageVariant';
 import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion';
 import { useCloseOnPointerOutside } from './hooks/useCloseOnPointerOutside';
 import priceAlertService from './services/priceAlertService';
-import { brandLogoPngAbsolute, brandShareImageAbsolute } from './config/brandAssets';
+import {
+  brandLogoPngAbsolute,
+  brandShareImageAbsolute,
+  getBrandAssetVersionSuffix,
+} from './config/brandAssets';
 
 // Lazy load all page components for code splitting
 const Swap = lazy(() => import('./pages/Swap'));
@@ -827,8 +831,8 @@ function App() {
                 <Router>
                   <InitialAnimationGate>
                   <Helmet>
-                    <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
-                    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+                    <link rel="icon" type="image/png" href={`/favicon.png${getBrandAssetVersionSuffix()}`} sizes="512x512" />
+                    <link rel="icon" type="image/png" href={`/favicon-32x32.png${getBrandAssetVersionSuffix()}`} sizes="32x32" />
                     
                     {/* Farcaster Mini App Embed Meta Tags */}
                     <meta name="fc:miniapp" content={JSON.stringify({
@@ -909,9 +913,9 @@ function Home() {
         <meta name="twitter:image" content={brandShareImageAbsolute()} />
         <meta name="twitter:image:alt" content="Boing Finance — DeFi That Bounces Back; brand preview with medallion mark" />
         <link rel="canonical" href="https://boing.finance" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
-        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+        <link rel="icon" type="image/svg+xml" href={`/favicon.svg${getBrandAssetVersionSuffix()}`} />
+        <link rel="icon" type="image/png" href={`/favicon.png${getBrandAssetVersionSuffix()}`} sizes="512x512" />
+        <link rel="icon" type="image/png" href={`/favicon-32x32.png${getBrandAssetVersionSuffix()}`} sizes="32x32" />
         
         {/* Structured Data for Homepage */}
         <script type="application/ld+json">

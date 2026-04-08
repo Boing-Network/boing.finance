@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
@@ -98,9 +99,33 @@ function envDefine(mode) {
   return define;
 }
 
-export default defineConfig(({ mode }) => ({
-  plugins: [react({ include: '**/*.{jsx,js,tsx,ts}' })],
-  define: envDefine(mode),
+/** Matches public/scripts/generate-version-manifest.js (prebuild). Busts CDN/browser favicon + OG caches per deploy. */
+function readPublicAssetVersion() {
+  try {
+    const p = path.join(__dirname, 'public', 'version.txt');
+    return fs.readFileSync(p, 'utf8').trim();
+  } catch {
+    return `dev-${Date.now()}`;
+  }
+}
+
+export default defineConfig(({ mode }) => {
+  const assetVersion = readPublicAssetVersion();
+
+  return {
+  plugins: [
+    react({ include: '**/*.{jsx,js,tsx,ts}' }),
+    {
+      name: 'inject-asset-version-html',
+      transformIndexHtml(html) {
+        return html.replaceAll('%VITE_ASSET_VERSION%', encodeURIComponent(assetVersion));
+      },
+    },
+  ],
+  define: {
+    ...envDefine(mode),
+    'import.meta.env.VITE_ASSET_VERSION': JSON.stringify(assetVersion),
+  },
   resolve: {
     alias: {
       ...nobleAliases,
@@ -134,4 +159,5 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 1200,
   },
   publicDir: 'public',
-}));
+};
+});

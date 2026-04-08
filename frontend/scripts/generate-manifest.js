@@ -67,6 +67,25 @@ try {
     throw new Error('Could not find accountAssociation or miniapp block');
   }
 
+  function appendAssetVersion(url, ver) {
+    if (!url || !ver || String(url).includes('?')) return url;
+    try {
+      new URL(url);
+      return `${url}?v=${encodeURIComponent(ver)}`;
+    } catch {
+      return url;
+    }
+  }
+
+  let assetVersion = '';
+  try {
+    assetVersion = fs
+      .readFileSync(path.join(__dirname, '..', 'public', 'version.txt'), 'utf8')
+      .trim();
+  } catch (_) {
+    /* optional during fresh clone */
+  }
+
   const manifest = {
     accountAssociation: {
       header: quotedField(assocBlock, 'header'),
@@ -86,6 +105,11 @@ try {
       tags: parseStringArray(miniBlock, 'tags'),
     },
   };
+
+  if (assetVersion) {
+    manifest.miniapp.iconUrl = appendAssetVersion(manifest.miniapp.iconUrl, assetVersion);
+    manifest.miniapp.heroImageUrl = appendAssetVersion(manifest.miniapp.heroImageUrl, assetVersion);
+  }
 
   const missing = [];
   ['header', 'payload', 'signature'].forEach((k) => {
