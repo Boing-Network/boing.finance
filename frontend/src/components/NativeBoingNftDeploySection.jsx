@@ -11,6 +11,12 @@ import {
 } from '../services/boingNativeLaunchWizardDeploy';
 import { BOING_QA_PURPOSE_OPTIONS, isValidBoingQaPurpose } from '../config/boingQa';
 import { tryParseEvenLengthDeployBytecodeHex } from '../utils/boingDeployBytecodeHex';
+import {
+  showBoingContractIncludedToast,
+  showBoingLaunchDeploySuccessToast,
+} from '../utils/boingDeploySuccessToast';
+import { scheduleBoingDeployReceiptFollowup } from '../services/boingDeployReceiptFollowup';
+import { getBoingObserverAccountUrl, getBoingObserverTxUrl } from '../config/boingExplorerUrls';
 
 const DEFAULT_NFT_PURPOSE = 'nft';
 
@@ -32,6 +38,8 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
   const [qaBusy, setQaBusy] = useState(false);
   const [qaResult, setQaResult] = useState(null);
   const [lastTx, setLastTx] = useState(null);
+  const [lastBoingTxId, setLastBoingTxId] = useState(null);
+  const [lastDeployedAccount, setLastDeployedAccount] = useState(null);
   const [qaPoolAcknowledged, setQaPoolAcknowledged] = useState(false);
 
   const effectiveBytecode = useMemo(
@@ -102,7 +110,17 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
       return null;
     }
     setLastTx(result.txHash);
-    toast.success('Collection deploy submitted — check explorer or Native VM for receipt.');
+    setLastBoingTxId(result.boingTxIdHex ?? null);
+    setLastDeployedAccount(null);
+    showBoingLaunchDeploySuccessToast({
+      txHash: result.txHash,
+      boingTxIdHex: result.boingTxIdHex,
+      deployedAccountId: null,
+    });
+    scheduleBoingDeployReceiptFollowup(result.boingTxIdHex, (id) => {
+      setLastDeployedAccount(id);
+      showBoingContractIncludedToast(id);
+    });
     return result.txHash;
   }, [
     collectionName,
@@ -293,9 +311,29 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
       </details>
 
       {lastTx && !embedInWizard && (
-        <p className="text-xs font-mono break-all mt-2" style={{ color: 'var(--text-secondary)' }}>
-          Result: {lastTx}
-        </p>
+        <div className="text-xs mt-2 space-y-1" style={{ color: 'var(--text-secondary)' }}>
+          <p className="font-mono break-all">Submit ack: {lastTx}</p>
+          {lastDeployedAccount && (
+            <a
+              href={getBoingObserverAccountUrl(lastDeployedAccount)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 underline block"
+            >
+              View collection contract on boing.observer
+            </a>
+          )}
+          {lastBoingTxId && !lastDeployedAccount && (
+            <a
+              href={getBoingObserverTxUrl(lastBoingTxId)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 underline block"
+            >
+              Track transaction on boing.observer
+            </a>
+          )}
+        </div>
       )}
     </section>
   );

@@ -11,6 +11,12 @@ import {
 } from '../services/boingNativeLaunchWizardDeploy';
 import { BOING_QA_PURPOSE_OPTIONS, isValidBoingQaPurpose } from '../config/boingQa';
 import { tryParseEvenLengthDeployBytecodeHex } from '../utils/boingDeployBytecodeHex';
+import {
+  showBoingContractIncludedToast,
+  showBoingLaunchDeploySuccessToast,
+} from '../utils/boingDeploySuccessToast';
+import { scheduleBoingDeployReceiptFollowup } from '../services/boingDeployReceiptFollowup';
+import { getBoingObserverAccountUrl, getBoingObserverTxUrl } from '../config/boingExplorerUrls';
 
 const DEFAULT_POOL_PURPOSE = 'dapp';
 
@@ -31,6 +37,9 @@ export default function NativeBoingPoolDeploySection() {
   const [qaBusy, setQaBusy] = useState(false);
   const [qaResult, setQaResult] = useState(null);
   const [qaPoolAcknowledged, setQaPoolAcknowledged] = useState(false);
+  const [lastTx, setLastTx] = useState(null);
+  const [lastBoingTxId, setLastBoingTxId] = useState(null);
+  const [lastDeployedAccount, setLastDeployedAccount] = useState(null);
 
   const effectiveBytecode = useMemo(
     () => computeEffectiveNativeDeployBytecode(customBytecode, bundledBytecode),
@@ -94,7 +103,18 @@ export default function NativeBoingPoolDeploySection() {
       toast.error(result.message);
       return;
     }
-    toast.success('Pool deploy submitted — verify address with CREATE2 / explorer.');
+    setLastTx(result.txHash);
+    setLastBoingTxId(result.boingTxIdHex ?? null);
+    setLastDeployedAccount(null);
+    showBoingLaunchDeploySuccessToast({
+      txHash: result.txHash,
+      boingTxIdHex: result.boingTxIdHex,
+      deployedAccountId: null,
+    });
+    scheduleBoingDeployReceiptFollowup(result.boingTxIdHex, (id) => {
+      setLastDeployedAccount(id);
+      showBoingContractIncludedToast(id);
+    });
   }, [
     customBytecode,
     descriptionHash,
@@ -298,6 +318,32 @@ export default function NativeBoingPoolDeploySection() {
           )}
         </div>
       </details>
+
+      {lastTx && (
+        <div className="text-xs mt-3 space-y-1" style={{ color: 'var(--text-secondary)' }}>
+          <p className="font-mono break-all">Submit ack: {lastTx}</p>
+          {lastDeployedAccount && (
+            <a
+              href={getBoingObserverAccountUrl(lastDeployedAccount)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 underline block"
+            >
+              View pool contract on boing.observer
+            </a>
+          )}
+          {lastBoingTxId && !lastDeployedAccount && (
+            <a
+              href={getBoingObserverTxUrl(lastBoingTxId)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 underline block"
+            >
+              Track transaction on boing.observer
+            </a>
+          )}
+        </div>
+      )}
     </section>
   );
 }

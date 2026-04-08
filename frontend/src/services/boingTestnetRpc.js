@@ -87,6 +87,21 @@ export async function fetchBoingTestnetChainHeight(options = {}) {
 }
 
 /**
+ * Execution receipt for an included tx (`boing_getTransactionReceipt`). `txIdHex` is the 32-byte id from
+ * `transactionIdFromSignedTransactionHex` from **boing-sdk** (Boing Express signed payload), not the mempool `"ok"` ack string.
+ * @param {string} txIdHex
+ * @param {{ signal?: AbortSignal }} [options]
+ * @returns {Promise<Record<string, unknown> | null>}
+ */
+export async function fetchBoingTransactionReceipt(txIdHex, options = {}) {
+  if (!txIdHex || typeof txIdHex !== 'string' || !/^0x[0-9a-fA-F]{64}$/i.test(txIdHex.trim())) {
+    throw new Error('tx_id must be 0x + 64 hex characters');
+  }
+  const normalized = `0x${txIdHex.trim().slice(2).toLowerCase()}`;
+  return boingJsonRpc('boing_getTransactionReceipt', [normalized], options);
+}
+
+/**
  * Normalize a 32-byte storage key hex (`0x` + 64 hex).
  * @param {string} keyHex
  * @returns {string | null}

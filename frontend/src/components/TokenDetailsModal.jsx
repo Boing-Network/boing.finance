@@ -8,6 +8,7 @@ import coingeckoService from '../services/coingeckoService';
 import etherscanService from '../services/etherscanService';
 import { tokenFavorites } from '../utils/tokenFavorites';
 import { getNetworkByChainId } from '../config/networks';
+import { getBoingObserverAccountUrl } from '../config/boingExplorerUrls';
 import { getPricePrediction } from '../utils/predictiveAnalytics';
 import toast from 'react-hot-toast';
 import LoadingSpinner from './LoadingSpinner';
@@ -154,7 +155,7 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network, onSetPriceAlert })
       10: `https://optimistic.etherscan.io/token/${address}`,
       8453: `https://basescan.org/token/${address}`,
       11155111: `https://sepolia.etherscan.io/token/${address}`,
-      6913: `https://boing.observer/account/${address}`
+      6913: getBoingObserverAccountUrl(address)
     };
     return explorerMap[chainId] || `https://etherscan.io/token/${address}`;
   };

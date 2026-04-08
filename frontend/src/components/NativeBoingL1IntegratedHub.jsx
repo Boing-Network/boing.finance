@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
+import { getBoingL1FullDexReadiness } from '../config/featureSupport';
 import { BOING_EXPRESS_ORIGIN, getExternalSwapUrl } from '../config/networkExternalLinks';
 import {
   BOING_NETWORK_BOING_PATTERN_AMM_LIQUIDITY_URL,
@@ -38,10 +39,21 @@ const FEATURE_COPY = {
  * When the user is on Boing native L1, EVM-centric DeFi pages show this hub first:
  * Boing VM–first guidance + links to native tools (optional Sepolia only as a separate-network reference).
  */
+const STATUS_STYLE = {
+  live: { label: 'Live', className: 'text-emerald-400' },
+  partial: { label: 'Partial', className: 'text-amber-300' },
+  planned: { label: 'Planned', className: 'text-slate-400' },
+};
+
 export default function NativeBoingL1IntegratedHub({ feature = 'swap' }) {
-  const { switchNetwork } = useWallet();
+  const { switchNetwork, chainId } = useWallet();
   const [switching, setSwitching] = useState(false);
   const copy = FEATURE_COPY[feature] || FEATURE_COPY.swap;
+
+  const dexReadiness = useMemo(() => {
+    if (Number(chainId) !== BOING_NATIVE_L1_CHAIN_ID) return null;
+    return getBoingL1FullDexReadiness(chainId);
+  }, [chainId]);
 
   const onSwitchSepolia = async () => {
     setSwitching(true);
@@ -100,6 +112,34 @@ export default function NativeBoingL1IntegratedHub({ feature = 'swap' }) {
           config (e.g. Sepolia for testing). That path does not run on Boing L1 itself.
         </li>
       </ul>
+      {dexReadiness && (
+        <details
+          className="mb-4 rounded-lg border px-3 py-2 text-xs"
+          style={{ borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}
+        >
+          <summary className="cursor-pointer font-medium text-[var(--text-primary)] select-none">
+            Full DEX on Boing — what is live vs in progress
+          </summary>
+          <p className="mt-2 mb-2 opacity-90">
+            Everything below is <strong>Boing VM</strong> (32-byte accounts + RPC), not Solidity factories on L1. Operators deploy
+            modules and pool contracts; this app wires env + flows.
+          </p>
+          <ul className="space-y-2 pl-0 list-none">
+            {dexReadiness.items.map((row) => {
+              const st = STATUS_STYLE[row.status] || STATUS_STYLE.planned;
+              return (
+                <li key={row.id} className="flex flex-col sm:flex-row sm:items-start sm:gap-2 border-t border-[var(--border-color)] pt-2 first:border-t-0 first:pt-0">
+                  <span className={`shrink-0 font-semibold uppercase tracking-wide text-[10px] ${st.className}`}>{st.label}</span>
+                  <span className="flex-1">
+                    <span className="font-medium text-[var(--text-primary)]">{row.label}</span>
+                    <span className="block opacity-90 mt-0.5">{row.detail}</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </details>
+      )}
       <div className="flex flex-wrap gap-2">
         <a
           href={BOING_EXPRESS_ORIGIN}
