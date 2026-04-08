@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { isBoingTestnetChainId, REFERENCE_NFT_COLLECTION_TEMPLATE_VERSION } from 'boing-sdk';
 import { useWallet } from '../contexts/WalletContext';
+import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import {
   computeEffectiveNativeDeployBytecode,
   executeBoingLaunchWizardDeploy,
@@ -16,7 +17,7 @@ import {
   showBoingLaunchDeploySuccessToast,
 } from '../utils/boingDeploySuccessToast';
 import { scheduleBoingDeployReceiptFollowup } from '../services/boingDeployReceiptFollowup';
-import { getBoingObserverAccountUrl, getBoingObserverTxUrl } from '../config/boingExplorerUrls';
+import { buildBoingExplorerAccountUrl, buildBoingExplorerTxUrl } from '../config/boingExplorerUrls';
 
 const DEFAULT_NFT_PURPOSE = 'nft';
 
@@ -28,6 +29,7 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
   ref
 ) {
   const { chainId, walletType, isConnected, getWalletProvider } = useWallet();
+  const { explorerBaseUrl } = useBoingNativeDexIntegration();
   const [purpose, setPurpose] = useState(DEFAULT_NFT_PURPOSE);
 
   const bundledBytecode = useMemo(() => getBundledNativeNftCollectionBytecodeHex(), []);
@@ -116,10 +118,11 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
       txHash: result.txHash,
       boingTxIdHex: result.boingTxIdHex,
       deployedAccountId: null,
+      explorerBaseUrl,
     });
     scheduleBoingDeployReceiptFollowup(result.boingTxIdHex, (id) => {
       setLastDeployedAccount(id);
-      showBoingContractIncludedToast(id);
+      showBoingContractIncludedToast(id, explorerBaseUrl);
     });
     return result.txHash;
   }, [
@@ -130,6 +133,7 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
     getWalletProvider,
     purpose,
     qaPoolAcknowledged,
+    explorerBaseUrl,
   ]);
 
   useImperativeHandle(
@@ -315,7 +319,7 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
           <p className="font-mono break-all">Submit ack: {lastTx}</p>
           {lastDeployedAccount && (
             <a
-              href={getBoingObserverAccountUrl(lastDeployedAccount)}
+              href={buildBoingExplorerAccountUrl(explorerBaseUrl, lastDeployedAccount)}
               target="_blank"
               rel="noopener noreferrer"
               className="text-cyan-400 underline block"
@@ -325,7 +329,7 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
           )}
           {lastBoingTxId && !lastDeployedAccount && (
             <a
-              href={getBoingObserverTxUrl(lastBoingTxId)}
+              href={buildBoingExplorerTxUrl(explorerBaseUrl, lastBoingTxId)}
               target="_blank"
               rel="noopener noreferrer"
               className="text-cyan-400 underline block"

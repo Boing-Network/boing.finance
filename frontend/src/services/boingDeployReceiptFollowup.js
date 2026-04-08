@@ -16,6 +16,14 @@ export function pickDeployedAccountIdFromBoingReceipt(receipt) {
       if (!/^0x0{64}$/i.test(hex)) return hex;
     }
   }
+  const rd = /** @type {Record<string, unknown>} */ (receipt).return_data;
+  if (typeof rd === 'string') {
+    const x = rd.trim();
+    if (/^0x[0-9a-fA-F]{64}$/i.test(x)) {
+      const hex = `0x${x.slice(2).toLowerCase()}`;
+      if (!/^0x0{64}$/i.test(hex)) return hex;
+    }
+  }
   return null;
 }
 

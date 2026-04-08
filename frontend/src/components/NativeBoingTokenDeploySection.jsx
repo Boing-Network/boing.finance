@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { isBoingTestnetChainId, REFERENCE_FUNGIBLE_TEMPLATE_VERSION } from 'boing-sdk';
 import { useWallet } from '../contexts/WalletContext';
+import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import {
   computeEffectiveNativeDeployBytecode,
   executeBoingNativeTokenDeploy,
@@ -16,7 +17,7 @@ import {
   showBoingLaunchDeploySuccessToast,
 } from '../utils/boingDeploySuccessToast';
 import { scheduleBoingDeployReceiptFollowup } from '../services/boingDeployReceiptFollowup';
-import { getBoingObserverAccountUrl, getBoingObserverTxUrl } from '../config/boingExplorerUrls';
+import { buildBoingExplorerAccountUrl, buildBoingExplorerTxUrl } from '../config/boingExplorerUrls';
 
 /**
  * Native Boing token deploy helper for Deploy Token page.
@@ -36,6 +37,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
   ref
 ) {
   const { chainId, walletType, isConnected, getWalletProvider } = useWallet();
+  const { explorerBaseUrl } = useBoingNativeDexIntegration();
   const purpose = BOING_QA_PURPOSE_TOKEN;
 
   const bundledBytecode = useMemo(() => getBundledNativeFungibleBytecodeHex(), []);
@@ -147,10 +149,11 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
       txHash: result.txHash,
       boingTxIdHex: result.boingTxIdHex,
       deployedAccountId: null,
+      explorerBaseUrl,
     });
     scheduleBoingDeployReceiptFollowup(result.boingTxIdHex, (id) => {
       setLastDeployedAccount(id);
-      showBoingContractIncludedToast(id);
+      showBoingContractIncludedToast(id, explorerBaseUrl);
     });
     return result.txHash;
   }, [
@@ -163,6 +166,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
     tokenDecimals,
     tokenName,
     tokenSymbol,
+    explorerBaseUrl,
   ]);
 
   useImperativeHandle(
@@ -367,7 +371,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
           <p className="font-mono break-all">Submit ack: {lastTx}</p>
           {lastDeployedAccount && (
             <a
-              href={getBoingObserverAccountUrl(lastDeployedAccount)}
+              href={buildBoingExplorerAccountUrl(explorerBaseUrl, lastDeployedAccount)}
               target="_blank"
               rel="noopener noreferrer"
               className="text-cyan-400 underline block"
@@ -377,7 +381,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
           )}
           {lastBoingTxId && !lastDeployedAccount && (
             <a
-              href={getBoingObserverTxUrl(lastBoingTxId)}
+              href={buildBoingExplorerTxUrl(explorerBaseUrl, lastBoingTxId)}
               target="_blank"
               rel="noopener noreferrer"
               className="text-cyan-400 underline block"

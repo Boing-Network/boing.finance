@@ -8,13 +8,15 @@ import coingeckoService from '../services/coingeckoService';
 import etherscanService from '../services/etherscanService';
 import { tokenFavorites } from '../utils/tokenFavorites';
 import { getNetworkByChainId } from '../config/networks';
-import { getBoingObserverAccountUrl } from '../config/boingExplorerUrls';
+import { buildBoingExplorerAccountUrl } from '../config/boingExplorerUrls';
+import { useOptionalBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import { getPricePrediction } from '../utils/predictiveAnalytics';
 import toast from 'react-hot-toast';
 import LoadingSpinner from './LoadingSpinner';
 import ShareTokenModal from './ShareTokenModal';
 
 const TokenDetailsModal = ({ token, isOpen, onClose, network, onSetPriceAlert }) => {
+  const dexIntegration = useOptionalBoingNativeDexIntegration();
   const [isFavorite, setIsFavorite] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [priceData, setPriceData] = useState(null);
@@ -155,7 +157,7 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network, onSetPriceAlert })
       10: `https://optimistic.etherscan.io/token/${address}`,
       8453: `https://basescan.org/token/${address}`,
       11155111: `https://sepolia.etherscan.io/token/${address}`,
-      6913: getBoingObserverAccountUrl(address)
+      6913: buildBoingExplorerAccountUrl(dexIntegration?.explorerBaseUrl, address)
     };
     return explorerMap[chainId] || `https://etherscan.io/token/${address}`;
   };

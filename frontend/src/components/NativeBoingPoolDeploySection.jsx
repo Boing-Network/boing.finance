@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { isBoingTestnetChainId } from 'boing-sdk';
 import { useWallet } from '../contexts/WalletContext';
+import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import {
   computeEffectiveNativeDeployBytecode,
   executeBoingLaunchWizardDeploy,
@@ -16,7 +17,7 @@ import {
   showBoingLaunchDeploySuccessToast,
 } from '../utils/boingDeploySuccessToast';
 import { scheduleBoingDeployReceiptFollowup } from '../services/boingDeployReceiptFollowup';
-import { getBoingObserverAccountUrl, getBoingObserverTxUrl } from '../config/boingExplorerUrls';
+import { buildBoingExplorerAccountUrl, buildBoingExplorerTxUrl } from '../config/boingExplorerUrls';
 
 const DEFAULT_POOL_PURPOSE = 'dapp';
 
@@ -25,6 +26,7 @@ const DEFAULT_POOL_PURPOSE = 'dapp';
  */
 export default function NativeBoingPoolDeploySection() {
   const { chainId, walletType, isConnected, getWalletProvider } = useWallet();
+  const { explorerBaseUrl } = useBoingNativeDexIntegration();
   const [purposeCategory, setPurposeCategory] = useState(DEFAULT_POOL_PURPOSE);
   const [poolLabel, setPoolLabel] = useState('');
   const [poolSymbol, setPoolSymbol] = useState('');
@@ -110,10 +112,11 @@ export default function NativeBoingPoolDeploySection() {
       txHash: result.txHash,
       boingTxIdHex: result.boingTxIdHex,
       deployedAccountId: null,
+      explorerBaseUrl,
     });
     scheduleBoingDeployReceiptFollowup(result.boingTxIdHex, (id) => {
       setLastDeployedAccount(id);
-      showBoingContractIncludedToast(id);
+      showBoingContractIncludedToast(id, explorerBaseUrl);
     });
   }, [
     customBytecode,
@@ -123,6 +126,7 @@ export default function NativeBoingPoolDeploySection() {
     poolSymbol,
     purposeCategory,
     qaPoolAcknowledged,
+    explorerBaseUrl,
   ]);
 
   if (!isBoingTestnetChainId(chainId) || walletType !== 'boingExpress' || !isConnected) {
@@ -324,7 +328,7 @@ export default function NativeBoingPoolDeploySection() {
           <p className="font-mono break-all">Submit ack: {lastTx}</p>
           {lastDeployedAccount && (
             <a
-              href={getBoingObserverAccountUrl(lastDeployedAccount)}
+              href={buildBoingExplorerAccountUrl(explorerBaseUrl, lastDeployedAccount)}
               target="_blank"
               rel="noopener noreferrer"
               className="text-cyan-400 underline block"
@@ -334,7 +338,7 @@ export default function NativeBoingPoolDeploySection() {
           )}
           {lastBoingTxId && !lastDeployedAccount && (
             <a
-              href={getBoingObserverTxUrl(lastBoingTxId)}
+              href={buildBoingExplorerTxUrl(explorerBaseUrl, lastBoingTxId)}
               target="_blank"
               rel="noopener noreferrer"
               className="text-cyan-400 underline block"

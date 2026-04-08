@@ -9,7 +9,7 @@ import {
   normalizeBoingFaucetAccountHex
 } from '../services/boingTestnetRpc';
 import { getBoingNativeFeeUsd, BOING_USD_REFERENCE_PRICE } from '../config/boingEconomics';
-import { getBoingObserverHomeUrl } from '../config/boingExplorerUrls';
+import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 
 const WEB_FAUCET = 'https://boing.network/faucet';
 const TESTNET_JOIN = 'https://boing.network/testnet/join';
@@ -31,6 +31,7 @@ function formatBalanceDisplay(raw, symbol) {
 export default function BoingNativeTokenPanel() {
   const queryClient = useQueryClient();
   const { chainId, account, isConnected, walletType, switchNetwork, getAccountBalance } = useWallet();
+  const { explorerBaseUrl } = useBoingNativeDexIntegration();
   const [faucetBusy, setFaucetBusy] = useState(false);
   const [switchBusy, setSwitchBusy] = useState(false);
 
@@ -254,7 +255,7 @@ export default function BoingNativeTokenPanel() {
           </button>
 
           <a
-            href={getBoingObserverHomeUrl()}
+            href={explorerBaseUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs sm:text-sm font-medium px-2 py-2 rounded-lg hover:underline"
