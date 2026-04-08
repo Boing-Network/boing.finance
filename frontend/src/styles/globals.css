@@ -778,6 +778,28 @@ code, pre, .monospace {
   background-clip: text;
 }
 
+/* Logo wordmark — slate + accent, matches Colosseum-style shell */
+.logo-wordmark {
+  background: linear-gradient(
+    115deg,
+    #e9eef5 0%,
+    color-mix(in srgb, var(--primary-color) 88%, #e9eef5) 38%,
+    var(--primary-color) 62%,
+    color-mix(in srgb, var(--primary-color) 55%, #9aa8bc) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.boing-logo-svg {
+  border-radius: 50%;
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--primary-color) 28%, transparent));
+}
+
 /* === BUTTONS (Step 5.1) — Deep Trade uses var(--btn-primary-gradient) when set === */
 .btn-primary, button[data-variant="primary"] {
   background: var(--btn-primary-gradient, linear-gradient(135deg, var(--accent-teal), var(--accent-cyan)));

@@ -2,11 +2,11 @@
   "name": "Boing Finance",
   "short_name": "boing",
   "icons": [
-    { "src": "/assets/boing-profile-twitter.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/assets/boing-logo-mark.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
     { "src": "/favicon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
   ],
-  "theme_color": "#020B26",
-  "background_color": "#020B26",
+  "theme_color": "#06080c",
+  "background_color": "#06080c",
   "display": "standalone",
   "start_url": "/",
   "scope": "/"

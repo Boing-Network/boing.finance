@@ -3,10 +3,11 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { PageHeader, PageCard } from '../../components/PageLayout';
 import { useWalletConnection } from '../../hooks/useWalletConnection';
+import { BRAND_LOGO_MARK_PNG } from '../../config/brandAssets';
 
 const MOCK_NFTS = [
-  { id: 1, name: 'Boing Astronaut #42', image: '/assets/boing-profile-twitter.png', staked: false, rewards: 0 },
-  { id: 2, name: 'Boing Astronaut #128', image: '/assets/boing-profile-twitter.png', staked: true, rewards: 125 },
+  { id: 1, name: 'Boing Astronaut #42', image: BRAND_LOGO_MARK_PNG, staked: false, rewards: 0 },
+  { id: 2, name: 'Boing Astronaut #128', image: BRAND_LOGO_MARK_PNG, staked: true, rewards: 125 },
 ];
 
 export default function BoingStaking() {

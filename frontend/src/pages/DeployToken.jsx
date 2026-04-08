@@ -33,6 +33,7 @@ import {
   BOING_NETWORK_E2_PARTNER_APP_NATIVE_BOING_URL,
   BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL,
 } from '../config/boingNetworkDocsUrls';
+import { brandLogoPngAbsolute } from '../config/brandAssets';
 
 // Import ABI and bytecode from the artifacts
 const ERC20_ABI = AdvancedERC20Artifact.abi;
@@ -41,7 +42,7 @@ const TOKEN_FACTORY_ABI = TokenFactoryArtifact.abi;
 const _TOKEN_IMPLEMENTATION_ABI = TokenImplementationArtifact.abi;
 
 /** Boing logo URL (design system) — used as default when token has no custom logo. */
-const BOING_LOGO_URL = 'https://boing.finance/assets/boing-profile-twitter.png';
+const BOING_LOGO_URL = brandLogoPngAbsolute();
 
 // MochiAstronaut component
 

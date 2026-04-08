@@ -28,7 +28,7 @@
   "scripts": {
     "dev": "vite",
     "start": "vite",
-    "prebuild": "node scripts/update-service-worker-version.js && node scripts/generate-version-manifest.js",
+    "prebuild": "node scripts/update-service-worker-version.js && node scripts/generate-version-manifest.js && node scripts/generate-brand-assets.mjs && node scripts/generate-favicon.mjs",
     "build": "npm run generate-manifest && cross-env CI=false vite build",
     "build:prod": "cross-env CI=false REACT_APP_ENV=production vite build",
     "build:staging": "cross-env CI=false REACT_APP_ENV=staging vite build",
@@ -41,6 +41,7 @@
     "smoke:boing-rpc": "node scripts/smoke-boing-testnet-rpc.mjs",
     "setup-base": "node scripts/setup-base-miniapp.js",
     "generate-manifest": "node scripts/generate-manifest.js",
+    "generate-brand-assets": "node scripts/generate-brand-assets.mjs",
     "generate-favicon": "node scripts/generate-favicon.mjs"
   },
   "eslintConfig": {

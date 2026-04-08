@@ -1,6 +1,8 @@
 // Notification System
 // Provides browser push notifications and enhanced toast notifications
 
+import { BRAND_LOGO_MARK_PNG } from '../config/brandAssets';
+
 class NotificationService {
   constructor() {
     this.permission = null;
@@ -45,8 +47,8 @@ class NotificationService {
     }
 
     const defaultOptions = {
-      icon: '/assets/boing-profile-twitter.png',
-      badge: '/assets/boing-profile-twitter.png',
+      icon: BRAND_LOGO_MARK_PNG,
+      badge: BRAND_LOGO_MARK_PNG,
       tag: 'boing-finance',
       requireInteraction: false,
       ...options
@@ -83,8 +85,8 @@ class NotificationService {
   async notifyDeploymentSuccess(tokenName, tokenAddress) {
     return this.showNotification('Token Deployed Successfully! 🎉', {
       body: `${tokenName} has been deployed at ${tokenAddress.substring(0, 6)}...${tokenAddress.substring(tokenAddress.length - 4)}`,
-      icon: '/assets/boing-profile-twitter.png',
-      badge: '/assets/boing-profile-twitter.png',
+      icon: BRAND_LOGO_MARK_PNG,
+      badge: BRAND_LOGO_MARK_PNG,
       tag: `deployment-${Date.now()}`,
       onClick: () => {
         window.location.href = `/tokens?address=${tokenAddress}`;
@@ -95,7 +97,7 @@ class NotificationService {
   async notifyTransactionConfirmed(txHash, network) {
     return this.showNotification('Transaction Confirmed ✅', {
       body: `Your transaction has been confirmed on ${network}`,
-      icon: '/assets/boing-profile-twitter.png',
+      icon: BRAND_LOGO_MARK_PNG,
       tag: `tx-${txHash}`,
       onClick: () => {
         // Open transaction in explorer
@@ -114,7 +116,7 @@ class NotificationService {
     
     return this.showNotification(`Price Alert: ${tokenSymbol}`, {
       body: message,
-      icon: '/assets/boing-profile-twitter.png',
+      icon: BRAND_LOGO_MARK_PNG,
       tag: `price-alert-${tokenSymbol}`,
       requireInteraction: true
     });
@@ -127,9 +129,9 @@ class NotificationService {
     
     return this.showNotification('Portfolio Update', {
       body: `Total Value: $${totalValue.toLocaleString()} (${changeText})`,
-      icon: '/assets/boing-profile-twitter.png',
+      icon: BRAND_LOGO_MARK_PNG,
       tag: 'portfolio-update',
-      badge: '/assets/boing-profile-twitter.png'
+      badge: BRAND_LOGO_MARK_PNG
     });
   }
 

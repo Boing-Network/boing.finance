@@ -1,15 +1,59 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Boing Finance">
   <title>Boing Finance</title>
-  <rect width="64" height="64" rx="14" fill="#020B26"/>
   <defs>
-    <clipPath id="a"><circle cx="32" cy="32" r="26"/></clipPath>
+    <radialGradient id="boing-mark-disc" cx="32%" cy="28%" r="78%">
+      <stop offset="0%" stop-color="#1e2836"/>
+      <stop offset="45%" stop-color="#121a24"/>
+      <stop offset="100%" stop-color="#06080c"/>
+    </radialGradient>
+    <linearGradient id="boing-mark-rim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.14)"/>
+      <stop offset="50%" stop-color="rgba(138,154,175,0.12)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.05)"/>
+    </linearGradient>
+    <linearGradient id="boing-mark-b" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e9eef5" stop-opacity="0.95"/>
+      <stop offset="42%" stop-color="#00e5ff"/>
+      <stop offset="100%" stop-color="#123a44"/>
+    </linearGradient>
+    <linearGradient id="boing-mark-orbit" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="rgba(0,229,255,0.28)"/>
+      <stop offset="55%" stop-color="#00e5ff"/>
+      <stop offset="100%" stop-color="#9dd8f0"/>
+    </linearGradient>
+    <filter id="boing-mark-soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="0.35" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
-  <image
-    width="64"
-    height="64"
-    clip-path="url(#a)"
-    preserveAspectRatio="xMidYMid slice"
-    href="/assets/boing-profile-twitter.png"
-    xlink:href="/assets/boing-profile-twitter.png"
+  <circle cx="32" cy="32" r="30" fill="url(#boing-mark-disc)"/>
+  <circle cx="32" cy="32" r="29.25" fill="none" stroke="url(#boing-mark-rim)" stroke-width="0.85" opacity="0.9"/>
+  <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(0,0,0,0.35)" stroke-width="0.6"/>
+  <path
+    d="M 14 38 C 22 22, 38 14, 50 20"
+    fill="none"
+    stroke="url(#boing-mark-orbit)"
+    stroke-width="1.35"
+    stroke-linecap="round"
+    opacity="0.88"
+    filter="url(#boing-mark-soft)"
   />
+  <path
+    d="M 49.2 19.4 L 50.6 21.8 L 53.2 22.2 L 51.1 24 L 51.6 26.8 L 49 25.5 L 46.4 26.8 L 47 24 L 44.8 22.2 L 47.4 21.8 Z"
+    fill="#e9eef5"
+    opacity="0.88"
+  />
+  <text
+    x="32"
+    y="40"
+    text-anchor="middle"
+    font-family="Orbitron, system-ui, sans-serif"
+    font-size="29"
+    font-weight="700"
+    fill="url(#boing-mark-b)"
+    letter-spacing="-0.04em"
+  >B</text>
 </svg>
