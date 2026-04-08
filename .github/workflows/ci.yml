@@ -62,6 +62,22 @@ jobs:
         working-directory: frontend
         run: npm run lint || echo "⚠️ Linting issues found (non-blocking)"
 
+  boing-rpc-smoke:
+    name: Boing testnet RPC smoke
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: smoke-boing-testnet-rpc (public JSON-RPC)
+        run: node frontend/scripts/smoke-boing-testnet-rpc.mjs
+
   build-check:
     name: Build Check
     runs-on: ubuntu-latest
