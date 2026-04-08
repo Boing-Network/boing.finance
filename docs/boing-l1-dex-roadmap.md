@@ -28,7 +28,7 @@ Short-term work so deploy/DEX flows fail **understandably** and links to the pub
 - [x] **Observer URLs:** single helper `frontend/src/config/boingExplorerUrls.js` (avoid hard-coded divergent bases); includes **`/tx/{tx_id}`** for tracking links.
 - [x] **Docs:** [boing-vm-contracts-and-explorer.md](./boing-vm-contracts-and-explorer.md) — VM deploy vs Solidity; transparency layers; what still needs protocol/explorer product.
 - [x] **Post-deploy deep link:** derive **`tx_id`** from Boing Express signed tx (**`transactionIdFromSignedTransactionHex`** in **boing-sdk**), **background**-poll **`boing_getTransactionReceipt`** (UI returns immediately), parse **`logs[].address`** for the new **AccountId** when present (init-code / log attribution per RPC spec); toast + in-panel links — `boingExpressNativeTx.js`, `boingDeployReceiptFollowup.js`, `boingDeploySuccessToast.jsx`, native deploy sections.
-- [ ] **CI smoke:** optional script: `boing_chainHeight` + `boing_qaCheck` against public RPC with pinned template (see cross-repo PRE-VIBEMINER doc).
+- [x] **CI smoke:** `frontend` **`npm run smoke:boing-rpc`** — `boing_chainHeight` (+ optional `BOING_SMOKE_BYTECODE_HEX` for `boing_qaCheck`). Env: **`BOING_SMOKE_RPC_URL`**. See cross-repo PRE-VIBEMINER doc for deeper node checks.
 - [ ] **Verifier / artifact registry UI:** remains **upstream** (network + Observer); track against Phase 1–3 and HANDOFF-DEPENDENT-PROJECTS.
 
 ## Phase 1 — Network & bytecode (blocking)
