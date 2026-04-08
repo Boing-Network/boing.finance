@@ -12,7 +12,7 @@ import AdvancedERC20Artifact from '../artifacts/AdvancedERC20.json';
 import TokenFactoryArtifact from '../artifacts/TokenFactory.json';
 import TokenImplementationArtifact from '../artifacts/TokenImplementation.json';
 import { Helmet } from 'react-helmet-async';
-import { getContractAddress } from '../config/contracts';
+import { getContractAddress, getBoingNativeVmModuleId } from '../config/contracts';
 import LogoUpload from '../components/LogoUpload';
 import { uploadMetadataToIPFS, createTokenMetadata } from '../utils/ipfsUpload';
 import TokenPreview from '../components/TokenPreview';
@@ -1895,8 +1895,30 @@ export default function DeployToken() {
                   {/* Deployment Method Indicator */}
                   {network && (
                     <div className="mt-2">
-                      {getContractAddress(network?.chainId, 'tokenFactory') && 
-                       getContractAddress(network?.chainId, 'tokenFactory') !== '0x0000000000000000000000000000000000000000' ? (
+                      {Number(network.chainId) === BOING_NATIVE_L1_CHAIN_ID ? (
+                        <div className="text-sm text-amber-300/95 space-y-1">
+                          <div className="flex items-start gap-1">
+                            <svg className="w-4 h-4 mr-1 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                            </svg>
+                            <span>
+                              <span className="font-medium text-amber-200">Boing L1 (native VM):</span>{' '}
+                              token deploy uses Boing VM bytecode (reference secured fungible), not the EVM{' '}
+                              <code className="text-xs text-amber-100/90">TokenFactory</code> contract used on other chains.
+                            </span>
+                          </div>
+                          <p className="text-xs text-amber-200/80 pl-5">
+                            A native DEX factory is a separate Boing VM module id (
+                            <code className="text-[11px]">nativeVm.dexFactory</code>
+                            ), not Solidity <code className="text-[11px]">dexFactory</code>.{' '}
+                            {getBoingNativeVmModuleId(network.chainId, 'dexFactory')
+                              ? 'This build has a non-zero native DEX factory id configured.'
+                              : 'This build does not set a native DEX factory id (optional; operator / env).'}
+                          </p>
+                        </div>
+                      ) : getContractAddress(network?.chainId, 'tokenFactory') &&
+                        getContractAddress(network?.chainId, 'tokenFactory') !==
+                          '0x0000000000000000000000000000000000000000' ? (
                         <div className="flex items-center text-sm text-green-400">
                           <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />

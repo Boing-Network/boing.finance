@@ -245,7 +245,10 @@ export async function preflightBoingLaunchWizard(client, input) {
  * @param {() => import('ethers').Eip1193Provider | null} opts.getWalletProvider
  * @param {boolean} [opts.qaPoolAcknowledged]
  * @param {Record<string, unknown>} opts.fields — passed to {@link buildBoingLaunchIntegrationInput}
- * @returns {Promise<{ ok: true, txHash: string, qaResult: object } | { ok: false, code: string, message: string, qaResult?: object }>}
+ * @returns {Promise<
+ *   | { ok: true, txHash: string, boingTxIdHex: string | null, qaResult: object }
+ *   | { ok: false, code: string, message: string, qaResult?: object }
+ * >}
  */
 export async function executeBoingLaunchWizardDeploy({ kind, getWalletProvider, qaPoolAcknowledged = false, ...fields }) {
   let mergedFields = fields;
@@ -311,9 +314,10 @@ export async function executeBoingLaunchWizardDeploy({ kind, getWalletProvider, 
   }
 
   try {
-    const hash = await boingExpressSendTransaction(p, tx);
-    const txHash = typeof hash === 'string' ? hash : JSON.stringify(hash);
-    return { ok: true, txHash, qaResult: pre };
+    const sendRes = await boingExpressSendTransaction(p, tx, { returnSubmitMeta: true });
+    const txHash = typeof sendRes === 'string' ? sendRes : String(sendRes.txHash);
+    const boingTxIdHex = typeof sendRes === 'object' && sendRes.boingTxIdHex ? sendRes.boingTxIdHex : null;
+    return { ok: true, txHash, boingTxIdHex, qaResult: pre };
   } catch (e) {
     return {
       ok: false,

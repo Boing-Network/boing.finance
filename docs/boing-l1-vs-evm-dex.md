@@ -19,7 +19,7 @@ There is **no compiler switch** that turns the existing Solidity tree into Boing
   - `nativeConstantProductPool` — 32-byte pool `AccountId` (canonical testnet default + env override).
   - `nativeVm.dexFactory`, `nativeVm.swapRouter`, `nativeVm.liquidityLocker` — **placeholders** (`0x00…00`) until operators publish real module ids (`REACT_APP_BOING_NATIVE_VM_*` at build time).
 
-See also: [boing-l1-dex-roadmap.md](./boing-l1-dex-roadmap.md).
+See also: [boing-l1-dex-roadmap.md](./boing-l1-dex-roadmap.md), [boing-vm-contracts-and-explorer.md](./boing-vm-contracts-and-explorer.md).
 
 ## What “deploy the Solidity DEX on Boing” actually means
 

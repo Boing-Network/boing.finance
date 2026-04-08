@@ -6,7 +6,7 @@
  * hex from `boingExpressSignTransaction` (user-approved Ed25519 signature in the extension).
  */
 
-import { BOING_QA_PLACEHOLDER_DESCRIPTION_HASH_HEX, bytesToHex } from 'boing-sdk';
+import { BOING_QA_PLACEHOLDER_DESCRIPTION_HASH_HEX, bytesToHex, transactionIdFromSignedTransactionHex } from 'boing-sdk';
 import { simulateBoingSignedTransaction, submitBoingSignedTransaction } from './boingNativeVm';
 import { normalizeBoingFaucetAccountHex } from './boingTestnetRpc';
 
@@ -142,19 +142,29 @@ export async function boingExpressSignTransaction(provider, txObject) {
  *
  * @param {{ request: Function }} provider
  * @param {Record<string, unknown>} txObject
- * @returns {Promise<string>} Transaction hash from the node
+ * @param {{ returnSubmitMeta?: boolean }} [options] — when true and `type === 'contract_deploy_meta'`, returns `{ txHash, boingTxIdHex }` for receipt / Observer follow-up
+ * @returns {Promise<string | { txHash: string, boingTxIdHex: string | null }>}
  */
-export async function boingExpressSendTransaction(provider, txObject) {
+export async function boingExpressSendTransaction(provider, txObject, options = {}) {
   if (!provider || typeof provider.request !== 'function') {
     throw new Error('Boing Express provider not available');
   }
+  const returnSubmitMeta = options.returnSubmitMeta === true;
+
   if (txObject && txObject.type === 'contract_deploy_meta') {
     const forSign = normalizeContractDeployMetaForSign(txObject);
     const signedHex = await boingExpressSignTransaction(provider, forSign);
+    let boingTxIdHex = null;
+    try {
+      boingTxIdHex = transactionIdFromSignedTransactionHex(signedHex);
+    } catch {
+      boingTxIdHex = null;
+    }
+    const pack = (txHash) => (returnSubmitMeta ? { txHash, boingTxIdHex } : txHash);
     try {
       const sub = await submitBoingSignedTransaction(signedHex);
-      if (sub && typeof sub === 'object' && sub.tx_hash) return sub.tx_hash;
-      return String(sub);
+      const txHash = sub && typeof sub === 'object' && sub.tx_hash != null ? String(sub.tx_hash) : String(sub);
+      return pack(txHash);
     } catch (subErr) {
       const m = subErr instanceof Error ? subErr.message : String(subErr);
       if (TX_DECODE_ERR_RE.test(m)) {
@@ -163,7 +173,7 @@ export async function boingExpressSendTransaction(provider, txObject) {
             method: 'boing_sendTransaction',
             params: [forSign],
           });
-          if (typeof hash === 'string') return hash;
+          if (typeof hash === 'string') return pack(hash);
         } catch {
           /* fall through to original error */
         }
@@ -171,10 +181,11 @@ export async function boingExpressSendTransaction(provider, txObject) {
       throw subErr;
     }
   }
-  return provider.request({
+  const out = await provider.request({
     method: 'boing_sendTransaction',
     params: [txObject],
   });
+  return typeof out === 'string' ? out : String(out);
 }
 
 /**

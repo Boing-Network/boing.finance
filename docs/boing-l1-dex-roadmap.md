@@ -2,12 +2,34 @@
 
 This is a **cross-repo** milestone list. The Solidity DEX in `contracts/` is **not** blocked by frontend work alone — **Boing VM programs** must exist before the app can offer factory/router/locker parity on L1.
 
+## Public transparency — who owns what
+
+End-to-end “contracts visible on **boing.observer** with clear behavior” spans four layers. All four appear in the phased work below.
+
+| Layer | Role |
+|-------|------|
+| **Boing VM + RPC** | Execution, storage, events — foundation for on-chain “contracts.” Exposes methods such as **`boing_getTransactionReceipt`**, **`boing_getContractStorage`**, **`boing_getLogs`**. |
+| **boing.observer** | Surfaces **accounts** and **transactions** (and richer **contract** pages as the team adds them: bytecode, storage, etc.). |
+| **“Etherscan-verified” clarity** | Needs **published artifacts / interfaces** (upstream canonical deploy docs) and/or a **verifier** product if the network adds one — **not** something the frontend alone can replace. |
+| **boing.finance** | Wires deploy/swap, **links to Observer**, derives **`tx_id`** from the signed payload for receipt lookup, and shows **View contract** when deploy receipts include a log **`address`**. |
+
 ## Phase 0 — Today (shipped)
 
 - [x] Boing L1: native **constant-product** pool in config + **NativeAmmSwapPanel** (swap / add liquidity via Boing Express).
 - [x] Config placeholders: `nativeVm.{dexFactory,swapRouter,liquidityLocker}` + env wiring in `contracts.js`.
 - [x] EVM path unchanged: Sepolia / mainnets use **DEXFactoryV2** stack via ethers.
 - [x] Docs: [boing-l1-vs-evm-dex.md](./boing-l1-vs-evm-dex.md).
+
+## Phase P0 — Reliability & transparency (active — boing.finance)
+
+Short-term work so deploy/DEX flows fail **understandably** and links to the public explorer stay **consistent**.
+
+- [x] **Deploy errors:** richer UX when the node returns **Invalid opcode at offset 0** (template/node mismatch, bad Advanced hex, EVM bytecode pasted) — `frontend/src/utils/boingExpressRpcError.js`.
+- [x] **Observer URLs:** single helper `frontend/src/config/boingExplorerUrls.js` (avoid hard-coded divergent bases); includes **`/tx/{tx_id}`** for tracking links.
+- [x] **Docs:** [boing-vm-contracts-and-explorer.md](./boing-vm-contracts-and-explorer.md) — VM deploy vs Solidity; transparency layers; what still needs protocol/explorer product.
+- [x] **Post-deploy deep link:** derive **`tx_id`** from Boing Express signed tx (**`transactionIdFromSignedTransactionHex`** in **boing-sdk**), **background**-poll **`boing_getTransactionReceipt`** (UI returns immediately), parse **`logs[].address`** for the new **AccountId** when present (init-code / log attribution per RPC spec); toast + in-panel links — `boingExpressNativeTx.js`, `boingDeployReceiptFollowup.js`, `boingDeploySuccessToast.jsx`, native deploy sections.
+- [ ] **CI smoke:** optional script: `boing_chainHeight` + `boing_qaCheck` against public RPC with pinned template (see cross-repo PRE-VIBEMINER doc).
+- [ ] **Verifier / artifact registry UI:** remains **upstream** (network + Observer); track against Phase 1–3 and HANDOFF-DEPENDENT-PROJECTS.
 
 ## Phase 1 — Network & bytecode (blocking)
 
@@ -27,6 +49,7 @@ This is a **cross-repo** milestone list. The Solidity DEX in `contracts/` is **n
 - [ ] **Write paths:** build `ContractCall` payloads (use **boing-sdk** encoders or new ones), simulate, submit via Boing Express.
 - [ ] **UX parity (incremental):** Create Pool / Swap / Liquidity flows on 6913 when `nativeVm` ids are non-zero — gated behind feature detection (`getFeatureSupport().nativeVmDex` and `REACT_APP_BOING_NATIVE_VM_DEX_UI=1` when ready).
 - [ ] **Env / ops:** document required `REACT_APP_BOING_NATIVE_VM_*` for production builds.
+- [ ] **Transparency UX:** when RPC adds stable **deployed-account** fields or standard log topics, extend `pickDeployedAccountIdFromBoingReceipt` (or use **return_data** layout) so Observer links work for every template — not only log-attributed deploys.
 
 ## Phase 3 — Hardening
 

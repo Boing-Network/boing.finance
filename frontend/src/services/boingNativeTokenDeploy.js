@@ -58,7 +58,10 @@ export async function preflightReferenceFungibleDeployQa({
  * @param {string} [input.initialSupply]
  * @param {number} [input.tokenDecimals]
  * @param {boolean} [input.qaPoolAcknowledged]
- * @returns {Promise<{ ok: true, txHash: string, qaResult: object } | { ok: false, code: string, message: string, qaResult?: object }>}
+ * @returns {Promise<
+ *   | { ok: true, txHash: string, boingTxIdHex: string | null, qaResult: object }
+ *   | { ok: false, code: string, message: string, qaResult?: object }
+ * >}
  */
 export async function executeBoingNativeTokenDeploy({
   getWalletProvider,

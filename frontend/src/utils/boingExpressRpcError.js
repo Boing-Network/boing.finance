@@ -35,6 +35,14 @@ export function formatBoingExpressRpcError(e) {
       return 'Rate limited — wait a minute and try again.';
     }
 
+    // Boing VM deploy / simulate: first bytecode byte is not a valid VM opcode for this node (wrong template, truncated hex, or EVM bytecode pasted by mistake).
+    if (/invalid opcode at offset 0/i.test(msg)) {
+      return (
+        `${msg.trim()} ` +
+        'The node rejected deploy bytecode at the first VM instruction. Common causes: template/node mismatch, bad Advanced hex, or EVM bytecode pasted by mistake. Clear overrides, update Boing Express, align SDK with your RPC. Details: repo docs/boing-vm-contracts-and-explorer.md.'
+      );
+    }
+
     // Returned by the node when `boing_submitTransaction` / `boing_simulateTransaction` cannot bincode-decode the signed tx hex.
     if (/unexpected end of file/i.test(msg) || /Invalid transaction:\s*io error:/i.test(msg)) {
       return (
@@ -70,6 +78,12 @@ export function formatBoingExpressRpcError(e) {
   }
   if (e && typeof e === 'object' && typeof e.message === 'string') {
     const m = e.message;
+    if (/invalid opcode at offset 0/i.test(m)) {
+      return (
+        `${m.trim()} ` +
+        'Boing VM deploy bytecode does not match this node (or is not VM code). Clear Advanced overrides and align SDK with RPC — see repo docs/boing-vm-contracts-and-explorer.md.'
+      );
+    }
     if (/unexpected end of file/i.test(m) || /Invalid transaction:\s*io error:/i.test(m)) {
       return (
         `${m.trim()} ` +

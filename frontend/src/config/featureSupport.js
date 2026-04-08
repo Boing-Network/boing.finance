@@ -132,4 +132,89 @@ export function getChainsWithBridge() {
   return EVM_CHAIN_IDS.filter((id) => getFeatureSupport(id).bridge === 'boing');
 }
 
+/**
+ * Boing L1 “full DEX” experience matrix for UX and ops (VM-first, not EVM parity).
+ * @param {number} chainId
+ * @param {{ nativeConstantProductPoolHex?: string | null }} [options] — same as {@link getFeatureSupport}
+ * @returns {{ items: Array<{ id: string, label: string, status: 'live' | 'partial' | 'planned', detail: string }> } | null}
+ */
+export function getBoingL1FullDexReadiness(chainId, options) {
+  if (Number(chainId) !== BOING_NATIVE_L1_CHAIN_ID) return null;
+  const fs = getFeatureSupport(chainId, options);
+
+  const items = [
+    {
+      id: 'token_deploy',
+      label: 'Deploy fungible tokens',
+      status: fs.deployToken ? 'partial' : 'planned',
+      detail: fs.deployToken
+        ? 'Boing VM deploy + Boing Express; bytecode must match the node you use (QA).'
+        : 'Not enabled for this chain in app config.',
+    },
+    {
+      id: 'nft_deploy',
+      label: 'Deploy NFT collections',
+      status: 'partial',
+      detail: 'Native collection deploy (contract_deploy_meta); needs operator bytecode and Boing Express.',
+    },
+    {
+      id: 'cp_swap',
+      label: 'Swap (native constant-product pool)',
+      status: fs.hasNativeAmm ? 'live' : 'planned',
+      detail: fs.hasNativeAmm
+        ? 'Single pool: contract_call on configured AccountId + Boing Express.'
+        : 'Configure a native pool id (build env or RPC defaults).',
+    },
+    {
+      id: 'cp_liquidity',
+      label: 'Add liquidity (same pool)',
+      status: fs.hasNativeAmm ? 'live' : 'planned',
+      detail: 'Same flow as the native swap panel / Create Pool (Boing) section.',
+    },
+    {
+      id: 'new_pool_deploy',
+      label: 'Deploy a new pool contract',
+      status: 'partial',
+      detail: 'Launch wizard pool bytecode (env + Advanced); not the EVM factory form.',
+    },
+    {
+      id: 'multihop_factory',
+      label: 'Multi-pair routing (VM factory + router)',
+      status: fs.nativeVmDex.swapParityMinimum ? 'partial' : 'planned',
+      detail: fs.nativeVmDex.swapParityMinimum
+        ? 'Factory and router AccountIds are set; deeper router UX is still evolving.'
+        : 'Publish module ids and set REACT_APP_BOING_NATIVE_VM_DEX_FACTORY / _SWAP_ROUTER.',
+    },
+    {
+      id: 'locker',
+      label: 'Liquidity locker module',
+      status: fs.nativeVmDex.lockerId ? 'live' : 'planned',
+      detail: fs.nativeVmDex.lockerId
+        ? 'Locker AccountId is set in this build.'
+        : 'Set REACT_APP_BOING_NATIVE_VM_LIQUIDITY_LOCKER when a locker is deployed.',
+    },
+    {
+      id: 'pools_list',
+      label: 'Pools explorer (Uniswap-style factory list)',
+      status: 'planned',
+      detail: 'This app’s pool directory is EVM-factory backed; native indexing / directory UI is follow-on work.',
+    },
+    {
+      id: 'bridge',
+      label: 'In-app cross-chain bridge',
+      status: 'planned',
+      detail: 'This bridge UI targets EVM-style aggregators; a Boing VM bridge needs its own protocol + wallet flow.',
+    },
+    {
+      id: 'explorer_transparency',
+      label: 'Public transparency (Observer + artifacts)',
+      status: 'partial',
+      detail:
+        'Deploy flows link to boing.observer (tx + contract when receipt logs carry address). Full “verified source” needs upstream artifacts / Observer contract pages.',
+    },
+  ];
+
+  return { items };
+}
+
 export default getFeatureSupport;
