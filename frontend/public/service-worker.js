@@ -3,7 +3,7 @@
 // IMPORTANT: Update CACHE_VERSION on each deployment to force cache invalidation
 // This ensures users get the latest version after deployment
 
-const CACHE_VERSION = 'v1775632195595'; // Update this version number on each deployment
+const CACHE_VERSION = 'v1775633590055'; // Update this version number on each deployment
 const CACHE_NAME = 'boing-finance-' + CACHE_VERSION;
 const RUNTIME_CACHE = 'boing-finance-runtime-' + CACHE_VERSION;
 
@@ -28,11 +28,7 @@ const deleteAllOldCaches = async () => {
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/favicon.ico',
-  '/favicon.svg',
   '/manifest.json',
-  '/assets/boing-logo-mark.png',
-  '/assets/boing-logo-mark.svg',
 ];
 
 // Install event - cache static assets
@@ -92,6 +88,31 @@ self.addEventListener('fetch', (event) => {
   // page.route, and vite preview has no /api handler (E2E mocks would see HTTP 403/404).
   // POST RPC responses should not be cached by this SW anyway.
   if (url.pathname === '/api/boing-rpc') {
+    return;
+  }
+
+  // Favicons / share art: never serve stale from SW (browser + CDN cache aggressively).
+  const BRAND_PATHS_NO_SW_CACHE = new Set([
+    '/favicon.ico',
+    '/favicon-alt.ico',
+    '/favicon.svg',
+    '/favicon.png',
+    '/favicon-32x32.png',
+    '/favicon-96x96.png',
+    '/apple-touch-icon.png',
+    '/preview-image.png',
+    '/mstile-150x150.png',
+    '/assets/boing-logo-mark.png',
+    '/assets/boing-logo-mark.svg',
+    '/assets/boing-profile-twitter.png',
+    '/assets/boing-profile-facebook.png',
+    '/assets/boing-banner-facebook.png',
+    '/assets/boing-logo-light-mode.png',
+    '/assets/boing-logo-dark-nebula.png',
+    '/assets/icon-only-transparent.png',
+  ]);
+  if (BRAND_PATHS_NO_SW_CACHE.has(url.pathname)) {
+    event.respondWith(fetch(request, { cache: 'no-store' }));
     return;
   }
 

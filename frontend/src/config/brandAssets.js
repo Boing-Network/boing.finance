@@ -5,6 +5,16 @@
 
 const DEFAULT_SITE_ORIGIN = 'https://boing.finance';
 
+/** Query suffix from Vite define (prebuild `version.txt`); busts favicon / OG CDN caches per deploy. */
+export function getBrandAssetVersionSuffix() {
+  const v =
+    typeof import.meta !== 'undefined' &&
+    import.meta.env &&
+    import.meta.env.VITE_ASSET_VERSION;
+  if (v == null || String(v) === '') return '';
+  return `?v=${encodeURIComponent(String(v))}`;
+}
+
 /** Path from site root (leading slash). */
 export const BRAND_LOGO_MARK_PNG = '/assets/boing-logo-mark.png';
 
@@ -15,12 +25,17 @@ export const BRAND_SHARE_IMAGE_PATH = '/preview-image.png';
 
 export function brandLogoPngAbsolute(origin = DEFAULT_SITE_ORIGIN) {
   const base = (origin || '').replace(/\/$/, '');
-  return `${base}${BRAND_LOGO_MARK_PNG}`;
+  return `${base}${BRAND_LOGO_MARK_PNG}${getBrandAssetVersionSuffix()}`;
 }
 
 export function brandShareImageAbsolute(origin = DEFAULT_SITE_ORIGIN) {
   const base = (origin || '').replace(/\/$/, '');
-  return `${base}${BRAND_SHARE_IMAGE_PATH}`;
+  return `${base}${BRAND_SHARE_IMAGE_PATH}${getBrandAssetVersionSuffix()}`;
+}
+
+/** Relative path for Notification.icon / in-app raster references (includes cache-bust). */
+export function brandLogoMarkPathWithCacheBust() {
+  return `${BRAND_LOGO_MARK_PNG}${getBrandAssetVersionSuffix()}`;
 }
 
 export { DEFAULT_SITE_ORIGIN };

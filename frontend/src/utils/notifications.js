@@ -1,7 +1,7 @@
 // Notification System
 // Provides browser push notifications and enhanced toast notifications
 
-import { BRAND_LOGO_MARK_PNG } from '../config/brandAssets';
+import { brandLogoMarkPathWithCacheBust } from '../config/brandAssets';
 
 class NotificationService {
   constructor() {
@@ -47,8 +47,8 @@ class NotificationService {
     }
 
     const defaultOptions = {
-      icon: BRAND_LOGO_MARK_PNG,
-      badge: BRAND_LOGO_MARK_PNG,
+      icon: brandLogoMarkPathWithCacheBust(),
+      badge: brandLogoMarkPathWithCacheBust(),
       tag: 'boing-finance',
       requireInteraction: false,
       ...options
@@ -85,8 +85,8 @@ class NotificationService {
   async notifyDeploymentSuccess(tokenName, tokenAddress) {
     return this.showNotification('Token Deployed Successfully! 🎉', {
       body: `${tokenName} has been deployed at ${tokenAddress.substring(0, 6)}...${tokenAddress.substring(tokenAddress.length - 4)}`,
-      icon: BRAND_LOGO_MARK_PNG,
-      badge: BRAND_LOGO_MARK_PNG,
+      icon: brandLogoMarkPathWithCacheBust(),
+      badge: brandLogoMarkPathWithCacheBust(),
       tag: `deployment-${Date.now()}`,
       onClick: () => {
         window.location.href = `/tokens?address=${tokenAddress}`;
@@ -97,7 +97,7 @@ class NotificationService {
   async notifyTransactionConfirmed(txHash, network) {
     return this.showNotification('Transaction Confirmed ✅', {
       body: `Your transaction has been confirmed on ${network}`,
-      icon: BRAND_LOGO_MARK_PNG,
+      icon: brandLogoMarkPathWithCacheBust(),
       tag: `tx-${txHash}`,
       onClick: () => {
         // Open transaction in explorer
@@ -116,7 +116,7 @@ class NotificationService {
     
     return this.showNotification(`Price Alert: ${tokenSymbol}`, {
       body: message,
-      icon: BRAND_LOGO_MARK_PNG,
+      icon: brandLogoMarkPathWithCacheBust(),
       tag: `price-alert-${tokenSymbol}`,
       requireInteraction: true
     });
@@ -129,9 +129,9 @@ class NotificationService {
     
     return this.showNotification('Portfolio Update', {
       body: `Total Value: $${totalValue.toLocaleString()} (${changeText})`,
-      icon: BRAND_LOGO_MARK_PNG,
+      icon: brandLogoMarkPathWithCacheBust(),
       tag: 'portfolio-update',
-      badge: BRAND_LOGO_MARK_PNG
+      badge: brandLogoMarkPathWithCacheBust()
     });
   }
 
