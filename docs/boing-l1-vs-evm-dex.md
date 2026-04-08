@@ -47,4 +47,5 @@ The Solidity contracts in this repo remain a **reference design** and **Sepolia 
 | `REACT_APP_BOING_NATIVE_VM_SWAP_ROUTER` | Router module id. |
 | `REACT_APP_BOING_NATIVE_VM_LIQUIDITY_LOCKER` | Locker module id. |
 | `REACT_APP_BOING_L1_DEX_DOCS_URL` | Optional public URL for this documentation (shown in UI banners). |
-| `REACT_APP_BOING_NATIVE_VM_DEX_UI` | Set to `1` when factory/router flows are implemented (suppresses pending-integration banner). |
+| `REACT_APP_BOING_EXPLORER_BASE_URL` | Optional HTTPS base for Boing explorer links (deploy toasts, native token panel, token modal on 6913). If unset, the app prefers RPC `boing_getNetworkInfo` → `end_user.explorer_url` (when HTTPS), then falls back to `https://boing.observer`. |
+| `REACT_APP_BOING_NATIVE_VM_DEX_UI` | Set to `1` when factory/router UI is wired. Hides the amber “modules configured, UI in progress” banner; when swap parity requirements are met, shows a teal confirmation banner instead. |

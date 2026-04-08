@@ -1,12 +1,18 @@
 import React from 'react';
 import toast from 'react-hot-toast';
-import { getBoingObserverAccountUrl, getBoingObserverTxUrl } from '../config/boingExplorerUrls';
+import {
+  BOING_OBSERVER_BASE_URL,
+  buildBoingExplorerAccountUrl,
+  buildBoingExplorerTxUrl,
+} from '../config/boingExplorerUrls';
 
 /**
- * @param {{ txHash?: string, boingTxIdHex?: string | null, deployedAccountId?: string | null }} result
+ * @param {string} deployedAccountId
+ * @param {string | null | undefined} explorerBaseUrl
  */
-export function showBoingContractIncludedToast(deployedAccountId) {
+export function showBoingContractIncludedToast(deployedAccountId, explorerBaseUrl) {
   if (!deployedAccountId || typeof deployedAccountId !== 'string') return;
+  const base = explorerBaseUrl || BOING_OBSERVER_BASE_URL;
   toast.custom(
     () => (
       <div
@@ -21,13 +27,13 @@ export function showBoingContractIncludedToast(deployedAccountId) {
           Contract included on-chain
         </div>
         <a
-          href={getBoingObserverAccountUrl(deployedAccountId)}
+          href={buildBoingExplorerAccountUrl(base, deployedAccountId)}
           className="underline block"
           style={{ color: 'var(--accent-cyan, #38bdf8)' }}
           target="_blank"
           rel="noopener noreferrer"
         >
-          View contract on boing.observer
+          View contract in explorer
         </a>
       </div>
     ),
@@ -35,7 +41,11 @@ export function showBoingContractIncludedToast(deployedAccountId) {
   );
 }
 
+/**
+ * @param {{ txHash?: string, boingTxIdHex?: string | null, deployedAccountId?: string | null, explorerBaseUrl?: string | null }} result
+ */
 export function showBoingLaunchDeploySuccessToast(result) {
+  const base = result.explorerBaseUrl || BOING_OBSERVER_BASE_URL;
   const deployed = result.deployedAccountId && typeof result.deployedAccountId === 'string' ? result.deployedAccountId : null;
   const txId = result.boingTxIdHex && typeof result.boingTxIdHex === 'string' ? result.boingTxIdHex : null;
 
@@ -54,23 +64,23 @@ export function showBoingLaunchDeploySuccessToast(result) {
         </div>
         {deployed ? (
           <a
-            href={getBoingObserverAccountUrl(deployed)}
+            href={buildBoingExplorerAccountUrl(base, deployed)}
             className="underline block"
             style={{ color: 'var(--accent-cyan, #38bdf8)' }}
             target="_blank"
             rel="noopener noreferrer"
           >
-            View contract on boing.observer
+            View contract in explorer
           </a>
         ) : txId ? (
           <a
-            href={getBoingObserverTxUrl(txId)}
+            href={buildBoingExplorerTxUrl(base, txId)}
             className="underline block"
             style={{ color: 'var(--accent-cyan, #38bdf8)' }}
             target="_blank"
             rel="noopener noreferrer"
           >
-            Track transaction on boing.observer
+            Track transaction in explorer
           </a>
         ) : (
           <p className="text-xs opacity-90" style={{ color: 'var(--text-secondary)' }}>

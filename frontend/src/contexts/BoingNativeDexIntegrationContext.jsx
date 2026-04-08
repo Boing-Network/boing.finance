@@ -9,6 +9,7 @@ import { getContractAddress, getBoingNativeVmModuleId } from '../config/contract
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { buildNativeDexOverridesFromEnv, getSharedBoingClient } from '../services/boingNativeDexClient';
 import { fetchNativeCpPoolTokenRow } from '../services/boingNativePoolTokens';
+import { BOING_OBSERVER_BASE_URL } from '../config/boingExplorerUrls';
 
 /** @typedef {import('boing-sdk').NativeDexIntegrationDefaults} NativeDexIntegrationDefaults */
 /** @typedef {import('boing-sdk').CpPoolVenue} CpPoolVenue */
@@ -129,6 +130,23 @@ export function BoingNativeDexIntegrationProvider({ children }) {
     return staticFactoryHex || '';
   }, [defaults, staticFactoryHex]);
 
+  const explorerBaseUrl = useMemo(() => {
+    try {
+      const envRaw = process.env.REACT_APP_BOING_EXPLORER_BASE_URL;
+      if (typeof envRaw === 'string') {
+        const e = envRaw.trim();
+        if (e && /^https?:\/\//i.test(e)) return e.replace(/\/+$/, '');
+      }
+    } catch {
+      /* ignore */
+    }
+    const rpc = defaults?.endUserExplorerUrl;
+    if (typeof rpc === 'string' && rpc.trim() && /^https?:\/\//i.test(rpc.trim())) {
+      return rpc.trim().replace(/\/+$/, '');
+    }
+    return BOING_OBSERVER_BASE_URL;
+  }, [defaults]);
+
   const value = useMemo(
     () => ({
       defaults,
@@ -138,15 +156,21 @@ export function BoingNativeDexIntegrationProvider({ children }) {
       refresh,
       effectivePoolHex,
       effectiveFactoryHex,
+      explorerBaseUrl,
       poolSource: defaults?.poolSource ?? null,
       factorySource: defaults?.factorySource ?? null,
     }),
-    [defaults, venues, loading, error, refresh, effectivePoolHex, effectiveFactoryHex]
+    [defaults, venues, loading, error, refresh, effectivePoolHex, effectiveFactoryHex, explorerBaseUrl]
   );
 
   return (
     <BoingNativeDexIntegrationContext.Provider value={value}>{children}</BoingNativeDexIntegrationContext.Provider>
   );
+}
+
+/** Safe where the provider may be absent (e.g. modals in tests). */
+export function useOptionalBoingNativeDexIntegration() {
+  return useContext(BoingNativeDexIntegrationContext);
 }
 
 export function useBoingNativeDexIntegration() {
