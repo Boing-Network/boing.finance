@@ -290,8 +290,6 @@ export default function Bridge() {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Bridge | boing.finance" />
         <meta name="twitter:description" content="Bridge tokens between EVM and Solana." />
-        <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
-        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
       </Helmet>
       <div className="relative w-full min-w-0">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">

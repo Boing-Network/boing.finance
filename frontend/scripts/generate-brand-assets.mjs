@@ -2,6 +2,9 @@
  * Rasterize public/assets/boing-logo-mark.svg into favicons, PWA icons, OG image, and legacy paths.
  * Requires: sharp (devDependency). Run from frontend/: `npm run generate-brand-assets`
  * Then: `npm run generate-favicon` (uses boing-logo-mark.png as ICO source).
+ *
+ * The mark must use an outlined path for the letter “B”, not <text>: Sharp/librsvg has no Orbitron font,
+ * so <text> was rasterizing as a generic font and favicons looked like an “old” logo vs the app.
  */
 
 import fs from 'fs';

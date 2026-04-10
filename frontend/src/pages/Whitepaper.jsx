@@ -15,8 +15,6 @@ const Whitepaper = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Whitepaper - boing.finance" />
         <meta name="twitter:description" content="Technical whitepaper for boing.finance - Cross-chain DEX architecture and tokenomics." />
-        <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
-        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
       </Helmet>
       
       <div className="relative w-full min-w-0" style={{ color: 'var(--text-primary)' }}>
