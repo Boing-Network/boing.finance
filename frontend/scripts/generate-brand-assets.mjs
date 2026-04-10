@@ -14,10 +14,18 @@ const publicDir = path.join(__dirname, '..', 'public');
 const assetsDir = path.join(publicDir, 'assets');
 const svgPath = path.join(assetsDir, 'boing-logo-mark.svg');
 
-async function renderSquare(size, outAbsPath) {
+/** Solid tile behind small favicons — transparent + ICO quantization often reads as broken / “green” in tabs. */
+const FAVICON_TILE_BG = { r: 6, g: 8, b: 12, alpha: 1 };
+
+/**
+ * @param {number} size
+ * @param {string} outAbsPath
+ * @param {{ r: number, g: number, b: number, alpha: number }} [background] — default transparent; use FAVICON_TILE_BG for tab icons.
+ */
+async function renderSquare(size, outAbsPath, background = { r: 0, g: 0, b: 0, alpha: 0 }) {
   const buf = fs.readFileSync(svgPath);
   await sharp(buf)
-    .resize(size, size, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .resize(size, size, { fit: 'contain', background })
     .png({ compressionLevel: 9 })
     .toFile(outAbsPath);
   console.log(`[brand-assets] ${path.relative(publicDir, outAbsPath)} (${size}×${size})`);
@@ -117,17 +125,18 @@ async function main() {
   }
 
   await renderSquare(512, path.join(assetsDir, 'boing-logo-mark.png'));
-  await renderSquare(512, path.join(publicDir, 'favicon.png'));
+  await renderSquare(512, path.join(publicDir, 'favicon.png'), FAVICON_TILE_BG);
   await renderSquare(512, path.join(assetsDir, 'boing-profile-twitter.png'));
   await renderSquare(512, path.join(assetsDir, 'boing-logo-light-mode.png'));
   await renderSquare(512, path.join(assetsDir, 'boing-logo-dark-nebula.png'));
   await renderSquare(400, path.join(assetsDir, 'boing-profile-facebook.png'));
   await renderSquare(256, path.join(assetsDir, 'icon-only-transparent.png'));
 
-  await renderSquare(32, path.join(publicDir, 'favicon-32x32.png'));
-  await renderSquare(96, path.join(publicDir, 'favicon-96x96.png'));
-  await renderSquare(180, path.join(publicDir, 'apple-touch-icon.png'));
-  await renderSquare(150, path.join(publicDir, 'mstile-150x150.png'));
+  await renderSquare(16, path.join(publicDir, 'favicon-16x16.png'), FAVICON_TILE_BG);
+  await renderSquare(32, path.join(publicDir, 'favicon-32x32.png'), FAVICON_TILE_BG);
+  await renderSquare(96, path.join(publicDir, 'favicon-96x96.png'), FAVICON_TILE_BG);
+  await renderSquare(180, path.join(publicDir, 'apple-touch-icon.png'), FAVICON_TILE_BG);
+  await renderSquare(150, path.join(publicDir, 'mstile-150x150.png'), FAVICON_TILE_BG);
 
   copySvgFavicon();
   await buildSplash();
