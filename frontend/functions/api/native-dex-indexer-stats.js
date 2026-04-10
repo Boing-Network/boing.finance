@@ -6,6 +6,7 @@
  * Query (optional): `pools_page` + `pools_page_size` (1–500) to paginate `pools[]` only.
  *
  * Env: see `indexer/buildNativeDexIndexerStats.mjs` + `NATIVE_DEX_INDEXER_API_DISABLE`, `BOING_TESTNET_RPC_URL`.
+ * Disk state (`NATIVE_DEX_INDEXER_STATE_PATH`) is CLI-only via `scripts/native-dex-indexer-cli.mjs`.
  */
 
 import { buildNativeDexIndexerStats } from '../../indexer/buildNativeDexIndexerStats.mjs';
@@ -33,7 +34,6 @@ export async function onRequestGet({ env, request }) {
   try {
     const payload = await buildNativeDexIndexerStats({
       env,
-      persistStatePath: null,
       historyStore,
     });
     const url = new URL(request.url);

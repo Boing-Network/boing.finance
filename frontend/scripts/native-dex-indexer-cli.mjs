@@ -13,10 +13,14 @@
 
 import { writeFileSync } from 'node:fs';
 import { buildNativeDexIndexerStats } from '../indexer/buildNativeDexIndexerStats.mjs';
+import { createFsHistoryStore } from '../indexer/historyStoreFs.mjs';
 
 const outPath = (process.env.NATIVE_DEX_INDEXER_OUT_PATH || '').trim();
+const statePath = (process.env.NATIVE_DEX_INDEXER_STATE_PATH || '').trim();
 
-const payload = await buildNativeDexIndexerStats();
+const payload = await buildNativeDexIndexerStats({
+  historyStore: statePath ? createFsHistoryStore(statePath) : null,
+});
 const json = JSON.stringify(payload, null, 2);
 
 if (outPath) {

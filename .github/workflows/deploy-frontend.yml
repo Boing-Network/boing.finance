@@ -46,6 +46,11 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      # postinstall installs sdk deps too; explicit step documents CI requirement for Wrangler’s Function bundle.
+      - name: Install boing-sdk dependencies
+        working-directory: boing.network/boing-sdk
+        run: npm install --no-audit --no-fund
+
       - name: Install Wrangler
         run: npm install -g wrangler@latest
 

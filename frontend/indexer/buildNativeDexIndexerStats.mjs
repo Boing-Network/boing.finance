@@ -1,6 +1,9 @@
 /**
  * Env-aware wrapper around {@link buildNativeDexIndexerStatsForClient} from boing-sdk.
  * CLI, Cloudflare Pages, and optional KV-backed Workers use this module.
+ *
+ * Disk persistence: pass `historyStore` from `historyStoreFs.mjs` (CLI only). Do not use
+ * `node:fs` here so Wrangler can bundle this file for Pages Functions without nodejs_compat.
  */
 
 import {
@@ -31,29 +34,10 @@ function envGet(key, envObj) {
 }
 
 /**
- * @param {string} path
- * @returns {import('boing-sdk').NativeDexIndexerHistoryStore}
- */
-function createFsHistoryStore(path) {
-  return {
-    async get() {
-      const fs = await import('node:fs');
-      if (!fs.existsSync(path)) return null;
-      return fs.readFileSync(path, 'utf8');
-    },
-    async put(body) {
-      const fs = await import('node:fs');
-      fs.writeFileSync(path, body, 'utf8');
-    },
-  };
-}
-
-/**
  * @typedef {{
  *   rpcBaseUrl?: string,
  *   registerFromBlock?: number | null,
  *   logScanBlocks?: number,
- *   persistStatePath?: string | null,
  *   historyStore?: import('boing-sdk').NativeDexIndexerHistoryStore | null,
  *   overrides?: import('boing-sdk').NativeDexIntegrationOverrides,
  *   env?: Record<string, string | undefined>,
@@ -89,14 +73,6 @@ export async function buildNativeDexIndexerStats(options = {}) {
     50_000
   );
 
-  const stateFromEnv = envGet('NATIVE_DEX_INDEXER_STATE_PATH', envObj);
-  const persistStatePath =
-    options.persistStatePath !== undefined
-      ? options.persistStatePath
-      : stateFromEnv !== ''
-        ? stateFromEnv
-        : null;
-
   const mergedOverrides = {
     ...buildNativeDexIntegrationOverridesFromProcessEnv(),
     ...buildDexOverridesFromPlainEnv(envObj || {}),
@@ -104,11 +80,7 @@ export async function buildNativeDexIndexerStats(options = {}) {
   };
   const ov = Object.keys(mergedOverrides).length ? mergedOverrides : undefined;
 
-  /** @type {import('boing-sdk').NativeDexIndexerHistoryStore | null} */
-  let historyStore = options.historyStore ?? null;
-  if (!historyStore && persistStatePath) {
-    historyStore = createFsHistoryStore(persistStatePath);
-  }
+  const historyStore = options.historyStore ?? null;
 
   const client = createClient({ baseUrl: rpcBaseUrl });
 
