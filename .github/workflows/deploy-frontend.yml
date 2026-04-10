@@ -51,6 +51,10 @@ jobs:
         working-directory: boing.network/boing-sdk
         run: npm install --no-audit --no-fund
 
+      - name: Build boing-sdk (dist must include indexer exports for Pages Functions)
+        working-directory: boing.network/boing-sdk
+        run: npm run build
+
       - name: Install Wrangler
         run: npm install -g wrangler@latest
 
