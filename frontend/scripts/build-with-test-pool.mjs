@@ -10,7 +10,7 @@ import process from 'node:process';
 
 const pool =
   process.env.REACT_APP_BOING_NATIVE_AMM_POOL ||
-  '0xffaa1290614441902ba813bf3bd8bf057624e0bd4f16160a9d32cd65d3f4d0c2';
+  '0x7247ddc3180fdc4d3fd1e716229bfa16bad334a07d28aa9fda9ad1bfa7bdacc3';
 
 const env = { ...process.env, REACT_APP_BOING_NATIVE_AMM_POOL: pool };
 const r = spawnSync('npm', ['run', 'build'], { stdio: 'inherit', env, shell: true });

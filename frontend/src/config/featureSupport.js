@@ -90,7 +90,8 @@ export function getFeatureSupport(chainId, options) {
     routerId,
     lockerId,
     swapParityMinimum: Boolean(factoryId && routerId),
-    fullyConfigured: Boolean(factoryId && routerId && lockerId),
+    /** Factory + multihop router; liquidity locker is optional. */
+    fullyConfigured: Boolean(factoryId && routerId),
   };
 
   return {
@@ -179,11 +180,11 @@ export function getBoingL1FullDexReadiness(chainId, options) {
     },
     {
       id: 'multihop_factory',
-      label: 'Multi-pair routing (VM factory + router)',
+      label: 'Multi-pair routing (factory + multihop router)',
       status: fs.nativeVmDex.swapParityMinimum ? 'partial' : 'planned',
       detail: fs.nativeVmDex.swapParityMinimum
-        ? 'Factory and router AccountIds are set; deeper router UX is still evolving.'
-        : 'Publish module ids and set REACT_APP_BOING_NATIVE_VM_DEX_FACTORY / _SWAP_ROUTER.',
+        ? 'Factory and router are set. Automatic multi-pool paths appear after pairs are registered on the factory (operator bootstrap).'
+        : 'Publish factory and multihop router module ids for your network.',
     },
     {
       id: 'locker',
@@ -195,9 +196,10 @@ export function getBoingL1FullDexReadiness(chainId, options) {
     },
     {
       id: 'pools_list',
-      label: 'Pools explorer (Uniswap-style factory list)',
-      status: 'planned',
-      detail: 'This app’s pool directory is EVM-factory backed; native indexing / directory UI is follow-on work.',
+      label: 'Pools explorer (factory list)',
+      status: 'partial',
+      detail:
+        'On Boing testnet, use Swap → Pools for a native pool table and factory pair count. The EVM Pools page lists Solidity-backed pools on other networks.',
     },
     {
       id: 'bridge',

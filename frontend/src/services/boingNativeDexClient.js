@@ -1,3 +1,4 @@
+import { buildNativeDexIntegrationOverridesFromProcessEnv } from 'boing-sdk';
 import { createBoingBrowserRpcClient } from './boingTestnetRpc';
 
 let sharedClient = null;
@@ -13,18 +14,13 @@ export function getSharedBoingClient() {
   return sharedClient;
 }
 
-/** Env overrides for {@link fetchNativeDexIntegrationDefaults} (highest precedence in SDK merge). */
+/**
+ * Build-time + process env overrides for {@link fetchNativeDexIntegrationDefaults}
+ * (pool, factory, multihop router, LP vault/share, and other native DEX ids — see `buildNativeDexIntegrationOverridesFromProcessEnv` in boing-sdk).
+ */
 export function buildNativeDexOverridesFromEnv() {
   try {
-    const pool = (process.env.REACT_APP_BOING_NATIVE_AMM_POOL || '').trim();
-    const fac = (process.env.REACT_APP_BOING_NATIVE_VM_DEX_FACTORY || '').trim();
-    const o = {};
-    if (/^0x[0-9a-fA-F]{64}$/i.test(pool)) {
-      o.nativeCpPoolAccountHex = `0x${pool.slice(2).toLowerCase()}`;
-    }
-    if (/^0x[0-9a-fA-F]{64}$/i.test(fac)) {
-      o.nativeDexFactoryAccountHex = `0x${fac.slice(2).toLowerCase()}`;
-    }
+    const o = buildNativeDexIntegrationOverridesFromProcessEnv();
     return Object.keys(o).length ? o : undefined;
   } catch {
     return undefined;

@@ -73,3 +73,7 @@ Verification on a `boing.network` clone: `npm run print-native-dex-routes` in `e
 
 1. Watch **nativeVm** env vars moving from zero to real ids on testnet builds.
 2. In code, `frontend/src/services/boingNativeDexContracts.js` centralizes module id reads and TODO hooks for future calldata builders.
+
+## Uniswap-style UX parity (Boing VM)
+
+For a product-facing matrix (pool discovery, token picker, charts, multihop, LP positions, mobile polish), see **[boing-vm-uniswap-parity-roadmap.md](./boing-vm-uniswap-parity-roadmap.md)**.

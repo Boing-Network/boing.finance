@@ -189,15 +189,15 @@ export async function boingExpressSendTransaction(provider, txObject, options = 
 }
 
 /**
- * Sign `contract_call` (or any Express tx object), simulate via public RPC, widen `access_list` when the node
- * reports `access_list_covers_suggestion === false`, then submit. Each retry re-prompts signing in the extension.
+ * Sign `contract_call`, simulate, widen access list when the node suggests — stop on first successful simulation
+ * (does not submit). Use for preview-before-broadcast flows.
  *
  * @param {{ request: Function }} provider
- * @param {Record<string, unknown>} txObject — must include `type`, `contract`, `calldata`, and usually `access_list`
+ * @param {Record<string, unknown>} txObject
  * @param {{ maxSimulationRetries?: number }} [options]
- * @returns {Promise<string>} tx hash from `boing_submitTransaction`
+ * @returns {Promise<{ signedHex: string, simulation: Awaited<ReturnType<typeof simulateBoingSignedTransaction>> }>}
  */
-export async function boingExpressContractCallSignSimulateSubmit(provider, txObject, options = {}) {
+export async function boingExpressContractCallSignSimulateUntilOk(provider, txObject, options = {}) {
   if (!provider || typeof provider.request !== 'function') {
     throw new Error('Boing Express provider not available');
   }
@@ -212,15 +212,13 @@ export async function boingExpressContractCallSignSimulateSubmit(provider, txObj
   for (let attempt = 0; attempt < max; attempt += 1) {
     const fullTx = {
       ...base,
-      access_list: { read, write }
+      access_list: { read, write },
     };
     const signedHex = await boingExpressSignTransaction(provider, fullTx);
     lastSim = await simulateBoingSignedTransaction(signedHex);
 
     if (lastSim?.success) {
-      const sub = await submitBoingSignedTransaction(signedHex);
-      if (sub && typeof sub === 'object' && sub.tx_hash) return sub.tx_hash;
-      return String(sub);
+      return { signedHex, simulation: lastSim };
     }
 
     if (lastSim?.access_list_covers_suggestion === false && lastSim?.suggested_access_list) {
@@ -240,4 +238,25 @@ export async function boingExpressContractCallSignSimulateSubmit(provider, txObj
   const e = new Error(`Access list retry limit exceeded (${max})`);
   e.simulation = lastSim;
   throw e;
+}
+
+/**
+ * Sign `contract_call` (or any Express tx object), simulate via public RPC, widen `access_list` when the node
+ * reports `access_list_covers_suggestion === false`, then submit. Each retry re-prompts signing in the extension.
+ *
+ * @param {{ request: Function }} provider
+ * @param {Record<string, unknown>} txObject — must include `type`, `contract`, `calldata`, and usually `access_list`
+ * @param {{ maxSimulationRetries?: number }} [options]
+ * @returns {Promise<string>} tx hash from `boing_submitTransaction`
+ */
+export async function boingExpressContractCallSignSimulateSubmit(provider, txObject, options = {}) {
+  const { signedHex, simulation } = await boingExpressContractCallSignSimulateUntilOk(provider, txObject, options);
+  if (!simulation?.success) {
+    const e = new Error(simulation?.error || 'Simulation failed');
+    e.simulation = simulation;
+    throw e;
+  }
+  const sub = await submitBoingSignedTransaction(signedHex);
+  if (sub && typeof sub === 'object' && sub.tx_hash) return sub.tx_hash;
+  return String(sub);
 }

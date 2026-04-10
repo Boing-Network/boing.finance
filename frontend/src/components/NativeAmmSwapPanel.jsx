@@ -40,20 +40,61 @@ function parsePositiveBigInt(raw) {
   }
 }
 
+function shortTokenHex(h) {
+  if (!h || typeof h !== 'string') return '—';
+  const t = h.trim();
+  if (t.length < 18) return t || '—';
+  return `${t.slice(0, 10)}…${t.slice(-4)}`;
+}
+
+/**
+ * @param {string} hex
+ * @param {Array<{ id: string, symbol?: string, name?: string }>} indexerTokens
+ */
+function tokenLegLabel(hex, indexerTokens) {
+  const id = (hex || '').trim().toLowerCase();
+  if (!id) return '—';
+  const e = (indexerTokens || []).find((t) => (t.id || '').toLowerCase() === id);
+  if (e?.symbol?.trim()) return e.symbol.trim();
+  const nm = (e?.name || '').trim();
+  if (nm) return nm.length > 14 ? `${nm.slice(0, 12)}…` : nm;
+  return shortTokenHex(hex);
+}
+
 /**
  * In-app swap against the configured native CP pool (`contracts` nativeConstantProductPool: env override or canonical testnet id).
- * Requires Boing Express on chain 6913. Reserves are ledger units (u64-safe); no ERC-20 legs.
+ * Requires Boing Express on chain 6913. Reserves are integer pool units (u64-safe); no ERC-20 legs.
  * @param {{ slippagePercent?: number, defaultOpenAddLiquidity?: boolean }} props
  */
-export default function NativeAmmSwapPanel({ slippagePercent = 0.5, defaultOpenAddLiquidity = false }) {
+export default function NativeAmmSwapPanel({
+  slippagePercent = 0.5,
+  defaultOpenAddLiquidity = false,
+  embedded = false,
+}) {
   const { chainId, walletType, isConnected, getWalletProvider, account } = useWallet();
   const {
     effectivePoolHex: pool,
     venues,
+    indexerPickerTokens,
     loading: dexIntegrationLoading,
     error: dexIntegrationError,
     refresh: refreshDexIntegration,
   } = useBoingNativeDexIntegration();
+
+  const venueForPool = useMemo(() => {
+    const ph = (pool || '').trim().toLowerCase();
+    if (!ph) return null;
+    return venues.find((v) => (v.poolHex || '').toLowerCase() === ph) ?? venues[0] ?? null;
+  }, [venues, pool]);
+
+  const legA = useMemo(
+    () => (venueForPool ? tokenLegLabel(venueForPool.tokenAHex, indexerPickerTokens) : 'A'),
+    [venueForPool, indexerPickerTokens]
+  );
+  const legB = useMemo(
+    () => (venueForPool ? tokenLegLabel(venueForPool.tokenBHex, indexerPickerTokens) : 'B'),
+    [venueForPool, indexerPickerTokens]
+  );
 
   const [reserveA, setReserveA] = useState(null);
   const [reserveB, setReserveB] = useState(null);
@@ -213,18 +254,22 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5, defaultOpenA
   return (
     <section
       data-testid="native-amm-panel"
-      className="mb-6 rounded-xl border p-5 text-left"
-      style={{
-        backgroundColor: 'var(--bg-card)',
-        borderColor: 'rgba(59, 130, 246, 0.45)',
-      }}
+      className={embedded ? 'mb-0 p-0 text-left' : 'mb-6 rounded-xl border p-5 text-left'}
+      style={
+        embedded
+          ? undefined
+          : {
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'rgba(59, 130, 246, 0.45)',
+            }
+      }
     >
       <h2 className="text-lg font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
-        Native constant-product pool (Boing VM)
+        {embedded ? 'Pool swap' : 'Native constant-product pool (Boing VM)'}
       </h2>
       <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-        Trade against the public native constant-product pool for this deployment. Use <strong>whole-number</strong> ledger
-        units only (≤ u64 for correct VM math). After you click swap, <strong>Boing Express</strong> will ask you to sign;
+        Trade against the public native constant-product pool for this deployment. Use <strong>whole-number</strong>{' '}
+        amounts only (≤ u64 for correct pool math). After you click swap, <strong>Boing Express</strong> will ask you to sign;
         the node may request a <strong>second signature</strong> if it widens the access list. Pool bytecode is{' '}
         <strong>immutable</strong> in this MVP. More flows:{' '}
         <Link to="/boing/native-vm" className="text-blue-400 underline text-sm">
@@ -234,12 +279,12 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5, defaultOpenA
       </p>
 
       <div className="flex flex-wrap gap-2 mb-3 text-xs" style={{ color: 'var(--text-tertiary)' }}>
-        <span>
-          Reserve A:{' '}
+        <span title={venueForPool?.tokenAHex}>
+          Reserve <span className="font-semibold text-[var(--text-secondary)]">{legA}</span>:{' '}
           <strong className="text-[var(--text-primary)]">{reserveA != null ? reserveA.toString() : '—'}</strong>
         </span>
-        <span>
-          Reserve B:{' '}
+        <span title={venueForPool?.tokenBHex}>
+          Reserve <span className="font-semibold text-[var(--text-secondary)]">{legB}</span>:{' '}
           <strong className="text-[var(--text-primary)]">{reserveB != null ? reserveB.toString() : '—'}</strong>
         </span>
         <span className="ml-auto flex flex-wrap gap-2 items-center">
@@ -292,13 +337,17 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5, defaultOpenA
               color: 'var(--text-primary)',
             }}
           >
-            <option value="a_to_b">A → B (sell A for B)</option>
-            <option value="b_to_a">B → A (sell B for A)</option>
+            <option value="a_to_b">
+              {legA} → {legB} (sell {legA} for {legB})
+            </option>
+            <option value="b_to_a">
+              {legB} → {legA} (sell {legB} for {legA})
+            </option>
           </select>
         </div>
         <div>
           <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
-            Amount in (integer units)
+            Amount in — sell {direction === 'a_to_b' ? legA : legB} (integer units)
           </label>
           <input
             type="text"
@@ -319,8 +368,8 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5, defaultOpenA
 
       {amountOutEst != null && (
         <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-          Est. out: <strong>{amountOutEst.toString()}</strong> · Min out ({slippagePercent}% slip):{' '}
-          <strong>{minOutBn != null ? minOutBn.toString() : '—'}</strong>
+          Est. out ({direction === 'a_to_b' ? legB : legA}): <strong>{amountOutEst.toString()}</strong> · Min out (
+          {slippagePercent}% slip): <strong>{minOutBn != null ? minOutBn.toString() : '—'}</strong>
           {sdkRoute != null && (
             <span className="block text-xs mt-1.5" style={{ color: 'var(--text-tertiary)' }}>
               <code className="text-[10px]">boing-sdk</code> routing: {sdkRoute.hops.length} hop
@@ -363,13 +412,13 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5, defaultOpenA
           Add liquidity (reserve A + B)
         </summary>
         <p className="text-xs mt-2 mb-3" style={{ color: 'var(--text-tertiary)' }}>
-          Increments on-chain ledger reserves (selector <code className="text-[10px]">0x11</code>). No LP
-          shares in this MVP pool.
+          Increments on-chain pool reserves (selector <code className="text-[10px]">0x11</code>). No LP shares in this MVP
+          pool.
         </p>
         <div className="grid gap-3 sm:grid-cols-2 mb-3">
           <div>
             <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
-              Add reserve A (integer)
+              Add reserve {legA} (integer)
             </label>
             <input
               type="text"
@@ -386,7 +435,7 @@ export default function NativeAmmSwapPanel({ slippagePercent = 0.5, defaultOpenA
           </div>
           <div>
             <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
-              Add reserve B (integer)
+              Add reserve {legB} (integer)
             </label>
             <input
               type="text"

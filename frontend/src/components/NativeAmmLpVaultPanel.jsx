@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
@@ -14,6 +14,7 @@ import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import { getContractAddress } from '../config/contracts';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
+import { buildBoingExplorerAccountUrl } from '../config/boingExplorerUrls';
 import { normalizeBoingFaucetAccountHex } from '../services/boingTestnetRpc';
 import { boingExpressContractCallSignSimulateSubmit } from '../services/boingExpressNativeTx';
 import { getWindowBoingProvider } from '../utils/boingWalletDiscovery';
@@ -61,20 +62,41 @@ function parsePositiveBigInt(raw) {
  * Boing Express UI for native AMM LP vault (`configure`, `deposit_add`) and LP share token `transfer`.
  * Checklist A7.4 — prefills pool / vault / share from `contracts` + env (`REACT_APP_BOING_NATIVE_AMM_LP_*`).
  *
- * @param {{ compact?: boolean }} props
+ * @param {{ compact?: boolean, embedded?: boolean }} props
  */
-export default function NativeAmmLpVaultPanel({ compact = false }) {
+export default function NativeAmmLpVaultPanel({ compact = false, embedded = false }) {
   const { chainId, walletType, isConnected, getWalletProvider, account } = useWallet();
-  const { effectivePoolHex } = useBoingNativeDexIntegration();
+  const { effectivePoolHex, effectiveLpVaultHex, effectiveLpShareHex, vaultPoolMappings, explorerBaseUrl } =
+    useBoingNativeDexIntegration();
 
   const defaultPool =
     effectivePoolHex || getContractAddress(BOING_NATIVE_L1_CHAIN_ID, 'nativeConstantProductPool') || '';
-  const defaultVault = getContractAddress(BOING_NATIVE_L1_CHAIN_ID, 'nativeAmmLpVault') || '';
-  const defaultShare = getContractAddress(BOING_NATIVE_L1_CHAIN_ID, 'nativeAmmLpShareToken') || '';
+  const defaultVault =
+    effectiveLpVaultHex || getContractAddress(BOING_NATIVE_L1_CHAIN_ID, 'nativeAmmLpVault') || '';
+  const defaultShare =
+    effectiveLpShareHex || getContractAddress(BOING_NATIVE_L1_CHAIN_ID, 'nativeAmmLpShareToken') || '';
 
   const [poolHex, setPoolHex] = useState(() => normalizeHex32Input(defaultPool));
   const [vaultHex, setVaultHex] = useState(() => normalizeHex32Input(defaultVault));
   const [shareHex, setShareHex] = useState(() => normalizeHex32Input(defaultShare));
+
+  useEffect(() => {
+    const p = normalizeHex32Input(effectivePoolHex || '');
+    if (!isValidAccountHex32(p)) return;
+    setPoolHex((prev) => ((prev || '').trim() === '' || !isValidAccountHex32(prev) ? p : prev));
+  }, [effectivePoolHex]);
+
+  useEffect(() => {
+    const v = normalizeHex32Input(effectiveLpVaultHex || '');
+    if (!isValidAccountHex32(v)) return;
+    setVaultHex((prev) => ((prev || '').trim() === '' || !isValidAccountHex32(prev) ? v : prev));
+  }, [effectiveLpVaultHex]);
+
+  useEffect(() => {
+    const s = normalizeHex32Input(effectiveLpShareHex || '');
+    if (!isValidAccountHex32(s)) return;
+    setShareHex((prev) => ((prev || '').trim() === '' || !isValidAccountHex32(prev) ? s : prev));
+  }, [effectiveLpShareHex]);
 
   const [depAmountA, setDepAmountA] = useState('');
   const [depAmountB, setDepAmountB] = useState('');
@@ -87,6 +109,13 @@ export default function NativeAmmLpVaultPanel({ compact = false }) {
   const [busy, setBusy] = useState(false);
 
   const senderHex = useMemo(() => normalizeBoingFaucetAccountHex(account), [account]);
+
+  const linkedPoolsForVault = useMemo(() => {
+    const v = normalizeHex32Input(vaultHex);
+    if (!isValidAccountHex32(v) || !vaultPoolMappings.length) return [];
+    const vn = v.toLowerCase();
+    return vaultPoolMappings.filter((m) => m.vaultHex === vn);
+  }, [vaultHex, vaultPoolMappings]);
 
   const canSubmit = useMemo(() => {
     return (
@@ -194,14 +223,18 @@ export default function NativeAmmLpVaultPanel({ compact = false }) {
 
   return (
     <section
-      className={`rounded-xl border p-5 text-left ${compact ? 'mt-4' : 'mb-6'}`}
-      style={{
-        backgroundColor: 'var(--bg-card)',
-        borderColor: 'rgba(91, 33, 182, 0.35)',
-      }}
+      className={`text-left ${embedded ? 'mb-0 p-0 rounded-none border-0 shadow-none' : `rounded-xl border p-5 ${compact ? 'mt-4' : 'mb-6'}`}`}
+      style={
+        embedded
+          ? undefined
+          : {
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'rgba(91, 33, 182, 0.35)',
+            }
+      }
     >
       <h2 className="text-lg font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
-        Native LP vault &amp; share token
+        {embedded ? 'Your liquidity (vault and share token)' : 'Native LP vault and share token'}
       </h2>
       <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
         <strong>Vault</strong> <code className="text-xs">configure</code> wires pool + share token;{' '}
@@ -209,7 +242,7 @@ export default function NativeAmmLpVaultPanel({ compact = false }) {
         mints vault shares. <strong>Share transfer</strong> moves LP share balances on the share-token contract (same
         access list as CLI §7h).
       </p>
-      {hint}
+      {!embedded && hint}
 
       <div className="grid gap-3 sm:grid-cols-1 mb-4">
         <label className="block text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>
@@ -261,6 +294,32 @@ export default function NativeAmmLpVaultPanel({ compact = false }) {
           spellCheck={false}
         />
       </div>
+
+      {linkedPoolsForVault.length > 0 && (
+        <div
+          className="mb-4 rounded-lg border px-3 py-2 text-xs"
+          style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-secondary)' }}
+        >
+          <p className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
+            Pools linked to this vault (env map)
+          </p>
+          <ul className="list-disc pl-4 space-y-1 font-mono" style={{ color: 'var(--text-secondary)' }}>
+            {linkedPoolsForVault.map((m) => (
+              <li key={m.poolHex}>
+                <a
+                  href={buildBoingExplorerAccountUrl(explorerBaseUrl, m.poolHex)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-cyan-400 hover:underline"
+                >
+                  {m.poolHex.slice(0, 12)}…{m.poolHex.slice(-6)}
+                </a>
+                {m.label ? <span className="text-[var(--text-tertiary)]"> — {m.label}</span> : null}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="space-y-4 border-t border-border pt-4">
         <div>
@@ -382,7 +441,7 @@ export default function NativeAmmLpVaultPanel({ compact = false }) {
         </div>
       </div>
 
-      {!compact && (
+      {!compact && !embedded && (
         <p className="text-xs mt-4" style={{ color: 'var(--text-tertiary)' }}>
           More tools:{' '}
           <Link to="/liquidity" className="text-cyan-400 underline">

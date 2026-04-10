@@ -13,8 +13,9 @@
  */
 
 /** @type {string | null} `0x` + 64 hex on public testnet; set `null` to disable in-app native AMM until configured */
+/** Live CP pool on `https://testnet-rpc.boing.network` — mirror `boing-sdk` / operator record Appendix B. */
 export const CANONICAL_BOING_TESTNET_NATIVE_CP_POOL_HEX =
-  '0xffaa1290614441902ba813bf3bd8bf057624e0bd4f16160a9d32cd65d3f4d0c2';
+  '0x7247ddc3180fdc4d3fd1e716229bfa16bad334a07d28aa9fda9ad1bfa7bdacc3';
 
 /**
  * @returns {string} normalized pool id or empty string if unset / invalid

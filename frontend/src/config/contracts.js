@@ -1,3 +1,11 @@
+import {
+  CANONICAL_BOING_TESTNET_NATIVE_AMM_LP_VAULT_HEX,
+  CANONICAL_BOING_TESTNET_NATIVE_DEX_FACTORY_HEX,
+  CANONICAL_BOING_TESTNET_NATIVE_DEX_LEDGER_ROUTER_V2_HEX,
+  CANONICAL_BOING_TESTNET_NATIVE_DEX_LEDGER_ROUTER_V3_HEX,
+  CANONICAL_BOING_TESTNET_NATIVE_DEX_MULTIHOP_SWAP_ROUTER_HEX,
+  CANONICAL_BOING_TESTNET_NATIVE_LP_SHARE_TOKEN_HEX,
+} from 'boing-sdk';
 import { getCanonicalBoingTestnetNativeAmmPoolHex } from './boingCanonicalTestnetPool';
 
 const BOING_VM_ZERO_32 = '0x0000000000000000000000000000000000000000000000000000000000000000';
@@ -24,6 +32,8 @@ export const CONTRACTS = {
       dexFactory: BOING_VM_ZERO_32,
       liquidityLocker: BOING_VM_ZERO_32,
       swapRouter: BOING_VM_ZERO_32,
+      ledgerRouterV2: BOING_VM_ZERO_32,
+      ledgerRouterV3: BOING_VM_ZERO_32,
     },
     tokens: {},
     pairs: {},
@@ -412,6 +422,8 @@ export const CONTRACTS = {
       ['dexFactory', process.env.REACT_APP_BOING_NATIVE_VM_DEX_FACTORY],
       ['liquidityLocker', process.env.REACT_APP_BOING_NATIVE_VM_LIQUIDITY_LOCKER],
       ['swapRouter', process.env.REACT_APP_BOING_NATIVE_VM_SWAP_ROUTER],
+      ['ledgerRouterV2', process.env.REACT_APP_BOING_NATIVE_DEX_LEDGER_ROUTER_V2],
+      ['ledgerRouterV3', process.env.REACT_APP_BOING_NATIVE_DEX_LEDGER_ROUTER_V3],
     ];
     for (const [key, envRaw] of entries) {
       if (typeof envRaw !== 'string' || !envRaw.trim()) continue;
@@ -419,6 +431,28 @@ export const CONTRACTS = {
       if (/^0x[0-9a-fA-F]{64}$/i.test(e)) {
         vm[key] = `0x${e.slice(2).toLowerCase()}`;
       }
+    }
+  } catch {
+    /* ignore */
+  }
+})();
+
+/** Fill 6913 native DEX AccountIds from `boing-sdk` embedded testnet canon when still zero (env wins above). */
+(function applyBoingNativeDexEmbeddedCanonical6913() {
+  try {
+    if (!CONTRACTS[6913]) return;
+    const z = BOING_VM_ZERO_32;
+    const vm = CONTRACTS[6913].nativeVm;
+    if (!vm) return;
+    if (vm.dexFactory === z) vm.dexFactory = CANONICAL_BOING_TESTNET_NATIVE_DEX_FACTORY_HEX;
+    if (vm.swapRouter === z) vm.swapRouter = CANONICAL_BOING_TESTNET_NATIVE_DEX_MULTIHOP_SWAP_ROUTER_HEX;
+    if (vm.ledgerRouterV2 === z) vm.ledgerRouterV2 = CANONICAL_BOING_TESTNET_NATIVE_DEX_LEDGER_ROUTER_V2_HEX;
+    if (vm.ledgerRouterV3 === z) vm.ledgerRouterV3 = CANONICAL_BOING_TESTNET_NATIVE_DEX_LEDGER_ROUTER_V3_HEX;
+    if (CONTRACTS[6913].nativeAmmLpVault === z) {
+      CONTRACTS[6913].nativeAmmLpVault = CANONICAL_BOING_TESTNET_NATIVE_AMM_LP_VAULT_HEX;
+    }
+    if (CONTRACTS[6913].nativeAmmLpShareToken === z) {
+      CONTRACTS[6913].nativeAmmLpShareToken = CANONICAL_BOING_TESTNET_NATIVE_LP_SHARE_TOKEN_HEX;
     }
   } catch {
     /* ignore */
@@ -450,7 +484,7 @@ export const getContractAddress = (chainId, contractName) => {
 
 /**
  * Non-zero Boing VM module id (32-byte AccountId hex) for chain 6913, or null.
- * @param {'dexFactory'|'liquidityLocker'|'swapRouter'} moduleKey
+ * @param {'dexFactory'|'liquidityLocker'|'swapRouter'|'ledgerRouterV2'|'ledgerRouterV3'} moduleKey
  */
 export function getBoingNativeVmModuleId(chainId, moduleKey) {
   if (Number(chainId) !== 6913) return null;

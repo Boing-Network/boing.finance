@@ -23,6 +23,7 @@ import {
 import { getWindowBoingProvider } from '../../utils/boingWalletDiscovery';
 import { buildContractDeployMetaTx } from 'boing-sdk';
 import NativeAmmLpVaultPanel from '../../components/NativeAmmLpVaultPanel';
+import NativeDexLedgerForwardPanel from '../../components/NativeDexLedgerForwardPanel';
 import {
   BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL,
   BOING_NETWORK_RPC_API_SPEC_URL,
@@ -393,6 +394,20 @@ export default function BoingNativeVm() {
         </PageCard>
 
         <NativeAmmLpVaultPanel />
+
+        <div className="mb-6">
+          <PageCard className="mb-0">
+            <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+              Advanced — integrator DEX calls
+            </h3>
+            <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+              Optional <code className="text-xs">contract_call</code> builders for v5-style pool operations (explicit
+              output recipients). Most users should trade on the Swap page; this section is for protocol-aligned tooling
+              and power users.
+            </p>
+            <NativeDexLedgerForwardPanel />
+          </PageCard>
+        </div>
 
         <PageCard className="mb-6">
           <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>

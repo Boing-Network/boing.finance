@@ -75,6 +75,8 @@ jobs:
         env:
           REACT_APP_ENV: production
           REACT_APP_BACKEND_URL: https://boing-api-prod.nico-chikuji.workers.dev
+          # Optional repo variable: e.g. /api/native-dex-indexer-stats or https://…/stats (Worker)
+          REACT_APP_BOING_NATIVE_DEX_INDEXER_STATS_URL: ${{ vars.REACT_APP_BOING_NATIVE_DEX_INDEXER_STATS_URL }}
           CI: false
 
       - name: Build for Staging
@@ -84,6 +86,7 @@ jobs:
         env:
           REACT_APP_ENV: staging
           REACT_APP_BACKEND_URL: https://boing-api-staging.nico-chikuji.workers.dev
+          REACT_APP_BOING_NATIVE_DEX_INDEXER_STATS_URL: ${{ vars.REACT_APP_BOING_NATIVE_DEX_INDEXER_STATS_URL_STAGING }}
           CI: false
 
       - name: Deploy to Cloudflare Pages (Production)
@@ -92,7 +95,7 @@ jobs:
         run: |
           echo "🚀 Deploying to Cloudflare Pages (Production)..."
           echo "Project: boing-finance-prod"
-          echo "Note: Project will be auto-created if it doesn't exist"
+          echo "Note: wrangler.toml in frontend/ supplies KV bindings (e.g. NATIVE_DEX_INDEXER_KV) for Functions."
           wrangler pages deploy dist \
             --project-name=boing-finance-prod \
             --branch=main \

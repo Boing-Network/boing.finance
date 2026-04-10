@@ -9,6 +9,15 @@ import { getContractAddress, getBoingNativeVmModuleId } from '../config/contract
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { buildNativeDexOverridesFromEnv, getSharedBoingClient } from '../services/boingNativeDexClient';
 import { fetchNativeCpPoolTokenRow } from '../services/boingNativePoolTokens';
+import {
+  extractTokenDirectoryFromIndexer,
+  fetchRemoteDexIndexerStats,
+  updateLocalReserveSnapshotsAndScore,
+} from '../services/nativeDexIndexerClient';
+import { fetchOracleUsdPerUnitMap, loadNativeDexOracleMap } from '../services/nativeDexOracleUsd';
+import { appendReserveHistorySamples, getReserveSamplingIntervalMs } from '../services/nativeDexReserveHistory';
+import { loadVaultPoolMappings } from '../services/nativeDexVaultPoolMap';
+import { mergeRemoteIndexerWithDirectoryPools } from '../services/nativeDexIndexerDirectoryMerge';
 import { BOING_OBSERVER_BASE_URL } from '../config/boingExplorerUrls';
 
 /** @typedef {import('boing-sdk').NativeDexIntegrationDefaults} NativeDexIntegrationDefaults */
@@ -17,7 +26,7 @@ import { BOING_OBSERVER_BASE_URL } from '../config/boingExplorerUrls';
 const BoingNativeDexIntegrationContext = createContext(null);
 
 /**
- * Fetches `boing_getNetworkInfo` DEX defaults and hydrates CP venues for SDK routing (single pool today; extensible to directory logs).
+ * Fetches `boing_getNetworkInfo` DEX defaults, factory pair count (light snapshot), and hydrates CP venues for routing.
  */
 export function BoingNativeDexIntegrationProvider({ children }) {
   const { chainId } = useWallet();
@@ -25,11 +34,34 @@ export function BoingNativeDexIntegrationProvider({ children }) {
   const watchChainIdRef = useRef(watchChainId);
   watchChainIdRef.current = watchChainId;
   const fetchGenRef = useRef(0);
+  const venuesRef = useRef(/** @type {CpPoolVenue[]} */ ([]));
+  const softHydrateLockRef = useRef(false);
 
   const [defaults, setDefaults] = useState(null);
   const [venues, setVenues] = useState(/** @type {CpPoolVenue[]} */ ([]));
+  /** Factory `pairs_count` + chain head from a light directory snapshot (no log scan). */
+  const [directoryMeta, setDirectoryMeta] = useState(
+    /** @type {{ pairsCount: string | null; headHeight: number | null }} */ ({ pairsCount: null, headHeight: null })
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(/** @type {Error | null} */ (null));
+  const [dexDirectoryExtras, setDexDirectoryExtras] = useState({
+    registerPairLogCount: null,
+    registerLogScanFromBlock: null,
+  });
+  const [remoteIndexerStats, setRemoteIndexerStats] = useState(null);
+  const [localPoolActivity, setLocalPoolActivity] = useState(/** @type {Record<string, { activityScore: string, hadPrior: boolean }>} */ ({}));
+  const [oracleUsdByToken, setOracleUsdByToken] = useState(/** @type {Record<string, string>} */ ({}));
+  const [oracleUsdLoading, setOracleUsdLoading] = useState(false);
+  const [oracleUsdError, setOracleUsdError] = useState(/** @type {string | null} */ (null));
+
+  const vaultPoolMappings = useMemo(() => loadVaultPoolMappings(), []);
+  const oracleConfig = useMemo(() => loadNativeDexOracleMap(), []);
+  const reserveSampleIntervalMs = useMemo(() => getReserveSamplingIntervalMs(), []);
+  const indexerPickerTokens = useMemo(
+    () => extractTokenDirectoryFromIndexer(remoteIndexerStats),
+    [remoteIndexerStats]
+  );
 
   const staticPoolHex = useMemo(
     () => getContractAddress(BOING_NATIVE_L1_CHAIN_ID, 'nativeConstantProductPool') || '',
@@ -46,6 +78,10 @@ export function BoingNativeDexIntegrationProvider({ children }) {
     if (startedFor !== BOING_NATIVE_L1_CHAIN_ID) {
       setDefaults(null);
       setVenues([]);
+      setDirectoryMeta({ pairsCount: null, headHeight: null });
+      setDexDirectoryExtras({ registerPairLogCount: null, registerLogScanFromBlock: null });
+      setRemoteIndexerStats(null);
+      setLocalPoolActivity({});
       setError(null);
       setLoading(false);
       return;
@@ -60,9 +96,29 @@ export function BoingNativeDexIntegrationProvider({ children }) {
       if (watchChainIdRef.current !== startedFor) return;
       setDefaults(d);
 
+      try {
+        const lightSnap = await fetchNativeDexDirectorySnapshot(client, { overrides });
+        if (watchChainIdRef.current !== startedFor) return;
+        setDirectoryMeta({
+          pairsCount:
+            lightSnap.pairsCount != null && typeof lightSnap.pairsCount === 'bigint'
+              ? lightSnap.pairsCount.toString()
+              : lightSnap.pairsCount != null
+                ? String(lightSnap.pairsCount)
+                : null,
+          headHeight: typeof lightSnap.headHeight === 'number' ? lightSnap.headHeight : null,
+        });
+      } catch {
+        if (watchChainIdRef.current !== startedFor) return;
+        setDirectoryMeta({ pairsCount: null, headHeight: null });
+      }
+
       const poolHex = d.nativeCpPoolAccountHex;
       if (!poolHex) {
         setVenues([]);
+        setDexDirectoryExtras({ registerPairLogCount: null, registerLogScanFromBlock: null });
+        setRemoteIndexerStats(null);
+        setLocalPoolActivity({});
         return;
       }
 
@@ -81,6 +137,10 @@ export function BoingNativeDexIntegrationProvider({ children }) {
           });
           if (watchChainIdRef.current !== startedFor) return;
           const logs = snap.registerLogs;
+          setDexDirectoryExtras({
+            registerPairLogCount: Array.isArray(logs) ? logs.length : null,
+            registerLogScanFromBlock: dirFrom,
+          });
           if (logs?.length) {
             const rows = logs.map((l) => ({
               poolHex: l.poolHex,
@@ -96,16 +156,35 @@ export function BoingNativeDexIntegrationProvider({ children }) {
             v = [...byPool.values()];
           }
         } catch {
+          setDexDirectoryExtras({ registerPairLogCount: null, registerLogScanFromBlock: null });
           /* keep canonical-pool venues only */
         }
+      } else {
+        setDexDirectoryExtras({ registerPairLogCount: null, registerLogScanFromBlock: null });
       }
 
       if (watchChainIdRef.current !== startedFor) return;
+      setLocalPoolActivity(updateLocalReserveSnapshotsAndScore(v));
+      appendReserveHistorySamples(v);
+      try {
+        let stats = await fetchRemoteDexIndexerStats();
+        const dirBase = (process.env.REACT_APP_BOING_NATIVE_DEX_DIRECTORY_BASE_URL || '').trim();
+        if (dirBase) {
+          stats = await mergeRemoteIndexerWithDirectoryPools(stats, dirBase);
+        }
+        setRemoteIndexerStats(stats);
+      } catch {
+        setRemoteIndexerStats(null);
+      }
       setVenues(v);
     } catch (e) {
       if (watchChainIdRef.current !== startedFor) return;
       setDefaults(null);
       setVenues([]);
+      setDirectoryMeta({ pairsCount: null, headHeight: null });
+      setDexDirectoryExtras({ registerPairLogCount: null, registerLogScanFromBlock: null });
+      setRemoteIndexerStats(null);
+      setLocalPoolActivity({});
       setError(e instanceof Error ? e : new Error(String(e)));
     } finally {
       if (fetchGenRef.current === myGen) {
@@ -115,8 +194,97 @@ export function BoingNativeDexIntegrationProvider({ children }) {
   }, []);
 
   useEffect(() => {
+    venuesRef.current = venues;
+  }, [venues]);
+
+  const refreshVenuesSoft = useCallback(async () => {
+    if (watchChainIdRef.current !== BOING_NATIVE_L1_CHAIN_ID) return;
+    const rows = venuesRef.current;
+    if (!rows.length) return;
+    if (softHydrateLockRef.current) return;
+    softHydrateLockRef.current = true;
+    try {
+      const client = getSharedBoingClient();
+      const minimal = rows.map((v) => ({
+        poolHex: v.poolHex,
+        tokenAHex: v.tokenAHex,
+        tokenBHex: v.tokenBHex,
+      }));
+      const v2 = await hydrateCpPoolVenuesFromRpc(client, minimal, { concurrency: 2 });
+      if (watchChainIdRef.current !== BOING_NATIVE_L1_CHAIN_ID) return;
+      appendReserveHistorySamples(v2);
+      setLocalPoolActivity(updateLocalReserveSnapshotsAndScore(v2));
+      setVenues(v2);
+    } catch {
+      /* ignore */
+    } finally {
+      softHydrateLockRef.current = false;
+    }
+  }, []);
+
+  useEffect(() => {
     void refresh();
   }, [watchChainId, refresh]);
+
+  const tokenSetForOracle = useMemo(() => {
+    const { byToken } = oracleConfig;
+    if (!byToken.size || !venues.length) return [];
+    /** @type {Set<string>} */
+    const out = new Set();
+    for (const v of venues) {
+      for (const t of [v.tokenAHex, v.tokenBHex]) {
+        const k = (t || '').trim().toLowerCase();
+        if (byToken.has(k)) out.add(k);
+      }
+    }
+    return [...out].sort();
+  }, [venues, oracleConfig]);
+
+  useEffect(() => {
+    if (watchChainId !== BOING_NATIVE_L1_CHAIN_ID) {
+      setOracleUsdByToken({});
+      setOracleUsdLoading(false);
+      setOracleUsdError(null);
+      return;
+    }
+    if (tokenSetForOracle.length === 0) {
+      setOracleUsdByToken({});
+      setOracleUsdLoading(false);
+      setOracleUsdError(null);
+      return;
+    }
+    const ac = new AbortController();
+    const tid = setTimeout(() => {
+      setOracleUsdLoading(true);
+      setOracleUsdError(null);
+      void fetchOracleUsdPerUnitMap(tokenSetForOracle, oracleConfig, { signal: ac.signal })
+        .then((m) => {
+          if (!ac.signal.aborted) setOracleUsdByToken(m);
+        })
+        .catch(() => {
+          if (!ac.signal.aborted) {
+            setOracleUsdByToken({});
+            setOracleUsdError('CoinGecko oracle fetch failed');
+          }
+        })
+        .finally(() => {
+          if (!ac.signal.aborted) setOracleUsdLoading(false);
+        });
+    }, 400);
+    return () => {
+      clearTimeout(tid);
+      ac.abort();
+    };
+  }, [watchChainId, tokenSetForOracle.join('|'), oracleConfig]);
+
+  useEffect(() => {
+    if (reserveSampleIntervalMs <= 0 || watchChainId !== BOING_NATIVE_L1_CHAIN_ID) return undefined;
+    const id = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+      void refreshVenuesSoft();
+    }, reserveSampleIntervalMs);
+    return () => clearInterval(id);
+  }, [watchChainId, reserveSampleIntervalMs, refreshVenuesSoft]);
 
   const effectivePoolHex = useMemo(() => {
     const fromRpc = defaults?.nativeCpPoolAccountHex;
@@ -129,6 +297,36 @@ export function BoingNativeDexIntegrationProvider({ children }) {
     if (fromRpc) return fromRpc;
     return staticFactoryHex || '';
   }, [defaults, staticFactoryHex]);
+
+  const effectiveMultihopRouterHex = useMemo(() => {
+    const fromRpc = defaults?.nativeDexMultihopSwapRouterAccountHex;
+    if (fromRpc) return fromRpc;
+    return getBoingNativeVmModuleId(BOING_NATIVE_L1_CHAIN_ID, 'swapRouter') || '';
+  }, [defaults]);
+
+  const effectiveLedgerRouterV2Hex = useMemo(() => {
+    const fromRpc = defaults?.nativeDexLedgerRouterV2AccountHex;
+    if (fromRpc) return fromRpc;
+    return getBoingNativeVmModuleId(BOING_NATIVE_L1_CHAIN_ID, 'ledgerRouterV2') || '';
+  }, [defaults]);
+
+  const effectiveLedgerRouterV3Hex = useMemo(() => {
+    const fromRpc = defaults?.nativeDexLedgerRouterV3AccountHex;
+    if (fromRpc) return fromRpc;
+    return getBoingNativeVmModuleId(BOING_NATIVE_L1_CHAIN_ID, 'ledgerRouterV3') || '';
+  }, [defaults]);
+
+  const effectiveLpVaultHex = useMemo(() => {
+    const fromRpc = defaults?.nativeAmmLpVaultAccountHex;
+    if (fromRpc) return fromRpc;
+    return getContractAddress(BOING_NATIVE_L1_CHAIN_ID, 'nativeAmmLpVault') || '';
+  }, [defaults]);
+
+  const effectiveLpShareHex = useMemo(() => {
+    const fromRpc = defaults?.nativeLpShareTokenAccountHex;
+    if (fromRpc) return fromRpc;
+    return getContractAddress(BOING_NATIVE_L1_CHAIN_ID, 'nativeAmmLpShareToken') || '';
+  }, [defaults]);
 
   const explorerBaseUrl = useMemo(() => {
     try {
@@ -151,16 +349,55 @@ export function BoingNativeDexIntegrationProvider({ children }) {
     () => ({
       defaults,
       venues,
+      directoryMeta,
       loading,
       error,
       refresh,
       effectivePoolHex,
       effectiveFactoryHex,
+      effectiveMultihopRouterHex,
+      effectiveLedgerRouterV2Hex,
+      effectiveLedgerRouterV3Hex,
+      effectiveLpVaultHex,
+      effectiveLpShareHex,
       explorerBaseUrl,
       poolSource: defaults?.poolSource ?? null,
       factorySource: defaults?.factorySource ?? null,
+      dexDirectoryExtras,
+      remoteIndexerStats,
+      indexerPickerTokens,
+      localPoolActivity,
+      oracleUsdByToken,
+      oracleUsdLoading,
+      oracleUsdError,
+      vaultPoolMappings,
+      reserveSampleIntervalMs,
     }),
-    [defaults, venues, loading, error, refresh, effectivePoolHex, effectiveFactoryHex, explorerBaseUrl]
+    [
+      defaults,
+      venues,
+      directoryMeta,
+      loading,
+      error,
+      refresh,
+      effectivePoolHex,
+      effectiveFactoryHex,
+      effectiveMultihopRouterHex,
+      effectiveLedgerRouterV2Hex,
+      effectiveLedgerRouterV3Hex,
+      effectiveLpVaultHex,
+      effectiveLpShareHex,
+      explorerBaseUrl,
+      dexDirectoryExtras,
+      remoteIndexerStats,
+      indexerPickerTokens,
+      localPoolActivity,
+      oracleUsdByToken,
+      oracleUsdLoading,
+      oracleUsdError,
+      vaultPoolMappings,
+      reserveSampleIntervalMs,
+    ]
   );
 
   return (
