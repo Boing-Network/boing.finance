@@ -28,9 +28,12 @@
   "scripts": {
     "dev": "vite",
     "start": "vite",
-    "prebuild": "node scripts/update-service-worker-version.js && node scripts/generate-version-manifest.js && node scripts/generate-brand-assets.mjs && node scripts/generate-favicon.mjs",
+    "assets:prebundle": "node scripts/update-service-worker-version.js && node scripts/generate-version-manifest.js && node scripts/generate-brand-assets.mjs && node scripts/generate-favicon.mjs",
+    "prebuild": "npm run assets:prebundle",
     "build": "npm run generate-manifest && cross-env CI=false vite build",
+    "prebuild:prod": "npm run assets:prebundle",
     "build:prod": "cross-env CI=false REACT_APP_ENV=production vite build",
+    "prebuild:staging": "npm run assets:prebundle",
     "build:staging": "cross-env CI=false REACT_APP_ENV=staging vite build",
     "preview": "vite preview",
     "test": "echo \"No unit tests configured\" && exit 0",

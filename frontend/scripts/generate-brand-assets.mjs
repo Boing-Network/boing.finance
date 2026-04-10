@@ -23,6 +23,35 @@ async function renderSquare(size, outAbsPath) {
   console.log(`[brand-assets] ${path.relative(publicDir, outAbsPath)} (${size}×${size})`);
 }
 
+/** Tab + PWA: keep in sync with canonical mark (avoids drift from hand-edited public/favicon.svg). */
+function copySvgFavicon() {
+  const out = path.join(publicDir, 'favicon.svg');
+  fs.copyFileSync(svgPath, out);
+  console.log('[brand-assets] favicon.svg (copy of assets/boing-logo-mark.svg)');
+}
+
+/** Base / Farcaster miniapp `splashImageUrl` — was missing from public/, caused broken image links. */
+async function buildSplash() {
+  const buf = fs.readFileSync(svgPath);
+  const logo = await sharp(buf)
+    .resize(220, 220, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png()
+    .toBuffer();
+  const out = path.join(publicDir, 'splash.png');
+  await sharp({
+    create: {
+      width: 512,
+      height: 512,
+      channels: 4,
+      background: { r: 6, g: 8, b: 12, alpha: 1 },
+    },
+  })
+    .composite([{ input: logo, gravity: 'center' }])
+    .png({ compressionLevel: 9 })
+    .toFile(out);
+  console.log('[brand-assets] splash.png (512×512, boing-logo-mark on #06080c)');
+}
+
 async function buildOgImage() {
   const logoBuf = await sharp(fs.readFileSync(svgPath))
     .resize(280, 280, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
@@ -100,6 +129,8 @@ async function main() {
   await renderSquare(180, path.join(publicDir, 'apple-touch-icon.png'));
   await renderSquare(150, path.join(publicDir, 'mstile-150x150.png'));
 
+  copySvgFavicon();
+  await buildSplash();
   await buildOgImage();
   await buildFacebookBanner();
 
