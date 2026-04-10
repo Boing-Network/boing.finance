@@ -3,7 +3,7 @@
  * See boing.network docs/HANDOFF_BOING_FINANCE_NATIVE_DEX_AND_DIRECTORY.md
  */
 
-import { collectAllNativeDexDirectoryPools } from 'boing-sdk';
+import { collectAllNativeDexDirectoryPools } from './nativeDexDirectoryPoolsCollect';
 
 const DEFAULT_MAX_DIRECTORY_POOLS = 2000;
 
