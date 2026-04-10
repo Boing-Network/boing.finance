@@ -77,6 +77,9 @@ jobs:
 
       - name: smoke-boing-testnet-rpc (public JSON-RPC)
         run: node frontend/scripts/smoke-boing-testnet-rpc.mjs
+        env:
+          # Public RPC may return 403 to datacenter IPs; script uses browser-like UA + optional soft skip.
+          BOING_SMOKE_SKIP_ON_BLOCK: '1'
 
   build-check:
     name: Build Check
