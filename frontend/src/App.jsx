@@ -835,8 +835,6 @@ function App() {
                     <link rel="icon" type="image/png" href={`/favicon-16x16.png${getBrandAssetVersionSuffix()}`} sizes="16x16" />
                     <link rel="icon" type="image/png" href={`/favicon-96x96.png${getBrandAssetVersionSuffix()}`} sizes="96x96" />
                     <link rel="icon" type="image/png" href={`/favicon.png${getBrandAssetVersionSuffix()}`} sizes="512x512" />
-                    <link rel="icon" href={`/favicon.ico${getBrandAssetVersionSuffix()}`} sizes="any" />
-                    <link rel="icon" type="image/svg+xml" href={`/favicon.svg${getBrandAssetVersionSuffix()}`} />
                     
                     {/* Farcaster Mini App Embed Meta Tags */}
                     <meta name="fc:miniapp" content={JSON.stringify({
@@ -921,8 +919,6 @@ function Home() {
         <link rel="icon" type="image/png" href={`/favicon-16x16.png${getBrandAssetVersionSuffix()}`} sizes="16x16" />
         <link rel="icon" type="image/png" href={`/favicon-96x96.png${getBrandAssetVersionSuffix()}`} sizes="96x96" />
         <link rel="icon" type="image/png" href={`/favicon.png${getBrandAssetVersionSuffix()}`} sizes="512x512" />
-        <link rel="icon" href={`/favicon.ico${getBrandAssetVersionSuffix()}`} sizes="any" />
-        <link rel="icon" type="image/svg+xml" href={`/favicon.svg${getBrandAssetVersionSuffix()}`} />
         
         {/* Structured Data for Homepage */}
         <script type="application/ld+json">
