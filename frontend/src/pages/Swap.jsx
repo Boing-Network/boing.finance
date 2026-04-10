@@ -18,8 +18,7 @@ import ShareCardModal from '../components/ShareCardModal';
 import ProactiveTipsBanner from '../components/ProactiveTipsBanner';
 import TrendingPairs from '../components/TrendingPairs';
 import NativeBoingL1IntegratedHub from '../components/NativeBoingL1IntegratedHub';
-import NativeAmmSwapPanel from '../components/NativeAmmSwapPanel';
-import NativeDexDirectoryRoutePanel from '../components/NativeDexDirectoryRoutePanel';
+import NativeBoingTradeHub from '../components/NativeBoingTradeHub';
 import getFeatureSupport from '../config/featureSupport';
 import BoingNativeDexStatusBanner from '../components/BoingNativeDexStatusBanner';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
@@ -1850,10 +1849,7 @@ const Swap = () => {
             <NativeBoingL1IntegratedHub feature="swap" />
           )}
           {featureSupport.swap === 'native_amm' && (
-            <>
-              <NativeAmmSwapPanel slippagePercent={settings.slippage} />
-              <NativeDexDirectoryRoutePanel slippagePercent={settings.slippage} />
-            </>
+            <NativeBoingTradeHub slippagePercent={settings.slippage} />
           )}
 
           {/* Swap Interface + Sidebar */}

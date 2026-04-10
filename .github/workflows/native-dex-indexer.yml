@@ -1,0 +1,81 @@
+# Optional: build native DEX indexer JSON (pools + AMM log scan + reserve history) for operators who host stats off-chain.
+# Artifacts are not auto-deployed; download and upload to R2/Pages or point the app at /api/native-dex-indexer-stats.
+name: Native DEX indexer
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: npm ci
+
+      - uses: actions/cache@v4
+        id: indexer-state
+        with:
+          path: frontend/.native-dex-indexer-state.json
+          key: native-dex-indexer-state-v1-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            native-dex-indexer-state-v1-
+
+      - name: Run indexer
+        working-directory: frontend
+        env:
+          NATIVE_DEX_INDEXER_RPC_URL: ${{ vars.BOING_INDEXER_RPC_URL }}
+          NATIVE_DEX_INDEXER_STATE_PATH: .native-dex-indexer-state.json
+          NATIVE_DEX_INDEXER_OUT_PATH: ${{ runner.temp }}/native-dex-indexer-stats.json
+          NATIVE_DEX_INDEXER_LOG_SCAN_BLOCKS: ${{ vars.NATIVE_DEX_INDEXER_LOG_SCAN_BLOCKS }}
+          NATIVE_DEX_INDEXER_REGISTER_FROM_BLOCK: ${{ vars.NATIVE_DEX_INDEXER_REGISTER_FROM_BLOCK }}
+          NATIVE_DEX_INDEXER_TOKEN_USD_JSON: ${{ vars.NATIVE_DEX_INDEXER_TOKEN_USD_JSON }}
+          NATIVE_DEX_INDEXER_TOKEN_DIRECTORY_JSON: ${{ vars.NATIVE_DEX_INDEXER_TOKEN_DIRECTORY_JSON }}
+        run: node scripts/native-dex-indexer-cli.mjs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-dex-indexer-stats
+          path: ${{ runner.temp }}/native-dex-indexer-stats.json
+          retention-days: 14
+
+  # Optional: create bucket once (logged-in Wrangler): wrangler r2 bucket create boing-finance-native-dex-stats
+  # Then set repo variables NATIVE_DEX_INDEXER_R2_BUCKET=boing-finance-native-dex-stats and NATIVE_DEX_INDEXER_R2_OBJECT_KEY=native-dex-indexer-stats.json (or your key).
+  # Requires secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID (same as frontend deploy).
+  upload-r2:
+    name: Upload indexer JSON to R2
+    needs: build
+    if: ${{ vars.NATIVE_DEX_INDEXER_R2_BUCKET != '' && vars.NATIVE_DEX_INDEXER_R2_OBJECT_KEY != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: native-dex-indexer-stats
+          path: indexer-out
+
+      - name: Install wrangler
+        run: npm install -g wrangler@4
+
+      - name: Put object to R2
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          wrangler r2 object put "${{ vars.NATIVE_DEX_INDEXER_R2_BUCKET }}/${{ vars.NATIVE_DEX_INDEXER_R2_OBJECT_KEY }}" \
+            -f "indexer-out/native-dex-indexer-stats.json" \
+            --remote \
+            --content-type application/json

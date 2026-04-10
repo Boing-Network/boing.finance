@@ -2,6 +2,13 @@ name = "boing-finance"
 compatibility_date = "2024-01-01"
 pages_build_output_dir = "dist"
 
+# Durable native DEX indexer state for GET /api/native-dex-indexer-stats (key: native_dex_indexer_state_v1).
+# Same KV namespace as boing.network workers/native-dex-indexer (optional shared history).
+[[kv_namespaces]]
+binding = "NATIVE_DEX_INDEXER_KV"
+id = "28b6a1cbc43b4cceaaa69d7e305ad93c"
+preview_id = "f6c686292e544a868a3bbfa8c37cede6"
+
 [env.production]
 name = "boing-finance-prod"
 

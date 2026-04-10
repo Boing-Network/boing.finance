@@ -16,5 +16,8 @@ frontend/build/
 frontend/test-results/
 frontend/playwright-report/
 
+# Native DEX indexer CLI state (reserve history)
+frontend/.native-dex-indexer-state.json
+
 # Windows accidental reserved-name file
 nul

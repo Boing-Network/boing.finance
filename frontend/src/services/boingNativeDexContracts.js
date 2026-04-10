@@ -52,7 +52,7 @@ export function getNativeVmDexModuleSummary(chainId) {
     swapRouter,
     liquidityLocker,
     swapParityMinimum: Boolean(dexFactory && swapRouter),
-    fullyConfigured: Boolean(dexFactory && swapRouter && liquidityLocker),
+    fullyConfigured: Boolean(dexFactory && swapRouter),
   };
 }
 

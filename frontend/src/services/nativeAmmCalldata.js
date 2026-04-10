@@ -10,6 +10,8 @@ export const SELECTOR_NATIVE_AMM_REMOVE_LIQUIDITY = 0x12;
 /** Storage keys matching `boing_execution::native_amm::reserve_*_key`. */
 export const NATIVE_AMM_RESERVE_A_KEY = `0x${'0'.repeat(62)}01`;
 export const NATIVE_AMM_RESERVE_B_KEY = `0x${'0'.repeat(62)}02`;
+/** Total LP supply key (`k[31] == 0x03`) — `native_amm::total_lp_supply_key`. */
+export const NATIVE_AMM_TOTAL_LP_SUPPLY_KEY = `0x${'0'.repeat(62)}03`;
 
 function selectorWord(selector) {
   const w = new Uint8Array(32);
