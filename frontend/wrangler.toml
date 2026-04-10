@@ -12,6 +12,12 @@ preview_id = "f6c686292e544a868a3bbfa8c37cede6"
 [env.production]
 name = "boing-finance-prod"
 
+# Top-level `kv_namespaces` are not inherited; production deploy must repeat bindings.
+[[env.production.kv_namespaces]]
+binding = "NATIVE_DEX_INDEXER_KV"
+id = "28b6a1cbc43b4cceaaa69d7e305ad93c"
+preview_id = "f6c686292e544a868a3bbfa8c37cede6"
+
 # Environment Variables
 # NOTE: These are exposed in the frontend bundle (REACT_APP_* variables are public)
 # For production, use Cloudflare Pages environment variables instead of hardcoding here
