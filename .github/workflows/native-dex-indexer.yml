@@ -1,11 +1,23 @@
-# Optional: build native DEX indexer JSON (pools + AMM log scan + reserve history) for operators who host stats off-chain.
-# Artifacts are not auto-deployed; download and upload to R2/Pages or point the app at /api/native-dex-indexer-stats.
+# Builds off-chain native DEX stats JSON (pools + AMM log scan + history). This is **not** a Cloudflare Worker
+# deploy: it uploads a GitHub Actions artifact (+ optional R2 when repo vars are set). Live on-demand JSON is
+# also served by the **Pages Function** `GET /api/native-dex-indexer-stats` when you deploy the frontend.
 name: Native DEX indexer
 
 on:
   workflow_dispatch:
   schedule:
     - cron: '0 */6 * * *'
+  push:
+    branches:
+      - main
+      - staging
+    paths:
+      - 'frontend/indexer/**'
+      - 'frontend/scripts/native-dex-indexer-cli.mjs'
+      - 'frontend/scripts/postinstall-boing-sdk.mjs'
+      - 'frontend/functions/api/native-dex-indexer-stats.js'
+      - 'frontend/functions/lib/**'
+      - '.github/workflows/native-dex-indexer.yml'
 
 jobs:
   build:
@@ -62,6 +74,15 @@ jobs:
           name: native-dex-indexer-stats
           path: ${{ runner.temp }}/native-dex-indexer-stats.json
           retention-days: 14
+
+      - name: Summary
+        if: success()
+        run: |
+          echo "## Native DEX indexer (off-chain JSON)" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Artifact:** \`native-dex-indexer-stats\` (download from this run’s Artifacts)." >> "$GITHUB_STEP_SUMMARY"
+          echo "- **R2 upload:** runs only when \`NATIVE_DEX_INDEXER_R2_BUCKET\` and \`NATIVE_DEX_INDEXER_R2_OBJECT_KEY\` repo variables are set." >> "$GITHUB_STEP_SUMMARY"
+          echo "- **No separate service deploy** — the scheduled indexer is for operators; the site’s **Pages Function** serves \`/api/native-dex-indexer-stats\` when you deploy **frontend** (Cloudflare Pages)." >> "$GITHUB_STEP_SUMMARY"
 
   # Optional: create bucket once (logged-in Wrangler): wrangler r2 bucket create boing-finance-native-dex-stats
   # Then set repo variables NATIVE_DEX_INDEXER_R2_BUCKET=boing-finance-native-dex-stats and NATIVE_DEX_INDEXER_R2_OBJECT_KEY=native-dex-indexer-stats.json (or your key).
