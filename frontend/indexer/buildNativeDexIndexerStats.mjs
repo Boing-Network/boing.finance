@@ -24,6 +24,34 @@ function parseIntEnv(n, fallback) {
   return Number.isFinite(v) ? v : fallback;
 }
 
+/**
+ * Public RPC edges often return 403 + "Just a moment…" to default Node `fetch` (GitHub Actions).
+ * Optional: set `NATIVE_DEX_INDEXER_RPC_USER_AGENT` to override; set `NATIVE_DEX_INDEXER_RPC_NO_BROWSER_UA=1`
+ * in CI to skip (e.g. internal RPC that rejects unknown UAs).
+ */
+function rpcClientConfig(baseUrl) {
+  const raw =
+    typeof process !== 'undefined' && String(process.env?.NATIVE_DEX_INDEXER_RPC_NO_BROWSER_UA || '').trim() === '1';
+  const customUa =
+    typeof process !== 'undefined' ? String(process.env?.NATIVE_DEX_INDEXER_RPC_USER_AGENT || '').trim() : '';
+  const ci = typeof process !== 'undefined' && String(process.env?.GITHUB_ACTIONS || '').trim() === 'true';
+  const ua =
+    customUa ||
+    (!raw && ci
+      ? 'Mozilla/5.0 (compatible; BoingFinance-NativeDexIndexer/1.0; +https://github.com/Boing-Network/boing.finance)'
+      : '');
+  if (!ua) {
+    return { baseUrl };
+  }
+  return {
+    baseUrl,
+    extraHeaders: {
+      'User-Agent': ua,
+      Accept: 'application/json',
+    },
+  };
+}
+
 /** @param {string} key @param {Record<string, string | undefined> | null | undefined} envObj */
 function envGet(key, envObj) {
   if (envObj && typeof envObj === 'object' && envObj[key] != null && String(envObj[key]).trim()) {
@@ -86,7 +114,7 @@ export async function buildNativeDexIndexerStats(options = {}) {
 
   const historyStore = options.historyStore ?? null;
 
-  const client = new BoingClient({ baseUrl: rpcBaseUrl });
+  const client = new BoingClient(rpcClientConfig(rpcBaseUrl));
 
   return buildNativeDexIndexerStatsForClient(client, {
     overrides: ov,
