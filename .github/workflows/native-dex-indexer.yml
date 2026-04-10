@@ -30,9 +30,12 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Install and build boing-sdk (file: link; dist must export indexer helpers)
+      - name: "Install and build boing-sdk (linked package; dist must include indexer helpers)"
         working-directory: boing.network/boing-sdk
         run: npm install --no-audit --no-fund && npm run build
+
+      - name: Verify boing-sdk indexer dist
+        run: test -f boing.network/boing-sdk/dist/nativeDexIndexerStats.js
 
       - uses: actions/cache@v4
         id: indexer-state
