@@ -1279,8 +1279,6 @@ function CreatePool() {
         <Helmet>
           <title>Create Pool | boing.finance — New Liquidity Pools on EVM & Solana</title>
           <meta name="description" content="Create new liquidity pools on EVM and Solana. Deploy trading pairs and earn fees with boing.finance." />
-          <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
-          <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
         </Helmet>
         <div className="relative w-full min-w-0">
           <div className="relative z-10 container mx-auto px-4 py-8">
@@ -1311,8 +1309,6 @@ function CreatePool() {
         <title>Create Pool | boing.finance — New Liquidity Pools on EVM & Solana</title>
         <meta name="description" content="Create new liquidity pools on EVM and Solana. Deploy pairs, earn fees. One interface with boing.finance." />
         <meta name="keywords" content="liquidity pools, create pool, DeFi, AMM, trading pairs" />
-        <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
-        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
       </Helmet>
       <div className="relative w-full min-w-0">
         <div className="relative z-10 container mx-auto px-4 py-8">

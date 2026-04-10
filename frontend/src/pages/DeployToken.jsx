@@ -1671,8 +1671,6 @@ export default function DeployToken() {
         <meta name="twitter:description" content="Create your own token on EVM or Solana. No code required." />
         <meta name="twitter:site" content="@boingfinance" />
         <link rel="canonical" href="https://boing.finance/deploy-token" />
-        <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
-        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
         
         {/* Structured Data for DeployToken Page */}
         <script type="application/ld+json">

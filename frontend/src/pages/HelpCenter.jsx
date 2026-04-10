@@ -175,8 +175,6 @@ const HelpCenter = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Help Center - boing.finance" />
         <meta name="twitter:description" content="Get help with boing.finance - Support and guides." />
-        <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
-        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
       </Helmet>
       
       <div className="relative w-full min-w-0" style={{ color: 'var(--text-primary)' }}>
