@@ -1,7 +1,7 @@
 /**
  * Ensure file-linked `boing-sdk` has `dist/` (prepare does not always run on parent `npm ci`).
  */
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
@@ -25,7 +25,20 @@ if (!existsSync(nobleHashes)) {
   }
 }
 
-if (!existsSync(distIndex)) {
+function sdkDistNeedsRebuild() {
+  if (!existsSync(distIndex)) return true;
+  try {
+    const src = readFileSync(distIndex, 'utf8');
+    // Stale committed dist/ on boing.network main often omits Pages indexer exports.
+    if (!src.includes('buildNativeDexIndexerStatsForClient')) return true;
+    if (!src.includes('buildDexOverridesFromPlainEnv')) return true;
+  } catch {
+    return true;
+  }
+  return false;
+}
+
+if (sdkDistNeedsRebuild()) {
   const r = spawnSync('npm', ['run', 'build'], { cwd: sdkRoot, stdio: 'inherit', shell: true });
   if (r.status !== 0) {
     console.error(
