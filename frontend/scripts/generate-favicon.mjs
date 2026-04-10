@@ -27,6 +27,9 @@ const SOURCE = process.env.FAVICON_SOURCE
 const OUT_ICO = path.join(publicDir, 'favicon.ico');
 const OUT_ICO_ALT = path.join(publicDir, 'favicon-alt.ico');
 
+/** Match generate-brand-assets favicon PNGs (solid #06080c) so ICO layers are not transparent 8‑bit mush in tabs. */
+const FAVICON_TILE_BG = { r: 6, g: 8, b: 12, alpha: 1 };
+
 /** Embedded PNG layers (Vista+ ICO). 256px omitted to keep favicon.ico lightweight; PNG favicons cover HD. */
 const ICO_SIZES = [16, 24, 32, 48, 64, 128];
 
@@ -34,7 +37,7 @@ async function pngForSize(inputPath, size) {
   return sharp(inputPath)
     .resize(size, size, {
       fit: 'contain',
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
+      background: FAVICON_TILE_BG,
     })
     .png({ compressionLevel: 9, effort: 10 })
     .toBuffer();
