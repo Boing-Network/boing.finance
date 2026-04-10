@@ -831,8 +831,11 @@ function App() {
                 <Router>
                   <InitialAnimationGate>
                   <Helmet>
-                    <link rel="icon" type="image/png" href={`/favicon.png${getBrandAssetVersionSuffix()}`} sizes="512x512" />
+                    <link rel="icon" href={`/favicon.ico${getBrandAssetVersionSuffix()}`} sizes="48x48" />
                     <link rel="icon" type="image/png" href={`/favicon-32x32.png${getBrandAssetVersionSuffix()}`} sizes="32x32" />
+                    <link rel="icon" type="image/png" href={`/favicon-96x96.png${getBrandAssetVersionSuffix()}`} sizes="96x96" />
+                    <link rel="icon" type="image/png" href={`/favicon.png${getBrandAssetVersionSuffix()}`} sizes="512x512" />
+                    <link rel="icon" type="image/svg+xml" href={`/favicon.svg${getBrandAssetVersionSuffix()}`} />
                     
                     {/* Farcaster Mini App Embed Meta Tags */}
                     <meta name="fc:miniapp" content={JSON.stringify({
@@ -913,9 +916,11 @@ function Home() {
         <meta name="twitter:image" content={brandShareImageAbsolute()} />
         <meta name="twitter:image:alt" content="Boing Finance — DeFi That Bounces Back; brand preview with medallion mark" />
         <link rel="canonical" href="https://boing.finance" />
-        <link rel="icon" type="image/svg+xml" href={`/favicon.svg${getBrandAssetVersionSuffix()}`} />
-        <link rel="icon" type="image/png" href={`/favicon.png${getBrandAssetVersionSuffix()}`} sizes="512x512" />
+        <link rel="icon" href={`/favicon.ico${getBrandAssetVersionSuffix()}`} sizes="48x48" />
         <link rel="icon" type="image/png" href={`/favicon-32x32.png${getBrandAssetVersionSuffix()}`} sizes="32x32" />
+        <link rel="icon" type="image/png" href={`/favicon-96x96.png${getBrandAssetVersionSuffix()}`} sizes="96x96" />
+        <link rel="icon" type="image/png" href={`/favicon.png${getBrandAssetVersionSuffix()}`} sizes="512x512" />
+        <link rel="icon" type="image/svg+xml" href={`/favicon.svg${getBrandAssetVersionSuffix()}`} />
         
         {/* Structured Data for Homepage */}
         <script type="application/ld+json">

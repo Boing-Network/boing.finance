@@ -6,6 +6,7 @@ import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import LoadingSpinner from '../components/LoadingSpinner';
 import OptimizedImage from '../components/OptimizedImage';
+import { brandShareImageAbsolute } from '../config/brandAssets';
 
 const Blog = () => {
   // eslint-disable-next-line no-unused-vars
@@ -69,9 +70,9 @@ const Blog = () => {
       <Helmet>
         <title>Blog & News | boing.finance — Updates & Announcements</title>
         <meta name="description" content="Latest news, updates, and announcements from boing.finance. The DeFi that always bounces back." />
-        <meta property="og:image" content="https://boing.finance/preview-image.png" />
+        <meta property="og:image" content={brandShareImageAbsolute()} />
         <meta property="og:image:alt" content="Boing Finance — DeFi That Bounces Back brand banner" />
-        <meta name="twitter:image" content="https://boing.finance/preview-image.png" />
+        <meta name="twitter:image" content={brandShareImageAbsolute()} />
       </Helmet>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
