@@ -2,14 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <!-- PNG first: Chromium picks the first suitable icon for the tab; solid-tile PNGs avoid ICO/SVG decode glitches. -->
+    <!-- PNG-only tab icons (with ?v=): avoids stale CDN /favicon.ico and SVG decode quirks; /favicon.ico still exists for crawlers/bookmarks. -->
     <link rel="icon" type="image/png" href="/favicon-32x32.png?v=%VITE_ASSET_VERSION%" sizes="32x32" />
     <link rel="icon" type="image/png" href="/favicon-16x16.png?v=%VITE_ASSET_VERSION%" sizes="16x16" />
     <link rel="icon" type="image/png" href="/favicon-96x96.png?v=%VITE_ASSET_VERSION%" sizes="96x96" />
     <link rel="icon" type="image/png" href="/favicon.png?v=%VITE_ASSET_VERSION%" sizes="512x512" />
-    <link rel="icon" href="/favicon.ico?v=%VITE_ASSET_VERSION%" sizes="any" />
-    <link rel="shortcut icon" href="/favicon.ico?v=%VITE_ASSET_VERSION%" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=%VITE_ASSET_VERSION%" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=%VITE_ASSET_VERSION%" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#06080c" />
