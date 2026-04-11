@@ -223,7 +223,7 @@ body {
   min-width: 0;
 }
 
-/* Anchor targets (e.g. #tokenomics, #pillars) — avoid being hidden under sticky header when scrolled into view */
+/* Anchor targets (e.g. #tokenomics) — avoid being hidden under sticky header when scrolled into view */
 section[id] {
   scroll-margin-top: 6rem;
 }

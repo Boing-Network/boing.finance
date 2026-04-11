@@ -654,7 +654,7 @@ function AppContent() {
       </header>
 
       <main className="flex-1 flex flex-col relative min-h-0">
-        {/* Page Content with Error Boundary and Suspense — scroll container so Pillars/Tokenomics etc. are reachable */}
+        {/* Page Content with Error Boundary and Suspense — scroll container for long home content */}
         <ErrorBoundary>
           <div className="relative z-10 flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden pb-6 sm:pb-8">
             <BoingNativeTokenPanel />
@@ -1183,39 +1183,6 @@ function Home() {
                 );
               })}
             </div>
-
-            {/* The Pillars of the Boing Network — design system assets */}
-            <section className="mt-20 md:mt-28 space-y-8">
-              <h2 className="text-2xl md:text-3xl font-bold text-center" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-display-serif)' }}>
-                The Pillars of the Boing Network
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                  { id: 'security', name: 'Security', tagline: 'Safety and correctness first — always over speed.' },
-                  { id: 'scalability', name: 'Scalability', tagline: 'High throughput without compromising the other pillars.' },
-                  { id: 'decentralization', name: 'Decentralization', tagline: 'Anyone can participate. No one can shut the door.' },
-                  { id: 'authenticity', name: 'Authenticity', tagline: 'One chain, one identity — authentic and independent.' },
-                  { id: 'transparency', name: 'Transparency', tagline: '100% open — in design, governance, and operations. Trust through verification.' },
-                  { id: 'quality', name: 'Quality Assurance', tagline: 'Legitimate purpose only — enforced by the network.' },
-                ].map(({ id, name, tagline }) => (
-                  <div
-                    key={id}
-                    className="card flex flex-col sm:flex-row items-center gap-4 p-5 text-center sm:text-left"
-                  >
-                    <img
-                      src={`${process.env.PUBLIC_URL || ''}/assets/pillar-${id}.png`}
-                      alt=""
-                      className="w-20 h-20 object-contain flex-shrink-0"
-                      onError={(e) => { e.target.style.display = 'none'; }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-bold mb-1" style={{ color: 'var(--text-primary)' }}>{name}</h3>
-                      <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{tagline}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
 
             {/* 4. Governance & BOING */}
             <section className="mt-20 md:mt-28">
