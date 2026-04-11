@@ -11,6 +11,8 @@ backend/.wrangler/tmp/
 # Frontend build outputs (Vite → dist; legacy CRA → build)
 frontend/dist/
 frontend/build/
+# Wrangler Pages Functions local bundle output
+frontend/_worker.bundle
 
 # Playwright
 frontend/test-results/
