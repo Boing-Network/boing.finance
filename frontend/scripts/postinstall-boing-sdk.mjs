@@ -32,6 +32,7 @@ function sdkDistNeedsRebuild() {
     // Stale committed dist/ on boing.network main often omits Pages indexer exports.
     if (!src.includes('buildNativeDexIndexerStatsForClient')) return true;
     if (!src.includes('buildDexOverridesFromPlainEnv')) return true;
+    if (!src.includes('collectAllNativeDexDirectoryPools')) return true;
   } catch {
     return true;
   }

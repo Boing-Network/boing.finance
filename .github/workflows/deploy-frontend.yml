@@ -89,8 +89,10 @@ jobs:
         env:
           REACT_APP_ENV: production
           REACT_APP_BACKEND_URL: https://boing-api-prod.nico-chikuji.workers.dev
-          # Optional repo variable: e.g. /api/native-dex-indexer-stats or https://…/stats (Worker)
+          # Stats JSON (KV/history): Pages `/api/native-dex-indexer-stats`, R2/static URL, or Worker `https://…/stats`
           REACT_APP_BOING_NATIVE_DEX_INDEXER_STATS_URL: ${{ vars.REACT_APP_BOING_NATIVE_DEX_INDEXER_STATS_URL }}
+          # D1 directory: Worker origin only — app calls `/v1/directory/*` (not on Pages by default)
+          REACT_APP_BOING_NATIVE_DEX_DIRECTORY_BASE_URL: ${{ vars.REACT_APP_BOING_NATIVE_DEX_DIRECTORY_BASE_URL }}
           CI: false
 
       - name: Build for Staging
@@ -101,6 +103,7 @@ jobs:
           REACT_APP_ENV: staging
           REACT_APP_BACKEND_URL: https://boing-api-staging.nico-chikuji.workers.dev
           REACT_APP_BOING_NATIVE_DEX_INDEXER_STATS_URL: ${{ vars.REACT_APP_BOING_NATIVE_DEX_INDEXER_STATS_URL_STAGING }}
+          REACT_APP_BOING_NATIVE_DEX_DIRECTORY_BASE_URL: ${{ vars.REACT_APP_BOING_NATIVE_DEX_DIRECTORY_BASE_URL_STAGING }}
           CI: false
 
       - name: Deploy to Cloudflare Pages (Production)

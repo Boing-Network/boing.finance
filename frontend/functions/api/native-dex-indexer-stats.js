@@ -1,9 +1,12 @@
 /**
- * On-demand native DEX indexer JSON (boing-sdk). GET /api/native-dex-indexer-stats
+ * On-demand native DEX **stats** JSON (boing-sdk). GET /api/native-dex-indexer-stats
  *
  * Optional KV (Cloudflare Pages): bind `NATIVE_DEX_INDEXER_KV`; key `native_dex_indexer_state_v1`.
  *
  * Query (optional): `pools_page` + `pools_page_size` (1–500) to paginate `pools[]` only.
+ *
+ * **Directory (D1):** lives on the `boing-native-dex-indexer` Worker (`/v1/directory/*`), not here. The SPA merges
+ * Worker directory rows when `REACT_APP_BOING_NATIVE_DEX_DIRECTORY_BASE_URL` is set (see `nativeDexIndexerDirectoryMerge.js`).
  *
  * Env: see `indexer/buildNativeDexIndexerStats.mjs` + `NATIVE_DEX_INDEXER_API_DISABLE`, `BOING_TESTNET_RPC_URL`.
  * Disk state (`NATIVE_DEX_INDEXER_STATE_PATH`) is CLI-only via `scripts/native-dex-indexer-cli.mjs`.

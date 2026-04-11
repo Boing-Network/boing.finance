@@ -1,6 +1,9 @@
-# Builds off-chain native DEX stats JSON (pools + AMM log scan + history). This is **not** a Cloudflare Worker
-# deploy: it uploads a GitHub Actions artifact (+ optional R2 when repo vars are set). Live on-demand JSON is
-# also served by the **Pages Function** `GET /api/native-dex-indexer-stats` when you deploy the frontend.
+# Builds off-chain native DEX **stats** JSON (pools + AMM log scan + history). This workflow does **not** deploy
+# the `boing-native-dex-indexer` Worker (that lives in boing.network). It uploads a GitHub artifact and optionally
+# pushes JSON to R2. Consumers: same-origin **Pages** `GET /api/native-dex-indexer-stats`, a public URL to that
+# JSON, or the Worker’s **`GET /stats`** when you point `REACT_APP_BOING_NATIVE_DEX_INDEXER_STATS_URL` there.
+# **D1 directory** (`/v1/directory/*`) is served by the Worker only — set `REACT_APP_BOING_NATIVE_DEX_DIRECTORY_BASE_URL`
+# to the Worker origin (see `workers/native-dex-indexer` README in boing.network).
 name: Native DEX indexer
 
 on:
@@ -81,8 +84,8 @@ jobs:
           echo "## Native DEX indexer (off-chain JSON)" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Artifact:** \`native-dex-indexer-stats\` (download from this run’s Artifacts)." >> "$GITHUB_STEP_SUMMARY"
-          echo "- **R2 upload:** runs only when \`NATIVE_DEX_INDEXER_R2_BUCKET\` and \`NATIVE_DEX_INDEXER_R2_OBJECT_KEY\` repo variables are set." >> "$GITHUB_STEP_SUMMARY"
-          echo "- **No separate service deploy** — the scheduled indexer is for operators; the site’s **Pages Function** serves \`/api/native-dex-indexer-stats\` when you deploy **frontend** (Cloudflare Pages)." >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Worker vs Pages:** D1 directory API is on the **native-dex-indexer Worker** (\`/v1/directory/*\`). Stats JSON may come from this CI job (artifact/R2), from **Pages** \`/api/native-dex-indexer-stats\`, or from the Worker \`/stats\` — keep \`REACT_APP_BOING_NATIVE_DEX_INDEXER_STATS_URL\` aligned with what you actually host." >> "$GITHUB_STEP_SUMMARY"
+          echo "- **R2 upload:** runs when \`NATIVE_DEX_INDEXER_R2_BUCKET\` + \`NATIVE_DEX_INDEXER_R2_OBJECT_KEY\` are set; uses \`CLOUDFLARE_API_TOKEN\` + \`CLOUDFLARE_ACCOUNT_ID\` (same secrets as frontend Pages deploy)." >> "$GITHUB_STEP_SUMMARY"
 
   # Optional: create bucket once (logged-in Wrangler): wrangler r2 bucket create boing-finance-native-dex-stats
   # Then set repo variables NATIVE_DEX_INDEXER_R2_BUCKET=boing-finance-native-dex-stats and NATIVE_DEX_INDEXER_R2_OBJECT_KEY=native-dex-indexer-stats.json (or your key).
