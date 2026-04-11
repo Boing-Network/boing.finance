@@ -84,10 +84,7 @@ All official assets are wired from **`frontend/public/assets/`**.
    - **Status:** Uses existing hero/thumb images; circuit glow uses `--accent-teal` / `--glow-cyan`.  
    - **Optional:** If you have official mascot assets (e.g. PNG/SVG for different states or “BOING!” comic logo), they can be dropped into `public/images/` and referenced where the hero/mascot is used.
 
-4. **Pillar / marketing imagery**  
-   - **Status:** Home page **"The Pillars of the Boing Network"** section uses all six `pillar-*.png` assets with design-system taglines.
-
-5. **“BOING!” comic-style logo**  
+4. **“BOING!” comic-style logo**  
    - **From visual_notes:** Orange–yellow gradient (#FF9900 → #FFD700), comic/display style.  
    - **Status:** App logo is `icon-only-transparent.png` (nav, footer, manifests, JSON-LD). Optional wordmark: `logo-boing-comic.png` when `showComic={true}`. If you have an official “BOING!” logo (SVG/PNG), add it to `public/` and use it in the header or marketing; optional CSS class can use `--accent-gold` / gradient for text version.
 
@@ -98,7 +95,7 @@ All official assets are wired from **`frontend/public/assets/`**.
 - **Design tokens, typography, base styles, UI components, backgrounds, and motion** are implemented in line with the **Boing_Network_Official_Visual_Design_System** and **Cursor_AI_Agent_Prompt** PDFs.
 - **Hex grid** opacity was set to **0.06** and **landing overlay** to **0.3 → 0.6**; **navbar** to **0.8** to match the Official doc.
 - **Cinzel** was added as an optional display serif (`--font-display-serif`) for high-impact titles.
-- All **`public/assets/`** images (aquatic-space background, mascots, comic logo, pillars, hex-grid) are wired into the app as described above.
+- **`public/assets/`** images (aquatic-space background, mascots, comic logo, hex-grid) are wired into the app as described above. Pillar PNGs were removed with the home pillars section.
 - **Placeholder logo:** `icon-only-transparent.png` is the single source for the Boing icon (navbar, footer, manifests, JSON-LD). Theme colors in manifest/site.webmanifest use design token `#0A0E1A` (--bg-primary).
 
 ---
