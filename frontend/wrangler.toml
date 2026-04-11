@@ -1,3 +1,5 @@
+# Cloudflare Pages + Functions — non-secret config belongs in this file (version-controlled).
+# Secrets (API tokens, etc.) stay out of git; set those in GitHub Actions secrets or the dashboard where required.
 name = "boing-finance"
 compatibility_date = "2024-01-01"
 pages_build_output_dir = "dist"
@@ -18,18 +20,30 @@ binding = "NATIVE_DEX_INDEXER_KV"
 id = "28b6a1cbc43b4cceaaa69d7e305ad93c"
 preview_id = "f6c686292e544a868a3bbfa8c37cede6"
 
-# Environment Variables
-# NOTE: These are exposed in the frontend bundle (REACT_APP_* variables are public)
-# For production, use Cloudflare Pages environment variables instead of hardcoding here
+# Pages Functions + local `wrangler pages dev` — plain string bindings on `env`.
+# Client `REACT_APP_*` for the SPA are baked at `vite build` from `env/github-build.*.env` in CI (see deploy workflow).
 [vars]
 REACT_APP_ENV = "development"
 REACT_APP_BACKEND_URL = "https://boing-api-staging.nico-chikuji.workers.dev"
+BOING_TESTNET_RPC_URL = "https://testnet-rpc.boing.network"
+# Optional tuning for GET /api/native-dex-indexer-stats (see indexer/buildNativeDexIndexerStats.mjs)
+NATIVE_DEX_INDEXER_LOG_SCAN_BLOCKS = "8000"
 
-# Production Environment Variables
-# NOTE: For production, use Cloudflare Pages environment variables instead of hardcoding here
 [env.production.vars]
 REACT_APP_ENV = "production"
 REACT_APP_BACKEND_URL = "https://boing-api-prod.nico-chikuji.workers.dev"
+BOING_TESTNET_RPC_URL = "https://testnet-rpc.boing.network"
+NATIVE_DEX_INDEXER_LOG_SCAN_BLOCKS = "8000"
 
-# Optional: Pages Function `api/boing-rpc` upstream (bind as plain var / secret in dashboard if needed).
-# BOING_TESTNET_RPC_URL = "https://testnet-rpc.boing.network"
+# Preview / non-production Pages deployments (e.g. staging project + preview branches).
+# KV must be repeated here when this block exists (non-inheritable).
+[[env.preview.kv_namespaces]]
+binding = "NATIVE_DEX_INDEXER_KV"
+id = "28b6a1cbc43b4cceaaa69d7e305ad93c"
+preview_id = "f6c686292e544a868a3bbfa8c37cede6"
+
+[env.preview.vars]
+REACT_APP_ENV = "staging"
+REACT_APP_BACKEND_URL = "https://boing-api-staging.nico-chikuji.workers.dev"
+BOING_TESTNET_RPC_URL = "https://testnet-rpc.boing.network"
+NATIVE_DEX_INDEXER_LOG_SCAN_BLOCKS = "8000"
