@@ -198,6 +198,14 @@ export default function BoingNativeTokenPanel() {
               )}
             </span>
           </div>
+          <p
+            className="text-[11px] leading-snug max-w-3xl mt-1"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            Chain height and read-only figures use this app&apos;s Boing RPC (default: public testnet). Explorer uses
+            the observer URL; numbers can differ from a private local node or from indexer-backed views if chain state
+            diverges.
+          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 shrink-0">
