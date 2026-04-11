@@ -1,0 +1,2443 @@
+------formdata-undici-063177751182
+Content-Disposition: form-data; name="metadata"
+
+{"main_module":"functionsWorker-0.9829907453153087.js"}
+------formdata-undici-063177751182
+Content-Disposition: form-data; name="functionsWorker-0.9829907453153087.js"; filename="functionsWorker-0.9829907453153087.js"
+Content-Type: application/javascript+module
+
+var __defProp = Object.defineProperty;
+var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
+
+// api/boing-rpc.js
+async function onRequestPost({ request, env }) {
+  const upstreamBase = (env.BOING_TESTNET_RPC_URL || "https://testnet-rpc.boing.network").replace(/\/$/, "");
+  const upstreamUrl = `${upstreamBase}/`;
+  const body = await request.text();
+  const res = await fetch(upstreamUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": request.headers.get("Content-Type") || "application/json",
+      Accept: "application/json"
+    },
+    body
+  });
+  const text = await res.text();
+  return new Response(text, {
+    status: res.status,
+    headers: {
+      "Content-Type": res.headers.get("Content-Type") || "application/json",
+      "Cache-Control": "no-store"
+    }
+  });
+}
+__name(onRequestPost, "onRequestPost");
+
+// ../../../boing.network/boing-sdk/dist/errors.js
+var BoingRpcError = class _BoingRpcError extends Error {
+  static {
+    __name(this, "BoingRpcError");
+  }
+  constructor(code, message, data, method, retryAfterMs) {
+    super(message);
+    this.code = code;
+    this.data = data;
+    this.method = method;
+    this.retryAfterMs = retryAfterMs;
+    this.name = "BoingRpcError";
+    Object.setPrototypeOf(this, _BoingRpcError.prototype);
+  }
+  /** Short string for logging: "BoingRpcError(code, method): message". */
+  toString() {
+    const method = this.method ? ` ${this.method}` : "";
+    return `BoingRpcError(${this.code}${method}): ${this.message}`;
+  }
+  /** True if this is a QA deployment rejection (-32050). */
+  get isQaRejected() {
+    return this.code === -32050;
+  }
+  /** True if deployment was referred to governance QA pool (-32051). */
+  get isQaPendingPool() {
+    return this.code === -32051;
+  }
+  /** True if QA pool is disabled by governance (-32054). */
+  get isQaPoolDisabled() {
+    return this.code === -32054;
+  }
+  /** True if QA pool hit global max pending (-32055). */
+  get isQaPoolFull() {
+    return this.code === -32055;
+  }
+  /** True if deployer exceeded per-address pool cap (-32056). */
+  get isQaPoolDeployerCap() {
+    return this.code === -32056;
+  }
+  /** True if the node rejected the call due to HTTP JSON-RPC rate limiting (-32016). */
+  get isRateLimited() {
+    return this.code === -32016;
+  }
+  /** For -32051, `data.tx_hash` when present. */
+  get pendingPoolTxHash() {
+    if (this.code !== -32051 || !this.data || typeof this.data !== "object")
+      return void 0;
+    const d = this.data;
+    return typeof d.tx_hash === "string" ? d.tx_hash : void 0;
+  }
+  /** QA rejection details when code is -32050. */
+  get qaData() {
+    if (this.code !== -32050 || !this.data || typeof this.data !== "object")
+      return void 0;
+    const d = this.data;
+    if (typeof d.rule_id === "string" && typeof d.message === "string") {
+      return { rule_id: d.rule_id, message: d.message };
+    }
+    return void 0;
+  }
+};
+function isRetriableBoingRpcError(e) {
+  if (!(e instanceof BoingRpcError))
+    return true;
+  if (e.isRateLimited)
+    return true;
+  if (e.code === -32e3) {
+    const m = e.message;
+    if (/\bHTTP 429\b/.test(m))
+      return true;
+    if (/\bHTTP 502\b/.test(m))
+      return true;
+    if (/\bHTTP 503\b/.test(m))
+      return true;
+    if (/\bHTTP 504\b/.test(m))
+      return true;
+    if (/Request timed out after \d+ms/.test(m))
+      return true;
+    if (/ECONNRESET|ETIMEDOUT|ENOTFOUND|EAI_AGAIN/i.test(m))
+      return true;
+    if (/fetch failed|Failed to fetch|Load failed|network/i.test(m))
+      return true;
+  }
+  return false;
+}
+__name(isRetriableBoingRpcError, "isRetriableBoingRpcError");
+
+// ../../../boing.network/boing-sdk/dist/retryAfter.js
+var MAX_RETRY_AFTER_MS = 864e5;
+function parseRetryAfterMs(value) {
+  if (value == null)
+    return void 0;
+  const trimmed = value.trim();
+  if (trimmed === "")
+    return void 0;
+  const asInt = Number.parseInt(trimmed, 10);
+  if (!Number.isNaN(asInt) && asInt >= 0 && String(asInt) === trimmed) {
+    return Math.min(asInt * 1e3, MAX_RETRY_AFTER_MS);
+  }
+  const when = Date.parse(trimmed);
+  if (!Number.isNaN(when)) {
+    const delta = when - Date.now();
+    if (delta > 0)
+      return Math.min(delta, MAX_RETRY_AFTER_MS);
+  }
+  return void 0;
+}
+__name(parseRetryAfterMs, "parseRetryAfterMs");
+
+// ../../../boing.network/boing-sdk/dist/hex.js
+function ensureHex(s) {
+  const t = s.trim();
+  return t.startsWith("0x") ? t : "0x" + t;
+}
+__name(ensureHex, "ensureHex");
+function bytesToHex(bytes) {
+  return "0x" + Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+__name(bytesToHex, "bytesToHex");
+var HEX_RE = /^[0-9a-fA-F]+$/;
+function validateHex32(hex) {
+  const normalized = ensureHex(hex);
+  const raw = normalized.slice(2);
+  if (raw.length !== 64)
+    throw new Error(`Expected 32 bytes (64 hex chars), got ${raw.length} hex chars`);
+  if (!HEX_RE.test(raw))
+    throw new Error("Invalid hex: expected 0-9, a-f, A-F");
+  return normalized;
+}
+__name(validateHex32, "validateHex32");
+
+// ../../../boing.network/boing-sdk/dist/client.js
+var DEFAULT_RPC_ID = 1;
+var DEFAULT_TIMEOUT_MS = 3e4;
+var DEFAULT_RETRY_BASE_MS = 250;
+function defaultFetchImpl(input, init) {
+  return globalThis.fetch(input, init);
+}
+__name(defaultFetchImpl, "defaultFetchImpl");
+function sleepMs(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+__name(sleepMs, "sleepMs");
+function generateClientRequestId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `boing-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+}
+__name(generateClientRequestId, "generateClientRequestId");
+var BoingClient = class {
+  static {
+    __name(this, "BoingClient");
+  }
+  constructor(config) {
+    this.id = DEFAULT_RPC_ID;
+    if (typeof config === "string") {
+      this.baseUrl = config.replace(/\/$/, "");
+      this.fetchImpl = defaultFetchImpl;
+      this.timeoutMs = DEFAULT_TIMEOUT_MS;
+      this.extraHeaders = {};
+      this.maxRetries = 0;
+      this.retryBaseDelayMs = DEFAULT_RETRY_BASE_MS;
+      this.generateRequestId = false;
+    } else {
+      this.baseUrl = config.baseUrl.replace(/\/$/, "");
+      this.fetchImpl = config.fetch ?? defaultFetchImpl;
+      this.timeoutMs = config.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+      this.extraHeaders = { ...config.extraHeaders ?? {} };
+      this.maxRetries = Math.max(0, config.maxRetries ?? 0);
+      this.retryBaseDelayMs = Math.max(0, config.retryBaseDelayMs ?? DEFAULT_RETRY_BASE_MS);
+      this.generateRequestId = config.generateRequestId === true;
+    }
+  }
+  /** Normalized RPC origin (no trailing slash). */
+  getBaseUrl() {
+    return this.baseUrl;
+  }
+  /**
+   * Correlation id from the most recent JSON-RPC **`POST /`** response (**`x-request-id`**).
+   * Useful for support UI when CORS exposes this header on the response.
+   */
+  getLastXRequestId() {
+    return this.lastXRequestId;
+  }
+  recordRequestIdFromResponse(res) {
+    const v = res.headers.get("x-request-id")?.trim();
+    this.lastXRequestId = v && v.length > 0 ? v : void 0;
+  }
+  rpcExtraHeaders() {
+    const h = { ...this.extraHeaders };
+    if (this.generateRequestId) {
+      h["X-Request-Id"] = generateClientRequestId();
+    }
+    return h;
+  }
+  async requestOnce(method, params = []) {
+    const body = {
+      jsonrpc: "2.0",
+      id: this.id++,
+      method,
+      params
+    };
+    const controller = this.timeoutMs > 0 ? new AbortController() : null;
+    const timeoutId = controller ? setTimeout(() => controller.abort(), this.timeoutMs) : null;
+    try {
+      const headers = {
+        "Content-Type": "application/json",
+        ...this.rpcExtraHeaders()
+      };
+      const res = await this.fetchImpl(this.baseUrl, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(body),
+        signal: controller?.signal
+      });
+      this.recordRequestIdFromResponse(res);
+      if (!res.ok) {
+        const retryAfterMs = parseRetryAfterMs(res.headers.get("retry-after"));
+        let detail = (res.statusText ?? "").trim();
+        let bodyText = "";
+        try {
+          bodyText = (await res.text()).trim().slice(0, 400);
+          if (bodyText.length > 0) {
+            detail = detail.length > 0 ? `${detail} \u2014 ${bodyText}` : bodyText;
+          }
+        } catch {
+        }
+        let msg = detail.length > 0 ? `HTTP ${res.status}: ${detail}` : `HTTP ${res.status}`;
+        if (res.status === 413) {
+          msg = `HTTP 413: JSON-RPC body exceeds this node limit (operators can raise BOING_RPC_MAX_BODY_MB). ${msg}`;
+        }
+        if (res.status === 429 && bodyText.length > 0) {
+          try {
+            const j = JSON.parse(bodyText);
+            if (j.error != null) {
+              throw new BoingRpcError(j.error.code, j.error.message, j.error.data, method, retryAfterMs);
+            }
+          } catch (e) {
+            if (e instanceof BoingRpcError)
+              throw e;
+          }
+        }
+        throw new BoingRpcError(-32e3, msg, void 0, method, retryAfterMs);
+      }
+      const json = await res.json();
+      if (json.error != null) {
+        throw new BoingRpcError(json.error.code, json.error.message, json.error.data, method);
+      }
+      if (!("result" in json)) {
+        throw new BoingRpcError(-32e3, "Invalid RPC response: no result or error", void 0, method);
+      }
+      return json.result;
+    } catch (err) {
+      if (err instanceof BoingRpcError)
+        throw err;
+      if (err instanceof Error && err.name === "AbortError") {
+        throw new BoingRpcError(-32e3, `Request timed out after ${this.timeoutMs}ms`, void 0, method);
+      }
+      throw new BoingRpcError(-32e3, err instanceof Error ? err.message : String(err), void 0, method);
+    } finally {
+      if (timeoutId != null)
+        clearTimeout(timeoutId);
+    }
+  }
+  async request(method, params = []) {
+    let lastErr;
+    const attempts = 1 + this.maxRetries;
+    for (let attempt = 0; attempt < attempts; attempt++) {
+      try {
+        return await this.requestOnce(method, params);
+      } catch (e) {
+        lastErr = e;
+        if (attempt >= attempts - 1 || !isRetriableBoingRpcError(e)) {
+          throw e;
+        }
+        const backoff = this.retryBaseDelayMs * Math.pow(2, attempt);
+        const ra = e instanceof BoingRpcError ? e.retryAfterMs : void 0;
+        const delay = ra != null && ra > 0 ? Math.max(backoff, ra) : backoff;
+        if (delay > 0)
+          await sleepMs(delay);
+      }
+    }
+    throw lastErr;
+  }
+  async requestBatchOnce(calls) {
+    const BATCH = "jsonrpc.batch";
+    const batchBody = calls.map((c) => ({
+      jsonrpc: "2.0",
+      id: this.id++,
+      method: c.method,
+      params: c.params ?? []
+    }));
+    const controller = this.timeoutMs > 0 ? new AbortController() : null;
+    const timeoutId = controller ? setTimeout(() => controller.abort(), this.timeoutMs) : null;
+    try {
+      const headers = {
+        "Content-Type": "application/json",
+        ...this.rpcExtraHeaders()
+      };
+      const res = await this.fetchImpl(this.baseUrl, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(batchBody),
+        signal: controller?.signal
+      });
+      this.recordRequestIdFromResponse(res);
+      if (!res.ok) {
+        const retryAfterMs = parseRetryAfterMs(res.headers.get("retry-after"));
+        let detail = (res.statusText ?? "").trim();
+        let bodyText = "";
+        try {
+          bodyText = (await res.text()).trim().slice(0, 400);
+          if (bodyText.length > 0) {
+            detail = detail.length > 0 ? `${detail} \u2014 ${bodyText}` : bodyText;
+          }
+        } catch {
+        }
+        const msg = detail.length > 0 ? `HTTP ${res.status}: ${detail}` : `HTTP ${res.status}`;
+        if (res.status === 429 && bodyText.length > 0) {
+          try {
+            const j = JSON.parse(bodyText);
+            if (j.error != null) {
+              throw new BoingRpcError(j.error.code, j.error.message, j.error.data, BATCH, retryAfterMs);
+            }
+          } catch (e) {
+            if (e instanceof BoingRpcError)
+              throw e;
+          }
+        }
+        throw new BoingRpcError(-32e3, msg, void 0, BATCH, retryAfterMs);
+      }
+      const json = await res.json();
+      if (!Array.isArray(json)) {
+        throw new BoingRpcError(-32e3, "Invalid RPC response: expected JSON array for batch", void 0, BATCH);
+      }
+      return json;
+    } catch (err) {
+      if (err instanceof BoingRpcError)
+        throw err;
+      if (err instanceof Error && err.name === "AbortError") {
+        throw new BoingRpcError(-32e3, `Request timed out after ${this.timeoutMs}ms`, void 0, BATCH);
+      }
+      throw new BoingRpcError(-32e3, err instanceof Error ? err.message : String(err), void 0, BATCH);
+    } finally {
+      if (timeoutId != null)
+        clearTimeout(timeoutId);
+    }
+  }
+  /**
+   * POST a JSON-RPC **batch** (JSON array of requests). Assigns monotonic numeric `id`s; returns the response array in order.
+   */
+  async requestBatch(calls) {
+    let lastErr;
+    const attempts = 1 + this.maxRetries;
+    for (let attempt = 0; attempt < attempts; attempt++) {
+      try {
+        return await this.requestBatchOnce(calls);
+      } catch (e) {
+        lastErr = e;
+        if (attempt >= attempts - 1 || !isRetriableBoingRpcError(e)) {
+          throw e;
+        }
+        const backoff = this.retryBaseDelayMs * Math.pow(2, attempt);
+        const ra = e instanceof BoingRpcError ? e.retryAfterMs : void 0;
+        const delay = ra != null && ra > 0 ? Math.max(backoff, ra) : backoff;
+        if (delay > 0)
+          await sleepMs(delay);
+      }
+    }
+    throw lastErr;
+  }
+  /**
+   * `GET {baseUrl}/live` — process is up (no chain read; for orchestrator liveness).
+   * Uses the same `extraHeaders` as JSON-RPC (e.g. auth in front of the node).
+   */
+  async checkHttpLive() {
+    try {
+      const res = await this.fetchImpl(`${this.baseUrl}/live`, {
+        method: "GET",
+        headers: this.rpcExtraHeaders()
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+  /**
+   * `GET {baseUrl}/ready` — node can serve RPC (read lock on state). Returns false on **503** when
+   * the node enforces **`BOING_RPC_READY_MIN_PEERS`** and peer count is too low.
+   */
+  async checkHttpReady() {
+    try {
+      const res = await this.fetchImpl(`${this.baseUrl}/ready`, {
+        method: "GET",
+        headers: this.rpcExtraHeaders()
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+  /**
+   * One round-trip sanity check for dashboards and CI: `health`, supported method count,
+   * optional catalog size, whether OpenAPI JSON is exposed, plain HTTP `/live` + `/ready`,
+   * and a small JSON-RPC **batch** probe (`jsonrpcBatchOk`).
+   */
+  async preflightRpc() {
+    const [health, supported, httpLiveOk, httpReadyOk, httpOpenApiJsonOk, wellKnownBoingRpcOk, httpLiveJsonOk] = await Promise.all([
+      this.health(),
+      this.rpcSupportedMethods(),
+      this.checkHttpLive(),
+      this.checkHttpReady(),
+      this.checkHttpOpenApiJson(),
+      this.checkWellKnownBoingRpc(),
+      this.checkHttpLiveJson()
+    ]);
+    let catalogMethodCount = null;
+    try {
+      const cat = await this.getRpcMethodCatalog();
+      catalogMethodCount = cat.methods?.length ?? 0;
+    } catch {
+      catalogMethodCount = null;
+    }
+    let openApiPresent = false;
+    try {
+      const oa = await this.getRpcOpenApi();
+      openApiPresent = typeof oa === "object" && oa !== null && "openapi" in oa;
+    } catch {
+      openApiPresent = false;
+    }
+    let jsonrpcBatchOk = false;
+    try {
+      const batch = await this.requestBatch([
+        { method: "boing_chainHeight", params: [] },
+        { method: "boing_clientVersion", params: [] }
+      ]);
+      jsonrpcBatchOk = batch.length === 2 && batch[0]?.error == null && batch[1]?.error == null && typeof batch[0]?.result === "number" && typeof batch[1]?.result === "string";
+    } catch {
+      jsonrpcBatchOk = false;
+    }
+    return {
+      health,
+      supportedMethodCount: supported.length,
+      catalogMethodCount,
+      openApiPresent,
+      httpLiveOk,
+      httpReadyOk,
+      jsonrpcBatchOk,
+      httpOpenApiJsonOk,
+      wellKnownBoingRpcOk,
+      httpLiveJsonOk
+    };
+  }
+  /** `GET {baseUrl}/openapi.json` — same document as `boing_getRpcOpenApi` when the node exposes it. */
+  async checkHttpOpenApiJson() {
+    try {
+      const res = await this.fetchImpl(`${this.baseUrl}/openapi.json`, {
+        method: "GET",
+        headers: this.rpcExtraHeaders()
+      });
+      if (!res.ok)
+        return false;
+      const ct = res.headers.get("content-type") ?? "";
+      if (!ct.includes("application/json"))
+        return false;
+      const j = await res.json();
+      return typeof j === "object" && j !== null && "openapi" in j;
+    } catch {
+      return false;
+    }
+  }
+  /** `GET {baseUrl}/.well-known/boing-rpc` — path hints for HTTP discovery. */
+  async checkWellKnownBoingRpc() {
+    try {
+      const res = await this.fetchImpl(`${this.baseUrl}/.well-known/boing-rpc`, {
+        method: "GET",
+        headers: this.rpcExtraHeaders()
+      });
+      if (!res.ok)
+        return false;
+      const j = await res.json();
+      return typeof j === "object" && j !== null && "schema_version" in j;
+    } catch {
+      return false;
+    }
+  }
+  /** `GET {baseUrl}/live.json` — JSON liveness probe. */
+  async checkHttpLiveJson() {
+    try {
+      const res = await this.fetchImpl(`${this.baseUrl}/live.json`, {
+        method: "GET",
+        headers: this.rpcExtraHeaders()
+      });
+      if (!res.ok)
+        return false;
+      const j = await res.json();
+      return typeof j === "object" && j !== null && j.ok === true;
+    } catch {
+      return false;
+    }
+  }
+  /**
+   * **`GET {baseUrl}/openapi.json`** — same OpenAPI document as **`boing_getRpcOpenApi`**, without a JSON-RPC round-trip.
+   * Prefer this in browser devtools panels; throws **`BoingRpcError`** when the response is not OK or not JSON.
+   */
+  async fetchOpenApiViaHttp() {
+    const res = await this.fetchImpl(`${this.baseUrl}/openapi.json`, {
+      method: "GET",
+      headers: this.rpcExtraHeaders()
+    });
+    if (!res.ok) {
+      throw new BoingRpcError(-32e3, `HTTP ${res.status}: could not load OpenAPI from /openapi.json`, void 0, "GET /openapi.json");
+    }
+    const ct = res.headers.get("content-type") ?? "";
+    if (!ct.includes("application/json")) {
+      throw new BoingRpcError(-32e3, "GET /openapi.json: expected application/json Content-Type", void 0, "GET /openapi.json");
+    }
+    const j = await res.json();
+    if (typeof j !== "object" || j === null || !("openapi" in j)) {
+      throw new BoingRpcError(-32e3, "GET /openapi.json: response is not a valid OpenAPI root object", void 0, "GET /openapi.json");
+    }
+    return j;
+  }
+  /** Current chain height (tip block number). */
+  async chainHeight() {
+    return this.request("boing_chainHeight", []);
+  }
+  /** Build identity string for this node (e.g. `boing-node/0.1.0`). Params: `[]`. */
+  async clientVersion() {
+    return this.request("boing_clientVersion", []);
+  }
+  /**
+   * Alphabetically sorted `boing_*` method names implemented by this binary (discovery). Params: `[]`.
+   */
+  async rpcSupportedMethods() {
+    return this.request("boing_rpcSupportedMethods", []);
+  }
+  /** Embedded JSON Schema-style catalog for codegen (params `[]`). See `boing_getNetworkInfo.developer`. */
+  async getRpcMethodCatalog() {
+    return this.request("boing_getRpcMethodCatalog", []);
+  }
+  /** Minimal OpenAPI 3.1 document for `POST /` JSON-RPC and `GET /ws` (params `[]`). */
+  async getRpcOpenApi() {
+    return this.request("boing_getRpcOpenApi", []);
+  }
+  /**
+   * Liveness and build identity (params `[]`). Prefer this over `boing_chainHeight` for load balancers:
+   * includes `client_version`, optional `chain_id` / `chain_name` from node env, and `head_height`.
+   */
+  async health() {
+    return this.request("boing_health", []);
+  }
+  /**
+   * Committed chain tip: `head_height`, `finalized_height` (same as head today), and tip `latest_block_hash`.
+   * See RPC-API-SPEC.md — finality semantics.
+   */
+  async getSyncState() {
+    return this.request("boing_getSyncState", []);
+  }
+  /**
+   * Network + tip snapshot for dApps (params `[]`). Includes `chain_native` (sums over committed accounts) and
+   * `rpc.not_available` for capabilities this surface does not expose (e.g. staking APY).
+   * See RPC-API-SPEC.md — `chain_id` / `chain_name` require node env `BOING_CHAIN_ID` / `BOING_CHAIN_NAME`.
+   */
+  async getNetworkInfo() {
+    return this.request("boing_getNetworkInfo", []);
+  }
+  /** Get spendable balance for an account. Params: 32-byte account ID (hex). */
+  async getBalance(hexAccountId) {
+    const hex = validateHex32(hexAccountId);
+    return this.request("boing_getBalance", [hex]);
+  }
+  /** Get full account state (balance, nonce, stake). Params: 32-byte account ID (hex). */
+  async getAccount(hexAccountId) {
+    const hex = validateHex32(hexAccountId);
+    return this.request("boing_getAccount", [hex]);
+  }
+  /** Get block by height. Returns null if not found. */
+  async getBlockByHeight(height, includeReceipts) {
+    const params = includeReceipts === true ? [height, true] : includeReceipts === false ? [height, false] : [height];
+    return this.request("boing_getBlockByHeight", params);
+  }
+  /** Receipt for an included tx (`Transaction.id` hex), or `null` if unknown. */
+  async getTransactionReceipt(hexTxId) {
+    return this.request("boing_getTransactionReceipt", [validateHex32(hexTxId)]);
+  }
+  /**
+   * Bounded log query over committed blocks (see RPC-API-SPEC — max block span and result cap on the node).
+   * Optional `address` is normalized to 32-byte hex when provided.
+   */
+  async getLogs(filter) {
+    const payload = {
+      fromBlock: filter.fromBlock,
+      toBlock: filter.toBlock
+    };
+    if (filter.address != null && filter.address !== "") {
+      payload.address = validateHex32(filter.address);
+    }
+    if (filter.topics != null) {
+      payload.topics = filter.topics;
+    }
+    return this.request("boing_getLogs", [payload]);
+  }
+  /** Get block by hash. Params: 32-byte block hash (hex). */
+  async getBlockByHash(hexBlockHash, includeReceipts) {
+    const hex = validateHex32(hexBlockHash);
+    const params = includeReceipts === true ? [hex, true] : includeReceipts === false ? [hex, false] : [hex];
+    return this.request("boing_getBlockByHash", params);
+  }
+  /** Get Merkle proof for an account. Params: 32-byte account ID (hex). */
+  async getAccountProof(hexAccountId) {
+    const hex = validateHex32(hexAccountId);
+    return this.request("boing_getAccountProof", [hex]);
+  }
+  /** Verify an account Merkle proof. Params: hex proof, hex state root. */
+  async verifyAccountProof(hexProof, hexStateRoot) {
+    return this.request("boing_verifyAccountProof", [
+      ensureHex(hexProof),
+      ensureHex(hexStateRoot)
+    ]);
+  }
+  /** Read one 32-byte VM storage slot for a contract (`SLOAD` semantics; missing → zero word). */
+  async getContractStorage(hexContractId, hexKey32) {
+    return this.request("boing_getContractStorage", [
+      validateHex32(hexContractId),
+      validateHex32(hexKey32)
+    ]);
+  }
+  /** Simulate a transaction without applying it. Params: hex-encoded signed transaction. */
+  async simulateTransaction(hexSignedTx) {
+    const hex = ensureHex(hexSignedTx);
+    return this.request("boing_simulateTransaction", [hex]);
+  }
+  /**
+   * Dry-run a `contract_call` without a signed transaction (`boing_simulateContractCall`).
+   * Params: `[contract_hex, calldata_hex, sender_hex?, at_block?]` — see `docs/RPC-API-SPEC.md`.
+   */
+  async simulateContractCall(contractHex, calldataHex, options) {
+    const contract = validateHex32(contractHex);
+    const calldata = ensureHex(calldataHex);
+    const params = [contract, calldata];
+    if (options?.senderHex !== void 0 || options?.atBlock !== void 0) {
+      const sender = options.senderHex === void 0 || options.senderHex === null ? null : validateHex32(options.senderHex);
+      params.push(sender);
+      if (options.atBlock !== void 0) {
+        params.push(options.atBlock === "latest" ? "latest" : options.atBlock);
+      }
+    }
+    return this.request("boing_simulateContractCall", params);
+  }
+  /**
+   * Submit a signed transaction to the mempool.
+   * The hex_signed_tx must be hex-encoded bincode-serialized SignedTransaction (from Rust/CLI or future signer).
+   */
+  async submitTransaction(hexSignedTx) {
+    const hex = ensureHex(hexSignedTx);
+    return this.request("boing_submitTransaction", [hex]);
+  }
+  /** Register a dApp for incentive tracking. Params: 32-byte hex contract id, 32-byte hex owner id. */
+  async registerDappMetrics(hexContract, hexOwner) {
+    return this.request("boing_registerDappMetrics", [
+      validateHex32(hexContract),
+      validateHex32(hexOwner)
+    ]);
+  }
+  /** Submit a signed intent. Params: hex-encoded signed intent. */
+  async submitIntent(hexSignedIntent) {
+    return this.request("boing_submitIntent", [ensureHex(hexSignedIntent)]);
+  }
+  /**
+   * Pre-flight QA check for a deployment (no submit). Matches node param order:
+   * [hex_bytecode, purpose_category?, description_hash?, asset_name?, asset_symbol?].
+   * When passing asset_name, include description_hash (or use a 32-byte placeholder) per RPC-API-SPEC.
+   * Returns allow | reject | unsure; when reject, rule_id and message are set.
+   */
+  /** List pending governance QA pool items. */
+  async qaPoolList() {
+    return this.request("boing_qaPoolList", []);
+  }
+  /** Read effective QA pool governance config and `pending_count`. */
+  async qaPoolConfig() {
+    return this.request("boing_qaPoolConfig", []);
+  }
+  /** Read-only: effective QA rule registry JSON (same shape as `qa_registry.json`). No auth. */
+  async getQaRegistry() {
+    return this.request("boing_getQaRegistry", []);
+  }
+  /**
+   * Vote on a pooled Unsure deploy. `voter` must be a governance administrator unless the node uses dev_open_voting.
+   * Params: tx_hash hex, voter account hex, `allow` | `reject` | `abstain`.
+   */
+  async qaPoolVote(txHashHex, voterHex, vote) {
+    return this.request("boing_qaPoolVote", [
+      validateHex32(txHashHex),
+      validateHex32(voterHex),
+      vote
+    ]);
+  }
+  /**
+   * Apply QA registry and pool governance config on the node (operator RPC).
+   * Params are full JSON documents as strings (same format as `qa_registry.json` / `qa_pool_config.json`).
+   * Requires `X-Boing-Operator` when the node has `BOING_OPERATOR_RPC_TOKEN` set.
+   */
+  async operatorApplyQaPolicy(registryJson, qaPoolConfigJson) {
+    return this.request("boing_operatorApplyQaPolicy", [registryJson, qaPoolConfigJson]);
+  }
+  async qaCheck(hexBytecode, purposeCategory, descriptionHash, assetName, assetSymbol) {
+    const hex = ensureHex(hexBytecode);
+    const params = [hex];
+    if (purposeCategory != null) {
+      params.push(purposeCategory);
+      if (descriptionHash != null) {
+        params.push(ensureHex(descriptionHash));
+        if (assetName != null) {
+          params.push(assetName);
+          if (assetSymbol != null)
+            params.push(assetSymbol);
+        }
+      }
+    }
+    return this.request("boing_qaCheck", params);
+  }
+  /** Request testnet BOING (only when node is started with --faucet-enable). Params: 32-byte account ID (hex). Rate limited per account. */
+  async faucetRequest(hexAccountId) {
+    const hex = validateHex32(hexAccountId);
+    return this.request("boing_faucetRequest", [hex]);
+  }
+};
+
+// ../../../boing.network/boing-sdk/dist/canonicalTestnet.js
+var CANONICAL_BOING_TESTNET_NATIVE_CP_POOL_HEX = validateHex32("0x7247ddc3180fdc4d3fd1e716229bfa16bad334a07d28aa9fda9ad1bfa7bdacc3");
+
+// ../../../boing.network/boing-sdk/dist/canonicalTestnetDex.js
+var CANONICAL_BOING_TESTNET_NATIVE_DEX_DEPLOYER_HEX = validateHex32("0x3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29");
+var CANONICAL_BOING_TESTNET_NATIVE_DEX_FACTORY_HEX = validateHex32("0x58112627fc84618a27b82e9af82bc9a51761c6d3cca1260c93d56d22b6c481a1");
+var CANONICAL_BOING_TESTNET_NATIVE_DEX_LEDGER_ROUTER_V1_HEX = validateHex32("0x371b4cd7e3b88e06e6b89bdc86214918a7e7ec73b62deb7f9975e4166736d54d");
+var CANONICAL_BOING_TESTNET_NATIVE_DEX_LEDGER_ROUTER_V2_HEX = validateHex32("0x33334ff73c44c93335ac5e69938a52ea65fa77b062d1961ed22c131adaa31e0f");
+var CANONICAL_BOING_TESTNET_NATIVE_DEX_LEDGER_ROUTER_V3_HEX = validateHex32("0x2c90ffcddeb2683219b4b8143a91d7b93f249bcb0d9523c8b4f2111de668b79a");
+var CANONICAL_BOING_TESTNET_NATIVE_DEX_MULTIHOP_SWAP_ROUTER_HEX = validateHex32("0xf801cd1aa5ec402f89a2f394b49e6b0c136264d8945b16a4a6a81a188b18acc1");
+var CANONICAL_BOING_TESTNET_NATIVE_AMM_LP_VAULT_HEX = validateHex32("0x937d09ee8e4dcc521c812566ad4930792e74ad004ecb3ae2cc73dc015813aa8d");
+var CANONICAL_BOING_TESTNET_NATIVE_LP_SHARE_TOKEN_HEX = validateHex32("0x101201403f573e5b1d6d5c6b93d52d12c68957f4a228d5dad76e78c747044421");
+
+// ../../../boing.network/boing-sdk/dist/chainIds.js
+var BOING_TESTNET_CHAIN_ID_HEX = "0x1b01";
+function strip0x(h) {
+  const t = h.trim().toLowerCase();
+  return t.startsWith("0x") ? t.slice(2) : t;
+}
+__name(strip0x, "strip0x");
+function normalizeBoingChainIdHex(chainId) {
+  if (typeof chainId === "bigint") {
+    if (chainId < 0n) {
+      throw new Error("normalizeBoingChainIdHex: negative chain id");
+    }
+    return `0x${chainId.toString(16)}`;
+  }
+  if (typeof chainId === "number") {
+    if (!Number.isInteger(chainId) || chainId < 0) {
+      throw new Error(`normalizeBoingChainIdHex: invalid number ${chainId}`);
+    }
+    return `0x${BigInt(chainId).toString(16)}`;
+  }
+  const s = chainId.trim();
+  if (/^\d+$/.test(s)) {
+    const n2 = BigInt(s);
+    if (n2 < 0n) {
+      throw new Error("normalizeBoingChainIdHex: negative chain id");
+    }
+    return `0x${n2.toString(16)}`;
+  }
+  const bare = strip0x(s);
+  if (!/^[0-9a-f]+$/i.test(bare)) {
+    throw new Error("normalizeBoingChainIdHex: expected decimal or hex chain id");
+  }
+  const n = BigInt(`0x${bare}`);
+  return `0x${n.toString(16)}`;
+}
+__name(normalizeBoingChainIdHex, "normalizeBoingChainIdHex");
+function isBoingTestnetChainId(chainId) {
+  try {
+    const h = normalizeBoingChainIdHex(chainId).toLowerCase();
+    return h === BOING_TESTNET_CHAIN_ID_HEX;
+  } catch {
+    return false;
+  }
+}
+__name(isBoingTestnetChainId, "isBoingTestnetChainId");
+
+// ../../../boing.network/boing-sdk/dist/indexerBatch.js
+var DEFAULT_GET_LOGS_MAX_BLOCK_SPAN = 128;
+async function mapWithConcurrencyLimit(items, limit, fn, options) {
+  if (limit < 1)
+    throw new RangeError("limit must be >= 1");
+  if (!Number.isInteger(limit))
+    throw new TypeError("limit must be an integer");
+  if (items.length === 0)
+    return [];
+  const results = new Array(items.length);
+  let next = 0;
+  const signal = options?.signal;
+  async function worker() {
+    while (true) {
+      if (signal?.aborted) {
+        throw new Error("mapWithConcurrencyLimit aborted");
+      }
+      const idx = next++;
+      if (idx >= items.length)
+        return;
+      results[idx] = await fn(items[idx], idx);
+    }
+  }
+  __name(worker, "worker");
+  const workers = Math.min(limit, items.length);
+  await Promise.all(Array.from({ length: workers }, () => worker()));
+  return results;
+}
+__name(mapWithConcurrencyLimit, "mapWithConcurrencyLimit");
+function planLogBlockChunks(fromBlock, toBlock, maxSpan = DEFAULT_GET_LOGS_MAX_BLOCK_SPAN) {
+  if (!Number.isInteger(fromBlock) || !Number.isInteger(toBlock)) {
+    throw new TypeError("fromBlock and toBlock must be integers");
+  }
+  if (maxSpan < 1)
+    throw new RangeError("maxSpan must be >= 1");
+  if (fromBlock > toBlock)
+    return [];
+  const chunks = [];
+  let start = fromBlock;
+  while (start <= toBlock) {
+    const end = Math.min(start + maxSpan - 1, toBlock);
+    chunks.push({ fromBlock: start, toBlock: end });
+    start = end + 1;
+  }
+  return chunks;
+}
+__name(planLogBlockChunks, "planLogBlockChunks");
+function compareLogEntries(a, b) {
+  if (a.block_height !== b.block_height)
+    return a.block_height - b.block_height;
+  if (a.tx_index !== b.tx_index)
+    return a.tx_index - b.tx_index;
+  return a.log_index - b.log_index;
+}
+__name(compareLogEntries, "compareLogEntries");
+async function getLogsChunked(client, filter, options) {
+  const maxSpan = options?.maxBlockSpan ?? DEFAULT_GET_LOGS_MAX_BLOCK_SPAN;
+  const concurrent = options?.maxConcurrent ?? 1;
+  const { fromBlock, toBlock, ...rest } = filter;
+  const chunks = planLogBlockChunks(fromBlock, toBlock, maxSpan);
+  const parts = await mapWithConcurrencyLimit(chunks, concurrent, async (c) => client.getLogs({
+    ...rest,
+    fromBlock: c.fromBlock,
+    toBlock: c.toBlock
+  }), { signal: options?.signal });
+  const rows = [];
+  for (const part of parts) {
+    rows.push(...part);
+  }
+  rows.sort(compareLogEntries);
+  return rows;
+}
+__name(getLogsChunked, "getLogsChunked");
+
+// ../../../boing.network/boing-sdk/dist/nativeDexFactory.js
+var NATIVE_DEX_FACTORY_TOPIC_REGISTER_HEX = (() => {
+  const u8 = new Uint8Array(32);
+  u8.set(new TextEncoder().encode("BOING_NATIVE_DEX_FACTORY_REG1"));
+  return bytesToHex(u8);
+})();
+var NATIVE_DEX_FACTORY_CREATE2_SALT_V1_HEX = (() => {
+  const u8 = new Uint8Array(32);
+  const s = new TextEncoder().encode("BOING_NATIVEDEX_FACTORY_V1");
+  u8.set(s);
+  return bytesToHex(u8);
+})();
+
+// ../../../boing.network/boing-sdk/dist/receiptLogs.js
+var TOPIC_HEX_RE = /^[0-9a-fA-F]{64}$/;
+function normalizeTopicWord(topic) {
+  const raw = topic.trim().replace(/^0x/i, "");
+  if (raw.length !== 64 || !TOPIC_HEX_RE.test(raw)) {
+    throw new Error(`Topic must be 32 bytes (64 hex chars), got ${raw.length}`);
+  }
+  return "0x" + raw.toLowerCase();
+}
+__name(normalizeTopicWord, "normalizeTopicWord");
+
+// ../../../boing.network/boing-sdk/dist/nativeDexFactoryLogs.js
+var T0_REG = normalizeTopicWord(NATIVE_DEX_FACTORY_TOPIC_REGISTER_HEX);
+function isNativeDexFactoryRegisterTopic0(topic) {
+  try {
+    return normalizeTopicWord(topic) === T0_REG;
+  } catch {
+    return false;
+  }
+}
+__name(isNativeDexFactoryRegisterTopic0, "isNativeDexFactoryRegisterTopic0");
+function isNativeDexFactoryRegisterLog3Shape(log) {
+  if (log.topics.length !== 3)
+    return false;
+  return isNativeDexFactoryRegisterTopic0(log.topics[0]);
+}
+__name(isNativeDexFactoryRegisterLog3Shape, "isNativeDexFactoryRegisterLog3Shape");
+function tryParseNativeDexFactoryRegisterLog3(log) {
+  try {
+    if (!isNativeDexFactoryRegisterLog3Shape(log))
+      return null;
+    const raw = log.data.trim().replace(/^0x/i, "");
+    if (raw.length < 64)
+      return null;
+    const poolHex = validateHex32(`0x${raw.slice(0, 64)}`);
+    const tokenAHex = validateHex32(log.topics[1]);
+    const tokenBHex = validateHex32(log.topics[2]);
+    return { tokenAHex, tokenBHex, poolHex };
+  } catch {
+    return null;
+  }
+}
+__name(tryParseNativeDexFactoryRegisterLog3, "tryParseNativeDexFactoryRegisterLog3");
+function tryParseNativeDexFactoryRegisterRpcLogEntry(log) {
+  const p = tryParseNativeDexFactoryRegisterLog3(log);
+  if (!p)
+    return null;
+  return {
+    ...p,
+    block_height: log.block_height,
+    tx_index: log.tx_index,
+    tx_id: log.tx_id,
+    log_index: log.log_index,
+    address: log.address
+  };
+}
+__name(tryParseNativeDexFactoryRegisterRpcLogEntry, "tryParseNativeDexFactoryRegisterRpcLogEntry");
+
+// ../../../boing.network/boing-sdk/dist/dexIntegration.js
+function parseOptionalHex32(v) {
+  if (v == null || typeof v !== "string")
+    return null;
+  const t = v.trim();
+  if (!t)
+    return null;
+  try {
+    return validateHex32(t);
+  } catch {
+    return null;
+  }
+}
+__name(parseOptionalHex32, "parseOptionalHex32");
+function mergeOptionalAccountHex(chainId, override, rpcField, embeddedWhenTestnet) {
+  const o = override;
+  if (o?.trim()) {
+    try {
+      return { hex: validateHex32(o), source: "override" };
+    } catch {
+      return { hex: null, source: "none" };
+    }
+  }
+  const rpc = parseOptionalHex32(rpcField ?? null);
+  if (rpc)
+    return { hex: rpc, source: "rpc_end_user" };
+  if (chainId != null && isBoingTestnetChainId(chainId) && embeddedWhenTestnet != null) {
+    return { hex: embeddedWhenTestnet, source: "sdk_testnet_embedded" };
+  }
+  return { hex: null, source: "none" };
+}
+__name(mergeOptionalAccountHex, "mergeOptionalAccountHex");
+function getProcessEnvRecord() {
+  if (typeof globalThis === "undefined")
+    return void 0;
+  const proc = globalThis.process;
+  return proc?.env;
+}
+__name(getProcessEnvRecord, "getProcessEnvRecord");
+function readFirstProcessEnv(keys) {
+  const env = getProcessEnvRecord();
+  if (env == null)
+    return void 0;
+  for (const k of keys) {
+    const v = env[k];
+    if (v != null && String(v).trim())
+      return String(v).trim();
+  }
+  return void 0;
+}
+__name(readFirstProcessEnv, "readFirstProcessEnv");
+function buildNativeDexIntegrationOverridesFromProcessEnv() {
+  const o = {};
+  const pool = readFirstProcessEnv([
+    "REACT_APP_BOING_NATIVE_AMM_POOL",
+    "VITE_BOING_NATIVE_AMM_POOL",
+    "BOING_NATIVE_AMM_POOL"
+  ]);
+  const fac = readFirstProcessEnv([
+    "REACT_APP_BOING_NATIVE_VM_DEX_FACTORY",
+    "VITE_BOING_NATIVE_VM_DEX_FACTORY",
+    "BOING_NATIVE_VM_DEX_FACTORY",
+    "BOING_DEX_FACTORY_HEX"
+  ]);
+  const hop = readFirstProcessEnv([
+    "REACT_APP_BOING_NATIVE_VM_SWAP_ROUTER",
+    "VITE_BOING_NATIVE_VM_SWAP_ROUTER",
+    "BOING_NATIVE_VM_SWAP_ROUTER",
+    "BOING_NATIVE_DEX_MULTIHOP_SWAP_ROUTER"
+  ]);
+  const l2 = readFirstProcessEnv([
+    "REACT_APP_BOING_NATIVE_DEX_LEDGER_ROUTER_V2",
+    "VITE_BOING_NATIVE_DEX_LEDGER_ROUTER_V2",
+    "BOING_NATIVE_DEX_LEDGER_ROUTER_V2"
+  ]);
+  const l3 = readFirstProcessEnv([
+    "REACT_APP_BOING_NATIVE_DEX_LEDGER_ROUTER_V3",
+    "VITE_BOING_NATIVE_DEX_LEDGER_ROUTER_V3",
+    "BOING_NATIVE_DEX_LEDGER_ROUTER_V3"
+  ]);
+  const vault = readFirstProcessEnv([
+    "REACT_APP_BOING_NATIVE_AMM_LP_VAULT",
+    "VITE_BOING_NATIVE_AMM_LP_VAULT",
+    "BOING_NATIVE_AMM_LP_VAULT"
+  ]);
+  const share = readFirstProcessEnv([
+    "REACT_APP_BOING_NATIVE_AMM_LP_SHARE_TOKEN",
+    "VITE_BOING_NATIVE_AMM_LP_SHARE_TOKEN",
+    "BOING_NATIVE_AMM_LP_SHARE_TOKEN"
+  ]);
+  if (pool)
+    o.nativeCpPoolAccountHex = pool;
+  if (fac)
+    o.nativeDexFactoryAccountHex = fac;
+  if (hop)
+    o.nativeDexMultihopSwapRouterAccountHex = hop;
+  if (l2)
+    o.nativeDexLedgerRouterV2AccountHex = l2;
+  if (l3)
+    o.nativeDexLedgerRouterV3AccountHex = l3;
+  if (vault)
+    o.nativeAmmLpVaultAccountHex = vault;
+  if (share)
+    o.nativeLpShareTokenAccountHex = share;
+  return o;
+}
+__name(buildNativeDexIntegrationOverridesFromProcessEnv, "buildNativeDexIntegrationOverridesFromProcessEnv");
+function mergeNativeDexIntegrationDefaults(info, overrides) {
+  const chainId = info?.chain_id ?? null;
+  const eu = info?.end_user;
+  const poolEmb = CANONICAL_BOING_TESTNET_NATIVE_CP_POOL_HEX;
+  const facEmb = CANONICAL_BOING_TESTNET_NATIVE_DEX_FACTORY_HEX;
+  const hopEmb = CANONICAL_BOING_TESTNET_NATIVE_DEX_MULTIHOP_SWAP_ROUTER_HEX;
+  const l2Emb = CANONICAL_BOING_TESTNET_NATIVE_DEX_LEDGER_ROUTER_V2_HEX;
+  const l3Emb = CANONICAL_BOING_TESTNET_NATIVE_DEX_LEDGER_ROUTER_V3_HEX;
+  const vaultEmb = CANONICAL_BOING_TESTNET_NATIVE_AMM_LP_VAULT_HEX;
+  const shareEmb = CANONICAL_BOING_TESTNET_NATIVE_LP_SHARE_TOKEN_HEX;
+  const pool = mergeOptionalAccountHex(chainId, overrides?.nativeCpPoolAccountHex, eu?.canonical_native_cp_pool ?? null, poolEmb);
+  const factory = mergeOptionalAccountHex(chainId, overrides?.nativeDexFactoryAccountHex, eu?.canonical_native_dex_factory ?? null, facEmb);
+  const multihop = mergeOptionalAccountHex(chainId, overrides?.nativeDexMultihopSwapRouterAccountHex, eu?.canonical_native_dex_multihop_swap_router ?? null, hopEmb);
+  const ledgerV2 = mergeOptionalAccountHex(chainId, overrides?.nativeDexLedgerRouterV2AccountHex, eu?.canonical_native_dex_ledger_router_v2 ?? null, l2Emb);
+  const ledgerV3 = mergeOptionalAccountHex(chainId, overrides?.nativeDexLedgerRouterV3AccountHex, eu?.canonical_native_dex_ledger_router_v3 ?? null, l3Emb);
+  const vault = mergeOptionalAccountHex(chainId, overrides?.nativeAmmLpVaultAccountHex, eu?.canonical_native_amm_lp_vault ?? null, vaultEmb);
+  const share = mergeOptionalAccountHex(chainId, overrides?.nativeLpShareTokenAccountHex, eu?.canonical_native_lp_share_token ?? null, shareEmb);
+  let endUserExplorerUrl = null;
+  const ex = eu?.explorer_url;
+  if (typeof ex === "string") {
+    const t = ex.trim();
+    if (t && /^https?:\/\//i.test(t)) {
+      endUserExplorerUrl = t.replace(/\/+$/, "");
+    }
+  }
+  return {
+    nativeCpPoolAccountHex: pool.hex,
+    nativeDexFactoryAccountHex: factory.hex,
+    poolSource: pool.source,
+    factorySource: factory.source,
+    nativeDexMultihopSwapRouterAccountHex: multihop.hex,
+    nativeDexMultihopSwapRouterSource: multihop.source,
+    nativeDexLedgerRouterV2AccountHex: ledgerV2.hex,
+    nativeDexLedgerRouterV2Source: ledgerV2.source,
+    nativeDexLedgerRouterV3AccountHex: ledgerV3.hex,
+    nativeDexLedgerRouterV3Source: ledgerV3.source,
+    nativeAmmLpVaultAccountHex: vault.hex,
+    nativeAmmLpVaultSource: vault.source,
+    nativeLpShareTokenAccountHex: share.hex,
+    nativeLpShareTokenSource: share.source,
+    endUserExplorerUrl
+  };
+}
+__name(mergeNativeDexIntegrationDefaults, "mergeNativeDexIntegrationDefaults");
+async function fetchNativeDexIntegrationDefaults(client, overrides) {
+  const info = await client.getNetworkInfo();
+  return mergeNativeDexIntegrationDefaults(info, overrides);
+}
+__name(fetchNativeDexIntegrationDefaults, "fetchNativeDexIntegrationDefaults");
+async function fetchNativeDexFactoryRegisterLogs(client, opts) {
+  const factoryAccountHex = validateHex32(opts.factoryAccountHex);
+  const raw = await getLogsChunked(client, {
+    fromBlock: opts.fromBlock,
+    toBlock: opts.toBlock,
+    address: factoryAccountHex,
+    topics: [NATIVE_DEX_FACTORY_TOPIC_REGISTER_HEX, null, null]
+  }, {});
+  const out = [];
+  for (const row of raw) {
+    const p = tryParseNativeDexFactoryRegisterRpcLogEntry(row);
+    if (p)
+      out.push(p);
+  }
+  return out;
+}
+__name(fetchNativeDexFactoryRegisterLogs, "fetchNativeDexFactoryRegisterLogs");
+
+// ../../../boing.network/boing-sdk/dist/nativeAmmPool.js
+var HEX_RE2 = /^[0-9a-fA-F]+$/;
+var NATIVE_CONSTANT_PRODUCT_RESERVE_A_KEY_HEX = `0x${"00".repeat(31)}01`;
+var NATIVE_CONSTANT_PRODUCT_RESERVE_B_KEY_HEX = `0x${"00".repeat(31)}02`;
+var NATIVE_CONSTANT_PRODUCT_TOTAL_LP_KEY_HEX = `0x${"00".repeat(31)}03`;
+var NATIVE_CONSTANT_PRODUCT_TOKEN_A_KEY_HEX = `0x${"00".repeat(31)}04`;
+var NATIVE_CONSTANT_PRODUCT_TOKEN_B_KEY_HEX = `0x${"00".repeat(31)}05`;
+var NATIVE_CONSTANT_PRODUCT_TOKENS_CONFIGURED_KEY_HEX = `0x${"00".repeat(31)}06`;
+var NATIVE_CONSTANT_PRODUCT_SWAP_FEE_BPS_KEY_HEX = `0x${"00".repeat(31)}07`;
+var LP_BALANCE_XOR_U8 = (() => {
+  const u8 = new Uint8Array(32);
+  u8.set(new TextEncoder().encode("BOING_NATIVEAMM_LPRV1"));
+  return u8;
+})();
+function nativeAmmLpBalanceStorageKeyHex(senderHex32) {
+  const raw = validateHex32(senderHex32).slice(2).toLowerCase();
+  let out = "";
+  for (let i = 0; i < 32; i++) {
+    const b = parseInt(raw.slice(i * 2, i * 2 + 2), 16) ^ LP_BALANCE_XOR_U8[i];
+    out += b.toString(16).padStart(2, "0");
+  }
+  return `0x${out}`;
+}
+__name(nativeAmmLpBalanceStorageKeyHex, "nativeAmmLpBalanceStorageKeyHex");
+function decodeBoingStorageWordU128(valueHex) {
+  const raw = ensureHex(valueHex).slice(2).toLowerCase();
+  if (raw.length === 0)
+    return 0n;
+  if (raw.length % 2 !== 0) {
+    throw new Error("storage word: hex length must be even");
+  }
+  if (!HEX_RE2.test(raw)) {
+    throw new Error("storage word: invalid hex");
+  }
+  const word64 = raw.length > 64 ? raw.slice(-64) : raw.padStart(64, "0");
+  const low16BytesHex = word64.slice(32);
+  return BigInt(`0x${low16BytesHex}`);
+}
+__name(decodeBoingStorageWordU128, "decodeBoingStorageWordU128");
+function decodeNativeAmmLogDataU128Triple(dataHex) {
+  const raw = ensureHex(dataHex).slice(2).toLowerCase();
+  if (!HEX_RE2.test(raw)) {
+    throw new Error("native AMM log data: invalid hex");
+  }
+  if (raw.length < 192) {
+    throw new Error("native AMM log data: expected at least 96 bytes (192 hex chars)");
+  }
+  const w = /* @__PURE__ */ __name((start) => decodeBoingStorageWordU128(`0x${raw.slice(start, start + 64)}`), "w");
+  return [w(0), w(64), w(128)];
+}
+__name(decodeNativeAmmLogDataU128Triple, "decodeNativeAmmLogDataU128Triple");
+async function fetchNativeConstantProductSwapFeeBps(client, poolHex32) {
+  const pool = validateHex32(poolHex32);
+  const w = await client.getContractStorage(pool, NATIVE_CONSTANT_PRODUCT_SWAP_FEE_BPS_KEY_HEX);
+  return decodeBoingStorageWordU128(w.value);
+}
+__name(fetchNativeConstantProductSwapFeeBps, "fetchNativeConstantProductSwapFeeBps");
+async function fetchNativeConstantProductPoolSnapshot(client, poolHex32, options) {
+  const pool = validateHex32(poolHex32);
+  const signer = options?.signerHex32?.trim();
+  const reads = [
+    client.getContractStorage(pool, NATIVE_CONSTANT_PRODUCT_RESERVE_A_KEY_HEX),
+    client.getContractStorage(pool, NATIVE_CONSTANT_PRODUCT_RESERVE_B_KEY_HEX),
+    client.getContractStorage(pool, NATIVE_CONSTANT_PRODUCT_TOTAL_LP_KEY_HEX)
+  ];
+  if (signer) {
+    reads.push(client.getContractStorage(pool, nativeAmmLpBalanceStorageKeyHex(signer)));
+  }
+  const out = await Promise.all(reads);
+  const snap = {
+    reserveA: decodeBoingStorageWordU128(out[0].value),
+    reserveB: decodeBoingStorageWordU128(out[1].value),
+    totalLpSupply: decodeBoingStorageWordU128(out[2].value)
+  };
+  if (signer && out[3]) {
+    snap.signerLpBalance = decodeBoingStorageWordU128(out[3].value);
+  }
+  return snap;
+}
+__name(fetchNativeConstantProductPoolSnapshot, "fetchNativeConstantProductPoolSnapshot");
+
+// ../../../boing.network/boing-sdk/dist/bincode.js
+var SIGNED_TX_SIGNATURE_TRAIL_BYTES = 8 + 64;
+
+// ../../../boing.network/boing-sdk/dist/nativeDexFactoryPool.js
+var NATIVE_DEX_FACTORY_COUNT_KEY_HEX = `0x${"00".repeat(16)}424f494e4744455800000000ffffffff`;
+function decodeNativeDexFactoryPairsCountReturnData(returnDataHex) {
+  const w = decodeBoingStorageWordU128(ensureHex(returnDataHex));
+  return w & 0xffffffffffffffffn;
+}
+__name(decodeNativeDexFactoryPairsCountReturnData, "decodeNativeDexFactoryPairsCountReturnData");
+async function fetchNativeDexFactoryPairsCount(client, factoryHex32) {
+  const f = validateHex32(factoryHex32);
+  const w = await client.getContractStorage(f, NATIVE_DEX_FACTORY_COUNT_KEY_HEX);
+  return decodeNativeDexFactoryPairsCountReturnData(w.value);
+}
+__name(fetchNativeDexFactoryPairsCount, "fetchNativeDexFactoryPairsCount");
+
+// ../../../boing.network/boing-sdk/dist/nativeDexDirectory.js
+function clampBlock(n, lo, hi) {
+  if (n < lo)
+    return lo;
+  if (n > hi)
+    return hi;
+  return n;
+}
+__name(clampBlock, "clampBlock");
+async function fetchNativeDexDirectorySnapshot(client, options) {
+  const info = await client.getNetworkInfo();
+  const headHeight = info.head_height;
+  const defaults = mergeNativeDexIntegrationDefaults(info, options?.overrides);
+  const factoryHex = defaults.nativeDexFactoryAccountHex;
+  let pairsCount = null;
+  if (factoryHex != null) {
+    pairsCount = await fetchNativeDexFactoryPairsCount(client, factoryHex);
+  }
+  let registerLogs = null;
+  const rl = options?.registerLogs;
+  if (rl != null && factoryHex != null) {
+    const fromBlock = rl.fromBlock;
+    const toBlock = clampBlock(rl.toBlock ?? headHeight, 0, headHeight);
+    if (fromBlock <= toBlock) {
+      registerLogs = await fetchNativeDexFactoryRegisterLogs(client, {
+        factoryAccountHex: factoryHex,
+        fromBlock,
+        toBlock
+      });
+    } else {
+      registerLogs = [];
+    }
+  }
+  return {
+    chainId: info.chain_id ?? null,
+    headHeight,
+    defaults,
+    pairsCount,
+    registerLogs
+  };
+}
+__name(fetchNativeDexDirectorySnapshot, "fetchNativeDexDirectorySnapshot");
+
+// ../../../boing.network/boing-sdk/dist/nativeAmm.js
+var NATIVE_CP_SWAP_FEE_BPS = 30;
+function nativeAmmLogTopic0Utf8(ascii) {
+  const u8 = new Uint8Array(32);
+  const enc = new TextEncoder().encode(ascii);
+  if (enc.length > 32) {
+    throw new RangeError("native AMM topic0 label too long");
+  }
+  u8.set(enc);
+  return u8;
+}
+__name(nativeAmmLogTopic0Utf8, "nativeAmmLogTopic0Utf8");
+var NATIVE_AMM_TOPIC_SWAP_HEX = bytesToHex(nativeAmmLogTopic0Utf8("BOING_NATIVEAMM_SWAP_V1"));
+var NATIVE_AMM_TOPIC_ADD_LIQUIDITY_HEX = bytesToHex(nativeAmmLogTopic0Utf8("BOING_NATIVEAMM_ADDLP_V1"));
+var NATIVE_AMM_TOPIC_REMOVE_LIQUIDITY_HEX = bytesToHex(nativeAmmLogTopic0Utf8("BOING_NATIVEAMM_RMLP_V1"));
+
+// ../../../boing.network/boing-sdk/dist/nativeAmmLogs.js
+var T0_SWAP = normalizeTopicWord(NATIVE_AMM_TOPIC_SWAP_HEX);
+var T0_ADD = normalizeTopicWord(NATIVE_AMM_TOPIC_ADD_LIQUIDITY_HEX);
+var T0_REMOVE = normalizeTopicWord(NATIVE_AMM_TOPIC_REMOVE_LIQUIDITY_HEX);
+function kindFromNormalizedTopic0(t0) {
+  if (t0 === T0_SWAP)
+    return "swap";
+  if (t0 === T0_ADD)
+    return "addLiquidity";
+  if (t0 === T0_REMOVE)
+    return "removeLiquidity";
+  return null;
+}
+__name(kindFromNormalizedTopic0, "kindFromNormalizedTopic0");
+function tryParseNativeAmmLog2(log) {
+  try {
+    if (log.topics.length !== 2)
+      return null;
+    const t0 = normalizeTopicWord(log.topics[0]);
+    const t1 = normalizeTopicWord(log.topics[1]);
+    const kind = kindFromNormalizedTopic0(t0);
+    if (kind == null)
+      return null;
+    const [w0, w1, w2] = decodeNativeAmmLogDataU128Triple(log.data);
+    const callerHex = t1;
+    switch (kind) {
+      case "swap":
+        return {
+          kind: "swap",
+          callerHex,
+          direction: w0,
+          amountIn: w1,
+          amountOutAfterFee: w2
+        };
+      case "addLiquidity":
+        return {
+          kind: "addLiquidity",
+          callerHex,
+          amountA: w0,
+          amountB: w1,
+          lpMinted: w2
+        };
+      case "removeLiquidity":
+        return {
+          kind: "removeLiquidity",
+          callerHex,
+          liquidityBurned: w0,
+          amountAOut: w1,
+          amountBOut: w2
+        };
+    }
+  } catch {
+    return null;
+  }
+}
+__name(tryParseNativeAmmLog2, "tryParseNativeAmmLog2");
+function tryParseNativeAmmRpcLogEntry(entry) {
+  const event = tryParseNativeAmmLog2(entry);
+  if (!event)
+    return null;
+  return {
+    ...event,
+    block_height: entry.block_height,
+    tx_index: entry.tx_index,
+    tx_id: entry.tx_id,
+    log_index: entry.log_index,
+    address: entry.address
+  };
+}
+__name(tryParseNativeAmmRpcLogEntry, "tryParseNativeAmmRpcLogEntry");
+function filterMapNativeAmmRpcLogs(entries) {
+  const out = [];
+  for (const e of entries) {
+    const p = tryParseNativeAmmRpcLogEntry(e);
+    if (p)
+      out.push(p);
+  }
+  return out;
+}
+__name(filterMapNativeAmmRpcLogs, "filterMapNativeAmmRpcLogs");
+
+// ../../../boing.network/boing-sdk/dist/nativeDexRouting.js
+function normHex32(h) {
+  return validateHex32(h).toLowerCase();
+}
+__name(normHex32, "normHex32");
+function effectiveFeeBps(raw) {
+  return raw === 0n ? BigInt(NATIVE_CP_SWAP_FEE_BPS) : raw;
+}
+__name(effectiveFeeBps, "effectiveFeeBps");
+function dedupePoolRows(rows) {
+  const m = /* @__PURE__ */ new Map();
+  for (const r of rows) {
+    const k = normHex32(r.poolHex);
+    if (!m.has(k))
+      m.set(k, r);
+  }
+  return [...m.values()];
+}
+__name(dedupePoolRows, "dedupePoolRows");
+async function hydrateCpPoolVenuesFromRpc(client, rows, options) {
+  const uniq = dedupePoolRows(rows);
+  const concurrency = options?.concurrency ?? 8;
+  return mapWithConcurrencyLimit(uniq, concurrency, async (r) => {
+    const poolHex = validateHex32(r.poolHex);
+    const tokenAHex = validateHex32(r.tokenAHex);
+    const tokenBHex = validateHex32(r.tokenBHex);
+    const [snap, feeRaw] = await Promise.all([
+      fetchNativeConstantProductPoolSnapshot(client, poolHex),
+      fetchNativeConstantProductSwapFeeBps(client, poolHex)
+    ]);
+    return {
+      poolHex,
+      tokenAHex,
+      tokenBHex,
+      reserveA: snap.reserveA,
+      reserveB: snap.reserveB,
+      feeBps: effectiveFeeBps(feeRaw)
+    };
+  });
+}
+__name(hydrateCpPoolVenuesFromRpc, "hydrateCpPoolVenuesFromRpc");
+
+// ../../../boing.network/boing-sdk/dist/nativeDexIndexerStats.js
+var SYNTH_A = "0x0000000000000000000000000000000000000000000000000000000000000e01";
+var SYNTH_B = "0x0000000000000000000000000000000000000000000000000000000000000e02";
+var MAX_HISTORY_PER_POOL = 200;
+var MAX_BLOCK_HEADERS_FOR_24H = 512;
+function storageWordToAccountHex(valueHex) {
+  if (!valueHex || typeof valueHex !== "string")
+    return null;
+  try {
+    const v = validateHex32(valueHex.trim());
+    if (/^0x0+$/i.test(v))
+      return null;
+    return `0x${v.slice(2).toLowerCase()}`;
+  } catch {
+    return null;
+  }
+}
+__name(storageWordToAccountHex, "storageWordToAccountHex");
+async function fetchNativeCpPoolTokenRow(client, poolHex32) {
+  const pool = validateHex32(poolHex32.trim());
+  const [wa, wb] = await Promise.all([
+    client.getContractStorage(pool, NATIVE_CONSTANT_PRODUCT_TOKEN_A_KEY_HEX),
+    client.getContractStorage(pool, NATIVE_CONSTANT_PRODUCT_TOKEN_B_KEY_HEX)
+  ]);
+  let tokenAHex = storageWordToAccountHex(wa.value);
+  let tokenBHex = storageWordToAccountHex(wb.value);
+  if (!tokenAHex && !tokenBHex) {
+    tokenAHex = SYNTH_A;
+    tokenBHex = SYNTH_B;
+  } else {
+    tokenAHex = tokenAHex || SYNTH_A;
+    tokenBHex = tokenBHex || SYNTH_B;
+  }
+  return { poolHex: pool, tokenAHex, tokenBHex };
+}
+__name(fetchNativeCpPoolTokenRow, "fetchNativeCpPoolTokenRow");
+function parseNativeDexIndexerPersistedDoc(raw) {
+  if (!raw)
+    return { history: {} };
+  try {
+    const p = JSON.parse(raw);
+    if (p && typeof p === "object" && p !== null && "history" in p) {
+      const h = p.history;
+      if (h && typeof h === "object") {
+        return { history: { ...h } };
+      }
+    }
+  } catch {
+  }
+  return { history: {} };
+}
+__name(parseNativeDexIndexerPersistedDoc, "parseNativeDexIndexerPersistedDoc");
+function appendVenuesToHistoryDoc(doc, venues, headHeight, nowMs, maxPerPool = MAX_HISTORY_PER_POOL) {
+  const history = { ...doc.history };
+  for (const v of venues) {
+    const k = v.poolHex.toLowerCase();
+    const ra = v.reserveA.toString();
+    const rb = v.reserveB.toString();
+    const arr = Array.isArray(history[k]) ? [...history[k]] : [];
+    const last = arr[arr.length - 1];
+    if (!last || last.ra !== ra || last.rb !== rb) {
+      arr.push({ t: nowMs, ra, rb });
+    }
+    history[k] = arr.slice(-maxPerPool);
+  }
+  return { history, lastHeadHeight: headHeight, savedAt: nowMs };
+}
+__name(appendVenuesToHistoryDoc, "appendVenuesToHistoryDoc");
+function parseUsdMap(json) {
+  if (!json?.trim())
+    return {};
+  try {
+    const o = JSON.parse(json);
+    if (!o || typeof o !== "object")
+      return {};
+    const out = {};
+    for (const [key, val] of Object.entries(o)) {
+      const k = key.trim().toLowerCase();
+      if (k === "default" || k === "defaulta" || k === "defaultb") {
+        out[k] = String(val);
+        continue;
+      }
+      if (!/^0x[0-9a-f]{64}$/i.test(k))
+        continue;
+      out[`0x${k.slice(2).toLowerCase()}`] = String(val);
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+__name(parseUsdMap, "parseUsdMap");
+function estimatePoolTvlUsd(tokenAHex, tokenBHex, reserveA, reserveB, usdMap) {
+  const keys = Object.keys(usdMap);
+  if (keys.length === 0)
+    return null;
+  const a = tokenAHex.trim().toLowerCase();
+  const b = tokenBHex.trim().toLowerCase();
+  const pa = usdMap[a] ?? usdMap.defaulta ?? usdMap.default ?? null;
+  const pb = usdMap[b] ?? usdMap.defaultb ?? usdMap.default ?? null;
+  if (pa == null && pb == null)
+    return null;
+  try {
+    const ra = Number(reserveA);
+    const rb = Number(reserveB);
+    const fa = pa != null ? parseFloat(String(pa)) : 0;
+    const fb = pb != null ? parseFloat(String(pb)) : 0;
+    if (!Number.isFinite(ra) || !Number.isFinite(rb) || !Number.isFinite(fa) || !Number.isFinite(fb))
+      return null;
+    const partA = pa != null ? ra * fa : 0;
+    const partB = pb != null ? rb * fb : 0;
+    const tvl = partA + partB;
+    return Number.isFinite(tvl) ? tvl : null;
+  } catch {
+    return null;
+  }
+}
+__name(estimatePoolTvlUsd, "estimatePoolTvlUsd");
+function blockTimestampToMs(ts) {
+  if (!Number.isFinite(ts))
+    return 0;
+  return ts < 1e12 ? ts * 1e3 : ts;
+}
+__name(blockTimestampToMs, "blockTimestampToMs");
+async function fetchBlockTimeMap(client, heights) {
+  const uniq = [...new Set(heights.filter((h) => Number.isInteger(h) && h >= 0))].slice(0, MAX_BLOCK_HEADERS_FOR_24H);
+  const m = /* @__PURE__ */ new Map();
+  if (uniq.length === 0)
+    return m;
+  const blocks = await mapWithConcurrencyLimit(uniq, 4, (h) => client.getBlockByHeight(h, false));
+  for (let i = 0; i < uniq.length; i++) {
+    const h = uniq[i];
+    const b = blocks[i];
+    const raw = b?.header?.timestamp;
+    if (typeof raw === "number" && Number.isFinite(raw)) {
+      m.set(h, blockTimestampToMs(raw));
+    }
+  }
+  return m;
+}
+__name(fetchBlockTimeMap, "fetchBlockTimeMap");
+function tokenDirectoryFromVenues(venues) {
+  const by = /* @__PURE__ */ new Map();
+  for (const v of venues) {
+    for (const raw of [v.tokenAHex, v.tokenBHex]) {
+      const id = validateHex32(raw.trim());
+      const low = id.toLowerCase();
+      if (by.has(low))
+        continue;
+      by.set(low, {
+        id: low,
+        symbol: `${id.slice(0, 8)}\u2026${id.slice(-4)}`,
+        name: `Pool token ${id.slice(0, 10)}\u2026`
+      });
+    }
+  }
+  return [...by.values()].sort((x, y) => x.symbol.localeCompare(y.symbol));
+}
+__name(tokenDirectoryFromVenues, "tokenDirectoryFromVenues");
+function mergeTokenDirectoryExtra(base, extraJson) {
+  if (!extraJson?.trim())
+    return base;
+  try {
+    const arr = JSON.parse(extraJson);
+    if (!Array.isArray(arr))
+      return base;
+    const by = new Map(base.map((t) => [t.id.toLowerCase(), { ...t }]));
+    for (const row of arr) {
+      if (!row || typeof row !== "object")
+        continue;
+      const idRaw = row.id ?? row.address;
+      if (typeof idRaw !== "string")
+        continue;
+      let id;
+      try {
+        id = validateHex32(idRaw.trim());
+      } catch {
+        continue;
+      }
+      const low = id.toLowerCase();
+      const symbol = String(row.symbol || base.find((b) => b.id === low)?.symbol || "").slice(0, 16);
+      const name = String(row.name || "").slice(0, 80);
+      by.set(low, {
+        id: low,
+        symbol: symbol || `${id.slice(0, 8)}\u2026`,
+        name: name || `Token ${id.slice(0, 10)}\u2026`
+      });
+    }
+    return [...by.values()].sort((x, y) => x.symbol.localeCompare(y.symbol));
+  } catch {
+    return base;
+  }
+}
+__name(mergeTokenDirectoryExtra, "mergeTokenDirectoryExtra");
+function buildDexOverridesFromPlainEnv(env) {
+  const o = {};
+  if (!env || typeof env !== "object")
+    return o;
+  const pick = /* @__PURE__ */ __name((...keys) => {
+    for (const k of keys) {
+      const v = env[k];
+      if (v != null && String(v).trim())
+        return String(v).trim();
+    }
+    return "";
+  }, "pick");
+  const pool = pick("REACT_APP_BOING_NATIVE_AMM_POOL", "VITE_BOING_NATIVE_AMM_POOL", "BOING_NATIVE_AMM_POOL");
+  const fac = pick("REACT_APP_BOING_NATIVE_VM_DEX_FACTORY", "VITE_BOING_NATIVE_VM_DEX_FACTORY", "BOING_NATIVE_VM_DEX_FACTORY", "BOING_DEX_FACTORY_HEX");
+  const hop = pick("REACT_APP_BOING_NATIVE_VM_SWAP_ROUTER", "VITE_BOING_NATIVE_VM_SWAP_ROUTER", "BOING_NATIVE_VM_SWAP_ROUTER", "BOING_NATIVE_DEX_MULTIHOP_SWAP_ROUTER");
+  const l2 = pick("REACT_APP_BOING_NATIVE_DEX_LEDGER_ROUTER_V2", "VITE_BOING_NATIVE_DEX_LEDGER_ROUTER_V2", "BOING_NATIVE_DEX_LEDGER_ROUTER_V2");
+  const l3 = pick("REACT_APP_BOING_NATIVE_DEX_LEDGER_ROUTER_V3", "VITE_BOING_NATIVE_DEX_LEDGER_ROUTER_V3", "BOING_NATIVE_DEX_LEDGER_ROUTER_V3");
+  const vault = pick("REACT_APP_BOING_NATIVE_AMM_LP_VAULT", "VITE_BOING_NATIVE_AMM_LP_VAULT", "BOING_NATIVE_AMM_LP_VAULT");
+  const share = pick("REACT_APP_BOING_NATIVE_AMM_LP_SHARE_TOKEN", "VITE_BOING_NATIVE_AMM_LP_SHARE_TOKEN", "BOING_NATIVE_AMM_LP_SHARE_TOKEN");
+  if (pool)
+    o.nativeCpPoolAccountHex = pool;
+  if (fac)
+    o.nativeDexFactoryAccountHex = fac;
+  if (hop)
+    o.nativeDexMultihopSwapRouterAccountHex = hop;
+  if (l2)
+    o.nativeDexLedgerRouterV2AccountHex = l2;
+  if (l3)
+    o.nativeDexLedgerRouterV3AccountHex = l3;
+  if (vault)
+    o.nativeAmmLpVaultAccountHex = vault;
+  if (share)
+    o.nativeLpShareTokenAccountHex = share;
+  return o;
+}
+__name(buildDexOverridesFromPlainEnv, "buildDexOverridesFromPlainEnv");
+async function buildNativeDexIndexerStatsForClient(client, opts = {}) {
+  const logScanBlocks = Math.min(Math.max(1, opts.logScanBlocks ?? 8e3), 5e4);
+  const registerFromBlock = opts.registerFromBlock ?? NaN;
+  const nowMs = opts.nowMs ?? Date.now();
+  const cutoffMs = nowMs - 864e5;
+  const usdMap = parseUsdMap(opts.tokenUsdJson);
+  const ov = opts.overrides && Object.keys(opts.overrides).length > 0 ? opts.overrides : void 0;
+  const d = await fetchNativeDexIntegrationDefaults(client, ov);
+  const poolHex = d.nativeCpPoolAccountHex;
+  if (!poolHex) {
+    return {
+      updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+      note: "No native CP pool in RPC defaults / overrides",
+      headHeight: null,
+      pools: [],
+      history: {},
+      tokenDirectory: []
+    };
+  }
+  const row = await fetchNativeCpPoolTokenRow(client, poolHex);
+  let venues = await hydrateCpPoolVenuesFromRpc(client, [row], { concurrency: 4 });
+  let registerMeta = null;
+  if (Number.isFinite(registerFromBlock) && registerFromBlock >= 0) {
+    try {
+      const snap = await fetchNativeDexDirectorySnapshot(client, {
+        overrides: ov,
+        registerLogs: { fromBlock: registerFromBlock }
+      });
+      const logs = snap.registerLogs;
+      registerMeta = { count: Array.isArray(logs) ? logs.length : 0, fromBlock: registerFromBlock };
+      if (logs?.length) {
+        const rows = logs.map((l) => ({
+          poolHex: l.poolHex,
+          tokenAHex: l.tokenAHex,
+          tokenBHex: l.tokenBHex
+        }));
+        const dirVenues = await hydrateCpPoolVenuesFromRpc(client, rows, { concurrency: 4 });
+        const byPool = /* @__PURE__ */ new Map();
+        for (const venue of [...venues, ...dirVenues]) {
+          byPool.set(venue.poolHex.toLowerCase(), venue);
+        }
+        venues = [...byPool.values()];
+      }
+    } catch (e) {
+      registerMeta = { error: e instanceof Error ? e.message : String(e) };
+    }
+  }
+  const lightSnap = await fetchNativeDexDirectorySnapshot(client, { overrides: ov });
+  const headHeight = typeof lightSnap.headHeight === "number" ? lightSnap.headHeight : null;
+  let history = {};
+  if (opts.historyStore) {
+    const raw = await opts.historyStore.get();
+    const doc = parseNativeDexIndexerPersistedDoc(raw);
+    const next = appendVenuesToHistoryDoc(doc, venues, headHeight ?? 0, nowMs);
+    await opts.historyStore.put(JSON.stringify(next));
+    history = next.history;
+  }
+  const pools = [];
+  for (const v of venues) {
+    const pool = v.poolHex.toLowerCase();
+    let swapCount = 0;
+    let volumeInSum = 0n;
+    let addLiquidityCount = 0;
+    let removeLiquidityCount = 0;
+    let swapCount24h = 0;
+    let volume24h = 0n;
+    if (headHeight != null && Number.isFinite(headHeight)) {
+      const toB = Math.floor(headHeight);
+      const fromB = Math.max(0, toB - logScanBlocks + 1);
+      try {
+        const logs = await getLogsChunked(client, { fromBlock: fromB, toBlock: toB, address: pool }, { maxConcurrent: 1 });
+        const parsed = filterMapNativeAmmRpcLogs(logs);
+        const swapHeights = [];
+        for (const ev of parsed) {
+          if (ev.address && ev.address.toLowerCase() !== pool)
+            continue;
+          switch (ev.kind) {
+            case "swap":
+              swapCount += 1;
+              volumeInSum += ev.amountIn;
+              swapHeights.push(ev.block_height);
+              break;
+            case "addLiquidity":
+              addLiquidityCount += 1;
+              break;
+            case "removeLiquidity":
+              removeLiquidityCount += 1;
+              break;
+            default:
+              break;
+          }
+        }
+        const timeMap = await fetchBlockTimeMap(client, swapHeights);
+        for (const ev of parsed) {
+          if (ev.kind !== "swap")
+            continue;
+          if (ev.address && ev.address.toLowerCase() !== pool)
+            continue;
+          const tms = timeMap.get(ev.block_height);
+          if (tms != null && tms >= cutoffMs) {
+            swapCount24h += 1;
+            volume24h += ev.amountIn;
+          }
+        }
+      } catch {
+      }
+    }
+    const tvlUsd = estimatePoolTvlUsd(v.tokenAHex, v.tokenBHex, v.reserveA, v.reserveB, usdMap);
+    const rowOut = {
+      poolHex: v.poolHex,
+      tokenAHex: v.tokenAHex,
+      tokenBHex: v.tokenBHex,
+      swapCount,
+      swapCount24h,
+      swaps24h: swapCount24h,
+      volume24hApprox: volume24h.toString(),
+      volumeScanWindowApprox: volumeInSum.toString(),
+      tvlApprox: `reserveA=${v.reserveA.toString()} reserveB=${v.reserveB.toString()}`,
+      note: `window ${logScanBlocks} blocks \xB7 swapsWindow ${swapCount} \xB7 addLiq ${addLiquidityCount} \xB7 remLiq ${removeLiquidityCount}`
+    };
+    if (tvlUsd != null && Number.isFinite(tvlUsd)) {
+      rowOut.tvlUsdApprox = tvlUsd.toFixed(4);
+    }
+    pools.push(rowOut);
+  }
+  const tokenDirectory = mergeTokenDirectoryExtra(tokenDirectoryFromVenues(venues), opts.tokenDirectoryExtraJson);
+  const noteParts = [
+    "boing-sdk nativeDexIndexerStats v2 \xB7 volume24h uses block header timestamps (cap unique headers)",
+    headHeight != null ? `head ${headHeight}` : "no head",
+    `scanBlocks ${logScanBlocks}`
+  ];
+  if (registerMeta)
+    noteParts.push(`registerLogs ${JSON.stringify(registerMeta)}`);
+  return {
+    updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+    note: noteParts.join(" \xB7 "),
+    headHeight,
+    pools,
+    history,
+    tokenDirectory
+  };
+}
+__name(buildNativeDexIndexerStatsForClient, "buildNativeDexIndexerStatsForClient");
+
+// ../indexer/buildNativeDexIndexerStats.mjs
+function parseIntEnv(n, fallback) {
+  const v = parseInt(String(n ?? ""), 10);
+  return Number.isFinite(v) ? v : fallback;
+}
+__name(parseIntEnv, "parseIntEnv");
+function rpcClientConfig(baseUrl) {
+  const raw = typeof process !== "undefined" && String(process.env?.NATIVE_DEX_INDEXER_RPC_NO_BROWSER_UA || "").trim() === "1";
+  const customUa = typeof process !== "undefined" ? String(process.env?.NATIVE_DEX_INDEXER_RPC_USER_AGENT || "").trim() : "";
+  const ci = typeof process !== "undefined" && String(process.env?.GITHUB_ACTIONS || "").trim() === "true";
+  const ua = customUa || (!raw && ci ? "Mozilla/5.0 (compatible; BoingFinance-NativeDexIndexer/1.0; +https://github.com/Boing-Network/boing.finance)" : "");
+  if (!ua) {
+    return { baseUrl };
+  }
+  return {
+    baseUrl,
+    extraHeaders: {
+      "User-Agent": ua,
+      Accept: "application/json"
+    }
+  };
+}
+__name(rpcClientConfig, "rpcClientConfig");
+function envGet(key, envObj) {
+  if (envObj && typeof envObj === "object" && envObj[key] != null && String(envObj[key]).trim()) {
+    return String(envObj[key]).trim();
+  }
+  try {
+    if (typeof process !== "undefined" && process.env?.[key]) return String(process.env[key]).trim();
+  } catch {
+  }
+  return "";
+}
+__name(envGet, "envGet");
+async function buildNativeDexIndexerStats(options = {}) {
+  const envObj = options.env;
+  const rpcBaseUrl = (options.rpcBaseUrl || envGet("NATIVE_DEX_INDEXER_RPC_URL", envObj) || envGet("BOING_TESTNET_RPC_URL", envObj) || "https://testnet-rpc.boing.network").replace(/\/$/, "");
+  const regStr = envGet("NATIVE_DEX_INDEXER_REGISTER_FROM_BLOCK", envObj);
+  const registerFromBlock = options.registerFromBlock !== void 0 ? options.registerFromBlock : regStr !== "" ? parseIntEnv(regStr, NaN) : NaN;
+  const logScanBlocks = Math.min(
+    Math.max(
+      1,
+      options.logScanBlocks ?? parseIntEnv(envGet("NATIVE_DEX_INDEXER_LOG_SCAN_BLOCKS", envObj), 8e3)
+    ),
+    5e4
+  );
+  const mergedOverrides = {
+    ...buildNativeDexIntegrationOverridesFromProcessEnv(),
+    ...buildDexOverridesFromPlainEnv(envObj || {}),
+    ...options.overrides || {}
+  };
+  const ov = Object.keys(mergedOverrides).length ? mergedOverrides : void 0;
+  const historyStore = options.historyStore ?? null;
+  const client = new BoingClient(rpcClientConfig(rpcBaseUrl));
+  return buildNativeDexIndexerStatsForClient(client, {
+    overrides: ov,
+    registerFromBlock: Number.isFinite(registerFromBlock) && registerFromBlock >= 0 ? registerFromBlock : void 0,
+    logScanBlocks,
+    historyStore,
+    tokenUsdJson: envGet("NATIVE_DEX_INDEXER_TOKEN_USD_JSON", envObj),
+    tokenDirectoryExtraJson: envGet("NATIVE_DEX_INDEXER_TOKEN_DIRECTORY_JSON", envObj)
+  });
+}
+__name(buildNativeDexIndexerStats, "buildNativeDexIndexerStats");
+
+// lib/sliceIndexerPoolsResponse.mjs
+function sliceIndexerPoolsInPayloadForUrl(payload, url) {
+  if (!payload || typeof payload !== "object") return payload;
+  const pageRaw = url.searchParams.get("pools_page");
+  const sizeRaw = url.searchParams.get("pools_page_size");
+  if (pageRaw == null || sizeRaw == null || pageRaw === "" || sizeRaw === "") return payload;
+  const page = parseInt(String(pageRaw), 10);
+  const pageSize = parseInt(String(sizeRaw), 10);
+  if (!Number.isFinite(page) || page < 0) return payload;
+  if (!Number.isFinite(pageSize) || pageSize < 1 || pageSize > 500) return payload;
+  const pools = Array.isArray(payload.pools) ? (
+    /** @type {unknown[]} */
+    payload.pools
+  ) : [];
+  const total = pools.length;
+  const start = page * pageSize;
+  const slice = pools.slice(start, start + pageSize);
+  return {
+    ...payload,
+    pools: slice,
+    poolsPageMeta: {
+      page,
+      pageSize,
+      total,
+      returned: slice.length
+    }
+  };
+}
+__name(sliceIndexerPoolsInPayloadForUrl, "sliceIndexerPoolsInPayloadForUrl");
+
+// api/native-dex-indexer-stats.js
+async function onRequestGet({ env, request }) {
+  const disable = String(env.NATIVE_DEX_INDEXER_API_DISABLE || "").trim();
+  if (disable === "1" || disable.toLowerCase() === "true") {
+    return new Response(JSON.stringify({ error: "native-dex-indexer API disabled", pools: [], history: {} }), {
+      status: 503,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+  let historyStore = null;
+  if (env.NATIVE_DEX_INDEXER_KV && typeof env.NATIVE_DEX_INDEXER_KV.get === "function") {
+    const kv = env.NATIVE_DEX_INDEXER_KV;
+    historyStore = {
+      get: /* @__PURE__ */ __name(() => kv.get("native_dex_indexer_state_v1"), "get"),
+      put: /* @__PURE__ */ __name((body) => kv.put("native_dex_indexer_state_v1", body), "put")
+    };
+  }
+  try {
+    const payload = await buildNativeDexIndexerStats({
+      env,
+      historyStore
+    });
+    const url = new URL(request.url);
+    const body = sliceIndexerPoolsInPayloadForUrl(
+      /** @type {Record<string, unknown>} */
+      payload,
+      url
+    );
+    return new Response(JSON.stringify(body), {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "public, max-age=30, s-maxage=60"
+      }
+    });
+  } catch (e) {
+    return new Response(
+      JSON.stringify({
+        error: e instanceof Error ? e.message : String(e),
+        updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+        pools: [],
+        history: {},
+        tokenDirectory: []
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
+}
+__name(onRequestGet, "onRequestGet");
+
+// _middleware.js
+var CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://static.cloudflareinsights.com https://*.cloudflareinsights.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com",
+  "img-src 'self' data: https:",
+  "connect-src 'self' https://*.workers.dev https://*.etherscan.io https://*.infura.io https://*.alchemyapi.io https://*.pinata.cloud https://*.web3.storage https://*.nft.storage https://*.storacha.network https://static.cloudflareinsights.com https://*.cloudflareinsights.com https://api.coingecko.com https://www.walletlink.org https://api.thegraph.com https://gateway-arbitrum.network.thegraph.com https://gateway.network.thegraph.com https://*.network.thegraph.com https://chain-proxy.wallet.coinbase.com https://api.dfuse.io https://testnet-rpc.boing.network https://*.boing.network wss://*.infura.io wss://*.alchemyapi.io wss://www.walletlink.org",
+  "frame-src 'self' https://*.etherscan.io"
+].join("; ");
+async function onRequest(context) {
+  const response = await context.next();
+  const headers = new Headers(response.headers);
+  headers.set("Content-Security-Policy", CONTENT_SECURITY_POLICY);
+  headers.set("X-Frame-Options", "DENY");
+  headers.set("X-Content-Type-Options", "nosniff");
+  headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers
+  });
+}
+__name(onRequest, "onRequest");
+
+// ../.wrangler/tmp/pages-6Lty7n/functionsRoutes-0.7078781969494375.mjs
+var routes = [
+  {
+    routePath: "/api/boing-rpc",
+    mountPath: "/api",
+    method: "POST",
+    middlewares: [],
+    modules: [onRequestPost]
+  },
+  {
+    routePath: "/api/native-dex-indexer-stats",
+    mountPath: "/api",
+    method: "GET",
+    middlewares: [],
+    modules: [onRequestGet]
+  },
+  {
+    routePath: "/",
+    mountPath: "/",
+    method: "",
+    middlewares: [onRequest],
+    modules: []
+  }
+];
+
+// ../../../../../AppData/Roaming/npm/node_modules/wrangler/node_modules/path-to-regexp/dist.es2015/index.js
+function lexer(str) {
+  var tokens = [];
+  var i = 0;
+  while (i < str.length) {
+    var char = str[i];
+    if (char === "*" || char === "+" || char === "?") {
+      tokens.push({ type: "MODIFIER", index: i, value: str[i++] });
+      continue;
+    }
+    if (char === "\\") {
+      tokens.push({ type: "ESCAPED_CHAR", index: i++, value: str[i++] });
+      continue;
+    }
+    if (char === "{") {
+      tokens.push({ type: "OPEN", index: i, value: str[i++] });
+      continue;
+    }
+    if (char === "}") {
+      tokens.push({ type: "CLOSE", index: i, value: str[i++] });
+      continue;
+    }
+    if (char === ":") {
+      var name = "";
+      var j = i + 1;
+      while (j < str.length) {
+        var code = str.charCodeAt(j);
+        if (
+          // `0-9`
+          code >= 48 && code <= 57 || // `A-Z`
+          code >= 65 && code <= 90 || // `a-z`
+          code >= 97 && code <= 122 || // `_`
+          code === 95
+        ) {
+          name += str[j++];
+          continue;
+        }
+        break;
+      }
+      if (!name)
+        throw new TypeError("Missing parameter name at ".concat(i));
+      tokens.push({ type: "NAME", index: i, value: name });
+      i = j;
+      continue;
+    }
+    if (char === "(") {
+      var count = 1;
+      var pattern = "";
+      var j = i + 1;
+      if (str[j] === "?") {
+        throw new TypeError('Pattern cannot start with "?" at '.concat(j));
+      }
+      while (j < str.length) {
+        if (str[j] === "\\") {
+          pattern += str[j++] + str[j++];
+          continue;
+        }
+        if (str[j] === ")") {
+          count--;
+          if (count === 0) {
+            j++;
+            break;
+          }
+        } else if (str[j] === "(") {
+          count++;
+          if (str[j + 1] !== "?") {
+            throw new TypeError("Capturing groups are not allowed at ".concat(j));
+          }
+        }
+        pattern += str[j++];
+      }
+      if (count)
+        throw new TypeError("Unbalanced pattern at ".concat(i));
+      if (!pattern)
+        throw new TypeError("Missing pattern at ".concat(i));
+      tokens.push({ type: "PATTERN", index: i, value: pattern });
+      i = j;
+      continue;
+    }
+    tokens.push({ type: "CHAR", index: i, value: str[i++] });
+  }
+  tokens.push({ type: "END", index: i, value: "" });
+  return tokens;
+}
+__name(lexer, "lexer");
+function parse(str, options) {
+  if (options === void 0) {
+    options = {};
+  }
+  var tokens = lexer(str);
+  var _a = options.prefixes, prefixes = _a === void 0 ? "./" : _a, _b = options.delimiter, delimiter = _b === void 0 ? "/#?" : _b;
+  var result = [];
+  var key = 0;
+  var i = 0;
+  var path = "";
+  var tryConsume = /* @__PURE__ */ __name(function(type) {
+    if (i < tokens.length && tokens[i].type === type)
+      return tokens[i++].value;
+  }, "tryConsume");
+  var mustConsume = /* @__PURE__ */ __name(function(type) {
+    var value2 = tryConsume(type);
+    if (value2 !== void 0)
+      return value2;
+    var _a2 = tokens[i], nextType = _a2.type, index = _a2.index;
+    throw new TypeError("Unexpected ".concat(nextType, " at ").concat(index, ", expected ").concat(type));
+  }, "mustConsume");
+  var consumeText = /* @__PURE__ */ __name(function() {
+    var result2 = "";
+    var value2;
+    while (value2 = tryConsume("CHAR") || tryConsume("ESCAPED_CHAR")) {
+      result2 += value2;
+    }
+    return result2;
+  }, "consumeText");
+  var isSafe = /* @__PURE__ */ __name(function(value2) {
+    for (var _i = 0, delimiter_1 = delimiter; _i < delimiter_1.length; _i++) {
+      var char2 = delimiter_1[_i];
+      if (value2.indexOf(char2) > -1)
+        return true;
+    }
+    return false;
+  }, "isSafe");
+  var safePattern = /* @__PURE__ */ __name(function(prefix2) {
+    var prev = result[result.length - 1];
+    var prevText = prefix2 || (prev && typeof prev === "string" ? prev : "");
+    if (prev && !prevText) {
+      throw new TypeError('Must have text between two parameters, missing text after "'.concat(prev.name, '"'));
+    }
+    if (!prevText || isSafe(prevText))
+      return "[^".concat(escapeString(delimiter), "]+?");
+    return "(?:(?!".concat(escapeString(prevText), ")[^").concat(escapeString(delimiter), "])+?");
+  }, "safePattern");
+  while (i < tokens.length) {
+    var char = tryConsume("CHAR");
+    var name = tryConsume("NAME");
+    var pattern = tryConsume("PATTERN");
+    if (name || pattern) {
+      var prefix = char || "";
+      if (prefixes.indexOf(prefix) === -1) {
+        path += prefix;
+        prefix = "";
+      }
+      if (path) {
+        result.push(path);
+        path = "";
+      }
+      result.push({
+        name: name || key++,
+        prefix,
+        suffix: "",
+        pattern: pattern || safePattern(prefix),
+        modifier: tryConsume("MODIFIER") || ""
+      });
+      continue;
+    }
+    var value = char || tryConsume("ESCAPED_CHAR");
+    if (value) {
+      path += value;
+      continue;
+    }
+    if (path) {
+      result.push(path);
+      path = "";
+    }
+    var open = tryConsume("OPEN");
+    if (open) {
+      var prefix = consumeText();
+      var name_1 = tryConsume("NAME") || "";
+      var pattern_1 = tryConsume("PATTERN") || "";
+      var suffix = consumeText();
+      mustConsume("CLOSE");
+      result.push({
+        name: name_1 || (pattern_1 ? key++ : ""),
+        pattern: name_1 && !pattern_1 ? safePattern(prefix) : pattern_1,
+        prefix,
+        suffix,
+        modifier: tryConsume("MODIFIER") || ""
+      });
+      continue;
+    }
+    mustConsume("END");
+  }
+  return result;
+}
+__name(parse, "parse");
+function match(str, options) {
+  var keys = [];
+  var re = pathToRegexp(str, keys, options);
+  return regexpToFunction(re, keys, options);
+}
+__name(match, "match");
+function regexpToFunction(re, keys, options) {
+  if (options === void 0) {
+    options = {};
+  }
+  var _a = options.decode, decode = _a === void 0 ? function(x) {
+    return x;
+  } : _a;
+  return function(pathname) {
+    var m = re.exec(pathname);
+    if (!m)
+      return false;
+    var path = m[0], index = m.index;
+    var params = /* @__PURE__ */ Object.create(null);
+    var _loop_1 = /* @__PURE__ */ __name(function(i2) {
+      if (m[i2] === void 0)
+        return "continue";
+      var key = keys[i2 - 1];
+      if (key.modifier === "*" || key.modifier === "+") {
+        params[key.name] = m[i2].split(key.prefix + key.suffix).map(function(value) {
+          return decode(value, key);
+        });
+      } else {
+        params[key.name] = decode(m[i2], key);
+      }
+    }, "_loop_1");
+    for (var i = 1; i < m.length; i++) {
+      _loop_1(i);
+    }
+    return { path, index, params };
+  };
+}
+__name(regexpToFunction, "regexpToFunction");
+function escapeString(str) {
+  return str.replace(/([.+*?=^!:${}()[\]|/\\])/g, "\\$1");
+}
+__name(escapeString, "escapeString");
+function flags(options) {
+  return options && options.sensitive ? "" : "i";
+}
+__name(flags, "flags");
+function regexpToRegexp(path, keys) {
+  if (!keys)
+    return path;
+  var groupsRegex = /\((?:\?<(.*?)>)?(?!\?)/g;
+  var index = 0;
+  var execResult = groupsRegex.exec(path.source);
+  while (execResult) {
+    keys.push({
+      // Use parenthesized substring match if available, index otherwise
+      name: execResult[1] || index++,
+      prefix: "",
+      suffix: "",
+      modifier: "",
+      pattern: ""
+    });
+    execResult = groupsRegex.exec(path.source);
+  }
+  return path;
+}
+__name(regexpToRegexp, "regexpToRegexp");
+function arrayToRegexp(paths, keys, options) {
+  var parts = paths.map(function(path) {
+    return pathToRegexp(path, keys, options).source;
+  });
+  return new RegExp("(?:".concat(parts.join("|"), ")"), flags(options));
+}
+__name(arrayToRegexp, "arrayToRegexp");
+function stringToRegexp(path, keys, options) {
+  return tokensToRegexp(parse(path, options), keys, options);
+}
+__name(stringToRegexp, "stringToRegexp");
+function tokensToRegexp(tokens, keys, options) {
+  if (options === void 0) {
+    options = {};
+  }
+  var _a = options.strict, strict = _a === void 0 ? false : _a, _b = options.start, start = _b === void 0 ? true : _b, _c = options.end, end = _c === void 0 ? true : _c, _d = options.encode, encode = _d === void 0 ? function(x) {
+    return x;
+  } : _d, _e = options.delimiter, delimiter = _e === void 0 ? "/#?" : _e, _f = options.endsWith, endsWith = _f === void 0 ? "" : _f;
+  var endsWithRe = "[".concat(escapeString(endsWith), "]|$");
+  var delimiterRe = "[".concat(escapeString(delimiter), "]");
+  var route = start ? "^" : "";
+  for (var _i = 0, tokens_1 = tokens; _i < tokens_1.length; _i++) {
+    var token = tokens_1[_i];
+    if (typeof token === "string") {
+      route += escapeString(encode(token));
+    } else {
+      var prefix = escapeString(encode(token.prefix));
+      var suffix = escapeString(encode(token.suffix));
+      if (token.pattern) {
+        if (keys)
+          keys.push(token);
+        if (prefix || suffix) {
+          if (token.modifier === "+" || token.modifier === "*") {
+            var mod = token.modifier === "*" ? "?" : "";
+            route += "(?:".concat(prefix, "((?:").concat(token.pattern, ")(?:").concat(suffix).concat(prefix, "(?:").concat(token.pattern, "))*)").concat(suffix, ")").concat(mod);
+          } else {
+            route += "(?:".concat(prefix, "(").concat(token.pattern, ")").concat(suffix, ")").concat(token.modifier);
+          }
+        } else {
+          if (token.modifier === "+" || token.modifier === "*") {
+            throw new TypeError('Can not repeat "'.concat(token.name, '" without a prefix and suffix'));
+          }
+          route += "(".concat(token.pattern, ")").concat(token.modifier);
+        }
+      } else {
+        route += "(?:".concat(prefix).concat(suffix, ")").concat(token.modifier);
+      }
+    }
+  }
+  if (end) {
+    if (!strict)
+      route += "".concat(delimiterRe, "?");
+    route += !options.endsWith ? "$" : "(?=".concat(endsWithRe, ")");
+  } else {
+    var endToken = tokens[tokens.length - 1];
+    var isEndDelimited = typeof endToken === "string" ? delimiterRe.indexOf(endToken[endToken.length - 1]) > -1 : endToken === void 0;
+    if (!strict) {
+      route += "(?:".concat(delimiterRe, "(?=").concat(endsWithRe, "))?");
+    }
+    if (!isEndDelimited) {
+      route += "(?=".concat(delimiterRe, "|").concat(endsWithRe, ")");
+    }
+  }
+  return new RegExp(route, flags(options));
+}
+__name(tokensToRegexp, "tokensToRegexp");
+function pathToRegexp(path, keys, options) {
+  if (path instanceof RegExp)
+    return regexpToRegexp(path, keys);
+  if (Array.isArray(path))
+    return arrayToRegexp(path, keys, options);
+  return stringToRegexp(path, keys, options);
+}
+__name(pathToRegexp, "pathToRegexp");
+
+// ../../../../../AppData/Roaming/npm/node_modules/wrangler/templates/pages-template-worker.ts
+var escapeRegex = /[.+?^${}()|[\]\\]/g;
+function* executeRequest(request) {
+  const requestPath = new URL(request.url).pathname;
+  for (const route of [...routes].reverse()) {
+    if (route.method && route.method !== request.method) {
+      continue;
+    }
+    const routeMatcher = match(route.routePath.replace(escapeRegex, "\\$&"), {
+      end: false
+    });
+    const mountMatcher = match(route.mountPath.replace(escapeRegex, "\\$&"), {
+      end: false
+    });
+    const matchResult = routeMatcher(requestPath);
+    const mountMatchResult = mountMatcher(requestPath);
+    if (matchResult && mountMatchResult) {
+      for (const handler of route.middlewares.flat()) {
+        yield {
+          handler,
+          params: matchResult.params,
+          path: mountMatchResult.path
+        };
+      }
+    }
+  }
+  for (const route of routes) {
+    if (route.method && route.method !== request.method) {
+      continue;
+    }
+    const routeMatcher = match(route.routePath.replace(escapeRegex, "\\$&"), {
+      end: true
+    });
+    const mountMatcher = match(route.mountPath.replace(escapeRegex, "\\$&"), {
+      end: false
+    });
+    const matchResult = routeMatcher(requestPath);
+    const mountMatchResult = mountMatcher(requestPath);
+    if (matchResult && mountMatchResult && route.modules.length) {
+      for (const handler of route.modules.flat()) {
+        yield {
+          handler,
+          params: matchResult.params,
+          path: matchResult.path
+        };
+      }
+      break;
+    }
+  }
+}
+__name(executeRequest, "executeRequest");
+var pages_template_worker_default = {
+  async fetch(originalRequest, env, workerContext) {
+    let request = originalRequest;
+    const handlerIterator = executeRequest(request);
+    let data = {};
+    let isFailOpen = false;
+    const next = /* @__PURE__ */ __name(async (input, init) => {
+      if (input !== void 0) {
+        let url = input;
+        if (typeof input === "string") {
+          url = new URL(input, request.url).toString();
+        }
+        request = new Request(url, init);
+      }
+      const result = handlerIterator.next();
+      if (result.done === false) {
+        const { handler, params, path } = result.value;
+        const context = {
+          request: new Request(request.clone()),
+          functionPath: path,
+          next,
+          params,
+          get data() {
+            return data;
+          },
+          set data(value) {
+            if (typeof value !== "object" || value === null) {
+              throw new Error("context.data must be an object");
+            }
+            data = value;
+          },
+          env,
+          waitUntil: workerContext.waitUntil.bind(workerContext),
+          passThroughOnException: /* @__PURE__ */ __name(() => {
+            isFailOpen = true;
+          }, "passThroughOnException")
+        };
+        const response = await handler(context);
+        if (!(response instanceof Response)) {
+          throw new Error("Your Pages function should return a Response");
+        }
+        return cloneResponse(response);
+      } else if ("ASSETS") {
+        const response = await env["ASSETS"].fetch(request);
+        return cloneResponse(response);
+      } else {
+        const response = await fetch(request);
+        return cloneResponse(response);
+      }
+    }, "next");
+    try {
+      return await next();
+    } catch (error) {
+      if (isFailOpen) {
+        const response = await env["ASSETS"].fetch(request);
+        return cloneResponse(response);
+      }
+      throw error;
+    }
+  }
+};
+var cloneResponse = /* @__PURE__ */ __name((response) => (
+  // https://fetch.spec.whatwg.org/#null-body-status
+  new Response(
+    [101, 204, 205, 304].includes(response.status) ? null : response.body,
+    response
+  )
+), "cloneResponse");
+export {
+  pages_template_worker_default as default
+};
+
+------formdata-undici-063177751182--

@@ -15,8 +15,10 @@ on:
       - main
       - staging
     paths:
+      - 'frontend/env/github-native-dex-indexer.env'
       - 'frontend/indexer/**'
       - 'frontend/scripts/native-dex-indexer-cli.mjs'
+      - 'frontend/scripts/run-with-env-file.mjs'
       - 'frontend/scripts/postinstall-boing-sdk.mjs'
       - 'frontend/functions/api/native-dex-indexer-stats.js'
       - 'frontend/functions/lib/**'
@@ -63,14 +65,12 @@ jobs:
       - name: Run indexer
         working-directory: frontend
         env:
-          NATIVE_DEX_INDEXER_RPC_URL: ${{ vars.BOING_INDEXER_RPC_URL }}
           NATIVE_DEX_INDEXER_STATE_PATH: .native-dex-indexer-state.json
           NATIVE_DEX_INDEXER_OUT_PATH: ${{ runner.temp }}/native-dex-indexer-stats.json
-          NATIVE_DEX_INDEXER_LOG_SCAN_BLOCKS: ${{ vars.NATIVE_DEX_INDEXER_LOG_SCAN_BLOCKS }}
-          NATIVE_DEX_INDEXER_REGISTER_FROM_BLOCK: ${{ vars.NATIVE_DEX_INDEXER_REGISTER_FROM_BLOCK }}
+          # Optional JSON overrides (large payloads): keep in GitHub repo Variables if you prefer.
           NATIVE_DEX_INDEXER_TOKEN_USD_JSON: ${{ vars.NATIVE_DEX_INDEXER_TOKEN_USD_JSON }}
           NATIVE_DEX_INDEXER_TOKEN_DIRECTORY_JSON: ${{ vars.NATIVE_DEX_INDEXER_TOKEN_DIRECTORY_JSON }}
-        run: node scripts/native-dex-indexer-cli.mjs
+        run: node scripts/run-with-env-file.mjs env/github-native-dex-indexer.env -- node scripts/native-dex-indexer-cli.mjs
 
       - uses: actions/upload-artifact@v4
         with:
