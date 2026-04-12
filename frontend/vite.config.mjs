@@ -95,9 +95,11 @@ const REACT_APP_DEFAULTS = [
 ];
 
 function envDefine(mode) {
+  // Resolve env from the frontend package root (where vite.config.mjs lives), not process.cwd(),
+  // so `frontend/.env.local` is loaded when the dev server is started from the monorepo root.
   const fromFiles = {
-    ...loadEnv(mode, process.cwd(), 'REACT_APP_'),
-    ...loadEnv(mode, process.cwd(), 'VITE_'),
+    ...loadEnv(mode, __dirname, 'REACT_APP_'),
+    ...loadEnv(mode, __dirname, 'VITE_'),
   };
   const merged = Object.fromEntries(REACT_APP_DEFAULTS.map((k) => [k, '']));
   Object.assign(merged, fromFiles);
