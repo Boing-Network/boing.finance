@@ -17,10 +17,8 @@ import ExternalDEXQuotes from '../components/ExternalDEXQuotes';
 import ShareCardModal from '../components/ShareCardModal';
 import ProactiveTipsBanner from '../components/ProactiveTipsBanner';
 import TrendingPairs from '../components/TrendingPairs';
-import NativeBoingL1IntegratedHub from '../components/NativeBoingL1IntegratedHub';
 import NativeBoingTradeHub from '../components/NativeBoingTradeHub';
 import getFeatureSupport from '../config/featureSupport';
-import BoingNativeDexStatusBanner from '../components/BoingNativeDexStatusBanner';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 
 
@@ -1839,13 +1837,6 @@ const Swap = () => {
             <ProactiveTipsBanner />
           </div>
 
-          {chainId === BOING_NATIVE_L1_CHAIN_ID && (
-            <BoingNativeDexStatusBanner chainId={chainId} featureSupport={featureSupport} />
-          )}
-
-          {chainId === BOING_NATIVE_L1_CHAIN_ID && !featureSupport.hasNativeAmm && (
-            <NativeBoingL1IntegratedHub feature="swap" />
-          )}
           {featureSupport.swap === 'native_amm' && (
             <NativeBoingTradeHub slippagePercent={settings.slippage} />
           )}

@@ -60,11 +60,8 @@ async function createBrowserProviderAndSigner(eip1193Provider, accountAddress) {
  */
 function toastIfNoEvmSigner(signer, evmSignerUnavailableReason, opts = {}) {
   if (signer) return;
+  // Native Boing AccountIds are expected with Boing Express — documented under /docs?section=boing-l1 (no toast).
   if (evmSignerUnavailableReason === 'boing_native_account') {
-    toast(
-      'Boing Express is connected with a native Boing account (32-byte). This app’s ERC-20 deploy and EVM transactions need a 20-byte Ethereum address—use MetaMask or another EVM wallet with “EVM” selected (e.g. Sepolia), or use Boing Native VM for native Boing tools.',
-      { duration: 10000 }
-    );
     return;
   }
   toast.error(
@@ -173,9 +170,8 @@ export const WalletProvider = ({ children }) => {
   }, [disconnectWallet]);
 
   const setupEventListeners = useCallback(() => {
-    const raw = typeof window !== 'undefined'
-      ? (activeEip1193ProviderRef.current || window.ethereum)
-      : null;
+    // Never fall back to `window.ethereum` here — with multiple injectors that can wake Phantom while Boing is active.
+    const raw = typeof window !== 'undefined' ? activeEip1193ProviderRef.current : null;
     if (raw && typeof raw.removeListener === 'function') {
       raw.removeListener('accountsChanged', handleAccountsChanged);
       raw.removeListener('chainChanged', handleChainChanged);

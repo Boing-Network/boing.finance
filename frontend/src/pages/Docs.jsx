@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useSearchParams } from 'react-router-dom';
 
 // Import all section components
 import OverviewSection from '../components/docs/OverviewSection';
@@ -18,15 +19,13 @@ import SecuritySection from '../components/docs/SecuritySection';
 import FAQSection from '../components/docs/FAQSection';
 import GovernanceSection from '../components/docs/GovernanceSection';
 import BoingSection from '../components/docs/BoingSection';
+import BoingNativeL1Section from '../components/docs/BoingNativeL1Section';
 
-
-const Docs = () => {
-  const [activeSection, setActiveSection] = useState('overview');
-
-  const sections = [
+const DOC_NAV = [
     { id: 'overview', title: 'Overview', icon: '📖' },
     { id: 'features', title: 'Features', icon: '🚀' },
     { id: 'networks', title: 'Supported Networks', icon: '🌐' },
+    { id: 'boing-l1', title: 'Boing L1 & Express', icon: '⚡' },
     { id: 'contracts', title: 'Smart Contracts', icon: '📜' },
     { id: 'trading', title: 'Trading Guide', icon: '💱' },
     { id: 'liquidity', title: 'Liquidity Provision', icon: '💧' },
@@ -40,13 +39,33 @@ const Docs = () => {
     { id: 'api', title: 'API Reference', icon: '🔌' },
     { id: 'security', title: 'Security', icon: '🔒' },
     { id: 'faq', title: 'FAQ', icon: '❓' }
-  ];
+];
+
+const Docs = () => {
+  const [searchParams] = useSearchParams();
+  const [activeSection, setActiveSection] = useState(() => {
+    try {
+      const raw = new URLSearchParams(window.location.search).get('section');
+      return DOC_NAV.some((s) => s.id === raw) ? raw : 'overview';
+    } catch {
+      return 'overview';
+    }
+  });
+
+  useEffect(() => {
+    const raw = searchParams.get('section');
+    if (raw && DOC_NAV.some((s) => s.id === raw)) {
+      setActiveSection(raw);
+    }
+  }, [searchParams]);
+
+  const sections = DOC_NAV;
 
   return (
     <>
       <Helmet>
         <title>Documentation | boing.finance — Guides for Swap, Liquidity, Bridge & Deploy</title>
-        <meta name="description" content="Learn how to use boing.finance. Docs for swap, liquidity, bridge, token deployment, and APIs on EVM and Solana." />
+        <meta name="description" content="Learn how to use boing.finance. Docs for swap, liquidity, bridge, token and NFT deployment (EVM, Solana, Boing L1), and APIs." />
         <meta name="keywords" content="boing.finance documentation, DeFi guides, DEX tutorial, liquidity, bridge, deploy token" />
         <meta property="og:title" content="Documentation | boing.finance" />
         <meta property="og:description" content="Learn how to use boing.finance with our comprehensive documentation." />
@@ -114,6 +133,7 @@ const Docs = () => {
                 {activeSection === 'overview' && <OverviewSection />}
                 {activeSection === 'features' && <FeaturesSection />}
                 {activeSection === 'networks' && <NetworksSection />}
+                {activeSection === 'boing-l1' && <BoingNativeL1Section />}
                 {activeSection === 'contracts' && <SmartContractsSection />}
                 {activeSection === 'trading' && <TradingSection />}
                 {activeSection === 'liquidity' && <LiquiditySection />}

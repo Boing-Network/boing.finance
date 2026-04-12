@@ -63,11 +63,17 @@ const NetworksSection = () => {
       <div>
         <h2 className="text-3xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Supported Networks</h2>
-        <p className=" text-lg leading-relaxed mb-8"
+        <p className=" text-lg leading-relaxed mb-4"
           style={{ color: 'var(--text-secondary)'  }}>
           boing.finance supports EVM chains (Ethereum, Polygon, Arbitrum, Base, and more) and Solana. 
           EVM networks use the ERC-20 token standard; Solana uses SPL tokens. Use the network selector 
           to switch chains and the Bridge to move assets cross-chain.
+        </p>
+        <p className="text-sm leading-relaxed mb-8" style={{ color: 'var(--text-secondary)' }}>
+          <strong style={{ color: 'var(--text-primary)' }}>Boing L1 testnet</strong> (chain id 6913) is a native Boing VM network in
+          the same selector. Deploy, DEX, and signing paths differ from EVM—use the sidebar section{' '}
+          <strong>Boing L1 &amp; Express</strong> for wallet modes, <code className="text-xs">boing_sendTransaction</code>, and links
+          to protocol docs.
         </p>
       </div>
 
