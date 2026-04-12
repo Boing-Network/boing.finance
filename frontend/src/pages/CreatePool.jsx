@@ -16,6 +16,7 @@ import NativeBoingPoolDeploySection from '../components/NativeBoingPoolDeploySec
 import NativeAmmSwapPanel from '../components/NativeAmmSwapPanel';
 import getFeatureSupport from '../config/featureSupport';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
+import { showDeployCelebration } from '../utils/deployCelebration';
 
 
 // Toggle Button Component
@@ -910,8 +911,18 @@ function CreatePool() {
         // Set transaction hash for UI
         setTransactionHash(createPairTx.hash);
         
-        // Show success message
-        toast.success('Pool created successfully using fallback method!');
+        const fallbackExplorer = getNetworkByChainId(chainId)?.explorer;
+        showDeployCelebration({
+          deploymentKind: 'Liquidity pool (fallback flow)',
+          details: [
+            { label: 'Pair', value: `${getToken0Symbol()} / ${getToken1Symbol()}` },
+            { label: 'Pool address', value: pairAddress },
+            { label: 'Network', value: getNetworkByChainId(chainId)?.name || '—' },
+          ],
+          txHash: createPairTx.hash,
+          contractAddress: pairAddress,
+          evmExplorerBaseUrl: fallbackExplorer,
+        });
         setTransactionStatus('success');
         const fallbackPair = `${getToken0Symbol()}/${getToken1Symbol()}`;
         const fallbackChainName = getNetworkByChainId(chainId)?.name;
@@ -1013,12 +1024,24 @@ function CreatePool() {
         throw new Error('Transaction receipt not available. Please check the transaction hash on Etherscan.');
       }
       
-      if (enableLiquidityLock) {
-        toast.success(`Pool created and liquidity locked for ${Math.floor(lockDuration / (24 * 60 * 60))} days!`);
-      } else {
-        toast.success('Pool created successfully!');
-      }
-      
+      const poolExplorerBase = getNetworkByChainId(chainId)?.explorer;
+      const lockDays = Math.floor(lockDuration / (24 * 60 * 60));
+      showDeployCelebration({
+        deploymentKind: enableLiquidityLock ? `Liquidity pool · locked ${lockDays}d` : 'Liquidity pool',
+        details: [
+          { label: 'Pair', value: `${getToken0Symbol()} / ${getToken1Symbol()}` },
+          { label: 'Pool address', value: pairAddress },
+          { label: 'Network', value: getNetworkByChainId(chainId)?.name || '—' },
+          ...(enableLiquidityLock ? [{ label: 'Liquidity lock', value: `${lockDays} days` }] : []),
+          ...(!receipt.blockNumber || !receipt.gasUsed
+            ? [{ label: 'Note', value: 'Some receipt fields were unavailable; confirm on the block explorer.' }]
+            : []),
+        ],
+        txHash: receipt.hash,
+        contractAddress: pairAddress,
+        evmExplorerBaseUrl: poolExplorerBase,
+      });
+
       // Update transaction status
       setTransactionStatus('success');
 
@@ -1026,26 +1049,14 @@ function CreatePool() {
       const chainName = getNetworkByChainId(chainId)?.name;
       setShareData({ pair, chainName });
       setShareModalOpen(true);
-      
-      // Show detailed success message with transaction hash
-      toast.success(`Pool created successfully! Transaction: ${receipt.hash}`, {
-        duration: 10000
-      });
+
       recordAchievement?.(account, 'pool_create', 'first_pool');
-      
-      // If we don't have full receipt details, show a note
-      if (!receipt.blockNumber || !receipt.gasUsed) {
-        toast('Transaction confirmed but some details unavailable. Check Etherscan for full details.', {
-          duration: 8000,
-          icon: 'ℹ️'
-        });
-      }
       
       // Also log to console for debugging
       console.log('🎉 Pool created successfully!');
       console.log('Create pair with liquidity transaction hash:', receipt.hash);
       console.log('Block number:', receipt.blockNumber);
-      console.log('Gas used:', receipt.gasUsed.toString());
+      console.log('Gas used:', receipt.gasUsed != null ? receipt.gasUsed.toString() : 'n/a');
       console.log('Pair address:', pairAddress);
       console.log('Liquidity minted:', liquidity.toString());
       

@@ -113,6 +113,14 @@ export default function NativeBoingPoolDeploySection() {
       boingTxIdHex: result.boingTxIdHex,
       deployedAccountId: null,
       explorerBaseUrl,
+      celebration: {
+        deploymentKind: 'Native liquidity pool',
+        details: [
+          ...(poolLabel.trim() ? [{ label: 'Pool label', value: poolLabel.trim() }] : []),
+          ...(poolSymbol.trim() ? [{ label: 'Pool symbol', value: poolSymbol.trim() }] : []),
+          { label: 'QA purpose', value: String(purposeCategory || 'dapp') },
+        ],
+      },
     });
     scheduleBoingDeployReceiptFollowup(result.boingTxIdHex, (id) => {
       setLastDeployedAccount(id);

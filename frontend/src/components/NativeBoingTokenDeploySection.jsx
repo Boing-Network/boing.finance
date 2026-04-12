@@ -150,6 +150,17 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
       boingTxIdHex: result.boingTxIdHex,
       deployedAccountId: null,
       explorerBaseUrl,
+      celebration: {
+        deploymentKind: 'Native Boing token',
+        details: [
+          { label: 'Name', value: String(tokenName || '').trim() || '—' },
+          { label: 'Symbol', value: String(tokenSymbol || '').trim().toUpperCase() || '—' },
+          { label: 'Decimals', value: String(tokenDecimals ?? '—') },
+          ...(initialSupply !== '' && initialSupply != null
+            ? [{ label: 'Initial supply', value: String(initialSupply).trim() }]
+            : []),
+        ],
+      },
     });
     scheduleBoingDeployReceiptFollowup(result.boingTxIdHex, (id) => {
       setLastDeployedAccount(id);

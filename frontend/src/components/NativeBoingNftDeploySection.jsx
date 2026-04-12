@@ -119,6 +119,14 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
       boingTxIdHex: result.boingTxIdHex,
       deployedAccountId: null,
       explorerBaseUrl,
+      celebration: {
+        deploymentKind: 'Native NFT collection',
+        details: [
+          { label: 'Collection name', value: String(collectionName || '').trim() || '—' },
+          { label: 'Symbol', value: String(collectionSymbol || '').trim().toUpperCase() || '—' },
+          { label: 'QA purpose', value: String(purpose || 'nft') },
+        ],
+      },
     });
     scheduleBoingDeployReceiptFollowup(result.boingTxIdHex, (id) => {
       setLastDeployedAccount(id);

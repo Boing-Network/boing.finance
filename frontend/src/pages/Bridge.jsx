@@ -11,6 +11,7 @@ import TokenManagementModal from '../components/TokenManagementModal';
 import EmptyState from '../components/EmptyState';
 import { useAchievements } from '../contexts/AchievementContext';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
+import { showDeployCelebration } from '../utils/deployCelebration';
 import { BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL } from '../config/boingNetworkDocsUrls';
 
 // Add AnimatedBackground and BoingAstronaut components
@@ -198,6 +199,20 @@ export default function Bridge() {
       };
       
       setBridgeTransactions(prev => [newTransaction, ...prev]);
+
+      const fromNet = getNetworkInfo(fromChain);
+      const toNet = getNetworkInfo(toChain);
+      showDeployCelebration({
+        title: 'Bridge initiated',
+        deploymentKind: 'Cross-chain bridge',
+        details: [
+          { label: 'From', value: `${fromNet?.name || `Chain ${fromChain}`} · ${fromToken}` },
+          { label: 'To', value: `${toNet?.name || `Chain ${toChain}`} · ${toToken}` },
+          { label: 'Amount', value: String(amount) },
+          { label: 'Est. time', value: estimatedTime },
+          { label: 'Reference', value: newTransaction.txHash },
+        ],
+      });
       
       toast.success('Bridge transaction initiated! Check your transaction history for updates.');
       recordAchievement?.(account, 'bridge', 'first_bridge');

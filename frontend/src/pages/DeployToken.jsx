@@ -25,10 +25,11 @@ import { notificationService } from '../utils/notifications';
 import ShareCardModal from '../components/ShareCardModal';
 import { isBoingTestnetChainId } from 'boing-sdk';
 import NativeBoingTokenDeploySection from '../components/NativeBoingTokenDeploySection';
-import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
+import { BOING_NATIVE_L1_CHAIN_ID, getNetworkByChainId } from '../config/networks';
 import { getBoingNativeFeeUsd, formatUsdReferenceLabel, isBoingNativeFeeChain } from '../config/boingEconomics';
 import { isBoingNativeAccountIdHex } from '../utils/boingWalletDiscovery';
 import { brandLogoPngAbsolute } from '../config/brandAssets';
+import { showDeployCelebration } from '../utils/deployCelebration';
 
 // Import ABI and bytecode from the artifacts
 const ERC20_ABI = AdvancedERC20Artifact.abi;
@@ -134,6 +135,19 @@ function DeployTokenSolanaContent() {
       });
       setMintAddress(result.mintAddress);
       setSignature(result.signature);
+      const solCluster = network === 'devnet' ? '?cluster=devnet' : '';
+      showDeployCelebration({
+        deploymentKind: 'Solana SPL token',
+        details: [
+          { label: 'Name', value: name.trim() },
+          { label: 'Symbol', value: symbol.trim().toUpperCase() },
+          { label: 'Decimals', value: String(decimals) },
+          { label: 'Mint address', value: result.mintAddress },
+        ],
+        txHash: result.signature,
+        externalTxUrl: `https://explorer.solana.com/tx/${result.signature}${solCluster}`,
+        externalAddressUrl: `https://explorer.solana.com/address/${result.mintAddress}${solCluster}`,
+      });
       toast.success('SPL token deployed successfully!');
       recordSolanaDeployment({
         mintAddress: result.mintAddress,
@@ -1132,6 +1146,9 @@ export default function DeployToken() {
     setTxHash('');
     setTokenAddress('');
     setDeploymentError(null);
+
+    const blockExplorerBase =
+      network?.chainId != null ? getNetworkByChainId(network.chainId)?.explorer : undefined;
     
     // Initialize deployment steps
     const steps = [
@@ -1421,7 +1438,20 @@ export default function DeployToken() {
             metadataUrl
           });
           
-          toast.success(`Token deployed successfully! Address: ${deployedAddress}`);
+          showDeployCelebration({
+            deploymentKind: 'EVM token (TokenFactory)',
+            details: [
+              { label: 'Name', value: name },
+              { label: 'Symbol', value: symbol },
+              { label: 'Decimals', value: String(decimals) },
+              { label: 'Token address', value: deployedAddress },
+              { label: 'Network', value: network?.name || 'Unknown' },
+              { label: 'Factory', value: tokenFactoryAddress || '—' },
+            ],
+            txHash: tx.hash,
+            contractAddress: deployedAddress,
+            evmExplorerBaseUrl: blockExplorerBase,
+          });
           recordAchievement?.(account, 'token_deploy', 'first_deploy');
 
           // Show browser notification if enabled
@@ -1477,17 +1507,6 @@ export default function DeployToken() {
           existingDeployments.push(deploymentInfo);
           localStorage.setItem('tokenDeployments', JSON.stringify(existingDeployments));
           
-          // Show success message with next steps
-          const nextSteps = [
-            '✅ Contract deployed successfully via TokenFactory',
-            '🔍 Verify your contract on Etherscan',
-            '💧 Add liquidity to DEX for trading',
-            '📢 Announce deployment on social media',
-            '📋 Document security features implemented'
-          ];
-          
-          toast.success(`Next steps: ${nextSteps.join(' | ')}`);
-          
         } else {
           throw new Error('TokenDeployed event not found in transaction receipt');
         }
@@ -1514,8 +1533,20 @@ export default function DeployToken() {
           
           // Create contract instance
           const deployedContract = new ethers.Contract(deployedAddress, ERC20_ABI, signer);
-          
-          toast.success(`Token deployed successfully! Address: ${deployedAddress}`);
+
+          showDeployCelebration({
+            deploymentKind: 'EVM token (direct deploy)',
+            details: [
+              { label: 'Name', value: name },
+              { label: 'Symbol', value: symbol },
+              { label: 'Decimals', value: String(decimals) },
+              { label: 'Token address', value: deployedAddress },
+              { label: 'Network', value: network?.name || 'Unknown' },
+            ],
+            txHash: contract.deploymentTransaction().hash,
+            contractAddress: deployedAddress,
+            evmExplorerBaseUrl: blockExplorerBase,
+          });
           recordAchievement?.(account, 'token_deploy', 'first_deploy');
           setShareData({ name, symbol, address: deployedAddress });
           setShareModalOpen(true);
@@ -1585,32 +1616,6 @@ export default function DeployToken() {
           existingDeployments.push(deploymentInfo);
           localStorage.setItem('tokenDeployments', JSON.stringify(existingDeployments));
           
-          toast.success(`Token deployed successfully! Address: ${deployedAddress}`);
-          recordAchievement?.(account, 'token_deploy', 'first_deploy');
-          setShareData({ name, symbol, address: deployedAddress });
-          setShareModalOpen(true);
-
-          // Show browser notification if enabled
-          const deploymentNotificationSettings3 = JSON.parse(localStorage.getItem('boing_notification_settings') || '{"deployments": true}');
-          if (deploymentNotificationSettings3.deployments) {
-            await notificationService.notifyDeploymentSuccess(name, deployedAddress);
-          }
-          
-          // Show success message with next steps
-          const nextSteps = [
-            '✅ Contract deployed successfully',
-            '🔍 Verify your contract on Etherscan',
-            '💧 Add liquidity to DEX for trading',
-            '📢 Announce deployment on social media',
-            '📋 Document security features implemented'
-          ];
-          
-          if (postDeploymentActions.length > 0) {
-            nextSteps.push(`🔒 Security features applied: ${postDeploymentActions.join(', ')}`);
-          }
-          
-          toast.success(`Next steps: ${nextSteps.join(' | ')}`);
-          
         } catch (error) {
           console.error('Deployment error:', error);
           toast.error(`Deployment failed: ${error.message}`);
@@ -1634,10 +1639,24 @@ export default function DeployToken() {
   const handleConfirmRenounce = async () => {
     setShowRenounceModal(false);
     if (pendingRenounceContract) {
+      const contractAddr = String(pendingRenounceContract.target);
       try {
         toast('Sending second transaction to renounce ownership...');
-        await pendingRenounceContract.renounceOwnership();
+        const tx = await pendingRenounceContract.renounceOwnership();
+        await tx.wait();
         setOwnershipRenounced(true);
+        const renounceExplorer =
+          network?.chainId != null ? getNetworkByChainId(network.chainId)?.explorer : undefined;
+        showDeployCelebration({
+          title: 'Congratulations!',
+          deploymentKind: 'Token ownership renounced',
+          details: [
+            { label: 'Contract', value: contractAddr },
+            { label: 'Network', value: network?.name || '—' },
+          ],
+          txHash: tx.hash,
+          evmExplorerBaseUrl: renounceExplorer,
+        });
         toast.success('Ownership renounced successfully!');
       } catch (err) {
         toast.error('Failed to renounce ownership: ' + err.message);
