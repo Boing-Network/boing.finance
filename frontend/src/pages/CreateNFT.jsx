@@ -12,6 +12,7 @@ import { uploadToIPFS, validateFile } from '../utils/ipfsUpload';
 import { SOLANA_NETWORKS } from '../config/solanaConfig';
 import toast from 'react-hot-toast';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
+import { showDeployCelebration } from '../utils/deployCelebration';
 import { getBoingNativeFeeUsd, formatUsdReferenceLabel, isBoingNativeFeeChain } from '../config/boingEconomics';
 import NativeBoingNftDeploySection from '../components/NativeBoingNftDeploySection';
 
@@ -160,6 +161,20 @@ function CreateNFTSolanaContent() {
       });
       setMintAddress(result.mintAddress);
       setSignature(result.signature);
+      const solCluster = network === 'devnet' ? '?cluster=devnet' : '';
+      showDeployCelebration({
+        title: 'Congratulations!',
+        deploymentKind: 'Solana SPL NFT (mint)',
+        details: [
+          { label: 'Name', value: name.trim() },
+          { label: 'Symbol', value: symbol.trim().toUpperCase().slice(0, 10) },
+          { label: 'Mint address', value: result.mintAddress },
+          ...(result.metadataUri ? [{ label: 'Metadata URI', value: result.metadataUri }] : []),
+        ],
+        txHash: result.signature,
+        externalTxUrl: `https://explorer.solana.com/tx/${result.signature}${solCluster}`,
+        externalAddressUrl: `https://explorer.solana.com/address/${result.mintAddress}${solCluster}`,
+      });
       toast.success('NFT minted successfully!');
       // Record to backend (non-blocking)
       const url = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8787';

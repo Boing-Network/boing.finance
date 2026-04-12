@@ -28,6 +28,85 @@ import {
   BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL,
   BOING_NETWORK_RPC_API_SPEC_URL,
 } from '../../config/boingNetworkDocsUrls';
+import { BOING_OBSERVER_BASE_URL } from '../../config/boingExplorerUrls';
+import { showDeployCelebration } from '../../utils/deployCelebration';
+
+/**
+ * @param {unknown} hashRaw
+ * @returns {{ displayHash: string, observerTxId: string }}
+ */
+function normalizeBoingVmSubmitHash(hashRaw) {
+  if (hashRaw && typeof hashRaw === 'object' && !Array.isArray(hashRaw)) {
+    const o = /** @type {{ txHash?: unknown, boingTxIdHex?: unknown }} */ (hashRaw);
+    const txH = o.txHash != null ? String(o.txHash).trim() : '';
+    const bid = o.boingTxIdHex != null ? String(o.boingTxIdHex).trim() : '';
+    return { displayHash: txH || bid, observerTxId: bid || txH };
+  }
+  const s = hashRaw == null ? '' : String(hashRaw).trim();
+  return { displayHash: s, observerTxId: s };
+}
+
+/**
+ * @param {object} p
+ * @param {string} p.expressKind
+ * @param {string} p.submitHashDisplay
+ * @param {string} p.observerTxId
+ * @param {string} [p.exAssetName]
+ * @param {string} [p.exAssetSymbol]
+ * @param {string} [p.exDeployPurpose]
+ * @param {string} [p.exTransferTo]
+ * @param {string | number} [p.exTransferAmount]
+ * @param {string} [p.exCallContract]
+ * @param {string | number} [p.exStakeAmount]
+ */
+function showBoingNativeVmExpressCelebration({
+  expressKind,
+  submitHashDisplay,
+  observerTxId,
+  exAssetName,
+  exAssetSymbol,
+  exDeployPurpose,
+  exTransferTo,
+  exTransferAmount,
+  exCallContract,
+  exStakeAmount,
+}) {
+  /** @type {Array<{ label: string, value: string }>} */
+  const detailRows = [];
+  switch (expressKind) {
+    case 'contract_deploy':
+      if (exAssetName?.trim()) detailRows.push({ label: 'Asset name', value: exAssetName.trim() });
+      if (exAssetSymbol?.trim()) detailRows.push({ label: 'Asset symbol', value: exAssetSymbol.trim() });
+      if (exDeployPurpose?.trim()) detailRows.push({ label: 'Purpose', value: exDeployPurpose.trim() });
+      break;
+    case 'transfer':
+      if (exTransferTo?.trim()) detailRows.push({ label: 'To', value: exTransferTo.trim() });
+      if (String(exTransferAmount ?? '').trim() !== '')
+        detailRows.push({ label: 'Amount', value: String(exTransferAmount).trim() });
+      break;
+    case 'contract_call':
+      if (exCallContract?.trim()) detailRows.push({ label: 'Contract', value: exCallContract.trim() });
+      break;
+    case 'bond':
+    case 'unbond':
+      if (String(exStakeAmount ?? '').trim() !== '')
+        detailRows.push({ label: 'Amount', value: String(exStakeAmount).trim() });
+      break;
+    default: {
+      const _never = expressKind;
+      void _never;
+      break;
+    }
+  }
+  if (submitHashDisplay) detailRows.push({ label: 'Transaction ID', value: submitHashDisplay });
+  showDeployCelebration({
+    title: 'Submitted on Boing',
+    deploymentKind: `Native VM · ${String(expressKind).replace(/_/g, ' ')}`,
+    details: detailRows,
+    boingTxIdHex: observerTxId || undefined,
+    explorerBaseUrl: BOING_OBSERVER_BASE_URL,
+  });
+}
 
 function JsonBlock({ data, empty }) {
   if (data == null) {
@@ -183,7 +262,20 @@ export default function BoingNativeVm() {
     setSubmitHash(null);
     try {
       const r = await submitBoingSignedTransaction(signedTxHex);
-      setSubmitHash(r?.tx_hash ?? r);
+      let hashStr = '';
+      if (r && typeof r === 'object' && r.tx_hash != null) hashStr = String(r.tx_hash).trim();
+      else if (typeof r === 'string') hashStr = r.trim();
+      else if (r != null) hashStr = String(r).trim();
+      setSubmitHash(hashStr || null);
+      if (hashStr) {
+        showDeployCelebration({
+          title: 'Submitted on Boing',
+          deploymentKind: 'Native VM · signed transaction submit',
+          details: [{ label: 'Transaction ID', value: hashStr }],
+          boingTxIdHex: hashStr,
+          explorerBaseUrl: BOING_OBSERVER_BASE_URL,
+        });
+      }
       toast.success('Submitted');
     } catch (e) {
       toast.error(e?.message || 'boing_submitTransaction failed');
@@ -331,7 +423,22 @@ export default function BoingNativeVm() {
       }
       const tx = buildExpressTxObject();
       const hash = await boingExpressSendTransaction(p, tx);
-      setSubmitHash(hash);
+      const { displayHash, observerTxId } = normalizeBoingVmSubmitHash(hash);
+      setSubmitHash(displayHash || observerTxId || null);
+      if (displayHash || observerTxId) {
+        showBoingNativeVmExpressCelebration({
+          expressKind,
+          submitHashDisplay: displayHash || observerTxId,
+          observerTxId: observerTxId || displayHash,
+          exAssetName,
+          exAssetSymbol,
+          exDeployPurpose,
+          exTransferTo,
+          exTransferAmount,
+          exCallContract,
+          exStakeAmount,
+        });
+      }
       toast.success('Transaction submitted');
     } catch (e) {
       toast.error(e?.message || 'boing_sendTransaction failed');
