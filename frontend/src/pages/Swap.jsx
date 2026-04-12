@@ -25,7 +25,7 @@ import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrat
 const Swap = () => {
   const { isSolana } = useChainType();
   const { isConnected, account } = useWalletConnection();
-  const { chainId } = useWallet();
+  const { chainId, provider: walletProvider, signer: walletSigner } = useWallet();
   const { effectivePoolHex } = useBoingNativeDexIntegration();
   const featureSupport = useMemo(
     () =>
@@ -213,8 +213,11 @@ const Swap = () => {
   // Add custom token
   const addCustomToken = async (tokenAddress) => {
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const tokenInfo = await getTokenInfo(tokenAddress, provider);
+      if (!walletProvider) {
+        toast.error('Connect a wallet first');
+        return;
+      }
+      const tokenInfo = await getTokenInfo(tokenAddress, walletProvider);
       if (!tokenInfo) {
         toast.error('Invalid token address or token not found');
         return;
@@ -483,8 +486,10 @@ const Swap = () => {
     setSwapSuccess('');
 
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
+      if (!walletProvider) {
+        throw new Error('Connect a wallet first');
+      }
+      const signer = walletSigner ?? (await walletProvider.getSigner());
       
       // Router contract ABI (minimal for swap)
       const routerABI = [
@@ -921,15 +926,19 @@ const Swap = () => {
       return;
     }
 
+    if (!walletProvider) {
+      console.log('calculateExpectedOutput: No wallet provider');
+      setAmountOut('');
+      return;
+    }
+
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      
       // Router contract ABI (minimal for getAmountsOut)
       const routerABI = [
         'function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts)'
       ];
 
-      const routerContract = new ethers.Contract(calcRouterAddress, routerABI, provider);
+      const routerContract = new ethers.Contract(calcRouterAddress, routerABI, walletProvider);
 
       // Get contract addresses for validation (moved to higher scope)
       const contracts = getContractAddresses(chainId);
@@ -1342,7 +1351,7 @@ const Swap = () => {
       setAmountOut('');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- checkAvailablePairs, getConfiguredPairs intentionally omitted to avoid loops
-  }, [chainId, userTokens]);
+  }, [chainId, userTokens, walletProvider]);
 
   // Fetch user's tokens
   const fetchUserTokens = useCallback(async () => {
@@ -1354,11 +1363,13 @@ const Swap = () => {
     console.log('Starting token fetch for account:', account);
     setIsLoadingTokens(true);
     try {
-      // Use the same provider initialization as CreatePool
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      
+      if (!walletProvider) {
+        console.log('No wallet provider, skipping token fetch');
+        return;
+      }
+
       // Get all tokens from user's wallet by scanning transfer events
-      const allTokens = await getAllUserTokens(provider, account);
+      const allTokens = await getAllUserTokens(walletProvider, account);
       console.log('User wallet tokens found:', allTokens.length, allTokens);
       
       // Also check common tokens for better coverage
@@ -1401,7 +1412,7 @@ const Swap = () => {
         }
         
         try {
-          const tokenInfo = await getTokenInfo(tokenAddress, provider);
+          const tokenInfo = await getTokenInfo(tokenAddress, walletProvider);
           console.log(`Token ${tokenAddress}:`, {
             hasInfo: !!tokenInfo,
             symbol: tokenInfo?.symbol,
@@ -1439,7 +1450,7 @@ const Swap = () => {
     } finally {
       setIsLoadingTokens(false);
     }
-  }, [account, chainId, getAllUserTokens, getTokenInfo, getCommonTokens]);
+  }, [account, chainId, getAllUserTokens, getTokenInfo, getCommonTokens, walletProvider]);
 
   // Get configured trading pairs from contract config
   const getConfiguredPairs = useCallback(() => {
@@ -1476,12 +1487,15 @@ const Swap = () => {
       return [];
     }
 
+    if (!walletProvider) {
+      return [];
+    }
+
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
       const routerABI = [
         'function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts)'
       ];
-      const routerContract = new ethers.Contract(routerAddress, routerABI, provider);
+      const routerContract = new ethers.Contract(routerAddress, routerABI, walletProvider);
 
       const availablePairs = [];
       const testAmount = ethers.parseUnits('0.001', 18);
@@ -1526,12 +1540,12 @@ const Swap = () => {
       console.error('checkAvailablePairs: Error checking pairs:', error);
       return [];
     }
-  }, [chainId, userTokens]);
+  }, [chainId, userTokens, walletProvider]);
 
   // EIP-1559 gas cost estimate for display (fee data only, no signer)
   const DEFAULT_SWAP_GAS_LIMIT = 250000n;
   useEffect(() => {
-    if (!chainId || !window.ethereum) {
+    if (!chainId || !walletProvider) {
       setEstimatedGasCost(null);
       return;
     }
@@ -1539,8 +1553,7 @@ const Swap = () => {
     setEstimatedGasCostLoading(true);
     const run = async () => {
       try {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const feeData = await provider.getFeeData();
+        const feeData = await walletProvider.getFeeData();
         const mult = getGasFeeMultiplier();
         const gasLimit = DEFAULT_SWAP_GAS_LIMIT;
         let costWei;
@@ -1565,15 +1578,14 @@ const Swap = () => {
     run();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- DEFAULT_SWAP_GAS_LIMIT, getGasFeeMultiplier are constants
-  }, [chainId, settings.gasPriority]);
+  }, [chainId, settings.gasPriority, walletProvider]);
 
   // Initialize external DEX service
   useEffect(() => {
-    if (isConnected && chainId) {
+    if (isConnected && chainId && walletProvider) {
       const initializeExternalDEX = async () => {
         try {
-          const provider = new ethers.BrowserProvider(window.ethereum);
-          await externalSwapService.initialize(provider);
+          await externalSwapService.initialize(walletProvider);
           setIsExternalDEXAvailable(externalSwapService.isExternalDEXsAvailable(chainId));
         } catch (error) {
           console.error('Failed to initialize external DEX service:', error);
@@ -1582,7 +1594,7 @@ const Swap = () => {
       
       initializeExternalDEX();
     }
-  }, [isConnected, chainId]);
+  }, [isConnected, chainId, walletProvider]);
 
   // Fetch tokens on mount and when account changes
   useEffect(() => {
@@ -1701,8 +1713,10 @@ const Swap = () => {
     setSwapSuccess('');
 
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
+      if (!walletProvider) {
+        throw new Error('Connect a wallet first');
+      }
+      const signer = walletSigner ?? (await walletProvider.getSigner());
 
       // Check if approval is needed
       const tokenInData = userTokens.find(t => t.symbol === tokenIn);

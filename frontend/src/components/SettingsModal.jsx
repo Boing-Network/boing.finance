@@ -77,13 +77,13 @@ export default function SettingsModal({ isOpen, onClose, onSave, initialSettings
           </h2>
 
           <div className="mb-6 min-w-0">
-            <label className="block text-theme-secondary mb-3 font-medium">Gas fee priority</label>
+            <div className="block text-theme-secondary mb-3 font-medium">Gas fee priority</div>
             <div className="space-y-2">
               {gasPriorityOptions.map((option) => (
                 <label
                   key={option.value}
                   htmlFor={`settings-gas-${option.value}`}
-                  className="flex flex-wrap sm:flex-nowrap items-start gap-3 p-3 border border-theme rounded-lg cursor-pointer hover:bg-theme-secondary/60 transition-colors min-w-0"
+                  className="grid w-full min-w-0 cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-theme p-3 transition-colors hover:bg-theme-secondary/60"
                 >
                   <input
                     id={`settings-gas-${option.value}`}
@@ -92,13 +92,13 @@ export default function SettingsModal({ isOpen, onClose, onSave, initialSettings
                     value={option.value}
                     checked={gasPriority === option.value}
                     onChange={(e) => setGasPriority(e.target.value)}
-                    className="mt-1 shrink-0 text-blue-500"
+                    className="shrink-0 text-blue-500"
                   />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-theme-primary font-medium break-words">{option.label}</div>
-                    <div className="text-theme-tertiary text-sm break-words">{option.description}</div>
+                  <div className="min-w-0">
+                    <div className="font-medium break-words text-theme-primary">{option.label}</div>
+                    <div className="break-words text-sm text-theme-tertiary">{option.description}</div>
                   </div>
-                  <div className="text-xs text-theme-tertiary shrink-0 tabular-nums self-center">{option.multiplier}x</div>
+                  <div className="shrink-0 self-center tabular-nums text-xs text-theme-tertiary">{option.multiplier}x</div>
                 </label>
               ))}
             </div>

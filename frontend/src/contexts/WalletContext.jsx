@@ -98,7 +98,8 @@ export const WalletProvider = ({ children }) => {
 
   const getActiveRawEip1193 = useCallback(() => {
     if (typeof window === 'undefined') return null;
-    return activeEip1193ProviderRef.current || window.ethereum;
+    // Never fall back to window.ethereum — multi-wallet injection can route that to Phantom while Boing is connected.
+    return activeEip1193ProviderRef.current;
   }, []);
 
   // Debounce error messages to prevent spam
@@ -191,8 +192,7 @@ export const WalletProvider = ({ children }) => {
         throw new Error('No wallet detected. Please install MetaMask or another Web3 wallet.');
       }
 
-      // Use provided provider or fallback to window.ethereum
-      const provider = ethereumProvider || window.ethereum;
+      const provider = ethereumProvider ?? activeEip1193ProviderRef.current;
 
       if (!provider) {
         throw new Error('No wallet detected. Please install MetaMask or another Web3 wallet.');
@@ -489,7 +489,7 @@ export const WalletProvider = ({ children }) => {
     
     return () => {
       if (typeof window !== 'undefined') {
-        const raw = activeEip1193ProviderRef.current || window.ethereum;
+        const raw = activeEip1193ProviderRef.current;
         if (raw && typeof raw.removeListener === 'function') {
           raw.removeListener('accountsChanged', handleAccountsChanged);
           raw.removeListener('chainChanged', handleChainChanged);
