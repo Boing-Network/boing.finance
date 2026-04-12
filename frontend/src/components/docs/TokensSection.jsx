@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const TokensSection = () => {
   return (
@@ -249,6 +250,14 @@ const TokensSection = () => {
       <div>
         <h3 className="text-2xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Creating Your Own Token</h3>
+        <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+          On <strong style={{ color: 'var(--text-primary)' }}>Boing L1 testnet</strong>, fungible deploys use the Boing VM and{' '}
+          <strong>Boing Express</strong> (not the EVM factory path on this page). NFT collections follow the same pattern. See{' '}
+          <Link to="/docs?section=boing-l1" className="text-cyan-400 underline font-medium">
+            Boing L1 &amp; Express
+          </Link>{' '}
+          for wallet modes, env bytecode, <code className="text-xs">boing_sendTransaction</code>, and links to protocol docs.
+        </p>
         <div className="space-y-6">
           <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"

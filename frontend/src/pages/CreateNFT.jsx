@@ -13,10 +13,6 @@ import { SOLANA_NETWORKS } from '../config/solanaConfig';
 import toast from 'react-hot-toast';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { getBoingNativeFeeUsd, formatUsdReferenceLabel, isBoingNativeFeeChain } from '../config/boingEconomics';
-import {
-  BOING_NETWORK_BOING_CANONICAL_DEPLOY_ARTIFACTS_URL,
-  BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL,
-} from '../config/boingNetworkDocsUrls';
 import NativeBoingNftDeploySection from '../components/NativeBoingNftDeploySection';
 
 const SOLANA_NFT_STEPS = [
@@ -674,47 +670,6 @@ export default function CreateNFT() {
             <p className="text-theme-tertiary">Upload images from your computer, add metadata, and mint. Supports single, bulk, and dynamic collections up to 10,000.</p>
           </div>
 
-          {chainId === BOING_NATIVE_L1_CHAIN_ID && (
-            <div
-              className="mb-6 rounded-xl border px-4 py-3 text-left text-sm"
-              style={{
-                borderColor: 'rgba(45, 212, 191, 0.45)',
-                backgroundColor: 'var(--bg-card)',
-                color: 'var(--text-secondary)',
-              }}
-            >
-              <strong style={{ color: 'var(--text-primary)' }}>Boing testnet (native L1):</strong> This wizard targets{' '}
-              <strong>EVM</strong> NFT contracts when you use an Ethereum-capable wallet in the header. A native Boing{' '}
-              <strong>NFT collection</strong> deploy uses <code className="text-xs">contract_deploy_meta</code> with{' '}
-              <code className="text-xs">purpose_category: &quot;nft&quot;</code> and operator-pinned collection bytecode—see
-              the NFT section in{' '}
-              <a
-                href={BOING_NETWORK_BOING_CANONICAL_DEPLOY_ARTIFACTS_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-cyan-400 underline hover:text-cyan-300"
-              >
-                BOING-CANONICAL-DEPLOY-ARTIFACTS.md
-              </a>
-              . Ecosystem backlog (wallet / explorer / partners):{' '}
-              <a
-                href={BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-cyan-400 underline hover:text-cyan-300"
-              >
-                HANDOFF-DEPENDENT-PROJECTS.md
-              </a>
-              .               On the <strong>Review</strong> step, <strong>Deploy native collection</strong> runs the same unified QA +
-              Boing Express flow as Deploy Token when collection bytecode is configured (env or Advanced override). Low-level
-              RPC lives on{' '}
-              <Link to="/boing/native-vm" className="text-cyan-400 underline hover:text-cyan-300">
-                Native VM tools
-              </Link>
-              .
-            </div>
-          )}
-
           {/* Mode: Standard vs Dynamic collection */}
           <div className="flex justify-center gap-2 mb-6">
             <button
@@ -937,23 +892,16 @@ export default function CreateNFT() {
                             </button>
                           ))}
                         </div>
-                        <p className="text-amber-200/90 text-sm">
+                        <p className="text-gray-400 text-sm">
                           {isBoingNativeNftWizard
-                            ? 'Use Deploy native collection above when bytecode is configured; QA defaults to purpose nft. See '
+                            ? 'Use Deploy native collection when bytecode is configured. Details: '
                             : `Service fee (${dynamicFeeDisplayLine}) will be charged when you deploy this collection. Export the JSON for use with minting platforms or our contract when available.`}
                           {isBoingNativeNftWizard && (
-                            <>
-                              <a
-                                href={BOING_NETWORK_BOING_CANONICAL_DEPLOY_ARTIFACTS_URL}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-cyan-400 underline"
-                              >
-                                BOING-CANONICAL-DEPLOY-ARTIFACTS.md
-                              </a>
-                              . Export JSON works with any toolchain.
-                            </>
+                            <Link to="/docs?section=boing-l1" className="text-cyan-400 underline">
+                              Documentation → Boing L1 &amp; Express
+                            </Link>
                           )}
+                          {isBoingNativeNftWizard && '. Export JSON works with any toolchain.'}
                         </p>
                       </>
                     )}
@@ -1245,22 +1193,17 @@ export default function CreateNFT() {
                     </Link>
                   </div>
                 )}
-                <p className="text-amber-200/90 text-sm">
-                  {isBoingNativeNftWizard
-                    ? 'Metadata matches ERC-721-style JSON for portability. Native collection deploy uses automatic QA for purpose nft (override in Advanced if needed). See '
-                    : 'Metadata follows ERC-721 / OpenSea standards. Export the JSON to use with other minting tools; on-chain minting will be enabled when Boing NFT contracts launch.'}
-                  {isBoingNativeNftWizard && (
+                <p className="text-gray-400 text-sm">
+                  {isBoingNativeNftWizard ? (
                     <>
-                      <a
-                        href={BOING_NETWORK_BOING_CANONICAL_DEPLOY_ARTIFACTS_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-cyan-400 underline"
-                      >
-                        canonical deploy artifacts
-                      </a>
+                      Metadata matches ERC-721-style JSON for portability. Native deploy behavior:{' '}
+                      <Link to="/docs?section=boing-l1" className="text-cyan-400 underline">
+                        Documentation → Boing L1 &amp; Express
+                      </Link>
                       .
                     </>
+                  ) : (
+                    'Metadata follows ERC-721 / OpenSea standards. Export the JSON to use with other minting tools; on-chain minting will be enabled when Boing NFT contracts launch.'
                   )}
                 </p>
               </div>

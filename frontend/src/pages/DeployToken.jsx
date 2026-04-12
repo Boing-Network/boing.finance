@@ -12,7 +12,7 @@ import AdvancedERC20Artifact from '../artifacts/AdvancedERC20.json';
 import TokenFactoryArtifact from '../artifacts/TokenFactory.json';
 import TokenImplementationArtifact from '../artifacts/TokenImplementation.json';
 import { Helmet } from 'react-helmet-async';
-import { getContractAddress, getBoingNativeVmModuleId } from '../config/contracts';
+import { getContractAddress } from '../config/contracts';
 import LogoUpload from '../components/LogoUpload';
 import { uploadMetadataToIPFS, createTokenMetadata } from '../utils/ipfsUpload';
 import TokenPreview from '../components/TokenPreview';
@@ -24,15 +24,10 @@ import { deploymentHistory as deploymentHistoryUtil } from '../utils/deploymentH
 import { notificationService } from '../utils/notifications';
 import ShareCardModal from '../components/ShareCardModal';
 import { isBoingTestnetChainId } from 'boing-sdk';
-import NativeBoingDeployPanel from '../components/NativeBoingDeployPanel';
 import NativeBoingTokenDeploySection from '../components/NativeBoingTokenDeploySection';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { getBoingNativeFeeUsd, formatUsdReferenceLabel, isBoingNativeFeeChain } from '../config/boingEconomics';
 import { isBoingNativeAccountIdHex } from '../utils/boingWalletDiscovery';
-import {
-  BOING_NETWORK_E2_PARTNER_APP_NATIVE_BOING_URL,
-  BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL,
-} from '../config/boingNetworkDocsUrls';
 import { brandLogoPngAbsolute } from '../config/brandAssets';
 
 // Import ABI and bytecode from the artifacts
@@ -1712,64 +1707,6 @@ export default function DeployToken() {
                 Create and deploy your own ERC-20 token with advanced security features, 
                 comprehensive documentation, and professional-grade infrastructure.
               </p>
-              {!isSolana &&
-                isConnected &&
-                account &&
-                isBoingNativeAccountIdHex(account) &&
-                isBoingTestnetChainId(chainId) &&
-                walletType === 'boingExpress' && (
-                  <p
-                    className="text-sm max-w-2xl mx-auto mt-4 rounded-lg border px-4 py-3 text-left"
-                    style={{
-                      borderColor: 'rgba(45, 212, 191, 0.45)',
-                      backgroundColor: 'var(--bg-card)',
-                      color: 'var(--text-secondary)',
-                    }}
-                  >
-                    <strong style={{ color: 'var(--text-primary)' }}>Boing testnet + Boing Express:</strong> use the same
-                    launch wizard below (Token Basics → Network &amp; Plan → Security &amp; Info →{' '}
-                    <strong>Review &amp; Deploy</strong>). The final step runs a <strong>native VM</strong> deploy via Boing
-                    Express—not the ERC-20 factory. For classic ERC-20, switch the header to <strong>EVM</strong> and use
-                    Sepolia + MetaMask.
-                  </p>
-                )}
-              {!isSolana && (
-                <p className="text-sm max-w-2xl mx-auto mt-3 rounded-lg border px-3 py-2" style={{ borderColor: 'var(--border-color)', color: 'var(--text-tertiary)' }}>
-                  ERC-20 deployment uses <strong style={{ color: 'var(--text-secondary)' }}>EVM</strong> in the app chain toggle (header). If the header shows Solana, switch to EVM and connect MetaMask or another Ethereum wallet. Boing Express can expose a native Boing account (32-byte)—that account cannot sign EVM deploys here; use an EVM wallet for this flow or Boing Native VM for native tooling.
-                </p>
-              )}
-              {!isSolana &&
-                isConnected &&
-                account &&
-                isBoingNativeAccountIdHex(account) &&
-                !isBoingNativeDeployPath && (
-                <p className="text-sm max-w-2xl mx-auto mt-3 rounded-lg border px-3 py-2" style={{ borderColor: 'rgba(251, 191, 36, 0.45)', color: 'var(--text-secondary)' }}>
-                  You are connected with a <strong>native Boing</strong> account. ERC-20 deploy on this page needs a standard <strong>20-byte Ethereum</strong> address—switch the header to <strong>EVM</strong> and connect MetaMask (e.g. Sepolia), use <strong>Boing Native VM</strong> in this app for tooling, or follow the{' '}
-                  <a
-                    href={BOING_NETWORK_E2_PARTNER_APP_NATIVE_BOING_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-amber-300 underline hover:text-amber-200"
-                  >
-                    native Boing token deploy guide
-                  </a>
-                  {' '}(Boing Express + <code className="text-xs">boing_sendTransaction</code>). Cross-repo backlog:{' '}
-                  <a
-                    href={BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-amber-300 underline hover:text-amber-200"
-                  >
-                    HANDOFF-DEPENDENT-PROJECTS.md
-                  </a>
-                  .
-                </p>
-              )}
-              {!isSolana &&
-                !(isBoingTestnetChainId(chainId) && walletType === 'boingExpress' && isConnected) && (
-                  <NativeBoingDeployPanel tokenName={name} tokenSymbol={symbol} />
-                )}
-              
               {/* Quick Actions */}
               <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
                 <button
@@ -1894,28 +1831,7 @@ export default function DeployToken() {
                   {/* Deployment Method Indicator */}
                   {network && (
                     <div className="mt-2">
-                      {Number(network.chainId) === BOING_NATIVE_L1_CHAIN_ID ? (
-                        <div className="text-sm text-amber-300/95 space-y-1">
-                          <div className="flex items-start gap-1">
-                            <svg className="w-4 h-4 mr-1 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                            </svg>
-                            <span>
-                              <span className="font-medium text-amber-200">Boing L1 (native VM):</span>{' '}
-                              token deploy uses Boing VM bytecode (reference secured fungible), not the EVM{' '}
-                              <code className="text-xs text-amber-100/90">TokenFactory</code> contract used on other chains.
-                            </span>
-                          </div>
-                          <p className="text-xs text-amber-200/80 pl-5">
-                            A native DEX factory is a separate Boing VM module id (
-                            <code className="text-[11px]">nativeVm.dexFactory</code>
-                            ), not Solidity <code className="text-[11px]">dexFactory</code>.{' '}
-                            {getBoingNativeVmModuleId(network.chainId, 'dexFactory')
-                              ? 'This build has a non-zero native DEX factory id configured.'
-                              : 'This build does not set a native DEX factory id (optional; operator / env).'}
-                          </p>
-                        </div>
-                      ) : getContractAddress(network?.chainId, 'tokenFactory') &&
+                      {Number(network.chainId) === BOING_NATIVE_L1_CHAIN_ID ? null : getContractAddress(network?.chainId, 'tokenFactory') &&
                         getContractAddress(network?.chainId, 'tokenFactory') !==
                           '0x0000000000000000000000000000000000000000' ? (
                         <div className="flex items-center text-sm text-green-400">

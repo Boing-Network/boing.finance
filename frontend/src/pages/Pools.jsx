@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useWallet } from '../contexts/WalletContext';
@@ -16,13 +15,9 @@ import {
   getPoolAnalytics
 } from '../services/poolService';
 import { useBlockchainPools } from '../hooks/useBlockchainPools';
-import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
+import { getNetworkByChainId } from '../config/networks';
 import { useAchievements } from '../contexts/AchievementContext';
 import ShareCardModal from '../components/ShareCardModal';
-import NativeBoingL1IntegratedHub from '../components/NativeBoingL1IntegratedHub';
-import NativeAmmLiquidityRoutesHint from '../components/NativeAmmLiquidityRoutesHint';
-import getFeatureSupport from '../config/featureSupport';
-import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import { getNetworkBadgeBgClass } from '../utils/networkBadgeClasses';
 
 // Pool Card Component
@@ -691,15 +686,6 @@ const Pools = () => {
   const { isConnected, account } = useWalletConnection();
   const { chainId } = useWallet();
   const { record: recordAchievement } = useAchievements() || {};
-  const { effectivePoolHex } = useBoingNativeDexIntegration();
-  const featureSupport = useMemo(
-    () =>
-      getFeatureSupport(Number(chainId) || 0, {
-        nativeConstantProductPoolHex:
-          Number(chainId) === BOING_NATIVE_L1_CHAIN_ID ? effectivePoolHex : undefined,
-      }),
-    [chainId, effectivePoolHex]
-  );
   // Wallet state initialized
   const [activeTab, setActiveTab] = useState('all-pools');
   const [selectedPool, setSelectedPool] = useState(null);
@@ -1042,38 +1028,6 @@ const Pools = () => {
                 Manage your liquidity positions and explore available pools
               </p>
             </div>
-
-            {chainId === BOING_NATIVE_L1_CHAIN_ID && !featureSupport.hasNativeAmm && (
-              <NativeBoingL1IntegratedHub feature="pools" />
-            )}
-            <NativeAmmLiquidityRoutesHint />
-            {chainId === BOING_NATIVE_L1_CHAIN_ID && featureSupport.hasNativeAmm && (
-              <div
-                className="mb-6 rounded-xl border px-4 py-3 flex flex-wrap items-center gap-3 justify-between"
-                style={{
-                  borderColor: 'rgba(0, 229, 255, 0.35)',
-                  backgroundColor: 'rgba(2, 11, 38, 0.88)',
-                }}
-              >
-                <p className="text-sm text-gray-300">
-                  <strong className="text-white">Native AMM</strong> — swap or add reserves with Boing Express.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <Link
-                    to="/swap"
-                    className="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-medium"
-                  >
-                    Swap
-                  </Link>
-                  <Link
-                    to="/create-pool"
-                    className="px-3 py-1.5 rounded-lg bg-finance-purple hover:opacity-90 text-white text-sm font-medium"
-                  >
-                    Add liquidity
-                  </Link>
-                </div>
-              </div>
-            )}
 
             {/* Tabs */}
             <div className="bg-gray-800 rounded-xl p-2 mb-8 border border-gray-700">

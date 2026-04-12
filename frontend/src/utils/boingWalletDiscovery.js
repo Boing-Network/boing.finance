@@ -32,7 +32,7 @@ export function getWindowBoingProvider() {
  * Collect wallets that announce via EIP-6963 with Boing in name or rdns.
  * @returns {Promise<{ provider: { request: Function }, info: { uuid?: string, name?: string, rdns?: string, icon?: string } }[]>}
  */
-export function discoverBoingEip6963Providers(timeoutMs = 400) {
+export function discoverBoingEip6963Providers(timeoutMs = 800) {
   if (typeof window === 'undefined') return Promise.resolve([]);
 
   return new Promise((resolve) => {
@@ -54,7 +54,7 @@ export function discoverBoingEip6963Providers(timeoutMs = 400) {
     };
 
     window.addEventListener('eip6963:announceProvider', onAnnounce);
-    window.dispatchEvent(new Event('eip6963:requestProvider'));
+    // Intentionally do not dispatch `eip6963:requestProvider` — it prompts wallets (e.g. Phantom) even when the user only connects Boing Express.
 
     setTimeout(() => {
       window.removeEventListener('eip6963:announceProvider', onAnnounce);

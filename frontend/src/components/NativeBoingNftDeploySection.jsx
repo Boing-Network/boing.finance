@@ -168,10 +168,12 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
         Deploy native collection (Boing VM)
       </h3>
       <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-        Uses this wizard&apos;s <strong>collection name</strong> and <strong>symbol</strong> with{' '}
-        <code className="text-[10px]">contract_deploy_meta</code> and automatic QA (
-        <code className="text-[10px]">purpose_category</code> defaults to <strong>nft</strong>). Export metadata JSON above
-        for off-chain tooling.{' '}
+        Deploy uses this wizard&apos;s <strong>name</strong> and <strong>symbol</strong> with{' '}
+        <code className="text-[10px]">contract_deploy_meta</code> and QA. Export metadata JSON above when needed.{' '}
+        <Link to="/docs?section=boing-l1" className="text-green-400 underline text-sm">
+          Docs: Boing L1 &amp; Express
+        </Link>
+        {' · '}
         <Link to="/boing/native-vm" className="text-green-400 underline text-sm">
           Native VM tools
         </Link>

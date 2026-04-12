@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import getFeatureSupport, { getChainsWithDex } from '../config/featureSupport';
 import { getExternalSwapUrl } from '../config/networkExternalLinks';
@@ -11,13 +10,7 @@ import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrat
  * For Swap/Liquidity/Pools: offers Switch to Boing network OR use external DEX (mainnet-ready).
  */
 export default function NetworkSupportBanner({ featureLabel, chainIdsSupported, currentChainId, onSwitchNetwork, showExternalLink = true }) {
-  const { effectivePoolHex } = useBoingNativeDexIntegration();
   const supported = chainIdsSupported.includes(Number(currentChainId));
-  const boingNativeAmm =
-    Number(currentChainId) === BOING_NATIVE_L1_CHAIN_ID &&
-    getFeatureSupport(Number(currentChainId) || 0, {
-      nativeConstantProductPoolHex: effectivePoolHex,
-    }).hasNativeAmm;
   if (supported || !currentChainId) return null;
 
   const chainNames = chainIdsSupported
@@ -34,24 +27,6 @@ export default function NetworkSupportBanner({ featureLabel, chainIdsSupported, 
       <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
         <strong style={{ color: 'var(--text-primary)' }}>{featureLabel}</strong> is available on{' '}
         {chainNames.length > 1 ? chainNames.join(', ') : primaryName}. Switch network or use external DEX.
-        {Number(currentChainId) === BOING_NATIVE_L1_CHAIN_ID && (
-          <span className="block mt-2 text-xs opacity-90">
-            {boingNativeAmm && (featureLabel === 'Create Pool' || featureLabel === 'Liquidity') ? (
-              <>
-                A native constant-product pool is configured — add liquidity on the{' '}
-                <Link to="/swap" className="text-cyan-400 underline font-medium">
-                  Swap
-                </Link>{' '}
-                page with Boing Express (Boing VM, not an EVM factory).
-              </>
-            ) : (
-              <>
-                On Boing testnet, DEX-style flows use the Boing VM and operator-published pool/module ids — not Solidity
-                factories on this chain.
-              </>
-            )}
-          </span>
-        )}
       </p>
       <div className="flex flex-wrap gap-2">
         {externalUrl && (

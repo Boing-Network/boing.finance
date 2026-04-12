@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const LiquiditySection = () => {
   return (
@@ -6,10 +7,18 @@ const LiquiditySection = () => {
       <div>
         <h2 className="text-3xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Liquidity Provision Guide</h2>
-        <p className=" text-lg leading-relaxed mb-8"
+        <p className=" text-lg leading-relaxed mb-4"
           style={{ color: 'var(--text-secondary)'  }}>
           Learn how to provide liquidity to trading pairs and earn fees on boing.finance. Liquidity provision is 
           a key component of DeFi that allows you to earn passive income while supporting the ecosystem.
+        </p>
+        <p className="text-sm leading-relaxed mb-8" style={{ color: 'var(--text-secondary)' }}>
+          On <strong style={{ color: 'var(--text-primary)' }}>Boing L1 testnet</strong>, a configured native AMM uses the in-app
+          constant-product pool—add reserves from <strong>Swap</strong> with Boing Express, not a separate EVM factory step. See{' '}
+          <Link to="/docs?section=boing-l1" className="text-cyan-400 underline font-medium">
+            Boing L1 &amp; Express
+          </Link>
+          .
         </p>
       </div>
 

@@ -7,7 +7,10 @@ const OverviewSection = () => {
         <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Platform Overview</h2>
         <p className="text-lg leading-relaxed mb-6" style={{ color: 'var(--text-secondary)' }}>
           boing.finance is a DEX for swapping, liquidity, bridging, token & NFT deployment, and governance on EVM and Solana. 
-          Zero protocol fees. One interface, one portfolio. Use the AI Assistant, Help Center, and DeFi 101 to get started.
+          Zero protocol fees. One interface, one portfolio. Use the AI Assistant, Help Center, and DeFi 101 to get started.{' '}
+          <strong style={{ color: 'var(--text-primary)' }}>Boing L1 testnet</strong> (native VM, chain id 6913) appears in the
+          same network selector; use the sidebar section <strong>Boing L1 &amp; Express</strong> for Boing Express signing, native
+          token and NFT deploys, and DEX behavior on that chain.
         </p>
         
         <div className="grid md:grid-cols-2 gap-6 mb-8">

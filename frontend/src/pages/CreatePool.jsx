@@ -12,14 +12,10 @@ import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/network
 import { DexFeatureBanner } from '../components/NetworkSupportBanner';
 import { useAchievements } from '../contexts/AchievementContext';
 import ShareCardModal from '../components/ShareCardModal';
-import NativeBoingL1IntegratedHub from '../components/NativeBoingL1IntegratedHub';
 import NativeBoingPoolDeploySection from '../components/NativeBoingPoolDeploySection';
 import NativeAmmSwapPanel from '../components/NativeAmmSwapPanel';
 import getFeatureSupport from '../config/featureSupport';
-import BoingNativeDexStatusBanner from '../components/BoingNativeDexStatusBanner';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
-
-
 
 
 // Toggle Button Component
@@ -1314,51 +1310,16 @@ function CreatePool() {
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">
             <DexFeatureBanner featureLabel="Create Pool" currentChainId={chainId} onSwitchNetwork={switchNetwork} />
-            {chainId === BOING_NATIVE_L1_CHAIN_ID && (
-              <BoingNativeDexStatusBanner chainId={chainId} featureSupport={featureSupport} />
-            )}
-            {chainId === BOING_NATIVE_L1_CHAIN_ID && !featureSupport.hasNativeAmm && (
-              <>
-                <NativeBoingL1IntegratedHub feature="createPool" />
-                <NativeBoingPoolDeploySection />
-              </>
-            )}
+            {chainId === BOING_NATIVE_L1_CHAIN_ID && !featureSupport.hasNativeAmm && <NativeBoingPoolDeploySection />}
             {chainId === BOING_NATIVE_L1_CHAIN_ID && featureSupport.hasNativeAmm && (
-              <div
-                className="mb-6 rounded-xl border p-5 text-left"
-                style={{
-                  borderColor: 'rgba(45, 212, 191, 0.45)',
-                  backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                }}
-              >
-                <h2 className="text-xl font-semibold text-white mb-2">Boing testnet — native AMM liquidity</h2>
-                <p className="text-sm text-gray-300 mb-4">
-                  This network uses the in-app <strong>constant-product pool</strong> (not an EVM factory). Add reserves below
-                  with Boing Express—the same flow as on <strong>Swap</strong>. There is no separate “create pair” contract
-                  step on L1 in this app.
-                </p>
+              <div className="mb-6">
                 <NativeAmmSwapPanel defaultOpenAddLiquidity slippagePercent={0.5} />
-                <p className="text-xs text-gray-500 mt-4">
-                  Optional: Uniswap-style <strong>new pair</strong> with the full EVM form is available on{' '}
-                  <button
-                    type="button"
-                    onClick={() => typeof switchNetwork === 'function' && switchNetwork(11155111)}
-                    className="text-cyan-400 underline font-medium"
-                  >
-                    Sepolia
-                  </button>{' '}
-                  in this app — not a requirement for Boing L1.
-                </p>
               </div>
             )}
             {/* Header */}
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold text-white mb-4">Create Liquidity Pool</h1>
-              <p className="text-xl text-gray-300">
-                {chainId === BOING_NATIVE_L1_CHAIN_ID && featureSupport.hasNativeAmm
-                  ? 'Native pool: use the panel above. The factory form below is for EVM-configured networks (e.g. Sepolia).'
-                  : 'Deploy new trading pairs and earn fees from every trade'}
-              </p>
+              <p className="text-xl text-gray-300">Deploy new trading pairs and earn fees from every trade</p>
             </div>
 
             {/* Pool Configuration — hidden on Boing when native AMM is the supported path */}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const TradingSection = () => {
   return (
@@ -6,10 +7,18 @@ const TradingSection = () => {
       <div>
         <h2 className="text-3xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Trading Guide</h2>
-        <p className=" text-lg leading-relaxed mb-8"
+        <p className=" text-lg leading-relaxed mb-4"
           style={{ color: 'var(--text-secondary)'  }}>
           Learn how to trade tokens on boing.finance with our comprehensive guide. From basic swaps to advanced 
           trading strategies, we'll walk you through everything you need to know to start trading safely and efficiently.
+        </p>
+        <p className="text-sm leading-relaxed mb-8" style={{ color: 'var(--text-secondary)' }}>
+          On <strong style={{ color: 'var(--text-primary)' }}>Boing L1 testnet</strong>, swaps may use the native AMM with{' '}
+          <strong>Boing Express</strong> instead of MetaMask. See{' '}
+          <Link to="/docs?section=boing-l1" className="text-cyan-400 underline font-medium">
+            Boing L1 &amp; Express
+          </Link>
+          .
         </p>
       </div>
 
