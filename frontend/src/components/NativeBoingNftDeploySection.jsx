@@ -231,7 +231,19 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
         </button>
       </div>
 
-      <details className="mb-2 rounded-lg border" style={{ borderColor: 'var(--border-color)' }}>
+      {!hasBundled && !effectiveBytecode && (
+        <p className="text-xs mb-3 rounded-lg px-3 py-2 border" style={{ borderColor: 'rgba(251, 191, 36, 0.35)', color: 'var(--text-secondary)' }}>
+          <strong style={{ color: 'var(--text-primary)' }}>Bytecode required.</strong> Expand <strong>Advanced</strong> below (it opens automatically here), paste
+          even-length deploy hex, or set <code className="text-[10px]">REACT_APP_BOING_REFERENCE_NFT_COLLECTION_TEMPLATE_BYTECODE_HEX</code> in{' '}
+          <code className="text-[10px]">frontend/.env.local</code> and restart the dev server.
+        </p>
+      )}
+
+      <details
+        className="mb-2 rounded-lg border"
+        style={{ borderColor: 'var(--border-color)' }}
+        defaultOpen={!hasBundled}
+      >
         <summary className="cursor-pointer text-sm font-medium px-3 py-2" style={{ color: 'var(--text-primary)' }}>
           Advanced — bytecode, description hash, QA purpose
         </summary>
