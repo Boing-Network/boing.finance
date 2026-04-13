@@ -26,7 +26,7 @@ function shortHex(h) {
  *   onChange: (next: string) => void,
  *   excludeHex?: string | null,
  *   venueTokens?: import('boing-sdk').CpPoolVenue[],
- *   indexerTokens?: Array<{ id: string, symbol: string, name: string }>,
+ *   indexerTokens?: Array<{ id: string, symbol: string, name: string, decimals?: number }>,
  *   inputTestId?: string,
  * }} props
  */
@@ -54,12 +54,13 @@ export default function NativeVmTokenPickerField({
     const custom = loadCustomNativeVmTokens();
     const recent = loadRecentNativeVmTokens();
     const byId = new Map();
-    for (const e of [...curated, ...fromVenues, ...custom]) {
+    // Baseline defaults + env list only; on-chain venues + indexer + user custom win on conflicts.
+    for (const e of curated) {
       if (excludeNorm && e.id === excludeNorm) continue;
       byId.set(e.id, e);
     }
     for (const e of fromIndexer) {
-      if (!e?.id || excludeNorm && e.id === excludeNorm) continue;
+      if (!e?.id || (excludeNorm && e.id === excludeNorm)) continue;
       const id = normalizeNativeVmTokenId32(e.id);
       if (!id) continue;
       byId.set(id, {
@@ -67,6 +68,15 @@ export default function NativeVmTokenPickerField({
         symbol: e.symbol || shortHex(id),
         name: e.name || 'From indexer',
       });
+    }
+    // Pool-hydrated venues win over indexer rows for the same token id (on-chain truth).
+    for (const e of fromVenues) {
+      if (excludeNorm && e.id === excludeNorm) continue;
+      byId.set(e.id, e);
+    }
+    for (const e of custom) {
+      if (excludeNorm && e.id === excludeNorm) continue;
+      byId.set(e.id, e);
     }
     for (const id of recent) {
       if (excludeNorm && id === excludeNorm) continue;

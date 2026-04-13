@@ -406,6 +406,22 @@ curl -X POST "${config.apiUrl}/r2/upload" \\
                       {dexInt.venues?.length ?? 0}
                       {dexInt.loading ? ' (loading…)' : ''}
                     </p>
+                    {dexInt.dexDiscoveryRpcMeta && (
+                      <p className="text-xs font-mono break-all mb-2" style={{ color: 'var(--text-tertiary)' }}>
+                        L1 discovery — listDexTokens: {dexInt.dexDiscoveryRpcMeta.listTokens ? 'yes' : 'no'}, listDexPools:{' '}
+                        {dexInt.dexDiscoveryRpcMeta.listPools ? 'yes' : 'no'} · boing_rpcSupportedMethods count:{' '}
+                        {dexInt.dexDiscoveryRpcMeta.rpcSupportedMethodCount} · catalog names:{' '}
+                        {dexInt.dexDiscoveryRpcMeta.rpcCatalogNameCount}
+                        {dexInt.dexDiscoveryRpcMeta.preflightClientVersion != null && (
+                          <>
+                            {' '}
+                            · preflight client: {dexInt.dexDiscoveryRpcMeta.preflightClientVersion} (supportedMethods:{' '}
+                            {dexInt.dexDiscoveryRpcMeta.preflightSupportedMethodCount ?? '—'}, catalog:{' '}
+                            {dexInt.dexDiscoveryRpcMeta.preflightCatalogMethodCount ?? '—'})
+                          </>
+                        )}
+                      </p>
+                    )}
                     {dexInt.error && (
                       <p className="text-xs text-amber-400 mb-2">{dexInt.error.message}</p>
                     )}

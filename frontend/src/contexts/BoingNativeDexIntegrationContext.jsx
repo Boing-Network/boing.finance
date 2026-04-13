@@ -18,6 +18,15 @@ import { fetchOracleUsdPerUnitMap, loadNativeDexOracleMap } from '../services/na
 import { appendReserveHistorySamples, getReserveSamplingIntervalMs } from '../services/nativeDexReserveHistory';
 import { loadVaultPoolMappings } from '../services/nativeDexVaultPoolMap';
 import { mergeRemoteIndexerWithDirectoryPools } from '../services/nativeDexIndexerDirectoryMerge';
+import {
+  attachDexPoolDecimalsToVenues,
+  collectAllDexPoolsPagesL1,
+  collectAllDexTokensPagesL1,
+  dexPoolListRowsToPoolTokenRows,
+  dexTokenListRowsToPickerEntries,
+  resolveNativeDexL1DiscoveryCapabilities,
+} from '../services/nativeDexL1Discovery';
+import { normalizeNativeVmTokenId32 } from '../services/nativeVmTokenRegistry';
 import { BOING_OBSERVER_BASE_URL } from '../config/boingExplorerUrls';
 
 /** @typedef {import('boing-sdk').NativeDexIntegrationDefaults} NativeDexIntegrationDefaults */
@@ -38,7 +47,27 @@ export function BoingNativeDexIntegrationProvider({ children }) {
   const softHydrateLockRef = useRef(false);
 
   const [defaults, setDefaults] = useState(null);
-  const [venues, setVenues] = useState(/** @type {CpPoolVenue[]} */ ([]));
+  /** Hydrated from RPC only; UI **`venues`** also merge L1 pool leg decimals. */
+  const [venuesHydrated, setVenuesHydrated] = useState(/** @type {CpPoolVenue[]} */ ([]));
+  /** Last **`boing_listDexPools`** page rows (light) for **`tokenADecimals` / `tokenBDecimals`** overlay. */
+  const [l1DexPoolRows, setL1DexPoolRows] = useState(/** @type {import('boing-sdk').DexPoolListRow[]} */ ([]));
+  /** RPC discovery metadata (supported methods, catalog, optional preflight). */
+  const [dexDiscoveryRpcMeta, setDexDiscoveryRpcMeta] = useState(
+    /** @type {{
+     *   listTokens: boolean,
+     *   listPools: boolean,
+     *   rpcSupportedMethodCount: number,
+     *   rpcCatalogNameCount: number,
+     *   preflightSupportedMethodCount: number | null,
+     *   preflightCatalogMethodCount: number | null,
+     *   preflightClientVersion: string | null,
+     * } | null} */ (null)
+  );
+
+  const venues = useMemo(
+    () => attachDexPoolDecimalsToVenues(venuesHydrated, l1DexPoolRows),
+    [venuesHydrated, l1DexPoolRows]
+  );
   /** Factory `pairs_count` + chain head from a light directory snapshot (no log scan). */
   const [directoryMeta, setDirectoryMeta] = useState(
     /** @type {{ pairsCount: string | null; headHeight: number | null }} */ ({ pairsCount: null, headHeight: null })
@@ -50,6 +79,8 @@ export function BoingNativeDexIntegrationProvider({ children }) {
     registerLogScanFromBlock: null,
   });
   const [remoteIndexerStats, setRemoteIndexerStats] = useState(null);
+  /** L1 `boing_listDexTokens` rows (light); merged into picker directory ahead of indexer labels. */
+  const [l1DexTokenRows, setL1DexTokenRows] = useState(/** @type {import('boing-sdk').DexTokenListRow[]} */ ([]));
   const [localPoolActivity, setLocalPoolActivity] = useState(/** @type {Record<string, { activityScore: string, hadPrior: boolean }>} */ ({}));
   const [oracleUsdByToken, setOracleUsdByToken] = useState(/** @type {Record<string, string>} */ ({}));
   const [oracleUsdLoading, setOracleUsdLoading] = useState(false);
@@ -58,10 +89,27 @@ export function BoingNativeDexIntegrationProvider({ children }) {
   const vaultPoolMappings = useMemo(() => loadVaultPoolMappings(), []);
   const oracleConfig = useMemo(() => loadNativeDexOracleMap(), []);
   const reserveSampleIntervalMs = useMemo(() => getReserveSamplingIntervalMs(), []);
-  const indexerPickerTokens = useMemo(
-    () => extractTokenDirectoryFromIndexer(remoteIndexerStats),
-    [remoteIndexerStats]
-  );
+  const indexerPickerTokens = useMemo(() => {
+    const fromIndexer = extractTokenDirectoryFromIndexer(remoteIndexerStats);
+    const fromL1 = dexTokenListRowsToPickerEntries(l1DexTokenRows);
+    /** @type {Map<string, { id: string, symbol: string, name: string, decimals?: number }>} */
+    const byId = new Map();
+    for (const e of fromIndexer) {
+      const id = normalizeNativeVmTokenId32(e.id);
+      if (!id) continue;
+      /** @type {{ id: string, symbol: string, name: string, decimals?: number }} */
+      const row = { id, symbol: e.symbol, name: e.name };
+      if (typeof e.decimals === 'number') row.decimals = e.decimals;
+      byId.set(id, row);
+    }
+    for (const e of fromL1) {
+      /** @type {{ id: string, symbol: string, name: string, decimals?: number }} */
+      const row = { id: e.id, symbol: e.symbol, name: e.name };
+      if (typeof e.decimals === 'number') row.decimals = e.decimals;
+      byId.set(e.id, row);
+    }
+    return [...byId.values()];
+  }, [remoteIndexerStats, l1DexTokenRows]);
 
   const staticPoolHex = useMemo(
     () => getContractAddress(BOING_NATIVE_L1_CHAIN_ID, 'nativeConstantProductPool') || '',
@@ -77,10 +125,13 @@ export function BoingNativeDexIntegrationProvider({ children }) {
     const myGen = ++fetchGenRef.current;
     if (startedFor !== BOING_NATIVE_L1_CHAIN_ID) {
       setDefaults(null);
-      setVenues([]);
+      setVenuesHydrated([]);
       setDirectoryMeta({ pairsCount: null, headHeight: null });
       setDexDirectoryExtras({ registerPairLogCount: null, registerLogScanFromBlock: null });
       setRemoteIndexerStats(null);
+      setL1DexTokenRows([]);
+      setL1DexPoolRows([]);
+      setDexDiscoveryRpcMeta(null);
       setLocalPoolActivity({});
       setError(null);
       setLoading(false);
@@ -113,9 +164,52 @@ export function BoingNativeDexIntegrationProvider({ children }) {
         setDirectoryMeta({ pairsCount: null, headHeight: null });
       }
 
+      let l1Cap = {
+        listTokens: false,
+        listPools: false,
+        methods: /** @type {string[]} */ ([]),
+        catalogMethodNames: /** @type {string[]} */ ([]),
+        preflight: /** @type {import('boing-sdk').BoingRpcPreflightResult | null} */ (null),
+      };
+      /** @type {import('boing-sdk').DexTokenListRow[]} */
+      let l1Tokens = [];
+      try {
+        l1Cap = await resolveNativeDexL1DiscoveryCapabilities(client);
+      } catch {
+        l1Cap = {
+          listTokens: false,
+          listPools: false,
+          methods: [],
+          catalogMethodNames: [],
+          preflight: null,
+        };
+      }
+      if (watchChainIdRef.current !== startedFor) return;
+      setDexDiscoveryRpcMeta({
+        listTokens: l1Cap.listTokens,
+        listPools: l1Cap.listPools,
+        rpcSupportedMethodCount: l1Cap.methods.length,
+        rpcCatalogNameCount: l1Cap.catalogMethodNames.length,
+        preflightSupportedMethodCount: l1Cap.preflight?.supportedMethodCount ?? null,
+        preflightCatalogMethodCount: l1Cap.preflight?.catalogMethodCount ?? null,
+        preflightClientVersion: l1Cap.preflight?.health?.client_version ?? null,
+      });
+      if (l1Cap.listTokens) {
+        try {
+          const fac = (d.nativeDexFactoryAccountHex || '').trim();
+          const factoryOpt = /^0x[0-9a-f]{64}$/i.test(fac) ? fac : undefined;
+          l1Tokens = await collectAllDexTokensPagesL1(client, { factory: factoryOpt });
+        } catch {
+          l1Tokens = [];
+        }
+      }
+      if (watchChainIdRef.current !== startedFor) return;
+      setL1DexTokenRows(l1Tokens);
+
       const poolHex = d.nativeCpPoolAccountHex;
       if (!poolHex) {
-        setVenues([]);
+        setVenuesHydrated([]);
+        setL1DexPoolRows([]);
         setDexDirectoryExtras({ registerPairLogCount: null, registerLogScanFromBlock: null });
         setRemoteIndexerStats(null);
         setLocalPoolActivity({});
@@ -163,6 +257,35 @@ export function BoingNativeDexIntegrationProvider({ children }) {
         setDexDirectoryExtras({ registerPairLogCount: null, registerLogScanFromBlock: null });
       }
 
+      const wantL1Pools = (process.env.REACT_APP_BOING_NATIVE_DEX_DISCOVERY_POOLS || '1').trim() !== '0';
+      const facForPools = (d.nativeDexFactoryAccountHex || '').trim();
+      const factoryOptPools = /^0x[0-9a-f]{64}$/i.test(facForPools) ? facForPools : undefined;
+      /** @type {import('boing-sdk').DexPoolListRow[]} */
+      let l1PoolsAll = [];
+      if (wantL1Pools && l1Cap.listPools) {
+        try {
+          l1PoolsAll = await collectAllDexPoolsPagesL1(client, { factory: factoryOptPools });
+          if (watchChainIdRef.current !== startedFor) return;
+          const extraRows = dexPoolListRowsToPoolTokenRows(l1PoolsAll);
+          const seen = new Set(v.map((x) => x.poolHex.toLowerCase()));
+          const newRows = extraRows.filter((r) => r.poolHex && !seen.has(r.poolHex.toLowerCase()));
+          if (newRows.length) {
+            const hydratedExtra = await hydrateCpPoolVenuesFromRpc(client, newRows, { concurrency: 4 });
+            if (watchChainIdRef.current !== startedFor) return;
+            const byPool = new Map();
+            for (const venue of [...v, ...hydratedExtra]) {
+              byPool.set(venue.poolHex.toLowerCase(), venue);
+            }
+            v = [...byPool.values()];
+          }
+        } catch {
+          /* keep v */
+          l1PoolsAll = [];
+        }
+      }
+      if (watchChainIdRef.current !== startedFor) return;
+      setL1DexPoolRows(wantL1Pools && l1Cap.listPools ? l1PoolsAll : []);
+
       if (watchChainIdRef.current !== startedFor) return;
       setLocalPoolActivity(updateLocalReserveSnapshotsAndScore(v));
       appendReserveHistorySamples(v);
@@ -176,14 +299,17 @@ export function BoingNativeDexIntegrationProvider({ children }) {
       } catch {
         setRemoteIndexerStats(null);
       }
-      setVenues(v);
+      setVenuesHydrated(v);
     } catch (e) {
       if (watchChainIdRef.current !== startedFor) return;
       setDefaults(null);
-      setVenues([]);
+      setVenuesHydrated([]);
       setDirectoryMeta({ pairsCount: null, headHeight: null });
       setDexDirectoryExtras({ registerPairLogCount: null, registerLogScanFromBlock: null });
       setRemoteIndexerStats(null);
+      setL1DexTokenRows([]);
+      setL1DexPoolRows([]);
+      setDexDiscoveryRpcMeta(null);
       setLocalPoolActivity({});
       setError(e instanceof Error ? e : new Error(String(e)));
     } finally {
@@ -194,8 +320,8 @@ export function BoingNativeDexIntegrationProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    venuesRef.current = venues;
-  }, [venues]);
+    venuesRef.current = venuesHydrated;
+  }, [venuesHydrated]);
 
   const refreshVenuesSoft = useCallback(async () => {
     if (watchChainIdRef.current !== BOING_NATIVE_L1_CHAIN_ID) return;
@@ -214,7 +340,7 @@ export function BoingNativeDexIntegrationProvider({ children }) {
       if (watchChainIdRef.current !== BOING_NATIVE_L1_CHAIN_ID) return;
       appendReserveHistorySamples(v2);
       setLocalPoolActivity(updateLocalReserveSnapshotsAndScore(v2));
-      setVenues(v2);
+      setVenuesHydrated(v2);
     } catch {
       /* ignore */
     } finally {
@@ -366,6 +492,7 @@ export function BoingNativeDexIntegrationProvider({ children }) {
       dexDirectoryExtras,
       remoteIndexerStats,
       indexerPickerTokens,
+      dexDiscoveryRpcMeta,
       localPoolActivity,
       oracleUsdByToken,
       oracleUsdLoading,
@@ -391,6 +518,7 @@ export function BoingNativeDexIntegrationProvider({ children }) {
       dexDirectoryExtras,
       remoteIndexerStats,
       indexerPickerTokens,
+      dexDiscoveryRpcMeta,
       localPoolActivity,
       oracleUsdByToken,
       oracleUsdLoading,

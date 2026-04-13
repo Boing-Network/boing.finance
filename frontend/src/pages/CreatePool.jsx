@@ -17,6 +17,7 @@ import NativeAmmSwapPanel from '../components/NativeAmmSwapPanel';
 import getFeatureSupport from '../config/featureSupport';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import { showDeployCelebration } from '../utils/deployCelebration';
+import { fetchTradeableEvmTokenAddressesFromDexFactory } from '../services/evmDexTradeableTokens';
 
 
 // Toggle Button Component
@@ -368,18 +369,28 @@ function CreatePool() {
       
       // Also check common tokens for better coverage
       const commonTokens = getCommonTokens(chainId);
-      const allTokenAddresses = [...new Set([...allTokens, ...commonTokens])];
+      let factoryTokenAddrs = [];
+      try {
+        factoryTokenAddrs = await fetchTradeableEvmTokenAddressesFromDexFactory(provider, Number(chainId));
+      } catch {
+        /* RPC may reject large log ranges */
+      }
+      const factorySet = new Set(factoryTokenAddrs.map((a) => a.toLowerCase()));
+      const allTokenAddresses = [...new Set([...allTokens, ...commonTokens, ...factoryTokenAddrs])];
       
       const tokensWithBalance = [];
       
       for (const tokenAddress of allTokenAddresses) {
         try {
           const tokenInfo = await getTokenInfo(tokenAddress);
-          if (tokenInfo && tokenInfo.balance && tokenInfo.balance !== '0') {
+          const inFactory = factorySet.has(tokenAddress.toLowerCase());
+          const hasBal = tokenInfo?.balance && tokenInfo.balance !== '0';
+          if (tokenInfo && tokenInfo.symbol && tokenInfo.decimals != null && (hasBal || inFactory)) {
             tokensWithBalance.push({
               address: tokenAddress,
               ...tokenInfo,
-              formattedBalance: ethers.formatUnits(tokenInfo.balance, tokenInfo.decimals)
+              formattedBalance: ethers.formatUnits(tokenInfo.balance, tokenInfo.decimals),
+              fromDexFactory: inFactory && !hasBal,
             });
           }
         } catch (error) {
@@ -387,8 +398,12 @@ function CreatePool() {
         }
       }
       
-      // Sort by balance (highest first)
-      tokensWithBalance.sort((a, b) => parseFloat(b.formattedBalance) - parseFloat(a.formattedBalance));
+      tokensWithBalance.sort((a, b) => {
+        const az = a.fromDexFactory ? 1 : 0;
+        const bz = b.fromDexFactory ? 1 : 0;
+        if (az !== bz) return az - bz;
+        return parseFloat(b.formattedBalance) - parseFloat(a.formattedBalance);
+      });
       
       setUserTokens(tokensWithBalance);
     } catch (error) {

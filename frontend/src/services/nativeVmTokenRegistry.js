@@ -79,11 +79,23 @@ export function venueTokensToPickerEntries(venues) {
   if (!Array.isArray(venues)) return [];
   const byId = new Map();
   for (const v of venues) {
-    for (const hex of [v.tokenAHex, v.tokenBHex]) {
-      const id = normalizeNativeVmTokenId32(hex);
+    const row = /** @type {import('boing-sdk').CpPoolVenue & Record<string, unknown>} */ (v);
+    const legs = [
+      { hex: row.tokenAHex, sym: row.tokenASymbol, name: row.tokenAName },
+      { hex: row.tokenBHex, sym: row.tokenBSymbol, name: row.tokenBName },
+    ];
+    for (const leg of legs) {
+      const id = normalizeNativeVmTokenId32(leg.hex);
       if (!id || byId.has(id)) continue;
-      const short = `${id.slice(0, 8)}…${id.slice(-4)}`;
-      byId.set(id, { id, symbol: short, name: `From pool directory (${short})` });
+      const sym =
+        typeof leg.sym === 'string' && leg.sym.trim()
+          ? leg.sym.trim().slice(0, 16)
+          : `${id.slice(0, 8)}…${id.slice(-4)}`;
+      const nm =
+        typeof leg.name === 'string' && leg.name.trim()
+          ? leg.name.trim().slice(0, 80)
+          : `From pool (${sym})`;
+      byId.set(id, { id, symbol: sym, name: nm });
     }
   }
   return [...byId.values()];
