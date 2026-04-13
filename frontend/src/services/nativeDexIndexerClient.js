@@ -2,15 +2,49 @@
  * Optional first-party / subgraph-like stats URL + local reserve snapshots for Uniswap-style “activity” hints.
  */
 
+const INDEXER_STATS_URL_LS_KEY = 'boing_native_dex_indexer_stats_url_override_v1';
+
+/** User override (full URL to JSON). Empty = use build-time env only. */
+export function getNativeDexIndexerStatsUrlOverride() {
+  try {
+    const v = localStorage.getItem(INDEXER_STATS_URL_LS_KEY);
+    return typeof v === 'string' ? v.trim() : '';
+  } catch {
+    return '';
+  }
+}
+
+/** @param {string} url Full HTTPS URL, or empty string to clear */
+export function setNativeDexIndexerStatsUrlOverride(url) {
+  const t = (url || '').trim();
+  try {
+    if (!t) {
+      localStorage.removeItem(INDEXER_STATS_URL_LS_KEY);
+      return;
+    }
+    localStorage.setItem(INDEXER_STATS_URL_LS_KEY, t);
+  } catch {
+    /* quota / private mode */
+  }
+}
+
+/** Effective indexer stats JSON URL: local override wins, then CRA env. */
+export function resolveNativeDexIndexerStatsUrl() {
+  const o = getNativeDexIndexerStatsUrlOverride();
+  if (o) return o;
+  return (process.env.REACT_APP_BOING_NATIVE_DEX_INDEXER_STATS_URL || '').trim();
+}
+
 /**
  * @param {unknown} remotePayload
- * @returns {Array<{ id: string, symbol: string, name: string }>}
+ * @returns {Array<{ id: string, symbol: string, name: string, decimals?: number }>}
  */
 export function extractTokenDirectoryFromIndexer(remotePayload) {
   if (!remotePayload || typeof remotePayload !== 'object') return [];
-  const td = /** @type {{ tokenDirectory?: unknown }} */ (remotePayload).tokenDirectory;
+  const p = /** @type {{ tokenDirectory?: unknown, tokens?: unknown }} */ (remotePayload);
+  const td = Array.isArray(p.tokenDirectory) ? p.tokenDirectory : Array.isArray(p.tokens) ? p.tokens : null;
   if (!Array.isArray(td)) return [];
-  /** @type {Array<{ id: string, symbol: string, name: string }>} */
+  /** @type {Array<{ id: string, symbol: string, name: string, decimals?: number }>} */
   const out = [];
   for (const row of td) {
     if (!row || typeof row !== 'object') continue;
@@ -21,7 +55,11 @@ export function extractTokenDirectoryFromIndexer(remotePayload) {
     const id = `0x${t.slice(2).toLowerCase()}`;
     const symbol = String(/** @type {{ symbol?: unknown }} */ (row).symbol || '').slice(0, 16) || `${id.slice(0, 8)}…`;
     const name = String(/** @type {{ name?: unknown }} */ (row).name || '').slice(0, 80) || symbol;
-    out.push({ id, symbol, name });
+    const decRaw = /** @type {{ decimals?: unknown }} */ (row).decimals;
+    /** @type {{ id: string, symbol: string, name: string, decimals?: number }} */
+    const entry = { id, symbol, name };
+    if (typeof decRaw === 'number' && Number.isFinite(decRaw)) entry.decimals = decRaw;
+    out.push(entry);
   }
   return out;
 }
@@ -51,7 +89,7 @@ const LOCAL_SNAPSHOT_KEY = 'boing_native_dex_reserve_snap_v1';
  * @returns {Promise<RemoteDexIndexerPayload | null>}
  */
 export async function fetchRemoteDexIndexerStats() {
-  const raw = (process.env.REACT_APP_BOING_NATIVE_DEX_INDEXER_STATS_URL || '').trim();
+  const raw = resolveNativeDexIndexerStatsUrl();
   if (!raw) return null;
   try {
     const res = await fetch(raw, { method: 'GET', credentials: 'omit' });

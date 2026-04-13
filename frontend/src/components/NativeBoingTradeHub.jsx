@@ -4,6 +4,7 @@ import NativeAmmSwapPanel from './NativeAmmSwapPanel';
 import NativeAmmLpVaultPanel from './NativeAmmLpVaultPanel';
 import NativeLiquidityPositionsPanel from './NativeLiquidityPositionsPanel';
 import NativeDexDirectoryRoutePanel from './NativeDexDirectoryRoutePanel';
+import NativeDexIndexerSettingsStrip from './NativeDexIndexerSettingsStrip';
 import NativePoolsDirectoryPanel from './NativePoolsDirectoryPanel';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { useWallet } from '../contexts/WalletContext';
@@ -222,6 +223,7 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
             <NativeAmmLpVaultPanel embedded />
           </>
         )}
+        <NativeDexIndexerSettingsStrip />
       </div>
     </section>
   );

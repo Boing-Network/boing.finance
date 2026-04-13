@@ -6,6 +6,7 @@ import NativeDexPoolMetricsPanel from './NativeDexPoolMetricsPanel';
 import NativePoolsLiquidityChart from './NativePoolsLiquidityChart';
 import NativePoolsReserveHistoryChart from './NativePoolsReserveHistoryChart';
 import { estimatePoolTvlUsd, loadTokenUsdPerUnitMap, mergeTokenUsdMaps } from '../services/nativeDexUsdTvl';
+import { formatNativePoolReserveDisplay, resolveNativePoolLegDecimals } from '../utils/nativePoolReserveFormat';
 
 function shortHex(h) {
   if (!h || typeof h !== 'string') return '—';
@@ -323,8 +324,18 @@ export default function NativePoolsDirectoryPanel({ onTradeThisPair, focusPoolHe
                 <th className="px-3 py-2 font-medium">Pool</th>
                 <th className="px-3 py-2 font-medium">Token A</th>
                 <th className="px-3 py-2 font-medium">Token B</th>
-                <th className="px-3 py-2 font-medium text-right">Reserve A</th>
-                <th className="px-3 py-2 font-medium text-right">Reserve B</th>
+                <th className="px-3 py-2 font-medium text-right" title="Raw integer units; decimal column when decimals known from L1 or indexer">
+                  Reserve A
+                </th>
+                <th className="px-3 py-2 font-medium text-right" title="Raw integer units; decimal column when decimals known from L1 or indexer">
+                  Reserve B
+                </th>
+                <th className="px-3 py-2 font-medium text-right" title="ethers.formatUnits when token decimals are known">
+                  A (human)
+                </th>
+                <th className="px-3 py-2 font-medium text-right" title="ethers.formatUnits when token decimals are known">
+                  B (human)
+                </th>
                 {hasUsdHints && (
                   <th className="px-3 py-2 font-medium text-right" title={hasOraclePrices ? 'Includes CoinGecko where mapped' : ''}>
                     TVL (~USD)
@@ -387,6 +398,18 @@ export default function NativePoolsDirectoryPanel({ onTradeThisPair, focusPoolHe
                   </td>
                   <td className="px-3 py-2 text-right font-mono text-xs tabular-nums">{v.reserveA.toString()}</td>
                   <td className="px-3 py-2 text-right font-mono text-xs tabular-nums">{v.reserveB.toString()}</td>
+                  <td className="px-3 py-2 text-right font-mono text-xs tabular-nums text-emerald-200/90">
+                    {formatNativePoolReserveDisplay(
+                      v.reserveA,
+                      resolveNativePoolLegDecimals(v, 'a', indexerPickerTokens)
+                    )}
+                  </td>
+                  <td className="px-3 py-2 text-right font-mono text-xs tabular-nums text-emerald-200/90">
+                    {formatNativePoolReserveDisplay(
+                      v.reserveB,
+                      resolveNativePoolLegDecimals(v, 'b', indexerPickerTokens)
+                    )}
+                  </td>
                   {hasUsdHints && (
                     <td
                       className="px-3 py-2 text-right font-mono text-xs tabular-nums"

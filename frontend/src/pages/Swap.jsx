@@ -20,6 +20,7 @@ import TrendingPairs from '../components/TrendingPairs';
 import NativeBoingTradeHub from '../components/NativeBoingTradeHub';
 import getFeatureSupport from '../config/featureSupport';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
+import { fetchTradeableEvmTokenAddressesFromDexFactory } from '../services/evmDexTradeableTokens';
 
 
 const Swap = () => {
@@ -53,6 +54,8 @@ const Swap = () => {
   const [isLoadingTokens, setIsLoadingTokens] = useState(false);
   const [tokenInDropdownOpen, setTokenInDropdownOpen] = useState(false);
   const [tokenOutDropdownOpen, setTokenOutDropdownOpen] = useState(false);
+  const [customImportOpenFor, setCustomImportOpenFor] = useState(/** @type {null | 'tokenIn' | 'tokenOut'} */ (null));
+  const [customImportAddress, setCustomImportAddress] = useState('');
 
   // Swap transaction state
   const [isSwapping, setIsSwapping] = useState(false);
@@ -217,17 +220,23 @@ const Swap = () => {
         toast.error('Connect a wallet first');
         return;
       }
-      const tokenInfo = await getTokenInfo(tokenAddress, walletProvider);
+      const raw = (tokenAddress || '').trim();
+      if (!raw || !ethers.isAddress(raw)) {
+        toast.error('Enter a valid 0x token contract address');
+        return;
+      }
+      const checksummed = ethers.getAddress(raw);
+      const tokenInfo = await getTokenInfo(checksummed, walletProvider);
       if (!tokenInfo) {
         toast.error('Invalid token address or token not found');
         return;
       }
 
       // Add to user tokens if not already present
-      const existingToken = userTokens.find(t => t.address.toLowerCase() === tokenAddress.toLowerCase());
+      const existingToken = userTokens.find(t => t.address.toLowerCase() === checksummed.toLowerCase());
       if (!existingToken) {
         const newToken = {
-          address: tokenAddress,
+          address: checksummed,
           ...tokenInfo,
           formattedBalance: ethers.formatUnits(tokenInfo.balance, tokenInfo.decimals)
         };
@@ -240,6 +249,12 @@ const Swap = () => {
       console.error('Error adding custom token:', error);
       toast.error('Failed to add custom token');
     }
+  };
+
+  const submitCustomTokenImport = async () => {
+    await addCustomToken(customImportAddress);
+    setCustomImportAddress('');
+    setCustomImportOpenFor(null);
   };
 
   // Handle settings save
@@ -264,6 +279,18 @@ const Swap = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    if (!tokenInDropdownOpen) {
+      setCustomImportOpenFor((v) => (v === 'tokenIn' ? null : v));
+    }
+  }, [tokenInDropdownOpen]);
+
+  useEffect(() => {
+    if (!tokenOutDropdownOpen) {
+      setCustomImportOpenFor((v) => (v === 'tokenOut' ? null : v));
+    }
+  }, [tokenOutDropdownOpen]);
 
   // Handle token selection
   const handleTokenSelect = (token, forToken) => {
@@ -1376,7 +1403,15 @@ const Swap = () => {
       const commonTokens = getCommonTokens(chainId);
       console.log('Common tokens found:', commonTokens.length, commonTokens);
       
-      const allTokenAddresses = [...new Set([...allTokens, ...commonTokens])];
+      let factoryTokenAddrs = [];
+      try {
+        factoryTokenAddrs = await fetchTradeableEvmTokenAddressesFromDexFactory(walletProvider, Number(chainId));
+      } catch (e) {
+        console.warn('DEX factory token scan skipped:', e?.message || e);
+      }
+      const factorySet = new Set(factoryTokenAddrs.map((a) => a.toLowerCase()));
+
+      const allTokenAddresses = [...new Set([...allTokens, ...commonTokens, ...factoryTokenAddrs])];
       console.log('Total unique token addresses:', allTokenAddresses.length);
       
       // Debug: Log each address being processed
@@ -1422,12 +1457,20 @@ const Swap = () => {
             decimals: tokenInfo?.decimals
           });
           
-          if (tokenInfo && tokenInfo.balance && tokenInfo.balance !== '0' && 
-              tokenInfo.symbol && tokenInfo.name && tokenInfo.decimals) {
+          const inFactory = factorySet.has(tokenAddress.toLowerCase());
+          const hasBal = tokenInfo?.balance && tokenInfo.balance !== '0';
+          if (
+            tokenInfo &&
+            tokenInfo.symbol &&
+            tokenInfo.name &&
+            tokenInfo.decimals != null &&
+            (hasBal || inFactory)
+          ) {
             tokensWithBalance.push({
               address: tokenAddress,
               ...tokenInfo,
-              formattedBalance: ethers.formatUnits(tokenInfo.balance, tokenInfo.decimals)
+              formattedBalance: ethers.formatUnits(tokenInfo.balance, tokenInfo.decimals),
+              fromDexFactory: inFactory && !hasBal,
             });
             console.log(`✅ Added token: ${tokenInfo.symbol} (${tokenAddress})`);
           } else {
@@ -1439,8 +1482,13 @@ const Swap = () => {
         }
       }
       
-      // Sort by balance (highest first)
-      tokensWithBalance.sort((a, b) => parseFloat(b.formattedBalance) - parseFloat(a.formattedBalance));
+      // Wallet balances first; factory-only (zero balance) still listed for routing into pools.
+      tokensWithBalance.sort((a, b) => {
+        const az = a.fromDexFactory ? 1 : 0;
+        const bz = b.fromDexFactory ? 1 : 0;
+        if (az !== bz) return az - bz;
+        return parseFloat(b.formattedBalance) - parseFloat(a.formattedBalance);
+      });
       
       console.log('Final tokens to display:', tokensWithBalance.length, tokensWithBalance.map(t => `${t.symbol} (${t.address})`));
       setUserTokens(tokensWithBalance);
@@ -1961,15 +2009,54 @@ const Swap = () => {
                         )}
                       </div>
 
-                      {/* Add Custom Token */}
+                      {customImportOpenFor === 'tokenIn' && (
+                        <div className="mb-2 px-2 space-y-2 border-t border-gray-700 pt-2">
+                          <label htmlFor="swap-custom-token-in" className="sr-only">
+                            Token contract address
+                          </label>
+                          <input
+                            id="swap-custom-token-in"
+                            name="customTokenImportIn"
+                            type="text"
+                            value={customImportAddress}
+                            onChange={(e) => setCustomImportAddress(e.target.value)}
+                            placeholder="0x… token contract"
+                            className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg text-xs font-mono"
+                            autoComplete="off"
+                            spellCheck={false}
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => void submitCustomTokenImport()}
+                              className="flex-1 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium"
+                            >
+                              Import
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setCustomImportOpenFor(null);
+                                setCustomImportAddress('');
+                              }}
+                              className="flex-1 py-1.5 rounded-lg bg-gray-600 hover:bg-gray-500 text-white text-xs"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
                       <button
-                        onClick={() => addCustomToken('')}
+                        type="button"
+                        onClick={() =>
+                          setCustomImportOpenFor((prev) => (prev === 'tokenIn' ? null : 'tokenIn'))
+                        }
                         className="w-full flex items-center justify-center p-2 text-blue-400 hover:bg-gray-700 rounded-lg transition-colors text-sm"
                       >
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                         </svg>
-                        Add Custom Token
+                        {customImportOpenFor === 'tokenIn' ? 'Hide import' : 'Add custom token'}
                       </button>
                     </div>
                   </div>
@@ -2061,15 +2148,54 @@ const Swap = () => {
                         )}
                       </div>
 
-                      {/* Add Custom Token */}
+                      {customImportOpenFor === 'tokenOut' && (
+                        <div className="mb-2 px-2 space-y-2 border-t border-gray-700 pt-2">
+                          <label htmlFor="swap-custom-token-out" className="sr-only">
+                            Token contract address
+                          </label>
+                          <input
+                            id="swap-custom-token-out"
+                            name="customTokenImportOut"
+                            type="text"
+                            value={customImportAddress}
+                            onChange={(e) => setCustomImportAddress(e.target.value)}
+                            placeholder="0x… token contract"
+                            className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg text-xs font-mono"
+                            autoComplete="off"
+                            spellCheck={false}
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => void submitCustomTokenImport()}
+                              className="flex-1 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium"
+                            >
+                              Import
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setCustomImportOpenFor(null);
+                                setCustomImportAddress('');
+                              }}
+                              className="flex-1 py-1.5 rounded-lg bg-gray-600 hover:bg-gray-500 text-white text-xs"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
                       <button
-                        onClick={() => addCustomToken('')}
+                        type="button"
+                        onClick={() =>
+                          setCustomImportOpenFor((prev) => (prev === 'tokenOut' ? null : 'tokenOut'))
+                        }
                         className="w-full flex items-center justify-center p-2 text-blue-400 hover:bg-gray-700 rounded-lg transition-colors text-sm"
                       >
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                         </svg>
-                        Add Custom Token
+                        {customImportOpenFor === 'tokenOut' ? 'Hide import' : 'Add custom token'}
                       </button>
                     </div>
                   </div>

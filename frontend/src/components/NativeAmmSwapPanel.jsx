@@ -18,6 +18,10 @@ import { nativeConstantProductPoolAccessListJson } from '../services/nativeAmmAc
 import { boingExpressContractCallSignSimulateSubmit } from '../services/boingExpressNativeTx';
 import { getWindowBoingProvider } from '../utils/boingWalletDiscovery';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
+import {
+  formatNativePoolReserveDisplay,
+  resolveNativePoolLegDecimals,
+} from '../utils/nativePoolReserveFormat';
 
 function pickExpressProvider(getWalletProvider) {
   try {
@@ -93,6 +97,15 @@ export default function NativeAmmSwapPanel({
   );
   const legB = useMemo(
     () => (venueForPool ? tokenLegLabel(venueForPool.tokenBHex, indexerPickerTokens) : 'B'),
+    [venueForPool, indexerPickerTokens]
+  );
+
+  const reserveADecimals = useMemo(
+    () => (venueForPool ? resolveNativePoolLegDecimals(venueForPool, 'a', indexerPickerTokens) : null),
+    [venueForPool, indexerPickerTokens]
+  );
+  const reserveBDecimals = useMemo(
+    () => (venueForPool ? resolveNativePoolLegDecimals(venueForPool, 'b', indexerPickerTokens) : null),
     [venueForPool, indexerPickerTokens]
   );
 
@@ -281,11 +294,25 @@ export default function NativeAmmSwapPanel({
       <div className="flex flex-wrap gap-2 mb-3 text-xs" style={{ color: 'var(--text-tertiary)' }}>
         <span title={venueForPool?.tokenAHex}>
           Reserve <span className="font-semibold text-[var(--text-secondary)]">{legA}</span>:{' '}
-          <strong className="text-[var(--text-primary)]">{reserveA != null ? reserveA.toString() : '—'}</strong>
+          <strong className="text-[var(--text-primary)]">
+            {reserveA != null ? formatNativePoolReserveDisplay(reserveA, reserveADecimals) : '—'}
+          </strong>
+          {reserveADecimals != null && (
+            <span className="text-[10px] opacity-70 ml-0.5" title="Token decimals from L1 discovery or indexer">
+              ({reserveADecimals}d)
+            </span>
+          )}
         </span>
         <span title={venueForPool?.tokenBHex}>
           Reserve <span className="font-semibold text-[var(--text-secondary)]">{legB}</span>:{' '}
-          <strong className="text-[var(--text-primary)]">{reserveB != null ? reserveB.toString() : '—'}</strong>
+          <strong className="text-[var(--text-primary)]">
+            {reserveB != null ? formatNativePoolReserveDisplay(reserveB, reserveBDecimals) : '—'}
+          </strong>
+          {reserveBDecimals != null && (
+            <span className="text-[10px] opacity-70 ml-0.5" title="Token decimals from L1 discovery or indexer">
+              ({reserveBDecimals}d)
+            </span>
+          )}
         </span>
         <span className="ml-auto flex flex-wrap gap-2 items-center">
           <button
