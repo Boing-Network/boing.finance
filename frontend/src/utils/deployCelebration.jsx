@@ -487,8 +487,12 @@ function DeployCelebrationModal({
                   href={l.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
-                  style={{ backgroundColor: 'var(--finance-primary, #3b82f6)' }}
+                  className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-semibold transition hover:opacity-90"
+                  style={{
+                    backgroundColor: 'var(--finance-primary, #3b82f6)',
+                    /* Global `a { color: accent-cyan }` matches finance-primary — force readable label */
+                    color: '#050a12',
+                  }}
                 >
                   {l.label}
                 </a>
@@ -498,8 +502,12 @@ function DeployCelebrationModal({
 
           <button
             type="button"
-            className="w-full rounded-xl py-3 text-sm font-semibold text-white transition hover:opacity-90"
-            style={{ backgroundColor: 'var(--finance-green-mid, #22c55e)' }}
+            className="w-full rounded-xl py-3 text-sm font-semibold transition hover:opacity-90"
+            style={{
+              backgroundColor: 'var(--finance-green-mid, #22c55e)',
+              /* Global `button { color: primary }` can override Tailwind text-white */
+              color: '#ffffff',
+            }}
             onClick={onClose}
           >
             Done
