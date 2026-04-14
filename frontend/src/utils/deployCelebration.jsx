@@ -14,6 +14,14 @@ let celebrationRoot = null;
 /** Confetti canvas above celebration overlay (modal uses z-[25000]). */
 const DEPLOY_CONFETTI_Z = 26050;
 
+/**
+ * Main-thread renderer only. The package default uses `useWorker: true`; this file fires
+ * many `confetti()` calls back-to-back. With the worker, the first burst completion can run
+ * `done()` and detach the canvas while later bursts are still queued, so particles often
+ * never appear (noticed on deploy flows such as native token submit).
+ */
+const deployConfetti = confetti.create(null, { resize: true, useWorker: false });
+
 /** Lazy rasterized emoji confetti (canvas-confetti); empty array if unsupported. */
 let cachedPinataTextShapes = null;
 
@@ -79,7 +87,7 @@ function fireDeployConfetti() {
   const wildShapes = mixShapes(emojiShapes, geometry);
 
   const burst = (opts) => {
-    confetti({
+    deployConfetti({
       zIndex: DEPLOY_CONFETTI_Z,
       gravity: 1.1,
       decay: 0.89,
