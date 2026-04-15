@@ -424,6 +424,14 @@ curl -X POST "${config.apiUrl}/r2/upload" \\
                         )}
                       </p>
                     )}
+                    {dexInt.fungibleDeployDiscoveryMeta && (
+                      <p className="text-xs font-mono break-all mb-2" style={{ color: 'var(--text-tertiary)' }}>
+                        Fungible deploy scan — tokens: {dexInt.fungibleDeployDiscoveryMeta.count}, blocks fetched:{' '}
+                        {dexInt.fungibleDeployDiscoveryMeta.scannedBlocks}, heights{' '}
+                        {dexInt.fungibleDeployDiscoveryMeta.fromHeight ?? '—'}…
+                        {dexInt.fungibleDeployDiscoveryMeta.toHeight ?? '—'}
+                      </p>
+                    )}
                     {dexInt.error && (
                       <p className="text-xs text-amber-400 mb-2">{dexInt.error.message}</p>
                     )}
