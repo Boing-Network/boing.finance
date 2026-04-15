@@ -1,5 +1,5 @@
 /**
- * L1 JSON-RPC DEX discovery (`boing_listDexTokens`, `boing_listDexPools`) with graceful
+ * L1 JSON-RPC DEX discovery (`boing_listDexTokens`, `boing_listDexPools`, `boing_getDexToken`) with graceful
  * degradation when `boing_rpcSupportedMethods` omits them or the node is older.
  */
 
@@ -8,6 +8,7 @@ import { normalizeNativeVmTokenId32 } from './nativeVmTokenRegistry';
 
 export const BOING_LIST_DEX_TOKENS = 'boing_listDexTokens';
 export const BOING_LIST_DEX_POOLS = 'boing_listDexPools';
+export const BOING_GET_DEX_TOKEN = 'boing_getDexToken';
 
 /**
  * @param {import('boing-sdk').BoingClient} client
@@ -54,6 +55,23 @@ async function safePreflightRpc(client) {
 }
 
 /**
+ * Reads **`boing_getNetworkInfo` → `developer.dex_discovery_methods`** (`NetworkDeveloperHints` in boing-sdk).
+ * Operators publish the stable L1 triple here; merge into the capability union in **`resolveNativeDexL1DiscoveryCapabilities`**.
+ *
+ * @param {import('boing-sdk').BoingClient} client
+ * @returns {Promise<string[]>}
+ */
+async function safeNetworkInfoDexDiscoveryMethods(client) {
+  try {
+    const info = await client.getNetworkInfo();
+    const arr = info?.developer?.dex_discovery_methods;
+    return Array.isArray(arr) ? arr.map((m) => String(m).trim()).filter(Boolean) : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
  * One-shot probe when the node does not advertise methods (empty list) or the list is unavailable.
  *
  * @param {import('boing-sdk').BoingClient} client
@@ -83,16 +101,19 @@ async function probeDexDiscoveryMethod(client, kind) {
  * @returns {Promise<{
  *   methods: string[],
  *   catalogMethodNames: string[],
+ *   networkInfoDexDiscoveryMethodCount: number,
  *   listTokens: boolean,
  *   listPools: boolean,
+ *   getDexToken: boolean,
  *   preflight: import('boing-sdk').BoingRpcPreflightResult | null,
  * }>}
  */
 export async function resolveNativeDexL1DiscoveryCapabilities(client) {
   const wantPreflight = (process.env.REACT_APP_BOING_NATIVE_DEX_DISCOVERY_PREFLIGHT || '').trim() === '1';
-  const [methods, catalogMethodNames, preflight] = await Promise.all([
+  const [methods, catalogMethodNames, networkInfoDexMethods, preflight] = await Promise.all([
     safeRpcSupportedMethods(client),
     safeGetRpcMethodCatalogNames(client),
+    safeNetworkInfoDexDiscoveryMethods(client),
     wantPreflight ? safePreflightRpc(client) : Promise.resolve(null),
   ]);
 
@@ -100,17 +121,30 @@ export async function resolveNativeDexL1DiscoveryCapabilities(client) {
   const union = new Set();
   for (const m of methods) union.add(m);
   for (const m of catalogMethodNames) union.add(m);
+  for (const m of networkInfoDexMethods) union.add(m);
 
   let listTokens = union.has(BOING_LIST_DEX_TOKENS);
   let listPools = union.has(BOING_LIST_DEX_POOLS);
+  const getDexToken = union.has(BOING_GET_DEX_TOKEN);
 
-  const ambiguous = methods.length === 0 && catalogMethodNames.length === 0;
+  /** When the node publishes **`developer.dex_discovery_methods`**, treat that list as authoritative and skip heuristic probes. */
+  const hintedByGetNetworkInfo = networkInfoDexMethods.length > 0;
+  const ambiguous =
+    methods.length === 0 && catalogMethodNames.length === 0 && !hintedByGetNetworkInfo;
   if (ambiguous) {
     if (!listTokens) listTokens = await probeDexDiscoveryMethod(client, 'tokens');
     if (!listPools) listPools = await probeDexDiscoveryMethod(client, 'pools');
   }
 
-  return { methods, catalogMethodNames, listTokens, listPools, preflight };
+  return {
+    methods,
+    catalogMethodNames,
+    networkInfoDexDiscoveryMethodCount: networkInfoDexMethods.length,
+    listTokens,
+    listPools,
+    getDexToken,
+    preflight,
+  };
 }
 
 function readOptionalLiquidityFilter() {

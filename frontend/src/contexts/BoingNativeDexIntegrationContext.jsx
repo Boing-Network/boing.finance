@@ -26,7 +26,7 @@ import {
   dexTokenListRowsToPickerEntries,
   resolveNativeDexL1DiscoveryCapabilities,
 } from '../services/nativeDexL1Discovery';
-import { normalizeNativeVmTokenId32 } from '../services/nativeVmTokenRegistry';
+import { normalizeNativeVmTokenId32, venueTokensToPickerEntries } from '../services/nativeVmTokenRegistry';
 import { BOING_OBSERVER_BASE_URL } from '../config/boingExplorerUrls';
 
 /** @typedef {import('boing-sdk').NativeDexIntegrationDefaults} NativeDexIntegrationDefaults */
@@ -56,6 +56,8 @@ export function BoingNativeDexIntegrationProvider({ children }) {
     /** @type {{
      *   listTokens: boolean,
      *   listPools: boolean,
+     *   getDexToken: boolean,
+     *   networkInfoDexDiscoveryMethodCount: number,
      *   rpcSupportedMethodCount: number,
      *   rpcCatalogNameCount: number,
      *   preflightSupportedMethodCount: number | null,
@@ -92,6 +94,8 @@ export function BoingNativeDexIntegrationProvider({ children }) {
   const indexerPickerTokens = useMemo(() => {
     const fromIndexer = extractTokenDirectoryFromIndexer(remoteIndexerStats);
     const fromL1 = dexTokenListRowsToPickerEntries(l1DexTokenRows);
+    /** Legs from any hydrated CP venue (factory + L1 pools + register logs). Wins last so on-chain metadata from RPC hydration beats static lists. */
+    const fromVenues = venueTokensToPickerEntries(venues);
     /** @type {Map<string, { id: string, symbol: string, name: string, decimals?: number }>} */
     const byId = new Map();
     for (const e of fromIndexer) {
@@ -108,8 +112,13 @@ export function BoingNativeDexIntegrationProvider({ children }) {
       if (typeof e.decimals === 'number') row.decimals = e.decimals;
       byId.set(e.id, row);
     }
+    for (const e of fromVenues) {
+      /** @type {{ id: string, symbol: string, name: string }} */
+      const row = { id: e.id, symbol: e.symbol, name: e.name };
+      byId.set(e.id, row);
+    }
     return [...byId.values()];
-  }, [remoteIndexerStats, l1DexTokenRows]);
+  }, [remoteIndexerStats, l1DexTokenRows, venues]);
 
   const staticPoolHex = useMemo(
     () => getContractAddress(BOING_NATIVE_L1_CHAIN_ID, 'nativeConstantProductPool') || '',
@@ -167,6 +176,8 @@ export function BoingNativeDexIntegrationProvider({ children }) {
       let l1Cap = {
         listTokens: false,
         listPools: false,
+        getDexToken: false,
+        networkInfoDexDiscoveryMethodCount: 0,
         methods: /** @type {string[]} */ ([]),
         catalogMethodNames: /** @type {string[]} */ ([]),
         preflight: /** @type {import('boing-sdk').BoingRpcPreflightResult | null} */ (null),
@@ -179,6 +190,8 @@ export function BoingNativeDexIntegrationProvider({ children }) {
         l1Cap = {
           listTokens: false,
           listPools: false,
+          getDexToken: false,
+          networkInfoDexDiscoveryMethodCount: 0,
           methods: [],
           catalogMethodNames: [],
           preflight: null,
@@ -188,6 +201,8 @@ export function BoingNativeDexIntegrationProvider({ children }) {
       setDexDiscoveryRpcMeta({
         listTokens: l1Cap.listTokens,
         listPools: l1Cap.listPools,
+        getDexToken: l1Cap.getDexToken,
+        networkInfoDexDiscoveryMethodCount: l1Cap.networkInfoDexDiscoveryMethodCount,
         rpcSupportedMethodCount: l1Cap.methods.length,
         rpcCatalogNameCount: l1Cap.catalogMethodNames.length,
         preflightSupportedMethodCount: l1Cap.preflight?.supportedMethodCount ?? null,
