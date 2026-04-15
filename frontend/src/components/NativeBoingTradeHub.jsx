@@ -178,23 +178,38 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
                 className="mt-4 pt-4 border-t rounded-b-lg -mx-4 sm:-mx-6 px-4 sm:px-6"
                 style={{ borderColor: 'var(--border-color)' }}
               >
-                <p className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
-                  <strong className="text-[var(--text-primary)]">Other pools &amp; multihop</strong> — use{' '}
-                  <span className="text-[var(--text-tertiary)]">Smart route</span> for factory-registered pairs and routes
-                  across multiple pools (same signing flow as here).
+                <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
+                  <strong className="text-[var(--text-primary)]">Just deployed a token or pool?</strong> Browse the{' '}
+                  <strong>Pools</strong> tab to confirm your pair appears (tap <strong>Refresh</strong> if it just landed on-chain), then
+                  use <strong>Smart route</strong> on a pool row to pre-fill routing, or open <strong>Smart route</strong> here—same Boing
+                  Express signing flow as above, including multihop when the chain exposes factory routes.
                 </p>
-                <button
-                  type="button"
-                  onClick={() => setTabAndUrl('route')}
-                  className="text-sm px-4 py-2.5 min-h-[44px] rounded-xl font-medium border transition hover:opacity-95"
-                  style={{
-                    borderColor: 'rgba(59, 130, 246, 0.45)',
-                    color: 'var(--text-primary)',
-                    backgroundColor: 'var(--bg-secondary)',
-                  }}
-                >
-                  Open Smart route
-                </button>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setTabAndUrl('pools')}
+                    className="text-sm px-4 py-2.5 min-h-[44px] rounded-xl font-medium border transition hover:opacity-95"
+                    style={{
+                      borderColor: 'rgba(59, 130, 246, 0.45)',
+                      color: 'var(--text-primary)',
+                      backgroundColor: 'var(--bg-secondary)',
+                    }}
+                  >
+                    Open Pools
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTabAndUrl('route')}
+                    className="text-sm px-4 py-2.5 min-h-[44px] rounded-xl font-medium border transition hover:opacity-95"
+                    style={{
+                      borderColor: 'rgba(59, 130, 246, 0.45)',
+                      color: 'var(--text-primary)',
+                      backgroundColor: 'var(--bg-secondary)',
+                    }}
+                  >
+                    Open Smart route
+                  </button>
+                </div>
               </div>
             </>
           ) : (

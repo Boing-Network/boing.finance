@@ -290,6 +290,14 @@ export default function NativeAmmSwapPanel({
         </Link>
         .
       </p>
+      <p
+        className="text-sm mb-3 rounded-lg border px-3 py-2.5"
+        style={{ borderColor: 'rgba(59, 130, 246, 0.35)', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-secondary)' }}
+      >
+        <strong style={{ color: 'var(--text-primary)' }}>New token or new factory pool?</strong> This Swap tab only targets the{' '}
+        <strong>default</strong> constant-product pool. Use the <strong>Pools</strong> tab (above) to see discovered factory pairs—including
+        ones you just created—then <strong>Smart route</strong> to swap any registered path with Boing Express (multihop when needed).
+      </p>
 
       <div className="flex flex-wrap gap-2 mb-3 text-xs" style={{ color: 'var(--text-tertiary)' }}>
         <span title={venueForPool?.tokenAHex}>

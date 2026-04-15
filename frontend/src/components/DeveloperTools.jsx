@@ -409,7 +409,9 @@ curl -X POST "${config.apiUrl}/r2/upload" \\
                     {dexInt.dexDiscoveryRpcMeta && (
                       <p className="text-xs font-mono break-all mb-2" style={{ color: 'var(--text-tertiary)' }}>
                         L1 discovery — listDexTokens: {dexInt.dexDiscoveryRpcMeta.listTokens ? 'yes' : 'no'}, listDexPools:{' '}
-                        {dexInt.dexDiscoveryRpcMeta.listPools ? 'yes' : 'no'} · boing_rpcSupportedMethods count:{' '}
+                        {dexInt.dexDiscoveryRpcMeta.listPools ? 'yes' : 'no'}, getDexToken:{' '}
+                        {dexInt.dexDiscoveryRpcMeta.getDexToken ? 'yes' : 'no'} · getNetworkInfo dex_discovery_methods:{' '}
+                        {dexInt.dexDiscoveryRpcMeta.networkInfoDexDiscoveryMethodCount} · boing_rpcSupportedMethods count:{' '}
                         {dexInt.dexDiscoveryRpcMeta.rpcSupportedMethodCount} · catalog names:{' '}
                         {dexInt.dexDiscoveryRpcMeta.rpcCatalogNameCount}
                         {dexInt.dexDiscoveryRpcMeta.preflightClientVersion != null && (
