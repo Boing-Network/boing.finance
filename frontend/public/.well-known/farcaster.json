@@ -7,11 +7,11 @@
   "miniapp": {
     "version": "1",
     "name": "boing.finance",
-    "iconUrl": "https://boing.finance/assets/boing-logo-mark.png?v=v1776157370637-hlvwf5q",
+    "iconUrl": "https://boing.finance/assets/boing-logo-mark.png?v=v1776275042590-meelu1i",
     "homeUrl": "https://boing.finance",
     "splashImageUrl": "https://boing.finance/splash.png",
     "splashBackgroundColor": "#06080c",
-    "heroImageUrl": "https://boing.finance/preview-image.png?v=v1776157370637-hlvwf5q",
+    "heroImageUrl": "https://boing.finance/preview-image.png?v=v1776275042590-meelu1i",
     "tagline": "DeFi That Bounces Back",
     "primaryCategory": "finance",
     "tags": [

@@ -26,6 +26,7 @@ import {
   dexTokenListRowsToPickerEntries,
   resolveNativeDexL1DiscoveryCapabilities,
 } from '../services/nativeDexL1Discovery';
+import { collectFungibleStyleDeployPickerEntries } from '../services/nativeFungibleDeployDiscovery';
 import { normalizeNativeVmTokenId32, venueTokensToPickerEntries } from '../services/nativeVmTokenRegistry';
 import { BOING_OBSERVER_BASE_URL } from '../config/boingExplorerUrls';
 
@@ -83,6 +84,13 @@ export function BoingNativeDexIntegrationProvider({ children }) {
   const [remoteIndexerStats, setRemoteIndexerStats] = useState(null);
   /** L1 `boing_listDexTokens` rows (light); merged into picker directory ahead of indexer labels. */
   const [l1DexTokenRows, setL1DexTokenRows] = useState(/** @type {import('boing-sdk').DexTokenListRow[]} */ ([]));
+  /** Fungible-style VM deploys from recent blocks (`ContractDeployWithPurpose*`), merged after L1 list tokens. */
+  const [fungibleDeployPickerTokens, setFungibleDeployPickerTokens] = useState(
+    /** @type {Array<{ id: string, symbol: string, name: string }>} */ ([])
+  );
+  const [fungibleDeployDiscoveryMeta, setFungibleDeployDiscoveryMeta] = useState(
+    /** @type {{ count: number, fromHeight: number | null, toHeight: number | null, scannedBlocks: number } | null} */ (null)
+  );
   const [localPoolActivity, setLocalPoolActivity] = useState(/** @type {Record<string, { activityScore: string, hadPrior: boolean }>} */ ({}));
   const [oracleUsdByToken, setOracleUsdByToken] = useState(/** @type {Record<string, string>} */ ({}));
   const [oracleUsdLoading, setOracleUsdLoading] = useState(false);
@@ -94,6 +102,7 @@ export function BoingNativeDexIntegrationProvider({ children }) {
   const indexerPickerTokens = useMemo(() => {
     const fromIndexer = extractTokenDirectoryFromIndexer(remoteIndexerStats);
     const fromL1 = dexTokenListRowsToPickerEntries(l1DexTokenRows);
+    const fromFungibleDeploys = fungibleDeployPickerTokens;
     /** Legs from any hydrated CP venue (factory + L1 pools + register logs). Wins last so on-chain metadata from RPC hydration beats static lists. */
     const fromVenues = venueTokensToPickerEntries(venues);
     /** @type {Map<string, { id: string, symbol: string, name: string, decimals?: number }>} */
@@ -112,13 +121,19 @@ export function BoingNativeDexIntegrationProvider({ children }) {
       if (typeof e.decimals === 'number') row.decimals = e.decimals;
       byId.set(e.id, row);
     }
+    for (const e of fromFungibleDeploys) {
+      if (!e?.id || byId.has(e.id)) continue;
+      /** @type {{ id: string, symbol: string, name: string }} */
+      const row = { id: e.id, symbol: e.symbol, name: e.name };
+      byId.set(e.id, row);
+    }
     for (const e of fromVenues) {
       /** @type {{ id: string, symbol: string, name: string }} */
       const row = { id: e.id, symbol: e.symbol, name: e.name };
       byId.set(e.id, row);
     }
     return [...byId.values()];
-  }, [remoteIndexerStats, l1DexTokenRows, venues]);
+  }, [remoteIndexerStats, l1DexTokenRows, fungibleDeployPickerTokens, venues]);
 
   const staticPoolHex = useMemo(
     () => getContractAddress(BOING_NATIVE_L1_CHAIN_ID, 'nativeConstantProductPool') || '',
@@ -140,6 +155,8 @@ export function BoingNativeDexIntegrationProvider({ children }) {
       setRemoteIndexerStats(null);
       setL1DexTokenRows([]);
       setL1DexPoolRows([]);
+      setFungibleDeployPickerTokens([]);
+      setFungibleDeployDiscoveryMeta(null);
       setDexDiscoveryRpcMeta(null);
       setLocalPoolActivity({});
       setError(null);
@@ -156,9 +173,12 @@ export function BoingNativeDexIntegrationProvider({ children }) {
       if (watchChainIdRef.current !== startedFor) return;
       setDefaults(d);
 
+      /** @type {number | null} */
+      let directorySnapshotHeadHeight = null;
       try {
         const lightSnap = await fetchNativeDexDirectorySnapshot(client, { overrides });
         if (watchChainIdRef.current !== startedFor) return;
+        directorySnapshotHeadHeight = typeof lightSnap.headHeight === 'number' ? lightSnap.headHeight : null;
         setDirectoryMeta({
           pairsCount:
             lightSnap.pairsCount != null && typeof lightSnap.pairsCount === 'bigint'
@@ -166,10 +186,11 @@ export function BoingNativeDexIntegrationProvider({ children }) {
               : lightSnap.pairsCount != null
                 ? String(lightSnap.pairsCount)
                 : null,
-          headHeight: typeof lightSnap.headHeight === 'number' ? lightSnap.headHeight : null,
+          headHeight: directorySnapshotHeadHeight,
         });
       } catch {
         if (watchChainIdRef.current !== startedFor) return;
+        directorySnapshotHeadHeight = null;
         setDirectoryMeta({ pairsCount: null, headHeight: null });
       }
 
@@ -220,6 +241,38 @@ export function BoingNativeDexIntegrationProvider({ children }) {
       }
       if (watchChainIdRef.current !== startedFor) return;
       setL1DexTokenRows(l1Tokens);
+
+      let headForFungible = directorySnapshotHeadHeight;
+      if (headForFungible == null) {
+        try {
+          headForFungible = await client.chainHeight();
+        } catch {
+          headForFungible = null;
+        }
+      }
+      if (watchChainIdRef.current !== startedFor) return;
+      /** @type {Array<{ id: string, symbol: string, name: string }>} */
+      let fungibleEntries = [];
+      /** @type {{ count: number, fromHeight: number | null, toHeight: number | null, scannedBlocks: number } | null} */
+      let fungibleMeta = null;
+      if (headForFungible != null) {
+        try {
+          const r = await collectFungibleStyleDeployPickerEntries(client, headForFungible);
+          if (watchChainIdRef.current !== startedFor) return;
+          fungibleEntries = r.entries;
+          fungibleMeta = {
+            count: r.entries.length,
+            fromHeight: r.fromHeight,
+            toHeight: r.toHeight,
+            scannedBlocks: r.scannedBlocks,
+          };
+        } catch {
+          fungibleEntries = [];
+          fungibleMeta = null;
+        }
+      }
+      setFungibleDeployPickerTokens(fungibleEntries);
+      setFungibleDeployDiscoveryMeta(fungibleMeta);
 
       const poolHex = d.nativeCpPoolAccountHex;
       if (!poolHex) {
@@ -324,6 +377,8 @@ export function BoingNativeDexIntegrationProvider({ children }) {
       setRemoteIndexerStats(null);
       setL1DexTokenRows([]);
       setL1DexPoolRows([]);
+      setFungibleDeployPickerTokens([]);
+      setFungibleDeployDiscoveryMeta(null);
       setDexDiscoveryRpcMeta(null);
       setLocalPoolActivity({});
       setError(e instanceof Error ? e : new Error(String(e)));
@@ -507,6 +562,7 @@ export function BoingNativeDexIntegrationProvider({ children }) {
       dexDirectoryExtras,
       remoteIndexerStats,
       indexerPickerTokens,
+      fungibleDeployDiscoveryMeta,
       dexDiscoveryRpcMeta,
       localPoolActivity,
       oracleUsdByToken,
@@ -533,6 +589,7 @@ export function BoingNativeDexIntegrationProvider({ children }) {
       dexDirectoryExtras,
       remoteIndexerStats,
       indexerPickerTokens,
+      fungibleDeployDiscoveryMeta,
       dexDiscoveryRpcMeta,
       localPoolActivity,
       oracleUsdByToken,

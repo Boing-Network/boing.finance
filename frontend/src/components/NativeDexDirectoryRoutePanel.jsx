@@ -376,7 +376,8 @@ export default function NativeDexDirectoryRoutePanel({
       </h2>
       <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
         Find the best path across pools registered on the factory, then swap in one step with Boing Express. One-hop routes
-        hit the pool directly; longer paths use the multihop router when this network provides one.
+        hit the pool directly; longer paths use the multihop router when this network provides one. Recently finalized
+        fungible deploys (token/meme purpose) are merged into the token list when the app scans recent blocks on refresh.
       </p>
 
       <div className="grid gap-3 sm:grid-cols-2 mb-2">
