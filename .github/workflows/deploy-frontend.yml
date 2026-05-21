@@ -55,6 +55,10 @@ jobs:
         working-directory: boing.network/boing-sdk
         run: npm run build
 
+      - name: Verify boing-sdk canonical testnet pool hex
+        working-directory: frontend
+        run: node scripts/verify-canonical-testnet-pool-embed.mjs
+
       - name: Verify boing-sdk indexer module exists (Pages Functions bundle)
         run: |
           test -f boing.network/boing-sdk/dist/nativeDexIndexerStats.js
