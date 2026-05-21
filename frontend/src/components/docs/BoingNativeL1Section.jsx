@@ -6,6 +6,8 @@ import {
   BOING_NETWORK_E2_PARTNER_APP_NATIVE_BOING_URL,
   BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL,
   BOING_NETWORK_RPC_API_SPEC_URL,
+  BOING_NETWORK_TESTNET_RPC_INFRA_URL,
+  BOING_NETWORK_TESTNET_URL,
 } from '../../config/boingNetworkDocsUrls';
 
 const BOING_EXPRESS_URL = 'https://boing.express';
@@ -98,6 +100,47 @@ export default function BoingNativeL1Section() {
           <Link to="/boing/native-vm" className={linkCls}>
             Native VM tools
           </Link>
+          .
+        </p>
+      </div>
+
+      <div>
+        <h3 className="text-2xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
+          Public testnet endpoints (2026-05-21)
+        </h3>
+        <ul className="list-disc pl-5 space-y-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
+          <li>
+            RPC: <code className="text-xs">https://testnet-rpc.boing.network/</code> (chain id <strong>6913</strong>)
+          </li>
+          <li>
+            Canonical native AMM pool:{' '}
+            <code className="text-xs break-all">
+              0x7247ddc3180fdc4d3fd1e716229bfa16bad334a07d28aa9fda9ad1bfa7bdacc3
+            </code>{' '}
+            (<code className="text-xs">REACT_APP_BOING_NATIVE_AMM_POOL</code> at build time)
+          </li>
+          <li>
+            Native DEX factory:{' '}
+            <code className="text-xs break-all">
+              0x58112627fc84618a27b82e9af82bc9a51761c6d3cca1260c93d56d22b6c481a1
+            </code>
+          </li>
+          <li>
+            Bootnode: <code className="text-xs">/ip4/73.84.106.121/tcp/4001</code> — see{' '}
+            <a href="https://boing.network/testnet/join" target="_blank" rel="noopener noreferrer" className={linkCls}>
+              boing.network/testnet/join
+            </a>
+          </li>
+        </ul>
+        <p className="mt-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
+          Operator hub and smoke commands:{' '}
+          <a href={BOING_NETWORK_TESTNET_RPC_INFRA_URL} target="_blank" rel="noopener noreferrer" className={linkCls}>
+            TESTNET-RPC-INFRA.md
+          </a>
+          . Join flows and portal:{' '}
+          <a href={BOING_NETWORK_TESTNET_URL} target="_blank" rel="noopener noreferrer" className={linkCls}>
+            TESTNET.md
+          </a>
           .
         </p>
       </div>
