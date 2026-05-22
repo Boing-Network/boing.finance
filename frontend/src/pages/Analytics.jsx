@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import config from '../config';
 import { Helmet } from 'react-helmet-async';
@@ -16,6 +17,9 @@ import toast from 'react-hot-toast';
 import { CHART_COLORS } from '../theme/designTokens';
 import LiveMarketPulse from '../components/LiveMarketPulse';
 import FearGreedPanel from '../components/FearGreedPanel';
+import ResearchBriefBanner from '../components/research/ResearchBriefBanner';
+import OnchainIntelligenceDashboard from '../components/research/OnchainIntelligenceDashboard';
+import { getFearGreedIndex } from '../services/fearGreedService';
 
 // BoingAstronaut component
 
@@ -31,9 +35,17 @@ function getStored(key, fallback) {
 
 export default function Analytics() {
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
   const [timeRange, setTimeRange] = useState(() => getStored(STORAGE_KEYS.timeRange, '24h'));
-  const [activeSection, setActiveSection] = useState(() => getStored(STORAGE_KEYS.section, 'overview'));
+  const [activeSection, setActiveSection] = useState(() => getStored(STORAGE_KEYS.section, 'intelligence'));
   const [selectedNetwork, setSelectedNetwork] = useState('all');
+
+  useEffect(() => {
+    const section = searchParams.get('section');
+    if (section && ['intelligence', 'overview', 'market', 'trending'].includes(section)) {
+      setActiveSection(section);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     try {
@@ -304,7 +316,15 @@ export default function Analytics() {
     retry: 0,
   });
 
-  const sections = ['overview', 'market', 'trending'];
+  const { data: fearGreedData = [] } = useQuery({
+    queryKey: ['fear-greed-current'],
+    queryFn: () => getFearGreedIndex(1),
+    refetchInterval: 3600000,
+    staleTime: 1800000,
+    retry: 1,
+  });
+
+  const sections = ['intelligence', 'overview', 'market', 'trending'];
   const handleSectionKeyDown = (e) => {
     const i = sections.indexOf(activeSection);
     if (e.key === 'ArrowRight' && i < sections.length - 1) {
@@ -350,11 +370,11 @@ export default function Analytics() {
   return (
     <>
       <Helmet>
-        <title>Analytics | boing.finance — Market Data & DeFi Insights</title>
-        <meta name="description" content="Real-time DeFi analytics on EVM and Solana. Market data, pool stats, and trading insights with boing.finance." />
-        <meta name="keywords" content="DeFi analytics, market data, boing finance, EVM, Solana, pool stats" />
-        <meta property="og:title" content="Analytics | boing.finance" />
-        <meta property="og:description" content="Real-time market data and DeFi insights on EVM and Solana." />
+        <title>Onchain Intelligence | boing.finance — Research & Trading Analytics</title>
+        <meta name="description" content="Live onchain intelligence dashboard: liquidity migration, narrative tracking, smart-flow signals, and actionable crypto research across Solana, Base, L2s, and EVM." />
+        <meta name="keywords" content="onchain intelligence, DeFi research, smart money, liquidity migration, crypto analytics, boing finance" />
+        <meta property="og:title" content="Onchain Intelligence | boing.finance" />
+        <meta property="og:description" content="Multi-chain research dashboard with actionable trading insights from live onchain data." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/analytics" />
         <meta name="twitter:card" content="summary_large_image" />
@@ -369,10 +389,10 @@ export default function Analytics() {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                    Analytics
+                    Onchain Intelligence
                   </h1>
                   <p className="text-sm sm:text-base mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-                    Market trends and trading insights
+                    Research dashboard · liquidity, narratives, smart flow & actionable briefs
                   </p>
                   {dataUpdatedAt > 0 && (
                     <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
@@ -389,7 +409,9 @@ export default function Analytics() {
                           queryClient.invalidateQueries({ queryKey: ['trending-tokens'] }),
                           queryClient.invalidateQueries({ queryKey: ['historical-volume'] }),
                           queryClient.invalidateQueries({ queryKey: ['market-data'] }),
-                          queryClient.invalidateQueries({ queryKey: ['price-insights'] })
+                          queryClient.invalidateQueries({ queryKey: ['price-insights'] }),
+                          queryClient.invalidateQueries({ queryKey: ['fear-greed-current'] }),
+                          queryClient.invalidateQueries({ queryKey: ['fear-greed-history'] }),
                         ]);
                         toast.success('Analytics data refreshed');
                       } catch (e) {
@@ -446,13 +468,13 @@ export default function Analytics() {
                       id={`tab-${section}`}
                       tabIndex={activeSection === section ? 0 : -1}
                       onClick={() => setActiveSection(section)}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         activeSection === section
                           ? 'bg-blue-500 text-white'
                           : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                       }`}
                     >
-                      {section}
+                      {section === 'intelligence' ? 'Intelligence' : section.charAt(0).toUpperCase() + section.slice(1)}
                     </button>
                   ))}
                 </div>
@@ -479,6 +501,8 @@ export default function Analytics() {
 
             <LiveMarketPulse />
 
+            <ResearchBriefBanner page="analytics" />
+
             {/* Analytics Content - section-level loading; no full-page block */}
             {error ? (
               <div className="text-center py-12">
@@ -486,6 +510,17 @@ export default function Analytics() {
               </div>
             ) : (
               <div className="space-y-8">
+                {activeSection === 'intelligence' && (
+                  <OnchainIntelligenceDashboard
+                    analytics={analytics}
+                    trendingTokens={trendingTokens}
+                    marketData={marketData}
+                    fearGreed={fearGreedData}
+                    cryptoNews={cryptoNews}
+                    timeRange={timeRange}
+                  />
+                )}
+
                 {/* Overview Section */}
                 {activeSection === 'overview' && (
                   <div id="analytics-panel-overview" role="tabpanel" aria-labelledby="tab-overview" className="space-y-6">

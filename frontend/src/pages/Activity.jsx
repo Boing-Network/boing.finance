@@ -21,6 +21,8 @@ import { collectSwapCoinIds, computeTradingPnl, formatUsd } from '../utils/tradi
 import { downloadCSV } from '../utils/exportData';
 import { CHART_COLORS } from '../theme/designTokens';
 import LiveMarketPulse from '../components/LiveMarketPulse';
+import ResearchBriefBanner from '../components/research/ResearchBriefBanner';
+import WalletBehaviorPanel from '../components/research/WalletBehaviorPanel';
 import toast from 'react-hot-toast';
 import EmptyState from '../components/EmptyState';
 
@@ -186,15 +188,15 @@ export default function Activity() {
   return (
     <>
       <Helmet>
-        <title>Activity | boing.finance — Swaps, Liquidity & Bridge History</title>
-        <meta name="description" content="View your swap, liquidity, and bridge history with trading insights on EVM and Solana." />
+        <title>Wallet Flow Analysis | boing.finance — Onchain Activity Research</title>
+        <meta name="description" content="Wallet behavioral fingerprint, trading PnL, and onchain flow analysis across EVM chains — verifiable research output from live transaction data." />
       </Helmet>
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-white">Activity</h1>
-              <p className="text-gray-400 mt-1">Your trading history and on-chain activity insights</p>
+              <h1 className="text-3xl font-bold text-white">Wallet Flow Analysis</h1>
+              <p className="text-gray-400 mt-1">Behavioral patterns, execution PnL & cross-chain activity</p>
             </div>
             <div className="flex flex-wrap gap-2">
               <button
@@ -217,7 +219,11 @@ export default function Activity() {
             </div>
           </div>
 
+          <ResearchBriefBanner page="activity" compact />
+
           <LiveMarketPulse />
+
+          <WalletBehaviorPanel transactions={filtered} stats={stats} />
 
           {/* Personal trading PnL */}
           {swapTxs.length > 0 && (
@@ -422,7 +428,7 @@ export default function Activity() {
 
           <div className="flex flex-wrap gap-4 mt-6 text-sm">
             <Link to="/portfolio" className="text-cyan-400 hover:text-cyan-300">View portfolio →</Link>
-            <Link to="/analytics" className="text-cyan-400 hover:text-cyan-300">Market analytics →</Link>
+            <Link to="/analytics?section=intelligence" className="text-cyan-400 hover:text-cyan-300">Onchain intelligence →</Link>
             <Link to="/watchlist" className="text-cyan-400 hover:text-cyan-300">Watchlist →</Link>
           </div>
         </div>

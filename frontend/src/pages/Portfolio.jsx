@@ -32,6 +32,9 @@ import {
   computePeriodChange,
 } from '../utils/portfolioInsights';
 import LiveMarketPulse from '../components/LiveMarketPulse';
+import ResearchBriefBanner from '../components/research/ResearchBriefBanner';
+import PortfolioResearchPanel from '../components/research/PortfolioResearchPanel';
+import { computePortfolioResearchInsights } from '../utils/researchIntelligence';
 import { CHART_COLORS } from '../theme/designTokens';
 
 // MochiAstronaut component
@@ -403,6 +406,16 @@ export default function Portfolio() {
     [apiHistory]
   );
 
+  const portfolioResearchInsights = useMemo(
+    () => computePortfolioResearchInsights({
+      allocation: allocationSlices,
+      topMovers,
+      enrichedSummary,
+      change7d,
+    }),
+    [allocationSlices, topMovers, enrichedSummary, change7d]
+  );
+
   const networks = [
     { id: 'all', name: 'All Networks', color: NETWORK_BADGE_FALLBACK },
     { id: '1', name: 'Ethereum', color: getNetworkBadgeBgClass('1') },
@@ -479,8 +492,8 @@ export default function Portfolio() {
   return (
     <>
       <Helmet>
-        <title>Portfolio | boing.finance — Track Balances on EVM & Solana</title>
-        <meta name="description" content="Track your DeFi portfolio in one place. Balances, NFTs, and performance on EVM and Solana with boing.finance." />
+        <title>Exposure Intelligence | boing.finance — Portfolio Research</title>
+        <meta name="description" content="Multi-chain portfolio research: allocation, movers, performance drift, and actionable exposure decisions from live onchain balances." />
         <meta name="keywords" content="DeFi portfolio, token balances, boing finance, EVM, Solana, portfolio tracking" />
         <meta property="og:title" content="Portfolio | boing.finance" />
         <meta property="og:description" content="Track balances and performance on EVM and Solana." />
@@ -498,10 +511,10 @@ export default function Portfolio() {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                    Portfolio
+                    Exposure Intelligence
                   </h1>
                   <p className="text-sm sm:text-base mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-                    Assets and performance
+                    Holdings, allocation & research-driven risk context
                   </p>
                 </div>
                 <div className="flex-1 flex flex-wrap justify-center sm:justify-end gap-2">
@@ -608,7 +621,11 @@ export default function Portfolio() {
               </div>
             )}
 
+            <ResearchBriefBanner page="portfolio" compact />
+
             <LiveMarketPulse />
+
+            <PortfolioResearchPanel insights={portfolioResearchInsights} />
 
             {/* Hero Summary - Total Value + 24h Change */}
             <div
@@ -1382,7 +1399,7 @@ export default function Portfolio() {
 
                 <div className="flex flex-wrap gap-4 text-sm pt-2">
                   <Link to="/activity" className="text-cyan-400 hover:text-cyan-300">Trading activity →</Link>
-                  <Link to="/analytics" className="text-cyan-400 hover:text-cyan-300">Market analytics →</Link>
+                  <Link to="/analytics?section=intelligence" className="text-cyan-400 hover:text-cyan-300">Onchain intelligence →</Link>
                 </div>
 
               </div>
