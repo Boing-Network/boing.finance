@@ -142,10 +142,10 @@ const createNavigation = () => {
   deployment,
   tradeAndDeploy: Object.freeze([...trading, ...deployment]),
   analytics: Object.freeze([
-    Object.freeze({ name: 'Analytics', href: '/analytics', icon: '📊', description: 'Market insights', isAvailable: true, comingSoon: false, testnetOnly: false }),
-    Object.freeze({ name: 'Portfolio', href: '/portfolio', icon: '💼', description: 'Your holdings', isAvailable: true, comingSoon: false, testnetOnly: false }),
-    Object.freeze({ name: 'Activity', href: '/activity', icon: '📋', description: 'Swaps, liquidity & bridge', isAvailable: true, comingSoon: false, testnetOnly: false }),
-    Object.freeze({ name: 'Watchlist', href: '/watchlist', icon: '⭐', description: 'Track tokens & prices', isAvailable: true, comingSoon: false, testnetOnly: false })
+    Object.freeze({ name: 'Intelligence', href: '/analytics?section=intelligence', icon: '🧠', description: 'Onchain research & actionable briefs', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Portfolio', href: '/portfolio', icon: '💼', description: 'Exposure & allocation research', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Wallet Flow', href: '/activity', icon: '📋', description: 'Behavioral patterns & trading PnL', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Watchlist', href: '/watchlist', icon: '⭐', description: 'Narrative & early ecosystem tracking', isAvailable: true, comingSoon: false, testnetOnly: false })
   ]),
   governance: Object.freeze([
     Object.freeze({ name: 'Proposals', href: '/governance/proposals', icon: '📜', description: 'View and vote on proposals', isAvailable: true, comingSoon: false, testnetOnly: false }),
