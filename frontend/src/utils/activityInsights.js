@@ -9,7 +9,7 @@ const TYPE_LABELS = {
 
 export function filterByTimeRange(transactions, range) {
   if (!transactions?.length || range === 'all') return transactions || [];
-  const windows = { '7d': 7, '30d': 30, '90d': 90 };
+  const windows = { '7d': 7, '30d': 30, '90d': 90, '1y': 365, '24h': 1 };
   const days = windows[range];
   if (!days) return transactions;
   const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;

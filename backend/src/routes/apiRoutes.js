@@ -407,7 +407,7 @@ export const createAPIRoutes = () => {
       }
 
       // Validate range
-      const validRanges = ['24h', '7d', '30d', '1y'];
+      const validRanges = ['24h', '7d', '30d', '1y', 'all'];
       if (!validRanges.includes(range)) {
         return c.json({ 
           success: false, 
@@ -452,29 +452,41 @@ export const createAPIRoutes = () => {
           case '1y':
             timeWindow = 365 * 24 * 60 * 60 * 1000; // 1 year
             break;
+          case 'all':
+            timeWindow = null;
+            break;
         }
         
-        const startTime = new Date(now.getTime() - timeWindow);
+        const startTime = timeWindow != null ? new Date(now.getTime() - timeWindow) : null;
         
         // Query for most recent snapshots within the time window
         const allSnapshots = await db.select()
           .from(schema.analyticsSnapshots)
           .where(
-            sql`range = ${range} AND network IN (${sql.join(networks.map(n => sql`${n}`), sql`, `)}) AND datetime(timestamp) >= datetime(${startTime.toISOString()})`
+            startTime
+              ? sql`range = ${range} AND network IN (${sql.join(networks.map(n => sql`${n}`), sql`, `)}) AND datetime(timestamp) >= datetime(${startTime.toISOString()})`
+              : sql`range = ${range} AND network IN (${sql.join(networks.map(n => sql`${n}`), sql`, `)})`
           )
           .orderBy(sql`timestamp DESC`);
         
         if (allSnapshots.length > 0) {
           
-          // Aggregate data from snapshots
+          // Aggregate from latest snapshot per network (avoid double-counting period totals)
           let totalVolume = 0;
           let totalLiquidity = 0;
           let totalPools = 0;
           let totalTransactions = 0;
           const networkStats = {};
           const allTopPairs = [];
-          
+          const latestByNetwork = new Map();
+
           for (const snapshot of allSnapshots) {
+            if (!latestByNetwork.has(snapshot.network)) {
+              latestByNetwork.set(snapshot.network, snapshot);
+            }
+          }
+
+          for (const snapshot of latestByNetwork.values()) {
             const networkName = analyticsService.getNetworkName(snapshot.network);
             const snapshotData = snapshot.snapshotData ? JSON.parse(snapshot.snapshotData) : {};
             
@@ -542,17 +554,24 @@ export const createAPIRoutes = () => {
             case '1y':
               timeWindow = 365 * 24 * 60 * 60 * 1000;
               break;
+            case 'all':
+              timeWindow = null;
+              break;
           }
           
-          const startTime = new Date(now.getTime() - timeWindow);
+          const startTime = timeWindow != null ? new Date(now.getTime() - timeWindow) : null;
           
           // Query user interactions from database
-          const userActivity = await db.select()
-            .from(schema.userInteractions)
-            .where(
-              sql`datetime(timestamp) >= datetime(${startTime.toISOString()})`
-            )
-            .orderBy(sql`timestamp DESC`);
+          const userActivity = startTime
+            ? await db.select()
+                .from(schema.userInteractions)
+                .where(
+                  sql`datetime(timestamp) >= datetime(${startTime.toISOString()})`
+                )
+                .orderBy(sql`timestamp DESC`)
+            : await db.select()
+                .from(schema.userInteractions)
+                .orderBy(sql`timestamp DESC`);
           
           // Aggregate by action type
           const activityByType = {};

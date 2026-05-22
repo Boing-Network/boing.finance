@@ -40,18 +40,26 @@ export function createWalletActivityRoutes() {
         case '1y':
           timeWindow = 365 * 24 * 60 * 60 * 1000;
           break;
+        case 'all':
+          timeWindow = null;
+          break;
       }
       
-      const startTime = new Date(now.getTime() - timeWindow);
+      const startTime = timeWindow != null ? new Date(now.getTime() - timeWindow) : null;
       const db = c.get('db');
 
       // Query user interactions from database (tracked activities)
-      const trackedActivity = await db.select()
-        .from(schema.userInteractions)
-        .where(
-          sql`user_id = ${walletAddress} AND datetime(timestamp) >= datetime(${startTime.toISOString()})`
-        )
-        .orderBy(sql`timestamp DESC`);
+      const trackedActivity = startTime
+        ? await db.select()
+            .from(schema.userInteractions)
+            .where(
+              sql`user_id = ${walletAddress} AND datetime(timestamp) >= datetime(${startTime.toISOString()})`
+            )
+            .orderBy(sql`timestamp DESC`)
+        : await db.select()
+            .from(schema.userInteractions)
+            .where(sql`user_id = ${walletAddress}`)
+            .orderBy(sql`timestamp DESC`);
 
       // Aggregate by action type
       const activityByType = {};
