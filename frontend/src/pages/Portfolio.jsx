@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useWallet } from '../contexts/WalletContext';
 import { useChainType } from '../contexts/SolanaWalletContext';
@@ -21,9 +21,18 @@ import { saveSnapshot, getSnapshots } from '../services/portfolioSnapshotService
 import SharePortfolioModal from '../components/SharePortfolioModal';
 import NFTDetailModal from '../components/NFTDetailModal';
 import EmptyState from '../components/EmptyState';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import toast from 'react-hot-toast';
 import { getNetworkBadgeBgClass, NETWORK_BADGE_FALLBACK } from '../utils/networkBadgeClasses';
+import {
+  computeWeightedChange24h,
+  computeSnapshotChange24h,
+  computeAllocation,
+  computeTopMovers,
+  computePeriodChange,
+} from '../utils/portfolioInsights';
+import LiveMarketPulse from '../components/LiveMarketPulse';
+import { CHART_COLORS } from '../theme/designTokens';
 
 // MochiAstronaut component
 
@@ -281,7 +290,7 @@ export default function Portfolio() {
 
         return {
           totalValue: (totalValue + tokenValue).toFixed(2),
-          change24h: 0, // TODO: Calculate 24h change
+          change24h: 0,
           averageAPY: averageAPY,
           totalTokens: uniqueTokens.size + (tokenBalances?.balances?.length || 0),
           liquidityProvided: liquidityProvided.toFixed(2),
@@ -367,6 +376,33 @@ export default function Portfolio() {
     return getPortfolioHistoryForChart(30);
   }, [apiHistory]);
 
+  const enrichedSummary = useMemo(() => {
+    if (!portfolioSummary) return portfolioSummary;
+    const combinedValue = parseFloat(portfolioSummary.totalValue) || 0;
+    const weightedChange = computeWeightedChange24h(tokenBalances?.balances);
+    const snapshotHistory = apiHistory?.length
+      ? apiHistory
+      : getPortfolioHistoryForChart(7).map((h) => ({ value: h.value, timestamp: h.timestamp }));
+    const snapshotChange = computeSnapshotChange24h(combinedValue, snapshotHistory);
+    const change24h = snapshotChange ?? weightedChange ?? portfolioSummary.change24h ?? 0;
+    return { ...portfolioSummary, change24h };
+  }, [portfolioSummary, tokenBalances, apiHistory]);
+
+  const allocationSlices = useMemo(
+    () => computeAllocation(tokenBalances?.balances || []),
+    [tokenBalances]
+  );
+
+  const topMovers = useMemo(
+    () => computeTopMovers(tokenBalances?.balances || []),
+    [tokenBalances]
+  );
+
+  const change7d = useMemo(
+    () => computePeriodChange(apiHistory?.length ? apiHistory : getPortfolioHistoryForChart(7), 7),
+    [apiHistory]
+  );
+
   const networks = [
     { id: 'all', name: 'All Networks', color: NETWORK_BADGE_FALLBACK },
     { id: '1', name: 'Ethereum', color: getNetworkBadgeBgClass('1') },
@@ -395,15 +431,15 @@ export default function Portfolio() {
 
     // Only notify if there's a significant change (more than 5%)
     const lastValue = parseFloat(localStorage.getItem('boing_last_portfolio_value') || '0');
-    const currentValue = parseFloat(portfolioSummary.totalValue || '0');
+    const currentValue = parseFloat(enrichedSummary.totalValue || '0');
     
     if (lastValue > 0 && Math.abs(currentValue - lastValue) / lastValue > 0.05) {
-      const change24h = portfolioSummary.change24h || 0;
+      const change24h = enrichedSummary.change24h || 0;
       notificationService.notifyPortfolioUpdate(currentValue, change24h);
     }
     
     localStorage.setItem('boing_last_portfolio_value', currentValue.toString());
-  }, [portfolioSummary, account]);
+  }, [enrichedSummary, account]);
 
   if (isSolana) return <PortfolioSolanaContent />;
 
@@ -572,6 +608,8 @@ export default function Portfolio() {
               </div>
             )}
 
+            <LiveMarketPulse />
+
             {/* Hero Summary - Total Value + 24h Change */}
             <div
               className="rounded-2xl p-6 sm:p-8 mb-6"
@@ -584,16 +622,24 @@ export default function Portfolio() {
                 <div>
                   <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Total Value</p>
                   <p className="text-3xl sm:text-4xl font-bold text-cyan-400">
-                    ${portfolioSummary?.totalValue ? parseFloat(portfolioSummary.totalValue).toLocaleString() : '0'}
+                    ${enrichedSummary?.totalValue ? parseFloat(enrichedSummary.totalValue).toLocaleString() : '0'}
                   </p>
                 </div>
-                <div className="flex items-baseline gap-4">
+                <div className="flex items-baseline gap-6">
                   <div>
                     <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-tertiary)' }}>24h</p>
-                    <p className={`text-xl sm:text-2xl font-bold ${portfolioSummary?.change24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {portfolioSummary?.change24h >= 0 ? '+' : ''}{portfolioSummary?.change24h ? parseFloat(portfolioSummary.change24h).toFixed(2) : '0'}%
+                    <p className={`text-xl sm:text-2xl font-bold ${enrichedSummary?.change24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {enrichedSummary?.change24h >= 0 ? '+' : ''}{enrichedSummary?.change24h != null ? parseFloat(enrichedSummary.change24h).toFixed(2) : '0.00'}%
                     </p>
                   </div>
+                  {change7d != null && (
+                    <div>
+                      <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-tertiary)' }}>7d</p>
+                      <p className={`text-xl sm:text-2xl font-bold ${change7d >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {change7d >= 0 ? '+' : ''}{change7d.toFixed(2)}%
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -666,7 +712,7 @@ export default function Portfolio() {
                   >
                     <h3 className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>APY</h3>
                     <p className="text-xl font-bold text-green-400">
-                      {portfolioSummary?.averageAPY ? `${portfolioSummary.averageAPY.toFixed(2)}%` : '0.00%'}
+                      {enrichedSummary?.averageAPY ? `${enrichedSummary.averageAPY.toFixed(2)}%` : '0.00%'}
                     </p>
                   </div>
                   <div
@@ -675,7 +721,7 @@ export default function Portfolio() {
                   >
                     <h3 className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Tokens</h3>
                     <p className="text-xl font-bold text-finance-purple">
-                      {portfolioSummary?.totalTokens ? portfolioSummary.totalTokens.toLocaleString() : '0'}
+                      {enrichedSummary?.totalTokens ? enrichedSummary.totalTokens.toLocaleString() : '0'}
                     </p>
                   </div>
                   <div
@@ -684,7 +730,7 @@ export default function Portfolio() {
                   >
                     <h3 className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Liquidity</h3>
                     <p className="text-xl font-bold text-yellow-400">
-                      ${portfolioSummary?.liquidityProvided ? parseFloat(portfolioSummary.liquidityProvided).toLocaleString() : '0'}
+                      ${enrichedSummary?.liquidityProvided ? parseFloat(enrichedSummary.liquidityProvided).toLocaleString() : '0'}
                     </p>
                   </div>
                 </div>
@@ -728,6 +774,73 @@ export default function Portfolio() {
                 {/* Tab Content */}
                 {activeTab === 'overview' && (
                   <>
+                {/* Allocation + Top Movers */}
+                {allocationSlices.length > 0 && (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="rounded-2xl shadow-xl p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+                      <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Asset Allocation</h2>
+                      <ResponsiveContainer width="100%" height={260}>
+                        <PieChart>
+                          <Pie
+                            data={allocationSlices}
+                            dataKey="value"
+                            nameKey="name"
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={55}
+                            outerRadius={90}
+                            paddingAngle={2}
+                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                          >
+                            {allocationSlices.map((_, i) => (
+                              <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
+                            formatter={(value) => [`$${Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 })}`, 'Value']}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="rounded-2xl shadow-xl p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+                      <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>24h Movers</h2>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <h3 className="text-sm font-semibold text-green-400 mb-2">Top gainers</h3>
+                          {topMovers.gainers.length > 0 ? (
+                            <div className="space-y-2">
+                              {topMovers.gainers.map((t) => (
+                                <div key={t.symbol} className="flex justify-between text-sm p-2 rounded" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+                                  <span style={{ color: 'var(--text-primary)' }}>{t.symbol}</span>
+                                  <span className="text-green-400 font-medium">+{t.change24h.toFixed(2)}%</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>No priced tokens yet</p>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-semibold text-red-400 mb-2">Top losers</h3>
+                          {topMovers.losers.length > 0 ? (
+                            <div className="space-y-2">
+                              {topMovers.losers.map((t) => (
+                                <div key={t.symbol} className="flex justify-between text-sm p-2 rounded" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+                                  <span style={{ color: 'var(--text-primary)' }}>{t.symbol}</span>
+                                  <span className="text-red-400 font-medium">{t.change24h.toFixed(2)}%</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>No priced tokens yet</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Overview Content - Summary Cards Already Shown Above */}
                 {/* Quick Stats */}
                 <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
@@ -1266,6 +1379,11 @@ export default function Portfolio() {
                     )}
                   </div>
                 )}
+
+                <div className="flex flex-wrap gap-4 text-sm pt-2">
+                  <Link to="/activity" className="text-cyan-400 hover:text-cyan-300">Trading activity →</Link>
+                  <Link to="/analytics" className="text-cyan-400 hover:text-cyan-300">Market analytics →</Link>
+                </div>
 
               </div>
             )}

@@ -57,13 +57,29 @@ export default function TokenWatchlist() {
 
   const getPriceChange = (token) => {
     const priceKey = `${token.address}-${token.chainId}`;
-    const currentPrice = tokenPrices?.[priceKey] || token.price || 0;
-    const previousPrice = token.price || 0;
-    
-    if (previousPrice === 0) return null;
-    const change = ((currentPrice - previousPrice) / previousPrice) * 100;
-    return change;
+    const priceData = tokenPrices?.[priceKey];
+    if (priceData?.usd_24h_change != null && !Number.isNaN(priceData.usd_24h_change)) {
+      return priceData.usd_24h_change;
+    }
+    return null;
   };
+
+  const watchlistSummary = React.useMemo(() => {
+    if (!watchlist.length) return null;
+    const changes = filteredWatchlist
+      .map((t) => getPriceChange(t))
+      .filter((c) => c != null && !Number.isNaN(c));
+    const avgChange = changes.length ? changes.reduce((a, b) => a + b, 0) / changes.length : null;
+    let best = null;
+    let worst = null;
+    filteredWatchlist.forEach((t) => {
+      const ch = getPriceChange(t);
+      if (ch == null) return;
+      if (!best || ch > best.change) best = { symbol: t.symbol, change: ch };
+      if (!worst || ch < worst.change) worst = { symbol: t.symbol, change: ch };
+    });
+    return { count: watchlist.length, avgChange, best, worst };
+  }, [watchlist, filteredWatchlist, tokenPrices]);
 
   if (watchlist.length === 0) {
     return (
@@ -76,6 +92,34 @@ export default function TokenWatchlist() {
   }
 
   return (
+    <div className="space-y-4">
+      {watchlistSummary && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="rounded-xl p-4 bg-gray-800 border border-gray-700">
+            <p className="text-xs text-gray-400 mb-1">Watching</p>
+            <p className="text-2xl font-bold text-cyan-400">{watchlistSummary.count}</p>
+          </div>
+          <div className="rounded-xl p-4 bg-gray-800 border border-gray-700">
+            <p className="text-xs text-gray-400 mb-1">Avg 24h</p>
+            <p className={`text-2xl font-bold ${watchlistSummary.avgChange == null ? 'text-gray-400' : watchlistSummary.avgChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              {watchlistSummary.avgChange == null ? '—' : `${watchlistSummary.avgChange >= 0 ? '+' : ''}${watchlistSummary.avgChange.toFixed(2)}%`}
+            </p>
+          </div>
+          <div className="rounded-xl p-4 bg-gray-800 border border-gray-700">
+            <p className="text-xs text-gray-400 mb-1">Best</p>
+            <p className="text-sm font-bold text-green-400">
+              {watchlistSummary.best ? `${watchlistSummary.best.symbol} +${watchlistSummary.best.change.toFixed(2)}%` : '—'}
+            </p>
+          </div>
+          <div className="rounded-xl p-4 bg-gray-800 border border-gray-700">
+            <p className="text-xs text-gray-400 mb-1">Worst</p>
+            <p className="text-sm font-bold text-red-400">
+              {watchlistSummary.worst ? `${watchlistSummary.worst.symbol} ${watchlistSummary.worst.change.toFixed(2)}%` : '—'}
+            </p>
+          </div>
+        </div>
+      )}
+
     <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-white">Token Watchlist</h2>
@@ -94,7 +138,8 @@ export default function TokenWatchlist() {
       <div className="space-y-3">
         {filteredWatchlist.map((token, index) => {
           const priceKey = `${token.address}-${token.chainId}`;
-          const currentPrice = tokenPrices?.[priceKey] || token.price || 0;
+          const priceData = tokenPrices?.[priceKey];
+          const currentPrice = priceData?.usd ?? (typeof token.price === 'object' ? token.price?.usd : token.price) ?? 0;
           const priceChange = getPriceChange(token);
           const network = NETWORKS[token.chainId]?.name || 'Unknown';
 
@@ -153,6 +198,7 @@ export default function TokenWatchlist() {
           );
         })}
       </div>
+    </div>
     </div>
   );
 }

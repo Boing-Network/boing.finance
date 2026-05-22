@@ -14,6 +14,8 @@ import MetricTooltip from '../components/Tooltip';
 import { downloadCSV } from '../utils/exportData';
 import toast from 'react-hot-toast';
 import { CHART_COLORS } from '../theme/designTokens';
+import LiveMarketPulse from '../components/LiveMarketPulse';
+import FearGreedPanel from '../components/FearGreedPanel';
 
 // BoingAstronaut component
 
@@ -31,7 +33,6 @@ export default function Analytics() {
   const queryClient = useQueryClient();
   const [timeRange, setTimeRange] = useState(() => getStored(STORAGE_KEYS.timeRange, '24h'));
   const [activeSection, setActiveSection] = useState(() => getStored(STORAGE_KEYS.section, 'overview'));
-  const [overviewStep, setOverviewStep] = useState(1); // Wizard sub-steps for Overview
   const [selectedNetwork, setSelectedNetwork] = useState('all');
 
   useEffect(() => {
@@ -43,11 +44,6 @@ export default function Analytics() {
     try {
       localStorage.setItem(STORAGE_KEYS.section, activeSection);
     } catch (_) {}
-  }, [activeSection]);
-
-  // Reset overview step when switching sections
-  useEffect(() => {
-    if (activeSection !== 'overview') setOverviewStep(1);
   }, [activeSection]);
 
   const { data: analytics, isLoading, error, isFetching: analyticsFetching, dataUpdatedAt } = useQuery({
@@ -481,6 +477,8 @@ export default function Analytics() {
               </div>
             </div>
 
+            <LiveMarketPulse />
+
             {/* Analytics Content - section-level loading; no full-page block */}
             {error ? (
               <div className="text-center py-12">
@@ -491,56 +489,7 @@ export default function Analytics() {
                 {/* Overview Section */}
                 {activeSection === 'overview' && (
                   <div id="analytics-panel-overview" role="tabpanel" aria-labelledby="tab-overview" className="space-y-6">
-                  {/* Wizard step navigation for Overview */}
-                  <div
-                    className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl"
-                    style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
-                  >
-                    <div className="flex flex-wrap gap-2">
-                      {[
-                        { step: 1, label: 'Summary', icon: '📊' },
-                        { step: 2, label: 'Networks', icon: '🌐' },
-                        { step: 3, label: 'Pairs', icon: '🔄' },
-                        { step: 4, label: 'Activity', icon: '📈' },
-                        { step: 5, label: 'Insights', icon: '💡' },
-                      ].map(({ step, label, icon }) => (
-                        <button
-                          key={step}
-                          type="button"
-                          onClick={() => setOverviewStep(step)}
-                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
-                            overviewStep === step ? 'bg-blue-500 text-white' : 'hover:bg-gray-600 text-gray-300'
-                          }`}
-                        >
-                          <span>{icon}</span>
-                          <span>{label}</span>
-                        </button>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      {overviewStep > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => setOverviewStep(overviewStep - 1)}
-                          className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-600 hover:bg-gray-500 text-white"
-                        >
-                          ← Previous
-                        </button>
-                      )}
-                      {overviewStep < 5 && (
-                        <button
-                          type="button"
-                          onClick={() => setOverviewStep(overviewStep + 1)}
-                          className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white"
-                        >
-                          Next →
-                        </button>
-                      )}
-                    </div>
-                  </div>
 
-                  {/* Step 1: Key Metrics + Volume Chart */}
-                  {(overviewStep === 1) && <>
                 {/* Key Metrics - Compact */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   {isLoading && !marketData?.data ? (
@@ -790,10 +739,8 @@ export default function Analytics() {
                     </div>
                   )}
                 </div>
-                  </>}
 
-                  {/* Step 2: Network Performance + Network Distribution */}
-                  {(overviewStep === 2) && <>
+                  {/* Network Performance + Network Distribution */}
                 {/* Network Performance */}
                 <div className="card rounded-2xl shadow-xl p-6">
                   <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -915,10 +862,8 @@ export default function Analytics() {
                     </ResponsiveContainer>
                   </div>
                 )}
-                  </>}
 
-                  {/* Step 3: Top Trading Pairs */}
-                  {(overviewStep === 3) && <>
+                  {/* Top Trading Pairs */}
                 {/* Top Trading Pairs */}
                 <div className="card rounded-2xl shadow-xl p-6">
                   <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -1012,10 +957,8 @@ export default function Analytics() {
                     </div>
                   )}
                 </div>
-                  </>}
 
-                  {/* Step 4: User Activity */}
-                  {(overviewStep === 4) && <>
+                  {/* User Activity */}
                 {/* User Activity Chart */}
                 <div className="card rounded-2xl shadow-xl p-6">
                   <h2 className="text-2xl font-bold text-white mb-6">User Activity</h2>
@@ -1098,10 +1041,8 @@ export default function Analytics() {
                     </div>
                   )}
                 </div>
-                  </>}
 
-                  {/* Step 5: Price Insights, News, Platform Activity */}
-                  {(overviewStep === 5) && <>
+                  {/* Price Insights, News, Platform Activity */}
                 {cryptoNews?.articles?.length > 0 && (
                   <div
                     className="rounded-2xl shadow-xl p-6 mb-6"
@@ -1170,7 +1111,6 @@ export default function Analytics() {
                     </div>
                   </div>
                 )}
-                  </>}
                   </div>
                 )}
 
@@ -1184,6 +1124,7 @@ export default function Analytics() {
                       </div>
                     ) : marketData ? (
                       <>
+                        <FearGreedPanel />
                         <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-6">
                           <p className="text-sm text-blue-300">
                             <span className="font-semibold">Note:</span> Market data shows current global cryptocurrency statistics. 
@@ -1497,7 +1438,8 @@ export default function Analytics() {
                   </div>
                 )}
               </div>
-            )}</div>
+            )}
+          </div>
         </div>
       </div>
     </>

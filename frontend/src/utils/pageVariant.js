@@ -6,6 +6,8 @@ export function getPageVariant(pathname) {
   if (pathname === '/') return 'landing';
   if (pathname.startsWith('/analytics')) return 'analytics';
   if (pathname.startsWith('/portfolio')) return 'portfolio';
+  if (pathname.startsWith('/activity')) return 'analytics';
+  if (pathname.startsWith('/watchlist')) return 'analytics';
   if (pathname.startsWith('/governance')) return 'governance';
   if (pathname.startsWith('/boing')) return 'boing';
   if (pathname.startsWith('/docs') || pathname.startsWith('/blog') || pathname.startsWith('/help-center') || pathname.startsWith('/contact-us') || pathname.startsWith('/whitepaper') || pathname.startsWith('/terms') || pathname.startsWith('/privacy') || pathname.startsWith('/executive-summary') || pathname.startsWith('/status') || pathname.startsWith('/bug-report')) return 'docs';
