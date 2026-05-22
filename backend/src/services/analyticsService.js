@@ -154,17 +154,32 @@ class AnalyticsService {
   }
 
   // Build network stats and top pairs from DefiLlama breakdown
-  // Uses breakdown24h for 24h range, breakdown30d for 7d/30d
   buildFromDefiLlama(llamaData, networks, range = '24h') {
     const networkStats = {};
-    const pairVolumeMap = {}; // "DEX|Ethereum" -> volume
+    const pairVolumeMap = {};
 
     if (!llamaData?.protocols?.length) return { networkStats: {}, topPairs: [] };
 
-    const use24h = range === '24h';
+    const volumeField = {
+      '24h': 'total24h',
+      '7d': 'total7d',
+      '30d': 'total30d',
+      '1y': 'total1y',
+      all: 'totalAllTime',
+    }[range] || 'total24h';
+
+    const breakdownKey = range === '24h' ? 'breakdown24h' : 'breakdown30d';
+
     for (const proto of llamaData.protocols) {
-      const breakdown = use24h ? proto.breakdown24h : proto.breakdown30d;
+      const breakdown = proto[breakdownKey];
       if (!breakdown || typeof breakdown !== 'object') continue;
+
+      const protoPeriodTotal = parseFloat(proto[volumeField]) || 0;
+      let breakdownSum = 0;
+      for (const vol of Object.values(breakdown)) {
+        breakdownSum += typeof vol === 'number' ? vol : parseFloat(vol) || 0;
+      }
+      const scale = breakdownSum > 0 && protoPeriodTotal > 0 ? protoPeriodTotal / breakdownSum : 1;
 
       for (const [chainKey, pairs] of Object.entries(breakdown)) {
         const chainId = DEFILLAMA_TO_CHAIN[chainKey.toLowerCase()];
@@ -178,7 +193,8 @@ class AnalyticsService {
         let chainVol = 0;
         const pairData = typeof pairs === 'object' ? pairs : {};
         for (const [dexName, vol] of Object.entries(pairData)) {
-          const v = typeof vol === 'number' ? vol : parseFloat(vol) || 0;
+          const raw = typeof vol === 'number' ? vol : parseFloat(vol) || 0;
+          const v = raw * scale;
           chainVol += v;
           const pairKey = `${dexName}|${networkName}`;
           pairVolumeMap[pairKey] = (pairVolumeMap[pairKey] || 0) + v;
@@ -260,13 +276,20 @@ class AnalyticsService {
         if (topPairs.length === 0 && llamaBuilt.topPairs.length > 0) {
           topPairs = llamaBuilt.topPairs;
         }
-        if (totalVolume === 0 && (range === '24h' ? llamaData.total24h : llamaData.total30d)) {
-          totalVolume = range === '24h' ? llamaData.total24h : llamaData.total30d;
+        if (totalVolume === 0 && llamaData) {
+          const rootTotal = {
+            '24h': llamaData.total24h,
+            '7d': llamaData.total7d,
+            '30d': llamaData.total30d,
+            '1y': llamaData.total1y,
+            all: llamaData.totalAllTime,
+          }[range];
+          if (rootTotal) totalVolume = rootTotal;
         }
       }
 
-      // Final fallback: CoinGecko total volume
-      if (totalVolume === 0 && globalMarketData?.data?.total_volume?.usd) {
+      // Final fallback: CoinGecko total volume (24h global only)
+      if (totalVolume === 0 && range === '24h' && globalMarketData?.data?.total_volume?.usd) {
         totalVolume = globalMarketData.data.total_volume.usd;
       }
 

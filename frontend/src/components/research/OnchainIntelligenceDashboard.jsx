@@ -78,7 +78,7 @@ export default function OnchainIntelligenceDashboard({
           Each panel translates <strong className="text-white">live onchain & market data</strong> into research outputs:
           liquidity migration (where volume is routing), narrative radar (attention + sentiment),
           smart-flow proxies (high turnover pairs), and <strong className="text-white">actionable briefs</strong> with explicit trade/research decisions.
-          Period: <span className="text-cyan-400">{timeRange}</span>.
+          Period: <span className="text-cyan-400">{timeRange === 'all' ? 'All time' : timeRange}</span>.
         </p>
       </div>
 

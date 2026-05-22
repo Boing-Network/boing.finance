@@ -20,6 +20,17 @@ import FearGreedPanel from '../components/FearGreedPanel';
 import ResearchBriefBanner from '../components/research/ResearchBriefBanner';
 import OnchainIntelligenceDashboard from '../components/research/OnchainIntelligenceDashboard';
 import { getFearGreedIndex } from '../services/fearGreedService';
+import {
+  ANALYTICS_TIME_RANGES,
+  isValidAnalyticsRange,
+  getRangeLabel,
+  getRangeShortLabel,
+  getCoinGeckoMarketChartDays,
+  resolveVolumeMetric,
+  formatUsdVolume,
+  sampleTimeSeries,
+  formatChartTimeLabel,
+} from '../utils/analyticsTimeRange';
 
 // BoingAstronaut component
 
@@ -36,7 +47,10 @@ function getStored(key, fallback) {
 export default function Analytics() {
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
-  const [timeRange, setTimeRange] = useState(() => getStored(STORAGE_KEYS.timeRange, '24h'));
+  const [timeRange, setTimeRange] = useState(() => {
+    const stored = getStored(STORAGE_KEYS.timeRange, '24h');
+    return isValidAnalyticsRange(stored) ? stored : '24h';
+  });
   const [activeSection, setActiveSection] = useState(() => getStored(STORAGE_KEYS.section, 'intelligence'));
   const [selectedNetwork, setSelectedNetwork] = useState('all');
 
@@ -129,7 +143,7 @@ export default function Analytics() {
 
   // Fetch trending tokens - Combined CoinGecko + The Graph
   const { data: trendingTokens, isLoading: trendingLoading } = useQuery({
-    queryKey: ['trending-tokens', selectedNetwork],
+    queryKey: ['trending-tokens', selectedNetwork, timeRange],
     queryFn: async () => {
       // If "All Networks" is selected, use CoinGecko (global trending)
       if (selectedNetwork === 'all') {
@@ -155,7 +169,7 @@ export default function Analytics() {
         const chainId = selectedNetwork === 'all' ? 1 : parseInt(selectedNetwork) || 1;
         
         // Use backend analytics endpoint instead of direct The Graph call
-        const response = await fetch(`${config.apiUrl}/analytics?range=24h&networks=${chainId}`, {
+        const response = await fetch(`${config.apiUrl}/analytics?range=${encodeURIComponent(timeRange)}&networks=${chainId}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -250,8 +264,7 @@ export default function Analytics() {
   const { data: historicalVolumeData } = useQuery({
     queryKey: ['historical-volume', timeRange],
     queryFn: async () => {
-      const daysMap = { '24h': 1, '7d': 7, '30d': 30, '1y': 365 };
-      const days = daysMap[timeRange] || 7;
+      const days = getCoinGeckoMarketChartDays(timeRange);
       const chart = await coingeckoService.getMarketChartByCoinId('bitcoin', days);
       if (!chart?.total_volumes?.length) return null;
       return chart.total_volumes.map(([ts, vol]) => ({ timestamp: ts, volume: vol }));
@@ -336,31 +349,32 @@ export default function Analytics() {
     }
   };
 
-  const timeRanges = [
-    { id: '24h', name: '24 Hours' },
-    { id: '7d', name: '7 Days' },
-    { id: '30d', name: '30 Days' },
-    { id: '1y', name: '1 Year' },
-  ];
+  const timeRanges = ANALYTICS_TIME_RANGES;
 
-  // Generate time-series data: DefiLlama (real DEX volume) first, then CoinGecko fallback. No synthetic data.
+  const volumeMetric = useMemo(
+    () => resolveVolumeMetric({
+      timeRange,
+      analytics,
+      defiLlamaVolumeData,
+      historicalVolumeData,
+      geckoTerminalVolume,
+      marketData,
+    }),
+    [timeRange, analytics, defiLlamaVolumeData, historicalVolumeData, geckoTerminalVolume, marketData]
+  );
+
+  // Volume chart series: DefiLlama first, CoinGecko fallback
   const generateTimeSeriesData = useMemo(() => {
-    if (defiLlamaVolumeData?.length > 0) {
-      return defiLlamaVolumeData;
-    }
+    if (defiLlamaVolumeData?.length > 0) return defiLlamaVolumeData;
     if (historicalVolumeData?.length > 0) {
-      const step = Math.max(1, Math.floor(historicalVolumeData.length / (timeRange === '24h' ? 24 : timeRange === '1y' ? 12 : 7)));
-      return historicalVolumeData
-        .filter((_, i) => i % step === 0 || i === historicalVolumeData.length - 1)
-        .map(({ timestamp, volume }) => {
-          const date = new Date(timestamp);
-          let label = timeRange === '24h'
-            ? date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
-            : (timeRange === '7d' || timeRange === '30d')
-              ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-              : date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-          return { time: label, volume, timestamp };
-        });
+      return sampleTimeSeries(
+        historicalVolumeData.map(({ timestamp, volume }) => ({
+          time: formatChartTimeLabel(timestamp, timeRange),
+          volume,
+          timestamp,
+        })),
+        timeRange
+      );
     }
     return [];
   }, [timeRange, defiLlamaVolumeData, historicalVolumeData]);
@@ -407,7 +421,8 @@ export default function Analytics() {
                         await Promise.all([
                           queryClient.invalidateQueries({ queryKey: ['analytics'] }),
                           queryClient.invalidateQueries({ queryKey: ['trending-tokens'] }),
-                          queryClient.invalidateQueries({ queryKey: ['historical-volume'] }),
+                          queryClient.invalidateQueries({ queryKey: ['defillama-dex-volume'] }),
+                          queryClient.invalidateQueries({ queryKey: ['analytics-dashboard'] }),
                           queryClient.invalidateQueries({ queryKey: ['market-data'] }),
                           queryClient.invalidateQueries({ queryKey: ['price-insights'] }),
                           queryClient.invalidateQueries({ queryKey: ['fear-greed-current'] }),
@@ -489,10 +504,10 @@ export default function Analytics() {
                           : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                       }`}
                     >
-                      {range.id === '24h' ? '24h' : range.id === '7d' ? '7d' : range.id === '30d' ? '30d' : '1y'}
+                      {range.shortLabel}
                     </button>
                   ))}
-                  <MetricTooltip content="Time range affects Volume chart and User Activity. Key metrics use real-time or 24h data.">
+                  <MetricTooltip content="Time range filters volume charts, network stats, trending pairs, platform activity, and research briefs. Market cap uses live CoinGecko data.">
                     <span className="text-gray-500 cursor-help ml-1 text-sm">ⓘ</span>
                   </MetricTooltip>
                 </div>
@@ -543,49 +558,17 @@ export default function Analytics() {
                       border: '1px solid var(--border-color)',
                     }}
                   >
-                    <MetricTooltip content={`Total ${timeRange === '24h' ? '24h' : timeRange === '7d' ? '7-day' : timeRange === '30d' ? '30-day' : '1-year'} DEX volume. Sources: DefiLlama, GeckoTerminal, or CoinGecko.`}>
+                    <MetricTooltip content={`Total DEX volume for ${getRangeLabel(timeRange).toLowerCase()}. 24h uses the latest daily point; longer windows sum daily volumes in range.`}>
                       <h3 className="text-sm font-medium mb-1 inline-flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
-                        Volume ({timeRange})
+                        Volume ({getRangeShortLabel(timeRange)})
                         <span className="text-gray-500 cursor-help text-xs">ⓘ</span>
                       </h3>
                     </MetricTooltip>
                     <p className="text-xl sm:text-2xl font-bold text-blue-400">
-                      {(() => {
-                        let volume = 0;
-                        if (analytics?.totalVolume && parseFloat(analytics.totalVolume) > 0 && timeRange === '24h') {
-                          volume = parseFloat(analytics.totalVolume);
-                        } else if (defiLlamaVolumeData?.length) {
-                          // For 7d/30d/1y: sum all points for period total; for 24h use last point
-                          if (timeRange === '24h') {
-                            const last = defiLlamaVolumeData[defiLlamaVolumeData.length - 1];
-                            volume = last?.volume ?? 0;
-                          } else {
-                            volume = defiLlamaVolumeData.reduce((sum, p) => sum + (Number(p?.volume) || 0), 0);
-                          }
-                        } else if (historicalVolumeData?.length) {
-                          volume = timeRange === '24h'
-                            ? (historicalVolumeData[historicalVolumeData.length - 1]?.volume ?? 0)
-                            : historicalVolumeData.reduce((sum, p) => sum + (Number(p?.volume) || 0), 0);
-                        } else if (geckoTerminalVolume?.volume24h && timeRange === '24h') {
-                          volume = geckoTerminalVolume.volume24h;
-                        } else if (marketData?.data?.total_volume?.usd && timeRange === '24h') {
-                          volume = marketData.data.total_volume.usd;
-                        }
-                        if (volume === 0 || isNaN(volume)) return 'N/A';
-                        if (volume >= 1e12) return `$${(volume / 1e12).toFixed(2)}T`;
-                        if (volume >= 1e9) return `$${(volume / 1e9).toFixed(2)}B`;
-                        if (volume >= 1e6) return `$${(volume / 1e6).toFixed(2)}M`;
-                        return `$${volume.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-                      })()}
+                      {formatUsdVolume(volumeMetric.volume) || 'N/A'}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
-                      {analytics?.totalVolume && parseFloat(analytics.totalVolume) > 0 
-                        ? 'DEX volume (backend API)' 
-                        : defiLlamaVolumeData?.length 
-                          ? (geckoTerminalVolume?.volume24h ? 'DEX volume (DefiLlama, cross-checked with GeckoTerminal)' : 'DEX volume (DefiLlama)')
-                          : geckoTerminalVolume?.volume24h 
-                            ? 'DEX volume sample (GeckoTerminal)' 
-                            : (marketData?.data?.total_volume?.usd ? 'Global crypto market (CoinGecko)' : 'Loading...')}
+                      {volumeMetric.source || 'Loading...'}
                     </p>
                   </div>
                   
@@ -686,7 +669,7 @@ export default function Analytics() {
                 <div className="card rounded-2xl shadow-xl p-6">
                   <div className="mb-4">
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                      <h2 className="text-2xl font-bold text-white">Volume Over Time ({timeRanges.find(r => r.id === timeRange)?.name})</h2>
+                      <h2 className="text-2xl font-bold text-white">Volume Over Time ({getRangeLabel(timeRange)})</h2>
                       {generateTimeSeriesData.length > 0 && (
                         <button
                           type="button"
@@ -728,9 +711,9 @@ export default function Analytics() {
                         <XAxis 
                           dataKey="time" 
                           stroke="var(--text-tertiary)"
-                          angle={timeRange === '1y' ? -45 : 0}
-                          textAnchor={timeRange === '1y' ? 'end' : 'middle'}
-                          height={timeRange === '1y' ? 80 : 30}
+                          angle={timeRange === '1y' || timeRange === 'all' ? -45 : 0}
+                          textAnchor={timeRange === '1y' || timeRange === 'all' ? 'end' : 'middle'}
+                          height={timeRange === '1y' || timeRange === 'all' ? 80 : 30}
                         />
                         <YAxis 
                           stroke="var(--text-tertiary)"
