@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import config from '../config';
@@ -18,7 +18,7 @@ import { CHART_COLORS } from '../theme/designTokens';
 import LiveMarketPulse from '../components/LiveMarketPulse';
 import FearGreedPanel from '../components/FearGreedPanel';
 import ResearchBriefBanner from '../components/research/ResearchBriefBanner';
-import OnchainIntelligenceDashboard from '../components/research/OnchainIntelligenceDashboard';
+import AnalyticsTopPairsView from '../components/AnalyticsTopPairsView';
 import { getFearGreedIndex } from '../services/fearGreedService';
 import {
   ANALYTICS_TIME_RANGES,
@@ -31,6 +31,8 @@ import {
   sampleTimeSeries,
   formatChartTimeLabel,
 } from '../utils/analyticsTimeRange';
+
+const OnchainIntelligenceDashboard = lazy(() => import('../components/research/OnchainIntelligenceDashboard'));
 
 // BoingAstronaut component
 
@@ -526,14 +528,16 @@ export default function Analytics() {
             ) : (
               <div className="space-y-8">
                 {activeSection === 'intelligence' && (
-                  <OnchainIntelligenceDashboard
-                    analytics={analytics}
-                    trendingTokens={trendingTokens}
-                    marketData={marketData}
-                    fearGreed={fearGreedData}
-                    cryptoNews={cryptoNews}
-                    timeRange={timeRange}
-                  />
+                  <Suspense fallback={<ChartSkeleton />}>
+                    <OnchainIntelligenceDashboard
+                      analytics={analytics}
+                      trendingTokens={trendingTokens}
+                      marketData={marketData}
+                      fearGreed={fearGreedData}
+                      cryptoNews={cryptoNews}
+                      timeRange={timeRange}
+                    />
+                  </Suspense>
                 )}
 
                 {/* Overview Section */}
@@ -541,7 +545,7 @@ export default function Analytics() {
                   <div id="analytics-panel-overview" role="tabpanel" aria-labelledby="tab-overview" className="space-y-6">
 
                 {/* Key Metrics - Compact */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4">
                   {isLoading && !marketData?.data ? (
                     [1, 2, 3, 4].map((i) => (
                       <div key={i} className="rounded-xl p-4 border animate-pulse" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
@@ -906,59 +910,7 @@ export default function Analytics() {
                     )}
                   </div>
                   {analytics?.topPairs && Array.isArray(analytics.topPairs) && analytics.topPairs.length > 0 ? (
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-700">
-                        <thead className="bg-gray-700">
-                          <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                              Pair
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                              Network
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                              Volume
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                              Liquidity
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                              APY
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-gray-800 divide-y divide-gray-700">
-                          {(analytics?.topPairs || []).map((pair, index) => (
-                            <tr key={index} className="hover:bg-gray-700 transition-colors">
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center">
-                                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mr-3">
-                                    <span className="text-white font-bold text-sm">
-                                      {pair.token0Symbol?.charAt(0) || 'T'}{pair.token1Symbol?.charAt(0) || 'T'}
-                                    </span>
-                                  </div>
-                                  <span className="text-white font-medium">
-                                    {pair.token0Symbol}/{pair.token1Symbol}
-                                  </span>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-gray-300">
-                                {pair.network}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-white">
-                                ${parseFloat(pair.volume || 0).toLocaleString()}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-white">
-                                ${parseFloat(pair.liquidity || 0).toLocaleString()}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-green-400">
-                                {pair.apy ? `${parseFloat(pair.apy).toFixed(2)}%` : '0%'}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                    <AnalyticsTopPairsView pairs={analytics.topPairs} />
                   ) : (
                     <div className="text-center py-12">
                       <div className="bg-gray-700/50 rounded-lg p-6 max-w-md mx-auto">
@@ -1086,7 +1038,7 @@ export default function Analytics() {
                 {dashboardStats && (
                   <div className="rounded-2xl shadow-xl p-6 mb-6" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
                     <h2 className="text-xl font-bold text-white mb-4">Platform Activity</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                       {[
                         { k: 'total_interactions', l: 'Interactions' },
                         { k: 'unique_users', l: 'Unique users' },
@@ -1296,7 +1248,7 @@ export default function Analytics() {
                     >
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
                         <h2 className="text-xl sm:text-2xl font-bold text-white shrink-0">Trending Tokens</h2>
-                        <div className="flex flex-col min-[480px]:flex-row min-[480px]:items-center gap-2 sm:gap-3 w-full sm:w-auto min-w-0">
+                        <div className="flex flex-col filter:flex-row filter:items-center gap-2 sm:gap-3 w-full sm:w-auto min-w-0">
                           <label htmlFor="network-selector" className="text-sm text-gray-300 shrink-0">Network:</label>
                           <select
                             id="network-selector"

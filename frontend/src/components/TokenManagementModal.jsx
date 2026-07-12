@@ -156,8 +156,8 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md max-h-[80vh] relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4 sm:p-6">
+      <div className="bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md max-h-[85vh] relative overflow-y-auto">
         <button
           className="absolute top-4 right-4 text-gray-400 hover:text-white"
           onClick={onClose}

@@ -14,7 +14,7 @@ export default function AchievementToast({ achievement, onDismiss }) {
       initial={{ opacity: 0, y: 50, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -20 }}
-      className="fixed bottom-6 right-6 z-[100] max-w-sm rounded-xl border shadow-xl flex items-center gap-4 p-4"
+      className="fixed bottom-[max(5.5rem,env(safe-area-inset-bottom,0px))] right-[max(1.5rem,env(safe-area-inset-right,0px))] left-[max(1rem,env(safe-area-inset-left,0px))] sm:left-auto z-[100] max-w-sm rounded-xl border shadow-xl flex items-center gap-4 p-4"
       style={{
         background: 'linear-gradient(135deg, var(--bg-card), var(--bg-secondary))',
         borderColor: 'var(--glow-cyan)'

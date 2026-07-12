@@ -244,7 +244,7 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network, onSetPriceAlert })
                 <LoadingSpinner />
               </div>
             ) : priceInfo ? (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
                   <p className="text-sm mb-1" style={{ color: 'var(--text-tertiary)' }}>Price (USD)</p>
                   <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
@@ -268,8 +268,8 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network, onSetPriceAlert })
             {/* Token Details */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Token Information</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="min-w-0">
                   <p className="text-sm mb-1" style={{ color: 'var(--text-tertiary)' }}>Address</p>
                   <div className="flex items-center space-x-2">
                     <p className="font-mono text-sm" style={{ color: 'var(--text-secondary)' }}>

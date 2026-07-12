@@ -107,8 +107,8 @@ const OnboardingTour = ({ onComplete }) => {
   // Welcome modal style
   if (currentStep === 0) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 backdrop-blur-sm">
-        <div className="bg-gray-800 rounded-2xl p-8 max-w-md mx-4 border border-cyan-500 shadow-2xl">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 backdrop-blur-sm p-4 sm:p-6">
+        <div className="bg-gray-800 rounded-2xl p-4 sm:p-8 max-w-md w-full border border-cyan-500 shadow-2xl">
           <div className="text-center mb-6">
             <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-transparent">
               {currentStepData.title}

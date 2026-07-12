@@ -35,7 +35,9 @@ import LiveMarketPulse from '../components/LiveMarketPulse';
 import ResearchBriefBanner from '../components/research/ResearchBriefBanner';
 import PortfolioResearchPanel from '../components/research/PortfolioResearchPanel';
 import { computePortfolioResearchInsights } from '../utils/researchIntelligence';
-import { CHART_COLORS } from '../theme/designTokens';
+import PortfolioTokenBalancesView from '../components/PortfolioTokenBalancesView';
+import TransactionHistoryList from '../components/TransactionHistoryList';
+import config from '../config';
 
 // MochiAstronaut component
 
@@ -353,6 +355,25 @@ export default function Portfolio() {
     staleTime: 60000
   });
 
+  const { data: recentTransactions = [], isLoading: recentTxLoading } = useQuery({
+    queryKey: ['portfolio-recent-transactions', account],
+    queryFn: async () => {
+      if (!account || !config?.apiUrl) return [];
+      try {
+        const res = await fetch(`${config.apiUrl}/transactions/${account}?filter=all`);
+        const data = await res.json();
+        if (data?.success && Array.isArray(data.data)) {
+          return data.data.slice(0, 5);
+        }
+      } catch {
+        /* API may be unavailable */
+      }
+      return [];
+    },
+    enabled: !!account && activeTab === 'overview',
+    staleTime: 60000,
+  });
+
   // Get portfolio history for charts (D1 API preferred, localStorage fallback)
   const portfolioHistory7d = useMemo(() => {
     if (apiHistory && apiHistory.length > 0) {
@@ -365,18 +386,6 @@ export default function Portfolio() {
       return filtered.length > 0 ? filtered : getPortfolioHistoryForChart(7);
     }
     return getPortfolioHistoryForChart(7);
-  }, [apiHistory]);
-  const _portfolioHistory30d = useMemo(() => {
-    if (apiHistory && apiHistory.length > 0) {
-      const cutoff = new Date();
-      cutoff.setDate(cutoff.getDate() - 30);
-      const filtered = apiHistory
-        .filter((h) => new Date(h.timestamp) >= cutoff)
-        .map((h) => ({ date: h.date || new Date(h.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), value: h.value, timestamp: h.timestamp }))
-        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-      return filtered.length > 0 ? filtered : getPortfolioHistoryForChart(30);
-    }
-    return getPortfolioHistoryForChart(30);
   }, [apiHistory]);
 
   const enrichedSummary = useMemo(() => {
@@ -910,6 +919,31 @@ export default function Portfolio() {
                     </div>
                   </div>
                 </div>
+
+                {account && (
+                  <div className="bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 border border-gray-700">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
+                      <h2 className="text-xl font-bold text-white">Recent Activity</h2>
+                      <Link to="/activity" className="text-cyan-400 hover:text-cyan-300 text-sm font-medium">
+                        View all activity →
+                      </Link>
+                    </div>
+                    {recentTxLoading ? (
+                      <div className="space-y-3">
+                        {[...Array(3)].map((_, i) => (
+                          <div key={i} className="h-16 rounded-xl bg-gray-700 animate-pulse" />
+                        ))}
+                      </div>
+                    ) : (
+                      <TransactionHistoryList
+                        transactions={recentTransactions}
+                        compact
+                        showStatus={false}
+                        emptyMessage="No recent transactions. Swaps, liquidity, and bridge activity will appear here."
+                      />
+                    )}
+                  </div>
+                )}
                   </>
                 )}
 
@@ -984,110 +1018,12 @@ export default function Portfolio() {
                             }, {})
                           : null;
                         return (
-                      <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-700">
-                          <thead className="bg-gray-700">
-                            <tr>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Token</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Network</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Balance</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Price</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Value</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">24h Change</th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-gray-800 divide-y divide-gray-700">
-                            {grouped ? Object.entries(grouped).flatMap(([network, tokens]) => [
-                              <tr key={`header-${network}`} className="bg-gray-700/50">
-                                <td colSpan={6} className="px-6 py-2 text-sm font-semibold text-cyan-400">{network}</td>
-                              </tr>,
-                              ...tokens.map((token, index) => (
-                                <tr key={`${network}-${token.symbol}-${token.chainId}-${index}`} className="hover:bg-gray-700 transition-colors">
-                                  <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex items-center">
-                                      <div className="w-8 h-8 bg-gradient-to-br from-finance-purple to-cyan-600 rounded-full flex items-center justify-center mr-3">
-                                        <span className="text-white font-bold text-sm">
-                                          {token.symbol?.charAt(0) || 'T'}
-                                        </span>
-                                      </div>
-                                      <div>
-                                        <div className="text-white font-medium">{token.symbol}</div>
-                                        <div className="text-sm text-gray-400">{token.name}</div>
-                                      </div>
-                                    </div>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-gray-300">
-                                    {NETWORKS[token.chainId]?.name || `Chain ${token.chainId}`}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-white">
-                                    {parseFloat(token.balance).toLocaleString(undefined, { maximumFractionDigits: 6 })} {token.symbol}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-white">
-                                    ${token.price ? token.price.toLocaleString(undefined, { maximumFractionDigits: 4 }) : '0.00'}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-white font-semibold">
-                                    ${token.value ? token.value.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0.00'}
-                                  </td>
-                                  <td className={`px-6 py-4 whitespace-nowrap ${token.priceChange24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                    {token.priceChange24h !== undefined ? (
-                                      <>
-                                        {token.priceChange24h >= 0 ? '+' : ''}
-                                        {token.priceChange24h.toFixed(2)}%
-                                      </>
-                                    ) : 'N/A'}
-                                  </td>
-                                </tr>
-                              ))
-                            ]) : filtered.map((token, index) => (
-                                <tr key={index} className="hover:bg-gray-700 transition-colors">
-                                  <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex items-center">
-                                      <div className="w-8 h-8 bg-gradient-to-br from-finance-purple to-cyan-600 rounded-full flex items-center justify-center mr-3">
-                                        <span className="text-white font-bold text-sm">
-                                          {token.symbol?.charAt(0) || 'T'}
-                                        </span>
-                                      </div>
-                                      <div>
-                                        <div className="text-white font-medium">{token.symbol}</div>
-                                        <div className="text-sm text-gray-400">{token.name}</div>
-                                      </div>
-                                    </div>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-gray-300">
-                                    {NETWORKS[token.chainId]?.name || `Chain ${token.chainId}`}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-white">
-                                    {parseFloat(token.balance).toLocaleString(undefined, { maximumFractionDigits: 6 })} {token.symbol}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-white">
-                                    ${token.price ? token.price.toLocaleString(undefined, { maximumFractionDigits: 4 }) : '0.00'}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-white font-semibold">
-                                    ${token.value ? token.value.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0.00'}
-                                  </td>
-                                  <td className={`px-6 py-4 whitespace-nowrap ${token.priceChange24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                    {token.priceChange24h !== undefined ? (
-                                      <>
-                                        {token.priceChange24h >= 0 ? '+' : ''}
-                                        {token.priceChange24h.toFixed(2)}%
-                                      </>
-                                    ) : 'N/A'}
-                                  </td>
-                                </tr>
-                              ))}
-                          </tbody>
-                          <tfoot className="bg-gray-700">
-                            <tr>
-                              <td colSpan="4" className="px-6 py-4 text-right font-semibold text-white">
-                                Total Portfolio Value:
-                              </td>
-                              <td colSpan="2" className="px-6 py-4 text-left font-bold text-cyan-400">
-                                ${tokenBalances.totalValue ? tokenBalances.totalValue.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0.00'}
-                              </td>
-                            </tr>
-                          </tfoot>
-                        </table>
-                      </div>
+                      <PortfolioTokenBalancesView
+                        tokens={filtered}
+                        grouped={grouped}
+                        groupByNetwork={groupByNetwork}
+                        totalValue={tokenBalances.totalValue}
+                      />
                         );
                       })()
                     ) : (

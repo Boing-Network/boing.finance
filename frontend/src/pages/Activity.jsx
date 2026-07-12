@@ -24,17 +24,8 @@ import LiveMarketPulse from '../components/LiveMarketPulse';
 import ResearchBriefBanner from '../components/research/ResearchBriefBanner';
 import WalletBehaviorPanel from '../components/research/WalletBehaviorPanel';
 import toast from 'react-hot-toast';
+import TransactionHistoryList from '../components/TransactionHistoryList';
 import EmptyState from '../components/EmptyState';
-
-const EXPLORERS = {
-  1: 'https://etherscan.io/tx/',
-  137: 'https://polygonscan.com/tx/',
-  56: 'https://bscscan.com/tx/',
-  42161: 'https://arbiscan.io/tx/',
-  10: 'https://optimistic.etherscan.io/tx/',
-  8453: 'https://basescan.org/tx/',
-  11155111: 'https://sepolia.etherscan.io/tx/',
-};
 
 const TIME_RANGES = [
   { id: '7d', label: '7d' },
@@ -127,38 +118,6 @@ export default function Activity() {
     [swapTxs, swapPrices]
   );
 
-  const formatTime = (ts) => {
-    if (!ts) return '—';
-    const d = new Date(ts);
-    const now = new Date();
-    const diff = now - d;
-    if (diff < 60000) return 'Just now';
-    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
-    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
-    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  };
-
-  const openExplorer = (txHash, cId) => {
-    const explorer = EXPLORERS[cId] || EXPLORERS[1];
-    window.open(explorer + txHash, '_blank');
-  };
-
-  const getTypeIcon = (type) => {
-    switch (type) {
-      case 'swap': return <span className="text-blue-400">⇄</span>;
-      case 'liquidity': return <span className="text-green-400">+</span>;
-      case 'bridge': return <span className="text-purple-400">⇌</span>;
-      default: return <span className="text-gray-400">•</span>;
-    }
-  };
-
-  const getTypeLabel = (tx) => {
-    if (tx.type === 'swap') return `Swap ${tx.from || ''} → ${tx.to || ''}`;
-    if (tx.type === 'liquidity') return `${tx.action === 'add' ? 'Add' : 'Remove'} Liquidity`;
-    if (tx.type === 'bridge') return `Bridge ${tx.fromChain || ''} → ${tx.toChain || ''}`;
-    return tx.action || tx.type || 'Activity';
-  };
-
   const handleExport = () => {
     if (!filtered.length) {
       toast.error('No activity to export');
@@ -237,7 +196,7 @@ export default function Activity() {
                 </div>
                 <Link to="/watchlist" className="text-sm text-cyan-400 hover:text-cyan-300">Watchlist →</Link>
               </div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div className="rounded-xl p-3 bg-gray-900/50 border border-gray-700">
                   <p className="text-xs text-gray-400 mb-1">Est. volume</p>
                   <p className="text-xl font-bold text-cyan-400">{formatUsd(pnlInsights.estimatedVolumeUsd)}</p>
@@ -270,7 +229,7 @@ export default function Activity() {
           )}
 
           {/* Summary stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
             {[
               { label: 'Total transactions', value: stats.total, color: 'text-cyan-400' },
               { label: 'Swaps', value: stats.byType.swap, color: 'text-blue-400' },
@@ -383,38 +342,13 @@ export default function Activity() {
                 <p className="text-gray-400 mt-4">Loading activity...</p>
               </div>
             ) : filtered.length > 0 ? (
-              <ul className="divide-y divide-gray-700">
-                {filtered.map((tx) => (
-                  <li key={tx.id || tx.txHash} className="interactive-card p-4 hover:bg-gray-700/50 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0 text-lg">
-                        {getTypeIcon(tx.type)}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-white font-medium truncate">{getTypeLabel(tx)}</p>
-                        <p className="text-sm text-gray-400">
-                          {tx.amount && typeof tx.amount === 'string' ? tx.amount : ''}
-                          {tx.amount ? ' • ' : ''}{formatTime(tx.timestamp)}
-                          {tx.source === 'tracked' && <span className="text-gray-500"> • tracked</span>}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className="text-xs text-gray-500 hidden sm:inline">
-                        {NETWORKS[tx.chainId]?.name || `Chain ${tx.chainId}`}
-                      </span>
-                      {tx.txHash && (
-                        <button
-                          onClick={() => openExplorer(tx.txHash, tx.chainId)}
-                          className="interactive-link text-cyan-400 hover:text-cyan-300 text-sm font-medium"
-                        >
-                          View
-                        </button>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              <div className="p-3 sm:p-4">
+                <TransactionHistoryList
+                  transactions={filtered}
+                  compact
+                  showStatus={false}
+                />
+              </div>
             ) : (
               <EmptyState
                 variant="activity"

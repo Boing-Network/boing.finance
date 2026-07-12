@@ -580,8 +580,87 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
     );
   }
 
+  const renderPoolAvatars = (pool) => (
+    <div className="flex -space-x-2 shrink-0">
+      <div className="w-8 h-8 bg-cyan-600 rounded-full flex items-center justify-center">
+        <span className="text-white font-bold text-sm">
+          {pool.token0?.symbol?.charAt(0) || 'T'}
+        </span>
+      </div>
+      <div className="w-8 h-8 bg-finance-green rounded-full flex items-center justify-center">
+        <span className="text-white font-bold text-sm">
+          {pool.token1?.symbol?.charAt(0) || 'T'}
+        </span>
+      </div>
+    </div>
+  );
+
+  const renderPoolBadges = (pool) => (
+    <div className="flex flex-wrap items-center gap-1.5 mt-1">
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getChainColorForTable(pool.chainId)} text-white`}>
+        {getChainNameForTable(pool.chainId)}
+      </span>
+      {pool.source && (
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+          pool.isYourPool ? 'bg-finance-green' : 'bg-cyan-600'
+        } text-white`}>
+          {pool.source}
+        </span>
+      )}
+    </div>
+  );
+
   return (
     <div className="rounded-xl overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
+      {/* Mobile card list */}
+      <div className="lg:hidden divide-y" style={{ borderColor: 'var(--border-color)' }}>
+        {pools.map((pool, index) => (
+          <button
+            key={`mobile-${pool.address}-${index}`}
+            type="button"
+            className="w-full text-left px-4 py-4 hover:bg-cyan-500/5 transition-colors"
+            onClick={() => handleRowClick(pool)}
+          >
+            <div className="flex items-start gap-3 min-w-0">
+              {renderPoolAvatars(pool)}
+              <div className="flex-1 min-w-0">
+                <div className="font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                  {pool.token0?.symbol}/{pool.token1?.symbol}
+                </div>
+                {renderPoolBadges(pool)}
+              </div>
+              <span className="shrink-0 text-cyan-400" aria-hidden>→</span>
+            </div>
+            <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+              <div>
+                <dt className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Total Liquidity</dt>
+                <dd className="font-medium text-white">{pool.formattedTvl ? pool.formattedTvl : '$0'}</dd>
+              </div>
+              <div>
+                <dt className="text-xs" style={{ color: 'var(--text-tertiary)' }}>APY</dt>
+                <dd className="font-medium text-finance-green">
+                  {pool.apy && pool.apy > 0 ? `${pool.apy.toFixed(2)}%` : 'No data'}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs" style={{ color: 'var(--text-tertiary)' }}>24h Volume</dt>
+                <dd className="font-medium text-white">
+                  {pool.formattedVolume24h && pool.volume24h > 0 ? pool.formattedVolume24h : 'No data'}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Fee</dt>
+                <dd className="font-medium text-white">
+                  {pool.fee ? `${(pool.fee * 100).toFixed(2)}%` : '0.3%'}
+                </dd>
+              </div>
+            </dl>
+          </button>
+        ))}
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden lg:block">
       {/* Table Header */}
       <div className="px-6 py-4 border-b transition-colors duration-200" style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border-color)' }}>
         <div className="grid grid-cols-11 gap-4 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
@@ -676,6 +755,7 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
             {/* User-specific info row (expanded) */}
           </div>
         ))}
+      </div>
       </div>
     </div>
   );

@@ -80,7 +80,7 @@ const ShareTokenModal = ({ token, isOpen, onClose }) => {
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 backdrop-blur-sm p-4 sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby="share-token-title"
@@ -96,11 +96,11 @@ const ShareTokenModal = ({ token, isOpen, onClose }) => {
       }}
     >
       <div 
-        className="bg-gray-800 rounded-2xl p-8 max-w-md mx-4 border border-cyan-500 shadow-2xl"
+        className="bg-gray-800 rounded-2xl p-4 sm:p-6 max-w-md w-full max-h-[85vh] overflow-y-auto border border-cyan-500 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
-          <h2 id="share-token-title" className="text-2xl font-bold text-white">
+          <h2 id="share-token-title" className="text-lg sm:text-2xl font-bold text-white min-w-0 truncate pr-2">
             Share {token.symbol}
           </h2>
           <button
@@ -148,7 +148,7 @@ const ShareTokenModal = ({ token, isOpen, onClose }) => {
         </div>
 
         {/* Share Buttons */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-1 compact:grid-cols-2 gap-3 mb-6">
           <button
             onClick={() => handleShare('twitter')}
             className="flex items-center justify-center space-x-2 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"

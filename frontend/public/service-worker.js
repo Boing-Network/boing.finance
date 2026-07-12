@@ -3,7 +3,7 @@
 // IMPORTANT: Update CACHE_VERSION on each deployment to force cache invalidation
 // This ensures users get the latest version after deployment
 
-const CACHE_VERSION = 'v1776275042530'; // Update this version number on each deployment
+const CACHE_VERSION = 'v1783859310699'; // Keep in sync with public/version.json on deploy
 const CACHE_NAME = 'boing-finance-' + CACHE_VERSION;
 const RUNTIME_CACHE = 'boing-finance-runtime-' + CACHE_VERSION;
 
@@ -140,37 +140,19 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle API requests with network-first strategy
-  if (url.pathname.startsWith('/api/')) {
+  // API / live data: network-only — never cache portfolio, txs, or market JSON
+  // (stale runtime cache caused misleading offline "success" payloads).
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/transactions/')) {
     event.respondWith(
-      fetch(request, { cache: 'no-store' })
-        .then((response) => {
-          // Clone the response
-          const responseToCache = response.clone();
-          // Cache successful responses
-          if (response.status === 200) {
-            caches.open(RUNTIME_CACHE).then((cache) => {
-              cache.put(request, responseToCache);
-            });
+      fetch(request, { cache: 'no-store' }).catch(() =>
+        new Response(
+          JSON.stringify({ error: 'Offline', message: 'Network request failed' }),
+          {
+            status: 503,
+            headers: { 'Content-Type': 'application/json' },
           }
-          return response;
-        })
-        .catch(() => {
-          // Network failed, try cache
-          return caches.match(request).then((cachedResponse) => {
-            if (cachedResponse) {
-              return cachedResponse;
-            }
-            // Return offline page or error response
-            return new Response(
-              JSON.stringify({ error: 'Offline', message: 'Network request failed' }),
-              {
-                status: 503,
-                headers: { 'Content-Type': 'application/json' }
-              }
-            );
-          });
-        })
+        )
+      )
     );
     return;
   }

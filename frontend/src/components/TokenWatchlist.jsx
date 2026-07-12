@@ -94,7 +94,7 @@ export default function TokenWatchlist() {
   return (
     <div className="space-y-4">
       {watchlistSummary && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="rounded-xl p-4 bg-gray-800 border border-gray-700">
             <p className="text-xs text-gray-400 mb-1">Watching</p>
             <p className="text-2xl font-bold text-cyan-400">{watchlistSummary.count}</p>

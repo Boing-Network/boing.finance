@@ -103,7 +103,7 @@ const WalletConnect = () => {
         <button
           type="button"
           onClick={() => setShowDropdown(!showDropdown)}
-          className="bg-theme-secondary hover:bg-theme-tertiary text-theme-primary px-2.5 py-2 min-[1150px]:max-xl:px-2 xl:px-4 rounded-lg text-xs min-[1150px]:max-xl:text-xs xl:text-sm font-medium transition-colors flex items-center gap-1.5 xl:gap-2 border border-theme max-w-[min(100%,11rem)] min-[1150px]:max-xl:max-w-[9rem] xl:max-w-[13rem] 2xl:max-w-none min-w-0"
+          className="bg-theme-secondary hover:bg-theme-tertiary text-theme-primary px-2.5 py-2 nav:max-xl:px-2 xl:px-4 rounded-lg text-xs nav:max-xl:text-xs xl:text-sm font-medium transition-colors flex items-center gap-1.5 xl:gap-2 border border-theme max-w-[min(100%,11rem)] nav:max-xl:max-w-[9rem] xl:max-w-[13rem] 2xl:max-w-none min-w-0"
           title={account || undefined}
         >
           <WalletIcon className="w-4 h-4 shrink-0" />

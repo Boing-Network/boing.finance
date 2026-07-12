@@ -146,7 +146,7 @@ export default function SecurityBadges({
       </div>
 
       {/* Security Badges */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         {/* Audit Status */}
         <div className={`flex items-center space-x-2 p-3 rounded-lg ${
           securityInfo.auditStatus === 'audited' ? 'bg-green-900/20 border border-green-500/20' :
