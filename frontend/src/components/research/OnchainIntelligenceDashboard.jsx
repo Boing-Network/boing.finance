@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import SmartFlowsView from './SmartFlowsView';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
@@ -175,32 +176,7 @@ export default function OnchainIntelligenceDashboard({
           Pairs with high vol/liquidity or narrative overlap · behavioral pattern for informed-flow research
         </p>
         {smartFlows.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="text-left text-gray-400 border-b border-gray-700">
-                  <th className="py-2 pr-4">Pair</th>
-                  <th className="py-2 pr-4">Network</th>
-                  <th className="py-2 pr-4">Vol/Liq</th>
-                  <th className="py-2 pr-4">Signal</th>
-                </tr>
-              </thead>
-              <tbody>
-                {smartFlows.map((row, i) => (
-                  <tr key={i} className="border-b border-gray-800 text-gray-200">
-                    <td className="py-2.5 pr-4 font-medium">{row.pair}</td>
-                    <td className="py-2.5 pr-4">{row.network}</td>
-                    <td className="py-2.5 pr-4">{(row.volToLiq * 100).toFixed(0)}%</td>
-                    <td className="py-2.5 pr-4">
-                      <span className={`text-xs px-2 py-0.5 rounded ${row.isTrending ? 'bg-green-500/20 text-green-300' : 'bg-blue-500/20 text-blue-300'}`}>
-                        {row.signal}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <SmartFlowsView rows={smartFlows} />
         ) : (
           <p className="text-gray-500 text-sm py-4">Smart-flow table fills when top pair volume data is available.</p>
         )}

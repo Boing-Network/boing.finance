@@ -121,7 +121,7 @@ const OverviewSection = () => {
       <div>
         <h3 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Supported Networks</h3>
         <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {[
               { name: 'Ethereum', icon: '🔵', type: 'Mainnet' },
               { name: 'Polygon', icon: '🟣', type: 'Mainnet' },

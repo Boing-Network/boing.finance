@@ -30,7 +30,7 @@ export default function WalletBehaviorPanel({ transactions, stats }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
         <div className="rounded-lg p-3 bg-gray-900/50 border border-gray-700">
           <p className="text-xs text-gray-500">Primary chain</p>
           <p className="text-sm font-semibold text-white">{primaryChainName}</p>

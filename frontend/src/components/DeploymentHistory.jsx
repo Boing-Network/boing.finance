@@ -151,7 +151,7 @@ const DeploymentHistory = ({ onSelectDeployment, onClose }) => {
                 {getStatusBadge(deployment.status)}
               </div>
 
-              <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3 text-xs">
                 <div>
                   <span style={{ color: 'var(--text-tertiary)' }}>Network: </span>
                   <span style={{ color: 'var(--text-secondary)' }}>

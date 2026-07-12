@@ -5,87 +5,94 @@ import { useWalletConnection } from '../hooks/useWalletConnection';
 import { transactionTrackingService } from '../services/transactionTrackingService.js';
 import toast from 'react-hot-toast';
 import EmptyState from './EmptyState';
+import TransactionHistoryList from './TransactionHistoryList';
+
+const FILTER_TABS = [
+  { key: 'all', label: 'All' },
+  { key: 'swap', label: 'Swaps' },
+  { key: 'liquidity', label: 'Liquidity' },
+  { key: 'bridge', label: 'Bridge' },
+];
 
 export default function TransactionHistoryModal({ isOpen, onClose }) {
   const { account } = useWalletConnection();
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, swap, liquidity, bridge
+  const [filter, setFilter] = useState('all');
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [isPolling, setIsPolling] = useState(false);
   const pollingIntervalRef = useRef(null);
+  const prevCountRef = useRef(0);
+  const closeButtonRef = useRef(null);
 
-  const loadTransactions = useCallback(async () => {
+  const loadTransactions = useCallback(async ({ silent = false } = {}) => {
     if (!account) {
       setTransactions([]);
       setLoading(false);
       setError(null);
+      prevCountRef.current = 0;
       return;
     }
 
-    setLoading(true);
+    if (!silent) setLoading(true);
     setError(null);
     try {
       const apiUrl = getApiUrl();
       const response = await axios.get(`${apiUrl}/transactions/${account}?filter=${filter}`);
       if (response.data.success) {
         const newTransactions = response.data.data || [];
-        
-        // Check if we have new transactions (for notification)
-        if (transactions.length > 0 && newTransactions.length > transactions.length) {
-          const newCount = newTransactions.length - transactions.length;
+        if (prevCountRef.current > 0 && newTransactions.length > prevCountRef.current) {
+          const newCount = newTransactions.length - prevCountRef.current;
           console.log(`Found ${newCount} new transactions`);
         }
-        
+        prevCountRef.current = newTransactions.length;
         setTransactions(newTransactions);
         setLastUpdated(new Date());
-        setError(null); // Clear any previous errors
+        setError(null);
       } else {
-        // If API returns success: false but no error, treat as no transactions
         setTransactions([]);
+        prevCountRef.current = 0;
         setError(null);
         setLastUpdated(new Date());
       }
-    } catch (error) {
-      console.error('Failed to load transactions:', error);
-      
-      // Check if it's a network error or API not available
-      if (error.code === 'NETWORK_ERROR' || error.response?.status >= 500) {
-        // API not available - show no transactions state instead of error
+    } catch (err) {
+      console.error('Failed to load transactions:', err);
+
+      if (err.code === 'NETWORK_ERROR' || err.response?.status >= 500) {
         setTransactions([]);
         setError(null);
         setLastUpdated(new Date());
-      } else if (error.response?.status === 404) {
-        // No transactions found - this is normal for new users
+      } else if (err.response?.status === 404) {
         setTransactions([]);
+        prevCountRef.current = 0;
         setError(null);
         setLastUpdated(new Date());
       } else {
-        // Only show error for actual API errors, not missing data
         setError('Unable to load transaction history. Features are still being deployed.');
         setTransactions([]);
       }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
-  }, [account, filter, transactions.length]);
+  }, [account, filter]);
 
-  // Subscribe to transaction updates
   useEffect(() => {
     if (isOpen && account) {
       const unsubscribe = transactionTrackingService.subscribe((newTransactions) => {
-        console.log('Received new transaction update:', newTransactions);
-        // Add new transactions to the beginning of the list
-        setTransactions(prev => {
-          const existingIds = new Set(prev.map(tx => tx.txHash));
-          const uniqueNewTransactions = newTransactions.filter(tx => !existingIds.has(tx.txHash));
-          
-          // Show notification for new transactions
+        setTransactions((prev) => {
+          const existingIds = new Set(prev.map((tx) => tx.txHash));
+          const uniqueNewTransactions = newTransactions.filter((tx) => !existingIds.has(tx.txHash));
+
           if (uniqueNewTransactions.length > 0) {
-            toast.success(`${uniqueNewTransactions.length} new transaction${uniqueNewTransactions.length > 1 ? 's' : ''} added to history!`);
+            toast.success(
+              `${uniqueNewTransactions.length} new transaction${uniqueNewTransactions.length > 1 ? 's' : ''} added to history!`
+            );
           }
-          
-          return [...uniqueNewTransactions, ...prev];
+
+          const next = [...uniqueNewTransactions, ...prev];
+          prevCountRef.current = next.length;
+          return next;
         });
         setLastUpdated(new Date());
       });
@@ -94,7 +101,6 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
     }
   }, [isOpen, account]);
 
-  // Close on Escape key
   useEffect(() => {
     if (!isOpen) return;
     const handleEscape = (e) => {
@@ -104,181 +110,105 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
     return () => window.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
 
-  // Start polling for real-time updates when modal is open
+  useEffect(() => {
+    if (isOpen && closeButtonRef.current) {
+      closeButtonRef.current.focus();
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (isOpen && account) {
-      // Load immediately
       loadTransactions();
-      
-      // Set up polling every 30 seconds (less aggressive since most features aren't deployed yet)
+      setIsPolling(true);
       pollingIntervalRef.current = setInterval(() => {
-        loadTransactions();
+        loadTransactions({ silent: true });
       }, 30000);
-      
+
       return () => {
         if (pollingIntervalRef.current) {
           clearInterval(pollingIntervalRef.current);
           pollingIntervalRef.current = null;
         }
+        setIsPolling(false);
       };
-    } else {
-      // Clear polling when modal is closed or account changes
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
-      }
     }
+
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+    setIsPolling(false);
   }, [isOpen, account, loadTransactions]);
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'confirmed': return 'text-green-400';
-      case 'pending': return 'text-yellow-400';
-      case 'failed': return 'text-red-400';
-      default: return 'text-gray-400';
+  const handleFilterKeyDown = (e) => {
+    const keys = FILTER_TABS.map((t) => t.key);
+    const i = keys.indexOf(filter);
+    if (e.key === 'ArrowRight' && i < keys.length - 1) {
+      e.preventDefault();
+      setFilter(keys[i + 1]);
+    } else if (e.key === 'ArrowLeft' && i > 0) {
+      e.preventDefault();
+      setFilter(keys[i - 1]);
     }
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'confirmed':
-        return (
-          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-        );
-      case 'pending':
-        return (
-          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        );
-      case 'failed':
-        return (
-          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        );
-      default:
-        return (
-          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        );
-    }
-  };
-
-  const getTypeIcon = (type) => {
-    switch (type) {
-      case 'swap':
-        return (
-          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-            </svg>
-          </div>
-        );
-      case 'liquidity':
-        return (
-          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-          </div>
-        );
-      case 'bridge':
-        return (
-          <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-            </svg>
-          </div>
-        );
-      default:
-        return (
-          <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center">
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        );
-    }
-  };
-
-  const formatTime = (timestamp) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diff = now - date;
-    
-    if (diff < 60000) return 'Just now';
-    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
-    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
-    return date.toLocaleDateString();
-  };
-
-  const openExplorer = (txHash, chainId) => {
-    const explorers = {
-      1: 'https://etherscan.io/tx/',
-      137: 'https://polygonscan.com/tx/',
-      56: 'https://bscscan.com/tx/',
-      42161: 'https://arbiscan.io/tx/',
-      11155111: 'https://sepolia.etherscan.io/tx/' // Sepolia testnet
-    };
-    const explorer = explorers[chainId] || explorers[1];
-    window.open(explorer + txHash, '_blank');
   };
 
   if (!isOpen) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4 sm:p-6"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label="Transaction history modal"
+      aria-labelledby="transaction-history-title"
     >
       <div
-        className="bg-theme-card rounded-lg shadow-lg p-6 w-full max-w-4xl max-h-[80vh] relative border border-theme"
+        className="bg-theme-card rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-4xl max-h-[85vh] relative border border-theme overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <button
+          ref={closeButtonRef}
           className="absolute top-4 right-4 text-theme-tertiary hover:text-theme-primary"
           onClick={onClose}
           aria-label="Close transaction history"
         >
           &times;
         </button>
-        
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-theme-primary">Transaction History</h2>
-          <div className="flex items-center space-x-4">
+
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4 pr-8">
+          <h2 id="transaction-history-title" className="text-lg sm:text-xl font-bold text-theme-primary">
+            Transaction History
+          </h2>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
             {lastUpdated && (
-              <div className="text-theme-tertiary text-xs">
-                Last updated: {formatTime(lastUpdated.toISOString())}
+              <div className="text-theme-tertiary text-xs whitespace-nowrap">
+                Last updated: {new Date(lastUpdated).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
               </div>
             )}
-            {pollingIntervalRef.current && (
+            {isPolling && (
               <div className="flex items-center space-x-2 text-green-400 text-sm">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" aria-hidden />
                 <span>Live updates</span>
               </div>
             )}
           </div>
         </div>
-        
-        {/* Filter Tabs */}
-        <div className="flex space-x-1 mb-6 bg-theme-secondary rounded-lg p-1">
-          {[
-            { key: 'all', label: 'All' },
-            { key: 'swap', label: 'Swaps' },
-            { key: 'liquidity', label: 'Liquidity' },
-            { key: 'bridge', label: 'Bridge' }
-          ].map((tab) => (
+
+        <div
+          className="flex flex-wrap gap-1 mb-6 bg-theme-secondary rounded-lg p-1"
+          role="tablist"
+          aria-label="Transaction filters"
+          onKeyDown={handleFilterKeyDown}
+        >
+          {FILTER_TABS.map((tab) => (
             <button
               key={tab.key}
+              type="button"
+              role="tab"
+              aria-selected={filter === tab.key}
+              tabIndex={filter === tab.key ? 0 : -1}
               onClick={() => setFilter(tab.key)}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              className={`flex-1 min-w-[4.5rem] py-2 px-2 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-colors ${
                 filter === tab.key
                   ? 'bg-blue-600 text-white'
                   : 'text-theme-secondary hover:text-theme-primary'
@@ -289,19 +219,20 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
           ))}
         </div>
 
-        {/* Transactions List */}
-        <div className="overflow-y-auto max-h-96">
+        <div className="overflow-y-auto flex-1 min-h-0 max-h-[min(24rem,50vh)]">
           {loading ? (
-            <div className="space-y-4">
+            <div className="space-y-4" aria-busy="true" aria-label="Loading transactions">
               {[...Array(3)].map((_, i) => (
                 <div key={i} className="animate-pulse">
-                  <div className="bg-theme-secondary rounded-lg h-20"></div>
+                  <div className="bg-theme-secondary rounded-lg h-20" />
                 </div>
               ))}
             </div>
           ) : error ? (
             <div className="text-center py-8">
-              <div className="text-4xl mb-4">⚠️</div>
+              <div className="text-4xl mb-4" aria-hidden>
+                ⚠️
+              </div>
               <h4 className="text-lg font-semibold text-theme-primary mb-2">Unable to Load Transaction History</h4>
               <p className="text-theme-secondary mb-4">{error}</p>
               <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 max-w-md mx-auto mb-4">
@@ -310,53 +241,15 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
                 </p>
               </div>
               <button
-                onClick={loadTransactions}
+                type="button"
+                onClick={() => loadTransactions()}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200"
               >
                 Try Again
               </button>
             </div>
           ) : transactions.length > 0 ? (
-            <div className="space-y-3">
-              {transactions.map((tx) => (
-                <div key={tx.id} className="bg-theme-secondary rounded-lg p-4 hover:bg-theme-tertiary transition-colors border border-theme">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      {getTypeIcon(tx.type)}
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <p className="text-theme-primary font-medium">
-                            {tx.type === 'swap' && `${tx.from} → ${tx.to}`}
-                            {tx.type === 'liquidity' && `${tx.action} ${tx.pair}`}
-                            {tx.type === 'bridge' && `${tx.from} → ${tx.to} (${tx.fromChain}→${tx.toChain})`}
-                          </p>
-                          <span className={`flex items-center space-x-1 ${getStatusColor(tx.status)}`}>
-                            {getStatusIcon(tx.status)}
-                            <span className="text-xs capitalize">{tx.status}</span>
-                          </span>
-                        </div>
-                        <p className="text-theme-secondary text-sm">
-                          {tx.amount} {tx.type === 'swap' ? tx.from : ''} • {formatTime(tx.timestamp)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-theme-primary font-medium">
-                        {tx.type === 'swap' && `${tx.value} ${tx.to}`}
-                        {tx.type === 'liquidity' && `${tx.amount} ${tx.action}`}
-                        {tx.type === 'bridge' && `${tx.amount} ${tx.from}`}
-                      </p>
-                      <button
-                        onClick={() => openExplorer(tx.txHash, tx.chainId)}
-                        className="text-blue-400 hover:text-blue-300 text-xs"
-                      >
-                        View on Explorer
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <TransactionHistoryList transactions={transactions} showStatus />
           ) : (
             <EmptyState
               variant="transactions"
@@ -368,10 +261,10 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
           )}
         </div>
 
-        {/* Refresh Button */}
         <div className="mt-6 flex justify-center">
           <button
-            onClick={loadTransactions}
+            type="button"
+            onClick={() => loadTransactions()}
             disabled={loading}
             className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg transition duration-200 disabled:cursor-not-allowed"
           >
@@ -381,4 +274,4 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
       </div>
     </div>
   );
-} 
+}

@@ -66,10 +66,10 @@ export default function PriceAlertModal({ isOpen, onClose, token }) {
   if (!isOpen || !token) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700 max-w-md w-full mx-4">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white">Price Alerts for {token.symbol}</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 sm:p-6">
+      <div className="bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 border border-gray-700 max-w-md w-full max-h-[85vh] overflow-y-auto">
+        <div className="flex items-start justify-between gap-3 mb-6">
+          <h2 className="text-lg sm:text-2xl font-bold text-white min-w-0 break-words">Price Alerts for {token.symbol}</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors"

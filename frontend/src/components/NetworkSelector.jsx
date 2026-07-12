@@ -68,11 +68,11 @@ const NetworkSelector = () => {
         type="button"
         onClick={() => setShowDropdown(!showDropdown)}
         title="EIP-155 chain ID from your wallet (Boing L1 testnet is 6913 · 0x1b01)"
-        className="bg-theme-secondary hover:bg-theme-tertiary text-theme-primary px-2 py-2 min-[1150px]:max-xl:px-2 xl:px-3 rounded-lg font-medium transition-colors flex items-center gap-1.5 xl:gap-2 border border-theme max-w-[min(100%,11rem)] min-[1150px]:max-xl:max-w-[9.5rem] xl:max-w-[16rem] 2xl:max-w-none min-w-0"
+        className="bg-theme-secondary hover:bg-theme-tertiary text-theme-primary px-2 py-2 nav:max-xl:px-2 xl:px-3 rounded-lg font-medium transition-colors flex items-center gap-1.5 xl:gap-2 border border-theme max-w-[min(100%,11rem)] nav:max-xl:max-w-[9.5rem] xl:max-w-[16rem] 2xl:max-w-none min-w-0"
       >
         <span className="text-lg shrink-0">{getNetworkIcon(currentNetwork)}</span>
         <span className="flex min-w-0 flex-col items-start text-left">
-          <span className="text-xs min-[1150px]:max-xl:text-xs xl:text-sm truncate max-w-full">
+          <span className="text-xs nav:max-xl:text-xs xl:text-sm truncate max-w-full">
             {currentNetwork?.name || 'Unknown Network'}
           </span>
           {chainId != null && (

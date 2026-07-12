@@ -46,8 +46,8 @@ export default function SharePortfolioModal({ isOpen, onClose, portfolioData }) 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700 max-w-md w-full mx-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 sm:p-6">
+      <div className="bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 border border-gray-700 max-w-md w-full max-h-[85vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-white">Share Portfolio</h2>
           <button

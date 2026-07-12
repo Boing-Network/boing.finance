@@ -419,7 +419,7 @@ const Tokens = () => {
                 <button
                   type="button"
                   onClick={syncWithWallet}
-                  className="flex-1 min-[400px]:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition-colors text-sm sm:text-base whitespace-nowrap"
+                  className="flex-1 compact:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition-colors text-sm sm:text-base whitespace-nowrap"
                 >
                   Sync with Wallet
                 </button>
@@ -427,7 +427,7 @@ const Tokens = () => {
                   type="button"
                   onClick={scanTokens}
                   disabled={isScanning}
-                  className="flex-1 min-[400px]:flex-none bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white px-4 sm:px-6 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base whitespace-nowrap"
+                  className="flex-1 compact:flex-none bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white px-4 sm:px-6 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base whitespace-nowrap"
                 >
                   {isScanning ? (
                     <>

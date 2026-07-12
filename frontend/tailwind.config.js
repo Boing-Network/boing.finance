@@ -64,6 +64,17 @@ module.exports = {
   darkMode: 'class', // Enable class-based dark mode
   theme: {
     extend: {
+      screens: {
+        xs: '360px',
+        /** Full desktop nav — keep in sync with src/constants/breakpoints.js */
+        nav: '1150px',
+        /** Below full desktop nav (compact header + hamburger rail) */
+        'max-nav': { max: '1149px' },
+        /** Toolbar button rows */
+        compact: '400px',
+        /** Inline filter toolbars */
+        filter: '480px',
+      },
       colors: {
         cyan: nebulaCyan,
         teal: nebulaTeal,
