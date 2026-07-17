@@ -1417,8 +1417,6 @@ const Swap = () => {
       // Debug: Log each address being processed
       console.log('Processing token addresses:', allTokenAddresses);
       
-      const tokensWithBalance = [];
-      
       // Get contract addresses to exclude
       const contracts = getContractAddresses(chainId);
       const contractAddresses = new Set();
@@ -1436,51 +1434,40 @@ const Swap = () => {
           }
         });
       }
-      
-      console.log('Contract addresses to exclude:', Array.from(contractAddresses));
-      
-      for (const tokenAddress of allTokenAddresses) {
-        // Skip if this is a known contract address
-        if (contractAddresses.has(tokenAddress.toLowerCase())) {
-          console.log(`🚫 Skipping contract address: ${tokenAddress}`);
-          continue;
-        }
-        
-        try {
-          const tokenInfo = await getTokenInfo(tokenAddress, walletProvider);
-          console.log(`Token ${tokenAddress}:`, {
-            hasInfo: !!tokenInfo,
-            symbol: tokenInfo?.symbol,
-            name: tokenInfo?.name,
-            balance: tokenInfo?.balance,
-            hasBalance: tokenInfo?.balance && tokenInfo.balance !== '0',
-            decimals: tokenInfo?.decimals
-          });
-          
-          const inFactory = factorySet.has(tokenAddress.toLowerCase());
-          const hasBal = tokenInfo?.balance && tokenInfo.balance !== '0';
-          if (
-            tokenInfo &&
-            tokenInfo.symbol &&
-            tokenInfo.name &&
-            tokenInfo.decimals != null &&
-            (hasBal || inFactory)
-          ) {
-            tokensWithBalance.push({
-              address: tokenAddress,
-              ...tokenInfo,
-              formattedBalance: ethers.formatUnits(tokenInfo.balance, tokenInfo.decimals),
-              fromDexFactory: inFactory && !hasBal,
-            });
-            console.log(`✅ Added token: ${tokenInfo.symbol} (${tokenAddress})`);
-          } else {
-            console.log(`❌ Skipped token: ${tokenAddress} - Missing data or zero balance`);
+
+      const candidates = allTokenAddresses.filter(
+        (tokenAddress) => !contractAddresses.has(tokenAddress.toLowerCase())
+      );
+
+      const tokenResults = await Promise.all(
+        candidates.map(async (tokenAddress) => {
+          try {
+            const tokenInfo = await getTokenInfo(tokenAddress, walletProvider);
+            const inFactory = factorySet.has(tokenAddress.toLowerCase());
+            const hasBal = tokenInfo?.balance && tokenInfo.balance !== '0';
+            if (
+              tokenInfo &&
+              tokenInfo.symbol &&
+              tokenInfo.name &&
+              tokenInfo.decimals != null &&
+              (hasBal || inFactory)
+            ) {
+              return {
+                address: tokenAddress,
+                ...tokenInfo,
+                formattedBalance: ethers.formatUnits(tokenInfo.balance, tokenInfo.decimals),
+                fromDexFactory: inFactory && !hasBal,
+              };
+            }
+          } catch (error) {
+            if (import.meta.env.DEV) {
+              console.warn(`Failed to load token ${tokenAddress}:`, error.message);
+            }
           }
-        } catch (error) {
-          console.warn(`Failed to load token ${tokenAddress}:`, error.message);
-          // Skip tokens that fail to load
-        }
-      }
+          return null;
+        })
+      );
+      const tokensWithBalance = tokenResults.filter(Boolean);
       
       // Wallet balances first; factory-only (zero balance) still listed for routing into pools.
       tokensWithBalance.sort((a, b) => {
@@ -1545,44 +1532,39 @@ const Swap = () => {
       ];
       const routerContract = new ethers.Contract(routerAddress, routerABI, walletProvider);
 
-      const availablePairs = [];
       const testAmount = ethers.parseUnits('0.001', 18);
-
-      // Test common token pairs
       const commonTokens = userTokens.slice(0, 5); // Test first 5 tokens
-      
+      const pairJobs = [];
       for (let i = 0; i < commonTokens.length; i++) {
         for (let j = i + 1; j < commonTokens.length; j++) {
-          const tokenA = commonTokens[i];
-          const tokenB = commonTokens[j];
-          
-          try {
-            const path = [tokenA.address, tokenB.address];
-            const amountsOut = await routerContract.getAmountsOut(testAmount, path);
-            
-            if (amountsOut && amountsOut.length >= 2 && amountsOut[1] > 0n) {
-              availablePairs.push({
-                tokenA: tokenA.symbol,
-                tokenB: tokenB.symbol,
-                addressA: tokenA.address,
-                addressB: tokenB.address
-              });
-              console.log(`✅ Available pair: ${tokenA.symbol}/${tokenB.symbol}`);
-            }
-          } catch (error) {
-            console.log(`❌ No pair: ${tokenA.symbol}/${tokenB.symbol}`);
-          }
+          pairJobs.push([commonTokens[i], commonTokens[j]]);
         }
       }
-      
-      console.log('checkAvailablePairs: Available trading pairs:', availablePairs);
-      
-      // Show available pairs to user if they're trying to swap unavailable tokens
-      if (availablePairs.length > 0) {
-        const availablePairStrings = availablePairs.map(p => `${p.tokenA}/${p.tokenB}`).join(', ');
-        console.log('Available trading pairs:', availablePairStrings);
+
+      const settled = await Promise.allSettled(
+        pairJobs.map(async ([tokenA, tokenB]) => {
+          const path = [tokenA.address, tokenB.address];
+          const amountsOut = await routerContract.getAmountsOut(testAmount, path);
+          if (amountsOut && amountsOut.length >= 2 && amountsOut[1] > 0n) {
+            return {
+              tokenA: tokenA.symbol,
+              tokenB: tokenB.symbol,
+              addressA: tokenA.address,
+              addressB: tokenB.address,
+            };
+          }
+          return null;
+        })
+      );
+
+      const availablePairs = settled
+        .filter((r) => r.status === 'fulfilled' && r.value)
+        .map((r) => r.value);
+
+      if (import.meta.env.DEV) {
+        console.log('checkAvailablePairs: Available trading pairs:', availablePairs);
       }
-      
+
       return availablePairs;
     } catch (error) {
       console.error('checkAvailablePairs: Error checking pairs:', error);

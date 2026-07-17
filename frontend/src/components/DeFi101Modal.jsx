@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import useEscapeKey from '../hooks/useEscapeKey';
 
 const DEFI_TOPICS = [
   { id: 'slippage', title: 'Slippage', body: 'Max price change between submitting and confirming a swap. Higher slippage helps in volatile markets.' },
@@ -11,6 +12,7 @@ const DEFI_TOPICS = [
 export default function DeFi101Modal({ isOpen, onClose }) {
   const [activeTopic, setActiveTopic] = useState(null);
   const [showILCalc, setShowILCalc] = useState(false);
+  useEscapeKey(isOpen, onClose);
 
   if (!isOpen) return null;
 

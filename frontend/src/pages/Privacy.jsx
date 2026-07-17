@@ -50,13 +50,13 @@ const Privacy = () => {
             <div className="space-y-8">
               {/* Information We Collect */}
               <section className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">1. Information We Collect</h2>
+                <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>1. Information We Collect</h2>
                 
-                <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-3">1.1 Information You Provide</h3>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>1.1 Information You Provide</h3>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   We may collect information that you voluntarily provide when using our Service:
                 </p>
-                <ul className="list-disc list-inside style={{ color: 'var(--text-secondary)' }} space-y-2 mb-4">
+                <ul className="list-disc list-inside space-y-2 mb-4" style={{ color: 'var(--text-secondary)' }}>
                   <li>Wallet addresses when you connect to the platform</li>
                   <li>Transaction data and trading history</li>
                   <li>Communication preferences and settings</li>
@@ -64,11 +64,11 @@ const Privacy = () => {
                   <li>Information provided through our contact forms</li>
                 </ul>
 
-                <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-3">1.2 Automatically Collected Information</h3>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>1.2 Automatically Collected Information</h3>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   When you use our Service, we automatically collect certain information:
                 </p>
-                <ul className="list-disc list-inside style={{ color: 'var(--text-secondary)' }} space-y-2 mb-4">
+                <ul className="list-disc list-inside space-y-2 mb-4" style={{ color: 'var(--text-secondary)' }}>
                   <li>IP address and device information</li>
                   <li>Browser type and version</li>
                   <li>Operating system and platform</li>
@@ -76,11 +76,11 @@ const Privacy = () => {
                   <li>Error logs and performance metrics</li>
                 </ul>
 
-                <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-3">1.3 Blockchain Data</h3>
+                <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>1.3 Blockchain Data</h3>
                 <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   Since our Service operates on public blockchains, certain information is publicly available:
                 </p>
-                <ul className="list-disc list-inside style={{ color: 'var(--text-secondary)' }} space-y-2">
+                <ul className="list-disc list-inside space-y-2" style={{ color: 'var(--text-secondary)' }}>
                   <li>Transaction hashes and blockchain addresses</li>
                   <li>Trading volumes and liquidity pool data</li>
                   <li>Smart contract interactions</li>
@@ -90,11 +90,11 @@ const Privacy = () => {
 
               {/* How We Use Information */}
               <section className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">2. How We Use Information</h2>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>2. How We Use Information</h2>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   We use the information we collect for the following purposes:
                 </p>
-                <ul className="list-disc list-inside style={{ color: 'var(--text-secondary)' }} space-y-2 mb-4">
+                <ul className="list-disc list-inside space-y-2 mb-4" style={{ color: 'var(--text-secondary)' }}>
                   <li>Providing and maintaining the Service</li>
                   <li>Processing transactions and managing liquidity pools</li>
                   <li>Improving user experience and platform functionality</li>
@@ -110,35 +110,35 @@ const Privacy = () => {
 
               {/* Information Sharing */}
               <section className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">3. Information Sharing and Disclosure</h2>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>3. Information Sharing and Disclosure</h2>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   We may share your information in the following circumstances:
                 </p>
                 
-                <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-3">3.1 Service Providers</h3>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>3.1 Service Providers</h3>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   We may share information with trusted third-party service providers who assist us in operating our 
                   platform, such as:
                 </p>
-                <ul className="list-disc list-inside style={{ color: 'var(--text-secondary)' }} space-y-2 mb-4">
+                <ul className="list-disc list-inside space-y-2 mb-4" style={{ color: 'var(--text-secondary)' }}>
                   <li>Cloud hosting and infrastructure providers</li>
                   <li>Analytics and monitoring services</li>
                   <li>Customer support platforms</li>
                   <li>Security and fraud detection services</li>
                 </ul>
 
-                <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-3">3.2 Legal Requirements</h3>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>3.2 Legal Requirements</h3>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   We may disclose information if required by law or in response to:
                 </p>
-                <ul className="list-disc list-inside style={{ color: 'var(--text-secondary)' }} space-y-2 mb-4">
+                <ul className="list-disc list-inside space-y-2 mb-4" style={{ color: 'var(--text-secondary)' }}>
                   <li>Valid legal requests or court orders</li>
                   <li>Government investigations or regulatory inquiries</li>
                   <li>Protection of our rights, property, or safety</li>
                   <li>Prevention of fraud or illegal activities</li>
                 </ul>
 
-                <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-3">3.3 Business Transfers</h3>
+                <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>3.3 Business Transfers</h3>
                 <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   In the event of a merger, acquisition, or sale of assets, your information may be transferred as 
                   part of the transaction, subject to the same privacy protections.
@@ -147,11 +147,11 @@ const Privacy = () => {
 
               {/* Data Security */}
               <section className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">4. Data Security</h2>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>4. Data Security</h2>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   We implement appropriate technical and organizational measures to protect your information:
                 </p>
-                <ul className="list-disc list-inside style={{ color: 'var(--text-secondary)' }} space-y-2 mb-4">
+                <ul className="list-disc list-inside space-y-2 mb-4" style={{ color: 'var(--text-secondary)' }}>
                   <li>Encryption of data in transit and at rest</li>
                   <li>Regular security audits and vulnerability assessments</li>
                   <li>Access controls and authentication mechanisms</li>
@@ -169,11 +169,11 @@ const Privacy = () => {
 
               {/* Data Retention */}
               <section className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">5. Data Retention</h2>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>5. Data Retention</h2>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   We retain your information for as long as necessary to:
                 </p>
-                <ul className="list-disc list-inside style={{ color: 'var(--text-secondary)' }} space-y-2 mb-4">
+                <ul className="list-disc list-inside space-y-2 mb-4" style={{ color: 'var(--text-secondary)' }}>
                   <li>Provide and maintain the Service</li>
                   <li>Comply with legal obligations</li>
                   <li>Resolve disputes and enforce agreements</li>
@@ -187,53 +187,53 @@ const Privacy = () => {
 
               {/* Your Rights */}
               <section className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">6. Your Rights and Choices</h2>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>6. Your Rights and Choices</h2>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   Depending on your location, you may have certain rights regarding your personal information:
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
-                    <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">Access and Portability</h4>
-                    <p className="style={{ color: 'var(--text-secondary)' }} text-sm">
+                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Access and Portability</h4>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                       Request access to your personal information and receive a copy in a portable format.
                     </p>
                   </div>
                   
-                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
-                    <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">Correction</h4>
-                    <p className="style={{ color: 'var(--text-secondary)' }} text-sm">
+                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Correction</h4>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                       Request correction of inaccurate or incomplete personal information.
                     </p>
                   </div>
                   
-                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
-                    <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">Deletion</h4>
-                    <p className="style={{ color: 'var(--text-secondary)' }} text-sm">
+                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Deletion</h4>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                       Request deletion of your personal information, subject to legal requirements.
                     </p>
                   </div>
                   
-                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
-                    <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">Objection</h4>
-                    <p className="style={{ color: 'var(--text-secondary)' }} text-sm">
+                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Objection</h4>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                       Object to processing of your personal information in certain circumstances.
                     </p>
                   </div>
                 </div>
                 
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mt-4">
+                <p className="leading-relaxed mt-4" style={{ color: 'var(--text-secondary)' }}>
                   To exercise these rights, please contact us using the information provided below.
                 </p>
               </section>
 
               {/* Cookies and Tracking */}
               <section className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">7. Cookies and Tracking Technologies</h2>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>7. Cookies and Tracking Technologies</h2>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   We use cookies and similar tracking technologies to enhance your experience:
                 </p>
-                <ul className="list-disc list-inside style={{ color: 'var(--text-secondary)' }} space-y-2 mb-4">
+                <ul className="list-disc list-inside space-y-2 mb-4" style={{ color: 'var(--text-secondary)' }}>
                   <li>Essential cookies for platform functionality</li>
                   <li>Analytics cookies to understand usage patterns</li>
                   <li>Preference cookies to remember your settings</li>
@@ -247,15 +247,15 @@ const Privacy = () => {
 
               {/* Third-Party Services */}
               <section className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">8. Third-Party Services</h2>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>8. Third-Party Services</h2>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   Our Service may contain links to third-party websites or integrate with third-party services. 
                   We are not responsible for the privacy practices of these third parties.
                 </p>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   When you interact with third-party services through our platform:
                 </p>
-                <ul className="list-disc list-inside style={{ color: 'var(--text-secondary)' }} space-y-2">
+                <ul className="list-disc list-inside space-y-2" style={{ color: 'var(--text-secondary)' }}>
                   <li>Their privacy policies govern the collection and use of your information</li>
                   <li>We recommend reviewing their privacy practices</li>
                   <li>We do not control or endorse their privacy practices</li>
@@ -264,8 +264,8 @@ const Privacy = () => {
 
               {/* International Transfers */}
               <section className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">9. International Data Transfers</h2>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>9. International Data Transfers</h2>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   Your information may be transferred to and processed in countries other than your own. We ensure 
                   appropriate safeguards are in place to protect your information during international transfers.
                 </p>
@@ -277,7 +277,7 @@ const Privacy = () => {
 
               {/* Children's Privacy */}
               <section className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">10. Children's Privacy</h2>
+                <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>10. Children's Privacy</h2>
                 <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   Our Service is not intended for children under the age of 18. We do not knowingly collect personal 
                   information from children under 18. If you believe we have collected information from a child under 
@@ -287,12 +287,12 @@ const Privacy = () => {
 
               {/* Changes to Privacy Policy */}
               <section className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">11. Changes to This Privacy Policy</h2>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>11. Changes to This Privacy Policy</h2>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   We may update this Privacy Policy from time to time to reflect changes in our practices or applicable 
                   laws. We will notify you of any material changes by:
                 </p>
-                <ul className="list-disc list-inside style={{ color: 'var(--text-secondary)' }} space-y-2 mb-4">
+                <ul className="list-disc list-inside space-y-2 mb-4" style={{ color: 'var(--text-secondary)' }}>
                   <li>Posting the updated policy on our website</li>
                   <li>Sending email notifications to registered users</li>
                   <li>Displaying prominent notices on our platform</li>
@@ -304,16 +304,16 @@ const Privacy = () => {
 
               {/* Contact Information */}
               <section className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">12. Contact Us</h2>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>12. Contact Us</h2>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   If you have any questions about this Privacy Policy or our privacy practices, please contact us:
                 </p>
-                <div className="space-y-2 style={{ color: 'var(--text-secondary)' }}">
+                <div className="space-y-2" style={{ color: 'var(--text-secondary)' }}>
                   <p>• Email: privacy@boing.finance</p>
                   <p>• Discord: <a href="https://discord.gg/7RDtQtQvBW" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300">#privacy-support</a></p>
                   <p>• Telegram: <a href="https://t.me/boing_finance" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300">@boing_finance</a></p>
                 </div>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mt-4">
+                <p className="leading-relaxed mt-4" style={{ color: 'var(--text-secondary)' }}>
                   For users in the European Union, you also have the right to lodge a complaint with your local 
                   data protection authority.
                 </p>
@@ -322,7 +322,7 @@ const Privacy = () => {
 
             {/* Footer Note */}
             <div className="rounded-lg p-6 border text-center mt-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-              <p className="style={{ color: 'var(--text-secondary)' }} text-sm">
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                 This Privacy Policy was last updated on January 2025. We are committed to protecting your privacy 
                 and will continue to review and improve our privacy practices.
               </p>

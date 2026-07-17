@@ -139,16 +139,16 @@ export default function Portfolio() {
         
         return allPositions;
       } catch (error) {
+        console.warn('[Portfolio] Failed to load liquidity positions:', error?.message || error);
         return [];
       }
     },
+    staleTime: 60_000,
     refetchInterval: 30000,
+    refetchIntervalInBackground: false,
     enabled: !!account, // Enable even without blockchain initialization
     retry: 1,
     retryDelay: 1000,
-    onError: () => {
-      // Silently handle errors
-    }
   });
 
   // Fetch user's created pools from blockchain - React Query v5 API
@@ -160,16 +160,16 @@ export default function Portfolio() {
       try {
         return await getBlockchainCreatedPools();
       } catch (error) {
+        console.warn('[Portfolio] Failed to load created pools:', error?.message || error);
         return [];
       }
     },
+    staleTime: 60_000,
     refetchInterval: 30000,
+    refetchIntervalInBackground: false,
     enabled: !!account && blockchainInitialized,
     retry: 1,
     retryDelay: 1000,
-    onError: () => {
-      // Silently handle errors
-    }
   });
 
   // Filter pools by selected network
@@ -199,19 +199,23 @@ export default function Portfolio() {
       if (!account) return { ownedNfts: [], totalCount: 0 };
       let chainsToFetch = trackedNetworks.filter(id => nftSupportedChainIds.includes(Number(id)));
       if (chainsToFetch.length === 0) chainsToFetch = [chainId && nftSupportedChainIds.includes(Number(chainId)) ? chainId : 1];
-      const allNfts = [];
-      for (const cid of chainsToFetch) {
-        try {
-          const res = await alchemyService.getNFTsForOwner(cid, account, { pageSize: 100 });
-          const withChain = (res.ownedNfts || []).map(n => ({ ...n, chainId: cid }));
-          allNfts.push(...withChain);
-        } catch (e) {
-          console.warn('[Portfolio] NFT fetch failed for chain', cid, e);
-        }
-      }
+      const results = await Promise.all(
+        chainsToFetch.map(async (cid) => {
+          try {
+            const res = await alchemyService.getNFTsForOwner(cid, account, { pageSize: 100 });
+            return (res.ownedNfts || []).map((n) => ({ ...n, chainId: cid }));
+          } catch (e) {
+            console.warn('[Portfolio] NFT fetch failed for chain', cid, e);
+            return [];
+          }
+        })
+      );
+      const allNfts = results.flat();
       return { ownedNfts: allNfts, totalCount: allNfts.length };
     },
+    staleTime: 60_000,
     refetchInterval: 60000,
+    refetchIntervalInBackground: false,
     enabled: !!account && activeTab === 'nfts',
     retry: 1
   });
@@ -224,7 +228,9 @@ export default function Portfolio() {
       if (!account) return null;
       return await portfolioService.getMultiNetworkPortfolio(account, trackedNetworks);
     },
+    staleTime: 60_000,
     refetchInterval: 60000, // Refetch every minute
+    refetchIntervalInBackground: false,
     enabled: !!account,
     retry: 2
   });
