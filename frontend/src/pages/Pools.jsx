@@ -19,6 +19,7 @@ import { getNetworkByChainId } from '../config/networks';
 import { useAchievements } from '../contexts/AchievementContext';
 import ShareCardModal from '../components/ShareCardModal';
 import { getNetworkBadgeBgClass } from '../utils/networkBadgeClasses';
+import useEscapeKey from '../hooks/useEscapeKey';
 
 // Pool Card Component
 const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveLiquidity }) => {
@@ -209,6 +210,7 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
   const [token1Amount, setToken1Amount] = useState('');
   const [removePercentage, setRemovePercentage] = useState(25); // Default 25%
   const [isLoading, setIsLoading] = useState(false);
+  useEscapeKey(isOpen, onClose);
 
   if (!isOpen || !pool) return null;
 
@@ -273,14 +275,27 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'var(--shadow)' }}>
-      <div className="rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+    <div
+      className="fixed inset-0 flex items-center justify-center z-50 p-4"
+      style={{ backgroundColor: 'var(--shadow)' }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="pool-details-title"
+      onClick={onClose}
+    >
+      <div
+        className="rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto border"
+        style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Pool Details</h2>
+          <h2 id="pool-details-title" className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Pool Details</h2>
           <button
+            type="button"
             onClick={onClose}
             className="text-2xl hover:opacity-80 transition-opacity"
             style={{ color: 'var(--text-tertiary)' }}
+            aria-label="Close pool details"
           >
             ×
           </button>
@@ -816,7 +831,9 @@ const Pools = () => {
       }
     },
     enabled: !!account,
+    staleTime: 60_000,
     refetchInterval: 30000,
+    refetchIntervalInBackground: false,
     retry: 1, // Reduce retries to prevent long loading
     retryDelay: 1000,
     onError: (_error) => {
@@ -833,7 +850,9 @@ const Pools = () => {
       return getUserCreatedPools(account, chainId);
     },
     enabled: !!account,
+    staleTime: 60_000,
     refetchInterval: 30000,
+    refetchIntervalInBackground: false,
     retry: 2
   });
 
@@ -856,7 +875,9 @@ const Pools = () => {
         return [];
       }
     },
+    staleTime: 60_000,
     refetchInterval: 60000,
+    refetchIntervalInBackground: false,
     retry: 1, // Reduce retries
     retryDelay: 1000,
     enabled: chainId === 11155111 ? blockchainInitialized : true,

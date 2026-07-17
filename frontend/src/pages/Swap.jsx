@@ -23,6 +23,10 @@ import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrat
 import { fetchTradeableEvmTokenAddressesFromDexFactory } from '../services/evmDexTradeableTokens';
 
 
+const devLog = (...args) => {
+  if (import.meta.env.DEV) console.log(...args);
+};
+
 const Swap = () => {
   const { isSolana } = useChainType();
   const { isConnected, account } = useWalletConnection();
@@ -120,7 +124,7 @@ const Swap = () => {
       
       // Extract unique token addresses from the logs
       const tokenAddresses = [...new Set(logs.map(log => log.address))];
-      console.log(`Found ${tokenAddresses.length} unique tokens from transfer events`);
+      devLog(`Found ${tokenAddresses.length} unique tokens from transfer events`);
       
       return tokenAddresses;
     } catch (error) {
@@ -141,7 +145,7 @@ const Swap = () => {
         '0x7169D38820dfd117C3FA1f22a697dBA58d90BA06'  // USDT
       ],
       1: [ // Ethereum Mainnet
-        '0xA0b86a33E6441b8c4C8D8C8C8C8C8C8C8C8C8C8', // USDC
+        '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
         '0x514910771AF9Ca656af840dff83E8264EcF986CA', // LINK
         '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'  // WETH
       ]
@@ -152,7 +156,7 @@ const Swap = () => {
 
   // Get token information
   const getTokenInfo = useCallback(async (address, provider) => {
-    console.log(`🔍 Getting token info for address: ${address}`);
+    devLog(`🔍 Getting token info for address: ${address}`);
     try {
       const tokenContract = new ethers.Contract(address, [
         'function name() view returns (string)',
@@ -168,7 +172,7 @@ const Swap = () => {
         tokenContract.balanceOf(account)
       ]);
 
-      console.log(`✅ Token info for ${address}:`, { name, symbol, decimals, balance: balance.toString() });
+      devLog(`✅ Token info for ${address}:`, { name, symbol, decimals, balance: balance.toString() });
 
       // Format balance with appropriate decimal places based on token value
       const formattedBalance = formatTokenBalance(balance, decimals);
@@ -294,7 +298,7 @@ const Swap = () => {
 
   // Handle token selection
   const handleTokenSelect = (token, forToken) => {
-    console.log('🎯 Token selected:', { token: token.symbol, forToken });
+    devLog('🎯 Token selected:', { token: token.symbol, forToken });
     if (forToken === 'tokenIn') {
       setTokenIn(token.symbol);
       setTokenInDropdownOpen(false);
@@ -448,8 +452,8 @@ const Swap = () => {
 
   // Handle swap transaction
   const handleSwap = async () => {
-    console.log('=== HANDLE SWAP START ===');
-    console.log('Raw input values:', {
+    devLog('=== HANDLE SWAP START ===');
+    devLog('Raw input values:', {
       amountIn: amountIn,
       amountInType: typeof amountIn,
       amountInLength: amountIn ? amountIn.length : 0,
@@ -490,7 +494,7 @@ const Swap = () => {
 
     // Check if DEX is deployed on current network
     const swapRouterAddress = getContractAddress(chainId, 'dexRouter');
-    console.log('handleSwap: Starting swap with params:', {
+    devLog('handleSwap: Starting swap with params:', {
       chainId,
       routerAddress: swapRouterAddress,
       tokenIn,
@@ -531,7 +535,7 @@ const Swap = () => {
       // Calculate minimum amount out (with slippage tolerance)
       const slippageTolerance = settings.slippage / 100;
       
-      console.log('handleSwap: Starting amount calculation with:', {
+      devLog('handleSwap: Starting amount calculation with:', {
         amountIn,
         tokenIn,
         tokenOut,
@@ -550,7 +554,7 @@ const Swap = () => {
       
       // VALIDATION: Check for 18 decimal tokens specifically
       if (inputAmountNum > 1000) {
-        console.log('handleSwap: Warning - Amount may be too large for 18 decimal tokens', { 
+        devLog('handleSwap: Warning - Amount may be too large for 18 decimal tokens', { 
           amountIn, 
           inputAmountNum,
           warning: 'Amount > 1000 may cause issues with 18 decimal tokens'
@@ -569,7 +573,7 @@ const Swap = () => {
       }
       
       const parsedAmount = parseFloat(amountIn);
-      console.log('handleSwap: Parsed amount:', parsedAmount);
+      devLog('handleSwap: Parsed amount:', parsedAmount);
       
       // Validate that the input amount is reasonable (not too large)
       if (parsedAmount > 1000000) {
@@ -580,14 +584,14 @@ const Swap = () => {
       let amountInWei;
       if (tokenIn === 'ETH') {
         amountInWei = ethers.parseUnits(amountIn, 18); // ETH/WETH has 18 decimals
-        console.log('handleSwap: ETH amount calculation:', {
+        devLog('handleSwap: ETH amount calculation:', {
           amountIn,
           decimals: 18,
           amountInWei: amountInWei.toString()
         });
       } else {
         const tokenInData = userTokens.find(t => t.symbol === tokenIn);
-        console.log('handleSwap: Token data found:', {
+        devLog('handleSwap: Token data found:', {
           tokenIn,
           tokenInData: tokenInData ? {
             symbol: tokenInData.symbol,
@@ -607,7 +611,7 @@ const Swap = () => {
           throw new Error(`Invalid decimals for token ${tokenIn}: ${tokenInData.decimals}. Expected 0-18.`);
         }
         
-        console.log('handleSwap: Token amount calculation:', {
+        devLog('handleSwap: Token amount calculation:', {
           amountIn,
           decimals: tokenInData.decimals,
           tokenSymbol: tokenInData.symbol,
@@ -627,7 +631,7 @@ const Swap = () => {
         }
         
         amountInWei = ethers.parseUnits(amountIn, tokenInData.decimals);
-        console.log('handleSwap: Calculated amountInWei:', amountInWei.toString());
+        devLog('handleSwap: Calculated amountInWei:', amountInWei.toString());
         
         // Check if amount exceeds token balance
         if (tokenInData.balance && amountInWei > tokenInData.balance) {
@@ -643,7 +647,7 @@ const Swap = () => {
       
       // Validate that the amount is reasonable (not too large)
       const maxReasonableAmount = ethers.parseUnits('1000000', 18); // 1 million tokens max
-      console.log('handleSwap: Amount validation:', {
+      devLog('handleSwap: Amount validation:', {
         amountInWei: amountInWei.toString(),
         maxReasonableAmount: maxReasonableAmount.toString(),
         isTooLarge: amountInWei > maxReasonableAmount
@@ -659,7 +663,7 @@ const Swap = () => {
         throw new Error(`Amount unreasonably large: ${amountInWei.toString()} wei. This suggests an error in amount calculation.`);
       }
       
-      console.log('handleSwap: Amount calculations:', {
+      devLog('handleSwap: Amount calculations:', {
         amountIn,
         amountInWei: amountInWei.toString(),
         decimals: tokenIn === 'ETH' ? 18 : userTokens.find(t => t.symbol === tokenIn)?.decimals,
@@ -675,7 +679,7 @@ const Swap = () => {
       
       // Get WETH address for the network
       const wethAddress = getContractAddress(chainId, 'weth');
-      console.log('handleSwap: WETH address for chainId', chainId, ':', wethAddress);
+      devLog('handleSwap: WETH address for chainId', chainId, ':', wethAddress);
       
       if (!wethAddress || wethAddress === '0x0000000000000000000000000000000000000000') {
         throw new Error('WETH not configured for this network');
@@ -685,7 +689,7 @@ const Swap = () => {
       const path = [];
       if (tokenIn === 'ETH') {
         path.push(wethAddress); // Use correct WETH address for the network
-        console.log('handleSwap: Added WETH to path for ETH input:', wethAddress);
+        devLog('handleSwap: Added WETH to path for ETH input:', wethAddress);
       } else {
         // Get token address from userTokens
         const tokenInData = userTokens.find(t => t.symbol === tokenIn);
@@ -696,12 +700,12 @@ const Swap = () => {
           throw new Error(`Invalid token address for input token: ${tokenInData.address}`);
         }
         path.push(tokenInData.address);
-        console.log('handleSwap: Added input token to path', { symbol: tokenIn, address: tokenInData.address });
+        devLog('handleSwap: Added input token to path', { symbol: tokenIn, address: tokenInData.address });
       }
 
       if (tokenOut === 'ETH') {
         path.push(wethAddress); // Use correct WETH address for the network
-        console.log('handleSwap: Added WETH to path for ETH output:', wethAddress);
+        devLog('handleSwap: Added WETH to path for ETH output:', wethAddress);
       } else {
         // Get token address from userTokens
         const tokenOutData = userTokens.find(t => t.symbol === tokenOut);
@@ -712,10 +716,10 @@ const Swap = () => {
           throw new Error(`Invalid token address for output token: ${tokenOutData.address}`);
         }
         path.push(tokenOutData.address);
-        console.log('handleSwap: Added output token to path', { symbol: tokenOut, address: tokenOutData.address });
+        devLog('handleSwap: Added output token to path', { symbol: tokenOut, address: tokenOutData.address });
       }
 
-      console.log('handleSwap: Final swap path:', path);
+      devLog('handleSwap: Final swap path:', path);
 
       // Validate path length
       if (path.length !== 2) {
@@ -723,15 +727,15 @@ const Swap = () => {
       }
 
       // Get expected output amount
-      console.log('handleSwap: Calling getAmountsOut to calculate expected output...');
+      devLog('handleSwap: Calling getAmountsOut to calculate expected output...');
       const amountsOut = await routerContract.getAmountsOut(amountInWei, path);
-      console.log('handleSwap: getAmountsOut result:', amountsOut);
+      devLog('handleSwap: getAmountsOut result:', amountsOut);
       
       const expectedAmountOut = amountsOut[1];
       // eslint-disable-next-line no-undef
       const minAmountOut = expectedAmountOut * BigInt(Math.floor((1 - slippageTolerance) * 1000)) / BigInt(1000);
 
-      console.log('handleSwap: Output calculations:', {
+      devLog('handleSwap: Output calculations:', {
         expectedAmountOut: expectedAmountOut.toString(),
         minAmountOut: minAmountOut.toString(),
         slippageTolerance
@@ -739,7 +743,7 @@ const Swap = () => {
 
       // Calculate deadline
       const deadline = Math.floor(Date.now() / 1000) + (settings.deadline * 60);
-      console.log('handleSwap: Transaction deadline:', deadline, 'seconds from now');
+      devLog('handleSwap: Transaction deadline:', deadline, 'seconds from now');
 
       // EIP-1559 gas: get fee data and apply priority multiplier
       const feeData = await provider.getFeeData();
@@ -801,7 +805,7 @@ const Swap = () => {
 
       let tx;
       if (tokenIn === 'ETH') {
-        console.log('handleSwap: Executing swapExactETHForTokens...');
+        devLog('handleSwap: Executing swapExactETHForTokens...');
         tx = await routerContract.swapExactETHForTokens(
           minAmountOut,
           path,
@@ -810,7 +814,7 @@ const Swap = () => {
           { value: amountInWei, ...txOverrides }
         );
       } else if (tokenOut === 'ETH') {
-        console.log('handleSwap: Executing swapExactTokensForETH...');
+        devLog('handleSwap: Executing swapExactTokensForETH...');
         tx = await routerContract.swapExactTokensForETH(
           amountInWei,
           minAmountOut,
@@ -820,7 +824,7 @@ const Swap = () => {
           txOverrides
         );
       } else {
-        console.log('handleSwap: Executing swapExactTokensForTokens...');
+        devLog('handleSwap: Executing swapExactTokensForTokens...');
         tx = await routerContract.swapExactTokensForTokens(
           amountInWei,
           minAmountOut,
@@ -831,11 +835,11 @@ const Swap = () => {
         );
       }
 
-      console.log('handleSwap: Transaction sent:', tx.hash);
+      devLog('handleSwap: Transaction sent:', tx.hash);
 
       // Wait for transaction confirmation
       const receipt = await tx.wait();
-      console.log('handleSwap: Transaction confirmed:', receipt);
+      devLog('handleSwap: Transaction confirmed:', receipt);
       
       setSwapSuccess(`Swap successful! Transaction hash: ${receipt.hash}`);
       toast.success('Swap completed successfully!');
@@ -858,7 +862,7 @@ const Swap = () => {
             pairAddress: '' // Will be determined from the transaction
           }
         );
-        console.log('Transaction tracked successfully');
+        devLog('Transaction tracked successfully');
       } catch (error) {
         console.error('Failed to track transaction:', error);
       }
@@ -888,17 +892,17 @@ const Swap = () => {
 
   // Calculate expected output amount
   const calculateExpectedOutput = useCallback(async (inputAmount, inputToken, outputToken) => {
-    console.log('=== CALCULATE EXPECTED OUTPUT START ===');
-    console.log('Function called with:', { inputAmount, inputToken, outputToken });
+    devLog('=== CALCULATE EXPECTED OUTPUT START ===');
+    devLog('Function called with:', { inputAmount, inputToken, outputToken });
     
     // Simple validation first
     if (!inputAmount || !inputToken || !outputToken) {
-      console.log('calculateExpectedOutput: Missing required parameters');
+      devLog('calculateExpectedOutput: Missing required parameters');
       setAmountOut('');
       return;
     }
     
-    console.log('Raw input values:', {
+    devLog('Raw input values:', {
       inputAmount: inputAmount,
       inputAmountType: typeof inputAmount,
       inputAmountLength: inputAmount ? inputAmount.length : 0,
@@ -908,21 +912,21 @@ const Swap = () => {
     
     // VALIDATION: Check input amount immediately
     if (!inputAmount || isNaN(parseFloat(inputAmount)) || parseFloat(inputAmount) <= 0) {
-      console.log('calculateExpectedOutput: Invalid input amount', { inputAmount });
+      devLog('calculateExpectedOutput: Invalid input amount', { inputAmount });
       setAmountOut('');
       return;
     }
     
     const inputAmountNum = parseFloat(inputAmount);
     if (inputAmountNum > 1000000) {
-      console.log('calculateExpectedOutput: Input amount too large', { inputAmount, inputAmountNum });
+      devLog('calculateExpectedOutput: Input amount too large', { inputAmount, inputAmountNum });
       setAmountOut('');
       return;
     }
     
     // VALIDATION: Check for 18 decimal tokens specifically
     if (inputAmountNum > 1000) {
-      console.log('calculateExpectedOutput: Input amount may be too large for 18 decimal tokens', { 
+      devLog('calculateExpectedOutput: Input amount may be too large for 18 decimal tokens', { 
         inputAmount, 
         inputAmountNum,
         warning: 'Amount > 1000 may cause issues with 18 decimal tokens'
@@ -930,7 +934,7 @@ const Swap = () => {
     }
     
     if (!inputToken || !outputToken || inputToken === outputToken) {
-      console.log('calculateExpectedOutput: Invalid input parameters', { inputAmount, inputToken, outputToken });
+      devLog('calculateExpectedOutput: Invalid input parameters', { inputAmount, inputToken, outputToken });
       setAmountOut('');
       return;
     }
@@ -938,23 +942,23 @@ const Swap = () => {
     // Check if DEX is deployed on current network
     const calcRouterAddress = getContractAddress(chainId, 'dexRouter');
     const wethAddress = getContractAddress(chainId, 'weth');
-    console.log('calculateExpectedOutput: Router address for chainId', chainId, ':', calcRouterAddress);
-    console.log('calculateExpectedOutput: WETH address for chainId', chainId, ':', wethAddress);
+    devLog('calculateExpectedOutput: Router address for chainId', chainId, ':', calcRouterAddress);
+    devLog('calculateExpectedOutput: WETH address for chainId', chainId, ':', wethAddress);
     
     if (!calcRouterAddress || calcRouterAddress === '0x0000000000000000000000000000000000000000') {
-      console.log('calculateExpectedOutput: Router not deployed on this network');
+      devLog('calculateExpectedOutput: Router not deployed on this network');
       setAmountOut('');
       return;
     }
 
     if (!wethAddress || wethAddress === '0x0000000000000000000000000000000000000000') {
-      console.log('calculateExpectedOutput: WETH not configured for this network');
+      devLog('calculateExpectedOutput: WETH not configured for this network');
       setAmountOut('');
       return;
     }
 
     if (!walletProvider) {
-      console.log('calculateExpectedOutput: No wallet provider');
+      devLog('calculateExpectedOutput: No wallet provider');
       setAmountOut('');
       return;
     }
@@ -988,24 +992,24 @@ const Swap = () => {
       const path = [];
       if (inputToken === 'ETH') {
         path.push(wethAddress); // Use correct WETH address for the network
-        console.log('calculateExpectedOutput: Added WETH to path for ETH input:', wethAddress);
+        devLog('calculateExpectedOutput: Added WETH to path for ETH input:', wethAddress);
       } else {
         // Get token address from userTokens
         const tokenInData = userTokens.find(t => t.symbol === inputToken);
         if (!tokenInData) {
-          console.log('calculateExpectedOutput: Token not found in userTokens', { inputToken, userTokens: userTokens.map(t => t.symbol) });
+          devLog('calculateExpectedOutput: Token not found in userTokens', { inputToken, userTokens: userTokens.map(t => t.symbol) });
           setAmountOut('');
           return;
         }
         if (!tokenInData.address || tokenInData.address === '0x0000000000000000000000000000000000000000') {
-          console.log('calculateExpectedOutput: Invalid token address for input token', { symbol: inputToken, address: tokenInData.address });
+          devLog('calculateExpectedOutput: Invalid token address for input token', { symbol: inputToken, address: tokenInData.address });
           setAmountOut('');
           return;
         }
         
         // Validate that this is not a contract address
         if (contractAddresses.has(tokenInData.address.toLowerCase())) {
-          console.log('calculateExpectedOutput: Input token address is a contract address, not a token', { 
+          devLog('calculateExpectedOutput: Input token address is a contract address, not a token', { 
             symbol: inputToken, 
             address: tokenInData.address,
             contractAddresses: Array.from(contractAddresses)
@@ -1016,29 +1020,29 @@ const Swap = () => {
         }
         
         path.push(tokenInData.address);
-        console.log('calculateExpectedOutput: Added token to path', { symbol: inputToken, address: tokenInData.address });
+        devLog('calculateExpectedOutput: Added token to path', { symbol: inputToken, address: tokenInData.address });
       }
 
       if (outputToken === 'ETH') {
         path.push(wethAddress); // Use correct WETH address for the network
-        console.log('calculateExpectedOutput: Added WETH to path for ETH output:', wethAddress);
+        devLog('calculateExpectedOutput: Added WETH to path for ETH output:', wethAddress);
       } else {
         // Get token address from userTokens
         const tokenOutData = userTokens.find(t => t.symbol === outputToken);
         if (!tokenOutData) {
-          console.log('calculateExpectedOutput: Output token not found in userTokens', { outputToken, userTokens: userTokens.map(t => t.symbol) });
+          devLog('calculateExpectedOutput: Output token not found in userTokens', { outputToken, userTokens: userTokens.map(t => t.symbol) });
           setAmountOut('');
           return;
         }
         if (!tokenOutData.address || tokenOutData.address === '0x0000000000000000000000000000000000000000') {
-          console.log('calculateExpectedOutput: Invalid token address for output token', { symbol: outputToken, address: tokenOutData.address });
+          devLog('calculateExpectedOutput: Invalid token address for output token', { symbol: outputToken, address: tokenOutData.address });
           setAmountOut('');
           return;
         }
         
         // Validate that this is not a contract address
         if (contractAddresses.has(tokenOutData.address.toLowerCase())) {
-          console.log('calculateExpectedOutput: Output token address is a contract address, not a token', { 
+          devLog('calculateExpectedOutput: Output token address is a contract address, not a token', { 
             symbol: outputToken, 
             address: tokenOutData.address,
             contractAddresses: Array.from(contractAddresses)
@@ -1049,17 +1053,17 @@ const Swap = () => {
         }
         
         path.push(tokenOutData.address);
-        console.log('calculateExpectedOutput: Added output token to path', { symbol: outputToken, address: tokenOutData.address });
+        devLog('calculateExpectedOutput: Added output token to path', { symbol: outputToken, address: tokenOutData.address });
       }
 
       // Validate path length
       if (path.length !== 2) {
-        console.log('calculateExpectedOutput: Invalid path length:', path.length);
+        devLog('calculateExpectedOutput: Invalid path length:', path.length);
         setAmountOut('');
         return;
       }
 
-      console.log('calculateExpectedOutput: Swap path details:', {
+      devLog('calculateExpectedOutput: Swap path details:', {
         path: path,
         inputToken: inputToken,
         outputToken: outputToken,
@@ -1077,19 +1081,19 @@ const Swap = () => {
       // Validate token addresses
       if (path[0] === '0x0000000000000000000000000000000000000000' || 
           path[1] === '0x0000000000000000000000000000000000000000') {
-        console.log('calculateExpectedOutput: Invalid token address in path', { path });
+        devLog('calculateExpectedOutput: Invalid token address in path', { path });
         setAmountOut('');
         return;
       }
 
       // Check if tokens are the same
       if (path[0] === path[1]) {
-        console.log('calculateExpectedOutput: Cannot swap same token', { path });
+        devLog('calculateExpectedOutput: Cannot swap same token', { path });
         setAmountOut('');
         return;
       }
 
-      console.log('calculateExpectedOutput: About to call getAmountsOut with:', {
+      devLog('calculateExpectedOutput: About to call getAmountsOut with:', {
         path: path,
         inputAmount,
         inputToken,
@@ -1098,16 +1102,16 @@ const Swap = () => {
 
       // Try a small test amount first to check if the pair exists
       const testAmount = ethers.parseUnits('0.001', 18); // 0.001 tokens
-      console.log('calculateExpectedOutput: Testing with small amount:', testAmount.toString());
-      console.log('calculateExpectedOutput: Testing path:', path);
-      console.log('calculateExpectedOutput: Router address:', calcRouterAddress);
+      devLog('calculateExpectedOutput: Testing with small amount:', testAmount.toString());
+      devLog('calculateExpectedOutput: Testing path:', path);
+      devLog('calculateExpectedOutput: Router address:', calcRouterAddress);
       
       try {
         const testAmountsOut = await routerContract.getAmountsOut(testAmount, path);
-        console.log('calculateExpectedOutput: Test getAmountsOut result:', testAmountsOut);
+        devLog('calculateExpectedOutput: Test getAmountsOut result:', testAmountsOut);
         
         if (!testAmountsOut || testAmountsOut.length < 2 || testAmountsOut[1] === 0n) {
-          console.log('calculateExpectedOutput: No liquidity found for this trading pair', {
+          devLog('calculateExpectedOutput: No liquidity found for this trading pair', {
             inputToken,
             outputToken,
             testAmount: testAmount.toString(),
@@ -1120,8 +1124,8 @@ const Swap = () => {
           return;
         }
       } catch (testError) {
-        console.log('calculateExpectedOutput: Error testing trading pair:', testError);
-        console.log('calculateExpectedOutput: Error details:', {
+        devLog('calculateExpectedOutput: Error testing trading pair:', testError);
+        devLog('calculateExpectedOutput: Error details:', {
           message: testError.message,
           code: testError.code,
           data: testError.data,
@@ -1161,7 +1165,7 @@ const Swap = () => {
       // Get expected output amount
       let amountInWei;
       
-      console.log('calculateExpectedOutput: Starting amount calculation with:', {
+      devLog('calculateExpectedOutput: Starting amount calculation with:', {
         inputAmount,
         inputToken,
         outputToken,
@@ -1171,14 +1175,14 @@ const Swap = () => {
       // VALIDATION: Check input amount before any calculation
       const inputAmountNum = parseFloat(inputAmount);
       if (inputAmountNum > 1000000) {
-        console.log('calculateExpectedOutput: Input amount too large', { inputAmount, inputAmountNum });
+        devLog('calculateExpectedOutput: Input amount too large', { inputAmount, inputAmountNum });
         setAmountOut('');
         return;
       }
       
       // Check if input amount contains scientific notation or other problematic formats
       if (inputAmount.includes('e') || inputAmount.includes('E')) {
-        console.log('calculateExpectedOutput: Input amount contains scientific notation', { inputAmount });
+        devLog('calculateExpectedOutput: Input amount contains scientific notation', { inputAmount });
         setAmountOut('');
         return;
       }
@@ -1186,17 +1190,17 @@ const Swap = () => {
       // Check if input amount contains only valid numeric characters
       const validNumericRegex = /^[0-9.]+$/;
       if (!validNumericRegex.test(inputAmount)) {
-        console.log('calculateExpectedOutput: Input amount contains invalid characters', { inputAmount });
+        devLog('calculateExpectedOutput: Input amount contains invalid characters', { inputAmount });
         setAmountOut('');
         return;
       }
       
       const parsedAmount = parseFloat(inputAmount);
-      console.log('calculateExpectedOutput: Parsed amount:', parsedAmount);
+      devLog('calculateExpectedOutput: Parsed amount:', parsedAmount);
       
       // Validate that the input amount is reasonable (not too large)
       if (parsedAmount > 1000000) {
-        console.log('calculateExpectedOutput: Input amount too large', { inputAmount, parsedAmount });
+        devLog('calculateExpectedOutput: Input amount too large', { inputAmount, parsedAmount });
         setAmountOut('');
         return;
       }
@@ -1204,14 +1208,14 @@ const Swap = () => {
       // Get the correct decimals for the input token
       if (inputToken === 'ETH') {
         amountInWei = ethers.parseUnits(inputAmount, 18); // ETH/WETH has 18 decimals
-        console.log('calculateExpectedOutput: ETH amount calculation:', {
+        devLog('calculateExpectedOutput: ETH amount calculation:', {
           inputAmount,
           decimals: 18,
           amountInWei: amountInWei.toString()
         });
       } else {
         const tokenInData = userTokens.find(t => t.symbol === inputToken);
-        console.log('calculateExpectedOutput: Token data found:', {
+        devLog('calculateExpectedOutput: Token data found:', {
           inputToken,
           tokenInData: tokenInData ? {
             symbol: tokenInData.symbol,
@@ -1223,14 +1227,14 @@ const Swap = () => {
         });
         
         if (!tokenInData || !tokenInData.decimals) {
-          console.log('calculateExpectedOutput: Cannot determine decimals for input token', { inputToken });
+          devLog('calculateExpectedOutput: Cannot determine decimals for input token', { inputToken });
           setAmountOut('');
           return;
         }
         
         // Validate decimals are reasonable
         if (tokenInData.decimals < 0 || tokenInData.decimals > 18) {
-          console.log('calculateExpectedOutput: Invalid decimals for token', { 
+          devLog('calculateExpectedOutput: Invalid decimals for token', { 
             inputToken, 
             decimals: tokenInData.decimals 
           });
@@ -1240,17 +1244,17 @@ const Swap = () => {
         
         // Additional check for tokens with 18 decimals
         if (tokenInData.decimals === 18 && parseFloat(inputAmount) > 1000) {
-          console.log('calculateExpectedOutput: Amount too large for 18 decimal token', { inputAmount, tokenSymbol: tokenInData.symbol });
+          devLog('calculateExpectedOutput: Amount too large for 18 decimal token', { inputAmount, tokenSymbol: tokenInData.symbol });
           setAmountOut('');
           return;
         }
         
         amountInWei = ethers.parseUnits(inputAmount, tokenInData.decimals);
-        console.log('calculateExpectedOutput: Calculated amountInWei:', amountInWei.toString());
+        devLog('calculateExpectedOutput: Calculated amountInWei:', amountInWei.toString());
         
         // Check if amount exceeds token balance
         if (tokenInData.balance && amountInWei > tokenInData.balance) {
-          console.log('calculateExpectedOutput: Amount exceeds token balance', {
+          devLog('calculateExpectedOutput: Amount exceeds token balance', {
             amountInWei: amountInWei.toString(),
             balance: tokenInData.balance.toString(),
             formattedBalance: ethers.formatUnits(tokenInData.balance, tokenInData.decimals)
@@ -1262,7 +1266,7 @@ const Swap = () => {
         // Check if amount is unreasonably large for this token's decimals
         const maxReasonableForDecimals = ethers.parseUnits('1000000', tokenInData.decimals); // 1 million tokens
         if (amountInWei > maxReasonableForDecimals) {
-          console.log('calculateExpectedOutput: Amount too large for token decimals', {
+          devLog('calculateExpectedOutput: Amount too large for token decimals', {
             amountInWei: amountInWei.toString(),
             maxReasonableForDecimals: maxReasonableForDecimals.toString(),
             decimals: tokenInData.decimals
@@ -1274,14 +1278,14 @@ const Swap = () => {
       
       // Validate that the amount is reasonable (not too large)
       const maxReasonableAmount = ethers.parseUnits('1000000', 18); // 1 million tokens max
-      console.log('calculateExpectedOutput: Amount validation:', {
+      devLog('calculateExpectedOutput: Amount validation:', {
         amountInWei: amountInWei.toString(),
         maxReasonableAmount: maxReasonableAmount.toString(),
         isTooLarge: amountInWei > maxReasonableAmount
       });
       
       if (amountInWei > maxReasonableAmount) {
-        console.log('calculateExpectedOutput: Amount too large, likely invalid', { 
+        devLog('calculateExpectedOutput: Amount too large, likely invalid', { 
           amountInWei: amountInWei.toString(),
           maxReasonableAmount: maxReasonableAmount.toString()
         });
@@ -1292,7 +1296,7 @@ const Swap = () => {
       // Additional validation: check if amount is unreasonably large (more than 1 billion wei)
       const maxWeiAmount = ethers.parseUnits('1000000000', 18); // 1 billion wei
       if (amountInWei > maxWeiAmount) {
-        console.log('calculateExpectedOutput: Amount unreasonably large, preventing contract call', { 
+        devLog('calculateExpectedOutput: Amount unreasonably large, preventing contract call', { 
           amountInWei: amountInWei.toString(),
           maxWeiAmount: maxWeiAmount.toString()
         });
@@ -1300,7 +1304,7 @@ const Swap = () => {
         return;
       }
       
-      console.log('calculateExpectedOutput: Calling getAmountsOut with:', {
+      devLog('calculateExpectedOutput: Calling getAmountsOut with:', {
         amountInWei: amountInWei.toString(),
         path: path,
         inputAmount,
@@ -1311,7 +1315,7 @@ const Swap = () => {
       // Final safety check - prevent any amount larger than 1 billion wei
       const safetyLimit = ethers.parseUnits('1000000000', 18);
       if (amountInWei > safetyLimit) {
-        console.log('calculateExpectedOutput: FINAL SAFETY CHECK FAILED - Amount too large, preventing contract call', {
+        devLog('calculateExpectedOutput: FINAL SAFETY CHECK FAILED - Amount too large, preventing contract call', {
           amountInWei: amountInWei.toString(),
           safetyLimit: safetyLimit.toString()
         });
@@ -1320,18 +1324,18 @@ const Swap = () => {
       }
       
       const amountsOut = await routerContract.getAmountsOut(amountInWei, path);
-      console.log('calculateExpectedOutput: getAmountsOut result:', amountsOut);
+      devLog('calculateExpectedOutput: getAmountsOut result:', amountsOut);
       
       // Check if the result is valid
       if (!amountsOut || amountsOut.length < 2) {
-        console.log('calculateExpectedOutput: Invalid result from getAmountsOut', { amountsOut });
+        devLog('calculateExpectedOutput: Invalid result from getAmountsOut', { amountsOut });
         setAmountOut('');
         return;
       }
       
       // Check if the output amount is 0 or very small
       if (amountsOut[1] === 0n || amountsOut[1] < 1000n) {
-        console.log('calculateExpectedOutput: Output amount is too small or zero', { 
+        devLog('calculateExpectedOutput: Output amount is too small or zero', { 
           amountsOut: amountsOut.map(a => a.toString()),
           inputAmount,
           inputToken,
@@ -1348,19 +1352,19 @@ const Swap = () => {
       } else {
         const tokenOutData = userTokens.find(t => t.symbol === outputToken);
         if (!tokenOutData || !tokenOutData.decimals) {
-          console.log('calculateExpectedOutput: Cannot determine decimals for output token', { outputToken });
+          devLog('calculateExpectedOutput: Cannot determine decimals for output token', { outputToken });
           setAmountOut('');
           return;
         }
         expectedAmountOut = ethers.formatUnits(amountsOut[1], tokenOutData.decimals);
       }
       
-      console.log('calculateExpectedOutput: Expected output amount:', expectedAmountOut);
+      devLog('calculateExpectedOutput: Expected output amount:', expectedAmountOut);
       
       // Final validation - check if the output amount is reasonable
       const outputAmountNum = parseFloat(expectedAmountOut);
       if (outputAmountNum <= 0 || isNaN(outputAmountNum)) {
-        console.log('calculateExpectedOutput: Invalid output amount calculated', { expectedAmountOut, outputAmountNum });
+        devLog('calculateExpectedOutput: Invalid output amount calculated', { expectedAmountOut, outputAmountNum });
         setAmountOut('');
         return;
       }
@@ -1383,25 +1387,25 @@ const Swap = () => {
   // Fetch user's tokens
   const fetchUserTokens = useCallback(async () => {
     if (!account) {
-      console.log('No account available, skipping token fetch');
+      devLog('No account available, skipping token fetch');
       return;
     }
     
-    console.log('Starting token fetch for account:', account);
+    devLog('Starting token fetch for account:', account);
     setIsLoadingTokens(true);
     try {
       if (!walletProvider) {
-        console.log('No wallet provider, skipping token fetch');
+        devLog('No wallet provider, skipping token fetch');
         return;
       }
 
       // Get all tokens from user's wallet by scanning transfer events
       const allTokens = await getAllUserTokens(walletProvider, account);
-      console.log('User wallet tokens found:', allTokens.length, allTokens);
+      devLog('User wallet tokens found:', allTokens.length, allTokens);
       
       // Also check common tokens for better coverage
       const commonTokens = getCommonTokens(chainId);
-      console.log('Common tokens found:', commonTokens.length, commonTokens);
+      devLog('Common tokens found:', commonTokens.length, commonTokens);
       
       let factoryTokenAddrs = [];
       try {
@@ -1412,10 +1416,10 @@ const Swap = () => {
       const factorySet = new Set(factoryTokenAddrs.map((a) => a.toLowerCase()));
 
       const allTokenAddresses = [...new Set([...allTokens, ...commonTokens, ...factoryTokenAddrs])];
-      console.log('Total unique token addresses:', allTokenAddresses.length);
+      devLog('Total unique token addresses:', allTokenAddresses.length);
       
       // Debug: Log each address being processed
-      console.log('Processing token addresses:', allTokenAddresses);
+      devLog('Processing token addresses:', allTokenAddresses);
       
       // Get contract addresses to exclude
       const contracts = getContractAddresses(chainId);
@@ -1477,7 +1481,7 @@ const Swap = () => {
         return parseFloat(b.formattedBalance) - parseFloat(a.formattedBalance);
       });
       
-      console.log('Final tokens to display:', tokensWithBalance.length, tokensWithBalance.map(t => `${t.symbol} (${t.address})`));
+      devLog('Final tokens to display:', tokensWithBalance.length, tokensWithBalance.map(t => `${t.symbol} (${t.address})`));
       setUserTokens(tokensWithBalance);
     } catch (error) {
       console.error('Error fetching user tokens:', error);
@@ -1508,7 +1512,7 @@ const Swap = () => {
       }
     }
     
-    console.log('getConfiguredPairs: Configured pairs:', configuredPairs);
+    devLog('getConfiguredPairs: Configured pairs:', configuredPairs);
     return configuredPairs;
   }, [chainId]);
 
@@ -1518,7 +1522,7 @@ const Swap = () => {
     
     const routerAddress = getContractAddress(chainId, 'dexRouter');
     if (!routerAddress || routerAddress === '0x0000000000000000000000000000000000000000') {
-      console.log('checkAvailablePairs: Router not deployed on this network');
+      devLog('checkAvailablePairs: Router not deployed on this network');
       return [];
     }
 
@@ -1628,7 +1632,7 @@ const Swap = () => {
 
   // Fetch tokens on mount and when account changes
   useEffect(() => {
-    console.log('useEffect triggered - isConnected:', isConnected, 'account:', account, 'chainId:', chainId);
+    devLog('useEffect triggered - isConnected:', isConnected, 'account:', account, 'chainId:', chainId);
     if (isConnected && account) {
       fetchUserTokens();
     }
@@ -1638,14 +1642,14 @@ const Swap = () => {
   // Check available trading pairs when tokens are loaded
   useEffect(() => {
     if (userTokens.length > 0 && chainId) {
-      console.log('Checking available trading pairs...');
+      devLog('Checking available trading pairs...');
       checkAvailablePairs();
     }
   }, [userTokens, chainId, checkAvailablePairs]);
 
   // Calculate expected output when input changes
   useEffect(() => {
-    console.log('🔄 useEffect triggered for calculation:', {
+    devLog('🔄 useEffect triggered for calculation:', {
       amountIn,
       tokenIn,
       tokenOut,
@@ -1659,9 +1663,9 @@ const Swap = () => {
     });
     
     if (amountIn && tokenIn && tokenOut && tokenIn !== tokenOut) {
-      console.log('✅ Starting calculation with:', { amountIn, tokenIn, tokenOut });
+      devLog('✅ Starting calculation with:', { amountIn, tokenIn, tokenOut });
       const timeoutId = setTimeout(() => {
-        console.log('⏰ Debounced calculation starting...');
+        devLog('⏰ Debounced calculation starting...');
         calculateExpectedOutput(amountIn, tokenIn, tokenOut);
         
         // Also fetch external DEX quotes if available
@@ -1671,11 +1675,11 @@ const Swap = () => {
       }, 500); // Debounce for 500ms
       
       return () => {
-        console.log('🧹 Clearing timeout');
+        devLog('🧹 Clearing timeout');
         clearTimeout(timeoutId);
       };
     } else {
-      console.log('❌ Clearing amountOut due to invalid parameters');
+      devLog('❌ Clearing amountOut due to invalid parameters');
       setAmountOut('');
       setExternalQuotes([]);
       setSelectedExternalQuote(null);
@@ -1715,8 +1719,8 @@ const Swap = () => {
         setSelectedExternalQuote(quotes[0]);
       } else {
         // If no external quotes, show a helpful message
-        console.log('No external DEX quotes available - this is normal on Sepolia testnet');
-        console.log('Your DEX will be used for swaps');
+        devLog('No external DEX quotes available - this is normal on Sepolia testnet');
+        devLog('Your DEX will be used for swaps');
       }
     } catch (error) {
       console.error('Error fetching external quotes:', error);
@@ -2233,7 +2237,7 @@ const Swap = () => {
                     type="number"
                     value={amountIn}
                     onChange={(e) => {
-                      console.log('📝 Input changed:', e.target.value);
+                      devLog('📝 Input changed:', e.target.value);
                       setAmountIn(e.target.value);
                     }}
                     placeholder="0.0"

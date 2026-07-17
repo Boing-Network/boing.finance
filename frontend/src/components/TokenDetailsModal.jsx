@@ -59,21 +59,24 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network, onSetPriceAlert })
       const prices = history.prices.map(([, p]) => p).filter(Boolean);
       return getPricePrediction(prices, 7);
     },
-    enabled: !!token && !!network,
+    enabled: isOpen && !!token && !!network,
+    staleTime: 120_000,
     refetchInterval: 300000, // 5 min
+    refetchIntervalInBackground: false,
   });
 
   // Fetch price data - React Query v5 API
   const { data: priceInfo, isLoading: priceLoading } = useQuery({
     queryKey: ['tokenPrice', token?.address, network?.chainId],
     queryFn: async () => {
-      console.log('[TokenDetailsModal] Fetching token price:', { address: token?.address, chainId: network?.chainId });
       if (!token?.address || !network?.chainId) return null;
       const cgNetwork = getCoinGeckoNetwork(network.chainId);
       return await coingeckoService.getTokenPrice(token.address, cgNetwork);
     },
-    enabled: !!token && !!network,
+    enabled: isOpen && !!token && !!network,
+    staleTime: 60_000,
     refetchInterval: 60000, // Refetch every minute
+    refetchIntervalInBackground: false,
   });
 
   // Fetch holder count

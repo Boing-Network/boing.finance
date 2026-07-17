@@ -37,8 +37,11 @@ export default function GovernanceVote() {
         <meta name="description" content="Vote on proposals and create your own. Participate in boing.finance DAO governance." />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <PageHeader title="Governance Vote" subtitle="Create proposals and vote using your BOING tokens. Your voice shapes the protocol." />
+        <PageHeader title="Governance Vote" subtitle="Submit proposals to the off-chain registry. On-chain BOING thresholds are not enforced yet." />
 
+        <div className="mb-6 rounded-lg border border-amber-500/30 bg-amber-900/20 px-4 py-3 text-sm text-amber-100">
+          <strong>Signaling only:</strong> Creating a proposal does not check a 10,000 BOING balance on-chain. Submissions go to the governance API for review.
+        </div>
         <div className="flex gap-4 mb-8">
           <Link to="/governance/proposals" className="text-cyan-400 hover:text-cyan-300 text-sm font-medium">← Back to Proposals</Link>
           <Link to="/governance/learn" className="text-cyan-400 hover:text-cyan-300 text-sm font-medium">How it works</Link>
@@ -64,7 +67,9 @@ export default function GovernanceVote() {
                   <textarea id="governance-proposal-description" name="description" autoComplete="off" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe your proposal in detail..." required rows={6} className="w-full px-4 py-3 rounded-lg border bg-gray-800/50 resize-none" style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} />
                 </div>
                 {error && <p className="text-amber-400 text-sm">{error}</p>}
-                <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>You need BOING tokens to create a proposal. Minimum threshold: 10,000 BOING.</div>
+                <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                  Planned future requirement: hold BOING to create proposals (target threshold 10,000). Not enforced in this UI yet.
+                </div>
                 <button type="submit" disabled={loading} className="w-full py-3 rounded-lg font-medium bg-cyan-500 hover:bg-cyan-600 text-white transition-colors disabled:opacity-50">Submit Proposal</button>
               </form>
             )}
@@ -73,7 +78,7 @@ export default function GovernanceVote() {
           <PageCard className="text-center py-12">
             <div className="text-5xl mb-4">🔐</div>
             <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Connect Wallet to Vote</h3>
-            <p className="text-sm mb-6 max-w-md mx-auto" style={{ color: 'var(--text-secondary)' }}>Connect your wallet to create proposals and vote on governance decisions. Your BOING token balance determines your voting power.</p>
+            <p className="text-sm mb-6 max-w-md mx-auto" style={{ color: 'var(--text-secondary)' }}>Connect your wallet to submit proposals to the off-chain registry. On-chain voting power is not live yet.</p>
             <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Use the Connect Wallet button in the navigation bar.</p>
           </PageCard>
         )}
