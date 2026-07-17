@@ -4,10 +4,12 @@
 import React, { useState } from 'react';
 import { exportPortfolioPDF } from '../utils/exportData';
 import toast from 'react-hot-toast';
+import useEscapeKey from '../hooks/useEscapeKey';
 
 export default function SharePortfolioModal({ isOpen, onClose, portfolioData }) {
   const [_shareType, _setShareType] = useState('link'); // 'link' or 'image' (reserved for future use)
   const [anonymize, setAnonymize] = useState(true);
+  useEscapeKey(isOpen, onClose);
 
   if (!isOpen || !portfolioData) return null;
 

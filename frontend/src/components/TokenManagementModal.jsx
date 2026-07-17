@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
+import toast from 'react-hot-toast';
 import SecurityBadges from './SecurityBadges';
 import EmptyState from './EmptyState';
 import walletTokenService from '../services/walletTokenService';
+import useEscapeKey from '../hooks/useEscapeKey';
+
+const ERC20_META_ABI = [
+  'function name() view returns (string)',
+  'function symbol() view returns (string)',
+  'function decimals() view returns (uint8)',
+];
 
 export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, currentNetwork, account, provider, chainId }) {
+  useEscapeKey(isOpen, onClose);
   const [searchTerm, setSearchTerm] = useState('');
   const [customTokens, setCustomTokens] = useState([]);
   const [importAddress, setImportAddress] = useState('');
@@ -97,28 +106,41 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
 
   const importToken = async () => {
     if (!ethers.isAddress(importAddress)) {
-      alert('Invalid token address');
+      toast.error('Invalid token address');
+      return;
+    }
+    if (!provider) {
+      toast.error('Connect a wallet so we can read token metadata on-chain');
       return;
     }
 
     setImporting(true);
     try {
-      // In a real app, you'd fetch token info from the blockchain
-      // For demo purposes, we'll create a mock token
-      const mockToken = {
-        symbol: 'CUSTOM',
-        name: 'Custom Token',
-        address: importAddress,
-        decimals: 18,
-        logo: '🔴',
-        isCustom: true
-      };
-      
-      addCustomToken(mockToken);
+      const checksum = ethers.getAddress(importAddress);
+      const contract = new ethers.Contract(checksum, ERC20_META_ABI, provider);
+      const [name, symbol, decimalsRaw] = await Promise.all([
+        contract.name(),
+        contract.symbol(),
+        contract.decimals(),
+      ]);
+      const decimals = Number(decimalsRaw);
+      if (!symbol || !Number.isFinite(decimals)) {
+        throw new Error('Contract did not return valid ERC-20 metadata');
+      }
+
+      addCustomToken({
+        symbol: String(symbol),
+        name: String(name || symbol),
+        address: checksum,
+        decimals,
+        logo: '🪙',
+        isCustom: true,
+      });
       setImportAddress('');
       setActiveTab('custom');
+      toast.success(`Imported ${symbol}`);
     } catch (error) {
-      alert('Failed to import token: ' + error.message);
+      toast.error(error?.message || 'Failed to import token from chain');
     } finally {
       setImporting(false);
     }
@@ -193,7 +215,7 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
         </div>
 
         {/* Tabs */}
-        <div className="flex space-x-1 mb-4 bg-gray-700 rounded-lg p-1">
+        <div className="flex space-x-1 mb-4 bg-gray-700 rounded-lg p-1" role="tablist" aria-label="Token lists">
           {[
             { key: 'my-tokens', label: 'My Tokens' },
             { key: 'popular', label: 'Popular' },
@@ -202,6 +224,9 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
           ].map((tab) => (
             <button
               key={tab.key}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                 activeTab === tab.key

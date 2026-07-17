@@ -246,8 +246,8 @@ const FAQSection = () => {
             type="text"
             autoComplete="off"
             placeholder="Search FAQs..."
-            className="w-full bg-gray-700 border  rounded-lg px-4 py-3 style={{ color: 'var(--text-primary)' }} placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          style={{ borderColor: 'var(--border-color)'  }}
+            className="w-full bg-gray-700 border rounded-lg px-4 py-3 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{ color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
           />
           <div className="absolute right-3 top-3 text-gray-400">
             🔍

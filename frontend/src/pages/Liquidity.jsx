@@ -15,6 +15,7 @@ import getFeatureSupport from '../config/featureSupport';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import NativeAmmSwapPanel from '../components/NativeAmmSwapPanel';
 import NativeAmmLpVaultPanel from '../components/NativeAmmLpVaultPanel';
+import EmptyState from '../components/EmptyState';
 
 // Helper function to get API URL
 const getApiUrl = () => {
@@ -40,18 +41,24 @@ const Liquidity = () => {
     return saved ? JSON.parse(saved) : { slippage: 0.5, deadline: 20, darkMode: false };
   });
   const [pairs, setPairs] = useState([]);
-  const [loading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   // Fetch pairs data
   useEffect(() => {
     const fetchPools = async () => {
+      setLoading(true);
       try {
         const response = await axios.get(`${getApiUrl()}/api/liquidity/pools`);
         if (response.data.success) {
-          setPairs(response.data.data);
+          setPairs(response.data.data || []);
+        } else {
+          setPairs([]);
         }
       } catch (error) {
         console.error('Failed to fetch pools:', error);
+        setPairs([]);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -83,7 +90,9 @@ const Liquidity = () => {
         positions
       };
     },
+    staleTime: 60_000,
     refetchInterval: 30000,
+    refetchIntervalInBackground: false,
     enabled: !!account,
     retry: false
   });
@@ -198,24 +207,24 @@ const Liquidity = () => {
               The more liquidity you provide, the more fees you earn!
             </p>
             <div className="flex flex-wrap justify-center gap-3 mt-4 sm:mt-6">
-              <button
-                disabled
-                className="bg-gray-600 text-gray-400 px-3 sm:px-4 py-2 rounded-lg font-medium cursor-not-allowed border border-gray-500 text-sm sm:text-base"
+              <Link
+                to="/pools"
+                className="bg-cyan-600 hover:bg-cyan-500 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors border border-cyan-500/40 text-sm sm:text-base"
               >
-                📊 View All Pools
-              </button>
-              <button
-                disabled
-                className="bg-gray-600 text-gray-400 px-3 sm:px-4 py-2 rounded-lg font-medium cursor-not-allowed border border-gray-500 text-sm sm:text-base"
-              >
-                🔄 Start Trading
-              </button>
-              <a
-                href="/docs"
+                View All Pools
+              </Link>
+              <Link
+                to="/swap"
                 className="bg-white/20 hover:bg-white/30 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors border border-white/30 text-sm sm:text-base"
               >
-                📖 Learn More
-              </a>
+                Start Trading
+              </Link>
+              <Link
+                to="/docs"
+                className="bg-white/20 hover:bg-white/30 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors border border-white/30 text-sm sm:text-base"
+              >
+                Learn More
+              </Link>
             </div>
           </div>
 
@@ -287,12 +296,12 @@ const Liquidity = () => {
                       </div>
                     ))}
                   </div>
-                ) : (
+                ) : pairs.length > 0 ? (
                   <div className="space-y-3 sm:space-y-4">
                     {pairs.slice(0, 5).map((pair) => (
                       <div
                         key={pair.address}
-                        className="bg-gray-750 rounded-lg p-3 sm:p-4 hover:bg-gray-700 transition-colors cursor-pointer"
+                        className="bg-gray-750 rounded-lg p-3 sm:p-4 hover:bg-gray-700 transition-colors"
                       >
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
                           <div className="flex items-center space-x-3">
@@ -312,15 +321,23 @@ const Liquidity = () => {
                       </div>
                     ))}
                   </div>
+                ) : (
+                  <EmptyState
+                    variant="pools"
+                    title="No pools returned"
+                    description="Pool directory may be empty for this API, or the liquidity endpoint is offline. Browse on-chain pools instead."
+                    actionHref="/pools"
+                    actionLabel="Open Pools"
+                  />
                 )}
 
                 <div className="mt-4 sm:mt-6">
-                  <button
-                    disabled
-                    className="w-full bg-gray-600 text-gray-400 font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg cursor-not-allowed text-center block text-sm sm:text-base"
+                  <Link
+                    to="/pools"
+                    className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg text-center block text-sm sm:text-base transition-colors"
                   >
                     View All Pools
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -464,19 +481,13 @@ const Liquidity = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-6 sm:py-8">
-                    <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">💧</div>
-                    <h4 className="text-lg sm:text-xl font-semibold text-white mb-2">No Liquidity Positions</h4>
-                    <p className="text-gray-300 text-sm sm:text-base mb-4">
-                      Start providing liquidity to earn trading fees and rewards.
-                    </p>
-                    <button
-                      onClick={handleCreatePair}
-                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors text-sm sm:text-base"
-                    >
-                      Add Liquidity
-                    </button>
-                  </div>
+                  <EmptyState
+                    variant="pools"
+                    title="No Liquidity Positions"
+                    description="Start providing liquidity to earn trading fees and rewards."
+                    action={handleCreatePair}
+                    actionLabel="Add Liquidity"
+                  />
                 )}
               </div>
             </div>

@@ -4,6 +4,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import config from '../config';
 import toast from 'react-hot-toast';
+import useEscapeKey from '../hooks/useEscapeKey';
 
 const SUGGESTED_QUESTIONS = [
   "What's the best way to add liquidity to ETH/USDC?",
@@ -19,6 +20,7 @@ const AIChatModal = ({ isOpen, onClose, context }) => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  useEscapeKey(isOpen, onClose);
 
   useEffect(() => {
     if (isOpen && inputRef.current) {

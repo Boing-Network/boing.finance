@@ -1,11 +1,13 @@
 import React from 'react';
 import { shareSwapOnTwitter, sharePoolOnTwitter, shareDeployOnTwitter, copySwapShareText, copyPoolShareText } from '../utils/socialSharing';
 import toast from 'react-hot-toast';
+import useEscapeKey from '../hooks/useEscapeKey';
 
 /**
  * Modal to share swap, pool, or deploy success as a card (Twitter-ready text + copy).
  */
 export default function ShareCardModal({ isOpen, onClose, type, data }) {
+  useEscapeKey(isOpen, onClose);
   if (!isOpen || !data) return null;
 
   const handleTwitter = () => {
