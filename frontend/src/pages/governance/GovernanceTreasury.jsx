@@ -64,8 +64,12 @@ export default function GovernanceTreasury() {
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         <PageHeader
           title="DAO Treasury"
-          subtitle="Transparent view of protocol treasury, allocations, and recent transactions."
+          subtitle="Protocol treasury snapshot from the governance API when available."
         />
+
+        <div className="mb-6 rounded-lg border border-amber-500/30 bg-amber-900/20 px-4 py-3 text-sm text-amber-100">
+          <strong>Not live on-chain balances:</strong> Figures below come from the treasury API (or placeholders when empty). They are not a real-time multisig read until treasury indexing ships.
+        </div>
 
         {error && <p className="text-amber-400 text-sm mb-4">API: {error}</p>}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

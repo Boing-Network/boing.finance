@@ -324,7 +324,10 @@ const Status = () => {
                         <div className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(incident.status)}`}>
                           {incident.status}
                         </div>
-                        <div className={`px-2 py-1 rounded-full text-xs font-medium ${getImpactColor(incident.impact)} style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}`}>
+                        <div
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${getImpactColor(incident.impact)}`}
+                          style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}
+                        >
                           {incident.impact} impact
                         </div>
                       </div>

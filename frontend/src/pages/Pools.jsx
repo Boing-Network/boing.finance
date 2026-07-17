@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { Link, useNavigate } from 'react-router-dom';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useWallet } from '../contexts/WalletContext';
 import { useChainType } from '../contexts/SolanaWalletContext';
@@ -780,6 +781,7 @@ const Pools = () => {
   const { isSolana } = useChainType();
   const { isConnected, account, connectWallet } = useWalletConnection();
   const { chainId } = useWallet();
+  const navigate = useNavigate();
   const { record: recordAchievement } = useAchievements() || {};
   // Wallet state initialized
   const [activeTab, setActiveTab] = useState('all-pools');
@@ -902,6 +904,7 @@ const Pools = () => {
       }
     },
     refetchInterval: 60000,
+    refetchIntervalInBackground: false,
     retry: 2,
     enabled: chainId === 11155111 ? blockchainInitialized && searchTerm.trim().length > 0 : true,
     staleTime: 30000 // Cache for 30 seconds
@@ -925,28 +928,19 @@ const Pools = () => {
     setIsModalOpen(true);
   };
 
-  // eslint-disable-next-line no-unused-vars
-  const handleAddLiquidity = async (poolAddress, token0Amount, token1Amount, chainId) => {
-    // Implementation for adding liquidity
-    console.log('Adding liquidity to pool:', poolAddress, 'Token0:', token0Amount, 'Token1:', token1Amount);
-    // TODO: Implement actual liquidity addition logic
-    throw new Error('Add liquidity functionality not yet implemented');
+  const handleAddLiquidity = async () => {
+    toast('Use Create Pool / Liquidity to add reserves to a pair.', { icon: '💧' });
+    navigate('/create-pool');
   };
 
-  // eslint-disable-next-line no-unused-vars
-  const handleCollectFees = async (poolAddress, chainId) => {
-    // Implementation for collecting fees
-    console.log('Collecting fees for pool:', poolAddress);
-    // TODO: Implement actual fee collection logic
-    throw new Error('Collect fees functionality not yet implemented');
+  const handleCollectFees = async () => {
+    toast('Fee collection from this modal is not wired yet — manage positions from Liquidity.', { icon: 'ℹ️' });
+    navigate('/liquidity');
   };
 
-  // eslint-disable-next-line no-unused-vars
-  const handleRemoveLiquidity = async (poolAddress, percentage, chainId) => {
-    // Implementation for removing liquidity
-    console.log('Removing liquidity from pool:', poolAddress, 'Percentage:', percentage);
-    // TODO: Implement actual liquidity removal logic
-    throw new Error('Remove liquidity functionality not yet implemented');
+  const handleRemoveLiquidity = async () => {
+    toast('Remove liquidity from the Liquidity page for now.', { icon: 'ℹ️' });
+    navigate('/liquidity');
   };
 
   // Handle search execution
@@ -1245,19 +1239,13 @@ const Pools = () => {
                       </div>
                     )
                   ) : (
-                    <div className="text-center py-12">
-                      <div className="text-6xl mb-4">🏊</div>
-                      <h3 className="text-xl font-semibold text-white mb-2">No Liquidity Positions</h3>
-                      <p className="text-gray-400 mb-6">
-                        You haven't provided liquidity to any pools yet.
-                      </p>
-                      <button
-                        onClick={() => window.location.href = '/create-pool'}
-                        className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded-lg transition duration-200"
-                      >
-                        Create Your First Pool
-                      </button>
-                    </div>
+                    <EmptyState
+                      variant="pools"
+                      title="No Liquidity Positions"
+                      description="You haven't provided liquidity to any pools yet."
+                      actionHref="/create-pool"
+                      actionLabel="Create Your First Pool"
+                    />
                   )}
                 </div>
               )}

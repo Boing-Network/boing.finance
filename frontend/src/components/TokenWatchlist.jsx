@@ -72,6 +72,7 @@ export default function TokenWatchlist() {
       return prices;
     },
     refetchInterval: 60000,
+    refetchIntervalInBackground: false,
     staleTime: 60000,
     enabled: watchlist.length > 0,
   });

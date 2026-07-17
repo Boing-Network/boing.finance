@@ -347,42 +347,26 @@ const Liquidity = () => {
               <div className="bg-gray-800 rounded-xl p-4 sm:p-6 border border-gray-700">
                 <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Quick Actions</h3>
                 <div className="space-y-2 sm:space-y-3">
-                  {featureSupport.swap === 'native_amm' && Number(chainId) === BOING_NATIVE_L1_CHAIN_ID ? (
-                    <Link
-                      to="/create-pool"
-                      className="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition duration-200 text-center block text-sm sm:text-base"
-                    >
-                      📊 Add pool liquidity
-                    </Link>
-                  ) : (
-                    <button
-                      disabled
-                      className="w-full bg-gray-600 text-gray-400 font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg cursor-not-allowed text-sm sm:text-base"
-                    >
-                      📊 Create New Pair
-                    </button>
-                  )}
-                  <a
-                    href="/deploy-token"
+                  <Link
+                    to="/create-pool"
+                    className="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition duration-200 text-center block text-sm sm:text-base"
+                  >
+                    {featureSupport.swap === 'native_amm' && Number(chainId) === BOING_NATIVE_L1_CHAIN_ID
+                      ? 'Add pool liquidity'
+                      : 'Create New Pair'}
+                  </Link>
+                  <Link
+                    to="/deploy-token"
                     className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition duration-200 text-center block text-sm sm:text-base"
                   >
-                    🪙 Create Token
-                  </a>
-                  {featureSupport.swap === 'native_amm' && Number(chainId) === BOING_NATIVE_L1_CHAIN_ID ? (
-                    <Link
-                      to="/swap"
-                      className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition duration-200 text-center block text-sm sm:text-base"
-                    >
-                      🔄 Start Trading
-                    </Link>
-                  ) : (
-                    <button
-                      disabled
-                      className="w-full bg-gray-600 text-gray-400 font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg cursor-not-allowed text-center text-sm sm:text-base"
-                    >
-                      🔄 Start Trading
-                    </button>
-                  )}
+                    Create Token
+                  </Link>
+                  <Link
+                    to="/swap"
+                    className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition duration-200 text-center block text-sm sm:text-base"
+                  >
+                    Start Trading
+                  </Link>
                 </div>
               </div>
 

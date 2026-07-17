@@ -18,6 +18,11 @@ import getFeatureSupport from '../config/featureSupport';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import { showDeployCelebration } from '../utils/deployCelebration';
 import { fetchTradeableEvmTokenAddressesFromDexFactory } from '../services/evmDexTradeableTokens';
+import { tryAccruePoints } from '../utils/tryAccruePoints';
+
+const devLog = (...args) => {
+  if (import.meta.env.DEV) console.log(...args);
+};
 
 
 // Toggle Button Component
@@ -296,7 +301,7 @@ function CreatePool() {
       setToken0Allowance(allowance0);
       setToken1Allowance(allowance1);
       
-      console.log('Token allowances:', {
+      devLog('Token allowances:', {
         token0: allowance0.toString(),
         token1: allowance1.toString()
       });
@@ -658,7 +663,7 @@ function CreatePool() {
         return;
       }
 
-      console.log('Amount validation passed:', {
+      devLog('Amount validation passed:', {
         token0: { amount: token0Amount, decimals: token0Decimals, wei: token0AmountWei.toString() },
         token1: { amount: token1Amount, decimals: token1Decimals, wei: token1AmountWei.toString() }
       });
@@ -711,7 +716,7 @@ function CreatePool() {
       }
       
       // Log amounts for debugging
-      console.log('Token amounts:', {
+      devLog('Token amounts:', {
         token0: {
           symbol: getToken0Symbol(),
           decimals: token0Decimals,
@@ -730,34 +735,34 @@ function CreatePool() {
       const approvalNeeded = needsApproval();
       
       if (approvalNeeded.token0 || approvalNeeded.token1) {
-        console.log('Approval needed - attempting permit signatures for gasless approval');
+        devLog('Approval needed - attempting permit signatures for gasless approval');
         
         // Try to use permit signatures for gasless approvals
         let usePermitSignatures = false;
         let permitData = null;
         
         try {
-          console.log('Generating permit signatures for gasless approval...');
+          devLog('Generating permit signatures for gasless approval...');
           permitData = await generatePermitSignatures(token0, token1, token0AmountWei, token1AmountWei, signer, account);
           
           // Check if we have valid permit signatures
           if (permitData.deadlineA > 0 || permitData.deadlineB > 0) {
             usePermitSignatures = true;
-            console.log('Permit signatures generated successfully - will use gasless approval');
+            devLog('Permit signatures generated successfully - will use gasless approval');
             toast('Using gasless approval with permit signatures!', {
               duration: 3000,
               icon: '⚡'
             });
           } else {
-            console.log('Permit signatures not available - falling back to regular approvals');
+            devLog('Permit signatures not available - falling back to regular approvals');
           }
         } catch (error) {
-          console.log('Permit signature generation failed - falling back to regular approvals:', error);
+          devLog('Permit signature generation failed - falling back to regular approvals:', error);
         }
         
         // If permit signatures failed or are not available, use regular approvals
         if (!usePermitSignatures) {
-          console.log('Using regular approval transactions');
+          devLog('Using regular approval transactions');
           
           const factoryAddress = getContractAddress(chainId, 'dexFactory');
           
@@ -778,7 +783,7 @@ function CreatePool() {
           
           // Handle approvals sequentially to avoid confusion
           if (approvalNeeded.token0) {
-            console.log('Approving token0 with maximum allowance');
+            devLog('Approving token0 with maximum allowance');
             toast(`Approving ${getToken0Symbol()}... Please confirm in your wallet.`, {
               duration: 3000,
               icon: '⏳'
@@ -799,7 +804,7 @@ function CreatePool() {
           }
           
           if (approvalNeeded.token1) {
-            console.log('Approving token1 with maximum allowance');
+            devLog('Approving token1 with maximum allowance');
             toast(`Approving ${getToken1Symbol()}... Please confirm in your wallet.`, {
               duration: 3000,
               icon: '⏳'
@@ -822,16 +827,16 @@ function CreatePool() {
           // Update allowances after approval
           await checkTokenAllowances();
           
-          console.log('All approvals completed successfully');
+          devLog('All approvals completed successfully');
           toast.success('All token approvals completed! Proceeding with pool creation...');
         }
       } else {
-        console.log('No approval needed - sufficient allowances exist');
+        devLog('No approval needed - sufficient allowances exist');
       }
 
       // If liquidity locking is enabled, we need to approve LP tokens for the factory
       if (enableLiquidityLock) {
-        console.log('Liquidity locking enabled - will need LP token approval');
+        devLog('Liquidity locking enabled - will need LP token approval');
         // Note: LP token approval will be handled by the factory contract
         // The factory will mint LP tokens to the user and then transfer them for locking
       }
@@ -839,8 +844,8 @@ function CreatePool() {
       toast.success('Pool creation initiated! Check your wallet for confirmation.');
       
       // Single transaction: Create pair, add liquidity, and optionally lock it
-      console.log('Creating pair with liquidity in one transaction...');
-      console.log('Parameters:', {
+      devLog('Creating pair with liquidity in one transaction...');
+      devLog('Parameters:', {
         token0,
         token1,
         token0AmountWei: token0AmountWei.toString(),
@@ -853,12 +858,12 @@ function CreatePool() {
       let createPairWithLiquidityTx;
       
       // Try to use the single transaction approach, with permit signatures if available
-      console.log('Attempting single transaction approach for pool creation');
+      devLog('Attempting single transaction approach for pool creation');
       
       try {
         // If we have permit signatures, use the permit-based function
         if (usePermitSignatures && permitData) {
-          console.log('Using permit-based single transaction approach');
+          devLog('Using permit-based single transaction approach');
           createPairWithLiquidityTx = await dexFactory.createPairWithLiquidityPermit(
             token0,
             token1,
@@ -879,7 +884,7 @@ function CreatePool() {
           );
         } else {
           // Use the regular single transaction approach
-          console.log('Using regular single transaction approach');
+          devLog('Using regular single transaction approach');
           createPairWithLiquidityTx = await dexFactory.createPairWithLiquidity(
             token0,
             token1,
@@ -891,21 +896,21 @@ function CreatePool() {
             { gasLimit: 8000000 }
           );
         }
-        console.log('Single transaction approach successful');
+        devLog('Single transaction approach successful');
       } catch (error) {
-        console.log('Single transaction approach failed, falling back to separate steps:', error.message);
+        devLog('Single transaction approach failed, falling back to separate steps:', error.message);
         
         // Fallback: Create pair first, then add liquidity
-        console.log('Creating pair first...');
+        devLog('Creating pair first...');
         const createPairTx = await dexFactory.createPair(token0, token1, { gasLimit: 4000000 });
         await createPairTx.wait();
         
         // Get the created pair address
         const pairAddress = await dexFactory.getPair(token0, token1);
-        console.log('Pair created at:', pairAddress);
+        devLog('Pair created at:', pairAddress);
         
         // Add liquidity to the pair
-        console.log('Adding liquidity to pair...');
+        devLog('Adding liquidity to pair...');
         const pairContract = new ethers.Contract(pairAddress, [
           'function mint(address to) external returns (uint256 liquidity)'
         ], signer);
@@ -926,7 +931,7 @@ function CreatePool() {
         const mintTx = await pairContract.mint(account, { gasLimit: 4000000 });
         await mintTx.wait();
         
-        console.log('Fallback approach completed successfully');
+        devLog('Fallback approach completed successfully');
         
         // Set transaction hash for UI
         setTransactionHash(createPairTx.hash);
@@ -967,7 +972,7 @@ function CreatePool() {
       // Wait for transaction with timeout and better error handling
       let receipt;
       try {
-        console.log('Waiting for transaction confirmation...');
+        devLog('Waiting for transaction confirmation...');
         
         // Add timeout to prevent hanging
         const timeoutPromise = new Promise((_, reject) => {
@@ -979,13 +984,13 @@ function CreatePool() {
           timeoutPromise
         ]);
         
-        console.log('Pair created with liquidity:', receipt.hash);
+        devLog('Pair created with liquidity:', receipt.hash);
       } catch (waitError) {
         console.error('Error waiting for transaction:', waitError);
         
         // Check if transaction was actually sent
         if (createPairWithLiquidityTx.hash) {
-          console.log('Transaction hash exists, checking status...');
+          devLog('Transaction hash exists, checking status...');
           
           // Try to get transaction status directly
           try {
@@ -993,7 +998,7 @@ function CreatePool() {
             if (tx && tx.blockNumber) {
               // Transaction was mined, try to get receipt again
               receipt = await provider.getTransactionReceipt(createPairWithLiquidityTx.hash);
-              console.log('Retrieved transaction receipt:', receipt.hash);
+              devLog('Retrieved transaction receipt:', receipt.hash);
             } else {
               throw new Error('Transaction not yet mined or failed');
             }
@@ -1008,14 +1013,14 @@ function CreatePool() {
       
       // Get the created pair address from the transaction receipt
       const pairAddress = await dexFactory.getPair(token0, token1);
-      console.log('Pair address:', pairAddress);
+      devLog('Pair address:', pairAddress);
       
       // If we couldn't get the receipt but have a transaction hash, check if pool was created
       if (!receipt && createPairWithLiquidityTx.hash) {
-        console.log('No receipt available, checking if pool was created...');
+        devLog('No receipt available, checking if pool was created...');
         const pairCheck = await dexFactory.getPair(token0, token1);
         if (pairCheck !== "0x0000000000000000000000000000000000000000") {
-          console.log('Pool was created successfully despite receipt issues');
+          devLog('Pool was created successfully despite receipt issues');
           // Create a minimal receipt object
           receipt = {
             hash: createPairWithLiquidityTx.hash,
@@ -1034,10 +1039,10 @@ function CreatePool() {
           ], provider);
           liquidity = await pairContract.balanceOf(account);
         } catch (error) {
-          console.log('Could not get liquidity balance:', error.message);
+          devLog('Could not get liquidity balance:', error.message);
         }
       }
-      console.log('Liquidity minted:', liquidity.toString());
+      devLog('Liquidity minted:', liquidity.toString());
       
       // Ensure we have a valid receipt before proceeding
       if (!receipt || !receipt.hash) {
@@ -1071,14 +1076,21 @@ function CreatePool() {
       setShareModalOpen(true);
 
       recordAchievement?.(account, 'pool_create', 'first_pool');
+      tryAccruePoints({
+        address: account,
+        action: 'liquidity_add',
+        txHash: receipt.hash,
+        chainId,
+        metadata: { pair: `${getToken0Symbol()}/${getToken1Symbol()}`, pairAddress },
+      });
       
-      // Also log to console for debugging
-      console.log('🎉 Pool created successfully!');
-      console.log('Create pair with liquidity transaction hash:', receipt.hash);
-      console.log('Block number:', receipt.blockNumber);
-      console.log('Gas used:', receipt.gasUsed != null ? receipt.gasUsed.toString() : 'n/a');
-      console.log('Pair address:', pairAddress);
-      console.log('Liquidity minted:', liquidity.toString());
+      if (import.meta.env.DEV) {
+        console.log('Pool created successfully', {
+          hash: receipt.hash,
+          pairAddress,
+          liquidity: liquidity.toString(),
+        });
+      }
       
       // Reset form
       setToken0('');
@@ -1090,8 +1102,8 @@ function CreatePool() {
       setToken0Info(null);
       setToken1Info(null);
       
-      console.log('Liquidity lock enabled:', enableLiquidityLock);
-      console.log('Lock duration:', lockDuration);
+      devLog('Liquidity lock enabled:', enableLiquidityLock);
+      devLog('Lock duration:', lockDuration);
       
     } catch (error) {
       console.error('Error creating pool:', error);
@@ -1261,9 +1273,9 @@ function CreatePool() {
       permitData.rA = r0;
       permitData.sA = s0;
       
-      console.log('Permit signature generated for token0');
+      devLog('Permit signature generated for token0');
     } catch (error) {
-      console.log('Permit not supported for token0, will use existing allowance');
+      devLog('Permit not supported for token0, will use existing allowance');
     }
     
     try {
@@ -1290,9 +1302,9 @@ function CreatePool() {
       permitData.rB = r1;
       permitData.sB = s1;
       
-      console.log('Permit signature generated for token1');
+      devLog('Permit signature generated for token1');
     } catch (error) {
-      console.log('Permit not supported for token1, will use existing allowance');
+      devLog('Permit not supported for token1, will use existing allowance');
     }
     
     return permitData;

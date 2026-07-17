@@ -152,6 +152,7 @@ export default function Analytics() {
     queryKey: ['analytics', timeRange],
     queryFn: () => fetchAnalytics(timeRange),
     refetchInterval: 60000,
+    refetchIntervalInBackground: false,
     retry: 1,
     retryDelay: 2000,
     staleTime: STALE_1M,
@@ -182,6 +183,7 @@ export default function Analytics() {
       return [];
     },
     refetchInterval: 300000,
+    refetchIntervalInBackground: false,
     staleTime: STALE_1M,
     enabled: (isTrending || isIntelligence) && selectedNetwork === 'all',
   });
@@ -227,6 +229,7 @@ export default function Analytics() {
       return insights;
     },
     refetchInterval: 300000,
+    refetchIntervalInBackground: false,
     staleTime: STALE_1M,
     enabled: isOverview,
   });
@@ -240,6 +243,7 @@ export default function Analytics() {
     queryKey: ['defillama-dex-volume', timeRange],
     queryFn: () => getDexVolumeChart(timeRange),
     refetchInterval: 300000,
+    refetchIntervalInBackground: false,
     staleTime: STALE_1M,
     placeholderData: (prev) => prev,
     retry: 2,
@@ -251,6 +255,7 @@ export default function Analytics() {
     queryKey: ['geckoterminal-dex-volume24h'],
     queryFn: getDexVolume24h,
     refetchInterval: 300000,
+    refetchIntervalInBackground: false,
     staleTime: 120000,
     retry: 2,
     retryDelay: 1500,
@@ -269,6 +274,7 @@ export default function Analytics() {
       return chart.total_volumes.map(([ts, vol]) => ({ timestamp: ts, volume: vol }));
     },
     refetchInterval: 300000,
+    refetchIntervalInBackground: false,
     retry: 1,
     retryDelay: 5000,
     staleTime: STALE_1M,
@@ -297,6 +303,7 @@ export default function Analytics() {
       return response.json();
     },
     refetchInterval: 60000,
+    refetchIntervalInBackground: false,
     staleTime: STALE_1M,
     retry: 1,
     enabled: isOverview || isMarket || isIntelligence,
@@ -308,6 +315,7 @@ export default function Analytics() {
     queryFn: () => getCryptoNews({ pageSize: 8, sortBy: 'publishedAt' }),
     staleTime: 10 * 60 * 1000,
     refetchInterval: 10 * 60 * 1000,
+    refetchIntervalInBackground: false,
     retry: 1,
     enabled: hasNewsApiKey && (isIntelligence || isMarket),
   });
@@ -335,6 +343,7 @@ export default function Analytics() {
     queryKey: ['fear-greed-current'],
     queryFn: () => getFearGreedIndex(1),
     refetchInterval: 3600000,
+    refetchIntervalInBackground: false,
     staleTime: 1800000,
     retry: 1,
     enabled: isIntelligence || isMarket,

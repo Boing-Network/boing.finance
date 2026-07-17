@@ -4,6 +4,7 @@ import { isBoingNativeL1Chain } from '../config/networks';
 import apyCalculationService from './apyCalculationService';
 import externalPoolService from './externalPoolService';
 import simplePoolDataService from './simplePoolDataService';
+import { mapWithConcurrency } from '../utils/mapWithConcurrency';
 
 // DEXFactory ABI for pool-related functions (Enhanced for DEXFactoryV2)
 const DEX_FACTORY_ABI = [
@@ -277,25 +278,27 @@ class BlockchainPoolService {
       
       // Get the most recent pairs (last 'limit' pairs)
       const startIndex = Math.max(0, Number(totalPairs) - limit);
+      const endIndex = Number(totalPairs);
+      const indices = Array.from({ length: endIndex - startIndex }, (_, k) => startIndex + k);
       
       if (this.debug) {
-        console.log(`🔍 Scanning pairs from index ${startIndex} to ${Number(totalPairs) - 1}`);
+        console.log(`🔍 Scanning pairs from index ${startIndex} to ${endIndex - 1}`);
       }
-      
-      for (let i = startIndex; i < Number(totalPairs); i++) {
+
+      const scanned = await mapWithConcurrency(indices, 6, async (i) => {
         try {
           const pairAddress = await this.dexFactory.allPairs(i);
           if (this.debug) {
             console.log(`📍 Pair ${i}: ${pairAddress}`);
           }
-          
-          const poolInfo = await this.getPoolInfo(pairAddress);
-          if (poolInfo) {
-            pools.push(poolInfo);
-          }
+          return await this.getPoolInfo(pairAddress);
         } catch (error) {
           console.warn(`Failed to load pair at index ${i}:`, error);
+          return null;
         }
+      });
+      for (const poolInfo of scanned) {
+        if (poolInfo) pools.push(poolInfo);
       }
       
       if (this.debug) {
@@ -530,54 +533,35 @@ class BlockchainPoolService {
       const userPositions = [];
       
       // Scan through ALL pairs (not just recent ones) to ensure we find user's positions
-      const startIndex = 0;
       const endIndex = Number(totalPairs);
+      const indices = Array.from({ length: endIndex }, (_, i) => i);
       
       if (this.debug) {
-        console.log(`🔍 Scanning ALL pairs from index ${startIndex} to ${endIndex - 1}`);
+        console.log(`🔍 Scanning ALL pairs from index 0 to ${endIndex - 1}`);
       }
-      
-      for (let i = startIndex; i < endIndex; i++) {
+
+      const scanned = await mapWithConcurrency(indices, 6, async (i) => {
         try {
           const pairAddress = await this.dexFactory.allPairs(i);
-          
           if (this.debug) {
             console.log(`📍 Checking pair ${i}: ${pairAddress}`);
           }
-          
           const position = await this.getUserPositionInPool(userAddress, pairAddress);
           if (position && Number(position.lpBalance) > 0) {
-            if (this.debug) {
-              console.log(`✅ Found position in pair ${i}:`, {
-                pairAddress,
-                lpBalance: position.lpBalance,
-                userShare: position.userShare
-              });
-            }
-            userPositions.push(position);
-          } else {
-            if (this.debug) {
-              console.log(`❌ No position found in pair ${i}: ${pairAddress}`);
-            }
+            return position;
           }
+          return null;
         } catch (error) {
           console.warn(`Failed to check user position in pair ${i}:`, error);
-          if (this.debug) {
-            console.log(`💥 Error checking pair ${i}:`, error.message);
-          }
+          return null;
         }
+      });
+      for (const position of scanned) {
+        if (position) userPositions.push(position);
       }
       
       if (this.debug) {
         console.log(`🎯 Total positions found: ${userPositions.length}`);
-        if (userPositions.length > 0) {
-          console.log('📊 Found positions:', userPositions.map(pos => ({
-            pair: pos.address,
-            lpBalance: pos.lpBalance,
-            userShare: `${(pos.userShare * 100).toFixed(2)}%`,
-            lockInfo: pos.lockInfo ? `Locked until ${new Date(Number(pos.lockInfo.unlockTime) * 1000).toLocaleDateString()}` : 'Direct'
-          })));
-        }
       }
       
       return this.convertBigIntsToStrings(userPositions);
@@ -788,31 +772,30 @@ class BlockchainPoolService {
       const createdPools = [];
       
       // Scan through ALL pairs
-      const startIndex = 0;
       const endIndex = Number(totalPairs);
-      
-      for (let i = startIndex; i < endIndex; i++) {
+      const indices = Array.from({ length: endIndex }, (_, i) => i);
+
+      const scanned = await mapWithConcurrency(indices, 4, async (i) => {
         try {
           const pairAddress = await this.dexFactory.allPairs(i);
           const poolInfo = await this.getPoolInfo(pairAddress);
-          
-          if (poolInfo) {
-            // Check if user has significant liquidity in this pool (could indicate creation)
-            const userPosition = await this.getUserPositionInPool(userAddress, pairAddress);
-            if (userPosition && userPosition.userShare > 0.1) { // More than 10% share
-              if (this.debug) {
-                console.log(`🏭 Found created pool: ${pairAddress} with ${(userPosition.userShare * 100).toFixed(2)}% share`);
-              }
-              createdPools.push({
-                ...poolInfo,
-                userShare: userPosition.userShare,
-                isCreator: true
-              });
-            }
+          if (!poolInfo) return null;
+          const userPosition = await this.getUserPositionInPool(userAddress, pairAddress);
+          if (userPosition && userPosition.userShare > 0.1) {
+            return {
+              ...poolInfo,
+              userShare: userPosition.userShare,
+              isCreator: true,
+            };
           }
+          return null;
         } catch (error) {
           console.warn(`Failed to check created pool ${i}:`, error);
+          return null;
         }
+      });
+      for (const pool of scanned) {
+        if (pool) createdPools.push(pool);
       }
       
       if (this.debug) {
@@ -924,34 +907,34 @@ class BlockchainPoolService {
         console.log(`🔒 Getting all locks for user: ${userAddress}`);
       }
 
-      // Get all pools first
       const allPools = await this.getAllPools(100); // Get more pools to ensure we find user's locks
-      const userLocks = [];
-
-      for (const pool of allPools) {
+      const scanned = await mapWithConcurrency(allPools, 6, async (pool) => {
         try {
           const locks = await this.liquidityLocker.getLocks(pool.address);
-          
+          const matches = [];
           for (let i = 0; i < locks.length; i++) {
             const lock = locks[i];
             if (lock.owner.toLowerCase() === userAddress.toLowerCase() && lock.isLocked) {
-              userLocks.push({
+              matches.push({
                 pairAddress: pool.address,
                 lockIndex: i,
                 amount: lock.amount,
                 unlockTime: lock.unlockTime,
                 isLocked: lock.isLocked,
                 token0: pool.token0,
-                token1: pool.token1
+                token1: pool.token1,
               });
             }
           }
+          return matches;
         } catch (error) {
           if (this.debug) {
             console.log(`🔓 Could not get locks for pool ${pool.address}:`, error.message);
           }
+          return [];
         }
-      }
+      });
+      const userLocks = scanned.flat().filter(Boolean);
 
       if (this.debug) {
         console.log(`🔒 Found ${userLocks.length} locks for user:`, userLocks);
