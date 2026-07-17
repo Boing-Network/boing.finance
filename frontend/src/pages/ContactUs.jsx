@@ -23,22 +23,36 @@ const ContactUs = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
+    setSubmitStatus(null);
+
+    try {
+      const subject = encodeURIComponent(
+        `[${formData.category}] ${formData.subject || 'Contact from boing.finance'}`
+      );
+      const body = encodeURIComponent(
+        [
+          `Name: ${formData.name}`,
+          `Email: ${formData.email}`,
+          `Category: ${formData.category}`,
+          '',
+          formData.message,
+        ].join('\n')
+      );
+      const to =
+        formData.category === 'security'
+          ? 'security@boing.finance'
+          : formData.category === 'business'
+            ? 'business@boing.finance'
+            : 'support@boing.finance';
+
+      window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
       setSubmitStatus('success');
-      setFormData({
-        name: '',
-        email: '',
-        subject: '',
-        message: '',
-        category: 'general'
-      });
-      
-      // Reset status after 5 seconds
-      setTimeout(() => setSubmitStatus(null), 5000);
-    }, 2000);
+      setTimeout(() => setSubmitStatus(null), 8000);
+    } catch {
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactCategories = [
@@ -121,10 +135,10 @@ const ContactUs = () => {
           <div className="max-w-6xl mx-auto">
             {/* Header */}
             <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-5xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
                 Contact Us
               </h1>
-              <p className="text-xl style={{ color: 'var(--text-secondary)' }} mb-6">
+              <p className="text-xl mb-6" style={{ color: 'var(--text-secondary)' }}>
                 Get in touch with our team. We're here to help!
               </p>
               <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
@@ -137,13 +151,13 @@ const ContactUs = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Contact Form */}
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Send us a Message</h2>
+                <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Send us a Message</h2>
                 
                 {submitStatus === 'success' && (
                   <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4 mb-6">
                     <div className="flex items-center space-x-2">
                       <span className="text-green-400">✅</span>
-                      <p className="text-green-200">Thank you! Your message has been sent successfully. We'll get back to you soon.</p>
+                      <p className="text-green-200">Your email client should open with this message. Send it to reach our team — nothing is submitted until you hit send.</p>
                     </div>
                   </div>
                 )}
@@ -151,7 +165,7 @@ const ContactUs = () => {
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
+                      <label htmlFor="name" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
                         Name *
                       </label>
                       <input
@@ -168,7 +182,7 @@ const ContactUs = () => {
                     </div>
                     
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
+                      <label htmlFor="email" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
                         Email *
                       </label>
                       <input
@@ -186,7 +200,7 @@ const ContactUs = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="category" className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
+                    <label htmlFor="category" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
                       Category *
                     </label>
                     <select
@@ -207,7 +221,7 @@ const ContactUs = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="subject" className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
+                    <label htmlFor="subject" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
                       Subject *
                     </label>
                     <input
@@ -224,7 +238,7 @@ const ContactUs = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium style={{ color: 'var(--text-secondary)' }} mb-2">
+                    <label htmlFor="message" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
                       Message *
                     </label>
                     <textarea
@@ -243,7 +257,7 @@ const ContactUs = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 style={{ color: 'var(--text-primary)' }} font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center"
+                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center" style={{ color: 'var(--text-primary)' }}
                   >
                     {isSubmitting ? (
                       <>
@@ -261,21 +275,21 @@ const ContactUs = () => {
               <div className="space-y-6">
                 {/* Direct Contact Methods */}
                 <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                  <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Direct Contact</h2>
+                  <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Direct Contact</h2>
                   <div className="space-y-4">
                     {contactMethods.map((method) => (
                       <div key={method.title} className="flex items-start space-x-4 p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                         <span className="text-2xl">{method.icon}</span>
                         <div className="flex-1">
-                          <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-1">{method.title}</h3>
-                          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mb-2">{method.description}</p>
+                          <h3 className="text-lg font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>{method.title}</h3>
+                          <p className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>{method.description}</p>
                           <a
                             href={method.link}
                             className="text-blue-400 hover:text-blue-300 font-medium"
                           >
                             {method.contact}
                           </a>
-                          <p className="style={{ color: 'var(--text-tertiary)' }} text-xs mt-1">Response time: {method.response}</p>
+                          <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>Response time: {method.response}</p>
                         </div>
                       </div>
                     ))}
@@ -284,7 +298,7 @@ const ContactUs = () => {
 
                 {/* Support Channels */}
                 <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                  <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-6">Support Channels</h2>
+                  <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Support Channels</h2>
                   <div className="space-y-4">
                     {supportChannels.map((channel) => (
                       <a
@@ -294,8 +308,8 @@ const ContactUs = () => {
                       >
                         <span className="text-2xl">{channel.icon}</span>
                         <div className="flex-1">
-                          <h3 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-1">{channel.title}</h3>
-                          <p className="style={{ color: 'var(--text-secondary)' }} text-sm mb-2">{channel.description}</p>
+                          <h3 className="text-lg font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>{channel.title}</h3>
+                          <p className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>{channel.description}</p>
                           <p className="text-green-400 text-sm">{channel.status}</p>
                         </div>
                       </a>
@@ -305,8 +319,8 @@ const ContactUs = () => {
 
                 {/* Support Information */}
                 <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                  <h2 className="text-2xl font-bold style={{ color: 'var(--text-primary)' }} mb-4">Support Information</h2>
-                  <div className="space-y-2 style={{ color: 'var(--text-secondary)' }}">
+                  <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Support Information</h2>
+                  <div className="space-y-2" style={{ color: 'var(--text-secondary)' }}>
                     <div className="flex justify-between">
                       <span>Response Time:</span>
                       <span>24-48 hours</span>

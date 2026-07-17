@@ -9,9 +9,7 @@ import { getApiUrl } from '../config';
 import { getSupportedNetworks } from '../config/networks';
 import TokenManagementModal from '../components/TokenManagementModal';
 import EmptyState from '../components/EmptyState';
-import { useAchievements } from '../contexts/AchievementContext';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
-import { showDeployCelebration } from '../utils/deployCelebration';
 import { BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL } from '../config/boingNetworkDocsUrls';
 
 // Add AnimatedBackground and BoingAstronaut components
@@ -19,7 +17,6 @@ import { BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL } from '../config/boingNet
 export default function Bridge() {
   const { account } = useWalletConnection();
   const { network } = useNetwork();
-  const { record: recordAchievement } = useAchievements() || {};
 
   // Bridge state
   const [amount, setAmount] = useState('');
@@ -27,7 +24,6 @@ export default function Bridge() {
   const [toToken, setToToken] = useState('ETH');
   const [fromChain, setFromChain] = useState(1); // Ethereum
   const [toChain, setToChain] = useState(137); // Polygon
-  const [isBridging, setIsBridging] = useState(false);
   const [bridgeTransactions, setBridgeTransactions] = useState([]);
   const [tokenModalOpen, setTokenModalOpen] = useState(false);
   const [selectingToken, setSelectingToken] = useState(null); // 'from' or 'to'
@@ -132,31 +128,7 @@ export default function Bridge() {
         }
       } catch (error) {
         console.error('Failed to load bridge transactions:', error);
-        // Set mock data for demo
-        setBridgeTransactions([
-          {
-            id: '1',
-            fromChain: 1,
-            toChain: 137,
-            fromToken: 'ETH',
-            toToken: 'ETH',
-            amount: '0.5',
-            status: 'completed',
-            timestamp: Date.now() - 3600000,
-            txHash: '0x123...abc'
-          },
-          {
-            id: '2',
-            fromChain: 137,
-            toChain: 1,
-            fromToken: 'USDC',
-            toToken: 'USDC',
-            amount: '100',
-            status: 'pending',
-            timestamp: Date.now() - 1800000,
-            txHash: '0x456...def'
-          }
-        ]);
+        setBridgeTransactions([]);
       }
     };
 
@@ -179,50 +151,10 @@ export default function Bridge() {
       return;
     }
 
-    setIsBridging(true);
-    
-    try {
-      // Simulate bridge transaction
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      // Add transaction to list
-      const newTransaction = {
-        id: Date.now().toString(),
-        fromChain,
-        toChain,
-        fromToken,
-        toToken,
-        amount,
-        status: 'pending',
-        timestamp: Date.now(),
-        txHash: `0x${Math.random().toString(16).substr(2, 8)}...`
-      };
-      
-      setBridgeTransactions(prev => [newTransaction, ...prev]);
-
-      const fromNet = getNetworkInfo(fromChain);
-      const toNet = getNetworkInfo(toChain);
-      showDeployCelebration({
-        title: 'Bridge initiated',
-        deploymentKind: 'Cross-chain bridge',
-        details: [
-          { label: 'From', value: `${fromNet?.name || `Chain ${fromChain}`} · ${fromToken}` },
-          { label: 'To', value: `${toNet?.name || `Chain ${toChain}`} · ${toToken}` },
-          { label: 'Amount', value: String(amount) },
-          { label: 'Est. time', value: estimatedTime },
-          { label: 'Reference', value: newTransaction.txHash },
-        ],
-      });
-      
-      toast.success('Bridge transaction initiated! Check your transaction history for updates.');
-      recordAchievement?.(account, 'bridge', 'first_bridge');
-      setAmount('');
-      
-    } catch (error) {
-      toast.error('Bridge transaction failed');
-    } finally {
-      setIsBridging(false);
-    }
+    // Cross-chain bridge execution is not live in this UI yet — do not simulate success.
+    toast.error(
+      'Live bridge transfers are not available in the app yet. Check Status / Docs for network handoffs, or try again after mainnet bridge deployment.'
+    );
   };
 
   const handleTokenSelect = (token) => {
@@ -527,24 +459,21 @@ export default function Bridge() {
             </div>
 
             {/* Bridge Button */}
-            <div>
+            <div className="space-y-3">
+              <p className="text-sm text-amber-200/90 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2">
+                Live cross-chain transfers are not enabled in the app yet. Estimates below are informational only.
+              </p>
               <button
+                type="button"
                 onClick={handleBridge}
-                disabled={isBridging || !account || !amount || parseFloat(amount) <= 0 || fromChain === toChain}
+                disabled={!account || !amount || parseFloat(amount) <= 0 || fromChain === toChain}
                 className="w-full font-bold py-4 px-8 rounded-xl transition-all text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   backgroundColor: 'var(--primary-color)',
                   color: 'var(--bg-primary)',
                 }}
               >
-                {isBridging ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-4 sm:h-5 w-4 sm:w-5 border-b-2 border-white mr-2"></div>
-                    Bridging...
-                  </div>
-                ) : (
-                  'Bridge Tokens'
-                )}
+                Bridge not live yet
               </button>
             </div>
           </div>

@@ -864,6 +864,25 @@ const HelpArticle = () => {
           <li>Monitor for unauthorized transactions</li>
         </ul>
       `
+    },
+    shortcuts: {
+      title: 'Keyboard Shortcuts',
+      category: 'Keyboard Shortcuts',
+      content: `
+        <h2>Keyboard Shortcuts</h2>
+        <p>boing.finance supports a few keyboard helpers for faster navigation.</p>
+        <h3>Global</h3>
+        <ul>
+          <li><strong>Escape (Esc)</strong> — Close the active modal, dropdown, or menu</li>
+          <li><strong>Tab / Shift+Tab</strong> — Move focus between interactive controls</li>
+          <li><strong>Enter / Space</strong> — Activate the focused button or link</li>
+        </ul>
+        <h3>Tips</h3>
+        <ul>
+          <li>Use Esc first when a dialog is open so focus returns to the page</li>
+          <li>If a control is not reachable by keyboard, report it via Bug Report</li>
+        </ul>
+      `
     }
   };
 

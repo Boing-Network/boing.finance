@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import AIChatModal from '../components/AIChatModal';
+import EmptyState from '../components/EmptyState';
 
 const HelpCenter = () => {
   const [activeCategory, setActiveCategory] = useState('getting-started');
@@ -290,17 +291,13 @@ const HelpCenter = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <div className="text-6xl mb-4">🔍</div>
-                    <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>No results found</h3>
-                    <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>Try different keywords or browse our categories below</p>
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg transition-colors" style={{ color: 'var(--text-primary)' }}
-                    >
-                      Clear Search
-                    </button>
-                  </div>
+                  <EmptyState
+                    variant="search"
+                    title="No results found"
+                    description="Try different keywords or browse our categories below."
+                    action={() => setSearchQuery('')}
+                    actionLabel="Clear Search"
+                  />
                 )}
               </div>
             ) : (
