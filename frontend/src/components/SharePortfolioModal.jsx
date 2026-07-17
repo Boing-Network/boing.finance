@@ -46,13 +46,24 @@ export default function SharePortfolioModal({ isOpen, onClose, portfolioData }) 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 sm:p-6">
-      <div className="bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 border border-gray-700 max-w-md w-full max-h-[85vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 sm:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="share-portfolio-title"
+      onClick={onClose}
+    >
+      <div
+        className="bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 border border-gray-700 max-w-md w-full max-h-[85vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white">Share Portfolio</h2>
+          <h2 id="share-portfolio-title" className="text-2xl font-bold text-white">Share Portfolio</h2>
           <button
+            type="button"
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors"
+            aria-label="Close share portfolio"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

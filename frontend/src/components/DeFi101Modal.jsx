@@ -15,14 +15,20 @@ export default function DeFi101Modal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="defi101-title"
+    >
       <div
         className="rounded-2xl p-6 max-w-lg w-full max-h-[85vh] overflow-y-auto shadow-xl"
         style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>DeFi 101</h2>
+          <h2 id="defi101-title" className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>DeFi 101</h2>
           <button type="button" onClick={onClose} className="p-1 rounded hover:bg-white/10" aria-label="Close">&times;</button>
         </div>
         <div className="space-y-2 mb-4">

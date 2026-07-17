@@ -763,7 +763,7 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
 
 const Pools = () => {
   const { isSolana } = useChainType();
-  const { isConnected, account } = useWalletConnection();
+  const { isConnected, account, connectWallet } = useWalletConnection();
   const { chainId } = useWallet();
   const { record: recordAchievement } = useAchievements() || {};
   // Wallet state initialized
@@ -1077,12 +1077,13 @@ const Pools = () => {
               <h1 className="text-3xl font-bold text-white mb-4">Liquidity Pools</h1>
               <p className="text-gray-300 mb-8">Connect your wallet to see your pools and positions.</p>
               <div className="bg-gray-800 rounded-xl p-8 border border-gray-700">
-                <div className="text-6xl mb-4">🏊</div>
-                <h2 className="text-xl font-semibold text-white mb-2">Wallet Required</h2>
-                <p className="text-gray-400 mb-6">Connect your wallet to view your liquidity pools and earnings.</p>
-                <button className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded-lg transition duration-200">
-                  Connect Wallet
-                </button>
+                <EmptyState
+                  variant="pools"
+                  title="Wallet Required"
+                  description="Connect your wallet to view your liquidity pools and earnings."
+                  actionLabel="Connect Wallet"
+                  action={connectWallet}
+                />
               </div>
             </div>
           </div>
@@ -1111,10 +1112,30 @@ const Pools = () => {
 
             {/* Tabs */}
             <div className="bg-gray-800 rounded-xl p-2 mb-8 border border-gray-700">
-              <div className="flex space-x-2">
+              <div
+                className="flex space-x-2"
+                role="tablist"
+                aria-label="Pools views"
+                onKeyDown={(e) => {
+                  const ids = tabs.map((t) => t.id);
+                  const i = ids.indexOf(activeTab);
+                  if (e.key === 'ArrowRight' && i < ids.length - 1) {
+                    e.preventDefault();
+                    setActiveTab(ids[i + 1]);
+                  } else if (e.key === 'ArrowLeft' && i > 0) {
+                    e.preventDefault();
+                    setActiveTab(ids[i - 1]);
+                  }
+                }}
+              >
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === tab.id}
+                    id={`pools-tab-${tab.id}`}
+                    tabIndex={activeTab === tab.id ? 0 : -1}
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
                       activeTab === tab.id

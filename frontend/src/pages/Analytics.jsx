@@ -3,7 +3,6 @@ import { useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import config from '../config';
 import { Helmet } from 'react-helmet-async';
-import { BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import coingeckoService from '../services/coingeckoService';
 import { getDexVolumeChart } from '../services/defillamaService';
 import { getDexVolume24h } from '../services/geckoterminalService';
@@ -14,7 +13,6 @@ import { ChartSkeleton } from '../components/SkeletonLoader';
 import MetricTooltip from '../components/Tooltip';
 import { downloadCSV } from '../utils/exportData';
 import toast from 'react-hot-toast';
-import { CHART_COLORS } from '../theme/designTokens';
 import LiveMarketPulse from '../components/LiveMarketPulse';
 import FearGreedPanel from '../components/FearGreedPanel';
 import ResearchBriefBanner from '../components/research/ResearchBriefBanner';
@@ -33,10 +31,25 @@ import {
 } from '../utils/analyticsTimeRange';
 
 const OnchainIntelligenceDashboard = lazy(() => import('../components/research/OnchainIntelligenceDashboard'));
-
-// BoingAstronaut component
+const AnalyticsOverviewCharts = lazy(() => import('../components/AnalyticsOverviewCharts'));
 
 const STORAGE_KEYS = { timeRange: 'boing_analytics_timeRange', section: 'boing_analytics_section' };
+const STALE_1M = 60_000;
+
+const NETWORK_NAME_BY_CHAIN = {
+  '1': 'ethereum',
+  '137': 'polygon',
+  '56': 'binance-smart-chain',
+  '42161': 'arbitrum',
+  '10': 'optimism',
+  '8453': 'base',
+  '11155111': 'ethereum',
+};
+
+function getNetworkName(chainId) {
+  return NETWORK_NAME_BY_CHAIN[chainId] || 'ethereum';
+}
+
 function getStored(key, fallback) {
   try {
     const v = localStorage.getItem(key);
@@ -44,6 +57,55 @@ function getStored(key, fallback) {
   } catch {
     return fallback;
   }
+}
+
+async function fetchAnalytics(range) {
+  if (!config?.apiUrl) {
+    return {};
+  }
+  const response = await fetch(`${config.apiUrl}/analytics?range=${range}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    signal: AbortSignal.timeout(10000),
+  });
+
+  // Endpoint not deployed yet — treat as empty, not an error
+  if (response.status === 404) {
+    return {};
+  }
+
+  if (!response.ok) {
+    throw new Error(`Analytics API error (${response.status})`);
+  }
+
+  const data = await response.json();
+  if (data?.success && data?.data) {
+    return data.data;
+  }
+  return {};
+}
+
+function topPairsToTrendingTokens(topPairs, networkLabel) {
+  return (topPairs || []).slice(0, 20).map((pair) => {
+    const network = pair.network || networkLabel;
+    return {
+      id: `${pair.token0Symbol}-${pair.token1Symbol}`,
+      symbol: pair.token0Symbol,
+      name: `${pair.token0Symbol}/${pair.token1Symbol}`,
+      network,
+      volume: pair.volume,
+      liquidity: pair.liquidity,
+      item: {
+        id: `${pair.token0Symbol}-${pair.token1Symbol}`,
+        name: `${pair.token0Symbol}/${pair.token1Symbol}`,
+        symbol: pair.token0Symbol,
+        price_usd: 0,
+        market_cap_rank: null,
+        score: parseFloat(pair.volume) || 0,
+        network,
+      },
+    };
+  });
 }
 
 export default function Analytics() {
@@ -55,6 +117,11 @@ export default function Analytics() {
   });
   const [activeSection, setActiveSection] = useState(() => getStored(STORAGE_KEYS.section, 'intelligence'));
   const [selectedNetwork, setSelectedNetwork] = useState('all');
+
+  const isIntelligence = activeSection === 'intelligence';
+  const isOverview = activeSection === 'overview';
+  const isMarket = activeSection === 'market';
+  const isTrending = activeSection === 'trending';
 
   useEffect(() => {
     const section = searchParams.get('section');
@@ -74,162 +141,82 @@ export default function Analytics() {
     } catch (_) {}
   }, [activeSection]);
 
-  const { data: analytics, isLoading, error, isFetching: analyticsFetching, dataUpdatedAt } = useQuery({
+  const {
+    data: analytics,
+    isLoading,
+    isError: analyticsError,
+    error: analyticsErrorObj,
+    isFetching: analyticsFetching,
+    dataUpdatedAt,
+  } = useQuery({
     queryKey: ['analytics', timeRange],
     queryFn: () => fetchAnalytics(timeRange),
     refetchInterval: 60000,
     retry: 1,
     retryDelay: 2000,
-    staleTime: 0, // Always refetch when switching time range (fixes toggle bug)
-    onError: () => {},
+    staleTime: STALE_1M,
+    placeholderData: (prev) => prev,
+    enabled: isOverview || isIntelligence || isTrending,
   });
 
-  const fetchAnalytics = async (range) => {
-    try {
-      if (!config?.apiUrl) {
-        return {};
-      }
-      // Use fetch instead of axios to avoid automatic error logging
-      const response = await fetch(`${config.apiUrl}/analytics?range=${range}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        signal: AbortSignal.timeout(10000), // 10 second timeout
-      });
-      
-      // Handle 404 gracefully (expected - endpoint doesn't exist yet)
-      if (response.status === 404) {
-        return {};
-      }
-      
-      if (!response.ok) {
-        return {};
-      }
-      
-      const data = await response.json();
-        if (data?.success && data?.data) {
-        return data.data;
-      }
-      return {};
-    } catch (error) {
-      // Log errors for debugging
-      console.warn('Analytics fetch error:', error.message);
-      return {};
-    }
-  };
-
-  // Helper function to get network name for The Graph
-  const getNetworkName = (chainId) => {
-    const networkMap = {
-      '1': 'ethereum',
-      '137': 'polygon',
-      '56': 'binance-smart-chain',
-      '42161': 'arbitrum',
-      '10': 'optimism',
-      '8453': 'base',
-      '11155111': 'ethereum' // Sepolia fallback to ethereum
-    };
-    return networkMap[chainId] || 'ethereum';
-  };
-
-  // Fetch trending NFT collections (CoinGecko - requires Pro API for /nfts/markets; 401 on free tier)
   const hasCoinGeckoPro = !!process.env.REACT_APP_COINGECKO_API_KEY;
   const { data: trendingNfts = [] } = useQuery({
     queryKey: ['trending-nfts'],
     queryFn: () => coingeckoService.getNftMarkets(8),
     staleTime: 300000,
     retry: 0,
-    enabled: hasCoinGeckoPro,
+    enabled: hasCoinGeckoPro && (isTrending || isIntelligence),
   });
 
-  // Fetch trending tokens - Combined CoinGecko + The Graph
-  const { data: trendingTokens, isLoading: trendingLoading } = useQuery({
-    queryKey: ['trending-tokens', selectedNetwork, timeRange],
+  // CoinGecko global trending only — network mode derives from analytics.topPairs
+  const { data: coingeckoTrending, isLoading: cgTrendingLoading } = useQuery({
+    queryKey: ['trending-tokens', 'all'],
     queryFn: async () => {
-      // If "All Networks" is selected, use CoinGecko (global trending)
-      if (selectedNetwork === 'all') {
-        try {
-          const cgData = await coingeckoService.getTrendingTokens();
-          if (cgData && cgData.coins) {
-            return cgData.coins.map(coin => ({
-              ...coin,
-              item: {
-                ...coin.item,
-                network: 'all'
-              }
-            }));
-          }
-        } catch (error) {
-          console.error('Error fetching CoinGecko trending:', error);
-        }
+      const cgData = await coingeckoService.getTrendingTokens();
+      if (cgData?.coins) {
+        return cgData.coins.map((coin) => ({
+          ...coin,
+          item: { ...coin.item, network: 'all' },
+        }));
       }
-
-      // For specific networks, use backend analytics endpoint
-      // selectedNetwork is already a chain ID (1, 137, etc.) from the dropdown
-      try {
-        const chainId = selectedNetwork === 'all' ? 1 : parseInt(selectedNetwork) || 1;
-        
-        // Use backend analytics endpoint instead of direct The Graph call
-        const response = await fetch(`${config.apiUrl}/analytics?range=${encodeURIComponent(timeRange)}&networks=${chainId}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data?.success && data?.data?.topPairs && data.data.topPairs.length > 0) {
-            // Convert topPairs to trending tokens format
-            return data.data.topPairs.slice(0, 20).map(pair => ({
-              id: `${pair.token0Symbol}-${pair.token1Symbol}`,
-              symbol: pair.token0Symbol,
-              name: `${pair.token0Symbol}/${pair.token1Symbol}`,
-              network: pair.network || getNetworkName(chainId.toString()),
-              volume: pair.volume,
-              liquidity: pair.liquidity,
-              item: {
-                id: `${pair.token0Symbol}-${pair.token1Symbol}`,
-                name: `${pair.token0Symbol}/${pair.token1Symbol}`,
-                symbol: pair.token0Symbol,
-                price_usd: 0,
-                market_cap_rank: null,
-                score: parseFloat(pair.volume) || 0,
-                network: pair.network || getNetworkName(chainId.toString())
-              }
-            }));
-          }
-        }
-        
-        // Return empty array if backend doesn't have data
-        return [];
-      } catch (error) {
-        console.error(`Error fetching trending for network ${selectedNetwork}:`, error);
-        // Return empty array for network-specific queries that fail
-        return [];
-      }
-
+      return [];
     },
-    refetchInterval: 300000, // Refetch every 5 minutes
-    enabled: true, // Always enabled
+    refetchInterval: 300000,
+    staleTime: STALE_1M,
+    enabled: (isTrending || isIntelligence) && selectedNetwork === 'all',
   });
 
-  // DEX stats are now included in the analytics response from backend
-  // No need for separate query - using analytics.networkStats instead
+  const networkTrendingTokens = useMemo(() => {
+    if (selectedNetwork === 'all') return null;
+    const label = getNetworkName(selectedNetwork);
+    const pairs = analytics?.topPairs;
+    if (!pairs?.length) return [];
+    const filtered = pairs.filter((p) => {
+      const net = String(p.network || '').toLowerCase();
+      return !net || net === label || net.includes(label) || label.includes(net);
+    });
+    return topPairsToTrendingTokens(filtered.length ? filtered : pairs, label);
+  }, [selectedNetwork, analytics?.topPairs]);
 
-  // Fetch price insights (predictions for BTC & ETH using existing predictive analytics)
+  const trendingTokens = selectedNetwork === 'all' ? coingeckoTrending : networkTrendingTokens;
+  const trendingLoading =
+    selectedNetwork === 'all'
+      ? cgTrendingLoading
+      : isLoading && !analytics;
+
   const { data: priceInsights } = useQuery({
     queryKey: ['price-insights'],
     queryFn: async () => {
       const insights = [];
       const coins = [
         { id: 'bitcoin', symbol: 'BTC' },
-        { id: 'ethereum', symbol: 'ETH' }
+        { id: 'ethereum', symbol: 'ETH' },
       ];
       for (const coin of coins) {
         try {
           const history = await coingeckoService.getPriceHistoryByCoinId(coin.id, 7);
           if (history?.prices?.length >= 7) {
-            const prices = history.prices.map(([_, p]) => p).filter(Boolean);
+            const prices = history.prices.map(([, p]) => p).filter(Boolean);
             const prediction = getPricePrediction(prices, 7);
             insights.push({ symbol: coin.symbol, ...prediction });
           }
@@ -239,20 +226,27 @@ export default function Analytics() {
       }
       return insights;
     },
-    refetchInterval: 300000, // 5 min
+    refetchInterval: 300000,
+    staleTime: STALE_1M,
+    enabled: isOverview,
   });
 
-  // DefiLlama: reliable DEX volume (primary source, with retry + cache in service)
-  const { data: defiLlamaVolumeData, isFetched: defiLlamaFetched } = useQuery({
+  const {
+    data: defiLlamaVolumeData,
+    isFetched: defiLlamaFetched,
+    isLoading: defiLlamaLoading,
+    isFetching: defiLlamaFetching,
+  } = useQuery({
     queryKey: ['defillama-dex-volume', timeRange],
     queryFn: () => getDexVolumeChart(timeRange),
     refetchInterval: 300000,
-    staleTime: 0, // Always refetch when switching time range
+    staleTime: STALE_1M,
+    placeholderData: (prev) => prev,
     retry: 2,
     retryDelay: 1500,
+    enabled: isOverview,
   });
 
-  // Second DEX source: GeckoTerminal 24h volume (for fallback + cross-check)
   const { data: geckoTerminalVolume } = useQuery({
     queryKey: ['geckoterminal-dex-volume24h'],
     queryFn: getDexVolume24h,
@@ -260,10 +254,13 @@ export default function Analytics() {
     staleTime: 120000,
     retry: 2,
     retryDelay: 1500,
+    enabled: isOverview,
   });
 
-  // Fallback: CoinGecko Bitcoin volume - ONLY when DefiLlama unavailable (reduces 429 rate limits)
-  const { data: historicalVolumeData } = useQuery({
+  const {
+    data: historicalVolumeData,
+    isLoading: historicalVolumeLoading,
+  } = useQuery({
     queryKey: ['historical-volume', timeRange],
     queryFn: async () => {
       const days = getCoinGeckoMarketChartDays(timeRange);
@@ -274,61 +271,64 @@ export default function Analytics() {
     refetchInterval: 300000,
     retry: 1,
     retryDelay: 5000,
-    staleTime: 0, // Always refetch when switching time range
-    enabled: defiLlamaFetched && (!defiLlamaVolumeData || defiLlamaVolumeData.length === 0),
+    staleTime: STALE_1M,
+    placeholderData: (prev) => prev,
+    enabled:
+      isOverview &&
+      defiLlamaFetched &&
+      (!defiLlamaVolumeData || defiLlamaVolumeData.length === 0),
   });
 
-  // Fetch market data - React Query v5 API
-  // Note: CoinGecko global endpoint doesn't support time ranges - it always returns current data
+  const volumeLoading =
+    (defiLlamaLoading || defiLlamaFetching) ||
+    (defiLlamaFetched &&
+      (!defiLlamaVolumeData || defiLlamaVolumeData.length === 0) &&
+      historicalVolumeLoading);
+
   const { data: marketData, isLoading: marketLoading } = useQuery({
-    queryKey: ['market-data'], // Remove timeRange - CoinGecko doesn't support it
+    queryKey: ['market-data'],
     queryFn: async () => {
-      try {
-        // Get top cryptocurrencies market data
-        const response = await fetch(
-          `https://api.coingecko.com/api/v3/global${process.env.REACT_APP_COINGECKO_API_KEY ? `?x_cg_demo_api_key=${process.env.REACT_APP_COINGECKO_API_KEY}` : ''}`
-        );
-        if (!response.ok) return null;
-        return await response.json();
-      } catch (error) {
-        // Silently handle errors
-        return null;
+      const response = await fetch(
+        `https://api.coingecko.com/api/v3/global${process.env.REACT_APP_COINGECKO_API_KEY ? `?x_cg_demo_api_key=${process.env.REACT_APP_COINGECKO_API_KEY}` : ''}`
+      );
+      if (!response.ok) {
+        throw new Error(`Market data error (${response.status})`);
       }
+      return response.json();
     },
-    refetchInterval: 60000, // Refetch every minute
+    refetchInterval: 60000,
+    staleTime: STALE_1M,
+    retry: 1,
+    enabled: isOverview || isMarket || isIntelligence,
   });
 
-  // Crypto/DeFi news (NewsAPI.org - only when REACT_APP_NEWSAPI_KEY is set)
   const hasNewsApiKey = !!process.env.REACT_APP_NEWSAPI_KEY;
   const { data: cryptoNews } = useQuery({
     queryKey: ['crypto-news'],
     queryFn: () => getCryptoNews({ pageSize: 8, sortBy: 'publishedAt' }),
-    staleTime: 10 * 60 * 1000, // 10 min
+    staleTime: 10 * 60 * 1000,
     refetchInterval: 10 * 60 * 1000,
     retry: 1,
-    enabled: hasNewsApiKey,
+    enabled: hasNewsApiKey && (isIntelligence || isMarket),
   });
 
-  // Platform activity (backend analytics dashboard - same worker, /analytics path)
   const analyticsBase = config?.apiUrl ? new URL(config.apiUrl).origin : '';
   const { data: dashboardStats } = useQuery({
     queryKey: ['analytics-dashboard', timeRange],
     queryFn: async () => {
       if (!analyticsBase) return null;
-      try {
-        const res = await fetch(`${analyticsBase}/analytics/dashboard?timeRange=${timeRange}`, {
-          headers: { 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(8000),
-        });
-        if (!res.ok) return null;
-        const json = await res.json().catch(() => null);
-        return json?.success && json?.data ? json.data : null;
-      } catch {
-        return null;
-      }
+      const res = await fetch(`${analyticsBase}/analytics/dashboard?timeRange=${timeRange}`, {
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) return null;
+      const json = await res.json().catch(() => null);
+      return json?.success && json?.data ? json.data : null;
     },
-    staleTime: 60000,
+    staleTime: STALE_1M,
+    placeholderData: (prev) => prev,
     retry: 0,
+    enabled: isOverview,
   });
 
   const { data: fearGreedData = [] } = useQuery({
@@ -337,6 +337,7 @@ export default function Analytics() {
     refetchInterval: 3600000,
     staleTime: 1800000,
     retry: 1,
+    enabled: isIntelligence || isMarket,
   });
 
   const sections = ['intelligence', 'overview', 'market', 'trending'];
@@ -354,18 +355,18 @@ export default function Analytics() {
   const timeRanges = ANALYTICS_TIME_RANGES;
 
   const volumeMetric = useMemo(
-    () => resolveVolumeMetric({
-      timeRange,
-      analytics,
-      defiLlamaVolumeData,
-      historicalVolumeData,
-      geckoTerminalVolume,
-      marketData,
-    }),
+    () =>
+      resolveVolumeMetric({
+        timeRange,
+        analytics,
+        defiLlamaVolumeData,
+        historicalVolumeData,
+        geckoTerminalVolume,
+        marketData,
+      }),
     [timeRange, analytics, defiLlamaVolumeData, historicalVolumeData, geckoTerminalVolume, marketData]
   );
 
-  // Volume chart series: DefiLlama first, CoinGecko fallback
   const generateTimeSeriesData = useMemo(() => {
     if (defiLlamaVolumeData?.length > 0) return defiLlamaVolumeData;
     if (historicalVolumeData?.length > 0) {
@@ -381,7 +382,11 @@ export default function Analytics() {
     return [];
   }, [timeRange, defiLlamaVolumeData, historicalVolumeData]);
 
-  const volumeChartSource = defiLlamaVolumeData?.length ? 'defillama' : historicalVolumeData?.length ? 'coingecko' : null;
+  const volumeChartSource = defiLlamaVolumeData?.length
+    ? 'defillama'
+    : historicalVolumeData?.length
+      ? 'coingecko'
+      : null;
 
   return (
     <>
@@ -521,9 +526,19 @@ export default function Analytics() {
             <ResearchBriefBanner page="analytics" />
 
             {/* Analytics Content - section-level loading; no full-page block */}
-            {error ? (
-              <div className="text-center py-12">
+            {analyticsError ? (
+              <div className="text-center py-12 space-y-3">
                 <p className="text-red-400">Failed to load analytics. Please try again.</p>
+                {analyticsErrorObj?.message && (
+                  <p className="text-sm text-gray-500">{analyticsErrorObj.message}</p>
+                )}
+                <button
+                  type="button"
+                  onClick={() => queryClient.invalidateQueries({ queryKey: ['analytics'] })}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium"
+                >
+                  Retry
+                </button>
               </div>
             ) : (
               <div className="space-y-8">
@@ -669,221 +684,16 @@ export default function Analytics() {
                   </div>
                 )}
 
-                {/* Volume Chart */}
-                <div className="card rounded-2xl shadow-xl p-6">
-                  <div className="mb-4">
-                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                      <h2 className="text-2xl font-bold text-white">Volume Over Time ({getRangeLabel(timeRange)})</h2>
-                      {generateTimeSeriesData.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const rows = generateTimeSeriesData.map(({ time, volume, timestamp }) => ({
-                              Time: time,
-                              'Volume (USD)': Math.round(volume),
-                              Timestamp: timestamp ? new Date(timestamp).toISOString() : '',
-                            }));
-                            downloadCSV(rows, `volume-chart-${timeRange}-${new Date().toISOString().split('T')[0]}`);
-                            toast.success('Volume chart exported as CSV');
-                          }}
-                          className="px-3 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 text-white rounded-lg"
-                        >
-                          Export CSV
-                        </button>
-                      )}
-                    </div>
-                    {generateTimeSeriesData.length > 0 && volumeChartSource && (
-                      <div className={`${volumeChartSource === 'defillama' ? 'bg-green-500/10 border-green-500/30' : 'bg-blue-500/10 border-blue-500/30'} rounded-lg p-3 mb-4`}>
-                        <p className={`text-sm ${volumeChartSource === 'defillama' ? 'text-green-300' : 'text-blue-300'}`}>
-                          <span className="font-semibold">{volumeChartSource === 'defillama' ? '✅ DefiLlama (DEX volume):' : '📊 CoinGecko (Bitcoin volume):'}</span>{' '}
-                          {volumeChartSource === 'defillama'
-                            ? 'Real aggregated DEX trading volume across chains. Source: api.llama.fi. Cached with retries for reliability.'
-                            : 'Fallback: Bitcoin trading volume from CoinGecko as market proxy.'}
-                          {volumeChartSource === 'defillama' && geckoTerminalVolume?.volume24h && (
-                            <span className="block mt-1 text-green-200/90">24h volume cross-checked with GeckoTerminal (second DEX source).</span>
-                          )}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  {marketLoading ? (
-                    <ChartSkeleton height="300px" />
-                  ) : generateTimeSeriesData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={300}>
-                      <AreaChart data={generateTimeSeriesData} isAnimationActive animationDuration={800} animationEasing="ease-out">
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                        <XAxis 
-                          dataKey="time" 
-                          stroke="var(--text-tertiary)"
-                          angle={timeRange === '1y' || timeRange === 'all' ? -45 : 0}
-                          textAnchor={timeRange === '1y' || timeRange === 'all' ? 'end' : 'middle'}
-                          height={timeRange === '1y' || timeRange === 'all' ? 80 : 30}
-                        />
-                        <YAxis 
-                          stroke="var(--text-tertiary)"
-                          tickFormatter={(value) => {
-                            if (value >= 1e12) return `$${(value / 1e12).toFixed(2)}T`;
-                            if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
-                            if (value >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
-                            return `$${(value / 1e3).toFixed(2)}K`;
-                          }}
-                        />
-                        <Tooltip 
-                          contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
-                          labelStyle={{ color: 'var(--text-primary)' }}
-                          formatter={(value) => `$${parseFloat(value).toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
-                        />
-                        <Legend />
-                        <Area 
-                          type="monotone" 
-                          dataKey="volume" 
-                          stroke="var(--accent-cyan)" 
-                          fill="var(--accent-cyan)" 
-                          fillOpacity={0.3} 
-                          name="Volume (USD)" 
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div className="h-[300px] flex flex-col items-center justify-center gap-3 text-center px-4">
-                      <p className="text-gray-400">Volume data not available for this time range.</p>
-                      <p className="text-gray-500 text-sm">We use DefiLlama (DEX volume) and CoinGecko as fallback. Try another range or refresh.</p>
-                      <button
-                        onClick={async () => {
-                          await queryClient.invalidateQueries({ queryKey: ['analytics'] });
-                          await queryClient.invalidateQueries({ queryKey: ['historical-volume'] });
-                          toast.success('Refreshing...');
-                        }}
-                        className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
-                      >
-                        Try refreshing
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                  {/* Network Performance + Network Distribution */}
-                {/* Network Performance */}
-                <div className="card rounded-2xl shadow-xl p-6">
-                  <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                    <h2 className="text-2xl font-bold text-white">Network Performance</h2>
-                    {analytics?.networkStats && Object.keys(analytics.networkStats).length > 0 && (
-                      <button
-                        onClick={() => {
-                          const rows = Object.entries(analytics?.networkStats || {}).map(([network, stats]) => ({
-                            Network: network,
-                            'Volume (USD)': parseFloat(stats.volume || 0).toLocaleString(),
-                            Users: stats.users || 0,
-                            Pools: stats.pools || 0
-                          }));
-                          downloadCSV(rows, `network-performance-${new Date().toISOString().split('T')[0]}`);
-                          toast.success('Network Performance exported as CSV!');
-                        }}
-                        className="px-3 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 text-white rounded-lg"
-                      >
-                        Export CSV
-                      </button>
-                    )}
-                  </div>
-                  {analytics?.networkStats && typeof analytics.networkStats === 'object' && Object.keys(analytics.networkStats).length > 0 ? (
-                    <>
-                      <div className="mb-6">
-                        <ResponsiveContainer width="100%" height={300}>
-                          <BarChart data={Object.entries(analytics?.networkStats || {}).map(([network, stats]) => ({
-                            network,
-                            volume: parseFloat(stats.volume || 0),
-                            users: stats.users || 0,
-                            pools: stats.pools || 0
-                          }))} isAnimationActive animationDuration={600} animationEasing="ease-out">
-                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                            <XAxis dataKey="network" stroke="var(--text-tertiary)" />
-                            <YAxis stroke="var(--text-tertiary)" />
-                            <Tooltip 
-                              contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
-                              labelStyle={{ color: 'var(--text-primary)' }}
-                            />
-                            <Legend />
-                            <Bar dataKey="volume" fill="var(--accent-cyan)" name="Volume (USD)" />
-                            <Bar dataKey="pools" fill="var(--success-color)" name="Pools" />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {Object.entries(analytics?.networkStats || {}).map(([network, stats]) => (
-                          <div key={network} className="bg-gray-700 rounded-xl p-4">
-                            <h3 className="text-lg font-semibold text-white mb-3">{network}</h3>
-                            <div className="space-y-2">
-                              <div className="flex justify-between">
-                                <span className="text-gray-300">Volume:</span>
-                                <span className="text-white">${parseFloat(stats.volume || 0).toLocaleString()}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-gray-300">Users:</span>
-                                <span className="text-white">{stats.users ? stats.users.toLocaleString() : '0'}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-gray-300">Pools:</span>
-                                <span className="text-white">{stats.pools ? stats.pools.toLocaleString() : '0'}</span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-center py-12">
-                      <div className="bg-gray-700/50 rounded-lg p-6 max-w-md mx-auto">
-                        <p className="text-gray-300 mb-2">Network Performance Data Unavailable</p>
-                        <p className="text-sm text-gray-400 mb-4">
-                          {analytics && Object.keys(analytics).length > 0 
-                            ? 'Network statistics are being fetched from the backend. If this persists, the backend may not have collected data yet.'
-                            : 'Network-specific statistics require backend API integration. The backend endpoint is available but may need time to collect initial data.'}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          Data source: GeckoTerminal, DefiLlama, CoinGecko
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Network Distribution Pie Chart */}
-                {analytics?.networkStats && Object.keys(analytics.networkStats).length > 0 && (
-                  <div
-                    className="rounded-2xl shadow-xl p-6"
-                    style={{
-                      backgroundColor: 'var(--bg-card)',
-                      border: '1px solid var(--border-color)',
-                    }}
-                  >
-                    <h2 className="text-2xl font-bold text-white mb-6">Network Distribution</h2>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <PieChart isAnimationActive animationDuration={600} animationEasing="ease-out">
-                        <Pie
-                          data={Object.entries(analytics?.networkStats || {}).map(([network, stats]) => ({
-                            name: network,
-                            value: parseFloat(stats.volume || 0)
-                          }))}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                          outerRadius={80}
-                          fill="var(--accent-cyan)"
-                          dataKey="value"
-                        >
-                          {Object.keys(analytics?.networkStats || {}).map((_, index) => (
-                            <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip 
-                          contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
-                          labelStyle={{ color: 'var(--text-primary)' }}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
+                <Suspense fallback={<ChartSkeleton height="300px" />}>
+                  <AnalyticsOverviewCharts
+                    timeRange={timeRange}
+                    generateTimeSeriesData={generateTimeSeriesData}
+                    volumeChartSource={volumeChartSource}
+                    geckoTerminalVolume={geckoTerminalVolume}
+                    volumeLoading={volumeLoading}
+                    analytics={analytics}
+                  />
+                </Suspense>
 
                   {/* Top Trading Pairs */}
                 {/* Top Trading Pairs */}
@@ -928,89 +738,6 @@ export default function Analytics() {
                   )}
                 </div>
 
-                  {/* User Activity */}
-                {/* User Activity Chart */}
-                <div className="card rounded-2xl shadow-xl p-6">
-                  <h2 className="text-2xl font-bold text-white mb-6">User Activity</h2>
-                  {analytics?.userActivity && (analytics.userActivity?.totalActions ?? 0) > 0 ? (
-                    <>
-                      <div className="mb-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                          <div className="bg-gray-700 rounded-xl p-4">
-                            <p className="text-sm text-gray-400 mb-1">Total Actions</p>
-                            <p className="text-3xl font-bold text-white">
-                              {(analytics?.userActivity?.totalActions ?? 0).toLocaleString()}
-                            </p>
-                          </div>
-                          <div className="bg-gray-700 rounded-xl p-4">
-                            <p className="text-sm text-gray-400 mb-1">Unique Users</p>
-                            <p className="text-3xl font-bold text-white">
-                              {(analytics?.userActivity?.uniqueUsers ?? 0).toLocaleString()}
-                            </p>
-                          </div>
-                          <div className="bg-gray-700 rounded-xl p-4">
-                            <p className="text-sm text-gray-400 mb-1">Activity Types</p>
-                            <p className="text-3xl font-bold text-white">
-                              {Object.keys(analytics?.userActivity?.byType || {}).length}
-                            </p>
-                          </div>
-                        </div>
-                        {analytics?.userActivity?.byType && Object.keys(analytics?.userActivity?.byType || {}).length > 0 && (
-                          <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={Object.entries(analytics?.userActivity?.byType || {}).map(([action, count]) => ({
-                              action: action.replace('_', ' ').toUpperCase(),
-                              count: Array.isArray(count) ? count.length : count
-                            }))} isAnimationActive animationDuration={600} animationEasing="ease-out">
-                              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                              <XAxis dataKey="action" stroke="var(--text-tertiary)" />
-                              <YAxis stroke="var(--text-tertiary)" />
-                              <Tooltip 
-                                contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
-                                labelStyle={{ color: 'var(--text-primary)' }}
-                              />
-                              <Legend />
-                              <Bar dataKey="count" fill="var(--accent-purple)" name="Actions" />
-                            </BarChart>
-                          </ResponsiveContainer>
-                        )}
-                      </div>
-                      {analytics?.userActivity?.recentActivity?.length > 0 && (
-                        <div className="mt-6">
-                          <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
-                          <div className="space-y-2">
-                            {(analytics?.userActivity?.recentActivity || []).slice(0, 10).map((activity, index) => (
-                              <div key={index} className="bg-gray-700 rounded-lg p-3 flex items-center justify-between">
-                                <div>
-                                  <span className="text-white font-medium capitalize">{activity.action?.replace('_', ' ') || 'Unknown'}</span>
-                                  {activity.chainId && (
-                                    <span className="text-gray-400 text-sm ml-2">Chain: {activity.chainId}</span>
-                                  )}
-                                </div>
-                                <span className="text-gray-400 text-sm">
-                                  {activity.timestamp ? new Date(activity.timestamp).toLocaleString() : 'N/A'}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="text-center py-12">
-                      <div className="bg-gray-700/50 rounded-lg p-6 max-w-md mx-auto">
-                        <p className="text-gray-300 mb-2">User Activity Data Unavailable</p>
-                        <p className="text-sm text-gray-400 mb-4">
-                          {analytics && Object.keys(analytics).length > 0
-                            ? 'No user activity has been tracked yet. Activity will appear once users perform actions (swaps, liquidity operations, etc.).'
-                            : 'User activity metrics require backend API integration. The system tracks user interactions and on-chain transactions.'}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          Data source: Backend analytics API (tracks user interactions and on-chain transactions)
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
 
                   {/* Price Insights, News, Platform Activity */}
                 {cryptoNews?.articles?.length > 0 && (
@@ -1273,7 +1000,9 @@ export default function Analytics() {
                           {selectedNetwork === 'all' 
                             ? ' Data from CoinGecko (all cryptocurrencies).' 
                             : ` Data from backend API for ${getNetworkName(selectedNetwork)} network.`}
-                          {' '}Time range selection does not affect trending data as it reflects current market sentiment.
+                          {selectedNetwork === 'all'
+                            ? ' Time range does not affect CoinGecko trending (current market sentiment).'
+                            : ` Top pairs reflect the selected analytics range (${timeRange === 'all' ? 'all time' : timeRange}).`}
                         </p>
                       </div>
                       {trendingLoading ? (

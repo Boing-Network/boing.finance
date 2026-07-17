@@ -156,8 +156,17 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4 sm:p-6">
-      <div className="bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md max-h-[85vh] relative overflow-y-auto">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4 sm:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="token-mgmt-title"
+      onClick={onClose}
+    >
+      <div
+        className="bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md max-h-[85vh] relative overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           className="absolute top-4 right-4 text-gray-400 hover:text-white"
           onClick={onClose}
@@ -166,7 +175,7 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
           &times;
         </button>
         
-        <h2 className="text-xl font-bold text-white mb-4">Select Token</h2>
+        <h2 id="token-mgmt-title" className="text-xl font-bold text-white mb-4">Select Token</h2>
         
         {/* Search */}
         <div className="mb-4">

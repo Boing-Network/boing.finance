@@ -31,12 +31,16 @@ const WalletConnect = () => {
     let isMounted = true;
     if (evmWallet.isConnected && evmWallet.account) {
       setEvmBalanceLoading(true);
-      evmWallet.getAccountBalance?.().then((bal) => {
-        if (isMounted) {
-          setEvmBalance(bal);
-          setEvmBalanceLoading(false);
-        }
-      });
+      Promise.resolve(evmWallet.getAccountBalance?.())
+        .then((bal) => {
+          if (isMounted) setEvmBalance(bal ?? null);
+        })
+        .catch(() => {
+          if (isMounted) setEvmBalance(null);
+        })
+        .finally(() => {
+          if (isMounted) setEvmBalanceLoading(false);
+        });
     } else {
       setEvmBalance(null);
       setEvmBalanceLoading(false);
