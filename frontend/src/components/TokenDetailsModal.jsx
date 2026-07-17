@@ -162,14 +162,33 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network, onSetPriceAlert })
     return explorerMap[chainId] || `https://etherscan.io/token/${address}`;
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isOpen, onClose]);
+
   if (!isOpen || !token) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
-      <div className="rounded-xl p-6 shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" style={{
-        backgroundColor: 'var(--bg-card)',
-        border: '1px solid var(--border-color)'
-      }}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="token-details-title"
+      onClick={onClose}
+    >
+      <div
+        className="rounded-xl p-6 shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        style={{
+          backgroundColor: 'var(--bg-card)',
+          border: '1px solid var(--border-color)',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center space-x-4">
@@ -177,7 +196,7 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network, onSetPriceAlert })
               {token.symbol?.charAt(0) || 'T'}
             </div>
             <div>
-              <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+              <h2 id="token-details-title" className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
                 {token.name}
               </h2>
               <p className="text-lg" style={{ color: 'var(--text-secondary)' }}>
@@ -200,12 +219,14 @@ const TokenDetailsModal = ({ token, isOpen, onClose, network, onSetPriceAlert })
               </svg>
             </button>
             <button
+              type="button"
               onClick={onClose}
               className="p-2 rounded-lg transition-colors"
               style={{
                 backgroundColor: 'var(--bg-tertiary)',
                 color: 'var(--text-secondary)'
               }}
+              aria-label="Close token details"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

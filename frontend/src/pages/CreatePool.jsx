@@ -379,23 +379,28 @@ function CreatePool() {
       const allTokenAddresses = [...new Set([...allTokens, ...commonTokens, ...factoryTokenAddrs])];
       
       const tokensWithBalance = [];
-      
-      for (const tokenAddress of allTokenAddresses) {
-        try {
-          const tokenInfo = await getTokenInfo(tokenAddress);
-          const inFactory = factorySet.has(tokenAddress.toLowerCase());
-          const hasBal = tokenInfo?.balance && tokenInfo.balance !== '0';
-          if (tokenInfo && tokenInfo.symbol && tokenInfo.decimals != null && (hasBal || inFactory)) {
-            tokensWithBalance.push({
-              address: tokenAddress,
-              ...tokenInfo,
-              formattedBalance: ethers.formatUnits(tokenInfo.balance, tokenInfo.decimals),
-              fromDexFactory: inFactory && !hasBal,
-            });
+      const tokenResults = await Promise.all(
+        allTokenAddresses.map(async (tokenAddress) => {
+          try {
+            const tokenInfo = await getTokenInfo(tokenAddress);
+            const inFactory = factorySet.has(tokenAddress.toLowerCase());
+            const hasBal = tokenInfo?.balance && tokenInfo.balance !== '0';
+            if (tokenInfo && tokenInfo.symbol && tokenInfo.decimals != null && (hasBal || inFactory)) {
+              return {
+                address: tokenAddress,
+                ...tokenInfo,
+                formattedBalance: ethers.formatUnits(tokenInfo.balance, tokenInfo.decimals),
+                fromDexFactory: inFactory && !hasBal,
+              };
+            }
+          } catch {
+            /* Skip tokens that fail to load */
           }
-        } catch (error) {
-          // Skip tokens that fail to load
-        }
+          return null;
+        })
+      );
+      for (const t of tokenResults) {
+        if (t) tokensWithBalance.push(t);
       }
       
       tokensWithBalance.sort((a, b) => {

@@ -14,6 +14,7 @@ import PriceAlertModal from '../components/PriceAlertModal';
 import { tokenFavorites } from '../utils/tokenFavorites';
 import { addToWatchlist, removeFromWatchlist, isInWatchlist } from '../utils/tokenWatchlist';
 import toast from 'react-hot-toast';
+import EmptyState from '../components/EmptyState';
 
 // Initialize token scanner
 const tokenScanner = new TokenScanner();
@@ -737,38 +738,24 @@ const Tokens = () => {
 
           {/* No Tokens State */}
           {!loading && filteredTokens.length === 0 && tokens.length === 0 && !error && (
-            <div className="text-center py-8 sm:py-12">
-              <div className="text-4xl sm:text-6xl mb-4">🔍</div>
-              <h3 className="text-xl sm:text-2xl font-semibold text-white mb-2">No Tokens Found</h3>
-              <p className="text-gray-300 text-sm sm:text-base mb-4">
-                Try scanning for tokens or searching for a specific token address.
-              </p>
-              <button
-                type="button"
-                onClick={scanTokens}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors text-sm sm:text-base"
-              >
-                Scan for Tokens
-              </button>
-            </div>
+            <EmptyState
+              variant="tokens"
+              title="No Tokens Found"
+              description="Try scanning for tokens or searching for a specific token address."
+              action={scanTokens}
+              actionLabel="Scan for Tokens"
+            />
           )}
 
           {/* No Results After Filtering */}
           {!loading && filteredTokens.length === 0 && tokens.length > 0 && (
-            <div className="text-center py-8 sm:py-12">
-              <div className="text-4xl sm:text-6xl mb-4">🔍</div>
-              <h3 className="text-xl sm:text-2xl font-semibold text-white mb-2">No Tokens Match Filters</h3>
-              <p className="text-gray-300 text-sm sm:text-base mb-4">
-                Try adjusting your filters or clearing them to see all tokens.
-              </p>
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors text-sm sm:text-base"
-              >
-                Clear Filters
-              </button>
-            </div>
+            <EmptyState
+              variant="search"
+              title="No Tokens Match Filters"
+              description="Try adjusting your filters or clearing them to see all tokens."
+              action={clearFilters}
+              actionLabel="Clear Filters"
+            />
           )}
         </div></div>
 

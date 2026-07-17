@@ -30,29 +30,42 @@ const BugReport = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
+    setSubmitStatus(null);
+
+    try {
+      const subject = encodeURIComponent(
+        `[Bug ${formData.severity}/${formData.category}] ${formData.title || 'Bug report'}`
+      );
+      const body = encodeURIComponent(
+        [
+          `Email: ${formData.email || 'n/a'}`,
+          `Wallet: ${formData.walletAddress || 'n/a'}`,
+          `Browser: ${formData.browser || 'n/a'}`,
+          `Wallet app: ${formData.wallet || 'n/a'}`,
+          `Network: ${formData.network || 'n/a'}`,
+          '',
+          'Description:',
+          formData.description,
+          '',
+          'Steps to reproduce:',
+          formData.steps,
+          '',
+          'Expected:',
+          formData.expected,
+          '',
+          'Actual:',
+          formData.actual,
+        ].join('\n')
+      );
+
+      window.location.href = `mailto:support@boing.finance?subject=${subject}&body=${body}`;
       setSubmitStatus('success');
-      setFormData({
-        title: '',
-        description: '',
-        steps: '',
-        expected: '',
-        actual: '',
-        severity: 'medium',
-        category: 'general',
-        browser: '',
-        wallet: '',
-        network: '',
-        email: '',
-        walletAddress: ''
-      });
-      
-      // Reset status after 5 seconds
-      setTimeout(() => setSubmitStatus(null), 5000);
-    }, 2000);
+      setTimeout(() => setSubmitStatus(null), 8000);
+    } catch {
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const severityLevels = [
@@ -216,7 +229,7 @@ const BugReport = () => {
                     <div className="rounded-lg p-4 mb-6 border" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--success-color)' }}>
                       <div className="flex items-center space-x-2">
                         <span style={{ color: 'var(--success-color)' }}>✅</span>
-                        <p style={{ color: 'var(--text-secondary)' }}>Thank you! Your bug report has been submitted successfully. We'll investigate and get back to you soon.</p>
+                        <p style={{ color: 'var(--text-secondary)' }}>Your email client should open with this report. Send it to reach support — nothing is filed until you hit send.</p>
                       </div>
                     </div>
                   )}
