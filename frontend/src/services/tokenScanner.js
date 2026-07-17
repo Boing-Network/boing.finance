@@ -154,31 +154,13 @@ export class TokenScanner {
       const tokenAddresses = [...new Set(allLogs.map(log => log.address.toLowerCase()))];
       console.log(`Found ${tokenAddresses.length} unique token addresses`);
 
-      // Process first 10 tokens with faster processing
       const limitedTokenAddresses = tokenAddresses.slice(0, 10);
-      console.log(`Processing first ${limitedTokenAddresses.length} tokens with optimized speed`);
-
-      // Get token details with optimized rate limiting
-      const tokens = [];
-      for (let i = 0; i < limitedTokenAddresses.length; i++) {
-        const address = limitedTokenAddresses[i];
-        
-        // Reduced delay between token requests
-        if (i > 0) {
-          await new Promise(resolve => setTimeout(resolve, 300)); // Reduced to 300ms
-        }
-        
-        try {
-          const token = await this.getTokenDetails(address, chainId);
-          if (token) {
-            tokens.push(token);
-            console.log(`Processed token ${i + 1}/${limitedTokenAddresses.length}: ${token.name} (${token.symbol})`);
-          }
-        } catch (error) {
-          console.warn(`Error getting details for token ${address}:`, error.message);
-          continue;
-        }
-      }
+      const settled = await Promise.allSettled(
+        limitedTokenAddresses.map((address) => this.getTokenDetails(address, chainId))
+      );
+      const tokens = settled
+        .filter((r) => r.status === 'fulfilled' && r.value)
+        .map((r) => r.value);
 
       console.log(`Successfully processed ${tokens.length} tokens`);
       return tokens;

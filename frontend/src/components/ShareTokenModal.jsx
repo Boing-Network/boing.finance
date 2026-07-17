@@ -12,11 +12,13 @@ import {
   generateQRCode
 } from '../utils/socialSharing';
 import toast from 'react-hot-toast';
+import useEscapeKey from '../hooks/useEscapeKey';
 
 const ShareTokenModal = ({ token, isOpen, onClose }) => {
   const [customMessage, setCustomMessage] = useState('');
   const [qrCodeUrl, setQrCodeUrl] = useState(null);
   const [shareableLink, setShareableLink] = useState('');
+  useEscapeKey(isOpen, onClose);
 
   useEffect(() => {
     if (token && isOpen) {
@@ -86,11 +88,6 @@ const ShareTokenModal = ({ token, isOpen, onClose }) => {
       aria-labelledby="share-token-title"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
-          onClose();
-        }
-      }}
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') {
           onClose();
         }
       }}

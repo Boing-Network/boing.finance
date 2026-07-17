@@ -15,6 +15,7 @@ import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { showDeployCelebration } from '../utils/deployCelebration';
 import { getBoingNativeFeeUsd, formatUsdReferenceLabel, isBoingNativeFeeChain } from '../config/boingEconomics';
 import NativeBoingNftDeploySection from '../components/NativeBoingNftDeploySection';
+import useEscapeKey from '../hooks/useEscapeKey';
 
 const SOLANA_NFT_STEPS = [
   { id: 'upload', label: 'Image & Details', icon: '🖼️' },
@@ -366,6 +367,7 @@ export default function CreateNFT() {
   const [traitLayers, setTraitLayers] = useState([{ trait_type: '', values: [''] }]);
   const [generatedDynamicMetadata, setGeneratedDynamicMetadata] = useState([]);
   const [previewTokenIndex, setPreviewTokenIndex] = useState(null);
+  useEscapeKey(previewTokenIndex != null, () => setPreviewTokenIndex(null));
 
   const network = getCurrentNetwork?.();
   const nativeSymbol = network?.nativeCurrency?.symbol ?? 'ETH';

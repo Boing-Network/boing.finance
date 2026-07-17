@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 
 class SimplePoolDataService {
   constructor() {
-    this.debug = true;
+    this.debug = import.meta.env.DEV;
   }
 
   /**
@@ -313,20 +313,12 @@ class SimplePoolDataService {
   async processPoolsWithRealisticData(pools, provider) {
     if (!pools || pools.length === 0) return [];
 
-    const processedPools = [];
-    
-    for (const pool of pools) {
-      try {
-        const processedPool = await this.getPoolWithRealisticData(pool, provider);
-        if (processedPool) {
-          processedPools.push(processedPool);
-        }
-      } catch (error) {
-        if (this.debug) {
-          console.log(`Failed to process pool ${pool.address}:`, error.message);
-        }
-      }
-    }
+    const settled = await Promise.allSettled(
+      pools.map((pool) => this.getPoolWithRealisticData(pool, provider))
+    );
+    const processedPools = settled
+      .filter((r) => r.status === 'fulfilled' && r.value)
+      .map((r) => r.value);
 
     if (this.debug) {
       console.log(`📊 Processed ${processedPools.length} pools with realistic data`);

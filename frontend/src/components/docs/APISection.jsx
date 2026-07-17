@@ -354,8 +354,8 @@ const response = await fetch('https://api.boing.finance/v1/swap/quote', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    tokenIn: '0xA0b86a33E6441b8C4C8C8C8C8C8C8C8C8C8C8C8C',
-    tokenOut: '0xB0b86a33E6441b8C4C8C8C8C8C8C8C8C8C8C8C8C',
+    tokenIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+    tokenOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     amountIn: '1000000000000000000',
     slippage: 0.5
   })
@@ -377,8 +377,8 @@ const response = await fetch('https://api.boing.finance/v1/liquidity/add', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    tokenA: '0xA0b86a33E6441b8C4C8C8C8C8C8C8C8C8C8C8C8C',
-    tokenB: '0xB0b86a33E6441b8C4C8C8C8C8C8C8C8C8C8C8C8C',
+    tokenA: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+    tokenB: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     amountA: '1000000000000000000',
     amountB: '2000000000000000000',
     slippage: 0.5
@@ -401,7 +401,7 @@ const response = await fetch('https://api.boing.finance/v1/bridge/initiate', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    token: '0xA0b86a33E6441b8C4C8C8C8C8C8C8C8C8C8C8C8C',
+    token: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
     amount: '1000000000000000000',
     fromChain: 'ethereum',
     toChain: 'polygon',

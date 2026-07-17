@@ -26,7 +26,7 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
   const popularTokens = {
     1: [ // Ethereum
       { symbol: 'ETH', name: 'Ethereum', address: '0x0000000000000000000000000000000000000000', decimals: 18, logo: '🔵' },
-      { symbol: 'USDC', name: 'USD Coin', address: '0xA0b86a33E6441b8C4C8C8C8C8C8C8C8C8C8C8C8', decimals: 6, logo: '🔵' },
+      { symbol: 'USDC', name: 'USD Coin', address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', decimals: 6, logo: '🔵' },
       { symbol: 'USDT', name: 'Tether USD', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6, logo: '🟡' },
       { symbol: 'DAI', name: 'Dai Stablecoin', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18, logo: '🟡' },
       { symbol: 'WETH', name: 'Wrapped Ether', address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', decimals: 18, logo: '🔵' },
@@ -44,7 +44,7 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
       { symbol: 'USDC', name: 'USD Coin', address: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d', decimals: 18, logo: '🔵' },
       { symbol: 'USDT', name: 'Tether USD', address: '0x55d398326f99059fF775485246999027B3197955', decimals: 18, logo: '🟡' },
       { symbol: 'BUSD', name: 'Binance USD', address: '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56', decimals: 18, logo: '🟡' },
-      { symbol: 'WBNB', name: 'Wrapped BNB', address: '0xbb4CdB9CBd36B01bD1cBaEF2aF8C6b1c6c6c6c6c', decimals: 18, logo: '🟡' },
+      { symbol: 'WBNB', name: 'Wrapped BNB', address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', decimals: 18, logo: '🟡' },
     ],
     42161: [ // Arbitrum
       { symbol: 'ETH', name: 'Ethereum', address: '0x0000000000000000000000000000000000000000', decimals: 18, logo: '🔵' },
@@ -75,8 +75,7 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
     
     setLoadingUserTokens(true);
     try {
-      walletTokenService.initialize(provider, account, chainId, true); // Enable debug
-      const tokens = await walletTokenService.getUserTokens();
+      walletTokenService.initialize(provider, account, chainId, import.meta.env.DEV);      const tokens = await walletTokenService.getUserTokens();
       console.log('Fetched user tokens:', tokens);
       setUserTokens(tokens);
     } catch (error) {

@@ -61,7 +61,7 @@ export default function GovernanceProposals() {
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         <PageHeader
           title="Governance Proposals"
-          subtitle="View active proposals, vote with your BOING tokens, and shape the future of boing.finance."
+          subtitle="Off-chain proposal registry for shaping boing.finance — on-chain Governor voting is not live yet."
         >
           {account && (
             <Link to="/governance/vote" className="px-4 py-2 rounded-lg font-medium bg-cyan-500 hover:bg-cyan-600 text-white transition-colors">
@@ -70,6 +70,9 @@ export default function GovernanceProposals() {
           )}
         </PageHeader>
 
+        <div className="mb-6 rounded-lg border border-amber-500/30 bg-amber-900/20 px-4 py-3 text-sm text-amber-100">
+          <strong>Not on-chain voting:</strong> Votes here update an API registry and do not spend BOING voting power from a Governor contract. Treat tallies as community signaling until DAO contracts ship.
+        </div>
         <div className="flex gap-2 mb-6">
           {['all', 'active', 'passed', 'rejected', 'pending'].map((f) => (
             <button

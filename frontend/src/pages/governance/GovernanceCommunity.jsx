@@ -6,7 +6,7 @@ const SOCIAL_LINKS = [
   { name: 'Discord', icon: '💬', url: 'https://discord.gg/7RDtQtQvBW', description: 'Join our community chat, get support, and discuss governance.' },
   { name: 'Twitter', icon: '🐦', url: 'https://twitter.com/boing_finance', description: 'Follow for updates, announcements, and governance discussions.' },
   { name: 'Telegram', icon: '✈️', url: 'https://t.me/boing_finance', description: 'Real-time chat and community coordination.' },
-  { name: 'Forum', icon: '📋', url: 'https://forum.boing.finance', description: 'Governance discussions and proposal drafts. (Coming soon)' },
+  { name: 'Contact', icon: '📧', url: '/contact-us', description: 'Email the team with governance ideas and proposal drafts.' },
 ];
 
 export default function GovernanceCommunity() {
@@ -20,19 +20,27 @@ export default function GovernanceCommunity() {
         <PageHeader title="Governance Community" subtitle="Connect with the community, discuss proposals, and participate in governance." />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {SOCIAL_LINKS.map((link) => (
-            <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer" className="block">
-              <PageCard className="hover:border-cyan-400/40 transition-colors h-full">
-                <div className="flex items-start gap-4">
-                  <div className="text-3xl">{link.icon}</div>
-                  <div>
-                    <h3 className="text-lg font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>{link.name}</h3>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{link.description}</p>
+          {SOCIAL_LINKS.map((link) => {
+            const external = link.url.startsWith('http');
+            return (
+              <a
+                key={link.name}
+                href={link.url}
+                {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                className="block"
+              >
+                <PageCard className="hover:border-cyan-400/40 transition-colors h-full">
+                  <div className="flex items-start gap-4">
+                    <div className="text-3xl">{link.icon}</div>
+                    <div>
+                      <h3 className="text-lg font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>{link.name}</h3>
+                      <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{link.description}</p>
+                    </div>
                   </div>
-                </div>
-              </PageCard>
-            </a>
-          ))}
+                </PageCard>
+              </a>
+            );
+          })}
         </div>
 
         <PageCard>

@@ -47,7 +47,11 @@ export default function BoingPoints() {
         <meta name="description" content="Earn Boing points when you use boing.finance. Redeem for rewards and perks." />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <PageHeader title="Boing Points" subtitle="Earn points for every action on boing.finance. Swap, bridge, add liquidity, and more." />
+        <PageHeader title="Boing Points" subtitle="Track points earned from protocol usage. Rates and accrual wiring are still rolling out." />
+
+        <div className="mb-6 rounded-lg border border-amber-500/30 bg-amber-900/20 px-4 py-3 text-sm text-amber-100">
+          <strong>Accrual not fully live:</strong> Balances below come from the points API when available. Automatic earn-on-swap/LP is not guaranteed yet — treat earning rates as planned targets, not live guarantees.
+        </div>
 
         {account ? (
           <>
@@ -56,16 +60,20 @@ export default function BoingPoints() {
               <PageCard>
                 <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>Your Points</p>
                 {loading ? <p className="text-4xl font-bold text-cyan-400">…</p> : <p className="text-4xl font-bold text-cyan-400">{totalPoints.toLocaleString()}</p>}
-                <p className="text-xs mt-2" style={{ color: 'var(--text-tertiary)' }}>Points are earned automatically when you use the protocol.</p>
+                <p className="text-xs mt-2" style={{ color: 'var(--text-tertiary)' }}>
+                  {pointsData.updatedAt
+                    ? `Last API update: ${new Date(pointsData.updatedAt).toLocaleString()}`
+                    : 'No on-chain accrual receipt in the app yet — balance reflects API data only.'}
+                </p>
               </PageCard>
               <PageCard>
-                <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>Earning Rates</p>
+                <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>Planned earning rates</p>
                 <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
-                  <li>• Swap: 10 pts</li>
-                  <li>• Add liquidity: 25 pts</li>
-                  <li>• Bridge: 15 pts</li>
-                  <li>• Deploy token: 50 pts</li>
-                  <li>• Vote on proposal: 20 pts</li>
+                  <li>• Swap: 10 pts (planned)</li>
+                  <li>• Add liquidity: 25 pts (planned)</li>
+                  <li>• Bridge: 15 pts (planned)</li>
+                  <li>• Deploy token: 50 pts (planned)</li>
+                  <li>• Vote on proposal: 20 pts (planned)</li>
                 </ul>
               </PageCard>
             </div>
@@ -76,7 +84,7 @@ export default function BoingPoints() {
                 {loading ? (
                   <p className="py-6 text-center text-sm" style={{ color: 'var(--text-tertiary)' }}>Loading…</p>
                 ) : activity.length === 0 ? (
-                  <p className="py-6 text-center text-sm" style={{ color: 'var(--text-tertiary)' }}>No activity yet. Use the protocol to earn points.</p>
+                  <p className="py-6 text-center text-sm" style={{ color: 'var(--text-tertiary)' }}>No recorded point activity yet.</p>
                 ) : (
                   activity.map((a, i) => (
                     <div key={a.id ?? i} className="flex items-center justify-between py-3 border-b last:border-0" style={{ borderColor: 'var(--border-color)' }}>
