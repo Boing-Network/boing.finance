@@ -1,12 +1,13 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, lazy, Suspense } from 'react';
 import toast from 'react-hot-toast';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import { buildBoingExplorerAccountUrl } from '../config/boingExplorerUrls';
 import NativeDexPoolMetricsPanel from './NativeDexPoolMetricsPanel';
-import NativePoolsLiquidityChart from './NativePoolsLiquidityChart';
-import NativePoolsReserveHistoryChart from './NativePoolsReserveHistoryChart';
 import { estimatePoolTvlUsd, loadTokenUsdPerUnitMap, mergeTokenUsdMaps } from '../services/nativeDexUsdTvl';
 import { formatNativePoolReserveDisplay, resolveNativePoolLegDecimals } from '../utils/nativePoolReserveFormat';
+
+const NativePoolsLiquidityChart = lazy(() => import('./NativePoolsLiquidityChart'));
+const NativePoolsReserveHistoryChart = lazy(() => import('./NativePoolsReserveHistoryChart'));
 
 function shortHex(h) {
   if (!h || typeof h !== 'string') return '—';
@@ -265,14 +266,18 @@ export default function NativePoolsDirectoryPanel({ onTradeThisPair, focusPoolHe
 
       {venues.length > 0 && !loading && (
         <>
-          <NativePoolsReserveHistoryChart
-            venues={venues}
-            remoteIndexerStats={remoteIndexerStats}
-            focusPoolHex={focusPoolHex}
-            reserveSampleIntervalMs={reserveSampleIntervalMs}
-          />
+          <Suspense fallback={<div className="h-40 animate-pulse rounded-xl bg-gray-800/80" aria-hidden />}>
+            <NativePoolsReserveHistoryChart
+              venues={venues}
+              remoteIndexerStats={remoteIndexerStats}
+              focusPoolHex={focusPoolHex}
+              reserveSampleIntervalMs={reserveSampleIntervalMs}
+            />
+          </Suspense>
           <NativeDexPoolMetricsPanel venues={venues} directoryMeta={directoryMeta} remoteIndexerStats={remoteIndexerStats} />
-          <NativePoolsLiquidityChart venues={venues} />
+          <Suspense fallback={<div className="h-40 animate-pulse rounded-xl bg-gray-800/80" aria-hidden />}>
+            <NativePoolsLiquidityChart venues={venues} />
+          </Suspense>
         </>
       )}
 

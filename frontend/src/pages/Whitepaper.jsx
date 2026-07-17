@@ -55,24 +55,24 @@ const Whitepaper = () => {
             <section id="executive-summary" className="mb-12">
               <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>1. Executive Summary</h2>
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   boing.finance is a DEX for cross-chain trading and liquidity on EVM and Solana. One interface for swaps, bridge, and token deployment—no centralized intermediaries.
                 </p>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   AMM-based swaps, cross-chain bridge, and token deployment on EVM and Solana.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4 text-center">
+                  <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                     <div className="text-2xl font-bold text-blue-400 mb-2">Multi-Chain</div>
-                    <div className="text-sm style={{ color: 'var(--text-secondary)' }}">EVM & Solana support</div>
+                    <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>EVM & Solana support</div>
                   </div>
-                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4 text-center">
+                  <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                     <div className="text-2xl font-bold text-green-400 mb-2">AMM</div>
-                    <div className="text-sm style={{ color: 'var(--text-secondary)' }}">Automated market maker protocol</div>
+                    <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Automated market maker protocol</div>
                   </div>
-                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4 text-center">
+                  <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                     <div className="text-2xl font-bold text-purple-400 mb-2">Bridge</div>
-                    <div className="text-sm style={{ color: 'var(--text-secondary)' }}">Cross-chain asset transfer</div>
+                    <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Cross-chain asset transfer</div>
                   </div>
                 </div>
               </div>
@@ -82,15 +82,15 @@ const Whitepaper = () => {
             <section id="introduction" className="mb-12">
               <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>2. Introduction</h2>
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Problem Statement</h3>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Problem Statement</h3>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   DeFi is fragmented across chains: different wallets, bridges, and UIs. boing.finance unifies access on EVM and Solana.
                 </p>
-                <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4 mt-6">Solution Overview</h3>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <h3 className="text-xl font-semibold mb-4 mt-6" style={{ color: 'var(--text-primary)' }}>Solution Overview</h3>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   boing.finance provides a comprehensive solution through:
                 </p>
-                <ul className="list-disc list-inside style={{ color: 'var(--text-secondary)' }} space-y-2 mb-4">
+                <ul className="list-disc list-inside space-y-2 mb-4" style={{ color: 'var(--text-secondary)' }}>
                   <li>Unified trading on EVM and Solana</li>
                   <li>Automated market maker pools with cross-chain liquidity</li>
                   <li>Secure bridge protocol for asset transfers</li>
@@ -104,33 +104,33 @@ const Whitepaper = () => {
             <section id="technical-architecture" className="mb-12">
               <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>3. Technical Architecture</h2>
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Core Components</h3>
+                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Core Components</h3>
                 
                 <div className="space-y-6">
-                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
-                    <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">DEX Factory</h4>
-                    <p className="style={{ color: 'var(--text-secondary)' }} text-sm">
+                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>DEX Factory</h4>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                       The factory contract responsible for creating and managing trading pairs across different networks. Each network has its own factory instance that maintains the registry of all trading pairs.
                     </p>
                   </div>
                   
-                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
-                    <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">DEX Pair</h4>
-                    <p className="style={{ color: 'var(--text-secondary)' }} text-sm">
+                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>DEX Pair</h4>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                       Individual trading pair contracts that implement the constant product AMM formula (x * y = k). Each pair manages liquidity for two specific tokens and handles swap operations.
                     </p>
                   </div>
                   
-                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
-                    <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">DEX Router</h4>
-                    <p className="style={{ color: 'var(--text-secondary)' }} text-sm">
+                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>DEX Router</h4>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                       The main interface for users to interact with the DEX. Handles swap routing, slippage protection, and ensures optimal trade execution across multiple pairs.
                     </p>
                   </div>
                   
-                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
-                    <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">Cross-Chain Bridge</h4>
-                    <p className="style={{ color: 'var(--text-secondary)' }} text-sm">
+                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Cross-Chain Bridge</h4>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                       Smart contracts that facilitate the transfer of assets between different blockchain networks. Implements security measures including multi-signature validation and time locks.
                     </p>
                   </div>
@@ -142,29 +142,29 @@ const Whitepaper = () => {
             <section id="cross-chain-bridge" className="mb-12">
               <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>4. Cross-Chain Bridge Protocol</h2>
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Bridge Architecture</h3>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Bridge Architecture</h3>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   The cross-chain bridge enables seamless asset transfers between supported networks through a combination of smart contracts and validator nodes.
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
-                    <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">Lock & Mint</h4>
-                    <p className="style={{ color: 'var(--text-secondary)' }} text-sm">
+                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Lock & Mint</h4>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                       Assets are locked on the source chain and equivalent tokens are minted on the destination chain, maintaining the total supply across networks.
                     </p>
                   </div>
                   
-                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
-                    <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">Burn & Release</h4>
-                    <p className="style={{ color: 'var(--text-secondary)' }} text-sm">
+                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Burn & Release</h4>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                       When bridging back, tokens are burned on the destination chain and the original assets are released on the source chain.
                     </p>
                   </div>
                 </div>
                 
-                <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4 mt-6">Security Features</h3>
-                <ul className="list-disc list-inside style={{ color: 'var(--text-secondary)' }} space-y-2">
+                <h3 className="text-xl font-semibold mb-4 mt-6" style={{ color: 'var(--text-primary)' }}>Security Features</h3>
+                <ul className="list-disc list-inside space-y-2" style={{ color: 'var(--text-secondary)' }}>
                   <li>Multi-signature validator consensus</li>
                   <li>Time-locked bridge operations</li>
                   <li>Emergency pause functionality</li>
@@ -178,15 +178,15 @@ const Whitepaper = () => {
             <section id="tokenomics" className="mb-12">
               <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>5. Tokenomics</h2>
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">BOING Token</h3>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>BOING Token</h3>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   The BOING token serves as the governance and utility token for the boing.finance ecosystem.
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
-                    <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">Token Details</h4>
-                    <ul className="style={{ color: 'var(--text-secondary)' }} text-sm space-y-1">
+                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Token Details</h4>
+                    <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
                       <li>• Name: BOING</li>
                       <li>• Symbol: BOING</li>
                       <li>• Total Supply: 100,000,000</li>
@@ -195,9 +195,9 @@ const Whitepaper = () => {
                     </ul>
                   </div>
                   
-                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
-                    <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">Distribution</h4>
-                    <ul className="style={{ color: 'var(--text-secondary)' }} text-sm space-y-1">
+                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Distribution</h4>
+                    <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
                       <li>• Community Rewards: 40%</li>
                       <li>• Development Fund: 25%</li>
                       <li>• Team & Advisors: 15%</li>
@@ -207,8 +207,8 @@ const Whitepaper = () => {
                   </div>
                 </div>
                 
-                <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Utility</h3>
-                <ul className="list-disc list-inside style={{ color: 'var(--text-secondary)' }} space-y-2">
+                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Utility</h3>
+                <ul className="list-disc list-inside space-y-2" style={{ color: 'var(--text-secondary)' }}>
                   <li>Governance voting on protocol upgrades</li>
                   <li>Staking rewards for liquidity providers</li>
                   <li>Fee discounts on trading and bridging</li>
@@ -222,15 +222,15 @@ const Whitepaper = () => {
             <section id="governance" className="mb-12">
               <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>6. Governance</h2>
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">DAO Structure</h3>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>DAO Structure</h3>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   boing.finance operates as a decentralized autonomous organization (DAO) where token holders participate in governance decisions.
                 </p>
                 
                 <div className="space-y-4">
-                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
-                    <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">Proposal Types</h4>
-                    <ul className="style={{ color: 'var(--text-secondary)' }} text-sm space-y-1">
+                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Proposal Types</h4>
+                    <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
                       <li>• Protocol parameter changes</li>
                       <li>• New network integrations</li>
                       <li>• Treasury fund allocation</li>
@@ -239,9 +239,9 @@ const Whitepaper = () => {
                     </ul>
                   </div>
                   
-                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
-                    <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">Voting Mechanism</h4>
-                    <ul className="style={{ color: 'var(--text-secondary)' }} text-sm space-y-1">
+                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Voting Mechanism</h4>
+                    <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
                       <li>• One token, one vote</li>
                       <li>• Minimum quorum requirements</li>
                       <li>• Time-locked execution</li>
@@ -256,8 +256,8 @@ const Whitepaper = () => {
             <section id="security" className="mb-12">
               <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>7. Security Considerations</h2>
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Smart Contract Security</h3>
-                <ul className="list-disc list-inside style={{ color: 'var(--text-secondary)' }} space-y-2 mb-6">
+                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Smart Contract Security</h3>
+                <ul className="list-disc list-inside space-y-2 mb-6" style={{ color: 'var(--text-secondary)' }}>
                   <li>Reentrancy protection on all external calls</li>
                   <li>Integer overflow/underflow protection</li>
                   <li>Access control mechanisms</li>
@@ -265,8 +265,8 @@ const Whitepaper = () => {
                   <li>Comprehensive test coverage</li>
                 </ul>
                 
-                <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Cross-Chain Security</h3>
-                <ul className="list-disc list-inside style={{ color: 'var(--text-secondary)' }} space-y-2 mb-6">
+                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Cross-Chain Security</h3>
+                <ul className="list-disc list-inside space-y-2 mb-6" style={{ color: 'var(--text-secondary)' }}>
                   <li>Multi-signature validator consensus</li>
                   <li>Time-locked bridge operations</li>
                   <li>Cross-chain transaction verification</li>
@@ -274,8 +274,8 @@ const Whitepaper = () => {
                   <li>Emergency bridge pause capability</li>
                 </ul>
                 
-                <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Risk Mitigation</h3>
-                <ul className="list-disc list-inside style={{ color: 'var(--text-secondary)' }} space-y-2">
+                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Risk Mitigation</h3>
+                <ul className="list-disc list-inside space-y-2" style={{ color: 'var(--text-secondary)' }}>
                   <li>Gradual rollout of new features</li>
                   <li>Bug bounty programs</li>
                   <li>Regular security audits</li>
@@ -297,8 +297,8 @@ const Whitepaper = () => {
                 
                 <div className="space-y-6">
                   <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
-                    <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">✅ Phase 1: Foundation (Completed - Q4 2024)</h4>
-                    <ul className="style={{ color: 'var(--text-secondary)' }} text-sm space-y-1">
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>✅ Phase 1: Foundation (Completed - Q4 2024)</h4>
+                    <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
                       <li>• Core smart contract deployment across 6 networks</li>
                       <li>• Token deployment functionality (ERC-20 factory)</li>
                       <li>• Basic platform infrastructure and UI</li>
@@ -308,8 +308,8 @@ const Whitepaper = () => {
                   </div>
                   
                   <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4">
-                    <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">🚧 Phase 2: Core Features (In Development - Q1 2025)</h4>
-                    <ul className="style={{ color: 'var(--text-secondary)' }} text-sm space-y-1">
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>🚧 Phase 2: Core Features (In Development - Q1 2025)</h4>
+                    <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
                       <li>• <strong>Swap functionality</strong> - Token trading interface (locally developed, needs funding for production)</li>
                       <li>• <strong>Liquidity pools</strong> - AMM pool creation and management (locally developed, needs funding for production)</li>
                       <li>• <strong>Cross-chain bridge</strong> - Asset transfer between networks (locally developed, needs funding for production)</li>
@@ -320,9 +320,9 @@ const Whitepaper = () => {
                     </p>
                   </div>
                   
-                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
-                    <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">📋 Phase 3: Advanced Features (Post-Funding - Q2-Q3 2025)</h4>
-                    <ul className="style={{ color: 'var(--text-secondary)' }} text-sm space-y-1">
+                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>📋 Phase 3: Advanced Features (Post-Funding - Q2-Q3 2025)</h4>
+                    <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
                       <li>• <strong>Professional security audits</strong> - Third-party smart contract audits</li>
                       <li>• <strong>Advanced analytics dashboard</strong> - Comprehensive market data and portfolio tracking</li>
                       <li>• <strong>Token management interface</strong> - Token discovery and portfolio management</li>
@@ -331,9 +331,9 @@ const Whitepaper = () => {
                     </ul>
                   </div>
                   
-                  <div className="style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }} rounded-lg p-4">
-                    <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">🎯 Phase 4: Ecosystem & Governance (Future - Q4 2025+)</h4>
-                    <ul className="style={{ color: 'var(--text-secondary)' }} text-sm space-y-1">
+                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>🎯 Phase 4: Ecosystem & Governance (Future - Q4 2025+)</h4>
+                    <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
                       <li>• <strong>DAO governance implementation</strong> - Community-driven protocol decisions</li>
                       <li>• <strong>Token staking and rewards</strong> - BOING token utility and staking mechanisms</li>
                       <li>• <strong>Additional network integrations</strong> - Support for more blockchain networks</li>
@@ -344,8 +344,8 @@ const Whitepaper = () => {
                 </div>
                 
                 <div className="mt-6 p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
-                  <h4 className="text-lg font-semibold style={{ color: 'var(--text-primary)' }} mb-2">⚠️ Current Limitations</h4>
-                  <ul className="style={{ color: 'var(--text-secondary)' }} text-sm space-y-1">
+                  <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>⚠️ Current Limitations</h4>
+                  <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
                     <li>• <strong>Funding constraints</strong> - Many features are developed but not deployed due to lack of resources</li>
                     <li>• <strong>Solo development</strong> - All development done by single founder, limiting feature velocity</li>
                     <li>• <strong>No professional audits</strong> - Smart contracts need third-party security audits</li>
@@ -359,16 +359,16 @@ const Whitepaper = () => {
             <section id="conclusion" className="mb-12">
               <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>9. Conclusion</h2>
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   boing.finance delivers cross-chain DeFi on EVM and Solana with a modular, secure architecture.
                 </p>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   Currently in early development phase, boing.finance has successfully deployed 17+ smart contracts across 6 networks and provides functional token deployment capabilities. Many advanced features are developed locally but await funding for production deployment, professional audits, and team expansion.
                 </p>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed mb-4">
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   As a solo-founder project seeking investment, we are committed to transparency about our current capabilities and limitations. With proper funding, we aim to complete feature deployment, conduct professional security audits, and build a robust team to serve both retail and institutional DeFi users.
                 </p>
-                <p className="style={{ color: 'var(--text-secondary)' }} leading-relaxed">
+                <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   We invite the DeFi community and potential investors to join us in building a more interconnected and accessible financial future through responsible development and community-driven governance.
                 </p>
               </div>
@@ -376,8 +376,8 @@ const Whitepaper = () => {
 
             {/* Contact Information */}
             <div className="rounded-lg p-6 border text-center" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-              <h3 className="text-xl font-semibold style={{ color: 'var(--text-primary)' }} mb-4">Get Involved</h3>
-              <p className="style={{ color: 'var(--text-secondary)' }} mb-4">
+              <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Get Involved</h3>
+              <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>
                 Join the boing.finance community and help shape the future of cross-chain DeFi.
               </p>
               <div className="mb-4 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">

@@ -66,14 +66,20 @@ export default function ShareCardModal({ isOpen, onClose, type, data }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="share-card-title"
+    >
       <div
         className="rounded-2xl p-6 max-w-sm w-full shadow-xl"
         style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-lg" style={{ color: 'var(--text-primary)' }}>Share</h3>
+          <h3 id="share-card-title" className="font-semibold text-lg" style={{ color: 'var(--text-primary)' }}>Share</h3>
           <button type="button" onClick={onClose} className="p-1 rounded hover:bg-white/10" aria-label="Close">&times;</button>
         </div>
         <div className="mb-4">{getCardContent()}</div>

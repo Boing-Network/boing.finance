@@ -9,6 +9,7 @@ import {
   computeSmartFlowSignals,
   generateActionableInsights,
   MULTI_CHAIN_COVERAGE,
+  resolveCoverageStatus,
 } from '../../utils/researchIntelligence';
 import { CHART_COLORS } from '../../theme/designTokens';
 
@@ -71,7 +72,7 @@ export default function OnchainIntelligenceDashboard({
   );
 
   return (
-    <div id="analytics-panel-intelligence" role="tabpanel" className="space-y-6">
+    <div id="analytics-panel-intelligence" role="tabpanel" aria-labelledby="tab-intelligence" className="space-y-6">
       {/* Methodology strip */}
       <div className="rounded-xl p-4 border border-purple-500/30 bg-purple-500/5">
         <h3 className="text-sm font-bold text-purple-200 mb-2">How to read this dashboard</h3>
@@ -190,20 +191,31 @@ export default function OnchainIntelligenceDashboard({
         <h2 className="text-lg font-bold text-white mb-1">Multi-chain coverage matrix</h2>
         <p className="text-xs text-gray-400 mb-4">Solana, Base, L2s, L1 & native Boing · perps-relevant ecosystems highlighted</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {MULTI_CHAIN_COVERAGE.map((chain) => (
-            <div key={chain.id} className="p-3 rounded-xl bg-gray-800/50 border border-gray-700">
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-semibold text-white">{chain.label}</span>
-                <span className="text-xs px-1.5 py-0.5 rounded bg-green-500/20 text-green-400">{chain.status}</span>
+          {MULTI_CHAIN_COVERAGE.map((chain) => {
+            const status = resolveCoverageStatus(chain.id, analytics?.networkStats);
+            const statusClass =
+              status === 'live'
+                ? 'bg-green-500/20 text-green-400'
+                : status === 'partial'
+                  ? 'bg-yellow-500/20 text-yellow-300'
+                  : 'bg-gray-600/40 text-gray-400';
+            return (
+              <div key={chain.id} className="p-3 rounded-xl bg-gray-800/50 border border-gray-700">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-semibold text-white">{chain.label}</span>
+                  <span className={`text-xs px-1.5 py-0.5 rounded ${statusClass}`}>{status}</span>
+                </div>
+                <p className="text-xs text-cyan-400 mb-2">{chain.layer}</p>
+                <div className="flex flex-wrap gap-1">
+                  {chain.domains.map((d) => (
+                    <span key={d} className="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-gray-300">
+                      {d}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <p className="text-xs text-cyan-400 mb-2">{chain.layer}</p>
-              <div className="flex flex-wrap gap-1">
-                {chain.domains.map((d) => (
-                  <span key={d} className="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-gray-300">{d}</span>
-                ))}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
     </div>

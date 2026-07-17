@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useWallet } from '../contexts/WalletContext';
@@ -21,7 +21,6 @@ import { saveSnapshot, getSnapshots } from '../services/portfolioSnapshotService
 import SharePortfolioModal from '../components/SharePortfolioModal';
 import NFTDetailModal from '../components/NFTDetailModal';
 import EmptyState from '../components/EmptyState';
-import { AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import toast from 'react-hot-toast';
 import { getNetworkBadgeBgClass, NETWORK_BADGE_FALLBACK } from '../utils/networkBadgeClasses';
 import {
@@ -39,14 +38,12 @@ import PortfolioTokenBalancesView from '../components/PortfolioTokenBalancesView
 import TransactionHistoryList from '../components/TransactionHistoryList';
 import config from '../config';
 
-// MochiAstronaut component
-
+const PortfolioCharts = lazy(() => import('../components/PortfolioCharts'));
 export default function Portfolio() {
   const { isSolana } = useChainType();
   const [searchParams, setSearchParams] = useSearchParams();
   const { account, chainId, connectWallet } = useWallet();
   const [selectedNetwork, setSelectedNetwork] = useState('all');
-  const tabFromUrl = searchParams.get('tab');
   const collectionFromUrl = searchParams.get('collection');
   const [activeTab, setActiveTab] = useState(() => {
     if (searchParams.get('collection')) return 'nfts';
@@ -75,14 +72,9 @@ export default function Portfolio() {
   
   // Safely extract values with defaults
   const blockchainInitialized = blockchainPoolsHook?.isInitialized || false;
-  const _blockchainLoading = blockchainPoolsHook?.isLoading || false;
   const blockchainError = blockchainPoolsHook?.error || null;
   const getBlockchainUserPositions = blockchainPoolsHook?.getUserPositions || (async () => []);
   const getBlockchainCreatedPools = blockchainPoolsHook?.getUserCreatedPools || (async () => []);
-  // eslint-disable-next-line no-unused-vars
-  const getBlockchainPortfolioValue = blockchainPoolsHook?.getUserPortfolioValue || (async () => 0);
-  // eslint-disable-next-line no-unused-vars
-  const getBlockchainSepoliaPools = blockchainPoolsHook?.getAllSepoliaPools || (async () => []);
 
   // Fetch user's liquidity positions - Works in API-only mode
   const { data: userPools, isLoading: poolsLoading, refetch: refetchPools } = useQuery({
@@ -237,92 +229,52 @@ export default function Portfolio() {
     retry: 2
   });
 
-  // Calculate portfolio summary - Works in API-only mode
-  const { data: portfolioSummary = {
-    totalValue: 0,
-    change24h: 0,
-    averageAPY: 0,
-    totalTokens: 0,
-    liquidityProvided: 0,
-    totalPools: 0
-  }, isLoading: portfolioLoading } = useQuery({
-    queryKey: ['portfolio-summary', account, chainId, filteredUserPools, tokenBalances],
-    queryFn: async () => {
-      // Calculating portfolio summary
-      if (!account) {
-        return {
-          totalValue: 0,
-          change24h: 0,
-          averageAPY: 0,
-          totalTokens: 0,
-          liquidityProvided: 0,
-          totalPools: 0
-        };
-      }
+  // Calculate portfolio summary from positions + balances (pure reduction — no query thrash)
+  const portfolioSummary = useMemo(() => {
+    const empty = {
+      totalValue: 0,
+      change24h: 0,
+      averageAPY: 0,
+      totalTokens: 0,
+      liquidityProvided: 0,
+      totalPools: 0,
+    };
+    if (!account) return empty;
 
-      try {
-        // Calculate summary from filtered user positions
-        let totalValue = 0;
-        let totalAPY = 0;
-        let totalPools = filteredUserPools.length;
-        let uniqueTokens = new Set();
-        let liquidityProvided = 0;
+    try {
+      let totalValue = 0;
+      let totalAPY = 0;
+      const totalPools = filteredUserPools.length;
+      const uniqueTokens = new Set();
+      let liquidityProvided = 0;
 
-        filteredUserPools.forEach(pool => {
-          // Add token amounts to total value (simplified calculation)
-          const token0Value = parseFloat(pool.token0?.formattedAmount || 0);
-          const token1Value = parseFloat(pool.token1?.formattedAmount || 0);
-          totalValue += token0Value + token1Value;
-          
-          // Track unique tokens
-          if (pool.token0?.address) uniqueTokens.add(pool.token0.address);
-          if (pool.token1?.address) uniqueTokens.add(pool.token1.address);
-          
-          // Add APY
-          if (pool.apy) totalAPY += pool.apy;
-          
-          // Add liquidity provided
-          liquidityProvided += token0Value + token1Value;
-        });
+      filteredUserPools.forEach((pool) => {
+        const token0Value = parseFloat(pool.token0?.formattedAmount || 0);
+        const token1Value = parseFloat(pool.token1?.formattedAmount || 0);
+        totalValue += token0Value + token1Value;
+        if (pool.token0?.address) uniqueTokens.add(pool.token0.address);
+        if (pool.token1?.address) uniqueTokens.add(pool.token1.address);
+        if (pool.apy) totalAPY += pool.apy;
+        liquidityProvided += token0Value + token1Value;
+      });
 
-        const averageAPY = totalPools > 0 ? totalAPY / totalPools : 0;
+      const averageAPY = totalPools > 0 ? totalAPY / totalPools : 0;
+      const tokenValue = tokenBalances?.totalValue ? tokenBalances.totalValue : 0;
 
-        // Add token balances value if available
-        let tokenValue = 0;
-        if (tokenBalances && tokenBalances.totalValue) {
-          tokenValue = tokenBalances.totalValue;
-        }
-
-        return {
-          totalValue: (totalValue + tokenValue).toFixed(2),
-          change24h: 0,
-          averageAPY: averageAPY,
-          totalTokens: uniqueTokens.size + (tokenBalances?.balances?.length || 0),
-          liquidityProvided: liquidityProvided.toFixed(2),
-          totalPools: totalPools
-        };
-      } catch (error) {
-        return {
-          totalValue: 0,
-          change24h: 0,
-          averageAPY: 0,
-          totalTokens: 0,
-          liquidityProvided: 0,
-          totalPools: 0
-        };
-      }
-    },
-    refetchInterval: 30000,
-    enabled: !!account, // Enable even without blockchain initialization
-    retry: 2
-  });
-
-  // Sync URL tab param to activeTab
-  useEffect(() => {
-    if (tabFromUrl && ['overview','tokens','pools','nfts'].includes(tabFromUrl)) {
-      setActiveTab(tabFromUrl);
+      return {
+        totalValue: (totalValue + tokenValue).toFixed(2),
+        change24h: 0,
+        averageAPY,
+        totalTokens: uniqueTokens.size + (tokenBalances?.balances?.length || 0),
+        liquidityProvided: liquidityProvided.toFixed(2),
+        totalPools,
+      };
+    } catch {
+      return empty;
     }
-  }, [tabFromUrl]);
+  }, [account, filteredUserPools, tokenBalances]);
+
+  const portfolioLoading = balancesLoading && !tokenBalances;
 
   // Update tracked networks when chainId changes
   useEffect(() => {
@@ -678,7 +630,26 @@ export default function Portfolio() {
                 border: '1px solid var(--border-color)',
               }}
             >
-              <div className="flex gap-1 overflow-x-auto">
+              <div
+                className="flex gap-1 overflow-x-auto"
+                role="tablist"
+                aria-label="Portfolio sections"
+                onKeyDown={(e) => {
+                  const tabs = ['overview', 'tokens', 'pools', 'nfts'];
+                  const i = tabs.indexOf(activeTab);
+                  if (e.key === 'ArrowRight' && i < tabs.length - 1) {
+                    e.preventDefault();
+                    const next = tabs[i + 1];
+                    setActiveTab(next);
+                    setSearchParams(next === 'overview' ? {} : { tab: next });
+                  } else if (e.key === 'ArrowLeft' && i > 0) {
+                    e.preventDefault();
+                    const prev = tabs[i - 1];
+                    setActiveTab(prev);
+                    setSearchParams(prev === 'overview' ? {} : { tab: prev });
+                  }
+                }}
+              >
                 {[
                   { id: 'overview', label: 'Overview', icon: '📊' },
                   { id: 'tokens', label: 'Tokens', icon: '🪙' },
@@ -687,6 +658,11 @@ export default function Portfolio() {
                 ].map((tab) => (
                   <button
                     key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === tab.id}
+                    id={`portfolio-tab-${tab.id}`}
+                    tabIndex={activeTab === tab.id ? 0 : -1}
                     onClick={() => { setActiveTab(tab.id); setSearchParams(tab.id === 'overview' ? {} : { tab: tab.id }); }}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                       activeTab === tab.id ? 'shadow-md' : 'hover:opacity-80'
@@ -697,7 +673,7 @@ export default function Portfolio() {
                         : { color: 'var(--text-secondary)' }
                     }
                   >
-                    <span className="mr-1.5">{tab.icon}</span>
+                    <span className="mr-1.5" aria-hidden>{tab.icon}</span>
                     {tab.label}
                   </button>
                 ))}
@@ -761,75 +737,21 @@ export default function Portfolio() {
                   </div>
                 </div>
 
-                {/* Portfolio Value Chart */}
-                <div className="rounded-2xl shadow-xl p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Portfolio Value History</h2>
-                  </div>
-                  {portfolioHistory7d.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={300}>
-                      <AreaChart data={portfolioHistory7d} isAnimationActive animationDuration={800} animationEasing="ease-out">
-                        <defs>
-                          <linearGradient id="portfolioGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="var(--accent-cyan)" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="var(--accent-cyan)" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" className="opacity-40" style={{ stroke: 'var(--border-color)' }} />
-                        <XAxis dataKey="date" style={{ stroke: 'var(--text-tertiary)' }} />
-                        <YAxis style={{ stroke: 'var(--text-tertiary)' }} />
-                        <Tooltip 
-                          contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
-                          labelStyle={{ color: 'var(--text-primary)' }}
-                          formatter={(value) => [`$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 'Portfolio Value']}
-                        />
-                        <Area 
-                          type="monotone" 
-                          dataKey="value" 
-                          stroke="var(--accent-cyan)" 
-                          fill="url(#portfolioGradient)" 
-                          name="Portfolio Value"
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <ChartSkeleton height="300px" />
-                  )}
-                </div>
+                {/* Portfolio Value Chart + Allocation (lazy Recharts) */}
+                <Suspense fallback={<ChartSkeleton height="300px" />}>
+                  <PortfolioCharts
+                    portfolioHistory7d={portfolioHistory7d}
+                    allocationSlices={allocationSlices}
+                    showAllocation={activeTab === 'overview'}
+                  />
+                </Suspense>
 
                 {/* Tab Content */}
                 {activeTab === 'overview' && (
                   <>
-                {/* Allocation + Top Movers */}
-                {allocationSlices.length > 0 && (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="rounded-2xl shadow-xl p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                      <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Asset Allocation</h2>
-                      <ResponsiveContainer width="100%" height={260}>
-                        <PieChart>
-                          <Pie
-                            data={allocationSlices}
-                            dataKey="value"
-                            nameKey="name"
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={55}
-                            outerRadius={90}
-                            paddingAngle={2}
-                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                          >
-                            {allocationSlices.map((_, i) => (
-                              <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip
-                            contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
-                            formatter={(value) => [`$${Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 })}`, 'Value']}
-                          />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                    <div className="rounded-2xl shadow-xl p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+                {/* 24h Movers */}
+                {(topMovers.gainers.length > 0 || topMovers.losers.length > 0 || allocationSlices.length > 0) && (
+                  <div className="rounded-2xl shadow-xl p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
                       <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>24h Movers</h2>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
@@ -864,7 +786,6 @@ export default function Portfolio() {
                         </div>
                       </div>
                     </div>
-                  </div>
                 )}
 
                 {/* Overview Content - Summary Cards Already Shown Above */}

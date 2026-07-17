@@ -23,7 +23,7 @@ const getApiUrl = () => {
 
 const Liquidity = () => {
   const { isSolana } = useChainType();
-  const { isConnected, account } = useWalletConnection();
+  const { isConnected, account, connectWallet } = useWalletConnection();
   const { chainId, switchNetwork } = useWallet();
   const { effectivePoolHex } = useBoingNativeDexIntegration();
   const featureSupport = useMemo(
@@ -137,7 +137,11 @@ const Liquidity = () => {
         <div className="relative max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 overflow-x-hidden"><div className="relative z-10"><div className="text-center py-12">
               <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">Connect Your Wallet</h1>
               <p className="text-gray-300 mb-8">Connect your wallet to add liquidity and earn fees.</p>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200">
+              <button
+                type="button"
+                onClick={connectWallet}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200"
+              >
                 Connect Wallet
               </button>
             </div>
@@ -478,15 +482,19 @@ const Liquidity = () => {
             </div>
           )}
 
-          {/* Not Connected State */}
+          {/* Not Connected State — unreachable when early-return above; kept defensive */}
           {!isConnected && (
             <div className="text-center py-8 sm:py-12">
-              <div className="text-4xl sm:text-6xl mb-4">🔗</div>
+              <div className="text-4xl sm:text-6xl mb-4" aria-hidden>🔗</div>
               <h3 className="text-xl sm:text-2xl font-semibold text-white mb-2">Connect Your Wallet</h3>
               <p className="text-gray-300 text-sm sm:text-base mb-4">
                 Connect your wallet to view your liquidity positions and start providing liquidity.
               </p>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors text-sm sm:text-base">
+              <button
+                type="button"
+                onClick={connectWallet}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors text-sm sm:text-base"
+              >
                 Connect Wallet
               </button>
             </div>

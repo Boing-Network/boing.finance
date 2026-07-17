@@ -1,12 +1,11 @@
 // Unified Activity Page
 // Trading activity feed with insights for swaps, liquidity, and bridge transactions
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useWallet } from '../contexts/WalletContext';
 import { Helmet } from 'react-helmet-async';
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import config from '../config';
 import { NETWORKS } from '../config/networks';
 import { fetchWalletActivity } from '../services/analyticsService';
@@ -19,13 +18,15 @@ import {
 } from '../utils/activityInsights';
 import { collectSwapCoinIds, computeTradingPnl, formatUsd } from '../utils/tradingPnl';
 import { downloadCSV } from '../utils/exportData';
-import { CHART_COLORS } from '../theme/designTokens';
 import LiveMarketPulse from '../components/LiveMarketPulse';
 import ResearchBriefBanner from '../components/research/ResearchBriefBanner';
 import WalletBehaviorPanel from '../components/research/WalletBehaviorPanel';
 import toast from 'react-hot-toast';
 import TransactionHistoryList from '../components/TransactionHistoryList';
 import EmptyState from '../components/EmptyState';
+import { ChartSkeleton } from '../components/SkeletonLoader';
+
+const ActivityCharts = lazy(() => import('../components/ActivityCharts'));
 
 const TIME_RANGES = [
   { id: '7d', label: '7d' },
@@ -245,88 +246,70 @@ export default function Activity() {
 
           {/* Charts row */}
           {filtered.length > 0 && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-              <div className="lg:col-span-2 rounded-2xl p-5 bg-gray-800 border border-gray-700">
-                <h2 className="text-lg font-semibold text-white mb-4">Activity (14 days)</h2>
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={dailyChart}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="date" stroke="#9CA3AF" tick={{ fontSize: 11 }} />
-                    <YAxis stroke="#9CA3AF" allowDecimals={false} tick={{ fontSize: 11 }} />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
-                      labelStyle={{ color: '#F9FAFB' }}
-                    />
-                    <Bar dataKey="count" fill="#06B6D4" name="Transactions" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="rounded-2xl p-5 bg-gray-800 border border-gray-700">
-                <h2 className="text-lg font-semibold text-white mb-4">By type</h2>
-                {stats.typeBreakdown.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={200}>
-                    <PieChart>
-                      <Pie
-                        data={stats.typeBreakdown}
-                        dataKey="count"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={40}
-                        outerRadius={70}
-                        paddingAngle={2}
-                      >
-                        {stats.typeBreakdown.map((_, i) => (
-                          <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <p className="text-gray-500 text-sm text-center py-8">No breakdown yet</p>
-                )}
-                {stats.mostActiveChain && (
-                  <p className="text-xs text-gray-400 mt-2 text-center">
-                    Most active: {NETWORKS[stats.mostActiveChain.chainId]?.name || `Chain ${stats.mostActiveChain.chainId}`} ({stats.mostActiveChain.count})
-                  </p>
-                )}
-              </div>
-            </div>
+            <Suspense fallback={<ChartSkeleton height="200px" />}>
+              <ActivityCharts
+                dailyChart={dailyChart}
+                typeBreakdown={stats.typeBreakdown}
+                mostActiveChain={stats.mostActiveChain}
+              />
+            </Suspense>
           )}
 
           {/* Filters */}
           <div className="flex flex-wrap gap-2 mb-4 items-center">
-            <span className="text-xs text-gray-500 uppercase tracking-wide mr-1">Type</span>
-            {['all', 'swap', 'liquidity', 'bridge'].map((f) => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`interactive-button px-3 py-1.5 rounded-lg text-sm font-medium ${
-                  filter === f ? 'bg-cyan-500 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
-              >
-                {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
-              </button>
-            ))}
-            <span className="text-xs text-gray-500 uppercase tracking-wide ml-2 mr-1">Period</span>
-            {TIME_RANGES.map(({ id, label }) => (
-              <button
-                key={id}
-                onClick={() => setTimeRange(id)}
-                className={`interactive-button px-3 py-1.5 rounded-lg text-sm font-medium ${
-                  timeRange === id ? 'bg-blue-500 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+            <span className="text-xs text-gray-500 uppercase tracking-wide mr-1" id="activity-type-label">
+              Type
+            </span>
+            <div
+              className="flex flex-wrap gap-2"
+              role="tablist"
+              aria-labelledby="activity-type-label"
+            >
+              {['all', 'swap', 'liquidity', 'bridge'].map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  role="tab"
+                  aria-selected={filter === f}
+                  tabIndex={filter === f ? 0 : -1}
+                  onClick={() => setFilter(f)}
+                  className={`interactive-button px-3 py-1.5 rounded-lg text-sm font-medium ${
+                    filter === f ? 'bg-cyan-500 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                >
+                  {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+                </button>
+              ))}
+            </div>
+            <span className="text-xs text-gray-500 uppercase tracking-wide ml-2 mr-1" id="activity-period-label">
+              Period
+            </span>
+            <div
+              className="flex flex-wrap gap-2"
+              role="tablist"
+              aria-labelledby="activity-period-label"
+            >
+              {TIME_RANGES.map(({ id, label }) => (
+                <button
+                  key={id}
+                  type="button"
+                  role="tab"
+                  aria-selected={timeRange === id}
+                  tabIndex={timeRange === id ? 0 : -1}
+                  onClick={() => setTimeRange(id)}
+                  className={`interactive-button px-3 py-1.5 rounded-lg text-sm font-medium ${
+                    timeRange === id ? 'bg-blue-500 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
             <select
               value={chainFilter}
               onChange={(e) => setChainFilter(e.target.value)}
               className="px-3 py-1.5 rounded-lg bg-gray-700 text-white text-sm ml-auto"
+              aria-label="Filter by network"
             >
               <option value="all">All Networks</option>
               {Object.entries(NETWORKS).map(([id, n]) => (

@@ -16,7 +16,7 @@ function formatPrice(value) {
 }
 
 export default function LiveMarketPulse({ className = '' }) {
-  const { data: prices, dataUpdatedAt, isFetching } = useQuery({
+  const { data: prices, dataUpdatedAt, isFetching, isLoading, isError } = useQuery({
     queryKey: ['live-market-pulse'],
     queryFn: () => coingeckoService.getSimplePrices(PULSE_COINS.map((c) => c.id)),
     refetchInterval: 60000,
@@ -24,7 +24,29 @@ export default function LiveMarketPulse({ className = '' }) {
     retry: 1,
   });
 
-  if (!prices || Object.keys(prices).length === 0) return null;
+  if (isLoading && !prices) {
+    return (
+      <div
+        className={`rounded-xl p-3 sm:p-4 mb-6 animate-pulse ${className}`}
+        style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
+        aria-label="Loading live market prices"
+        aria-busy="true"
+      >
+        <div className="h-3 w-24 rounded mb-3" style={{ backgroundColor: 'var(--bg-tertiary)' }} />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-12 rounded-lg"
+              style={{ backgroundColor: 'var(--bg-tertiary)' }}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (isError || !prices || Object.keys(prices).length === 0) return null;
 
   return (
     <div
@@ -60,7 +82,8 @@ export default function LiveMarketPulse({ className = '' }) {
                 </p>
                 {change != null && !Number.isNaN(change) && (
                   <p className={`text-xs font-medium ${changePositive ? 'text-green-400' : 'text-red-400'}`}>
-                    {changePositive ? '+' : ''}{change.toFixed(2)}%
+                    {changePositive ? '+' : ''}
+                    {change.toFixed(2)}%
                   </p>
                 )}
               </div>

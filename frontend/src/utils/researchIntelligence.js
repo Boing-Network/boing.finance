@@ -1,16 +1,48 @@
 // Onchain research intelligence — synthesize live data into actionable research outputs
 
 export const MULTI_CHAIN_COVERAGE = [
-  { id: 'ethereum', label: 'Ethereum', layer: 'L1', domains: ['DeFi', 'LST', 'Perps'], status: 'live' },
-  { id: 'base', label: 'Base', layer: 'L2', domains: ['Consumer', 'Memecoins', 'Bridge inflow'], status: 'live' },
-  { id: 'arbitrum', label: 'Arbitrum', layer: 'L2', domains: ['Perps', 'DeFi', 'Gaming'], status: 'live' },
-  { id: 'optimism', label: 'Optimism', layer: 'L2', domains: ['DeFi', 'Governance'], status: 'live' },
-  { id: 'polygon', label: 'Polygon', layer: 'L2/Sidechain', domains: ['Payments', 'DeFi'], status: 'live' },
-  { id: 'bsc', label: 'BSC', layer: 'L1', domains: ['CEX flow', 'DeFi'], status: 'live' },
-  { id: 'solana', label: 'Solana', layer: 'L1', domains: ['Perps', 'Memecoins', 'NFTs'], status: 'live' },
-  { id: 'boing', label: 'Boing L1', layer: 'Native', domains: ['Native AMM', 'Testnet ops'], status: 'live' },
+  { id: 'ethereum', label: 'Ethereum', layer: 'L1', domains: ['DeFi', 'LST', 'Perps'] },
+  { id: 'base', label: 'Base', layer: 'L2', domains: ['Consumer', 'Memecoins', 'Bridge inflow'] },
+  { id: 'arbitrum', label: 'Arbitrum', layer: 'L2', domains: ['Perps', 'DeFi', 'Gaming'] },
+  { id: 'optimism', label: 'Optimism', layer: 'L2', domains: ['DeFi', 'Governance'] },
+  { id: 'polygon', label: 'Polygon', layer: 'L2/Sidechain', domains: ['Payments', 'DeFi'] },
+  { id: 'bsc', label: 'BSC', layer: 'L1', domains: ['CEX flow', 'DeFi'] },
+  { id: 'solana', label: 'Solana', layer: 'L1', domains: ['Perps', 'Memecoins', 'NFTs'] },
+  { id: 'boing', label: 'Boing L1', layer: 'Native', domains: ['Native AMM', 'Testnet ops'] },
 ];
 
+/**
+ * Derive coverage status from live networkStats (and optional Solana presence).
+ * @returns {'live'|'partial'|'no data'}
+ */
+export function resolveCoverageStatus(chainId, networkStats) {
+  if (!networkStats || typeof networkStats !== 'object') return 'no data';
+
+  const aliases = {
+    ethereum: ['ethereum', 'eth'],
+    base: ['base'],
+    arbitrum: ['arbitrum'],
+    optimism: ['optimism'],
+    polygon: ['polygon'],
+    bsc: ['bsc', 'binance-smart-chain', 'bnb'],
+    solana: ['solana'],
+    boing: ['boing', 'boing l1', 'boing-network'],
+  };
+
+  const keys = Object.keys(networkStats);
+  const matchKey = keys.find((k) => {
+    const nk = String(k).toLowerCase();
+    const list = aliases[chainId] || [chainId];
+    return list.some((a) => nk === a || nk.includes(a));
+  });
+
+  if (!matchKey) return 'no data';
+  const stats = networkStats[matchKey];
+  const volume = parseFloat(stats?.volume) || 0;
+  const pools = stats?.pools || 0;
+  if (volume > 0 || pools > 0) return 'live';
+  return 'partial';
+}
 const NETWORK_ALIASES = {
   ethereum: 'ethereum',
   eth: 'ethereum',
