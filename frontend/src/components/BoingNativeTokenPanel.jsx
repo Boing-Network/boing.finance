@@ -49,6 +49,7 @@ export default function BoingNativeTokenPanel() {
     queryFn: () => fetchBoingTestnetChainHeight(),
     staleTime: 30_000,
     refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
     retry: 1
   });
 
@@ -57,7 +58,8 @@ export default function BoingNativeTokenPanel() {
     queryFn: () => getAccountBalance(),
     enabled: Boolean(isConnected && onBoing && account),
     staleTime: 15_000,
-    refetchInterval: 45_000
+    refetchInterval: 45_000,
+    refetchIntervalInBackground: false,
   });
 
   const heightLabel = heightQuery.isLoading

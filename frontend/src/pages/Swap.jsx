@@ -21,6 +21,7 @@ import NativeBoingTradeHub from '../components/NativeBoingTradeHub';
 import getFeatureSupport from '../config/featureSupport';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import { fetchTradeableEvmTokenAddressesFromDexFactory } from '../services/evmDexTradeableTokens';
+import { tryAccruePoints } from '../utils/tryAccruePoints';
 
 
 const devLog = (...args) => {
@@ -844,6 +845,13 @@ const Swap = () => {
       setSwapSuccess(`Swap successful! Transaction hash: ${receipt.hash}`);
       toast.success('Swap completed successfully!');
       recordAchievement?.(account, 'swap', 'first_swap');
+      tryAccruePoints({
+        address: account,
+        action: 'swap',
+        txHash: receipt.hash,
+        chainId,
+        metadata: { tokenIn, tokenOut, amountIn },
+      });
       setShareData({ tokenIn, tokenOut, amountIn, amountOut });
       setShareModalOpen(true);
 
@@ -1786,6 +1794,13 @@ const Swap = () => {
       toast.success(`Swap executed on ${selectedExternalQuote.dexName}!`);
       setSwapSuccess(`Swap successful on ${selectedExternalQuote.dexName}! Transaction: ${result.txHash}`);
       recordAchievement?.(account, 'swap', 'first_swap');
+      tryAccruePoints({
+        address: account,
+        action: 'swap',
+        txHash: result.txHash,
+        chainId,
+        metadata: { tokenIn, tokenOut, amountIn, dex: selectedExternalQuote.dexName },
+      });
       setShareData({ tokenIn, tokenOut, amountIn, amountOut });
       setShareModalOpen(true);
 

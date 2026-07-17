@@ -47,10 +47,10 @@ export default function BoingPoints() {
         <meta name="description" content="Earn Boing points when you use boing.finance. Redeem for rewards and perks." />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <PageHeader title="Boing Points" subtitle="Track points earned from protocol usage. Rates and accrual wiring are still rolling out." />
+        <PageHeader title="Boing Points" subtitle="Track points earned from protocol usage. Accrual runs after confirmed swap, liquidity, and deploy actions when the API is reachable." />
 
-        <div className="mb-6 rounded-lg border border-amber-500/30 bg-amber-900/20 px-4 py-3 text-sm text-amber-100">
-          <strong>Accrual not fully live:</strong> Balances below come from the points API when available. Automatic earn-on-swap/LP is not guaranteed yet — treat earning rates as planned targets, not live guarantees.
+        <div className="mb-6 rounded-lg border border-cyan-500/30 bg-cyan-900/20 px-4 py-3 text-sm text-cyan-100">
+          <strong>How earning works:</strong> After a confirmed swap, pool create, or token deploy, the app requests point accrual from the Boing API (fire-and-forget). Rates below are the planned amounts; balances still depend on API availability.
         </div>
 
         {account ? (

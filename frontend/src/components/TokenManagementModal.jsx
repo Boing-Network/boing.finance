@@ -76,7 +76,9 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
     setLoadingUserTokens(true);
     try {
       walletTokenService.initialize(provider, account, chainId, import.meta.env.DEV);      const tokens = await walletTokenService.getUserTokens();
-      console.log('Fetched user tokens:', tokens);
+      if (import.meta.env.DEV) {
+        console.log('Fetched user tokens:', tokens);
+      }
       setUserTokens(tokens);
     } catch (error) {
       console.error('Failed to fetch user tokens:', error);

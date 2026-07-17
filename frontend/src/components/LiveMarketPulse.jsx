@@ -20,6 +20,7 @@ export default function LiveMarketPulse({ className = '' }) {
     queryKey: ['live-market-pulse'],
     queryFn: () => coingeckoService.getSimplePrices(PULSE_COINS.map((c) => c.id)),
     refetchInterval: 60000,
+    refetchIntervalInBackground: false,
     staleTime: 45000,
     retry: 1,
   });

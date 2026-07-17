@@ -28,6 +28,7 @@ import NativeBoingTokenDeploySection from '../components/NativeBoingTokenDeployS
 import { BOING_NATIVE_L1_CHAIN_ID, getNetworkByChainId } from '../config/networks';
 import { getBoingNativeFeeUsd, formatUsdReferenceLabel, isBoingNativeFeeChain } from '../config/boingEconomics';
 import { isBoingNativeAccountIdHex } from '../utils/boingWalletDiscovery';
+import { tryAccruePoints } from '../utils/tryAccruePoints';
 import { brandLogoPngAbsolute } from '../config/brandAssets';
 import { showDeployCelebration } from '../utils/deployCelebration';
 
@@ -1104,6 +1105,13 @@ export default function DeployToken() {
             date: new Date().toISOString(),
           });
           recordAchievement?.(account, 'token_deploy', 'first_deploy');
+          tryAccruePoints({
+            address: account,
+            action: 'deploy',
+            txHash: hash,
+            chainId: BOING_NATIVE_L1_CHAIN_ID,
+            metadata: { name, symbol, network: 'Boing Testnet' },
+          });
         }
       } finally {
         setDeploying(false);
@@ -1453,6 +1461,13 @@ export default function DeployToken() {
             evmExplorerBaseUrl: blockExplorerBase,
           });
           recordAchievement?.(account, 'token_deploy', 'first_deploy');
+          tryAccruePoints({
+            address: account,
+            action: 'deploy',
+            txHash: tx.hash,
+            chainId: network?.chainId,
+            metadata: { name, symbol, tokenAddress: deployedAddress },
+          });
 
           // Show browser notification if enabled
           const deploymentNotificationSettings1 = JSON.parse(localStorage.getItem('boing_notification_settings') || '{"deployments": true}');
@@ -1548,6 +1563,13 @@ export default function DeployToken() {
             evmExplorerBaseUrl: blockExplorerBase,
           });
           recordAchievement?.(account, 'token_deploy', 'first_deploy');
+          tryAccruePoints({
+            address: account,
+            action: 'deploy',
+            txHash: contract.deploymentTransaction().hash,
+            chainId: network?.chainId,
+            metadata: { name, symbol, tokenAddress: deployedAddress },
+          });
           setShareData({ name, symbol, address: deployedAddress });
           setShareModalOpen(true);
 

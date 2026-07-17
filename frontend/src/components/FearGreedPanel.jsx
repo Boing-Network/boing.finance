@@ -8,6 +8,7 @@ export default function FearGreedPanel() {
     queryKey: ['fear-greed-current'],
     queryFn: () => getFearGreedIndex(1),
     refetchInterval: 3600000,
+    refetchIntervalInBackground: false,
     staleTime: 1800000,
     retry: 1,
   });
@@ -16,6 +17,7 @@ export default function FearGreedPanel() {
     queryKey: ['fear-greed-history'],
     queryFn: () => getFearGreedIndex(30),
     refetchInterval: 3600000,
+    refetchIntervalInBackground: false,
     staleTime: 1800000,
     retry: 1,
   });

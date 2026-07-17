@@ -16,6 +16,10 @@ import { addToWatchlist, removeFromWatchlist, isInWatchlist } from '../utils/tok
 import toast from 'react-hot-toast';
 import EmptyState from '../components/EmptyState';
 
+const devLog = (...args) => {
+  if (import.meta.env.DEV) console.log(...args);
+};
+
 // Initialize token scanner
 const tokenScanner = new TokenScanner();
 
@@ -165,7 +169,7 @@ const Tokens = () => {
       setScanProgress({ current: 0, total: 0, message: 'Initializing scan...' });
       setSearchedToken(null);
       
-      console.log(`Starting token scan for chain ${selectedChain}`);
+      devLog(`Starting token scan for chain ${selectedChain}`);
       const network = NETWORKS[selectedChain];
       
       if (!network) {
@@ -180,12 +184,12 @@ const Tokens = () => {
         setTokens(scannedTokens);
         setLastScanTime(new Date());
         setScanProgress({ current: scannedTokens.length, total: scannedTokens.length, message: 'Scan complete!' });
-        console.log(`Found ${scannedTokens.length} tokens`);
+        devLog(`Found ${scannedTokens.length} tokens`);
       } else {
         setTokens([]);
         setLastScanTime(new Date());
         setScanProgress({ current: 0, total: 0, message: 'No tokens found' });
-        console.log('No tokens found in recent blocks');
+        devLog('No tokens found in recent blocks');
       }
     } catch (error) {
       console.error('Error scanning tokens:', error);
@@ -206,7 +210,7 @@ const Tokens = () => {
       setSearchedToken(null);
       
       const address = searchAddress.trim();
-      console.log(`Searching for token: ${address}`);
+      devLog(`Searching for token: ${address}`);
       
       // Try Alchemy API first for better metadata
       let token = null;
@@ -254,7 +258,7 @@ const Tokens = () => {
         }
         
         setSearchedToken(token);
-        console.log('Token found:', token.name);
+        devLog('Token found:', token.name);
       } else {
         setError('Token not found or invalid address');
       }
