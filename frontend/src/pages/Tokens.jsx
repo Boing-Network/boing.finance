@@ -15,6 +15,7 @@ import { tokenFavorites } from '../utils/tokenFavorites';
 import { addToWatchlist, removeFromWatchlist, isInWatchlist } from '../utils/tokenWatchlist';
 import toast from 'react-hot-toast';
 import EmptyState from '../components/EmptyState';
+import LiveDeploymentsPanel from '../components/LiveDeploymentsPanel';
 
 const devLog = (...args) => {
   if (import.meta.env.DEV) console.log(...args);
@@ -401,6 +402,8 @@ const Tokens = () => {
               </p>
             )}
           </div>
+
+          <LiveDeploymentsPanel />
 
           {/* Network Selection and Controls */}
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 border border-gray-700">

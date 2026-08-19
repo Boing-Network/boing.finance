@@ -1,5 +1,6 @@
 import coingeckoService from './coingeckoService';
 import { getTokenOhlcv } from './geckoterminalService';
+import { getTokenUsdQuote, dexscreenerChainSlug } from './dexscreenerService';
 import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import {
   COINGECKO_COIN_BY_SYMBOL,
@@ -98,6 +99,18 @@ async function coinSpot(coinId) {
   };
 }
 
+async function dexSpot(address, chainSlug) {
+  if (!isUsableAddress(address) || !chainSlug) return null;
+  const quote = await getTokenUsdQuote(address, chainSlug);
+  const price = Number(quote?.usd);
+  if (!Number.isFinite(price) || price <= 0) return null;
+  return {
+    price,
+    change24h: Number.isFinite(Number(quote.usd_24h_change)) ? Number(quote.usd_24h_change) : null,
+    source: 'dexscreener',
+  };
+}
+
 async function contractSpot(address, platform) {
   if (!isUsableAddress(address) || !platform) return null;
   const spot = await coingeckoService.getTokenPrice(address, platform, { maxAgeMs: SPOT_MAX_AGE_MS });
@@ -129,6 +142,8 @@ export async function fetchTokenSpot(params) {
       const s = await coinSpot(bySymbol);
       if (s) return s;
     }
+    const dex = await dexSpot(address, 'solana');
+    if (dex) return dex;
     const s = await contractSpot(address, SOLANA_COINGECKO_PLATFORM);
     if (s) return s;
     return { price: null, change24h: null, source: null, unavailableReason: 'unlisted' };
@@ -151,6 +166,11 @@ export async function fetchTokenSpot(params) {
     if (s) return s;
   }
   const platform = COINGECKO_PLATFORM_BY_CHAIN[chainId];
+  const slug = dexscreenerChainSlug(chainId);
+  if (isUsableAddress(address) && slug) {
+    const dex = await dexSpot(address, slug);
+    if (dex) return dex;
+  }
   if (isUsableAddress(address) && platform) {
     const s = await contractSpot(address, platform);
     if (s) return s;

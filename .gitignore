@@ -21,5 +21,10 @@ frontend/playwright-report/
 # Native DEX indexer CLI state (reserve history)
 frontend/.native-dex-indexer-state.json
 
+# Local secrets (never commit)
+.env.local
+**/.env.local
+frontend/.env.local
+
 # Windows accidental reserved-name file
 nul

@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './i18n'; // Initialize i18n
 import { WalletProvider } from './contexts/WalletContext';
 import { BoingNativeDexIntegrationProvider } from './contexts/BoingNativeDexIntegrationContext';
+import { ChainRealtimeProvider } from './contexts/ChainRealtimeContext';
 import { SolanaWalletProvider } from './contexts/SolanaWalletContext';
 import ChainTypeSelector from './components/ChainTypeSelector';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -799,6 +800,7 @@ function App() {
             <WalletProvider>
               <BoingNativeDexIntegrationProvider>
               <SolanaWalletProvider>
+              <ChainRealtimeProvider>
               <AchievementProvider>
                 <AchievementOverlay />
               <BaseMiniAppWrapper>
@@ -851,6 +853,7 @@ function App() {
                 </Router>
               </BaseMiniAppWrapper>
               </AchievementProvider>
+              </ChainRealtimeProvider>
               </SolanaWalletProvider>
               </BoingNativeDexIntegrationProvider>
             </WalletProvider>
