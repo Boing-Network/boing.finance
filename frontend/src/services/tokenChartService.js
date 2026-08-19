@@ -84,6 +84,100 @@ function empty(reason) {
   return { points: [], price: null, change24h: null, source: null, unavailableReason: reason };
 }
 
+const SPOT_MAX_AGE_MS = 12_000;
+
+async function coinSpot(coinId) {
+  if (!coinId) return null;
+  const spot = await coingeckoService.getCoinPrice(coinId, { maxAgeMs: SPOT_MAX_AGE_MS });
+  const price = Number(spot?.usd);
+  if (!Number.isFinite(price) || price <= 0) return null;
+  return {
+    price,
+    change24h: Number.isFinite(Number(spot?.usd_24h_change)) ? Number(spot.usd_24h_change) : null,
+    source: 'coingecko',
+  };
+}
+
+async function contractSpot(address, platform) {
+  if (!isUsableAddress(address) || !platform) return null;
+  const spot = await coingeckoService.getTokenPrice(address, platform, { maxAgeMs: SPOT_MAX_AGE_MS });
+  const price = Number(spot?.usd);
+  if (!Number.isFinite(price) || price <= 0) return null;
+  return {
+    price,
+    change24h: Number.isFinite(Number(spot?.usd_24h_change)) ? Number(spot.usd_24h_change) : null,
+    source: 'coingecko',
+  };
+}
+
+/**
+ * Latest USD quote (short cache) so Swap can move the last chart point between history refreshes.
+ */
+export async function fetchTokenSpot(params) {
+  const symbol = String(params?.symbol || '').toUpperCase();
+  const address = params?.address || '';
+  const isNative = Boolean(params?.isNative);
+  const isSolana = params?.chain === 'solana';
+
+  if (isSolana) {
+    if (isNative || symbol === 'SOL') {
+      const s = await coinSpot('solana');
+      if (s) return s;
+    }
+    const bySymbol = COINGECKO_COIN_BY_SYMBOL[symbol];
+    if (bySymbol) {
+      const s = await coinSpot(bySymbol);
+      if (s) return s;
+    }
+    const s = await contractSpot(address, SOLANA_COINGECKO_PLATFORM);
+    if (s) return s;
+    return { price: null, change24h: null, source: null, unavailableReason: 'unlisted' };
+  }
+
+  const chainId = Number(params?.chainId);
+  if (chainId === BOING_NATIVE_L1_CHAIN_ID) {
+    return { price: null, change24h: null, source: null, unavailableReason: 'native-l1' };
+  }
+  const network = getNetworkByChainId(chainId);
+  if (network?.isTestnet) {
+    return { price: null, change24h: null, source: null, unavailableReason: 'testnet' };
+  }
+
+  const nativeCoin =
+    (isNative && COINGECKO_NATIVE_COIN_BY_CHAIN[chainId]) || COINGECKO_COIN_BY_SYMBOL[symbol] || null;
+
+  if (isNative && nativeCoin) {
+    const s = await coinSpot(nativeCoin);
+    if (s) return s;
+  }
+  const platform = COINGECKO_PLATFORM_BY_CHAIN[chainId];
+  if (isUsableAddress(address) && platform) {
+    const s = await contractSpot(address, platform);
+    if (s) return s;
+  }
+  if (!isNative && nativeCoin) {
+    const s = await coinSpot(nativeCoin);
+    if (s) return s;
+  }
+  return { price: null, change24h: null, source: null, unavailableReason: 'unlisted' };
+}
+
+/** Replace or append the live spot so the series moves without waiting for a full history refetch. */
+export function overlayLivePrice(points, livePrice) {
+  if (!Array.isArray(points) || points.length === 0) return points || [];
+  const n = Number(livePrice);
+  if (!Number.isFinite(n) || n <= 0) return points;
+  const next = points.map((row) => ({ t: row.t, p: row.p }));
+  const now = Date.now();
+  const last = next[next.length - 1];
+  if (now - last.t < 180_000) {
+    next[next.length - 1] = { t: now, p: n };
+  } else {
+    next.push({ t: now, p: n });
+  }
+  return next;
+}
+
 /**
  * USD line series for Swap. CoinGecko first (listed majors), GeckoTerminal fallback (DEX tokens).
  * @param {{ chain?: 'evm' | 'solana', chainId?: number, address?: string, isNative?: boolean, symbol?: string, days?: number }} params

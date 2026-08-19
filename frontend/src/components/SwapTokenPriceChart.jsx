@@ -71,6 +71,8 @@ export default function SwapTokenPriceChart({
     [data?.points, days]
   );
 
+  const fillId = `swap-price-fill-${chain}-${chainId || 0}-${active?.symbol || 'tok'}-${days}`;
+  const live = Boolean(data?.price);
   const change = data?.change24h;
   const up = Number(change) >= 0;
   const src = sourceLabel(data?.source);
@@ -97,11 +99,20 @@ export default function SwapTokenPriceChart({
               </span>
             )}
           </div>
-          <p className="text-2xl sm:text-3xl font-bold mt-1" style={{ color: 'var(--text-primary)' }}>
+          <p className="text-2xl sm:text-3xl font-bold mt-1 tabular-nums" style={{ color: 'var(--text-primary)' }}>
             {data?.price ? formatUsdCompact(data.price) : isLoading ? '…' : '—'}
           </p>
-          <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
-            {src ? `USD · ${src}` : 'USD market chart'}
+          <p className="text-xs mt-1 flex items-center gap-2" style={{ color: 'var(--text-tertiary)' }}>
+            {live && (
+              <span className="inline-flex items-center gap-1.5" style={{ color: 'var(--finance-green, #00ff88)' }}>
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-60 animate-ping" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-green-400" />
+                </span>
+                Live
+              </span>
+            )}
+            <span>{src ? `USD · ${src}` : 'USD market chart'}</span>
           </p>
         </div>
         <div className="flex flex-col items-end gap-2">
@@ -157,7 +168,7 @@ export default function SwapTokenPriceChart({
           <ResponsiveContainer width="100%" height={240}>
             <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <defs>
-                <linearGradient id="swapPriceFill" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="var(--accent-cyan)" stopOpacity={0.35} />
                   <stop offset="95%" stopColor="var(--accent-cyan)" stopOpacity={0} />
                 </linearGradient>
@@ -191,11 +202,12 @@ export default function SwapTokenPriceChart({
                 type="monotone"
                 dataKey="p"
                 stroke="var(--accent-cyan)"
-                fill="url(#swapPriceFill)"
+                fill={`url(#${fillId})`}
                 strokeWidth={2}
                 name="Price"
-                isAnimationActive
-                animationDuration={500}
+                isAnimationActive={false}
+                dot={false}
+                activeDot={{ r: 4 }}
               />
             </AreaChart>
           </ResponsiveContainer>
