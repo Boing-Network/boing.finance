@@ -99,7 +99,7 @@ module.exports = {
     },
     // Tier 3 - Expansion networks (TokenFactory deploy when funded)
     avalanche: { url: TIER3_NETWORKS.avalanche.rpcUrl, chainId: 43114, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
-    fantom: { url: TIER3_NETWORKS.fantom.rpcUrl, chainId: 250, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
+    fantom: { url: process.env.FANTOM_RPC_URL || "https://rpcapi.fantom.network", chainId: 250, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
     zkSyncEra: { url: TIER3_NETWORKS.zkSyncEra.rpcUrl, chainId: 324, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
     linea: { url: TIER3_NETWORKS.linea.rpcUrl, chainId: 59144, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
     scroll: { url: TIER3_NETWORKS.scroll.rpcUrl, chainId: 534352, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
@@ -108,6 +108,9 @@ module.exports = {
     blast: { url: TIER3_NETWORKS.blast.rpcUrl, chainId: 81457, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
     opbnb: { url: TIER3_NETWORKS.opbnb.rpcUrl, chainId: 204, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
     mode: { url: TIER3_NETWORKS.mode.rpcUrl, chainId: 34443, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
+    gnosis: { url: TIER3_NETWORKS.gnosis.rpcUrl, chainId: 100, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
+    moonbeam: { url: TIER3_NETWORKS.moonbeam.rpcUrl, chainId: 1284, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
+    moonriver: { url: TIER3_NETWORKS.moonriver.rpcUrl, chainId: 1285, accounts: process.env.DEPLOYER_PRIVATE_KEY && process.env.DEPLOYER_PRIVATE_KEY !== "YOUR_PRIVATE_KEY_HERE" ? [process.env.DEPLOYER_PRIVATE_KEY] : [] },
   },
   etherscan: {
     apiKey: {

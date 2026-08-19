@@ -284,7 +284,8 @@ export const NETWORKS = {
   1284: {
     name: 'Moonbeam',
     symbol: 'GLMR',
-    rpcUrl: 'https://rpc.api.moonbeam.network',
+    rpcUrl: process.env.REACT_APP_MOONBEAM_RPC_URL || 'https://1rpc.io/glmr',
+    rpcUrls: [process.env.REACT_APP_MOONBEAM_RPC_URL, 'https://1rpc.io/glmr', 'https://moonbeam.drpc.org', 'https://rpc.api.moonbeam.network'].filter(Boolean),
     explorer: 'https://moonbeam.moonscan.io',
     chainId: 1284,
     nativeCurrency: { name: 'Glimmer', symbol: 'GLMR', decimals: 18 },
@@ -296,7 +297,8 @@ export const NETWORKS = {
   1285: {
     name: 'Moonriver',
     symbol: 'MOVR',
-    rpcUrl: 'https://rpc.api.moonriver.moonbeam.network',
+    rpcUrl: process.env.REACT_APP_MOONRIVER_RPC_URL || 'https://moonriver.drpc.org',
+    rpcUrls: [process.env.REACT_APP_MOONRIVER_RPC_URL, 'https://moonriver.drpc.org', 'https://rpc.api.moonriver.moonbeam.network'].filter(Boolean),
     explorer: 'https://moonriver.moonscan.io',
     chainId: 1285,
     nativeCurrency: { name: 'Moonriver', symbol: 'MOVR', decimals: 18 },

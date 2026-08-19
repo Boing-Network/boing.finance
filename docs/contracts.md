@@ -7,7 +7,7 @@ Which features require smart contract deployments and which work with APIs only.
 ### ✅ Deployed
 
 - **TokenFactory System:** Ethereum, Polygon, BSC, Arbitrum, Optimism, Base, Sepolia
-- **DEXFactory System:** Sepolia only (testing)
+- **DEXFactory System:** Sepolia only. Other listed EVM chains (except Ethereum) are **pre-funding**: wrapped native + hub tokens + deploy scripts are in repo; factory/router addresses stay zero until protocol deploy. See [evm-dex-enablement.md](evm-dex-enablement.md).
 
 ### Features Summary
 
@@ -15,9 +15,9 @@ Which features require smart contract deployments and which work with APIs only.
 | Feature         | Contracts required    | Status                     |
 | --------------- | --------------------- | -------------------------- |
 | Deploy Token    | TokenFactory          | ✅ All mainnets             |
-| Create Pool     | DEXFactory, DEXRouter | ⚠️ Sepolia only            |
-| Swap            | Optional (DEXRouter)  | ✅ Via external DEXs on all |
-| Liquidity       | DEXFactory            | ⚠️ Sepolia only            |
+| Create Pool     | DEXFactory, DEXRouter | ⚠️ Sepolia live; other EVM (not ETH) scripts ready |
+| Swap            | Optional (DEXRouter)  | ✅ Via Boing DEX when factory is set; else external |
+| Liquidity       | DEXFactory            | ⚠️ Sepolia live; other EVM (not ETH) scripts ready |
 | Bridge          | Optional              | ✅ Via external bridges     |
 | Portfolio       | No                    | ✅ API only                 |
 | Analytics       | No                    | ✅ API only                 |
@@ -26,8 +26,8 @@ Which features require smart contract deployments and which work with APIs only.
 
 ## Deployment Priority
 
-1. **High:** Deploy DEXFactory system to all mainnets (Create Pool, Liquidity).
-2. **Medium:** DEXRouter, LiquidityLocker on mainnets.
+1. **High:** Deploy DEXFactory system to listed EVM mainnets except Ethereum (Create Pool, Liquidity). Operator steps: [evm-dex-enablement.md](evm-dex-enablement.md).
+2. **Medium:** Verify factory/router/locker; then fund via Create Pool.
 3. **Low:** Native CrossChainBridge (or keep using external bridges).
 
 ## API-Only Features

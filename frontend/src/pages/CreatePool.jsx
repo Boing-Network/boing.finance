@@ -7,7 +7,7 @@ import { CreatePoolSolanaContent } from '../components/SolanaFeaturePlaceholder'
 import toast from 'react-hot-toast';
 import { ethers } from 'ethers';
 import DEXFactoryABI from '../artifacts/DEXFactory.json';
-import { getContractAddress, CONTRACTS } from '../config/contracts';
+import { getContractAddress, getEvmDexHubTokenAddresses } from '../config/contracts';
 import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { DexFeatureBanner } from '../components/NetworkSupportBanner';
 import { useAchievements } from '../contexts/AchievementContext';
@@ -247,26 +247,21 @@ function CreatePool() {
   // Get DEXFactory contract instance
   const getDEXFactoryContract = async () => {
     if (!window.ethereum || !chainId) return null;
-    // EVM factory form is wired to Sepolia in this app; Boing L1 uses the Boing VM, not this ethers path.
-    if (chainId !== 11155111) {
-      if (chainId === BOING_NATIVE_L1_CHAIN_ID) {
-        if (featureSupport.hasNativeAmm) {
-          toast.error(
-            'On Boing testnet, add liquidity via the native pool (Swap page, Boing Express). This page’s factory form is for EVM networks only (e.g. Sepolia in config).'
-          );
-        } else {
-          toast.error(
-            'On Boing testnet, use Deploy Token / Native VM. This factory form requires an EVM-configured network such as Sepolia.'
-          );
-        }
+    if (chainId === BOING_NATIVE_L1_CHAIN_ID) {
+      if (featureSupport.hasNativeAmm) {
+        toast.error(
+          'On Boing testnet, add liquidity via the native pool (Swap page, Boing Express). This factory form is for EVM networks only.'
+        );
       } else {
-        toast.error('Pool creation with this form requires an EVM network where a factory is configured (e.g. Sepolia).');
+        toast.error(
+          'On Boing testnet, use Deploy Token / Native VM. This factory form requires an EVM-configured network.'
+        );
       }
       return null;
     }
     const factoryAddress = getContractAddress(chainId, 'dexFactory');
-    if (!factoryAddress) {
-      toast.error('DEXFactory not deployed on this network');
+    if (!factoryAddress || factoryAddress === ethers.ZeroAddress) {
+      toast.error('DEX factory is not deployed on this network yet. Protocol deploy is required before Create Pool (funding).');
       return null;
     }
     const provider = new ethers.BrowserProvider(window.ethereum);
@@ -586,10 +581,7 @@ function CreatePool() {
 
   // Get common tokens for the current network
   const getCommonTokens = (networkId) => {
-    const tokens = CONTRACTS[networkId]?.tokens;
-    if (!tokens) return [];
-    
-    return Object.values(tokens).filter(address => address !== '0x0000000000000000000000000000000000000000');
+    return getEvmDexHubTokenAddresses(networkId);
   };
 
   useEffect(() => {

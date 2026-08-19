@@ -9,6 +9,28 @@ import {
 import { getCanonicalBoingTestnetNativeAmmPoolHex } from './boingCanonicalTestnetPool';
 
 const BOING_VM_ZERO_32 = '0x0000000000000000000000000000000000000000000000000000000000000000';
+const ZERO_EVM = '0x0000000000000000000000000000000000000000';
+
+const EVM_DEX_PROTOCOL_KEYS = [
+  'governor',
+  'boingToken',
+  'treasury',
+  'nftStaking',
+  'dexFactory',
+  'dexRouter',
+  'liquidityLocker',
+  'crossChainBridge',
+  'priceOracle',
+  'advancedERC20',
+  'tokenFactory',
+  'tokenImplementation',
+];
+
+export function isZeroEvmAddress(addr) {
+  if (!addr || typeof addr !== 'string') return true;
+  const h = addr.startsWith('0x') || addr.startsWith('0X') ? addr.slice(2) : addr;
+  return h.length === 40 && /^0+$/i.test(h);
+}
 
 // Contract addresses configuration for different networks
 export const CONTRACTS = {
@@ -86,6 +108,7 @@ export const CONTRACTS = {
     nftStaking: '0x0000000000000000000000000000000000000000',
     dexFactory: '0x0000000000000000000000000000000000000000',
     dexRouter: '0x0000000000000000000000000000000000000000',
+    liquidityLocker: '0x0000000000000000000000000000000000000000',
     weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // Real WETH address
     crossChainBridge: '0x0000000000000000000000000000000000000000',
     priceOracle: '0x0000000000000000000000000000000000000000',
@@ -104,6 +127,7 @@ export const CONTRACTS = {
   8453: {
     dexFactory: '0x0000000000000000000000000000000000000000', // Not deployed yet
     dexRouter: '0x0000000000000000000000000000000000000000', // Not deployed yet
+    liquidityLocker: '0x0000000000000000000000000000000000000000',
     weth: '0x4200000000000000000000000000000000000006', // WETH on Base
     crossChainBridge: '0x0000000000000000000000000000000000000000', // Not deployed yet
     priceOracle: '0x0000000000000000000000000000000000000000', // Not deployed yet
@@ -123,6 +147,7 @@ export const CONTRACTS = {
   137: {
     dexFactory: '0x0000000000000000000000000000000000000000',
     dexRouter: '0x0000000000000000000000000000000000000000',
+    liquidityLocker: '0x0000000000000000000000000000000000000000',
     weth: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', // WMATIC address
     crossChainBridge: '0x0000000000000000000000000000000000000000',
     priceOracle: '0x0000000000000000000000000000000000000000',
@@ -141,6 +166,7 @@ export const CONTRACTS = {
   56: {
     dexFactory: '0x0000000000000000000000000000000000000000', // Not deployed yet
     dexRouter: '0x0000000000000000000000000000000000000000', // Not deployed yet
+    liquidityLocker: '0x0000000000000000000000000000000000000000',
     weth: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', // WBNB on BSC
     crossChainBridge: '0x0000000000000000000000000000000000000000', // Not deployed yet
     priceOracle: '0x0000000000000000000000000000000000000000', // Not deployed yet
@@ -160,6 +186,7 @@ export const CONTRACTS = {
   10: {
     dexFactory: '0x0000000000000000000000000000000000000000', // Not deployed yet
     dexRouter: '0x0000000000000000000000000000000000000000', // Not deployed yet
+    liquidityLocker: '0x0000000000000000000000000000000000000000',
     weth: '0x4200000000000000000000000000000000000006', // WETH on Optimism
     crossChainBridge: '0x0000000000000000000000000000000000000000', // Not deployed yet
     priceOracle: '0x0000000000000000000000000000000000000000', // Not deployed yet
@@ -179,6 +206,7 @@ export const CONTRACTS = {
   42161: {
     dexFactory: '0x0000000000000000000000000000000000000000',
     dexRouter: '0x0000000000000000000000000000000000000000',
+    liquidityLocker: '0x0000000000000000000000000000000000000000',
     weth: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', // WETH on Arbitrum
     crossChainBridge: '0x0000000000000000000000000000000000000000',
     priceOracle: '0x0000000000000000000000000000000000000000',
@@ -197,12 +225,16 @@ export const CONTRACTS = {
   43114: {
     dexFactory: '0x0000000000000000000000000000000000000000',
     dexRouter: '0x0000000000000000000000000000000000000000',
+    liquidityLocker: '0x0000000000000000000000000000000000000000',
     weth: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7', // WAVAX on Avalanche
     crossChainBridge: '0x0000000000000000000000000000000000000000',
     priceOracle: '0x0000000000000000000000000000000000000000',
     tokenFactory: '0x0000000000000000000000000000000000000000',
     tokenImplementation: '0x0000000000000000000000000000000000000000',
-    tokens: {},
+    tokens: {
+      usdc: '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E',
+      usdt: '0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7',
+    },
     pairs: {}
   },
 
@@ -210,12 +242,16 @@ export const CONTRACTS = {
   250: {
     dexFactory: '0x0000000000000000000000000000000000000000',
     dexRouter: '0x0000000000000000000000000000000000000000',
+    liquidityLocker: '0x0000000000000000000000000000000000000000',
     weth: '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83', // WFTM on Fantom
     crossChainBridge: '0x0000000000000000000000000000000000000000',
     priceOracle: '0x0000000000000000000000000000000000000000',
     tokenFactory: '0x0000000000000000000000000000000000000000',
     tokenImplementation: '0x0000000000000000000000000000000000000000',
-    tokens: {},
+    tokens: {
+      usdc: '0x04068DA6C83AFCFA0e13ba15A6696662335D5B75',
+      dai: '0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E',
+    },
     pairs: {}
   },
 
@@ -223,12 +259,15 @@ export const CONTRACTS = {
   59144: {
     dexFactory: '0x0000000000000000000000000000000000000000',
     dexRouter: '0x0000000000000000000000000000000000000000',
+    liquidityLocker: '0x0000000000000000000000000000000000000000',
     weth: '0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f', // WETH on Linea
     crossChainBridge: '0x0000000000000000000000000000000000000000',
     priceOracle: '0x0000000000000000000000000000000000000000',
     tokenFactory: '0x0000000000000000000000000000000000000000',
     tokenImplementation: '0x0000000000000000000000000000000000000000',
-    tokens: {},
+    tokens: {
+      usdc: '0x176211869cA2b568f2BE7De6524E6338E3aB8F40',
+    },
     pairs: {}
   },
 
@@ -236,12 +275,15 @@ export const CONTRACTS = {
   324: {
     dexFactory: '0x0000000000000000000000000000000000000000',
     dexRouter: '0x0000000000000000000000000000000000000000',
+    liquidityLocker: '0x0000000000000000000000000000000000000000',
     weth: '0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91', // WETH on zkSync Era
     crossChainBridge: '0x0000000000000000000000000000000000000000',
     priceOracle: '0x0000000000000000000000000000000000000000',
     tokenFactory: '0x0000000000000000000000000000000000000000',
     tokenImplementation: '0x0000000000000000000000000000000000000000',
-    tokens: {},
+    tokens: {
+      usdc: '0x1d17CBcF0D6D143135aE902365D2E5e2A16538D4',
+    },
     pairs: {}
   },
 
@@ -249,12 +291,15 @@ export const CONTRACTS = {
   534352: {
     dexFactory: '0x0000000000000000000000000000000000000000',
     dexRouter: '0x0000000000000000000000000000000000000000',
+    liquidityLocker: '0x0000000000000000000000000000000000000000',
     weth: '0x5300000000000000000000000000000000000004', // WETH on Scroll
     crossChainBridge: '0x0000000000000000000000000000000000000000',
     priceOracle: '0x0000000000000000000000000000000000000000',
     tokenFactory: '0x0000000000000000000000000000000000000000',
     tokenImplementation: '0x0000000000000000000000000000000000000000',
-    tokens: {},
+    tokens: {
+      usdc: '0x06eFdBFf2a14a7c8E159bD5C4fa1f2e110C0FFD5',
+    },
     pairs: {}
   },
 
@@ -262,12 +307,15 @@ export const CONTRACTS = {
   1101: {
     dexFactory: '0x0000000000000000000000000000000000000000',
     dexRouter: '0x0000000000000000000000000000000000000000',
+    liquidityLocker: '0x0000000000000000000000000000000000000000',
     weth: '0x4F9A0e7FD2Bf6067db6994CF12E4495Df938E6e9', // WETH on Polygon zkEVM
     crossChainBridge: '0x0000000000000000000000000000000000000000',
     priceOracle: '0x0000000000000000000000000000000000000000',
     tokenFactory: '0x0000000000000000000000000000000000000000',
     tokenImplementation: '0x0000000000000000000000000000000000000000',
-    tokens: {},
+    tokens: {
+      usdc: '0xA8CE8aee21bC2A48a5EF680af9d3c43F19Bf46C8',
+    },
     pairs: {}
   },
 
@@ -275,12 +323,16 @@ export const CONTRACTS = {
   5000: {
     dexFactory: '0x0000000000000000000000000000000000000000',
     dexRouter: '0x0000000000000000000000000000000000000000',
+    liquidityLocker: '0x0000000000000000000000000000000000000000',
     weth: '0x78c1b0C915c4FAA5FffA6CAbf0219DA63d7f4cb8', // WMNT on Mantle
     crossChainBridge: '0x0000000000000000000000000000000000000000',
     priceOracle: '0x0000000000000000000000000000000000000000',
     tokenFactory: '0x0000000000000000000000000000000000000000',
     tokenImplementation: '0x0000000000000000000000000000000000000000',
-    tokens: {},
+    tokens: {
+      usdc: '0x09Bc4E0D864854cE73825DBC19Bd0Ad22dC5E17E',
+      usdt: '0x201EBa5CC46D216Ca6DC19A27a04caCB152C8665',
+    },
     pairs: {}
   },
 
@@ -288,12 +340,15 @@ export const CONTRACTS = {
   81457: {
     dexFactory: '0x0000000000000000000000000000000000000000',
     dexRouter: '0x0000000000000000000000000000000000000000',
+    liquidityLocker: '0x0000000000000000000000000000000000000000',
     weth: '0x4300000000000000000000000000000000000004', // WETH on Blast
     crossChainBridge: '0x0000000000000000000000000000000000000000',
     priceOracle: '0x0000000000000000000000000000000000000000',
     tokenFactory: '0x0000000000000000000000000000000000000000',
     tokenImplementation: '0x0000000000000000000000000000000000000000',
-    tokens: {},
+    tokens: {
+      usdb: '0x4300000000000000000000000000000000000003',
+    },
     pairs: {}
   },
 
@@ -301,12 +356,15 @@ export const CONTRACTS = {
   204: {
     dexFactory: '0x0000000000000000000000000000000000000000',
     dexRouter: '0x0000000000000000000000000000000000000000',
+    liquidityLocker: '0x0000000000000000000000000000000000000000',
     weth: '0x4200000000000000000000000000000000000006', // WBNB on opBNB (OP Stack)
     crossChainBridge: '0x0000000000000000000000000000000000000000',
     priceOracle: '0x0000000000000000000000000000000000000000',
     tokenFactory: '0x0000000000000000000000000000000000000000',
     tokenImplementation: '0x0000000000000000000000000000000000000000',
-    tokens: {},
+    tokens: {
+      usdt: '0x9e5AAC1Ba1a2e6aEd6b32689DFcF62A509Ca96f3',
+    },
     pairs: {}
   },
 
@@ -314,11 +372,73 @@ export const CONTRACTS = {
   34443: {
     dexFactory: '0x0000000000000000000000000000000000000000',
     dexRouter: '0x0000000000000000000000000000000000000000',
+    liquidityLocker: '0x0000000000000000000000000000000000000000',
     weth: '0x4200000000000000000000000000000000000006', // WETH on Mode (OP Stack)
     crossChainBridge: '0x0000000000000000000000000000000000000000',
     priceOracle: '0x0000000000000000000000000000000000000000',
     tokenFactory: '0x0000000000000000000000000000000000000000',
     tokenImplementation: '0x0000000000000000000000000000000000000000',
+    tokens: {
+      usdc: '0xd988097fb8612cc24eeC14542bC03424c656005f',
+    },
+    pairs: {}
+  },
+
+  // Gnosis Chain
+  100: {
+    dexFactory: ZERO_EVM,
+    dexRouter: ZERO_EVM,
+    liquidityLocker: ZERO_EVM,
+    weth: '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d',
+    crossChainBridge: ZERO_EVM,
+    priceOracle: ZERO_EVM,
+    tokenFactory: ZERO_EVM,
+    tokenImplementation: ZERO_EVM,
+    tokens: {
+      usdc: '0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83',
+      usdt: '0x4ECaBa5870353805a9F068101A40E0f32ed35062',
+    },
+    pairs: {}
+  },
+
+  // Moonbeam
+  1284: {
+    dexFactory: ZERO_EVM,
+    dexRouter: ZERO_EVM,
+    liquidityLocker: ZERO_EVM,
+    weth: '0xAcc15dC74880C9944775448304B263D191c6077F',
+    crossChainBridge: ZERO_EVM,
+    priceOracle: ZERO_EVM,
+    tokenFactory: ZERO_EVM,
+    tokenImplementation: ZERO_EVM,
+    tokens: {},
+    pairs: {}
+  },
+
+  // Moonriver
+  1285: {
+    dexFactory: ZERO_EVM,
+    dexRouter: ZERO_EVM,
+    liquidityLocker: ZERO_EVM,
+    weth: '0x98878B06940aE243284CA214f92Bb71a2b032B8A',
+    crossChainBridge: ZERO_EVM,
+    priceOracle: ZERO_EVM,
+    tokenFactory: ZERO_EVM,
+    tokenImplementation: ZERO_EVM,
+    tokens: {},
+    pairs: {}
+  },
+
+  // BSC Testnet
+  97: {
+    dexFactory: ZERO_EVM,
+    dexRouter: ZERO_EVM,
+    liquidityLocker: ZERO_EVM,
+    weth: '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd',
+    crossChainBridge: ZERO_EVM,
+    priceOracle: ZERO_EVM,
+    tokenFactory: ZERO_EVM,
+    tokenImplementation: ZERO_EVM,
     tokens: {},
     pairs: {}
   },
@@ -481,6 +601,44 @@ export const getContractAddress = (chainId, contractName) => {
   }
   return result;
 };
+
+/**
+ * Wrapped native + configured ERC-20 hub tokens for pickers (excludes protocol contracts).
+ * @param {number} chainId
+ * @returns {string[]}
+ */
+export function getEvmDexHubTokenAddresses(chainId) {
+  const contracts = getContractAddresses(chainId);
+  if (!contracts) return [];
+  const out = [];
+  if (typeof contracts.weth === 'string' && !isZeroEvmAddress(contracts.weth)) {
+    out.push(contracts.weth);
+  }
+  if (contracts.tokens && typeof contracts.tokens === 'object') {
+    for (const value of Object.values(contracts.tokens)) {
+      if (typeof value === 'string' && !isZeroEvmAddress(value)) out.push(value);
+    }
+  }
+  return [...new Set(out.map((a) => a.toLowerCase()))];
+}
+
+/**
+ * Factory / router / locker / factories — exclude from ERC-20 pickers, not hub tokens.
+ * @param {number} chainId
+ * @returns {Set<string>}
+ */
+export function getEvmDexProtocolAddresses(chainId) {
+  const contracts = getContractAddresses(chainId);
+  const set = new Set();
+  if (!contracts) return set;
+  for (const key of EVM_DEX_PROTOCOL_KEYS) {
+    const value = contracts[key];
+    if (typeof value === 'string' && value.startsWith('0x') && !isZeroEvmAddress(value)) {
+      set.add(value.toLowerCase());
+    }
+  }
+  return set;
+}
 
 /**
  * Non-zero Boing VM module id (32-byte AccountId hex) for chain 6913, or null.
