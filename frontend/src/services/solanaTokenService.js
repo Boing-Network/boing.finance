@@ -6,6 +6,7 @@
 import {
   Keypair,
   PublicKey,
+  SYSVAR_RENT_PUBKEY,
   SystemProgram,
   Transaction,
 } from '@solana/web3.js';
@@ -23,6 +24,12 @@ import { createCreateMetadataAccountV3Instruction } from '@metaplex-foundation/m
 import { getMetadataPDA } from './solanaMetaplex';
 import { uploadMetadataToR2ForSolana, uploadToR2ForSolana } from '../utils/solanaStorage';
 import { formatSolanaRpcError } from '../config/solanaConfig';
+import {
+  assertSolanaPayerFunded,
+  formatSolanaSimulationError,
+  simulateLegacyTransaction,
+  SOLANA_DEPLOY_RENT_LAMPORTS,
+} from './solanaDeployTx';
 
 // Validation
 const NAME_MAX = 32;
@@ -52,9 +59,14 @@ function validateTokenParams(params) {
  */
 export async function createSPLToken(connection, ownerAddress, signTransaction, params) {
   validateTokenParams(params);
-  const { name, symbol, decimals = 9, initialSupply = '0', logoFile } = params;
+  const { name, symbol, decimals = 9, initialSupply = '0', logoFile, network = 'devnet' } = params;
   const owner = new PublicKey(ownerAddress);
   const supplyAmount = BigInt(Math.floor(parseFloat(String(initialSupply || '0')) * Math.pow(10, Number(decimals))));
+  try {
+    await assertSolanaPayerFunded(connection, owner, network);
+  } catch (error) {
+    throw new Error(error?.message?.includes('SOL') ? error.message : formatSolanaRpcError(error, network));
+  }
 
   // 1. Upload metadata to R2
   let imageUri = '';
@@ -75,7 +87,7 @@ export async function createSPLToken(connection, ownerAddress, signTransaction, 
   try {
     lamports = await getMinimumBalanceForRentExemptMint(connection);
   } catch (error) {
-    throw new Error(formatSolanaRpcError(error));
+    throw new Error(formatSolanaRpcError(error, network));
   }
   const [metadataPDA] = getMetadataPDA(mintKeypair.publicKey);
 
@@ -139,6 +151,8 @@ export async function createSPLToken(connection, ownerAddress, signTransaction, 
         mintAuthority: owner,
         payer: owner,
         updateAuthority: owner,
+        systemProgram: SystemProgram.programId,
+        rent: SYSVAR_RENT_PUBKEY,
       },
       {
         createMetadataAccountArgsV3: {
@@ -158,24 +172,17 @@ export async function createSPLToken(connection, ownerAddress, signTransaction, 
     )
   );
 
-  try {
-    transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-  } catch (error) {
-    throw new Error(formatSolanaRpcError(error));
-  }
   transaction.feePayer = owner;
-  transaction.sign(mintKeypair);
-
-  // Simulate before send (security)
   let sim;
   try {
-    sim = await connection.simulateTransaction(transaction);
+    sim = await simulateLegacyTransaction(connection, transaction, [mintKeypair]);
   } catch (error) {
-    throw new Error(formatSolanaRpcError(error));
+    throw new Error(formatSolanaRpcError(error, network));
   }
   if (sim.value.err) {
-    throw new Error(`Simulation failed: ${JSON.stringify(sim.value.err)}`);
+    throw new Error(formatSolanaSimulationError(sim, network));
   }
+  transaction.sign(mintKeypair);
 
   const signed = await signTransaction(transaction);
   try {
@@ -191,14 +198,10 @@ export async function createSPLToken(connection, ownerAddress, signTransaction, 
       signature,
     };
   } catch (error) {
-    throw new Error(formatSolanaRpcError(error));
+    throw new Error(formatSolanaRpcError(error, network));
   }
 }
 
 export function estimateCreateTokenCost() {
-  const MINT_RENT = 0.00144 * 1e9;
-  const ATA_RENT = 0.00203928 * 1e9;
-  const METADATA_RENT = 0.01 * 1e9; // ~0.01 SOL for Metaplex metadata
-  const TX_FEE = 10000;
-  return Math.ceil(MINT_RENT + ATA_RENT + METADATA_RENT + TX_FEE);
+  return SOLANA_DEPLOY_RENT_LAMPORTS;
 }

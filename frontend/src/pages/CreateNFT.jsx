@@ -164,6 +164,7 @@ function CreateNFTSolanaContent() {
         symbol: symbol.trim().toUpperCase().slice(0, 10),
         description: description.trim(),
         imageFile,
+        network,
       });
       setMintAddress(result.mintAddress);
       setSignature(result.signature);
