@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import config from '../config';
 import { Helmet } from 'react-helmet-async';
-import coingeckoService from '../services/coingeckoService';
+import coingeckoService, { hasCoinGeckoApiKey } from '../services/coingeckoService';
 import { getDexVolumeChart } from '../services/defillamaService';
 import { getDexVolume24h } from '../services/geckoterminalService';
 import { getCryptoNews } from '../services/newsService';
@@ -160,7 +160,7 @@ export default function Analytics() {
     enabled: isOverview || isIntelligence || isTrending,
   });
 
-  const hasCoinGeckoPro = !!process.env.REACT_APP_COINGECKO_API_KEY;
+  const hasCoinGeckoPro = hasCoinGeckoApiKey();
   const { data: trendingNfts = [] } = useQuery({
     queryKey: ['trending-nfts'],
     queryFn: () => coingeckoService.getNftMarkets(8),

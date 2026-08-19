@@ -30,6 +30,8 @@ binding = "AI"
 NODE_ENV = "production"
 FRONTEND_URL = "https://boing.finance"
 WORKER_URL = "https://boing-api-prod.nico-chikuji.workers.dev"
+# Set via `wrangler secret`: ALCHEMY_WEBHOOK_SIGNING_KEY, HELIUS_WEBHOOK_SECRET
+# Webhook URLs: /api/webhooks/alchemy and /api/webhooks/helius
 
 [env.staging]
 name = "boing-api-staging"

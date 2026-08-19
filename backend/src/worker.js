@@ -14,6 +14,7 @@ import { createGovernanceRoutes } from './routes/governanceRoutes.js';
 import { createBoingRoutes } from './routes/boingRoutes.js';
 import { createSolanaRoutes } from './routes/solanaRoutes.js';
 import { createAggregatorRoutes } from './routes/aggregatorRoutes.js';
+import { createRealtimeRoutes } from './routes/realtimeRoutes.js';
 import collectAnalytics from './scheduled/collectAnalytics.js';
 
 // Create main app
@@ -34,7 +35,7 @@ app.use('*', async (c, next) => {
   return cors({
     origin: allowedOrigins,
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization', 'X-User-Address'],
+    allowHeaders: ['Content-Type', 'Authorization', 'X-User-Address', 'X-Alchemy-Signature'],
     credentials: true,
     maxAge: 86400 // Cache preflight for 24 hours
   })(c, next);
@@ -204,6 +205,10 @@ app.route('/api/solana', solanaRoutes);
 // Aggregator quotes (LI.FI / Jupiter) — no DB; do not cache
 const aggregatorRoutes = createAggregatorRoutes();
 app.route('/api/aggregator', aggregatorRoutes);
+
+// Alchemy / Helius webhooks + recent deploy events
+const realtimeRoutes = createRealtimeRoutes();
+app.route('/api', realtimeRoutes);
 
 // Webhook routes
 app.post('/api/webhook', async (c) => {

@@ -29,13 +29,14 @@ function formatAxisTime(ts, days) {
 function sourceLabel(source) {
   if (source === 'coingecko') return 'CoinGecko';
   if (source === 'geckoterminal') return 'GeckoTerminal';
+  if (source === 'dexscreener') return 'DexScreener';
   return null;
 }
 
 function emptyCopy(reason) {
   if (reason === 'testnet') return 'USD charts are for mainnet markets. Testnet tokens do not have public price history.';
   if (reason === 'native-l1') return 'Boing L1 uses pool reserve charts in the trade hub, not CoinGecko USD prices.';
-  return 'No public USD chart for this token yet. Charts use CoinGecko when the asset already has a market listing.';
+  return 'No public USD chart for this token yet. Charts use DexScreener for live DEX prices and CoinGecko when the asset already has a market listing.';
 }
 
 /**

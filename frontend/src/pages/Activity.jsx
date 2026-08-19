@@ -19,6 +19,7 @@ import {
 import { collectSwapCoinIds, computeTradingPnl, formatUsd } from '../utils/tradingPnl';
 import { downloadCSV } from '../utils/exportData';
 import LiveMarketPulse from '../components/LiveMarketPulse';
+import LiveDeploymentsPanel from '../components/LiveDeploymentsPanel';
 import ResearchBriefBanner from '../components/research/ResearchBriefBanner';
 import WalletBehaviorPanel from '../components/research/WalletBehaviorPanel';
 import toast from 'react-hot-toast';
@@ -181,6 +182,7 @@ export default function Activity() {
 
           <ResearchBriefBanner page="activity" compact />
 
+          <LiveDeploymentsPanel />
           <LiveMarketPulse />
 
           <WalletBehaviorPanel transactions={filtered} stats={stats} />
