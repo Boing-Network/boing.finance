@@ -22,7 +22,7 @@ High activity, large DeFi TVL, sub-cent fees, and a mature aggregator (Jupiter).
 
 - [x] Connect Phantom / Solflare; SOL balance; chain type EVM vs Solana
 - [x] Mainnet + Devnet RPC and explorers; network persisted in `localStorage`. Default: devnet unless `REACT_APP_SOLANA_NETWORK=mainnet`
-- [x] SPL token deploy on Deploy Token (chain selector EVM | Solana), Metaplex metadata, R2 for images
+- [x] SPL token deploy on Deploy Token (chain selector EVM | Solana), Metaplex metadata, R2 for images; optional mint/freeze/metadata authorities (EVM-style feature toggles; transfer limits need a custom program)
 - [x] Jupiter swaps on Swap when Solana is selected; market board via GeckoTerminal
 - [x] Portfolio: SOL + SPL balances (`getParsedTokenAccountsByOwner`)
 - [x] Optional `POST /api/solana/deployments` + D1 `solana_deployments` (`backend/drizzle/0003_solana_deployments.sql`)
