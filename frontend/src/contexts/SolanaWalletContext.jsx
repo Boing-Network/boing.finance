@@ -4,7 +4,6 @@
  * Separate from EVM WalletContext - use ChainTypeSelector to switch between EVM and Solana
  */
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { Connection } from '@solana/web3.js';
 
 const SolanaWalletContext = createContext();
 
@@ -84,8 +83,21 @@ export const SolanaWalletProvider = ({ children }) => {
     : (process.env.REACT_APP_SOLANA_DEVNET_RPC || 'https://api.devnet.solana.com');
 
   useEffect(() => {
-    setConnection(new Connection(rpcUrl));
-  }, [rpcUrl]);
+    if (chainType !== CHAIN_TYPE_SOLANA) {
+      setConnection(null);
+      return undefined;
+    }
+    let cancelled = false;
+    (async () => {
+      const { Connection } = await import('@solana/web3.js');
+      if (!cancelled) {
+        setConnection(new Connection(rpcUrl));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [chainType, rpcUrl]);
 
   const setChainType = useCallback((type) => {
     setChainTypeState(type);

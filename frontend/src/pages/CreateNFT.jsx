@@ -12,6 +12,7 @@ import { uploadToIPFS, validateFile } from '../utils/ipfsUpload';
 import { SOLANA_NETWORKS } from '../config/solanaConfig';
 import toast from 'react-hot-toast';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
+import { apiPath } from '../config';
 import { showDeployCelebration } from '../utils/deployCelebration';
 import { getBoingNativeFeeUsd, formatUsdReferenceLabel, isBoingNativeFeeChain } from '../config/boingEconomics';
 import NativeBoingNftDeploySection from '../components/NativeBoingNftDeploySection';
@@ -178,8 +179,7 @@ function CreateNFTSolanaContent() {
       });
       toast.success('NFT minted successfully!');
       // Record to backend (non-blocking)
-      const url = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8787';
-      fetch(`${url}/api/solana/deployments`, {
+      fetch(apiPath('solana/deployments'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

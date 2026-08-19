@@ -3,7 +3,7 @@
  * Uses backend R2 API for industry-standard, secure storage
  * All uploads return public HTTPS URLs (no IPFS required)
  */
-const getBackendUrl = () => process.env.REACT_APP_BACKEND_URL || 'http://localhost:8787';
+import { apiPath } from '../config';
 
 /**
  * Upload file (image) to R2 via backend - returns public URL
@@ -11,11 +11,10 @@ const getBackendUrl = () => process.env.REACT_APP_BACKEND_URL || 'http://localho
  * @returns {{ url: string, hash?: string, gatewayUrls?: string[] }}
  */
 export async function uploadToR2ForSolana(file) {
-  const backendUrl = getBackendUrl();
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await fetch(`${backendUrl}/api/r2/upload`, {
+  const response = await fetch(apiPath('r2/upload'), {
     method: 'POST',
     body: formData,
   });
@@ -40,8 +39,7 @@ export async function uploadToR2ForSolana(file) {
  * @returns {{ url: string }}
  */
 export async function uploadMetadataToR2ForSolana(metadata) {
-  const backendUrl = getBackendUrl();
-  const response = await fetch(`${backendUrl}/api/r2/metadata`, {
+  const response = await fetch(apiPath('r2/metadata'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(metadata),

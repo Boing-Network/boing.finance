@@ -44,7 +44,9 @@ NODE_ENV = "staging"
 FRONTEND_URL = "https://staging.boing.finance"
 WORKER_URL = "https://boing-api-staging.nico-chikuji.workers.dev"
 
-# D1 Database - Updated with actual database ID
+# D1 Database
+# Staging and production currently share this database_id. Create separate
+# Cloudflare D1 databases before treating environments as isolated.
 [[d1_databases]]
 binding = "DB"
 database_name = "boing-database"

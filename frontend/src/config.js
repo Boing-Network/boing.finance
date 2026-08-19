@@ -18,7 +18,6 @@ const config = {
   }
 };
 
-// Get current environment
 const getEnvironment = () => {
   if (process.env.NODE_ENV === 'production') {
     return process.env.REACT_APP_ENV === 'staging' ? 'staging' : 'production';
@@ -26,22 +25,37 @@ const getEnvironment = () => {
   return 'development';
 };
 
-// Export current config
 const currentConfig = config[getEnvironment()];
 
 export default currentConfig;
 
-// Helper function to get API URL
-export const getApiUrl = () => {
-  // In development, prefer local server, fallback to worker
-  if (getEnvironment() === 'development') {
-    return currentConfig.apiUrl;
-  }
-  return currentConfig.workerUrl;
+function stripTrailingSlash(url) {
+  return String(url || '').replace(/\/+$/, '');
+}
+
+function stripApiSuffix(url) {
+  return stripTrailingSlash(url).replace(/\/api$/i, '');
+}
+
+/** Worker origin without a trailing `/api` suffix. */
+export const getApiOrigin = () => {
+  const envUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_API_URL;
+  if (envUrl) return stripApiSuffix(envUrl);
+  return stripApiSuffix(currentConfig.apiUrl || currentConfig.workerUrl || 'http://localhost:8787');
 };
 
-// Helper function to check if we're in development
+/** Canonical API base, always ending in `/api`. */
+export const getApiUrl = () => `${getApiOrigin()}/api`;
+
+/**
+ * Join a path onto the API base without doubling `/api`.
+ * Accepts `liquidity/pools`, `/liquidity/pools`, or `/api/liquidity/pools`.
+ */
+export const apiPath = (path = '') => {
+  const cleaned = String(path || '').replace(/^\/+/, '').replace(/^api\//i, '');
+  return cleaned ? `${getApiUrl()}/${cleaned}` : getApiUrl();
+};
+
 export const isDevelopment = () => getEnvironment() === 'development';
 
-// Helper function to check if we're in production
-export const isProduction = () => getEnvironment() === 'production'; 
+export const isProduction = () => getEnvironment() === 'production';

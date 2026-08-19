@@ -13,6 +13,7 @@ import TokenFactoryArtifact from '../artifacts/TokenFactory.json';
 import TokenImplementationArtifact from '../artifacts/TokenImplementation.json';
 import { Helmet } from 'react-helmet-async';
 import { getContractAddress } from '../config/contracts';
+import { apiPath } from '../config';
 import LogoUpload from '../components/LogoUpload';
 import { uploadMetadataToIPFS, createTokenMetadata } from '../utils/ipfsUpload';
 import TokenPreview from '../components/TokenPreview';
@@ -88,8 +89,7 @@ function ToggleButton({ enabled, onToggle, disabled, size = "md", ariaLabel, ari
 // Record Solana deployment to backend (non-blocking)
 async function recordSolanaDeployment({ mintAddress, creatorAddress, network, type, name, symbol, metadataUri, signature }) {
   try {
-    const url = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8787';
-    await fetch(`${url}/api/solana/deployments`, {
+    await fetch(apiPath('solana/deployments'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ mintAddress, creatorAddress, network, type, name, symbol, metadataUri, signature }),

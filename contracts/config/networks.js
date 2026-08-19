@@ -1,7 +1,7 @@
 // Network configuration for boing.finance
 // Uses Infura API for all RPC endpoints
 
-const INFURA_API_KEY = "ca6843b2ac7a4fdc9b2af7fddc25904a";
+const INFURA_API_KEY = process.env.INFURA_API_KEY || process.env.INFURA_PROJECT_ID || "";
 
 // Helper function to generate Infura RPC URLs
 const getInfuraUrl = (network) => {

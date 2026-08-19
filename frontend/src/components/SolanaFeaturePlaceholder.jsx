@@ -19,18 +19,19 @@ export function CreatePoolSolanaContent() {
   return (
     <>
       <Helmet>
-        <title>Create Pool - Solana | Boing Finance</title>
+        <title>Create Pool - Solana | boing.finance</title>
       </Helmet>
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="max-w-xl mx-auto text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">Create Liquidity Pool</h1>
-          <p className="text-gray-400 mb-6">
+          <h1 className="text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Create Liquidity Pool</h1>
+          <p className="mb-6" style={{ color: 'var(--text-secondary)' }}>
             On Solana, liquidity pools are created through Raydium or Orca. Use Raydium to create AMM pools with your SPL tokens.
           </p>
           {!connected ? (
             <button
               onClick={connectWallet}
-              className="px-6 py-3 rounded-lg font-medium bg-cyan-600 text-white hover:bg-cyan-500"
+              className="px-6 py-3 rounded-lg font-medium text-white hover:opacity-90"
+              style={{ background: 'var(--accent-teal)' }}
             >
               Connect Solana Wallet
             </button>
@@ -39,12 +40,13 @@ export function CreatePoolSolanaContent() {
               href={RAYDIUM_CREATE_POOL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium bg-cyan-600 text-white hover:bg-cyan-500"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-white hover:opacity-90"
+              style={{ background: 'var(--accent-teal)' }}
             >
               Create Pool on Raydium →
             </a>
           )}
-          <p className="text-sm text-gray-500 mt-6">
+          <p className="text-sm mt-6" style={{ color: 'var(--text-tertiary)' }}>
             {solanaNetwork.name} • Pools use Raydium&apos;s AMM
           </p>
         </div>
@@ -60,18 +62,19 @@ export function LiquiditySolanaContent() {
   return (
     <>
       <Helmet>
-        <title>Liquidity - Solana | Boing Finance</title>
+        <title>Liquidity - Solana | boing.finance</title>
       </Helmet>
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="max-w-xl mx-auto text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">Liquidity</h1>
-          <p className="text-gray-400 mb-6">
+          <h1 className="text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Liquidity</h1>
+          <p className="mb-6" style={{ color: 'var(--text-secondary)' }}>
             Manage your Solana LP positions on Raydium. Add or remove liquidity for SPL token pairs.
           </p>
           {!connected ? (
             <button
               onClick={connectWallet}
-              className="px-6 py-3 rounded-lg font-medium bg-cyan-600 text-white hover:bg-cyan-500"
+              className="px-6 py-3 rounded-lg font-medium text-white hover:opacity-90"
+              style={{ background: 'var(--accent-teal)' }}
             >
               Connect Solana Wallet
             </button>
@@ -80,12 +83,13 @@ export function LiquiditySolanaContent() {
               href={RAYDIUM_LIQUIDITY}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium bg-cyan-600 text-white hover:bg-cyan-500"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-white hover:opacity-90"
+              style={{ background: 'var(--accent-teal)' }}
             >
               Open Raydium Liquidity →
             </a>
           )}
-          <p className="text-sm text-gray-500 mt-6">{solanaNetwork.name}</p>
+          <p className="text-sm mt-6" style={{ color: 'var(--text-tertiary)' }}>{solanaNetwork.name}</p>
         </div>
       </div>
     </>
@@ -99,18 +103,19 @@ export function PoolsSolanaContent() {
   return (
     <>
       <Helmet>
-        <title>Pools - Solana | Boing Finance</title>
+        <title>Pools - Solana | boing.finance</title>
       </Helmet>
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="max-w-xl mx-auto text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">Liquidity Pools</h1>
-          <p className="text-gray-400 mb-6">
+          <h1 className="text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Liquidity Pools</h1>
+          <p className="mb-6" style={{ color: 'var(--text-secondary)' }}>
             Browse and explore Solana liquidity pools on Raydium.
           </p>
           {!connected ? (
             <button
               onClick={connectWallet}
-              className="px-6 py-3 rounded-lg font-medium bg-cyan-600 text-white hover:bg-cyan-500"
+              className="px-6 py-3 rounded-lg font-medium text-white hover:opacity-90"
+              style={{ background: 'var(--accent-teal)' }}
             >
               Connect Solana Wallet
             </button>
@@ -119,12 +124,13 @@ export function PoolsSolanaContent() {
               href={RAYDIUM_POOLS}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium bg-cyan-600 text-white hover:bg-cyan-500"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-white hover:opacity-90"
+              style={{ background: 'var(--accent-teal)' }}
             >
               Browse Pools on Raydium →
             </a>
           )}
-          <p className="text-sm text-gray-500 mt-6">{solanaNetwork.name}</p>
+          <p className="text-sm mt-6" style={{ color: 'var(--text-tertiary)' }}>{solanaNetwork.name}</p>
         </div>
       </div>
     </>

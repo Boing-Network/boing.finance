@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import config from '../config';
+import { apiPath } from '../config';
 import { useWallet } from '../contexts/WalletContext';
 import { useChainType } from '../contexts/SolanaWalletContext';
 import { LiquiditySolanaContent } from '../components/SolanaFeaturePlaceholder';
@@ -16,11 +16,6 @@ import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrat
 import NativeAmmSwapPanel from '../components/NativeAmmSwapPanel';
 import NativeAmmLpVaultPanel from '../components/NativeAmmLpVaultPanel';
 import EmptyState from '../components/EmptyState';
-
-// Helper function to get API URL
-const getApiUrl = () => {
-  return config.apiUrl || 'http://localhost:8787';
-};
 
 const Liquidity = () => {
   const { isSolana } = useChainType();
@@ -48,7 +43,7 @@ const Liquidity = () => {
     const fetchPools = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`${getApiUrl()}/api/liquidity/pools`);
+        const response = await axios.get(apiPath('liquidity/pools'));
         if (response.data.success) {
           setPairs(response.data.data || []);
         } else {
@@ -56,6 +51,7 @@ const Liquidity = () => {
         }
       } catch (error) {
         console.error('Failed to fetch pools:', error);
+        toast.error('Could not load liquidity pools from the API.');
         setPairs([]);
       } finally {
         setLoading(false);
@@ -73,7 +69,7 @@ const Liquidity = () => {
       if (!account) {
         throw new Error('No wallet connected');
       }
-      const response = await axios.get(`${getApiUrl()}/api/liquidity/positions/${account}`);
+      const response = await axios.get(apiPath(`liquidity/positions/${account}`));
       const positions = response.data.data || [];
       
       // Calculate summary data from positions

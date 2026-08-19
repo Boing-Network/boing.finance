@@ -6,8 +6,8 @@ class TheGraphService {
   constructor() {
     // The Graph API endpoint
     // Using your API key for authentication
-    this.apiKey = process.env.REACT_APP_THE_GRAPH_API_KEY || 'server_b5a9f838aa860fa04075c2527ec8011f';
-    this.apiToken = process.env.REACT_APP_THE_GRAPH_API_TOKEN || 'eyJhbGciOiJLTVNFUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE4MDA3MDAxNzcsImp0aSI6ImY4ZDc4NzUzLTkxOTQtNGZmMi1hZjkzLTMzZjE2YThkZGRkOCIsImlhdCI6MTc2NDcwMDE3NywiaXNzIjoiZGZ1c2UuaW8iLCJzdWIiOiIwbWlkeTk0MDZlZGIxYjMxNDc5NDMiLCJ2IjoyLCJha2kiOiI1NmM3MWNlN2YzNzhhYTExZGZlZTRmNzk0NTZiY2E3Y2M3ZGJiYTBiN2M3MmY0MjZjZTQ3MGI0OTgxMWJhMmU0IiwidWlkIjoiMG1pZHk5NDA2ZWRiMWIzMTQ3OTQzIiwic3Vic3RyZWFtc19wbGFuX3RpZXIiOiJGUkVFIiwiY2ZnIjp7IlNVQlNUUkVBTVNfTUFYX1JFUVVFU1RTIjoiMiIsIlNVQlNUUkVBTVNfUEFSQUxMRUxfSk9CUyI6IjUiLCJTVUJTVFJFQU1TX1BBUkFMTEVMX1dPUktFUlMiOiI1In0sInRva2VuX2FwaV9wbGFuX3RpZXIiOiJGUkVFIiwidG9rZW5fYXBpX2ZlYXR1cmVfY29uZmlncyI6eyJUT0tFTl9BUElfQkFUQ0hfU0laRSI6IjEiLCJUT0tFTl9BUElfSVRFTVNfUkVUVVJORUQiOiIxMCIsIlRPS0VOX0FQSV9NQVhJTVVNX0FMTE9XRURfRU5EUE9JTlRfR1JPVVAiOiJuZnQiLCJUT0tFTl9BUElfUExBTl9DUkVESVRTX0NFTlRTIjoiMjUwMCIsIlRPS0VOX0FQSV9SQVRFX0xJTUlUX1BFUl9NSU5VVEUiOiIyMDAiLCJUT0tFTl9BUElfUkVBTF9USU1FX0RBVEEiOiJ0cnVlIn19.hanOsf8qIdXaFPDqyFeMb-jM2T2lkogUSAHyTpk7SOmjr9YruhCN5NaD_m-YdV57ALSBfqckVY6t7vA-V3MNEA';
+    this.apiKey = process.env.REACT_APP_THE_GRAPH_API_KEY || '';
+    this.apiToken = process.env.REACT_APP_THE_GRAPH_API_TOKEN || '';
     
     // The Graph API base URL
     // Using dfuse.io endpoint (based on your token)
@@ -36,7 +36,7 @@ class TheGraphService {
     const apiKey = this.apiKey;
     
     // If API key is available, use the gateway
-    if (apiKey && apiKey !== 'server_b5a9f838aa860fa04075c2527ec8011f') {
+    if (apiKey) {
       // Use gateway URL format: https://gateway-<network>.network.thegraph.com/api/<apiKey>/subgraphs/id/<subgraphId>
       // For now, fallback to public subgraphs if gateway not configured
       const networkMap = {
@@ -78,8 +78,8 @@ class TheGraphService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(this.apiToken && { 'Authorization': `Bearer ${this.apiToken}` }),
-          ...(this.apiKey && { 'X-API-Key': this.apiKey })
+          ...(this.apiToken ? { 'Authorization': `Bearer ${this.apiToken}` } : {}),
+          ...(this.apiKey ? { 'X-API-Key': this.apiKey } : {})
         },
         body: JSON.stringify({
           query,

@@ -31,12 +31,12 @@ Prerequisites: Node.js 18+, npm, Git. Cloudflare account only if you deploy.
 git clone <repository-url>
 cd boing.finance
 
-# Backend
-cd backend && npm install && npm run setup && npm run dev
+# Backend (Cloudflare Worker via Wrangler)
+cd backend && npm install && npm run dev
 
-# Frontend (separate terminal)
+# Frontend (separate terminal) — Vite listens on port 3000
 cd frontend && npm install && npm start
-# Vite: http://localhost:5173 (or the port printed by `vite`)
+# http://localhost:3000
 ```
 
 From the repo root: `npm run dev` runs backend and frontend together.

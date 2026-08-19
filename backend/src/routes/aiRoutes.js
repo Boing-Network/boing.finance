@@ -14,9 +14,26 @@ Keep responses concise (2-4 paragraphs max), clear, and practical. Do not give f
 
 export function createAIRoutes() {
   const router = new Hono();
+  const chatHits = new Map();
+
+  const allowChat = (ip, limit = 20, windowMs = 60_000) => {
+    const now = Date.now();
+    const rec = chatHits.get(ip) || { count: 0, start: now };
+    if (now - rec.start > windowMs) {
+      chatHits.set(ip, { count: 1, start: now });
+      return true;
+    }
+    rec.count += 1;
+    chatHits.set(ip, rec);
+    return rec.count <= limit;
+  };
 
   router.post('/chat', async (c) => {
     try {
+      const ip = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown';
+      if (!allowChat(String(ip).split(',')[0].trim())) {
+        return c.json({ success: false, error: 'Too many requests' }, 429);
+      }
       const body = await c.req.json().catch(() => ({}));
       const { message, context } = body;
 

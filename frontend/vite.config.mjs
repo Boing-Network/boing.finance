@@ -62,6 +62,7 @@ const REACT_APP_DEFAULTS = [
   'REACT_APP_OPBNB_RPC_URL',
   'REACT_APP_MODE_RPC_URL',
   'REACT_APP_BOING_TESTNET_RPC_DIRECT',
+  'REACT_APP_BOING_TESTNET_RPC_URL',
   'REACT_APP_BOING_NATIVE_AMM_POOL',
   'REACT_APP_BOING_NATIVE_AMM_LP_VAULT',
   'REACT_APP_BOING_NATIVE_AMM_LP_SHARE_TOKEN',
@@ -184,6 +185,20 @@ export default defineConfig(({ mode }) => {
     outDir: 'dist',
     sourcemap: true,
     chunkSizeWarningLimit: 1200,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/recharts')) return 'recharts';
+          if (
+            id.includes('node_modules/@solana') ||
+            id.includes('node_modules/@metaplex-foundation')
+          ) {
+            return 'solana';
+          }
+          return undefined;
+        },
+      },
+    },
   },
   publicDir: 'public',
 };
