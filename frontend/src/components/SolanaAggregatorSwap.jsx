@@ -12,8 +12,11 @@ import {
   getJupiterQuote,
 } from '../services/aggregatorSwapService';
 import { useTokenMarket } from '../hooks/useTokenMarket';
+import { useDexMarkets } from '../hooks/useDexMarkets';
 import { formatUsdCompact } from '../services/tokenChartService';
 import { ChartSkeleton } from './SkeletonLoader';
+import SwapMarketsBoard from './SwapMarketsBoard';
+import SwapSpotTicker from './SwapSpotTicker';
 
 const SwapTokenPriceChart = lazy(() => import('./SwapTokenPriceChart'));
 
@@ -59,9 +62,18 @@ export default function SolanaAggregatorSwap() {
   const [loading, setLoading] = useState(false);
   const [swapping, setSwapping] = useState(false);
   const [error, setError] = useState('');
+  const [extraTokens, setExtraTokens] = useState([]);
+  const listed = useMemo(() => {
+    const base = [...TOKENS];
+    for (const t of extraTokens) {
+      if (!base.some((b) => b.mint === t.mint)) base.push(t);
+    }
+    return base;
+  }, [extraTokens]);
+  const dexMarkets = useDexMarkets({ solana: true, enabled: true });
 
-  const inMeta = useMemo(() => TOKENS.find((t) => t.symbol === tokenIn), [tokenIn]);
-  const outMeta = useMemo(() => TOKENS.find((t) => t.symbol === tokenOut), [tokenOut]);
+  const inMeta = useMemo(() => listed.find((t) => t.symbol === tokenIn), [tokenIn, listed]);
+  const outMeta = useMemo(() => listed.find((t) => t.symbol === tokenOut), [tokenOut, listed]);
   const isMainnet = network === 'mainnet';
 
   const inMarket = useTokenMarket({
@@ -122,6 +134,36 @@ export default function SolanaAggregatorSwap() {
     return () => clearTimeout(t);
   }, [fetchQuote]);
 
+  const selectedMarket = useMemo(() => {
+    const list = dexMarkets.data || [];
+    return list.find((m) => m.symbol === tokenOut || m.address === outMeta?.mint) || list[0] || null;
+  }, [dexMarkets.data, tokenOut, outMeta?.mint]);
+
+  const selectDiscoveryMarket = (market) => {
+    if (!market?.address || !market?.symbol) return;
+    setExtraTokens((prev) => {
+      if (prev.some((t) => t.mint === market.address) || TOKENS.some((t) => t.mint === market.address)) return prev;
+      return [
+        ...prev,
+        {
+          symbol: market.symbol,
+          name: market.name,
+          mint: market.address,
+          decimals: market.decimals || 6,
+        },
+      ];
+    });
+    setTokenOut(market.symbol);
+    if (tokenIn === market.symbol) setTokenIn('SOL');
+  };
+
+  useEffect(() => {
+    if (tokenOut !== 'USDC') return;
+    const first = dexMarkets.data?.[0];
+    if (first) selectDiscoveryMarket(first);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dexMarkets.data]);
+
   const switchTokens = () => {
     setTokenIn(tokenOut);
     setTokenOut(tokenIn);
@@ -174,14 +216,32 @@ export default function SolanaAggregatorSwap() {
       </Helmet>
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Swap</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Spot</h1>
           <p className="text-sm mt-0.5 text-gray-400">
-            Jupiter routes Raydium, Orca, and other Solana venues · chart when a market exists
+            Discover trending Solana tokens and swap on-chain via Jupiter
           </p>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-          <div className="xl:col-span-7 order-2 xl:order-1">
+        <SwapSpotTicker
+          market={selectedMarket}
+          networkName={solanaNetwork.name}
+          fallbackPair={`${tokenOut}/${tokenIn}`}
+        />
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
+          <div className="xl:col-span-3 order-3 xl:order-1">
+            <SwapMarketsBoard
+              networkName="Solana"
+              tab={dexMarkets.tab}
+              onTab={dexMarkets.setTab}
+              queryText={dexMarkets.queryText}
+              onQueryText={dexMarkets.setQueryText}
+              rows={dexMarkets.rows}
+              isLoading={dexMarkets.isLoading}
+              selectedAddress={outMeta?.mint}
+              onSelect={selectDiscoveryMarket}
+            />
+          </div>
+          <div className="xl:col-span-5 order-2 xl:order-2">
             <Suspense fallback={<ChartSkeleton height="280px" />}>
               <SwapTokenPriceChart
                 chain="solana"
@@ -190,7 +250,7 @@ export default function SolanaAggregatorSwap() {
               />
             </Suspense>
           </div>
-          <div className="xl:col-span-5 order-1 xl:order-2 xl:sticky xl:top-20">
+          <div className="xl:col-span-4 order-1 xl:order-3 xl:sticky xl:top-20">
             <div
               className="rounded-2xl p-4 sm:p-5 space-y-4 shadow-xl"
               style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
@@ -213,7 +273,7 @@ export default function SolanaAggregatorSwap() {
                         value={tokenIn}
                         onChange={(e) => setTokenIn(e.target.value)}
                       >
-                        {TOKENS.map((t) => (
+                        {listed.map((t) => (
                           <option key={t.mint} value={t.symbol}>
                             {t.symbol}
                           </option>
@@ -252,7 +312,7 @@ export default function SolanaAggregatorSwap() {
                         value={tokenOut}
                         onChange={(e) => setTokenOut(e.target.value)}
                       >
-                        {TOKENS.map((t) => (
+                        {listed.map((t) => (
                           <option key={t.mint} value={t.symbol}>
                             {t.symbol}
                           </option>
