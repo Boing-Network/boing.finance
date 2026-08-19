@@ -22,6 +22,7 @@ import getFeatureSupport from '../config/featureSupport';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import { fetchTradeableEvmTokenAddressesFromDexFactory } from '../services/evmDexTradeableTokens';
 import { tryAccruePoints } from '../utils/tryAccruePoints';
+import { getEvmAggregatorQuote, sendAggregatorSwap, isNativeSwapSymbol } from '../services/aggregatorSwapService';
 
 
 const devLog = (...args) => {
@@ -42,6 +43,11 @@ const Swap = () => {
     [chainId, effectivePoolHex]
   );
   const { record: recordAchievement } = useAchievements() || {};
+
+  useEffect(() => {
+    const sym = getNetworkByChainId(chainId)?.nativeCurrency?.symbol;
+    if (sym) setTokenIn(sym);
+  }, [chainId]);
   
   // Swap state
   const [amountIn, setAmountIn] = useState('');
@@ -74,6 +80,8 @@ const Swap = () => {
   const [selectedExternalQuote, setSelectedExternalQuote] = useState(null);
   const [showExternalQuotes, setShowExternalQuotes] = useState(false);
   const [isExternalDEXAvailable, setIsExternalDEXAvailable] = useState(false);
+  const [aggregatorQuote, setAggregatorQuote] = useState(null);
+  const [routeSource, setRouteSource] = useState(/** @type {null | 'boing' | 'aggregator'} */ (null));
 
   // EIP-1559 gas estimate for display (no signer required)
   const [estimatedGasCost, setEstimatedGasCost] = useState(null);
@@ -331,8 +339,15 @@ const Swap = () => {
 
   // Helper functions to get selected token balances
   const getTokenInBalance = () => {
-    if (!tokenIn || tokenIn === 'ETH') {
-      // For ETH, we'd need to get native balance
+    if (!tokenIn || isNativeSwapSymbol(tokenIn, chainId) || tokenIn === 'ETH') {
+      const native = userTokens.find((t) => t.isNative || t.symbol === tokenIn);
+      if (native?.balance) {
+        try {
+          return parseFloat(ethers.formatUnits(native.balance, native.decimals || 18));
+        } catch {
+          return null;
+        }
+      }
       return null;
     }
     const token = userTokens.find(t => t.symbol === tokenIn);
@@ -407,7 +422,9 @@ const Swap = () => {
 
   // Check if DEX or native AMM swap is supported on current network
   const isSwapSupported = () =>
-    featureSupport.swap === 'boing' || featureSupport.swap === 'native_amm';
+    featureSupport.swap === 'boing' ||
+    featureSupport.swap === 'native_amm' ||
+    featureSupport.swap === 'aggregator';
 
   // Get network status message
   const getNetworkStatusMessage = () => {
@@ -421,7 +438,7 @@ const Swap = () => {
         message:
           chainId === BOING_NATIVE_L1_CHAIN_ID
             ? 'On Boing testnet: use the native pool panel below (Boing Express) when available, open Native VM tools, or switch to Sepolia for the classic EVM swap.'
-            : 'In-app AMM swap needs a Boing DEX factory and router on this network. After those are deployed, create a pool (funding) then swap. Ethereum is not in this rollout; Sepolia already has the protocol live.',
+            : 'Swap is not available on this network.',
       };
     }
 
@@ -429,6 +446,20 @@ const Swap = () => {
       return {
         type: 'success',
         message: 'Native pool swap — confirm amounts below, then approve in Boing Express.',
+      };
+    }
+
+    if (routeSource === 'aggregator' && aggregatorQuote?.venue) {
+      return {
+        type: 'success',
+        message: `Routing via ${aggregatorQuote.venue} (aggregator). Liquidity is on that venue, not a Boing pool.`,
+      };
+    }
+
+    if (featureSupport.swap === 'aggregator') {
+      return {
+        type: 'success',
+        message: 'Swaps route through public DEX aggregators when a market exists.',
       };
     }
 
@@ -466,6 +497,52 @@ const Swap = () => {
       return;
     }
 
+    if (aggregatorQuote?.transactionRequest && routeSource === 'aggregator') {
+      setIsSwapping(true);
+      setSwapError('');
+      setSwapSuccess('');
+      try {
+        if (!walletProvider) throw new Error('Connect a wallet first');
+        const signer = walletSigner ?? (await walletProvider.getSigner());
+        const fresh = await getEvmAggregatorQuote({
+          chainId: Number(chainId),
+          fromSymbol: tokenIn,
+          toSymbol: tokenOut,
+          amountHuman: amountIn,
+          fromAddress: account,
+          userTokens,
+          slippagePercent: settings.slippage,
+        });
+        const toUse = fresh?.transactionRequest ? fresh : aggregatorQuote;
+        toast(`Routing via ${toUse.venue}…`, { duration: 2500 });
+        const result = await sendAggregatorSwap(toUse, signer);
+        toast.success(`Swap sent via ${toUse.venue}`);
+        setSwapSuccess(`Swap successful via ${toUse.venue}. Transaction: ${result.txHash}`);
+        recordAchievement?.(account, 'swap', 'first_swap');
+        tryAccruePoints({
+          address: account,
+          action: 'swap',
+          txHash: result.txHash,
+          chainId,
+          metadata: { tokenIn, tokenOut, amountIn, dex: toUse.venue, provider: 'lifi' },
+        });
+        setShareData({ tokenIn, tokenOut, amountIn, amountOut });
+        setShareModalOpen(true);
+        setAmountIn('');
+        setAmountOut('');
+        setAggregatorQuote(null);
+        setRouteSource(null);
+        await fetchUserTokens();
+      } catch (error) {
+        const msg = error?.shortMessage || error?.message || 'Aggregator swap failed';
+        setSwapError(msg);
+        toast.error(msg);
+      } finally {
+        setIsSwapping(false);
+      }
+      return;
+    }
+
     // Check if we have a selected external quote
     if (selectedExternalQuote) {
       await handleExternalSwap();
@@ -492,7 +569,7 @@ const Swap = () => {
       toast.error(
         chainId === BOING_NATIVE_L1_CHAIN_ID
           ? 'On Boing testnet, use the native pool panel or Native VM with Boing Express. This swap box targets EVM routers on other configured networks only.'
-          : 'DEX swapping is not yet available on this network. Use a network where a router is configured in contracts, or an external DEX.'
+          : 'No aggregator route for this pair. Public DEXs need existing liquidity — try USDC, wrapped native, or a token that already trades.'
       );
       return;
     }
@@ -1460,6 +1537,32 @@ const Swap = () => {
       });
       
       devLog('Final tokens to display:', tokensWithBalance.length, tokensWithBalance.map(t => `${t.symbol} (${t.address})`));
+      const net = getNetworkByChainId(chainId);
+      const nativeSym = net?.nativeCurrency?.symbol || 'ETH';
+      if (!tokensWithBalance.some((t) => t.symbol === nativeSym || t.isNative)) {
+        try {
+          const wei = await walletProvider.getBalance(account);
+          tokensWithBalance.unshift({
+            address: ethers.ZeroAddress,
+            symbol: nativeSym,
+            name: net?.nativeCurrency?.name || nativeSym,
+            decimals: 18,
+            balance: wei.toString(),
+            formattedBalance: ethers.formatEther(wei),
+            isNative: true,
+          });
+        } catch {
+          tokensWithBalance.unshift({
+            address: ethers.ZeroAddress,
+            symbol: nativeSym,
+            name: nativeSym,
+            decimals: 18,
+            balance: '0',
+            formattedBalance: '0',
+            isNative: true,
+          });
+        }
+      }
       setUserTokens(tokensWithBalance);
     } catch (error) {
       console.error('Error fetching user tokens:', error);
@@ -1643,14 +1746,39 @@ const Swap = () => {
     if (amountIn && tokenIn && tokenOut && tokenIn !== tokenOut) {
       devLog('✅ Starting calculation with:', { amountIn, tokenIn, tokenOut });
       const timeoutId = setTimeout(() => {
-        devLog('⏰ Debounced calculation starting...');
-        calculateExpectedOutput(amountIn, tokenIn, tokenOut);
-        
-        // Also fetch external DEX quotes if available
-        if (isExternalDEXAvailable && amountIn && tokenIn && tokenOut) {
-          fetchExternalQuotes();
-        }
-      }, 500); // Debounce for 500ms
+        void (async () => {
+          setAggregatorQuote(null);
+          setRouteSource(null);
+          let agg = null;
+          if (Number(chainId) !== BOING_NATIVE_L1_CHAIN_ID && account) {
+            try {
+              agg = await getEvmAggregatorQuote({
+                chainId: Number(chainId),
+                fromSymbol: tokenIn,
+                toSymbol: tokenOut,
+                amountHuman: amountIn,
+                fromAddress: account,
+                userTokens,
+                slippagePercent: settings.slippage,
+              });
+            } catch (e) {
+              devLog('Aggregator quote skipped:', e?.message || e);
+            }
+          }
+          if (agg?.amountOutHuman) {
+            setAggregatorQuote(agg);
+            setAmountOut(agg.amountOutHuman);
+            setRouteSource('aggregator');
+            setSelectedExternalQuote(null);
+            return;
+          }
+          calculateExpectedOutput(amountIn, tokenIn, tokenOut);
+          if (featureSupport.swap === 'boing') setRouteSource('boing');
+          if (isExternalDEXAvailable) {
+            fetchExternalQuotes();
+          }
+        })();
+      }, 500);
       
       return () => {
         devLog('🧹 Clearing timeout');
@@ -1661,9 +1789,11 @@ const Swap = () => {
       setAmountOut('');
       setExternalQuotes([]);
       setSelectedExternalQuote(null);
+      setAggregatorQuote(null);
+      setRouteSource(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchExternalQuotes intentionally not in deps
-  }, [amountIn, tokenIn, tokenOut, calculateExpectedOutput, isExternalDEXAvailable]);
+  }, [amountIn, tokenIn, tokenOut, calculateExpectedOutput, isExternalDEXAvailable, account, chainId, userTokens, settings.slippage, featureSupport.swap]);
 
   // Fetch external DEX quotes
   const fetchExternalQuotes = async () => {
@@ -2188,8 +2318,10 @@ const Swap = () => {
                   if (configuredPairs.length > 0) {
                     const pairStrings = configuredPairs.map(p => `${p.tokenA}/${p.tokenB}`).join(', ');
                     return `Configured pairs: ${pairStrings}. Try swapping these tokens for best results.`;
+                  } else if (routeSource === 'aggregator' && aggregatorQuote?.venue) {
+                    return `Best public route: ${aggregatorQuote.venue}. Tokens without liquidity still cannot be swapped.`;
                   } else {
-                    return 'No pre-configured pairs available. You may need to create liquidity pools first.';
+                    return 'Quotes use public DEX aggregators when a market exists. Boing pools appear here after they are funded.';
                   }
                 })()}
               </div>
@@ -2274,6 +2406,11 @@ const Swap = () => {
                 {amountOut && parseFloat(amountOut) > 0 && (
                   <div className="mt-2 text-xs text-gray-400">
                     Rate: 1 {tokenIn} = {(parseFloat(amountOut) / parseFloat(amountIn)).toFixed(6)} {tokenOut}
+                    {routeSource === 'aggregator' && aggregatorQuote?.venue
+                      ? ` · via ${aggregatorQuote.venue}`
+                      : routeSource === 'boing'
+                        ? ' · Boing DEX'
+                        : ''}
                   </div>
                 )}
               </div>

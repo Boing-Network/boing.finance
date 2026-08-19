@@ -9,7 +9,7 @@
 | [boing-l1-dex-roadmap.md](./boing-l1-dex-roadmap.md) | Phased plan: network bytecode → published ids → app wiring. |
 | [boing-vm-contracts-and-explorer.md](./boing-vm-contracts-and-explorer.md) | Boing VM deploy vs EVM; Observer transparency; what to build next. |
 | [contracts.md](./contracts.md) | Contract registry overview (EVM-focused). |
-| [evm-dex-enablement.md](./evm-dex-enablement.md) | EVM DEX up to funding: factory/router deploy, Ethereum excluded, Create Pool is LP seed. |
+| [evm-dex-enablement.md](./evm-dex-enablement.md) | EVM DEX up to funding; in-app aggregator (LI.FI) and Jupiter on Solana. |
 | [contract-registry.md](./contract-registry.md) | Deployment addresses and history. |
 
 **Ops:** from `frontend/`, run **`npm run smoke:boing-rpc`** to verify public Boing testnet JSON-RPC (`boing_chainHeight`, optional `boing_qaCheck` via `BOING_SMOKE_BYTECODE_HEX`).

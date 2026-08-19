@@ -28,7 +28,7 @@ Solana is integrated as a non-EVM stack alongside EVM networks. This document co
 ## Integration approach
 
 - **Token creation:** Native SPL via @solana/spl-token (createMint, createAccount, mintTo). No custom program for basic tokens.
-- **Swap / Pools:** Jupiter and Raydium links (hybrid; no proprietary DEX initially).
+- **Swap / Pools:** In-app Jupiter swaps (mainnet); Raydium links for pools (no proprietary Solana DEX).
 - **Stack:** @solana/web3.js, @solana/spl-token, @solana/wallet-adapter-react.
 
 ---
@@ -46,7 +46,7 @@ Solana is integrated as a non-EVM stack alongside EVM networks. This document co
 - Cost: rent-exempt (~0.002 SOL mint + ATA), service fee configurable
 
 ### Phase 3: Swap & portfolio
-- Jupiter / Raydium for swaps and pool links
+- Jupiter in-app for swaps; Raydium links for pools
 - Portfolio: SOL + SPL token balances (getParsedTokenAccountsByOwner)
 
 ### Phase 4: Bridge (future)

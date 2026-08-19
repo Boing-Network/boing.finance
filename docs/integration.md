@@ -47,7 +47,7 @@ Networks are integrated **in order of user activity**. We use industry metrics t
 
 - Solana wallet connection (Phantom, Solflare, Backpack)
 - SPL token deployment (Deploy Token)
-- Swap (Jupiter link), Pools/Liquidity (Raydium links)
+- Swap (in-app Jupiter), Pools/Liquidity (Raydium links)
 - Portfolio: SOL + SPL token balances
 
 ### Phase 2: EVM networks (by user activity)

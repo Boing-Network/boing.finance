@@ -28,7 +28,7 @@ const hasDeployed = (addr) => hasDeployedAddress(addr) && addr !== ZERO;
  * @param {number} chainId
  * @param {{ nativeConstantProductPoolHex?: string | null }} [options] — optional pool from {@link fetchNativeDexIntegrationDefaults} when on 6913
  * @returns {{
- *   swap: 'boing' | 'native_amm' | 'external' | false,
+ *   swap: 'boing' | 'native_amm' | 'aggregator' | 'external' | false,
  *   liquidity: boolean,
  *   createPool: boolean, // true for EVM DEX or native AMM add-liquidity on Boing L1
  *   deployToken: boolean,
@@ -56,8 +56,9 @@ export function getFeatureSupport(chainId, options) {
   };
 
   if (!c) {
+    const onBoingNativeL1 = chainId === BOING_NATIVE_L1_CHAIN_ID;
     return {
-      swap: 'external',
+      swap: onBoingNativeL1 ? false : 'aggregator',
       liquidity: false,
       createPool: false,
       deployToken: false,
@@ -95,7 +96,7 @@ export function getFeatureSupport(chainId, options) {
   };
 
   return {
-    swap: hasDex ? 'boing' : hasNativeAmm ? 'native_amm' : 'external',
+    swap: hasDex ? 'boing' : hasNativeAmm ? 'native_amm' : onBoingNativeL1 ? false : 'aggregator',
     /** EVM router/factory LP, or native CP pool add-liquidity on Boing L1. */
     liquidity: hasDex || hasNativeAmm,
     /** EVM factory pair creation, or native pool bootstrap via add-liquidity on Boing L1. */
