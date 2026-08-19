@@ -39,7 +39,7 @@ If you deploy Boing contracts (TokenFactory, DEX, etc.) on this chain, add an en
 - Copy the structure from an existing chain (e.g. Sepolia or Ethereum).
 - Set each deployed contract address; use `'0x0000000000000000000000000000000000000000'` for not-yet-deployed contracts.
 - **TokenFactory / TokenImplementation:** Required for **Deploy Token**.
-- **dexFactory / dexRouter / weth:** Required for **Swap (Boing DEX)**, **Liquidity**, and **Create Pool**. Ethereum is not in the current DEX rollout; see [evm-dex-enablement.md](evm-dex-enablement.md).
+- **dexFactory / dexRouter / weth:** Required for **Swap (Boing DEX)**, **Liquidity**, and **Create Pool**. Ethereum is not in the current DEX rollout; see [contracts.md](./contracts.md).
 
 After this step:
 
@@ -50,7 +50,7 @@ After this step:
 ## 3. Optional: Backend / env
 
 - If the backend or frontend call chain-specific RPCs, add the RPC URL to the right env (e.g. Cloudflare Workers secrets, or `frontend/.env.example`).
-- Document the new variable in **`docs/configuration.md`**.
+- Document the new variable in **`frontend/.env.example`** (and mention it in [configuration.md](./configuration.md) only if it is required for production).
 
 ## Summary
 
@@ -58,7 +58,7 @@ After this step:
 |------|------|--------|
 | 1 | `frontend/src/config/networks.js` | Add chain (name, RPC, explorer, native currency). Required for UI and wallet. |
 | 2 | `frontend/src/config/contracts.js` | Add contract addresses when deployed. Enables Deploy Token / DEX features on that chain. |
-| 3 | Env / docs | RPC and API keys; document in `docs/configuration.md`. |
+| 3 | `frontend/.env.example` | RPC and API keys; keep `docs/configuration.md` as the production checklist only. |
 
 No need to change:
 

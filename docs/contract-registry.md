@@ -1,16 +1,16 @@
 # Smart Contract Deployment Registry
 
-This document tracks all deployed smart contracts across different networks for the boing.finance project.
+Historical deployment notes and explorer links. **The live source of truth for the app is** `frontend/src/config/contracts.js`. Enablement and operator steps: [contracts.md](./contracts.md).
 
 ## Overview
 
 - **Project:** boing.finance
 - **Contracts:** TokenFactory + TokenImplementation System, DEXFactory System
-- **Last Updated:** July 2, 2025
-- **Total Networks:** 7 (Ethereum, Arbitrum, Base, Polygon, BSC, Optimism, Sepolia)
+- **Last reviewed:** August 2026
+- **Networks with TokenFactory:** Ethereum, Arbitrum, Base, Polygon, BSC, Optimism, Sepolia
+- **DEXFactory:** Sepolia live (`0x291A02126420b53eCaAE518466Ac65C8482D3feb`); other EVM mainnets pre-funding
 - **Deployer:** `0xb24c5A62F8Da57967A08e11c88Fe18904f49920E`
 - **Platform Wallet:** `0x7f279e722E3C4A54B62D7fA08b3AC7f109FE58E2`
-- **Status:** ✅ TokenFactory deployed on all networks, DEXFactory deployed on Sepolia (testing phase)
 
 ---
 
@@ -588,71 +588,6 @@ constructor(
 
 ---
 
-### 8. Sepolia Testnet (Previous Deployment - Name/Symbol Issue)
-
-**Network Details:**
-
-- **Name:** Sepolia Testnet
-- **Chain ID:** 11155111
-- **Block Explorer:** [https://sepolia.etherscan.io](https://sepolia.etherscan.io)
-- **RPC Provider:** Infura
-
-**Contract Information:**
-
-- **TokenImplementation Address:** `0xCbCcE707b62615163d4582fC74476Dce747874B5`
-- **TokenFactory Address:** `0xFCE72cbF657D39b7Bf2913865924A8229A21703d`
-- **Deployment Date:** December 2024
-- **Deployer:** `0xb24c5A62F8Da57967A08e11c88Fe18904f49920E`
-- **Platform Wallet:** `0xb24c5A62F8Da57967A08e11c88Fe18904f49920E`
-
-**TokenImplementation Constructor:**
-
-```solidity
-constructor() ERC20("", "") Ownable(msg.sender)
-```
-
-**TokenFactory Constructor:**
-
-```solidity
-constructor(
-    address _platformWallet,      // 0xb24c5A62F8Da57967A08e11c88Fe18904f49920E
-    address _implementation       // 0xCbCcE707b62615163d4582fC74476Dce747874B5
-)
-```
-
-**Service Fee Structure (Sepolia):**
-
-- **Basic Plan:** 0.001 ETH (~$2-3)
-- **Professional Plan:** 0.003 ETH (~$6-9)
-- **Enterprise Plan:** 0.006 ETH (~$12-18)
-
-**Verification Status:**
-
-- **TokenImplementation:** [https://sepolia.etherscan.io/address/0xCbCcE707b62615163d4582fC74476Dce747874B5#code](https://sepolia.etherscan.io/address/0xCbCcE707b62615163d4582fC74476Dce747874B5#code)
-- **TokenFactory:** [https://sepolia.etherscan.io/address/0xFCE72cbF657D39b7Bf2913865924A8229A21703d#code](https://sepolia.etherscan.io/address/0xFCE72cbF657D39b7Bf2913865924A8229A21703d#code)
-- **Status:** ✅ Deployed & Verified
-
-**DEXFactory Information:**
-
-- **DEXFactory Address:** `0x5b2bc0398F86553e88f8546E89d5E518Bb597cD2`
-- **Deployment Date:** June 29, 2025
-- **Deployer:** `0xb24c5A62F8Da57967A08e11c88Fe18904f49920E`
-- **Transaction Hash:** `0x5703f03a59fff26555088586ab6b5f43a5bb9b65cd1e9c7ff320630f9f1b04e7`
-
-**DEXFactory Features:**
-
-- Core DEX functionality
-- Liquidity Locking (max 365 days)
-- Security Controls (emergency stop, pausable, reentrancy guard, owner controls)
-- Fee Rate: 0.3% (30 basis points)
-
-**Verification Status:**
-
-- **DEXFactory:** [https://sepolia.etherscan.io/address/0x5b2bc0398F86553e88f8546E89d5E518Bb597cD2#code](https://sepolia.etherscan.io/address/0x5b2bc0398F86553e88f8546E89d5E518Bb597cD2#code)
-- **Status:** ✅ Deployed & Verified
-
----
-
 ## Deployed Tokens
 
 This section tracks individual tokens deployed through the TokenFactory contract across different networks.
@@ -690,79 +625,22 @@ This section tracks individual tokens deployed through the TokenFactory contract
 
 ---
 
-## Frontend Configuration
+## Frontend configuration
 
-The frontend has been automatically updated with all deployed contract addresses:
-
-```javascript
-// frontend/src/config/contracts.js
-export const CONTRACTS = {
-  // Ethereum Mainnet
-  1: {
-    tokenFactory: "0xa40Cac462b983f8F69Eb258411F588b3e575F90E",
-    tokenImplementation: "0x0C4BcF0e9707266Be1543240fC613A163B5b99d1"
-  },
-  
-  // Arbitrum One
-  42161: {
-    tokenFactory: "0x48b3c4E011a8eEF87C60c257eaa004dABb86Ce3b",
-    tokenImplementation: "0x3213695638B2748678C6bcd812e8913C25f520B5"
-  },
-  
-  // Base
-  8453: {
-    tokenFactory: "0x594f4560A5fd52b49E824689Ec09770DB249Eca5",
-    tokenImplementation: "0x48b3c4E011a8eEF87C60c257eaa004dABb86Ce3b"
-  },
-  
-  // Polygon
-  137: {
-    tokenFactory: "0x1FAF7d4CAF23C1Ac79257ca74900011d2B7240A8",
-    tokenImplementation: "0x594f4560A5fd52b49E824689Ec09770DB249Eca5"
-  },
-  
-  // BSC
-  56: {
-    tokenFactory: "0x594f4560A5fd52b49E824689Ec09770DB249Eca5",
-    tokenImplementation: "0x48b3c4E011a8eEF87C60c257eaa004dABb86Ce3b"
-  },
-  
-  // Optimism
-  10: {
-    tokenFactory: "0xd3Ccd760974CdCBE8dE6169bbF7d2Bc618c87F36",
-    tokenImplementation: "0x84CA5c112CcEB034a2fE74f83026875c9d9f705B"
-  },
-  
-  // Sepolia Testnet
-  11155111: {
-    tokenFactory: "0xF6837c7142A97bE35ef04148522748EA288b494b",
-    tokenImplementation: "0x8e576F4F8e841B9B688f71b4A92C7cED26267e68"
-  }
-};
-```
-
-**Frontend Status:** ✅ Fully integrated - Pool creation feature available on Sepolia testnet
+Do **not** copy addresses from this file into the app. Edit **`frontend/src/config/contracts.js`**. After a DEX deploy, `contracts/scripts/deploy-dex.js` prints the snippet to paste.
 
 ---
 
-## Deployment Scripts
+## Deployment scripts
 
-### Production Deployment Scripts
+Scripts that exist in `contracts/scripts/`:
 
-- **Ethereum:** `deploy-ethereum.js`
-- **Arbitrum:** `deploy-arbitrum.js`
-- **Base:** `deploy-base.js`
-- **Polygon:** `deploy-polygon.js`
-- **BSC:** `deploy-bsc.js`
-- **Optimism:** `deploy-optimism.js`
+- `deploy-dex.js` — one Hardhat network (`npm run deploy:dex`)
+- `deploy-dex-multi-network.js` — rollout chains (`npm run deploy:dex:all`)
+- `check-dex-preflight.js` — RPC + wrapped-native checks (`npm run check:dex`)
+- `deploy-governance.js` — governance stack (`npm run deploy:governance`)
 
-### Verification Scripts
-
-- **Ethereum:** `verify-ethereum-boing-token.js`
-- **Base:** `verify-base-boing-token.js`
-- **Polygon:** `verify-polygon-boing-token.js`
-- **BSC:** `verify-bsc-boing-token.js`
-- **Optimism:** `verify-optimism-boing-token.js`
+Historical Sepolia JSON dumps: `contracts/deployments/archive/`. Active DEX deploys write `contracts/deployments/dex-<chainId>.json`.
 
 ---
 
@@ -816,18 +694,4 @@ OPTIMISTIC_ETHERSCAN_API_KEY=your_optimistic_etherscan_key
 - **Basic Plan:** Standard ERC20 with basic functionality
 - **Professional Plan:** Anti-bot, blacklist, transaction limits, cooldown
 - **Enterprise Plan:** All Professional features + anti-whale, pause, timelock
-
----
-
-## DEXFactory Deployments
-
-### Sepolia Testnet
-
-- **Contract Address**: `0x5b2bc0398F86553e88f8546E89d5E518Bb597cD2`
-- **Deployer**: `0xb24c5A62F8Da57967A08e11c88Fe18904f49920E`
-- **Transaction Hash**: `0x5703f03a59fff26555088586ab6b5f43a5bb9b65cd1e9c7ff320630f9f1b04e7`
-- **Block Number**: `null`
-- **Features**: Core DEX functionality, Liquidity Locking, Security Controls
-- **Verification**: [Etherscan](https://sepolia.etherscan.io/address/0x5b2bc0398F86553e88f8546E89d5E518Bb597cD2)
-- **Deployment Date**: 2025-06-29T23:22:36.975Z
 

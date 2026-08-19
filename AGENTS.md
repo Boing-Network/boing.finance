@@ -8,4 +8,4 @@
 
 - Native Boing DEX discovery in the frontend is layered: L1 RPC hints and lists (`boing_getNetworkInfo`, `boing_listDexPools`, `boing_listDexTokens`), optional indexer and register-log configuration, and metadata from hydrated pool venues, merged for pickers and labels.
 - The primary native Swap tab targets the network default constant-product pool; surfacing and swapping additional factory pairs (including multihop) is oriented around the Pools directory and Smart route flow.
-- Native DEX integration expectations, env flags, and operator handoffs are documented under `docs/` (including L1 discovery integration and Boing Network global/seamless token discovery handoffs).
+- Native DEX architecture, env flags, and operator handoffs live in `docs/native-dex.md` and `docs/native-dex-discovery.md`. Canonical frontend env catalog is `frontend/.env.example`; live EVM addresses are `frontend/src/config/contracts.js`.

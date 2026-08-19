@@ -1,6 +1,8 @@
 # Boing.Finance Network Integration
 
-This document covers how we onboard and integrate blockchain networks: **prioritize by user activity**, **integrate with maximum capabilities**, and use top-notch standards (secure, reliable, feature-rich). See [adding-a-network.md](adding-a-network.md) for step-by-step instructions to add a new chain.
+How we onboard chains: **prioritize by user activity**, aim for full in-app capability, degrade to aggregators/external links when native contracts are not live. Add a chain: [adding-a-network.md](./adding-a-network.md). Boing L1: [native-dex.md](./native-dex.md). EVM DEX: [contracts.md](./contracts.md).
+
+*Last reviewed: August 2026. TVL / address-count figures below are indicative snapshots, not live dashboards.*
 
 ---
 
@@ -43,9 +45,9 @@ Networks are integrated **in order of user activity**. We use industry metrics t
 
 ### Phase 1: Solana (first)
 
-**Status:** ✅ Complete. Scope: [docs/solana.md](solana.md)
+**Status:** ✅ Shipped. Details: [solana.md](./solana.md)
 
-- Solana wallet connection (Phantom, Solflare, Backpack)
+- Wallet: custom `SolanaWalletContext` (Phantom, Solflare)
 - SPL token deployment (Deploy Token)
 - Swap (in-app Jupiter), Pools/Liquidity (Raydium links)
 - Portfolio: SOL + SPL token balances
@@ -124,8 +126,20 @@ When integrating a network, aim for **full capability** within the app.
 | Avalanche | 43114 | Config | — | Pending |
 | Fantom, Linea, zkSync, Scroll, Mantle, Blast, opBNB, Mode | various | Config | — | Config ready, deploy pending |
 
-Cost estimates and deployment steps: [deployment.md](deployment.md). DEX up to funding (no LP seed): [evm-dex-enablement.md](evm-dex-enablement.md).
+Cost estimates and deployment steps: [deployment.md](./deployment.md). DEX up to funding (no LP seed): [contracts.md](./contracts.md).
 
 ---
 
-*Last updated: February 2025*
+## 6. Swap market data (EVM + Solana)
+
+In-app Swap uses **GeckoTerminal** for trending pools / tickers (not Boing L1 indexer JSON):
+
+| Module | Role |
+|--------|------|
+| `frontend/src/services/geckoterminalService.js` | Low-level API (trending pools, OHLCV, DEX volume) |
+| `frontend/src/services/dexMarketsService.js` | Chain mapping + pool normalization |
+| `frontend/src/hooks/useDexMarkets.js` | React Query |
+| `SwapMarketsBoard.jsx`, `SwapSpotTicker.jsx` | Swap UI |
+| `tokenChartService.js` | Price charts (also used from Analytics) |
+
+Boing L1 charts and TVL still follow [native-dex.md](./native-dex.md) (reserves + optional native indexer).

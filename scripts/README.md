@@ -1,6 +1,6 @@
 # Boing asset scripts (Python)
 
-Scripts to enhance and optimize assets for the outerspace-oceanic theme and hero presence across the webapp.
+Optional tools to generate hero/background PNGs into `frontend/public/images/`. **They are not part of the live visual shell** (that is `ColosseumReferenceBackdrop` — see `frontend/docs/DESIGN.md`).
 
 ## Setup
 
@@ -10,32 +10,26 @@ From the repo root:
 pip install -r scripts/requirements.txt
 ```
 
-## 1. Enhance hero (robot + environment)
-
-Optimizes the full Boing hero robot + environment PNG for use across the app.  
-Output: `hero_optimized.png` (hero/background), `hero_thumb.png` (mascot, footer), `hero_manifest.json`.
+## 1. Enhance hero
 
 ```bash
 python scripts/enhance_hero.py
 ```
 
-Run this after updating `boing_robot_hero.png` so the mascot, background scene, and footer use the latest asset.
+Writes `hero_optimized.png`, `hero_thumb.png`, and a local manifest next to `boing_robot_hero.png`.
 
 ## 2. Modified background
-
-Produces a variant of the dark background with different colors and shapes.  
-Output: `frontend/public/images/boing_background_dark_modified.png` (used when present).
 
 ```bash
 python scripts/modify_background.py
 ```
 
-## 3. Extract hero elements (optional)
+Writes `frontend/public/images/boing_background_dark_modified.png`.
 
-Splits `boing_robot_hero.png` into separate PNGs for 3D motion.  
-Output: `frontend/public/images/hero_elements/` and `manifest.json`.  
-The app uses the **full** hero (from enhance_hero.py) by default; this script is optional for alternative layouts.
+## 3. Extract hero elements
 
 ```bash
 python scripts/extract_robot_hero_elements.py
 ```
+
+Writes `frontend/public/images/hero_elements/` for experimental layouts.

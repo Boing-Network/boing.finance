@@ -1,6 +1,6 @@
 /**
  * Route → page color variant for Deep Trade (per-page accent emphasis).
- * Used by App.js to apply page-variant-* class to the root wrapper.
+ * Used by App.jsx to apply page-variant-* class to the root wrapper.
  */
 export function getPageVariant(pathname) {
   if (pathname === '/') return 'landing';

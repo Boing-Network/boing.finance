@@ -39,7 +39,7 @@ export function formatBoingExpressRpcError(e) {
     if (/invalid opcode at offset 0/i.test(msg)) {
       return (
         `${msg.trim()} ` +
-        'The node rejected deploy bytecode at the first VM instruction. Common causes: template/node mismatch, bad Advanced hex, or EVM bytecode pasted by mistake. Clear overrides, update Boing Express, align SDK with your RPC. Details: repo docs/boing-vm-contracts-and-explorer.md.'
+        'The node rejected deploy bytecode at the first VM instruction. Common causes: template/node mismatch, bad Advanced hex, or EVM bytecode pasted by mistake. Clear overrides, update Boing Express, align SDK with your RPC. Details: repo docs/native-dex.md.'
       );
     }
 
@@ -81,7 +81,7 @@ export function formatBoingExpressRpcError(e) {
     if (/invalid opcode at offset 0/i.test(m)) {
       return (
         `${m.trim()} ` +
-        'Boing VM deploy bytecode does not match this node (or is not VM code). Clear Advanced overrides and align SDK with RPC — see repo docs/boing-vm-contracts-and-explorer.md.'
+        'Boing VM deploy bytecode does not match this node (or is not VM code). Clear Advanced overrides and align SDK with RPC — see repo docs/native-dex.md.'
       );
     }
     if (/unexpected end of file/i.test(m) || /Invalid transaction:\s*io error:/i.test(m)) {
