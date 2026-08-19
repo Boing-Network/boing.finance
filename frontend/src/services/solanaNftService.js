@@ -23,6 +23,7 @@ import {
 } from '@solana/spl-token';
 import { createCreateMetadataAccountV3Instruction } from '@metaplex-foundation/mpl-token-metadata';
 import { getMetadataPDA } from './solanaMetaplex';
+import { formatSolanaRpcError } from '../config/solanaConfig';
 import { uploadMetadataToR2ForSolana, uploadToR2ForSolana } from '../utils/solanaStorage';
 
 const NAME_MAX = 32;
@@ -63,7 +64,12 @@ export async function createSPLNFT(connection, ownerAddress, signTransaction, pa
   const { url: metadataUri } = await uploadMetadataToR2ForSolana(metadata);
 
   const mintKeypair = Keypair.generate();
-  const lamports = await getMinimumBalanceForRentExemptMint(connection);
+  let lamports;
+  try {
+    lamports = await getMinimumBalanceForRentExemptMint(connection);
+  } catch (error) {
+    throw new Error(formatSolanaRpcError(error));
+  }
   const [metadataPDA] = getMetadataPDA(mintKeypair.publicKey);
 
   const transaction = new Transaction();
@@ -152,27 +158,39 @@ export async function createSPLNFT(connection, ownerAddress, signTransaction, pa
     )
   );
 
-  transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+  try {
+    transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+  } catch (error) {
+    throw new Error(formatSolanaRpcError(error));
+  }
   transaction.feePayer = owner;
   transaction.sign(mintKeypair);
 
-  const sim = await connection.simulateTransaction(transaction);
+  let sim;
+  try {
+    sim = await connection.simulateTransaction(transaction);
+  } catch (error) {
+    throw new Error(formatSolanaRpcError(error));
+  }
   if (sim.value.err) {
     throw new Error(`Simulation failed: ${JSON.stringify(sim.value.err)}`);
   }
 
   const signed = await signTransaction(transaction);
-  const signature = await connection.sendRawTransaction(signed.serialize(), {
-    skipPreflight: false,
-    preflightCommitment: 'confirmed',
-  });
-  await connection.confirmTransaction(signature, 'confirmed');
-
-  return {
-    mintAddress: mintKeypair.publicKey.toBase58(),
-    tokenAccountAddress: ata.toBase58(),
-    metadataUri,
-    imageUri,
-    signature,
-  };
+  try {
+    const signature = await connection.sendRawTransaction(signed.serialize(), {
+      skipPreflight: false,
+      preflightCommitment: 'confirmed',
+    });
+    await connection.confirmTransaction(signature, 'confirmed');
+    return {
+      mintAddress: mintKeypair.publicKey.toBase58(),
+      tokenAccountAddress: ata.toBase58(),
+      metadataUri,
+      imageUri,
+      signature,
+    };
+  } catch (error) {
+    throw new Error(formatSolanaRpcError(error));
+  }
 }
