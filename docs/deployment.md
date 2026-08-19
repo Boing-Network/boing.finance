@@ -130,6 +130,20 @@ See [docs/integration.md](integration.md) for prioritization.
 1. Ethereum, BSC, Base, Arbitrum, Polygon, Optimism (TokenFactory already deployed)
 2. Avalanche, zkSync Era, Mantle, Scroll, Linea, Blast, Fantom, opBNB, Mode (deploy when funded)
 
+### Deploy DEX (per network, no LP seed)
+
+Ethereum is excluded. See [evm-dex-enablement.md](evm-dex-enablement.md).
+
+```bash
+cd contracts
+npm run check:dex
+export DEPLOYER_PRIVATE_KEY=your_private_key
+npx hardhat run scripts/deploy-dex.js --network base
+# Or: node scripts/deploy-dex-multi-network.js
+```
+
+After deployment: copy addresses from `contracts/deployments/dex-<chainId>.json` into `frontend/src/config/contracts.js`. Funding is Create Pool in the app, not this script.
+
 ### Deploy TokenFactory (per network)
 
 ```bash

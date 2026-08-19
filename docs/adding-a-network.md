@@ -39,7 +39,7 @@ If you deploy Boing contracts (TokenFactory, DEX, etc.) on this chain, add an en
 - Copy the structure from an existing chain (e.g. Sepolia or Ethereum).
 - Set each deployed contract address; use `'0x0000000000000000000000000000000000000000'` for not-yet-deployed contracts.
 - **TokenFactory / TokenImplementation:** Required for **Deploy Token**.
-- **dexFactory / dexRouter / weth:** Required for **Swap (Boing DEX)**, **Liquidity**, and **Create Pool**.
+- **dexFactory / dexRouter / weth:** Required for **Swap (Boing DEX)**, **Liquidity**, and **Create Pool**. Ethereum is not in the current DEX rollout; see [evm-dex-enablement.md](evm-dex-enablement.md).
 
 After this step:
 

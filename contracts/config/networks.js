@@ -153,7 +153,7 @@ const TIER3_NETWORKS = {
   fantom: {
     name: "Fantom",
     chainId: 250,
-    rpcUrl: "https://rpc.ftm.tools",
+    rpcUrl: "https://rpcapi.fantom.network",
     explorer: "https://ftmscan.com",
     nativeToken: "FTM",
     gasPrice: "10000000000", // 10 gwei
@@ -239,6 +239,36 @@ const TIER3_NETWORKS = {
     gasPrice: "1000000", // 0.001 gwei
     color: "#DF2E2D",
     apiKey: "MODESCAN_API_KEY"
+  },
+  gnosis: {
+    name: "Gnosis Chain",
+    chainId: 100,
+    rpcUrl: "https://rpc.gnosischain.com",
+    explorer: "https://gnosisscan.io",
+    nativeToken: "XDAI",
+    gasPrice: "1000000000",
+    color: "#04795B",
+    apiKey: "GNOSISSCAN_API_KEY"
+  },
+  moonbeam: {
+    name: "Moonbeam",
+    chainId: 1284,
+    rpcUrl: "https://1rpc.io/glmr",
+    explorer: "https://moonbeam.moonscan.io",
+    nativeToken: "GLMR",
+    gasPrice: "100000000000",
+    color: "#53CBC8",
+    apiKey: "MOONBEAM_API_KEY"
+  },
+  moonriver: {
+    name: "Moonriver",
+    chainId: 1285,
+    rpcUrl: "https://moonriver.drpc.org",
+    explorer: "https://moonriver.moonscan.io",
+    nativeToken: "MOVR",
+    gasPrice: "1000000000",
+    color: "#F2A318",
+    apiKey: "MOONRIVER_API_KEY"
   }
 };
 

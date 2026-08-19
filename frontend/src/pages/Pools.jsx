@@ -17,6 +17,7 @@ import {
 } from '../services/poolService';
 import { useBlockchainPools } from '../hooks/useBlockchainPools';
 import { getNetworkByChainId } from '../config/networks';
+import getFeatureSupport from '../config/featureSupport';
 import { useAchievements } from '../contexts/AchievementContext';
 import ShareCardModal from '../components/ShareCardModal';
 import { getNetworkBadgeBgClass } from '../utils/networkBadgeClasses';
@@ -864,13 +865,14 @@ const Pools = () => {
     queryFn: async () => {
       // Fetching all pools
       try {
-        if (chainId === 11155111 && blockchainInitialized) { // Sepolia
-          // Use blockchain service to get all Sepolia pools (limit to 30)
-          return await getAllSepoliaPools(30);
-        } else {
-          // Fallback to API for other networks - using blockchain service
+        const hasDex = getFeatureSupport(Number(chainId) || 0).hasDex;
+        if (hasDex && blockchainInitialized) {
+          if (chainId === 11155111) {
+            return await getAllSepoliaPools(30);
+          }
           return await getAllPoolsFromBlockchain(chainId);
         }
+        return await getAllPoolsFromBlockchain(chainId);
       } catch (error) {
         console.error('[Pools] Error fetching all pools:', error);
         // Return empty array instead of throwing to prevent page crash
@@ -882,7 +884,7 @@ const Pools = () => {
     refetchIntervalInBackground: false,
     retry: 1, // Reduce retries
     retryDelay: 1000,
-    enabled: chainId === 11155111 ? blockchainInitialized : true,
+    enabled: getFeatureSupport(Number(chainId) || 0).hasDex ? blockchainInitialized : true,
     onError: (error) => {
       console.error('[Pools] All pools query error:', error);
       // Don't throw - let the component handle empty state
@@ -894,10 +896,12 @@ const Pools = () => {
     queryKey: ['all-pools-search', chainId, blockchainInitialized, searchTerm, searchPage, searchLimit],
     queryFn: async () => {
       // Fetching pools for search
-      if (chainId === 11155111 && blockchainInitialized && searchTerm.trim()) { // Sepolia
-        // Use blockchain service to get all Sepolia pools (limited for search)
-        const totalLimit = Math.max(500, searchPage * searchLimit); // Get at least 500 pools to ensure comprehensive search
-        return await getAllSepoliaPools(totalLimit); // Get pools up to the current page
+      if (getFeatureSupport(Number(chainId) || 0).hasDex && blockchainInitialized && searchTerm.trim()) {
+        if (chainId === 11155111) {
+          const totalLimit = Math.max(500, searchPage * searchLimit);
+          return await getAllSepoliaPools(totalLimit);
+        }
+        return await getAllPoolsFromBlockchain(chainId);
       } else {
         // Fallback to API for other networks - using blockchain service
         return await getAllPoolsFromBlockchain(chainId);
@@ -906,7 +910,9 @@ const Pools = () => {
     refetchInterval: 60000,
     refetchIntervalInBackground: false,
     retry: 2,
-    enabled: chainId === 11155111 ? blockchainInitialized && searchTerm.trim().length > 0 : true,
+    enabled: getFeatureSupport(Number(chainId) || 0).hasDex
+      ? blockchainInitialized && searchTerm.trim().length > 0
+      : true,
     staleTime: 30000 // Cache for 30 seconds
   });
 

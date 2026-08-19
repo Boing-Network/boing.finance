@@ -1,7 +1,7 @@
 /**
  * Feature support per network.
- * Derives from config/contracts.js so the app can show "Swap (via external DEX)",
- * "Create Pool (Sepolia only)", etc., and gate actions when contracts aren't deployed.
+ * Derives from config/contracts.js so the app can show external DEX fallbacks
+ * and gate Create Pool / Liquidity until factory + router are deployed.
  */
 import CONTRACTS, { getContractAddresses, getBoingNativeVmModuleId } from './contracts';
 import { BOING_NATIVE_L1_CHAIN_ID } from './networks';

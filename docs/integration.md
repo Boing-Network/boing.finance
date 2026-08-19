@@ -54,12 +54,12 @@ Networks are integrated **in order of user activity**. We use industry metrics t
 
 | # | Network | Chain ID | Status |
 |---|---------|----------|--------|
-| 1 | BSC | 56 | TokenFactory ✅, DEX — |
-| 2 | Ethereum | 1 | TokenFactory ✅, DEX partial |
-| 3 | Base | 8453 | TokenFactory ✅ |
-| 4 | Arbitrum | 42161 | TokenFactory ✅ |
-| 5 | Polygon | 137 | TokenFactory ✅ |
-| 6 | Optimism | 10 | TokenFactory ✅ |
+| 1 | BSC | 56 | TokenFactory ✅, DEX protocol pending (scripts ready) |
+| 2 | Ethereum | 1 | TokenFactory ✅, DEX excluded from this rollout |
+| 3 | Base | 8453 | TokenFactory ✅, DEX protocol pending |
+| 4 | Arbitrum | 42161 | TokenFactory ✅, DEX protocol pending |
+| 5 | Polygon | 137 | TokenFactory ✅, DEX protocol pending |
+| 6 | Optimism | 10 | TokenFactory ✅, DEX protocol pending |
 | 7 | Avalanche | 43114 | Config ✅, TokenFactory pending |
 | 8 | zkSync Era | 324 | Config ✅, TokenFactory pending |
 | 9 | Linea | 59144 | Config ✅ |
@@ -114,17 +114,17 @@ When integrating a network, aim for **full capability** within the app.
 
 | Network | Chain ID | TokenFactory | DEX | Status |
 |---------|----------|--------------|-----|--------|
-| Sepolia | 11155111 | ✅ | ✅ | Full |
-| Ethereum | 1 | ✅ | Partial | Token deploy live |
-| Base | 8453 | ✅ | — | Token deploy live |
-| Polygon | 137 | ✅ | — | Token deploy live |
-| BSC | 56 | ✅ | — | Token deploy live |
-| Optimism | 10 | ✅ | — | Token deploy live |
-| Arbitrum | 42161 | ✅ | — | Token deploy live |
+| Sepolia | 11155111 | ✅ | ✅ | Full (protocol + test pools) |
+| Ethereum | 1 | ✅ | Excluded | Token deploy live; no Boing DEX rollout |
+| Base | 8453 | ✅ | Pre-funding | Token deploy live; DEX scripts ready |
+| Polygon | 137 | ✅ | Pre-funding | Token deploy live; DEX scripts ready |
+| BSC | 56 | ✅ | Pre-funding | Token deploy live; DEX scripts ready |
+| Optimism | 10 | ✅ | Pre-funding | Token deploy live; DEX scripts ready |
+| Arbitrum | 42161 | ✅ | Pre-funding | Token deploy live; DEX scripts ready |
 | Avalanche | 43114 | Config | — | Pending |
 | Fantom, Linea, zkSync, Scroll, Mantle, Blast, opBNB, Mode | various | Config | — | Config ready, deploy pending |
 
-Cost estimates and deployment steps: [deployment.md](deployment.md).
+Cost estimates and deployment steps: [deployment.md](deployment.md). DEX up to funding (no LP seed): [evm-dex-enablement.md](evm-dex-enablement.md).
 
 ---
 

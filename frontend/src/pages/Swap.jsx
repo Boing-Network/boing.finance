@@ -6,7 +6,7 @@ import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useChainType } from '../contexts/SolanaWalletContext';
 import { SwapSolanaContent } from '../components/SolanaFeaturePlaceholder';
 import { useAchievements } from '../contexts/AchievementContext';
-import { getContractAddress, getContractAddresses } from '../config/contracts';
+import { getContractAddress, getContractAddresses, getEvmDexHubTokenAddresses, getEvmDexProtocolAddresses } from '../config/contracts';
 import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import SettingsModal from '../components/SettingsModal';
 import toast from 'react-hot-toast';
@@ -134,25 +134,9 @@ const Swap = () => {
     }
   }, [chainId]);
 
-  // Get common tokens for the network
+  // Get hub tokens (wrapped native + configured stables) for the network
   const getCommonTokens = useCallback((networkId) => {
-    // Common token addresses for different networks
-    const commonTokens = {
-      11155111: [ // Sepolia
-        '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238', // USDC
-        '0x779877A7B0D9E8603169DdbD7836e478b4624789', // LINK
-        '0x097D90c9d3E0B50Ca60e1ae45F6A81010f9FB534', // WETH
-        '0x68194a729C2450ad26072b3D33ADaCbcef39D574', // DAI
-        '0x7169D38820dfd117C3FA1f22a697dBA58d90BA06'  // USDT
-      ],
-      1: [ // Ethereum Mainnet
-        '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
-        '0x514910771AF9Ca656af840dff83E8264EcF986CA', // LINK
-        '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'  // WETH
-      ]
-    };
-    
-    return commonTokens[networkId] || [];
+    return getEvmDexHubTokenAddresses(networkId);
   }, []);
 
   // Get token information
@@ -437,7 +421,7 @@ const Swap = () => {
         message:
           chainId === BOING_NATIVE_L1_CHAIN_ID
             ? 'On Boing testnet: use the native pool panel below (Boing Express) when available, open Native VM tools, or switch to Sepolia for the classic EVM swap.'
-            : 'DEX swapping is not yet available on this network. Currently only supported on Sepolia testnet.',
+            : 'In-app AMM swap needs a Boing DEX factory and router on this network. After those are deployed, create a pool (funding) then swap. Ethereum is not in this rollout; Sepolia already has the protocol live.',
       };
     }
 
@@ -1429,26 +1413,11 @@ const Swap = () => {
       // Debug: Log each address being processed
       devLog('Processing token addresses:', allTokenAddresses);
       
-      // Get contract addresses to exclude
-      const contracts = getContractAddresses(chainId);
-      const contractAddresses = new Set();
-      if (contracts) {
-        // Add all contract addresses to exclude list
-        Object.values(contracts).forEach(value => {
-          if (typeof value === 'string' && value.startsWith('0x')) {
-            contractAddresses.add(value.toLowerCase());
-          } else if (typeof value === 'object') {
-            Object.values(value).forEach(v => {
-              if (typeof v === 'string' && v.startsWith('0x')) {
-                contractAddresses.add(v.toLowerCase());
-              }
-            });
-          }
-        });
-      }
+      const protocolAddresses = getEvmDexProtocolAddresses(chainId);
+      const hubSet = new Set(commonTokens.map((a) => a.toLowerCase()));
 
       const candidates = allTokenAddresses.filter(
-        (tokenAddress) => !contractAddresses.has(tokenAddress.toLowerCase())
+        (tokenAddress) => !protocolAddresses.has(tokenAddress.toLowerCase())
       );
 
       const tokenResults = await Promise.all(
@@ -1456,13 +1425,14 @@ const Swap = () => {
           try {
             const tokenInfo = await getTokenInfo(tokenAddress, walletProvider);
             const inFactory = factorySet.has(tokenAddress.toLowerCase());
+            const isHub = hubSet.has(tokenAddress.toLowerCase());
             const hasBal = tokenInfo?.balance && tokenInfo.balance !== '0';
             if (
               tokenInfo &&
               tokenInfo.symbol &&
               tokenInfo.name &&
               tokenInfo.decimals != null &&
-              (hasBal || inFactory)
+              (hasBal || inFactory || isHub)
             ) {
               return {
                 address: tokenAddress,
