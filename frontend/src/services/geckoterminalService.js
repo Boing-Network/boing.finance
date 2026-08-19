@@ -69,5 +69,26 @@ export async function getTokenOhlcv(network, tokenAddress, days = 7) {
   }
 }
 
-const geckoterminalService = { getDexVolume24h, getTokenOhlcv };
+/**
+ * Trending DEX pools on one GeckoTerminal network (eth, base, solana, …).
+ * @param {string} network
+ * @returns {Promise<{ pools: object[], included: object[] }>}
+ */
+export async function getNetworkTrendingPools(network) {
+  if (!network) return { pools: [], included: [] };
+  const url =
+    `${GEECKO_TERMINAL_BASE}/networks/${encodeURIComponent(network)}/trending_pools` +
+    `?include=base_token,quote_token`;
+  try {
+    const data = await cachedFetch(url, {}, { ttlMs: 45_000, retries: 1 });
+    const pools = Array.isArray(data?.data) ? data.data : [];
+    const included = Array.isArray(data?.included) ? data.included : [];
+    return { pools, included };
+  } catch (err) {
+    console.warn('GeckoTerminal trending pools error:', err?.message);
+    return { pools: [], included: [] };
+  }
+}
+
+const geckoterminalService = { getDexVolume24h, getTokenOhlcv, getNetworkTrendingPools };
 export default geckoterminalService;

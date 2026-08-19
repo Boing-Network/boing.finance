@@ -16,11 +16,13 @@ import externalSwapService from '../services/externalSwapService';
 import ExternalDEXQuotes from '../components/ExternalDEXQuotes';
 import ShareCardModal from '../components/ShareCardModal';
 import ProactiveTipsBanner from '../components/ProactiveTipsBanner';
-import TrendingPairs from '../components/TrendingPairs';
 import NativeBoingTradeHub from '../components/NativeBoingTradeHub';
 import SwapTokenSelect from '../components/SwapTokenSelect';
+import SwapMarketsBoard from '../components/SwapMarketsBoard';
+import SwapSpotTicker from '../components/SwapSpotTicker';
 import { ChartSkeleton } from '../components/SkeletonLoader';
 import { useTokenMarket } from '../hooks/useTokenMarket';
+import { useDexMarkets } from '../hooks/useDexMarkets';
 import { formatUsdCompact } from '../services/tokenChartService';
 import getFeatureSupport from '../config/featureSupport';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
@@ -72,6 +74,7 @@ const Swap = () => {
   const [tokenOutDropdownOpen, setTokenOutDropdownOpen] = useState(false);
   const [customImportOpenFor, setCustomImportOpenFor] = useState(/** @type {null | 'tokenIn' | 'tokenOut'} */ (null));
   const [customImportAddress, setCustomImportAddress] = useState('');
+  const [focusOutAddress, setFocusOutAddress] = useState('');
 
   // Swap transaction state
   const [isSwapping, setIsSwapping] = useState(false);
@@ -302,8 +305,33 @@ const Swap = () => {
       setTokenInDropdownOpen(false);
     } else {
       setTokenOut(token.symbol);
+      setFocusOutAddress(token.address || '');
       setTokenOutDropdownOpen(false);
     }
+  };
+
+  const selectDiscoveryMarket = (market) => {
+    if (!market?.address || !market?.symbol) return;
+    const nativeSym = getNetworkByChainId(chainId)?.nativeCurrency?.symbol || 'ETH';
+    setUserTokens((prev) => {
+      if (prev.some((t) => (t.address || '').toLowerCase() === market.address.toLowerCase())) return prev;
+      return [
+        ...prev,
+        {
+          address: market.address,
+          symbol: market.symbol,
+          name: market.name,
+          decimals: market.decimals || 18,
+          balance: '0',
+          formattedBalance: '0',
+          fromDiscovery: true,
+          logo: market.logo,
+        },
+      ];
+    });
+    setFocusOutAddress(market.address);
+    setTokenOut(market.symbol);
+    if (tokenIn === market.symbol) setTokenIn(nativeSym);
   };
 
   // Switch tokens
@@ -338,15 +366,29 @@ const Swap = () => {
   }, [userTokens, tokenIn, chainId]);
 
   const chartTokenOut = useMemo(() => {
-    const t = userTokens.find((x) => x.symbol === tokenOut);
+    const byAddr = focusOutAddress
+      ? userTokens.find((x) => (x.address || '').toLowerCase() === focusOutAddress.toLowerCase())
+      : null;
+    const t = byAddr || userTokens.find((x) => x.symbol === tokenOut);
     return {
-      symbol: tokenOut,
-      address: t?.address || '',
-      isNative: Boolean(t?.isNative || isNativeSwapSymbol(tokenOut, chainId)),
+      symbol: t?.symbol || tokenOut,
+      address: t?.address || focusOutAddress || '',
+      isNative: Boolean(t?.isNative || isNativeSwapSymbol(t?.symbol || tokenOut, chainId)),
     };
-  }, [userTokens, tokenOut, chainId]);
+  }, [userTokens, tokenOut, chainId, focusOutAddress]);
 
   const showEvmSwapDesk = featureSupport.swap !== 'native_amm';
+  const dexMarkets = useDexMarkets({
+    chainId: Number(chainId),
+    enabled: showEvmSwapDesk && !isSolana,
+  });
+  const selectedMarket = useMemo(() => {
+    const list = dexMarkets.data || [];
+    if (focusOutAddress) {
+      return list.find((m) => m.address.toLowerCase() === focusOutAddress.toLowerCase()) || null;
+    }
+    return list.find((m) => m.symbol === tokenOut) || list[0] || null;
+  }, [dexMarkets.data, focusOutAddress, tokenOut]);
   const tokenInMarket = useTokenMarket({
     chain: 'evm',
     chainId: Number(chainId),
@@ -373,6 +415,17 @@ const Swap = () => {
     amountOut && tokenOutMarket.data?.price
       ? formatUsdCompact(parseFloat(amountOut) * tokenOutMarket.data.price)
       : '';
+
+  useEffect(() => {
+    setFocusOutAddress('');
+  }, [chainId]);
+
+  useEffect(() => {
+    if (!showEvmSwapDesk || isSolana || focusOutAddress) return;
+    const first = dexMarkets.data?.[0];
+    if (first) selectDiscoveryMarket(first);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- select on first trending load per chain
+  }, [showEvmSwapDesk, isSolana, dexMarkets.data, focusOutAddress, chainId]);
 
   // Helper functions to get selected token balances
   const getTokenInBalance = () => {
@@ -1600,7 +1653,16 @@ const Swap = () => {
           });
         }
       }
-      setUserTokens(tokensWithBalance);
+      setUserTokens((prev) => {
+        const discovered = prev.filter((t) => t.fromDiscovery);
+        const next = [...tokensWithBalance];
+        for (const d of discovered) {
+          if (!next.some((t) => (t.address || '').toLowerCase() === (d.address || '').toLowerCase())) {
+            next.push(d);
+          }
+        }
+        return next;
+      });
     } catch (error) {
       console.error('Error fetching user tokens:', error);
       toast.error('Failed to load your tokens');
@@ -1988,10 +2050,10 @@ const Swap = () => {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                Swap
+                Spot
               </h1>
               <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-                Trade on public DEX liquidity · chart when a market exists
+                Discover trending tokens on this chain and swap on-chain
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -2027,8 +2089,27 @@ const Swap = () => {
           )}
 
           {showEvmSwapDesk && (
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-          <div className="xl:col-span-7 order-2 xl:order-1">
+          <>
+          <SwapSpotTicker
+            market={selectedMarket}
+            networkName={getNetworkByChainId(chainId)?.name || 'Network'}
+            fallbackPair={`${tokenOut}/${tokenIn}`}
+          />
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
+          <div className="xl:col-span-3 order-3 xl:order-1">
+            <SwapMarketsBoard
+              networkName={getNetworkByChainId(chainId)?.name || 'Chain'}
+              tab={dexMarkets.tab}
+              onTab={dexMarkets.setTab}
+              queryText={dexMarkets.queryText}
+              onQueryText={dexMarkets.setQueryText}
+              rows={dexMarkets.rows}
+              isLoading={dexMarkets.isLoading}
+              selectedAddress={focusOutAddress || selectedMarket?.address}
+              onSelect={selectDiscoveryMarket}
+            />
+          </div>
+          <div className="xl:col-span-5 order-2 xl:order-2">
             <Suspense fallback={<ChartSkeleton height="280px" />}>
               <SwapTokenPriceChart
                 chain="evm"
@@ -2038,7 +2119,7 @@ const Swap = () => {
               />
             </Suspense>
           </div>
-          <div className="xl:col-span-5 order-1 xl:order-2 xl:sticky xl:top-20">
+          <div className="xl:col-span-4 order-1 xl:order-3 xl:sticky xl:top-20">
 
           <div
             className="rounded-2xl p-4 sm:p-5 shadow-xl mb-4 sm:mb-6"
@@ -2048,6 +2129,9 @@ const Swap = () => {
               boxShadow: '0 4px 24px var(--shadow)',
             }}
           >
+            <p className="text-sm font-bold mb-3 tabular-nums" style={{ color: 'var(--text-primary)' }}>
+              {selectedMarket?.pair || `${tokenOut} / ${tokenIn}`}
+            </p>
             <div className="flex justify-end mb-4">
               {(() => {
                 const s = getNetworkStatusMessage();
@@ -2325,12 +2409,7 @@ const Swap = () => {
           </div>
           </div>
           </div>
-          )}
-
-          {showEvmSwapDesk && (
-            <div className="mt-6">
-              <TrendingPairs />
-            </div>
+          </>
           )}
         </div>
       </div>
