@@ -2096,7 +2096,7 @@ const Swap = () => {
             fallbackPair={`${tokenOut}/${tokenIn}`}
           />
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
-          <div className="xl:col-span-3 order-3 xl:order-1">
+          <div className="xl:col-span-3 order-3 xl:order-1 xl:sticky xl:top-20">
             <SwapMarketsBoard
               networkName={getNetworkByChainId(chainId)?.name || 'Chain'}
               tab={dexMarkets.tab}
@@ -2109,7 +2109,7 @@ const Swap = () => {
               onSelect={selectDiscoveryMarket}
             />
           </div>
-          <div className="xl:col-span-5 order-2 xl:order-2">
+          <div className="xl:col-span-9 order-1 xl:order-2 flex flex-col gap-4 min-w-0">
             <Suspense fallback={<ChartSkeleton height="280px" />}>
               <SwapTokenPriceChart
                 chain="evm"
@@ -2118,9 +2118,6 @@ const Swap = () => {
                 tokenOut={chartTokenOut}
               />
             </Suspense>
-          </div>
-          <div className="xl:col-span-4 order-1 xl:order-3 xl:sticky xl:top-20">
-
           <div
             className="rounded-2xl p-4 sm:p-5 shadow-xl mb-4 sm:mb-6"
             style={{
