@@ -13,6 +13,7 @@ import { createAIRoutes } from './routes/aiRoutes.js';
 import { createGovernanceRoutes } from './routes/governanceRoutes.js';
 import { createBoingRoutes } from './routes/boingRoutes.js';
 import { createSolanaRoutes } from './routes/solanaRoutes.js';
+import { handleSolanaRpcPost } from './routes/solanaRpcRoute.js';
 import { createAggregatorRoutes } from './routes/aggregatorRoutes.js';
 import { createRealtimeRoutes } from './routes/realtimeRoutes.js';
 import collectAnalytics from './scheduled/collectAnalytics.js';
@@ -213,6 +214,8 @@ const boingRoutes = createBoingRoutes();
 boingRoutes.use('*', dbMiddleware);
 boingRoutes.use('*', cacheMiddleware);
 app.route('/api/boing', boingRoutes);
+
+app.post('/api/solana/rpc', handleSolanaRpcPost);
 
 // Mount Solana routes (deployments) at /api/solana
 const solanaRoutes = createSolanaRoutes();

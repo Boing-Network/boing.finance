@@ -142,8 +142,12 @@ function CreateNFTSolanaContent() {
 
   const handleMint = async (e) => {
     e.preventDefault();
-    if (!connected || !address || !connection || !signTransaction) {
+    if (!connected || !address || !signTransaction) {
       toast.error('Please connect your Solana wallet.');
+      return;
+    }
+    if (!connection) {
+      toast.error('Solana RPC is unavailable. Refresh and try again, or switch to Devnet.');
       return;
     }
     if (!name.trim() || !symbol.trim() || !imageFile) {
