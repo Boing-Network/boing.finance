@@ -1,12 +1,14 @@
 import React, { useState, useRef } from 'react';
 import { useCloseOnPointerOutside } from '../hooks/useCloseOnPointerOutside';
 import { useWallet } from '../contexts/WalletContext';
+import { useChainType } from '../contexts/SolanaWalletContext';
 import { getMainnetNetworks, getTestnetNetworks } from '../config/networks';
 import { formatEip155ChainId } from '../config/boingChainIds';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 const NetworkSelector = () => {
   const { isConnected, chainId, switchNetwork, getCurrentNetwork } = useWallet();
+  const { isSolana } = useChainType();
   const [showDropdown, setShowDropdown] = useState(false);
   const networkDropdownRootRef = useRef(null);
 
@@ -58,7 +60,7 @@ const NetworkSelector = () => {
     return icons[network.chainId] || '🌐';
   };
 
-  if (!isConnected || !currentNetwork) {
+  if (isSolana || !isConnected || !currentNetwork) {
     return null;
   }
 
