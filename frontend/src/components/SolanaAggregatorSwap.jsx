@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
 import { VersionedTransaction } from '@solana/web3.js';
@@ -11,9 +11,14 @@ import {
   buildJupiterSwapTx,
   getJupiterQuote,
 } from '../services/aggregatorSwapService';
+import { useTokenMarket } from '../hooks/useTokenMarket';
+import { formatUsdCompact } from '../services/tokenChartService';
+import { ChartSkeleton } from './SkeletonLoader';
+
+const SwapTokenPriceChart = lazy(() => import('./SwapTokenPriceChart'));
 
 const TOKENS = [
-  { symbol: 'SOL', name: 'Solana', mint: SOL_MINT, decimals: 9 },
+  { symbol: 'SOL', name: 'Solana', mint: SOL_MINT, decimals: 9, isNative: true },
   { symbol: 'USDC', name: 'USD Coin', mint: SOLANA_USDC, decimals: 6 },
   { symbol: 'USDT', name: 'Tether', mint: SOLANA_USDT, decimals: 6 },
 ];
@@ -35,6 +40,14 @@ function b64ToBytes(b64) {
   return out;
 }
 
+function toChartToken(meta) {
+  return {
+    symbol: meta?.symbol || '',
+    address: meta?.mint || '',
+    isNative: Boolean(meta?.isNative),
+  };
+}
+
 export default function SolanaAggregatorSwap() {
   const { connected, connectWallet, network, publicKey, connection, signTransaction } = useSolanaWallet();
   const solanaNetwork = SOLANA_NETWORKS[network] || SOLANA_NETWORKS.devnet;
@@ -49,6 +62,28 @@ export default function SolanaAggregatorSwap() {
 
   const inMeta = useMemo(() => TOKENS.find((t) => t.symbol === tokenIn), [tokenIn]);
   const outMeta = useMemo(() => TOKENS.find((t) => t.symbol === tokenOut), [tokenOut]);
+  const isMainnet = network === 'mainnet';
+
+  const inMarket = useTokenMarket({
+    chain: 'solana',
+    address: inMeta?.mint,
+    isNative: Boolean(inMeta?.isNative),
+    symbol: inMeta?.symbol,
+    days: 7,
+    enabled: isMainnet,
+  });
+  const outMarket = useTokenMarket({
+    chain: 'solana',
+    address: outMeta?.mint,
+    isNative: Boolean(outMeta?.isNative),
+    symbol: outMeta?.symbol,
+    days: 7,
+    enabled: isMainnet,
+  });
+  const amountInUsd =
+    amountIn && inMarket.data?.price ? formatUsdCompact(parseFloat(amountIn) * inMarket.data.price) : '';
+  const amountOutUsd =
+    amountOut && outMarket.data?.price ? formatUsdCompact(parseFloat(amountOut) * outMarket.data.price) : '';
 
   const fetchQuote = useCallback(async () => {
     setError('');
@@ -86,6 +121,11 @@ export default function SolanaAggregatorSwap() {
     }, 400);
     return () => clearTimeout(t);
   }, [fetchQuote]);
+
+  const switchTokens = () => {
+    setTokenIn(tokenOut);
+    setTokenOut(tokenIn);
+  };
 
   const onSwap = async () => {
     if (!connected || !publicKey) {
@@ -132,85 +172,116 @@ export default function SolanaAggregatorSwap() {
       <Helmet>
         <title>Swap - Solana | Boing Finance</title>
       </Helmet>
-      <div className="relative z-10 container mx-auto px-4 py-8">
-        <div className="max-w-xl mx-auto">
-          <h1 className="text-3xl font-bold text-white mb-2">Swap</h1>
-          <p className="text-gray-400 mb-6 text-sm">
-            Routes through Jupiter across Raydium, Orca, and other Solana venues. Liquidity is theirs; you sign in your wallet.
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Swap</h1>
+          <p className="text-sm mt-0.5 text-gray-400">
+            Jupiter routes Raydium, Orca, and other Solana venues · chart when a market exists
           </p>
+        </div>
 
-          {!connected ? (
-            <button
-              type="button"
-              onClick={connectWallet}
-              className="w-full px-6 py-3 rounded-lg font-medium bg-cyan-600 text-white hover:bg-cyan-500"
-            >
-              Connect Solana Wallet
-            </button>
-          ) : (
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+          <div className="xl:col-span-7 order-2 xl:order-1">
+            <Suspense fallback={<ChartSkeleton height="280px" />}>
+              <SwapTokenPriceChart
+                chain="solana"
+                tokenIn={toChartToken(inMeta)}
+                tokenOut={toChartToken(outMeta)}
+              />
+            </Suspense>
+          </div>
+          <div className="xl:col-span-5 order-1 xl:order-2 xl:sticky xl:top-20">
             <div
-              className="rounded-2xl p-5 space-y-4"
+              className="rounded-2xl p-4 sm:p-5 space-y-4 shadow-xl"
               style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
             >
-              <div className="flex gap-3">
-                <label className="flex-1 text-xs text-gray-400">
-                  From
-                  <select
-                    className="mt-1 w-full bg-gray-700 text-white rounded-lg px-3 py-2"
-                    value={tokenIn}
-                    onChange={(e) => setTokenIn(e.target.value)}
+              {!connected ? (
+                <button
+                  type="button"
+                  onClick={connectWallet}
+                  className="w-full px-6 py-3 rounded-xl font-medium bg-cyan-600 text-white hover:bg-cyan-500"
+                >
+                  Connect Solana Wallet
+                </button>
+              ) : (
+                <>
+                  <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--bg-tertiary, rgba(255,255,255,0.04))' }}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-gray-400 text-sm">You pay</span>
+                      <select
+                        className="bg-gray-700 text-white rounded-lg px-2 py-1 text-sm"
+                        value={tokenIn}
+                        onChange={(e) => setTokenIn(e.target.value)}
+                      >
+                        {TOKENS.map((t) => (
+                          <option key={t.mint} value={t.symbol}>
+                            {t.symbol}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <input
+                      className="w-full bg-transparent text-2xl font-bold text-white placeholder-gray-500 focus:outline-none"
+                      type="number"
+                      min="0"
+                      value={amountIn}
+                      onChange={(e) => setAmountIn(e.target.value)}
+                      placeholder="0.0"
+                    />
+                    {amountInUsd ? <p className="text-xs text-gray-500 mt-1">≈ {amountInUsd}</p> : null}
+                  </div>
+
+                  <div className="flex justify-center -my-1">
+                    <button
+                      type="button"
+                      onClick={switchTokens}
+                      className="bg-gray-700 hover:bg-gray-600 rounded-full p-2"
+                      aria-label="Switch tokens"
+                    >
+                      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" className="text-gray-300">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--bg-tertiary, rgba(255,255,255,0.04))' }}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-gray-400 text-sm">You receive</span>
+                      <select
+                        className="bg-gray-700 text-white rounded-lg px-2 py-1 text-sm"
+                        value={tokenOut}
+                        onChange={(e) => setTokenOut(e.target.value)}
+                      >
+                        {TOKENS.map((t) => (
+                          <option key={t.mint} value={t.symbol}>
+                            {t.symbol}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="text-2xl font-bold text-white">
+                      {loading ? '…' : amountOut || '0.0'}
+                    </div>
+                    {amountOutUsd ? <p className="text-xs text-gray-500 mt-1">≈ {amountOutUsd}</p> : null}
+                  </div>
+
+                  {quote?.venue && (
+                    <p className="text-xs text-cyan-400">Via {quote.venue} (Jupiter)</p>
+                  )}
+                  {error && <p className="text-sm text-red-400">{error}</p>}
+                  <button
+                    type="button"
+                    disabled={swapping || loading || !quote || tokenIn === tokenOut}
+                    onClick={() => void onSwap()}
+                    className="w-full py-3 rounded-xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 text-white disabled:opacity-50"
                   >
-                    {TOKENS.map((t) => (
-                      <option key={t.mint} value={t.symbol}>
-                        {t.symbol}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="flex-1 text-xs text-gray-400">
-                  To
-                  <select
-                    className="mt-1 w-full bg-gray-700 text-white rounded-lg px-3 py-2"
-                    value={tokenOut}
-                    onChange={(e) => setTokenOut(e.target.value)}
-                  >
-                    {TOKENS.map((t) => (
-                      <option key={t.mint} value={t.symbol}>
-                        {t.symbol}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-              <label className="block text-xs text-gray-400">
-                Amount
-                <input
-                  className="mt-1 w-full bg-gray-700 text-white rounded-lg px-3 py-3 text-xl"
-                  type="number"
-                  min="0"
-                  value={amountIn}
-                  onChange={(e) => setAmountIn(e.target.value)}
-                  placeholder="0.0"
-                />
-              </label>
-              <div className="text-sm text-gray-300">
-                {loading ? 'Finding Jupiter route…' : amountOut ? `You receive ~${amountOut} ${tokenOut}` : 'Enter an amount'}
-              </div>
-              {quote?.venue && (
-                <p className="text-xs text-cyan-400">Via {quote.venue} (Jupiter)</p>
+                    {swapping ? 'Swapping…' : 'Swap via Jupiter'}
+                  </button>
+                  <p className="text-xs text-gray-500 text-center">{solanaNetwork.name}</p>
+                </>
               )}
-              {error && <p className="text-sm text-red-400">{error}</p>}
-              <button
-                type="button"
-                disabled={swapping || loading || !quote || tokenIn === tokenOut}
-                onClick={() => void onSwap()}
-                className="w-full py-3 rounded-xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 text-white disabled:opacity-50"
-              >
-                {swapping ? 'Swapping…' : 'Swap via Jupiter'}
-              </button>
-              <p className="text-xs text-gray-500 text-center">{solanaNetwork.name}</p>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </>

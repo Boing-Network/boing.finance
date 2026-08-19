@@ -33,5 +33,41 @@ export async function getDexVolume24h() {
   }
 }
 
-const geckoterminalService = { getDexVolume24h };
+/**
+ * Token USD close series from GeckoTerminal OHLCV (DEX-listed tokens CoinGecko may miss).
+ * @param {string} network GeckoTerminal network id (eth, base, solana, …)
+ * @param {string} tokenAddress contract or mint
+ * @param {number} days 1 | 7 | 30
+ * @returns {Promise<{ points: { t: number, p: number }[], source: 'geckoterminal' } | null>}
+ */
+export async function getTokenOhlcv(network, tokenAddress, days = 7) {
+  if (!network || !tokenAddress) return null;
+  const timeframe = days <= 1 ? 'hour' : days <= 7 ? 'hour' : 'day';
+  const limit = days <= 1 ? 24 : days <= 7 ? 168 : 31;
+  const url =
+    `${GEECKO_TERMINAL_BASE}/networks/${encodeURIComponent(network)}` +
+    `/tokens/${encodeURIComponent(tokenAddress)}/ohlcv/${timeframe}` +
+    `?aggregate=1&limit=${limit}&currency=usd`;
+  try {
+    const data = await cachedFetch(url, {}, { ttlMs: CACHE_TTL_MS, retries: 1 });
+    const rows = data?.data?.attributes?.ohlcv_list;
+    if (!Array.isArray(rows) || rows.length < 2) return null;
+    const points = rows
+      .map((row) => {
+        const t = Number(row?.[0]) * (String(row?.[0]).length < 12 ? 1000 : 1);
+        const close = Number(row?.[4]);
+        if (!Number.isFinite(t) || !Number.isFinite(close) || close <= 0) return null;
+        return { t, p: close };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.t - b.t);
+    if (points.length < 2) return null;
+    return { points, source: 'geckoterminal' };
+  } catch (err) {
+    console.warn('GeckoTerminal OHLCV error:', err?.message);
+    return null;
+  }
+}
+
+const geckoterminalService = { getDexVolume24h, getTokenOhlcv };
 export default geckoterminalService;
