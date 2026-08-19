@@ -17,6 +17,24 @@ import { createAggregatorRoutes } from './routes/aggregatorRoutes.js';
 import { createRealtimeRoutes } from './routes/realtimeRoutes.js';
 import collectAnalytics from './scheduled/collectAnalytics.js';
 
+const LOCAL_ORIGINS = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:4173',
+  'http://127.0.0.1:4173',
+  'http://localhost:8787',
+  'http://127.0.0.1:8787',
+];
+
+function timingSafeEqual(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
+  let out = 0;
+  for (let i = 0; i < a.length; i += 1) out |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return out === 0;
+}
+
 // Create main app
 const app = new Hono();
 
@@ -25,12 +43,11 @@ app.use('*', async (c, next) => {
   const env = c.env.NODE_ENV || 'production';
   const frontendUrl = c.env.FRONTEND_URL || 'https://boing.finance';
   
-  // Determine allowed origins based on environment
   const allowedOrigins = env === 'production' 
     ? [frontendUrl, 'https://boing.finance']
     : env === 'staging'
-    ? [frontendUrl, 'https://staging.boing.finance', 'http://localhost:3000']
-    : ['http://localhost:3000', frontendUrl];
+    ? [frontendUrl, 'https://staging.boing.finance', ...LOCAL_ORIGINS]
+    : [...LOCAL_ORIGINS, frontendUrl];
   
   return cors({
     origin: allowedOrigins,
@@ -213,60 +230,38 @@ app.route('/api', realtimeRoutes);
 // Webhook routes
 app.post('/api/webhook', async (c) => {
   try {
-    console.log('🔔 Farcaster webhook received:', {
-      timestamp: new Date().toISOString(),
-      headers: Object.fromEntries(c.req.raw.headers.entries()),
-      body: await c.req.json()
-    });
-
-    // Handle different types of Farcaster events
-    const body = await c.req.json();
-    const { type, data } = body;
-
-    switch (type) {
-      case 'user_interaction':
-        console.log('👤 User interaction:', data);
-        break;
-      
-      case 'user_follow':
-        console.log('➕ User followed:', data);
-        break;
-      
-      case 'user_unfollow':
-        console.log('➖ User unfollowed:', data);
-        break;
-      
-      case 'app_install':
-        console.log('📱 App installed:', data);
-        break;
-      
-      case 'app_uninstall':
-        console.log('🗑️ App uninstalled:', data);
-        break;
-      
-      case 'analytics':
-        console.log('📊 Analytics data:', data);
-        break;
-      
-      default:
-        console.log('❓ Unknown webhook type:', type, data);
+    const envName = c.env.NODE_ENV || 'production';
+    const secret = c.env.FARCASTER_WEBHOOK_SECRET;
+    if (!secret) {
+      if (envName === 'production') {
+        return c.json({ success: false, error: 'Webhook not configured' }, 503);
+      }
+    } else {
+      const provided = c.req.header('authorization') || c.req.header('x-webhook-secret') || '';
+      const expected = provided.startsWith('Bearer ') ? provided.slice(7) : provided;
+      if (!timingSafeEqual(String(secret), String(expected))) {
+        return c.json({ success: false, error: 'Unauthorized' }, 401);
+      }
     }
+
+    const body = await c.req.json().catch(() => ({}));
+    const type = body?.type || null;
 
     return c.json({
       success: true,
       message: 'Webhook received successfully',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      type
     });
 
   } catch (error) {
-    console.error('❌ Webhook error:', error);
+    console.error('Webhook error:', error);
     
     return c.json({
       success: false,
       message: 'Webhook processed with errors',
-      error: error.message,
       timestamp: new Date().toISOString()
-    });
+    }, 400);
   }
 });
 

@@ -12,6 +12,7 @@ import { SolanaWalletProvider } from './contexts/SolanaWalletContext';
 import ChainTypeSelector from './components/ChainTypeSelector';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AchievementProvider } from './contexts/AchievementContext';
+import logger from './utils/logger';
 import AchievementOverlay from './components/AchievementOverlay';
 import BaseMiniAppWrapper from './components/BaseMiniAppWrapper';
 import BaseNetworkOptimizer from './components/BaseNetworkOptimizer';
@@ -96,7 +97,9 @@ function getQueryClient() {
             refetchOnWindowFocus: false,
             staleTime: 5 * 60 * 1000,
             throwOnError: false,
-            onError: () => {}
+            onError: (error) => {
+              logger.error(error, { source: 'react-query' });
+            }
           },
         },
       });

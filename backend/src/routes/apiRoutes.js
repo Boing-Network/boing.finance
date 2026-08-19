@@ -182,7 +182,13 @@ export const createAPIRoutes = () => {
       // Fetch price data from CoinGecko
       let priceData = null;
       try {
-        priceData = await coingeckoService.getTokenPrice(address, network);
+        const apiKey = c.env.COINGECKO_API_KEY || '';
+        const url = `https://api.coingecko.com/api/v3/simple/token_price/${network}?contract_addresses=${address}&vs_currencies=usd&include_24hr_change=true${apiKey ? `&x_cg_demo_api_key=${apiKey}` : ''}`;
+        const response = await fetch(url);
+        if (response.ok) {
+          const data = await response.json();
+          priceData = data[address.toLowerCase()];
+        }
       } catch (error) {
         console.error('Error fetching price data:', error);
       }

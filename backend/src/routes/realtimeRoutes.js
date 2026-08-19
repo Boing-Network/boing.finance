@@ -25,7 +25,9 @@ async function hmacSha256Hex(secret, message) {
 
 async function verifyAlchemySignature(c, rawBody) {
   const secret = c.env.ALCHEMY_WEBHOOK_SIGNING_KEY;
-  if (!secret) return true;
+  if (!secret) {
+    return (c.env.NODE_ENV || 'production') !== 'production';
+  }
   const header = c.req.header('x-alchemy-signature') || '';
   const digest = await hmacSha256Hex(secret, rawBody);
   return timingSafeEqual(digest, header.toLowerCase());
@@ -142,7 +144,11 @@ export const createRealtimeRoutes = () => {
   api.post('/webhooks/helius', async (c) => {
     const raw = await c.req.text();
     const secret = c.env.HELIUS_WEBHOOK_SECRET;
-    if (secret) {
+    if (!secret) {
+      if ((c.env.NODE_ENV || 'production') === 'production') {
+        return c.json({ success: false, error: 'Webhook not configured' }, 503);
+      }
+    } else {
       const header = c.req.header('authorization') || c.req.query('secret') || '';
       const expected = header.startsWith('Bearer ') ? header.slice(7) : header;
       if (!timingSafeEqual(String(secret), String(expected))) {

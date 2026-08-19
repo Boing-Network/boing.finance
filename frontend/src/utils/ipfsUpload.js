@@ -2,6 +2,8 @@
 // Uses public IPFS gateways and services for uploading files and metadata
 
 import { getBestIPFSKey, debugIPFSConfig } from '../config/ipfsConfig';
+import { apiPath } from '../config';
+import logger from './logger';
 
 const IPFS_GATEWAYS = [
   'https://ipfs.io/ipfs/',
@@ -15,16 +17,11 @@ const IPFS_GATEWAYS = [
 // Upload to Cloudflare R2 (Primary storage)
 const uploadToR2 = async (file) => {
   try {
-    console.log('Starting R2 upload...');
-    
-    // Get backend URL from environment or use default
-    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8787';
-    console.log('Using backend URL:', backendUrl);
-    
+    logger.debug('Starting R2 upload...');
     const formData = new FormData();
     formData.append('file', file);
     
-    const response = await fetch(`${backendUrl}/api/r2/upload`, {
+    const response = await fetch(apiPath('r2/upload'), {
       method: 'POST',
       body: formData
     });
@@ -416,8 +413,9 @@ const uploadMetadataToWeb3Storage = async (metadata, apiKey) => {
   }
 };
 
-// Debug Pinata API Key (available in browser console)
+// Debug Pinata API Key (dev console only — never expose key previews in production)
 export const debugPinataKey = async () => {
+  if (process.env.NODE_ENV !== 'development') return;
   const pinataKey = process.env.REACT_APP_PINATA_API_KEY;
   
   console.log('🔍 Debugging Pinata API Key');
@@ -497,7 +495,7 @@ export const debugPinataKey = async () => {
 };
 
 // Make debug function available globally
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   window.debugPinataKey = debugPinataKey;
 }
 

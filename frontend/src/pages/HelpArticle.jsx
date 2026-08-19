@@ -12,7 +12,7 @@ const HelpArticle = () => {
       category: 'Getting Started',
       content: `
         <h2>Connecting Your Wallet to boing.finance</h2>
-        <p>boing.finance supports multiple wallet types for seamless DeFi interactions across 6 blockchain networks.</p>
+        <p>boing.finance supports multiple wallet types for seamless DeFi interactions across EVM networks, Solana, and Boing Network L1.</p>
         
         <h3>Supported Wallets</h3>
         <ul>

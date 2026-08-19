@@ -1,13 +1,9 @@
 import axios from 'axios';
 import { ethers } from 'ethers';
-import config from '../config';
+import { apiPath } from '../config';
 import { getContractAddress } from '../config/contracts';
 import blockchainPoolService from './blockchainPoolService';
-
-// Helper function to get API URL
-const getApiUrl = () => {
-  return config.apiUrl || 'http://localhost:8787';
-};
+import logger from '../utils/logger';
 
 // Get all pools (public)
 export const getAllPools = async (chainId = null, page = 1, limit = 20) => {
@@ -23,7 +19,7 @@ export const getAllPools = async (chainId = null, page = 1, limit = 20) => {
         params.append('chainId', chainId.toString());
       }
       
-      const response = await axios.get(`${getApiUrl()}/api/liquidity/pools?${params}`);
+      const response = await axios.get(`${apiPath('liquidity/pools')}?${params}`);
       const apiData = response.data.data || [];
       
       // If API has data, return it
@@ -31,7 +27,7 @@ export const getAllPools = async (chainId = null, page = 1, limit = 20) => {
         return apiData;
       }
     } catch (apiError) {
-      console.warn('API call failed, falling back to blockchain data:', apiError);
+      logger.warn('API call failed, falling back to blockchain data:', apiError);
     }
     
     // Fallback to blockchain data
@@ -42,13 +38,13 @@ export const getAllPools = async (chainId = null, page = 1, limit = 20) => {
         const blockchainData = await blockchainPoolService.getAllPools(limit);
         return blockchainData;
       } catch (blockchainError) {
-        console.error('Blockchain fallback failed:', blockchainError);
+        logger.error('Blockchain fallback failed:', blockchainError);
       }
     }
     
     return [];
   } catch (error) {
-    console.error('Failed to fetch pools:', error);
+    logger.error('Failed to fetch pools:', error);
     return [];
   }
 };
@@ -65,7 +61,7 @@ export const getUserLiquidityPositions = async (account, chainId = null) => {
         params.append('chainId', chainId.toString());
       }
       
-      const response = await axios.get(`${getApiUrl()}/api/liquidity/positions/${account}?${params}`);
+      const response = await axios.get(`${apiPath(`liquidity/positions/${account}`)}?${params}`);
       const apiData = response.data.data || [];
       
       // If API has data, return it
@@ -73,7 +69,7 @@ export const getUserLiquidityPositions = async (account, chainId = null) => {
         return apiData;
       }
     } catch (apiError) {
-      console.warn('API call failed, falling back to blockchain data:', apiError);
+      logger.warn('API call failed, falling back to blockchain data:', apiError);
     }
     
     // Fallback to blockchain data
@@ -84,13 +80,13 @@ export const getUserLiquidityPositions = async (account, chainId = null) => {
         const blockchainData = await blockchainPoolService.getUserPositions(account);
         return blockchainData;
       } catch (blockchainError) {
-        console.error('Blockchain fallback failed:', blockchainError);
+        logger.error('Blockchain fallback failed:', blockchainError);
       }
     }
     
     return [];
   } catch (error) {
-    console.error('Failed to fetch user liquidity positions:', error);
+    logger.error('Failed to fetch user liquidity positions:', error);
     return [];
   }
 };
@@ -107,7 +103,7 @@ export const getUserCreatedPools = async (account, chainId = null) => {
         params.append('chainId', chainId.toString());
       }
       
-      const response = await axios.get(`${getApiUrl()}/api/liquidity/created/${account}?${params}`);
+      const response = await axios.get(`${apiPath(`liquidity/created/${account}`)}?${params}`);
       const apiData = response.data.data || [];
       
       // If API has data, return it
@@ -115,7 +111,7 @@ export const getUserCreatedPools = async (account, chainId = null) => {
         return apiData;
       }
     } catch (apiError) {
-      console.warn('API call failed, falling back to blockchain data:', apiError);
+      logger.warn('API call failed, falling back to blockchain data:', apiError);
     }
     
     // Fallback to blockchain data
@@ -126,13 +122,13 @@ export const getUserCreatedPools = async (account, chainId = null) => {
         const blockchainData = await blockchainPoolService.getUserCreatedPools(account);
         return blockchainData;
       } catch (blockchainError) {
-        console.error('Blockchain fallback failed:', blockchainError);
+        logger.error('Blockchain fallback failed:', blockchainError);
       }
     }
     
     return [];
   } catch (error) {
-    console.error('Failed to fetch user created pools:', error);
+    logger.error('Failed to fetch user created pools:', error);
     return [];
   }
 };
@@ -140,10 +136,10 @@ export const getUserCreatedPools = async (account, chainId = null) => {
 // Get pool details by address
 export const getPoolDetails = async (poolAddress, chainId) => {
   try {
-    const response = await axios.get(`${getApiUrl()}/api/liquidity/pool/${poolAddress}?chainId=${chainId}`);
+    const response = await axios.get(`${apiPath(`liquidity/pool/${poolAddress}`)}?chainId=${chainId}`);
     return response.data.data || null;
   } catch (error) {
-    console.error('Failed to fetch pool details:', error);
+    logger.error('Failed to fetch pool details:', error);
     return null;
   }
 };
@@ -153,7 +149,7 @@ export const getPoolAnalytics = async (poolAddress, chainId) => {
   try {
     // First try to get data from API
     try {
-      const response = await axios.get(`${getApiUrl()}/api/liquidity/analytics/${poolAddress}?chainId=${chainId}`);
+      const response = await axios.get(`${apiPath(`liquidity/analytics/${poolAddress}`)}?chainId=${chainId}`);
       const apiData = response.data.data || null;
       
       // If API has data, return it
@@ -161,7 +157,7 @@ export const getPoolAnalytics = async (poolAddress, chainId) => {
         return apiData;
       }
     } catch (apiError) {
-      console.warn('API call failed, falling back to blockchain data:', apiError);
+      logger.warn('API call failed, falling back to blockchain data:', apiError);
     }
     
     // Fallback to blockchain data
@@ -172,13 +168,13 @@ export const getPoolAnalytics = async (poolAddress, chainId) => {
         const blockchainData = await blockchainPoolService.getPoolAnalytics(poolAddress);
         return blockchainData;
       } catch (blockchainError) {
-        console.error('Blockchain fallback failed:', blockchainError);
+        logger.error('Blockchain fallback failed:', blockchainError);
       }
     }
     
     return null;
   } catch (error) {
-    console.error('Failed to fetch pool analytics:', error);
+    logger.error('Failed to fetch pool analytics:', error);
     return null;
   }
 };
@@ -192,7 +188,7 @@ export const fetchUserPoolsFromBlockchain = async (account, chainId) => {
     const factoryAddress = getContractAddress(chainId, 'dexFactory');
     
     if (!factoryAddress) {
-      console.error('DEXFactory not found for chainId:', chainId);
+      logger.error('DEXFactory not found for chainId:', chainId);
       return [];
     }
     
@@ -295,13 +291,13 @@ export const fetchUserPoolsFromBlockchain = async (account, chainId) => {
         }
       } catch (error) {
         // Skip pairs that fail to load
-        console.warn('Failed to load pair at index', i, error);
+        logger.warn('Failed to load pair at index', i, error);
       }
     }
     
     return userPools;
   } catch (error) {
-    console.error('Failed to fetch user pools from blockchain:', error);
+    logger.error('Failed to fetch user pools from blockchain:', error);
     return [];
   }
 };
@@ -316,10 +312,10 @@ export const getUserPortfolioSummary = async (account, chainId = null) => {
       params.append('chainId', chainId.toString());
     }
     
-    const response = await axios.get(`${getApiUrl()}/api/portfolio/${account}?${params}`);
+    const response = await axios.get(`${apiPath(`portfolio/${account}`)}?${params}`);
     return response.data.data || null;
   } catch (error) {
-    console.error('Failed to fetch user portfolio summary:', error);
+    logger.error('Failed to fetch user portfolio summary:', error);
     return null;
   }
 };
@@ -327,13 +323,13 @@ export const getUserPortfolioSummary = async (account, chainId = null) => {
 // Collect fees from a pool
 export const collectFees = async (poolAddress, chainId) => {
   try {
-    const response = await axios.post(`${getApiUrl()}/api/liquidity/collect-fees`, {
+    const response = await axios.post(apiPath('liquidity/collect-fees'), {
       poolAddress,
       chainId
     });
     return response.data;
   } catch (error) {
-    console.error('Failed to collect fees:', error);
+    logger.error('Failed to collect fees:', error);
     throw error;
   }
 };
@@ -341,14 +337,14 @@ export const collectFees = async (poolAddress, chainId) => {
 // Remove liquidity from a pool
 export const removeLiquidity = async (poolAddress, liquidityAmount, chainId) => {
   try {
-    const response = await axios.post(`${getApiUrl()}/api/liquidity/remove`, {
+    const response = await axios.post(apiPath('liquidity/remove'), {
       poolAddress,
       liquidityAmount,
       chainId
     });
     return response.data;
   } catch (error) {
-    console.error('Failed to remove liquidity:', error);
+    logger.error('Failed to remove liquidity:', error);
     throw error;
   }
 }; 

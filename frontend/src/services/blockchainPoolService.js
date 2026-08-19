@@ -5,6 +5,7 @@ import apyCalculationService from './apyCalculationService';
 import externalPoolService from './externalPoolService';
 import simplePoolDataService from './simplePoolDataService';
 import { mapWithConcurrency } from '../utils/mapWithConcurrency';
+import logger from '../utils/logger';
 
 // DEXFactory ABI for pool-related functions (Enhanced for DEXFactoryV2)
 const DEX_FACTORY_ABI = [
@@ -146,7 +147,7 @@ class BlockchainPoolService {
       return num.toFixed(4).replace(/\.?0+$/, ''); // Remove trailing zeros
     } catch (error) {
       if (this.debug) {
-        console.log(`Error formatting units for value ${value} with decimals ${decimals}:`, error);
+        logger.debug(`Error formatting units for value ${value} with decimals ${decimals}:`, error);
       }
       return value.toString();
     }
@@ -186,7 +187,7 @@ class BlockchainPoolService {
       }
     } catch (error) {
       if (this.debug) {
-        console.log(`Error formatting token reserve for value ${value} with decimals ${decimals}:`, error);
+        logger.debug(`Error formatting token reserve for value ${value} with decimals ${decimals}:`, error);
       }
       return value.toString();
     }
@@ -202,7 +203,7 @@ class BlockchainPoolService {
       this.dexFactory = null;
       this.liquidityLocker = null;
       if (this.debug) {
-        console.log('🔧 BlockchainPoolService: Boing L1 uses the Boing VM — skipping EVM DEXFactory/ethers wiring.');
+        logger.debug('🔧 BlockchainPoolService: Boing L1 uses the Boing VM — skipping EVM DEXFactory/ethers wiring.');
       }
       return false;
     }
@@ -211,7 +212,7 @@ class BlockchainPoolService {
     const lockerAddress = getContractAddress(chainId, 'liquidityLocker');
     
     if (this.debug) {
-      console.log('🔧 Initializing BlockchainPoolService:', {
+      logger.debug('🔧 Initializing BlockchainPoolService:', {
         chainId,
         factoryAddress,
         lockerAddress
@@ -221,7 +222,7 @@ class BlockchainPoolService {
     // Check if DEXFactory is deployed (not zero address)
     if (!factoryAddress || factoryAddress === '0x0000000000000000000000000000000000000000') {
       if (this.debug) {
-        console.log('⚠️ DEXFactory not deployed on this network. Service will work in API-only mode.');
+        logger.debug('⚠️ DEXFactory not deployed on this network. Service will work in API-only mode.');
       }
       // Don't throw error - allow service to work in API-only mode
       this.dexFactory = null;
@@ -243,19 +244,19 @@ class BlockchainPoolService {
           new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
         ]);
         if (this.debug) {
-          console.log('✅ DEXFactory connected successfully. Total pairs:', totalPairs.toString());
-          console.log('🏭 Using DEXFactoryV2 at:', factoryAddress);
+          logger.debug('✅ DEXFactory connected successfully. Total pairs:', totalPairs.toString());
+          logger.debug('🏭 Using DEXFactoryV2 at:', factoryAddress);
         }
         return true; // Successfully initialized
       } catch (error) {
-        console.warn('⚠️ Failed to connect to DEXFactory (contract may not be deployed):', error.message);
+        logger.warn('⚠️ Failed to connect to DEXFactory (contract may not be deployed):', error.message);
         // Don't throw - allow graceful degradation
         this.dexFactory = null;
         this.liquidityLocker = null;
         return false; // Contracts not available
       }
     } catch (error) {
-      console.warn('⚠️ Error setting up contracts:', error.message);
+      logger.warn('⚠️ Error setting up contracts:', error.message);
       this.dexFactory = null;
       this.liquidityLocker = null;
       return false; // Contracts not available
@@ -271,7 +272,7 @@ class BlockchainPoolService {
     try {
       const totalPairs = await this.dexFactory.allPairsLength();
       if (this.debug) {
-        console.log('📊 Total pairs in factory:', totalPairs.toString());
+        logger.debug('📊 Total pairs in factory:', totalPairs.toString());
       }
       
       const pools = [];
@@ -282,18 +283,18 @@ class BlockchainPoolService {
       const indices = Array.from({ length: endIndex - startIndex }, (_, k) => startIndex + k);
       
       if (this.debug) {
-        console.log(`🔍 Scanning pairs from index ${startIndex} to ${endIndex - 1}`);
+        logger.debug(`🔍 Scanning pairs from index ${startIndex} to ${endIndex - 1}`);
       }
 
       const scanned = await mapWithConcurrency(indices, 6, async (i) => {
         try {
           const pairAddress = await this.dexFactory.allPairs(i);
           if (this.debug) {
-            console.log(`📍 Pair ${i}: ${pairAddress}`);
+            logger.debug(`📍 Pair ${i}: ${pairAddress}`);
           }
           return await this.getPoolInfo(pairAddress);
         } catch (error) {
-          console.warn(`Failed to load pair at index ${i}:`, error);
+          logger.warn(`Failed to load pair at index ${i}:`, error);
           return null;
         }
       });
@@ -302,12 +303,12 @@ class BlockchainPoolService {
       }
       
       if (this.debug) {
-        console.log(`✅ Found ${pools.length} pools`);
+        logger.debug(`✅ Found ${pools.length} pools`);
       }
       
       return this.convertBigIntsToStrings(pools);
     } catch (error) {
-      console.error('Failed to get all pools:', error);
+      logger.error('Failed to get all pools:', error);
       return [];
     }
   }
@@ -320,7 +321,7 @@ class BlockchainPoolService {
 
     try {
       if (this.debug) {
-        console.log('🌐 Fetching all pools from Sepolia network...');
+        logger.debug('🌐 Fetching all pools from Sepolia network...');
       }
 
       // Get pools from your DEXFactory
@@ -330,18 +331,18 @@ class BlockchainPoolService {
       let externalPools = [];
       try {
         if (this.debug) {
-          console.log('🌐 Fetching external pools...');
+          logger.debug('🌐 Fetching external pools...');
         }
         const externalPoolsData = await externalPoolService.getAllSepoliaPools(this.provider, limit);
         externalPools = externalPoolsData.pools || [];
         if (this.debug) {
-          console.log(`🌐 External pools fetched: ${externalPools.length} pools`);
-          console.log('🌐 External pools sources:', externalPoolsData.sources);
+          logger.debug(`🌐 External pools fetched: ${externalPools.length} pools`);
+          logger.debug('🌐 External pools sources:', externalPoolsData.sources);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch external pools:', error);
+        logger.error('❌ Failed to fetch external pools:', error);
         if (this.debug) {
-          console.log('🌐 External pools fetch failed, continuing with your pools only');
+          logger.debug('🌐 External pools fetch failed, continuing with your pools only');
         }
       }
 
@@ -363,14 +364,14 @@ class BlockchainPoolService {
         .slice(0, limit);
 
       if (this.debug) {
-        console.log(`🌐 Total Sepolia pools found: ${allPools.length}`);
-        console.log(`🌐 Your pools: ${yourPools.length}, External pools: ${externalPools.length}`);
-        console.log(`🌐 Returning top ${sortedPools.length} pools by 24h volume`);
+        logger.debug(`🌐 Total Sepolia pools found: ${allPools.length}`);
+        logger.debug(`🌐 Your pools: ${yourPools.length}, External pools: ${externalPools.length}`);
+        logger.debug(`🌐 Returning top ${sortedPools.length} pools by 24h volume`);
       }
 
       return this.convertBigIntsToStrings(sortedPools);
     } catch (error) {
-      console.error('Failed to get all Sepolia pools:', error);
+      logger.error('Failed to get all Sepolia pools:', error);
       
       // Fallback to just your pools if external fetch fails
       return await this.getAllPools(limit);
@@ -405,7 +406,7 @@ class BlockchainPoolService {
       }
 
       if (this.debug) {
-        console.log(`🏊 Pool ${pairAddress}:`, {
+        logger.debug(`🏊 Pool ${pairAddress}:`, {
           token0,
           token1,
           totalSupply: totalSupply.toString(),
@@ -421,7 +422,7 @@ class BlockchainPoolService {
       ]);
 
       if (this.debug) {
-        console.log(`🔍 Token info for ${pairAddress}:`, {
+        logger.debug(`🔍 Token info for ${pairAddress}:`, {
           token0: {
             address: token0,
             name: token0Info?.name,
@@ -453,7 +454,7 @@ class BlockchainPoolService {
       const tvl = reserve0Human + reserve1Human;
       
       if (this.debug) {
-        console.log(`💰 TVL calculation for ${pairAddress}:`, {
+        logger.debug(`💰 TVL calculation for ${pairAddress}:`, {
           reserve0Raw: reserves[0].toString(),
           reserve1Raw: reserves[1].toString(),
           token0Decimals: token0Info.decimals,
@@ -480,7 +481,7 @@ class BlockchainPoolService {
         );
       } catch (error) {
         if (this.debug) {
-          console.log(`📊 APY calculation failed for ${pairAddress}:`, error.message);
+          logger.debug(`📊 APY calculation failed for ${pairAddress}:`, error.message);
         }
       }
 
@@ -513,7 +514,7 @@ class BlockchainPoolService {
       
       return this.convertBigIntsToStrings(poolInfo);
     } catch (error) {
-      console.error(`Failed to get pool info for ${pairAddress}:`, error);
+      logger.error(`Failed to get pool info for ${pairAddress}:`, error);
       return null;
     }
   }
@@ -525,7 +526,7 @@ class BlockchainPoolService {
     }
 
     if (this.debug) {
-      console.log(`🔍 Searching for positions for user: ${userAddress}`);
+      logger.debug(`🔍 Searching for positions for user: ${userAddress}`);
     }
 
     try {
@@ -537,14 +538,14 @@ class BlockchainPoolService {
       const indices = Array.from({ length: endIndex }, (_, i) => i);
       
       if (this.debug) {
-        console.log(`🔍 Scanning ALL pairs from index 0 to ${endIndex - 1}`);
+        logger.debug(`🔍 Scanning ALL pairs from index 0 to ${endIndex - 1}`);
       }
 
       const scanned = await mapWithConcurrency(indices, 6, async (i) => {
         try {
           const pairAddress = await this.dexFactory.allPairs(i);
           if (this.debug) {
-            console.log(`📍 Checking pair ${i}: ${pairAddress}`);
+            logger.debug(`📍 Checking pair ${i}: ${pairAddress}`);
           }
           const position = await this.getUserPositionInPool(userAddress, pairAddress);
           if (position && Number(position.lpBalance) > 0) {
@@ -552,7 +553,7 @@ class BlockchainPoolService {
           }
           return null;
         } catch (error) {
-          console.warn(`Failed to check user position in pair ${i}:`, error);
+          logger.warn(`Failed to check user position in pair ${i}:`, error);
           return null;
         }
       });
@@ -561,12 +562,12 @@ class BlockchainPoolService {
       }
       
       if (this.debug) {
-        console.log(`🎯 Total positions found: ${userPositions.length}`);
+        logger.debug(`🎯 Total positions found: ${userPositions.length}`);
       }
       
       return this.convertBigIntsToStrings(userPositions);
     } catch (error) {
-      console.error('Failed to get user positions:', error);
+      logger.error('Failed to get user positions:', error);
       return [];
     }
   }
@@ -584,7 +585,7 @@ class BlockchainPoolService {
       const userBalance = await pairContract.balanceOf(userAddress);
       
       if (this.debug) {
-        console.log(`💰 User ${userAddress} LP balance in ${pairAddress}: ${userBalance.toString()}`);
+        logger.debug(`💰 User ${userAddress} LP balance in ${pairAddress}: ${userBalance.toString()}`);
       }
       
       let totalBalance = userBalance;
@@ -596,7 +597,7 @@ class BlockchainPoolService {
           // Get all locks for this pair
           const locks = await this.liquidityLocker.getLocks(pairAddress);
           if (this.debug) {
-            console.log(`🔒 Found ${locks.length} locks for pair ${pairAddress}`);
+            logger.debug(`🔒 Found ${locks.length} locks for pair ${pairAddress}`);
           }
           
           // Find locks owned by this user
@@ -615,7 +616,7 @@ class BlockchainPoolService {
                 };
               }
               if (this.debug) {
-                console.log(`🔒 Found user lock ${i}: ${lock.amount.toString()} LP tokens, unlock: ${new Date(Number(lock.unlockTime) * 1000).toLocaleString()}`);
+                logger.debug(`🔒 Found user lock ${i}: ${lock.amount.toString()} LP tokens, unlock: ${new Date(Number(lock.unlockTime) * 1000).toLocaleString()}`);
               }
             }
           }
@@ -624,23 +625,23 @@ class BlockchainPoolService {
             // User has locked liquidity, treat this as their position
             totalBalance = totalLockedBalance;
             if (this.debug) {
-              console.log(`✅ Found locked position: ${totalBalance.toString()} LP tokens`);
+              logger.debug(`✅ Found locked position: ${totalBalance.toString()} LP tokens`);
             }
           } else {
             if (this.debug) {
-              console.log(`🔒 No locked liquidity found for user in ${pairAddress}`);
+              logger.debug(`🔒 No locked liquidity found for user in ${pairAddress}`);
             }
             return null; // No direct or locked balance
           }
         } catch (error) {
           if (this.debug) {
-            console.log(`🔓 Could not check locked liquidity:`, error.message);
+            logger.debug(`🔓 Could not check locked liquidity:`, error.message);
           }
           return null; // No direct balance and can't check locked
         }
       } else if (userBalance === 0n) {
         if (this.debug) {
-          console.log(`💰 No direct balance found for user in ${pairAddress}`);
+          logger.debug(`💰 No direct balance found for user in ${pairAddress}`);
         }
         return null; // No direct balance and no liquidity locker
       }
@@ -682,7 +683,7 @@ class BlockchainPoolService {
       const tvl = reserve0Human + reserve1Human;
 
       if (this.debug) {
-        console.log(`📊 Position calculation for ${pairAddress}:`, {
+        logger.debug(`📊 Position calculation for ${pairAddress}:`, {
           userLpBalance: totalBalance.toString(),
           totalSupply: totalSupply.toString(),
           userShare: `${(userShare * 100).toFixed(4)}%`,
@@ -713,7 +714,7 @@ class BlockchainPoolService {
         );
       } catch (error) {
         if (this.debug) {
-          console.log(`📊 APY calculation failed for position ${pairAddress}:`, error.message);
+          logger.debug(`📊 APY calculation failed for position ${pairAddress}:`, error.message);
         }
       }
 
@@ -749,9 +750,9 @@ class BlockchainPoolService {
       
       return this.convertBigIntsToStrings(position);
     } catch (error) {
-      console.error(`Failed to get user position in pool ${pairAddress}:`, error);
+      logger.error(`Failed to get user position in pool ${pairAddress}:`, error);
       if (this.debug) {
-        console.log(`💥 getUserPositionInPool failed for ${pairAddress}:`, error.message);
+        logger.debug(`💥 getUserPositionInPool failed for ${pairAddress}:`, error.message);
       }
       return null;
     }
@@ -764,7 +765,7 @@ class BlockchainPoolService {
     }
 
     if (this.debug) {
-      console.log(`🏭 Searching for pools created by user: ${userAddress}`);
+      logger.debug(`🏭 Searching for pools created by user: ${userAddress}`);
     }
 
     try {
@@ -790,7 +791,7 @@ class BlockchainPoolService {
           }
           return null;
         } catch (error) {
-          console.warn(`Failed to check created pool ${i}:`, error);
+          logger.warn(`Failed to check created pool ${i}:`, error);
           return null;
         }
       });
@@ -799,12 +800,12 @@ class BlockchainPoolService {
       }
       
       if (this.debug) {
-        console.log(`🏭 Total created pools found: ${createdPools.length}`);
+        logger.debug(`🏭 Total created pools found: ${createdPools.length}`);
       }
       
       return this.convertBigIntsToStrings(createdPools);
     } catch (error) {
-      console.error('Failed to get user created pools:', error);
+      logger.error('Failed to get user created pools:', error);
       return [];
     }
   }
@@ -848,7 +849,7 @@ class BlockchainPoolService {
       
       return this.convertBigIntsToStrings(analytics);
     } catch (error) {
-      console.error(`Failed to get pool analytics for ${pairAddress}:`, error);
+      logger.error(`Failed to get pool analytics for ${pairAddress}:`, error);
       return null;
     }
   }
@@ -879,7 +880,7 @@ class BlockchainPoolService {
       
       return this.convertBigIntsToStrings(tokenInfo);
     } catch (error) {
-      console.error(`Failed to get token info for ${tokenAddress}:`, error);
+      logger.error(`Failed to get token info for ${tokenAddress}:`, error);
       return {
         name: 'Unknown Token',
         symbol: 'UNKNOWN',
@@ -904,7 +905,7 @@ class BlockchainPoolService {
 
     try {
       if (this.debug) {
-        console.log(`🔒 Getting all locks for user: ${userAddress}`);
+        logger.debug(`🔒 Getting all locks for user: ${userAddress}`);
       }
 
       const allPools = await this.getAllPools(100); // Get more pools to ensure we find user's locks
@@ -929,7 +930,7 @@ class BlockchainPoolService {
           return matches;
         } catch (error) {
           if (this.debug) {
-            console.log(`🔓 Could not get locks for pool ${pool.address}:`, error.message);
+            logger.debug(`🔓 Could not get locks for pool ${pool.address}:`, error.message);
           }
           return [];
         }
@@ -937,12 +938,12 @@ class BlockchainPoolService {
       const userLocks = scanned.flat().filter(Boolean);
 
       if (this.debug) {
-        console.log(`🔒 Found ${userLocks.length} locks for user:`, userLocks);
+        logger.debug(`🔒 Found ${userLocks.length} locks for user:`, userLocks);
       }
 
       return this.convertBigIntsToStrings(userLocks);
     } catch (error) {
-      console.error('Failed to get user locks:', error);
+      logger.error('Failed to get user locks:', error);
       return [];
     }
   }
@@ -996,7 +997,7 @@ class BlockchainPoolService {
       
       return this.convertBigIntsToStrings(portfolio);
     } catch (error) {
-      console.error('Failed to get user portfolio value:', error);
+      logger.error('Failed to get user portfolio value:', error);
       const errorPortfolio = {
         totalValue: 0,
         totalPools: 0,

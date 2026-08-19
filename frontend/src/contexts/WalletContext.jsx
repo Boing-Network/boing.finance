@@ -1149,6 +1149,7 @@ export const WalletProvider = ({ children }) => {
   };
 
   const debugWalletState = () => {
+    if (process.env.NODE_ENV !== 'development') return;
     console.log('=== Wallet Debug Info ===');
     console.log('Current Account:', account);
     console.log('Is Connected:', isConnected);
@@ -1402,7 +1403,7 @@ export const WalletProvider = ({ children }) => {
     switchNetwork,
     getCurrentNetwork,
     getAccountBalance,
-    debugWalletState,
+    debugWalletState: process.env.NODE_ENV === 'development' ? debugWalletState : () => {},
     detectWalletProviders,
     getWalletProvider,
     connectWalletWithProvider,

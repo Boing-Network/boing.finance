@@ -121,7 +121,7 @@ export const NETWORKS = {
   11155111: {
     name: 'Sepolia',
     symbol: 'ETH',
-    rpcUrl: process.env.REACT_APP_SEPOLIA_RPC_URL || 'https://sepolia.infura.io/v3/ca6843b2ac7a4fdc9b2af7fddc25904a',
+    rpcUrl: process.env.REACT_APP_SEPOLIA_RPC_URL || 'https://rpc.sepolia.org',
     explorer: 'https://sepolia.etherscan.io',
     chainId: 11155111,
     nativeCurrency: { name: 'Sepolia Ether', symbol: 'ETH', decimals: 18 },

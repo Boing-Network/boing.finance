@@ -60,10 +60,10 @@ const AIChatModal = ({ isOpen, onClose, context }) => {
         throw new Error(data.error || 'No reply received');
       }
     } catch (err) {
-      toast.error(err.message || 'AI assistant unavailable');
+      toast.error('AI assistant unavailable');
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: `Sorry, I couldn't process that. ${err.message}`
+        content: "Sorry, I couldn't process that. Please try again in a moment."
       }]);
     } finally {
       setIsLoading(false);

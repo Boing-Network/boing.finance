@@ -7,7 +7,9 @@ export const createIPFSRoutes = () => {
 
   // Debug middleware to log all requests
   ipfs.use('*', async (c, next) => {
-    console.log(`[IPFS] ${c.req.method} ${c.req.url}`);
+    if ((c.env.NODE_ENV || 'production') !== 'production') {
+      console.log(`[IPFS] ${c.req.method} ${c.req.url}`);
+    }
     await next();
   });
 
@@ -168,6 +170,12 @@ export const createIPFSRoutes = () => {
   // R2 File list route
   ipfs.get('/r2/files', async (c) => {
     try {
+      const listSecret = c.env.R2_LIST_SECRET || c.env.ADMIN_API_KEY;
+      const provided = c.req.header('x-admin-key') || c.req.query('secret') || '';
+      if (!listSecret || provided !== listSecret) {
+        return c.json({ success: false, error: 'Not found' }, 404);
+      }
+
       if (!c.env.BOING_STORAGE) {
         return c.json({ 
           success: false,

@@ -7,6 +7,14 @@
  * @param {Array} headers - Optional array of header names
  * @returns {string} CSV string
  */
+const escapeHtml = (value) =>
+  String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
 export const exportToCSV = (data, headers = null) => {
   if (!data || data.length === 0) {
     return '';
@@ -253,8 +261,8 @@ export const exportToPDF = (element, filename = 'export') => {
       </head>
       <body>
         <div class="header">
-          <h1>${filename}</h1>
-          <p>Generated on ${new Date().toLocaleString()}</p>
+          <h1>${escapeHtml(filename)}</h1>
+          <p>Generated on ${escapeHtml(new Date().toLocaleString())}</p>
         </div>
         ${element.innerHTML}
         <div class="footer">
@@ -278,13 +286,24 @@ export const exportToPDF = (element, filename = 'export') => {
  * @param {Object} portfolioData - Portfolio data object
  */
 export const exportPortfolioPDF = (portfolioData) => {
-  // Create a temporary div with formatted portfolio data
   const tempDiv = document.createElement('div');
+  const tokenRows = portfolioData.balances?.length
+    ? portfolioData.balances.map((token) => `
+          <tr>
+            <td>${escapeHtml(token.name)}</td>
+            <td>${escapeHtml(token.symbol)}</td>
+            <td>${escapeHtml(token.balance || '0')}</td>
+            <td>$${escapeHtml(token.value || '0')}</td>
+            <td>${escapeHtml(token.network)}</td>
+          </tr>
+        `).join('')
+    : '<tr><td colspan="5">No tokens</td></tr>';
+
   tempDiv.innerHTML = `
     <h2>Portfolio Report</h2>
-    <p><strong>Total Value:</strong> $${portfolioData.totalValue || '0'}</p>
-    <p><strong>Total Tokens:</strong> ${portfolioData.totalTokens || '0'}</p>
-    <p><strong>Total Pools:</strong> ${portfolioData.totalPools || '0'}</p>
+    <p><strong>Total Value:</strong> $${escapeHtml(portfolioData.totalValue || '0')}</p>
+    <p><strong>Total Tokens:</strong> ${escapeHtml(portfolioData.totalTokens || '0')}</p>
+    <p><strong>Total Pools:</strong> ${escapeHtml(portfolioData.totalPools || '0')}</p>
     <h3>Token Holdings</h3>
     <table>
       <thead>
@@ -297,15 +316,7 @@ export const exportPortfolioPDF = (portfolioData) => {
         </tr>
       </thead>
       <tbody>
-        ${portfolioData.balances?.map(token => `
-          <tr>
-            <td>${token.name || ''}</td>
-            <td>${token.symbol || ''}</td>
-            <td>${token.balance || '0'}</td>
-            <td>$${token.value || '0'}</td>
-            <td>${token.network || ''}</td>
-          </tr>
-        `).join('') || '<tr><td colspan="5">No tokens</td></tr>'}
+        ${tokenRows}
       </tbody>
     </table>
   `;

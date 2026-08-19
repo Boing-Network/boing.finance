@@ -9,21 +9,22 @@
 
 const isDev = process.env.NODE_ENV === 'development';
 
-// Error tracking service placeholder
-// Replace with actual error tracking service (Sentry, LogRocket, etc.)
 const errorTrackingService = {
   captureException: (error, context = {}) => {
-    // In production, send to error tracking service
-    if (!isDev) {
-      // TODO: Integrate with error tracking service
-      // Example: Sentry.captureException(error, { extra: context });
+    if (typeof window !== 'undefined' && window.Sentry) {
+      window.Sentry.captureException(error, { extra: context });
+      return;
+    }
+    if (isDev) {
       console.error('[Error Tracking]', error, context);
     }
   },
   captureMessage: (message, level = 'info', context = {}) => {
-    if (!isDev) {
-      // TODO: Integrate with error tracking service
-      // Example: Sentry.captureMessage(message, { level, extra: context });
+    if (typeof window !== 'undefined' && window.Sentry) {
+      window.Sentry.captureMessage(message, { level, extra: context });
+      return;
+    }
+    if (isDev) {
       console.log('[Error Tracking]', message, level, context);
     }
   }
