@@ -152,12 +152,12 @@ export default function BoingNativeL1Section() {
         <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
           In-repo overview of native vs EVM DEX paths in this app:{' '}
           <a
-            href="https://github.com/Boing-Network/boing.finance/blob/main/docs/boing-l1-vs-evm-dex.md"
+            href="https://github.com/Boing-Network/boing.finance/blob/main/docs/native-dex.md"
             target="_blank"
             rel="noopener noreferrer"
             className={linkCls}
           >
-            docs/boing-l1-vs-evm-dex.md
+            docs/native-dex.md
           </a>
           .
         </p>

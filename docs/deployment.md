@@ -56,16 +56,18 @@ GitHub → Settings → Secrets and variables → Actions:
 
 **Required:**
 ```
-REACT_APP_ENVIRONMENT=production
+REACT_APP_ENV=production
 REACT_APP_BACKEND_URL=https://boing-api-prod.nico-chikuji.workers.dev
 ```
 
-**Optional:** Set in Pages → `boing-finance-prod` → Settings → Environment Variables. See [docs/configuration.md](configuration.md).
+(`REACT_APP_ENVIRONMENT` is an alias; see [configuration.md](./configuration.md).)
+
+**Optional:** Set in Pages → `boing-finance-prod` → Settings → Environment Variables. Canonical list: `frontend/.env.example`.
 
 ### Security & Build
 
 - `_headers` and `_redirects` in `frontend/public/` (security headers, www→apex redirect)
-- Build output: `build`; production branch: `main`
+- Build output: **`dist`** (Vite); production branch: `main`
 - SSL/TLS and DNS via Cloudflare
 
 ### Verification
@@ -118,7 +120,7 @@ This section ensures each integrated blockchain network is **mainnet-ready** bef
 - [ ] **RPC configured** – Primary + fallback RPCs in `frontend/src/config/networks.js`
 - [ ] **Wallet add params** – `getWalletAddChainParams()` returns valid chainId, chainName, nativeCurrency, rpcUrls, blockExplorerUrls
 - [ ] **WETH/Wrapped native** – Correct address in `frontend/src/config/contracts.js`
-- [ ] **SERVICE_CHARGES** – Mainnet pricing in `frontend/src/pages/DeployToken.js`
+- [ ] **SERVICE_CHARGES** – Mainnet pricing in `frontend/src/pages/DeployToken.jsx`
 - [ ] **External links** – Swap/Bridge URLs in `frontend/src/config/networkExternalLinks.js` (fallback when DEX not deployed)
 - [ ] **Hardhat network** – Entry in `contracts/hardhat.config.js` and `contracts/config/networks.js`
 - [ ] **Environment variables** – Optional RPC overrides documented in `frontend/.env.example`
@@ -132,7 +134,7 @@ See [docs/integration.md](integration.md) for prioritization.
 
 ### Deploy DEX (per network, no LP seed)
 
-Ethereum is excluded. See [evm-dex-enablement.md](evm-dex-enablement.md).
+Ethereum is excluded. See [contracts.md](./contracts.md).
 
 ```bash
 cd contracts

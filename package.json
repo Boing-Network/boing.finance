@@ -2,7 +2,6 @@
   "name": "boing",
   "version": "1.0.0",
   "description": "Cross-chain decentralized exchange",
-  "main": "index.js",
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm install && npm run dev",

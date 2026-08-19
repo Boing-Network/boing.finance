@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Minimal Boing JSON-RPC smoke for CI or local checks (Phase P0 — docs/boing-l1-dex-roadmap.md).
+ * Minimal Boing JSON-RPC smoke for CI or local checks (Phase P0 — docs/native-dex.md).
  *
  * Usage:
  *   npm run smoke:boing-rpc

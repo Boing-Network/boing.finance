@@ -1,5 +1,7 @@
 # Product Roadmap & Ideas
 
+Product / UX backlog — **not** an engineering spec. Native L1 work lives in [native-dex.md](./native-dex.md). *Last reviewed: August 2026 (items below may already be shipped or superseded).*
+
 Merged from Improvement Plan, UX & NFT Brainstorm, and Boing NFT Roadmap.
 
 ---

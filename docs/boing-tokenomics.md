@@ -1,5 +1,7 @@
 # boing.finance Tokenomics
 
+Narrative economics for **BOING**. On-chain addresses: [contract-registry.md](./contract-registry.md) and `frontend/src/config/contracts.js`. Governance/staking contracts are **not deployed** (placeholders). Most sections below remain **planned**. *Last reviewed: August 2026.*
+
 ## Token Overview
 
 **Token Name**: boing.finance
@@ -9,7 +11,9 @@
 **Decimals**: 18
 **Network**: Deployed on Ethereum mainnet (cross-chain bridges planned)
 
-## Current Status (Q3 2025)
+## Current Status
+
+Most protocol features below remain **planned**. Q3 2025 dates in older drafts are historical.
 
 ### ✅ Implemented Features
 

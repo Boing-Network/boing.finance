@@ -1,98 +1,49 @@
-# Solana Integration & Security
+# Solana integration
 
-Solana is integrated as a non-EVM stack alongside EVM networks. This document covers the integration plan and security practices. See [integration.md](integration.md) for prioritization and roadmap.
+Solana is a first-class non-EVM stack beside EVM and Boing L1. Prioritization: [integration.md](./integration.md).
 
----
+*Last reviewed: August 2026.*
 
-## Why Solana first?
+## Why Solana
 
-- **~17M+ active addresses** (7-day) — high user activity
-- **~$6.5–7B TVL** — strong DeFi ecosystem
-- **Sub-cent fees** — attractive for retail
-- **Growing adoption** — memecoins, NFTs, DeFi
+High activity, large DeFi TVL, sub-cent fees, and a mature aggregator (Jupiter). Metrics change quickly; treat third-party TVL tables as snapshots, not SLAs.
 
----
+## Stack (this repo)
 
-## Technical overview: Solana vs EVM
+| Aspect | Implementation |
+|--------|----------------|
+| RPC / web3 | `@solana/web3.js`, `@solana/spl-token` |
+| Metadata | `@metaplex-foundation/mpl-token-metadata` |
+| Wallet | Custom **`SolanaWalletContext.jsx`** — **Phantom** and **Solflare** (`window.solana` / `window.solflare`). Not `@solana/wallet-adapter-react`. |
+| Swap | In-app **Jupiter** (`SolanaAggregatorSwap.jsx`, backend `/api/aggregator`) |
+| Pools | External Raydium (and similar) links — no proprietary Solana AMM in this repo |
 
-| Aspect | EVM | Solana |
-|--------|-----|--------|
-| Language | Solidity | Rust (native) |
-| Account model | Contract storage | Account-based, PDA |
-| Token standard | ERC-20 | SPL Token |
-| Wallet | MetaMask, WalletConnect | Phantom, Solflare, Backpack |
-| SDK | ethers.js, viem | @solana/web3.js, @solana/spl-token |
+## Shipped
 
----
+- [x] Connect Phantom / Solflare; SOL balance; chain type EVM vs Solana
+- [x] Mainnet + Devnet RPC and explorers; network persisted in `localStorage`. Default: devnet unless `REACT_APP_SOLANA_NETWORK=mainnet`
+- [x] SPL token deploy on Deploy Token (chain selector EVM | Solana), Metaplex metadata, R2 for images
+- [x] Jupiter swaps on Swap when Solana is selected; market board via GeckoTerminal
+- [x] Portfolio: SOL + SPL balances (`getParsedTokenAccountsByOwner`)
+- [x] Optional `POST /api/solana/deployments` + D1 `solana_deployments` (`backend/drizzle/0003_solana_deployments.sql`)
 
-## Integration approach
+## Not in initial scope
 
-- **Token creation:** Native SPL via @solana/spl-token (createMint, createAccount, mintTo). No custom program for basic tokens.
-- **Swap / Pools:** In-app Jupiter swaps (mainnet); Raydium links for pools (no proprietary Solana DEX).
-- **Stack:** @solana/web3.js, @solana/spl-token, @solana/wallet-adapter-react.
+- SOL/SPL ↔ EVM bridge (Wormhole / LayerZero / Allbridge)
+- First-party Solana DEX / pool creation
 
----
+## Security
 
-## Scope (phases)
+- **Input validation:** name ≤ 32 chars; symbol ≤ 10; decimals 0–9; supply bounded; image ≤ 10MB, image MIME only.
+- **Transactions:** simulate with `connection.simulateTransaction()` before send. No private keys in the frontend; the wallet signs.
+- **Metaplex:** CreateMetadataAccountV3; NFTs revoke mint authority. Metadata/images on Cloudflare R2.
+- **Fees:** UI shows rent + tx fee; user approves the exact tx.
+- **RPC:** set `REACT_APP_SOLANA_MAINNET_RPC` for production.
 
-### Phase 1: Foundation
-- Solana wallet connection (Phantom, Solflare, Backpack) via wallet-adapter
-- Solana config: Mainnet + Devnet RPC, explorer URLs
-- Multi-chain: SolanaWalletContext, chain type (EVM vs Solana)
-
-### Phase 2: Token deployment
-- SPL token creation with Metaplex Token Metadata
-- Deploy Token page: chain selector EVM | Solana, Solana-specific form
-- Cost: rent-exempt (~0.002 SOL mint + ATA), service fee configurable
-
-### Phase 3: Swap & portfolio
-- Jupiter in-app for swaps; Raydium links for pools
-- Portfolio: SOL + SPL token balances (getParsedTokenAccountsByOwner)
-
-### Phase 4: Bridge (future)
-- SOL/SPL ↔ EVM via Wormhole, LayerZero, or Allbridge — out of scope for initial integration
-
----
-
-## Security & industry standards
-
-### Token & NFT creation
-
-- **Input validation:** Name max 32 chars; symbol max 10; decimals 0–9 (9 standard for Solana); initial supply bounded; image max 10MB, image MIME only.
-- **Transaction security:** Simulate with `connection.simulateTransaction()` before send. No private keys in frontend; user wallet signs all txs.
-- **Metaplex:** SPL tokens include Metaplex Token Metadata (CreateMetadataAccountV3). NFTs: metadata + immutable mint (mint authority revoked). Metadata and images on Cloudflare R2 (public HTTPS).
-- **Fee transparency:** Cost estimates in UI (rent + tx fee); user approves exact tx in wallet.
-
-### Wallet & network
-
-- **Providers:** window.solana (Phantom, Solflare, Backpack). Account change and disconnect handled.
-- **Mainnet/Devnet:** User-controlled in UI, persisted in localStorage. Default: devnet unless `REACT_APP_SOLANA_NETWORK=mainnet`.
-
-### Backend
-
-- Optional POST to `/api/solana/deployments` after successful mint. D1 table `solana_deployments` stores mint, creator, network, type, name, symbol, metadata URI, signature.
-- Run D1 migration `0003_solana_deployments.sql` before deploying backend. R2 configured for metadata/images. Set `REACT_APP_SOLANA_MAINNET_RPC` for production.
-
----
-
-## Success criteria
-
-- [ ] User can connect Phantom/Solflare and see Solana balance
-- [ ] User can deploy SPL token (name, symbol, supply) on mainnet/devnet
-- [ ] Deploy Token page: chain selector EVM | Solana
-- [ ] Token creation completes with sub-dollar fees
-- [ ] Portfolio shows Solana tokens when Solana wallet connected
-
----
-
-## Risks & mitigations
+## Risks
 
 | Risk | Mitigation |
 |------|------------|
-| Network instability | Multiple RPCs, retry logic |
-| Wallet fragmentation | Support Phantom, Solflare, Backpack |
-| Fee volatility | Quote fees in SOL at tx time |
-
----
-
-*Last updated: February 2025*
+| Network instability | Configurable RPC, retries |
+| Wallet fragmentation | Phantom + Solflare; prompt if neither is injected |
+| Fee volatility | Quote rent/fees in SOL at tx time |

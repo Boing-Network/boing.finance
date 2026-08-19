@@ -21,7 +21,7 @@ Foundation contracts for boing.finance governance, treasury, and BOING ecosystem
 
 2. **Deploy governance stack** (Sepolia):
    ```bash
-   npx hardhat run scripts/deploy-governance.js --network sepolia
+   cd contracts && npm run deploy:governance -- --network sepolia
    ```
 
 3. **Register addresses** in backend `contract_registry`:
@@ -45,4 +45,6 @@ Foundation contracts for boing.finance governance, treasury, and BOING ecosystem
 - `governanceApi.js` – proposals, votes, treasury, contracts
 - `boingApi.js` – points, activity
 - Governance pages (Proposals, Vote, Treasury) and BOING Points page use these services
-- Contract addresses from `config/contracts.js` (placeholders until deployment)
+- Contract addresses from `config/contracts.js` (all governance keys are still `0x000…` placeholders until deployment).
+
+*Last reviewed: August 2026.*

@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60">
-  <defs>
-    <pattern id="hex" width="60" height="51.96" patternUnits="userSpaceOnUse">
-      <path d="M30 0L60 15v30L30 60L0 30V15z" fill="none" stroke="rgba(0,229,204,0.06)" stroke-width="0.5"/>
-    </pattern>
-  </defs>
-  <rect width="100%" height="100%" fill="url(#hex)"/>
-</svg>

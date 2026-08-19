@@ -1,239 +1,100 @@
-# boing - Decentralized Exchange
+# boing.finance
 
-A modern decentralized exchange built with React, Cloudflare Workers, and D1 database. Supports cross-chain trading with optimized performance and scalability.
+Cross-chain DeFi app: **EVM** (TokenFactory, Sepolia DEX, LI.FI aggregator), **Solana** (SPL deploy, Jupiter), and **Boing Network L1** (native VM AMM via Boing Express).
 
-## 🚀 Features
+Frontend is **Vite + React 18**. Backend is **Cloudflare Workers + D1**.
 
-- **Cross-Chain Trading**: Trade tokens across different blockchains
-- **Liquidity Pools**: Provide liquidity and earn trading fees
-- **Real-time Analytics**: Track trading performance and market data
-- **Cloudflare Workers**: Serverless backend with global edge deployment
-- **D1 Database**: Fast, reliable SQLite-based database
-- **Modern UI**: Beautiful, responsive interface with Tailwind CSS
-
-## 🏗️ Architecture
+## Architecture
 
 ```
-├── frontend/          # React application
-├── backend/           # Cloudflare Workers API
-└── contracts/         # Smart contracts (Solidity)
+├── frontend/          # Vite React app (build output: dist/)
+├── backend/           # Cloudflare Workers API (Hono)
+├── contracts/         # Solidity (EVM only — not loadable on Boing VM)
+└── docs/              # Engineering docs (start at docs/README.md)
 ```
 
 ### Boing Network L1 (chain 6913)
 
-Boing L1 runs the **Boing VM**, not EVM application bytecode. The Solidity DEX in `contracts/` targets **EVM** networks (e.g. Sepolia). For how L1 differs, env vars for native modules, and the cross-repo roadmap, see **[docs/boing-l1-vs-evm-dex.md](./docs/boing-l1-vs-evm-dex.md)** and **[docs/boing-l1-dex-roadmap.md](./docs/boing-l1-dex-roadmap.md)**. Upstream coordination for Boing Express, Observer, and this app as a partner dApp: **[HANDOFF-DEPENDENT-PROJECTS.md](https://github.com/Boing-Network/boing.network/blob/main/docs/HANDOFF-DEPENDENT-PROJECTS.md)** (with **[THREE-CODEBASE-ALIGNMENT.md](https://github.com/Boing-Network/boing.network/blob/main/docs/THREE-CODEBASE-ALIGNMENT.md)** for RPC URLs and chain IDs).
+Boing L1 runs the **Boing VM**, not EVM application bytecode. Native swap, pool discovery, and operator handoffs: **[docs/native-dex.md](./docs/native-dex.md)** and **[docs/native-dex-discovery.md](./docs/native-dex-discovery.md)**. Upstream: [HANDOFF-DEPENDENT-PROJECTS.md](https://github.com/Boing-Network/boing.network/blob/main/docs/HANDOFF-DEPENDENT-PROJECTS.md), [THREE-CODEBASE-ALIGNMENT.md](https://github.com/Boing-Network/boing.network/blob/main/docs/THREE-CODEBASE-ALIGNMENT.md).
 
-## 🛠️ Tech Stack
+## Tech stack
 
-### Frontend
-- **React 18** - Modern UI framework
-- **Tailwind CSS** - Utility-first CSS framework
-- **Framer Motion** - Animation library
-- **React Query** - Data fetching and caching
-- **Ethers.js** - Ethereum interaction
+- **Frontend:** React 18, Vite, Tailwind CSS, Framer Motion, React Query, ethers.js, `@solana/web3.js`, `boing-sdk`
+- **Backend:** Cloudflare Workers, Hono, D1, Drizzle ORM (Better-SQLite3 locally)
+- **Contracts:** Solidity, Hardhat, OpenZeppelin
 
-### Backend
-- **Cloudflare Workers** - Serverless runtime
-- **Hono** - Fast web framework
-- **D1 Database** - SQLite-based edge database
-- **Drizzle ORM** - Type-safe database queries
-- **Better-SQLite3** - Local development database
+## Quick start
 
-### Smart Contracts
-- **Solidity** - Smart contract language
-- **Hardhat** - Development framework
-- **OpenZeppelin** - Secure contract libraries
-
-## 📦 Quick Start
-
-### Prerequisites
-
-- Node.js 18+
-- npm or yarn
-- Git
-- Cloudflare account (for deployment)
-
-### 1. Clone Repository
+Prerequisites: Node.js 18+, npm, Git. Cloudflare account only if you deploy.
 
 ```bash
 git clone <repository-url>
-cd boing
+cd boing.finance
+
+# Backend
+cd backend && npm install && npm run setup && npm run dev
+
+# Frontend (separate terminal)
+cd frontend && npm install && npm start
+# Vite: http://localhost:5173 (or the port printed by `vite`)
 ```
 
-### 2. Backend Setup
+From the repo root: `npm run dev` runs backend and frontend together.
 
-```bash
-cd backend
-npm install
-
-# Set up local database
-npm run setup
-
-# Start development server
-npm run dev
-```
-
-### 3. Frontend Setup
-
-```bash
-cd frontend
-npm install
-
-# Start development server
-npm start
-```
-
-### 4. Smart Contracts (Optional)
+### Smart contracts (optional)
 
 ```bash
 cd contracts
 npm install
-
-# Deploy to Sepolia testnet
-npm run deploy:sepolia
+npm run compile
+npm run check:dex
+# DEX deploy: npm run deploy:dex -- --network sepolia
 ```
 
-## 🌐 Deployment
+## Deployment
 
-### Automated Deployment (Recommended)
+**GitHub Actions:** push to `main` → production; `staging` → staging. Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`. Details: [docs/deployment.md](./docs/deployment.md).
 
-**GitHub Actions** workflows are configured for automatic deployment:
+Manual:
 
-- **Push to `main` branch** → Deploys to **production**
-- **Push to `staging` branch** → Deploys to **staging**
-
-**Setup Required:**
-1. Add GitHub Secrets:
-   - `CLOUDFLARE_API_TOKEN` - Get from [Cloudflare Dashboard](https://dash.cloudflare.com/profile/api-tokens)
-   - `CLOUDFLARE_ACCOUNT_ID` - Found in Cloudflare Dashboard sidebar
-
-2. See [docs/deployment.md](./docs/deployment.md) for detailed setup instructions.
-
-**Workflows:**
-- `.github/workflows/deploy-backend.yml` - Deploys Workers
-- `.github/workflows/deploy-frontend.yml` - Deploys Pages
-- `.github/workflows/ci.yml` - Runs tests and linting
-
-### Manual Deployment
-
-#### Cloudflare Workers Setup
-
-1. **Install Wrangler CLI**
-   ```bash
-   npm install -g wrangler
-   wrangler login
-   ```
-
-2. **Create D1 Database**
-   ```bash
-   cd backend
-   wrangler d1 create boing-database
-   ```
-
-3. **Generate Migration Files**
-   ```bash
-   npm run d1:generate
-   ```
-
-4. **Apply Database Schema**
-   ```bash
-   wrangler d1 execute boing-database --file=./d1-schema.sql
-   ```
-
-5. **Update Configuration**
-   - Edit `wrangler.toml` with your database ID
-   - Update `frontend/src/config.js` with your worker URLs
-
-6. **Deploy Backend**
-   ```bash
-   cd backend
-   
-   # Staging
-   npm run deploy:staging
-   # or: wrangler deploy --env staging
-   # Deploys to: boing-api-staging
-   
-   # Production
-   npm run deploy:prod
-   # or: wrangler deploy --env production
-   # Deploys to: boing-api-prod
-   
-   # Local Development (no deployment)
-   npm run dev
-   # Uses: wrangler dev (local only, uses base "boing-api" name)
-   ```
-   
-   **Note**: The base `boing-api` worker is for local development only. 
-   Production deployments use environment-specific workers (`boing-api-prod` and `boing-api-staging`).
-
-#### Frontend Deployment
-
-**Option 1: Manual Script**
 ```bash
-# From project root
-./deploy-frontend.sh staging   # Deploy to staging
-./deploy-frontend.sh production # Deploy to production
+./deploy-backend.sh staging    # or production
+./deploy-frontend.sh staging   # builds frontend/dist, wrangler pages deploy
 ```
 
-**Option 2: Cloudflare Pages Auto-Deploy**
-1. Connect your GitHub repository in Cloudflare Pages dashboard
-2. Set build settings:
-   - Build command: `cd dex/frontend && npm install && npm run build`
-   - Build output directory: `dex/frontend/build`
-   - Root directory: `dex/frontend`
-3. Set environment variables in Cloudflare Pages dashboard
+Cloudflare Pages (if configuring the dashboard by hand):
 
-**Option 3: Manual Wrangler**
-```bash
-cd frontend
-npm run build:prod  # or build:staging
-wrangler pages deploy build --project-name=boing-finance-prod
-```
+- Root: `frontend`
+- Build command: `npm install && npm run build:prod` (or `build:staging`)
+- Output directory: **`dist`** (not `build`)
 
-## 📚 Documentation
+## Documentation
 
-All project documentation lives in the **[docs](./docs)** folder:
+See **[docs/README.md](./docs/README.md)** for the full index. Highlights:
 
 | Document | Description |
 |----------|-------------|
-| [deployment.md](./docs/deployment.md) | Cloudflare Workers/Pages deploy, production config, troubleshooting |
-| [configuration.md](./docs/configuration.md) | Environment variables, API keys (NewsAPI, etc.) |
-| [contracts.md](./docs/contracts.md) | Smart contract deployment requirements |
-| [contract-registry.md](./docs/contract-registry.md) | Deployed contract addresses and verification links per network |
-| [product-roadmap.md](./docs/product-roadmap.md) | Roadmap, UX ideas, NFT plans, AI integration |
-| [boing-tokenomics.md](./docs/boing-tokenomics.md) | BOING token economics and distribution |
-| [adding-a-network.md](./docs/adding-a-network.md) | How to add a new blockchain network (single-point config) |
-| [integration.md](./docs/integration.md) | Network prioritization, roadmap, capabilities, and supported networks |
-| [solana.md](./docs/solana.md) | Solana integration plan and security practices |
+| [docs/native-dex.md](./docs/native-dex.md) | Boing L1 vs EVM DEX, roadmap, indexer |
+| [docs/native-dex-discovery.md](./docs/native-dex-discovery.md) | L1 list RPCs + operator handoff |
+| [docs/deployment.md](./docs/deployment.md) | Cloudflare Workers/Pages |
+| [docs/configuration.md](./docs/configuration.md) | Env vars (canonical list: `frontend/.env.example`) |
+| [docs/contracts.md](./docs/contracts.md) | EVM TokenFactory / DEX enablement |
+| [docs/integration.md](./docs/integration.md) | Networks, Solana, swap market data |
+| [frontend/docs/DESIGN.md](./frontend/docs/DESIGN.md) | Visual system (Colosseum shell) |
 
-## 🔧 Configuration
+## Configuration
 
-### Environment Variables
+**Backend secrets** (Wrangler): RPC URLs, `JWT_SECRET`, optional `LIFI_API_KEY` / `JUPITER_API_KEY`.
 
-#### Backend (Cloudflare Workers)
+**Frontend** (Cloudflare Pages or `frontend/.env.local`):
+
 ```bash
-# Set via wrangler secret put
-ETHEREUM_RPC_URL=your_rpc_url
-POLYGON_RPC_URL=your_rpc_url
-BSC_RPC_URL=your_rpc_url
-SEPOLIA_RPC_URL=your_rpc_url
-ETHERSCAN_API_KEY=your_api_key
-JWT_SECRET=your_jwt_secret
-```
-
-#### Frontend
-```bash
-# Set in Cloudflare Pages
 REACT_APP_ENV=production
+REACT_APP_BACKEND_URL=https://boing-api-prod.nico-chikuji.workers.dev
 ```
 
-### Database Configuration
+`REACT_APP_ENVIRONMENT` is accepted as an alias (`frontend/vite.config.mjs`). All `REACT_APP_*` values are public in the bundle.
 
-The application automatically switches between:
-- **Local Development**: Better-SQLite3 database
-- **Production**: Cloudflare D1 database
+## API
 
-## 📊 API Endpoints
-
-### Health Check
-- `GET /`
+Workers mount routes in `backend/src/worker.js` (`/api/dex`, `/api/aggregator`, `/api/governance`, `/api/solana`, …). Health: `GET /`.
