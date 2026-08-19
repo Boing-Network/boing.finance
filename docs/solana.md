@@ -38,7 +38,7 @@ High activity, large DeFi TVL, sub-cent fees, and a mature aggregator (Jupiter).
 - **Transactions:** simulate with `connection.simulateTransaction()` before send. No private keys in the frontend; the wallet signs.
 - **Metaplex:** CreateMetadataAccountV3; NFTs revoke mint authority. Metadata/images on Cloudflare R2.
 - **Fees:** UI shows rent + tx fee; user approves the exact tx.
-- **RPC:** set `REACT_APP_SOLANA_MAINNET_RPC` for production.
+- **RPC:** do not rely on `api.mainnet-beta.solana.com` / `api.devnet.solana.com` in the browser — they return **403 Access forbidden** for many origins. Set `REACT_APP_HELIUS_API_KEY` or `REACT_APP_SOLANA_DEVNET_RPC` / `REACT_APP_SOLANA_MAINNET_RPC` to a dedicated provider. The app also tries PublicNode / dRPC / Ankr fallbacks.
 
 ## Risks
 

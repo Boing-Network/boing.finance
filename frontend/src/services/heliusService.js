@@ -18,10 +18,14 @@ export function getHeliusCluster() {
   return net === 'mainnet' || net === 'mainnet-beta' ? 'mainnet' : 'devnet';
 }
 
-export function getHeliusRpcUrl() {
+export function getHeliusRpcUrl(clusterOverride) {
   const key = usableKey();
   if (!key) return null;
-  const cluster = getHeliusCluster();
+  const cluster = clusterOverride === 'mainnet' || clusterOverride === 'mainnet-beta'
+    ? 'mainnet'
+    : clusterOverride === 'devnet' || clusterOverride === 'testnet'
+      ? 'devnet'
+      : getHeliusCluster();
   const host = cluster === 'mainnet' ? 'mainnet.helius-rpc.com' : 'devnet.helius-rpc.com';
   return `https://${host}/?api-key=${key}`;
 }

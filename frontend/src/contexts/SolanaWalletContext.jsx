@@ -4,6 +4,7 @@
  * Separate from EVM WalletContext - use ChainTypeSelector to switch between EVM and Solana
  */
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { getSolanaRpcEndpoints } from '../config/solanaConfig';
 
 const SolanaWalletContext = createContext();
 
@@ -78,10 +79,6 @@ export const SolanaWalletProvider = ({ children }) => {
     }
   }, []);
 
-  const rpcUrl = network === 'mainnet'
-    ? (process.env.REACT_APP_SOLANA_MAINNET_RPC || 'https://api.mainnet-beta.solana.com')
-    : (process.env.REACT_APP_SOLANA_DEVNET_RPC || 'https://api.devnet.solana.com');
-
   useEffect(() => {
     if (chainType !== CHAIN_TYPE_SOLANA) {
       setConnection(null);
@@ -90,14 +87,25 @@ export const SolanaWalletProvider = ({ children }) => {
     let cancelled = false;
     (async () => {
       const { Connection } = await import('@solana/web3.js');
-      if (!cancelled) {
-        setConnection(new Connection(rpcUrl));
+      const endpoints = getSolanaRpcEndpoints(network);
+      for (const url of endpoints) {
+        try {
+          const conn = new Connection(url, 'confirmed');
+          await conn.getLatestBlockhash('confirmed');
+          if (!cancelled) setConnection(conn);
+          return;
+        } catch {
+          // try the next provider — public Solana RPC often returns 403 in the browser
+        }
+      }
+      if (!cancelled && endpoints[0]) {
+        setConnection(new Connection(endpoints[0], 'confirmed'));
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [chainType, rpcUrl]);
+  }, [chainType, network]);
 
   const setChainType = useCallback((type) => {
     setChainTypeState(type);
