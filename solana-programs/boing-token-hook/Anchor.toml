@@ -1,0 +1,23 @@
+[toolchain]
+anchor_version = "0.30.1"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+boing_token_hook = "EoytrX6g2iN8t2ujH1oJE7cfQiDHJeaiKSBoVVVvzmKu"
+
+[programs.devnet]
+boing_token_hook = "EoytrX6g2iN8t2ujH1oJE7cfQiDHJeaiKSBoVVVvzmKu"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "Localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "npx ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+cost = "node scripts/estimate-deploy-cost.mjs"
