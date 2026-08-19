@@ -115,8 +115,12 @@ function DeployTokenSolanaContent() {
 
   const handleDeploy = async (e) => {
     e.preventDefault();
-    if (!connected || !address || !connection || !signTransaction) {
+    if (!connected || !address || !signTransaction) {
       toast.error('Please connect your Solana wallet first.');
+      return;
+    }
+    if (!connection) {
+      toast.error('Solana RPC is unavailable. Refresh and try again, or switch to Devnet.');
       return;
     }
     if (!name.trim() || !symbol.trim()) {

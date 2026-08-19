@@ -90,16 +90,16 @@ export const SolanaWalletProvider = ({ children }) => {
       const endpoints = getSolanaRpcEndpoints(network);
       for (const url of endpoints) {
         try {
-          const conn = new Connection(url, 'confirmed');
+          const conn = new Connection(url, { commitment: 'confirmed', confirmTransactionInitialTimeout: 60_000 });
           await conn.getLatestBlockhash('confirmed');
           if (!cancelled) setConnection(conn);
           return;
         } catch {
-          // try the next provider — public Solana RPC often returns 403 in the browser
+          // try the next provider — public Solana RPC often 403s; some TLS endpoints fail in-browser
         }
       }
-      if (!cancelled && endpoints[0]) {
-        setConnection(new Connection(endpoints[0], 'confirmed'));
+      if (!cancelled) {
+        setConnection(null);
       }
     })();
     return () => {

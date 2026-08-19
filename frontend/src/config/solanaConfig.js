@@ -1,12 +1,8 @@
 /**
  * Solana network configuration
  */
+import { apiPath } from '../config';
 import { getHeliusRpcUrl } from '../services/heliusService';
-
-const OFFICIAL_PUBLIC_RPC = {
-  mainnet: 'https://api.mainnet-beta.solana.com',
-  devnet: 'https://api.devnet.solana.com',
-};
 
 /** Public hosts that currently 403 many browser origins (Cloudflare Pages included). */
 function isOfficialPublicSolanaRpc(url) {
@@ -21,10 +17,14 @@ function envRpc(network) {
   return url || '';
 }
 
+function workerRpc(cluster) {
+  return `${apiPath('solana/rpc')}?cluster=${cluster}`;
+}
+
 /**
  * Ordered RPC URLs for the selected cluster.
- * Prefer a dedicated provider (env or Helius). Official public RPCs are last
- * because they return HTTP 403 "Access forbidden" from many browser origins.
+ * Browser → Worker proxy first (avoids public-RPC 403 / SSL failures), then
+ * dedicated env/Helius, then CORS-friendly public providers.
  */
 export function getSolanaRpcEndpoints(network = 'devnet') {
   const cluster = network === 'mainnet' ? 'mainnet' : 'devnet';
@@ -34,6 +34,8 @@ export function getSolanaRpcEndpoints(network = 'devnet') {
     if (trimmed && !urls.includes(trimmed)) urls.push(trimmed);
   };
 
+  push(workerRpc(cluster));
+
   const configured = envRpc(cluster);
   if (configured && !isOfficialPublicSolanaRpc(configured)) {
     push(configured);
@@ -42,15 +44,13 @@ export function getSolanaRpcEndpoints(network = 'devnet') {
   push(getHeliusRpcUrl(cluster));
 
   if (cluster === 'mainnet') {
-    push('https://solana-rpc.publicnode.com');
-    push('https://solana.drpc.org');
+    push('https://rpc.ankr.com/solana');
+    push('https://solana.llamarpc.com');
+    push('https://solana.api.onfinality.io/public');
   } else {
-    push('https://solana-devnet.drpc.org');
     push('https://rpc.ankr.com/solana_devnet');
   }
 
-  if (configured) push(configured);
-  push(OFFICIAL_PUBLIC_RPC[cluster]);
   return urls;
 }
 
@@ -58,18 +58,17 @@ export function getSolanaRpcUrl(network = 'devnet') {
   return getSolanaRpcEndpoints(network)[0];
 }
 
-export function isSolanaRpcForbiddenError(error) {
+export function isSolanaRpcTransportError(error) {
   const message = error?.message || String(error || '');
-  return /403|access forbidden/i.test(message);
+  return /403|access forbidden|failed to fetch|ssl|err_ssl|network error|load failed|400/i.test(message);
 }
 
 export function formatSolanaRpcError(error, network = 'devnet') {
-  if (!isSolanaRpcForbiddenError(error)) {
+  if (!isSolanaRpcTransportError(error)) {
     return error?.message || 'Solana RPC request failed';
   }
   const cluster = network === 'mainnet' ? 'mainnet' : 'devnet';
-  const envName = cluster === 'mainnet' ? 'REACT_APP_SOLANA_MAINNET_RPC' : 'REACT_APP_SOLANA_DEVNET_RPC';
-  return `Solana ${cluster} RPC blocked this request (403). The public api.${cluster === 'mainnet' ? 'mainnet-beta' : 'devnet'}.solana.com endpoint rejects many browser deploys. Set ${envName} or REACT_APP_HELIUS_API_KEY to a dedicated RPC.`;
+  return `Could not reach a Solana ${cluster} RPC from this browser. Public Solana endpoints block many sites (403) and some fallbacks fail TLS. Try again after a refresh, or set REACT_APP_HELIUS_API_KEY / REACT_APP_SOLANA_${cluster === 'mainnet' ? 'MAINNET' : 'DEVNET'}_RPC.`;
 }
 
 export const SOLANA_NETWORKS = {
