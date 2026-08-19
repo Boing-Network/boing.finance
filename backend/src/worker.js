@@ -13,6 +13,7 @@ import { createAIRoutes } from './routes/aiRoutes.js';
 import { createGovernanceRoutes } from './routes/governanceRoutes.js';
 import { createBoingRoutes } from './routes/boingRoutes.js';
 import { createSolanaRoutes } from './routes/solanaRoutes.js';
+import { createAggregatorRoutes } from './routes/aggregatorRoutes.js';
 import collectAnalytics from './scheduled/collectAnalytics.js';
 
 // Create main app
@@ -199,6 +200,10 @@ app.route('/api/boing', boingRoutes);
 const solanaRoutes = createSolanaRoutes();
 solanaRoutes.use('*', dbMiddleware);
 app.route('/api/solana', solanaRoutes);
+
+// Aggregator quotes (LI.FI / Jupiter) — no DB; do not cache
+const aggregatorRoutes = createAggregatorRoutes();
+app.route('/api/aggregator', aggregatorRoutes);
 
 // Webhook routes
 app.post('/api/webhook', async (c) => {

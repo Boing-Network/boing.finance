@@ -15,6 +15,8 @@ In-app AMM swap on listed EVM networks needs a live **DEXFactoryV2 + LiquidityLo
 
 Empty factories are expected after stage 3: the picker can show hub tokens, Create Pool can open a pair, Swap quotes fail with insufficient liquidity until someone funds.
 
+**In-app swaps without Boing pools:** Swap routes through **LI.FI** on EVM (Uniswap, Pancake, etc.) and **Jupiter** on Solana. That uses *their* liquidity. Tokens with no market still have no route. Backend: `GET /api/aggregator/quote`. Optional Worker secrets `LIFI_API_KEY`, `JUPITER_API_KEY` for higher rate limits.
+
 ## Deploy (operator)
 
 ```bash
@@ -38,4 +40,4 @@ Each successful deploy writes `contracts/deployments/dex-<chainId>.json` and pri
 2. Verify on the explorer.
 3. Funding: Create Pool with wrapped native + a hub stable (or any ERC-20 pair).
 
-Sepolia already has the protocol (`0x291A…` factory). Solana stays on Jupiter / Raydium links, not this stack.
+Sepolia already has the protocol (`0x291A…` factory). Solana Swap uses in-app Jupiter, not this Solidity stack.

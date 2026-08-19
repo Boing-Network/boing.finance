@@ -26,6 +26,7 @@ Copy `frontend/.env.example` to `frontend/.env.local` and fill in values. **Do n
 - **CoinGecko** – `REACT_APP_COINGECKO_API_KEY` (higher rate limits, NFT markets)
 - **Etherscan** – `REACT_APP_ETHERSCAN_API_KEY`
 - **The Graph, Alchemy, LiFi, Socket** – see `frontend/.env.example`
+- **LI.FI / Jupiter (Worker)** – optional `LIFI_API_KEY`, `JUPITER_API_KEY` via `wrangler secret put` on `boing-api-*` for aggregator swap rate limits. Quotes work without keys.
 
 ---
 
