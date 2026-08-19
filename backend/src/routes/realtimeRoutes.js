@@ -114,6 +114,11 @@ export const createRealtimeRoutes = () => {
       c.header('Cache-Control', 'no-store');
       return c.json({ success: true, data: rows });
     } catch (error) {
+      const message = String(error?.message || error || '');
+      if (/no such table/i.test(message)) {
+        c.header('Cache-Control', 'no-store');
+        return c.json({ success: true, data: [] });
+      }
       return c.json({ success: false, error: error.message }, 500);
     }
   });

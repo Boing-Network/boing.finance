@@ -19,6 +19,8 @@ const ALLOWED_METHODS = new Set([
   'getHealth',
   'getVersion',
   'getGenesisHash',
+  'getTokenAccountBalance',
+  'getTokenSupply',
   'simulateTransaction',
   'sendTransaction',
   'isBlockhashValid',
