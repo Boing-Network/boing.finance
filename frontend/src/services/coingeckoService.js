@@ -38,15 +38,16 @@ class CoinGeckoService {
   }
 
   // Get token price by contract address or coin ID
-  async getTokenPrice(contractAddress, network = 'ethereum') {
+  async getTokenPrice(contractAddress, network = 'ethereum', options = {}) {
     // Handle coin IDs (for native tokens)
     if (network === 'coins') {
-      return this.getCoinPrice(contractAddress);
+      return this.getCoinPrice(contractAddress, options);
     }
+    const maxAge = Number.isFinite(options.maxAgeMs) ? options.maxAgeMs : this.cacheTimeout;
     const cacheKey = `price_${network}_${contractAddress}`;
     const cached = this.cache.get(cacheKey);
     
-    if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+    if (cached && Date.now() - cached.timestamp < maxAge) {
       return cached.data;
     }
 
@@ -137,11 +138,12 @@ class CoinGeckoService {
   }
 
   // Get coin price by ID (for native tokens)
-  async getCoinPrice(coinId) {
+  async getCoinPrice(coinId, options = {}) {
+    const maxAge = Number.isFinite(options.maxAgeMs) ? options.maxAgeMs : this.cacheTimeout;
     const cacheKey = `coin_price_${coinId}`;
     const cached = this.cache.get(cacheKey);
     
-    if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+    if (cached && Date.now() - cached.timestamp < maxAge) {
       return cached.data;
     }
 
@@ -191,7 +193,8 @@ class CoinGeckoService {
   async getPriceHistoryByCoinId(coinId, days = 7) {
     const cacheKey = `history_coin_${coinId}_${days}`;
     const cached = this.cache.get(cacheKey);
-    if (cached && Date.now() - cached.timestamp < this.cacheTimeout * 5) {
+    const ttl = days <= 1 ? 45_000 : this.cacheTimeout * 5;
+    if (cached && Date.now() - cached.timestamp < ttl) {
       return cached.data;
     }
     try {
@@ -213,7 +216,8 @@ class CoinGeckoService {
     const cacheKey = `history_${network}_${contractAddress}_${days}`;
     const cached = this.cache.get(cacheKey);
     
-    if (cached && Date.now() - cached.timestamp < this.cacheTimeout * 5) {
+    const ttl = days <= 1 ? 45_000 : this.cacheTimeout * 5;
+    if (cached && Date.now() - cached.timestamp < ttl) {
       return cached.data;
     }
 
