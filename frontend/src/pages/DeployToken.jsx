@@ -86,7 +86,138 @@ function ToggleButton({ enabled, onToggle, disabled, size = "md", ariaLabel, ari
   );
 }
 
-// Record Solana deployment to backend (non-blocking)
+const SOLANA_DEPLOY_FEATURES = [
+  {
+    key: 'renounceMint',
+    name: 'Mint Authority Removal',
+    description: 'Revoke mint authority after the initial supply so no more tokens can be created.',
+    risk: 'Low',
+    icon: '🔒',
+    available: true,
+  },
+  {
+    key: 'enableFreezing',
+    name: 'Freezing Authority',
+    description: 'Keep freeze authority so you can freeze token accounts in an emergency.',
+    risk: 'Medium',
+    icon: '❄️',
+    available: true,
+  },
+  {
+    key: 'enableBlacklist',
+    name: 'Blacklist Function',
+    description: 'SPL equivalent of a blacklist: freeze authority can freeze a wallet’s token account.',
+    risk: 'Medium',
+    icon: '🚫',
+    available: true,
+  },
+  {
+    key: 'immutableMetadata',
+    name: 'Immutable Metadata',
+    description: 'Lock name, symbol, and URI on-chain so they cannot be changed later.',
+    risk: 'Very Low',
+    icon: '📝',
+    available: true,
+  },
+  {
+    key: 'renounceOwnership',
+    name: 'Ownership Renouncement',
+    description: 'Remove mint and freeze authority and lock metadata in one step (fixed, decentralized mint).',
+    risk: 'Very Low',
+    icon: '🔐',
+    available: true,
+  },
+  {
+    key: 'maxTxAmount',
+    name: 'Transaction Limits',
+    description: 'Cap how many tokens can move in one transfer.',
+    risk: 'Low',
+    icon: '📊',
+    available: false,
+    unavailableReason: 'Needs a custom transfer-hook program, not standard SPL.',
+  },
+  {
+    key: 'antiBot',
+    name: 'Anti-Bot Protection',
+    description: 'Throttle bots and MEV around launch.',
+    risk: 'Low',
+    icon: '🤖',
+    available: false,
+    unavailableReason: 'Needs a custom transfer-hook program, not standard SPL.',
+  },
+  {
+    key: 'cooldown',
+    name: 'Cooldown Period',
+    description: 'Require a delay between transfers.',
+    risk: 'Low',
+    icon: '⏰',
+    available: false,
+    unavailableReason: 'Needs a custom transfer-hook program, not standard SPL.',
+  },
+  {
+    key: 'antiWhale',
+    name: 'Anti-Whale Protection',
+    description: 'Limit how large a single wallet can become.',
+    risk: 'Low',
+    icon: '🐋',
+    available: false,
+    unavailableReason: 'Needs a custom transfer-hook program, not standard SPL.',
+  },
+  {
+    key: 'pauseFunction',
+    name: 'Pause Functionality',
+    description: 'Emergency pause of all transfers.',
+    risk: 'Medium',
+    icon: '⏸️',
+    available: false,
+    unavailableReason: 'Needs Token-2022 pausable or a custom program.',
+  },
+  {
+    key: 'timelock',
+    name: 'Timelock Contract',
+    description: 'Delay administrative changes.',
+    risk: 'Very Low',
+    icon: '⏳',
+    available: false,
+    unavailableReason: 'Needs a separate timelock program.',
+  },
+  {
+    key: 'maxWallet',
+    name: 'Max Wallet Limit',
+    description: 'Set a maximum token balance per wallet.',
+    risk: 'Low',
+    icon: '💼',
+    available: false,
+    unavailableReason: 'Needs a custom transfer-hook program, not standard SPL.',
+  },
+];
+
+const DEFAULT_SOLANA_DEPLOY_FEATURES = {
+  renounceMint: true,
+  enableFreezing: false,
+  enableBlacklist: false,
+  immutableMetadata: false,
+  renounceOwnership: false,
+};
+
+function toggleSolanaDeployFeature(prev, key) {
+  const next = { ...prev, [key]: !prev[key] };
+  if (key === 'enableBlacklist' && next.enableBlacklist) next.enableFreezing = true;
+  if (key === 'enableFreezing' && !next.enableFreezing) next.enableBlacklist = false;
+  if (key === 'renounceOwnership' && next.renounceOwnership) {
+    next.renounceMint = true;
+    next.immutableMetadata = true;
+    next.enableFreezing = false;
+    next.enableBlacklist = false;
+  }
+  if ((key === 'enableFreezing' || key === 'enableBlacklist') && next.enableFreezing) {
+    next.renounceOwnership = false;
+  }
+  if (key === 'renounceMint' && !next.renounceMint) next.renounceOwnership = false;
+  if (key === 'immutableMetadata' && !next.immutableMetadata) next.renounceOwnership = false;
+  return next;
+}
+
 async function recordSolanaDeployment({ mintAddress, creatorAddress, network, type, name, symbol, metadataUri, signature }) {
   try {
     await fetch(apiPath('solana/deployments'), {
@@ -107,6 +238,7 @@ function DeployTokenSolanaContent() {
   const [decimals, setDecimals] = useState(9);
   const [initialSupply, setInitialSupply] = useState('');
   const [logoFile, setLogoFile] = useState(null);
+  const [features, setFeatures] = useState(DEFAULT_SOLANA_DEPLOY_FEATURES);
   const [deploying, setDeploying] = useState(false);
   const [mintAddress, setMintAddress] = useState('');
   const [signature, setSignature] = useState('');
@@ -127,6 +259,10 @@ function DeployTokenSolanaContent() {
       toast.error('Name and symbol are required.');
       return;
     }
+    if ((features.renounceMint || features.renounceOwnership) && !(Number(initialSupply) > 0)) {
+      toast.error('Set an initial supply before removing mint authority, or turn that option off to mint later.');
+      return;
+    }
     setDeploying(true);
     setMintAddress('');
     setSignature('');
@@ -138,6 +274,7 @@ function DeployTokenSolanaContent() {
         initialSupply: initialSupply || '0',
         logoFile: logoFile || undefined,
         network,
+        ...features,
       });
       setMintAddress(result.mintAddress);
       setSignature(result.signature);
@@ -149,6 +286,9 @@ function DeployTokenSolanaContent() {
           { label: 'Symbol', value: symbol.trim().toUpperCase() },
           { label: 'Decimals', value: String(decimals) },
           { label: 'Mint address', value: result.mintAddress },
+          { label: 'Mint authority', value: result.authorities?.mintAuthority ? 'Kept' : 'Revoked' },
+          { label: 'Freeze authority', value: result.authorities?.freezeAuthority ? 'Enabled' : 'None' },
+          { label: 'Metadata', value: result.authorities?.metadataMutable ? 'Mutable' : 'Immutable' },
         ],
         txHash: result.signature,
         externalTxUrl: `https://explorer.solana.com/tx/${result.signature}${solCluster}`,
@@ -176,7 +316,7 @@ function DeployTokenSolanaContent() {
   return (
     <div className="relative w-full min-w-0">
       <div className="relative z-10 container mx-auto px-4 py-8">
-        <div className="max-w-xl mx-auto">
+        <div className="max-w-2xl mx-auto">
           <Helmet>
             <title>Deploy SPL Token - Solana | Boing Finance</title>
           </Helmet>
@@ -301,7 +441,66 @@ function DeployTokenSolanaContent() {
                   className="w-full px-4 py-2 rounded-lg border"
                   style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
                 />
+                <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
+                  {features.renounceMint || features.renounceOwnership
+                    ? 'Required when mint authority is removed (fixed supply).'
+                    : 'Leave 0 to mint later while you keep mint authority.'}
+                </p>
               </div>
+              <div className="pt-2">
+                <h2 className="text-lg font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>Enhanced features</h2>
+                <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+                  Same choices as EVM deploy, mapped onto SPL mint / freeze / Metaplex authorities. Transfer limits, anti-bot, and pause need a custom Solana program.
+                </p>
+                <div className="space-y-3">
+                  {SOLANA_DEPLOY_FEATURES.map((feature) => {
+                    const enabled = Boolean(features[feature.key]);
+                    return (
+                      <div
+                        key={feature.key}
+                        className="p-3 sm:p-4 rounded-lg border"
+                        style={{
+                          backgroundColor: 'var(--bg-secondary)',
+                          borderColor: 'var(--border-color)',
+                          opacity: feature.available ? 1 : 0.72,
+                        }}
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                          <div className="flex items-start space-x-3 min-w-0">
+                            <span className="text-xl flex-shrink-0">{feature.icon}</span>
+                            <div className="min-w-0">
+                              <h3 id={`deploy-solana-${feature.key}`} className="font-medium text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>
+                                {feature.name}
+                              </h3>
+                              <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{feature.description}</p>
+                              {feature.available ? (
+                                <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-900 text-blue-200 rounded-full mt-1">
+                                  {feature.risk} Risk
+                                </span>
+                              ) : (
+                                <span className="inline-block px-2 py-1 text-xs font-medium rounded-full mt-1" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-secondary)' }}>
+                                  {feature.unavailableReason}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <ToggleButton
+                            enabled={feature.available && enabled}
+                            onToggle={() => setFeatures((prev) => toggleSolanaDeployFeature(prev, feature.key))}
+                            disabled={!feature.available || deploying}
+                            ariaLabelledBy={`deploy-solana-${feature.key}`}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              {features.renounceOwnership && (
+                <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  Ownership renouncement also removes mint and freeze authority and locks metadata. This cannot be undone.
+                </p>
+              )}
               <button
                 type="submit"
                 disabled={deploying}

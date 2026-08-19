@@ -14,11 +14,13 @@ import {
   createInitializeMint2Instruction,
   createAssociatedTokenAccountInstruction,
   createMintToInstruction,
+  createSetAuthorityInstruction,
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddressSync,
   getMinimumBalanceForRentExemptMint,
   MINT_SIZE,
+  AuthorityType,
 } from '@solana/spl-token';
 import { createCreateMetadataAccountV3Instruction } from '@metaplex-foundation/mpl-token-metadata';
 import { getMetadataPDA } from './solanaMetaplex';
@@ -50,18 +52,31 @@ function validateTokenParams(params) {
   if (BigInt(supply) > BigInt(SUPPLY_MAX)) throw new Error('Initial supply too large');
 }
 
+function resolveSplAuthorities(params, supplyAmount) {
+  const renounceOwnership = Boolean(params.renounceOwnership);
+  const renounceMint = renounceOwnership || Boolean(params.renounceMint);
+  const enableFreezing = !renounceOwnership && (Boolean(params.enableFreezing) || Boolean(params.enableBlacklist));
+  const immutableMetadata = renounceOwnership || Boolean(params.immutableMetadata);
+  if (renounceMint && supplyAmount <= 0n) {
+    throw new Error('Set an initial supply before removing mint authority, or keep mint authority to mint later.');
+  }
+  return { renounceMint, enableFreezing, immutableMetadata };
+}
+
 /**
  * Create SPL token with Metaplex metadata (R2)
  * @param {Connection} connection
  * @param {string} ownerAddress
  * @param {Function} signTransaction
- * @param {object} params - { name, symbol, decimals, initialSupply, logoFile? }
+ * @param {object} params - { name, symbol, decimals, initialSupply, logoFile?, network?,
+ *   renounceMint?, enableFreezing?, enableBlacklist?, immutableMetadata?, renounceOwnership? }
  */
 export async function createSPLToken(connection, ownerAddress, signTransaction, params) {
   validateTokenParams(params);
   const { name, symbol, decimals = 9, initialSupply = '0', logoFile, network = 'devnet' } = params;
   const owner = new PublicKey(ownerAddress);
   const supplyAmount = BigInt(Math.floor(parseFloat(String(initialSupply || '0')) * Math.pow(10, Number(decimals))));
+  const authorities = resolveSplAuthorities(params, supplyAmount);
   try {
     await assertSolanaPayerFunded(connection, owner, network);
   } catch (error) {
@@ -106,7 +121,7 @@ export async function createSPLToken(connection, ownerAddress, signTransaction, 
       mintKeypair.publicKey,
       Number(decimals),
       owner,
-      null,
+      authorities.enableFreezing ? owner : null,
       TOKEN_PROGRAM_ID
     )
   );
@@ -165,12 +180,25 @@ export async function createSPLToken(connection, ownerAddress, signTransaction, 
             collection: null,
             uses: null,
           },
-          isMutable: true,
+          isMutable: !authorities.immutableMetadata,
           collectionDetails: null,
         },
       }
     )
   );
+
+  if (authorities.renounceMint) {
+    transaction.add(
+      createSetAuthorityInstruction(
+        mintKeypair.publicKey,
+        owner,
+        AuthorityType.MintTokens,
+        null,
+        [],
+        TOKEN_PROGRAM_ID
+      )
+    );
+  }
 
   transaction.feePayer = owner;
   let sim;
@@ -196,6 +224,11 @@ export async function createSPLToken(connection, ownerAddress, signTransaction, 
       tokenAccountAddress: ata.toBase58(),
       metadataUri,
       signature,
+      authorities: {
+        mintAuthority: authorities.renounceMint ? null : ownerAddress,
+        freezeAuthority: authorities.enableFreezing ? ownerAddress : null,
+        metadataMutable: !authorities.immutableMetadata,
+      },
     };
   } catch (error) {
     throw new Error(formatSolanaRpcError(error, network));
