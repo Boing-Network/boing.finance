@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { ethers } from 'ethers';
 import { useWallet } from '../contexts/WalletContext';
@@ -18,12 +18,17 @@ import ShareCardModal from '../components/ShareCardModal';
 import ProactiveTipsBanner from '../components/ProactiveTipsBanner';
 import TrendingPairs from '../components/TrendingPairs';
 import NativeBoingTradeHub from '../components/NativeBoingTradeHub';
+import SwapTokenSelect from '../components/SwapTokenSelect';
+import { ChartSkeleton } from '../components/SkeletonLoader';
+import { useTokenMarket } from '../hooks/useTokenMarket';
+import { formatUsdCompact } from '../services/tokenChartService';
 import getFeatureSupport from '../config/featureSupport';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import { fetchTradeableEvmTokenAddressesFromDexFactory } from '../services/evmDexTradeableTokens';
 import { tryAccruePoints } from '../utils/tryAccruePoints';
 import { getEvmAggregatorQuote, sendAggregatorSwap, isNativeSwapSymbol } from '../services/aggregatorSwapService';
 
+const SwapTokenPriceChart = lazy(() => import('../components/SwapTokenPriceChart'));
 
 const devLog = (...args) => {
   if (import.meta.env.DEV) console.log(...args);
@@ -323,19 +328,51 @@ const Swap = () => {
     return logos[symbol] || logos['DEFAULT'];
   };
 
-  // Get token name
-  const getTokenName = (symbol) => {
-    const names = {
-      'ETH': 'Ethereum',
-      'WETH': 'Wrapped Ethereum',
-      'USDC': 'USD Coin',
-      'USDT': 'Tether USD',
-      'LINK': 'Chainlink',
-      'ENS': 'Ethereum Name Service',
-      'BOING': 'Boing Token'
+  const chartTokenIn = useMemo(() => {
+    const t = userTokens.find((x) => x.symbol === tokenIn);
+    return {
+      symbol: tokenIn,
+      address: t?.address || '',
+      isNative: Boolean(t?.isNative || isNativeSwapSymbol(tokenIn, chainId)),
     };
-    return names[symbol] || symbol;
-  };
+  }, [userTokens, tokenIn, chainId]);
+
+  const chartTokenOut = useMemo(() => {
+    const t = userTokens.find((x) => x.symbol === tokenOut);
+    return {
+      symbol: tokenOut,
+      address: t?.address || '',
+      isNative: Boolean(t?.isNative || isNativeSwapSymbol(tokenOut, chainId)),
+    };
+  }, [userTokens, tokenOut, chainId]);
+
+  const showEvmSwapDesk = featureSupport.swap !== 'native_amm';
+  const tokenInMarket = useTokenMarket({
+    chain: 'evm',
+    chainId: Number(chainId),
+    address: chartTokenIn.address,
+    isNative: chartTokenIn.isNative,
+    symbol: chartTokenIn.symbol,
+    days: 7,
+    enabled: showEvmSwapDesk && !isSolana,
+  });
+  const tokenOutMarket = useTokenMarket({
+    chain: 'evm',
+    chainId: Number(chainId),
+    address: chartTokenOut.address,
+    isNative: chartTokenOut.isNative,
+    symbol: chartTokenOut.symbol,
+    days: 7,
+    enabled: showEvmSwapDesk && !isSolana,
+  });
+  const amountInUsd =
+    amountIn && tokenInMarket.data?.price
+      ? formatUsdCompact(parseFloat(amountIn) * tokenInMarket.data.price)
+      : '';
+  const amountOutUsd =
+    amountOut && tokenOutMarket.data?.price
+      ? formatUsdCompact(parseFloat(amountOut) * tokenOutMarket.data.price)
+      : '';
 
   // Helper functions to get selected token balances
   const getTokenInBalance = () => {
@@ -808,7 +845,7 @@ const Swap = () => {
       devLog('handleSwap: Transaction deadline:', deadline, 'seconds from now');
 
       // EIP-1559 gas: get fee data and apply priority multiplier
-      const feeData = await provider.getFeeData();
+      const feeData = await walletProvider.getFeeData();
       const mult = getGasFeeMultiplier();
       const applyMult = (v) => (v && v > 0n ? (v * BigInt(Math.round(mult * 100)) / 100n) : v);
       const maxFeePerGas = applyMult(feeData.maxFeePerGas);
@@ -1940,84 +1977,77 @@ const Swap = () => {
         <meta name="twitter:description" content="Swap tokens on EVM and Solana. Best rates." />
       </Helmet>
       <div className="relative w-full min-w-0">
-        {/* Settings Button */}
-        <button
-          className="absolute top-6 right-6 z-30 p-2 rounded-full shadow-lg"
-          style={{
-            backgroundColor: 'var(--bg-card)',
-            border: '1px solid var(--border-color)'
-          }}
-          onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--bg-tertiary)'}
-          onMouseLeave={(e) => e.target.style.backgroundColor = 'var(--bg-card)'}
-          onClick={() => setSettingsOpen(true)}
-          aria-label="Open settings"
-        >
-          <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7zm7.94-2.06a1 1 0 0 0 .26-1.09l-1.43-2.49a1 1 0 0 1 0-.9l1.43-2.49a1 1 0 0 0-.26-1.09l-2.12-2.12a1 1 0 0 0-1.09-.26l-2.49 1.43a1 1 0 0 1 .9 0l-2.49-1.43a1 1 0 0 0-1.09.26l-2.12 2.12a1 1 0 0 0-.26 1.09l1.43 2.49a1 1 0 0 1 0 .9l-1.43 2.49a1 1 0 0 0 .26 1.09l2.12 2.12a1 1 0 0 0 1.09.26l2.49-1.43a1 1 0 0 1 .9 0l2.49 1.43a1 1 0 0 0 1.09-.26l2.12-2.12z" />
-          </svg>
-        </button>
-
-        {/* Gas Priority Indicator */}
-        <div className="absolute top-6 right-20 z-30 px-3 py-2 rounded-lg shadow-lg" style={{
-          backgroundColor: 'var(--bg-card)',
-          border: '1px solid var(--border-color)'
-        }}>
-          <div className="flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${
-              settings.gasPriority === 'high' ? 'bg-red-400' : 
-              settings.gasPriority === 'medium' ? 'bg-yellow-400' : 'bg-green-400'
-            }`}></div>
-            <span className="text-white text-xs font-medium">
-              {getGasPriorityLabel()}
-            </span>
-          </div>
-        </div>
         <SettingsModal
           isOpen={settingsOpen}
           onClose={() => setSettingsOpen(false)}
           onSave={handleSaveSettings}
           initialSettings={settings}
         />
-        
-        {/* Main Content Container */}
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          {/* Header - Compact */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
             <div>
-              <h1
-                className="text-2xl sm:text-3xl font-bold"
-                style={{ color: 'var(--text-primary)' }}
-              >
+              <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
                 Swap
               </h1>
-              <p
-                className="text-sm sm:text-base mt-0.5"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                Trade tokens instantly
+              <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                Trade on public DEX liquidity · chart when a market exists
               </p>
             </div>
-            <ProactiveTipsBanner />
+            <div className="flex flex-wrap items-center gap-2">
+              <ProactiveTipsBanner />
+              <div
+                className="px-3 py-2 rounded-lg"
+                style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
+              >
+                <div className="flex items-center space-x-2">
+                  <div className={`w-2 h-2 rounded-full ${
+                    settings.gasPriority === 'high' ? 'bg-red-400' :
+                    settings.gasPriority === 'medium' ? 'bg-yellow-400' : 'bg-green-400'
+                  }`} />
+                  <span className="text-white text-xs font-medium">{getGasPriorityLabel()}</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="p-2 rounded-lg"
+                style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
+                onClick={() => setSettingsOpen(true)}
+                aria-label="Open settings"
+              >
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7zm7.94-2.06a1 1 0 0 0 .26-1.09l-1.43-2.49a1 1 0 0 1 0-.9l1.43-2.49a1 1 0 0 0-.26-1.09l-2.12-2.12a1 1 0 0 0-1.09-.26l-2.49 1.43a1 1 0 0 1 .9 0l-2.49-1.43a1 1 0 0 0-1.09.26l-2.12 2.12a1 1 0 0 0-.26 1.09l1.43 2.49a1 1 0 0 1 0 .9l-1.43 2.49a1 1 0 0 0 .26 1.09l2.12 2.12a1 1 0 0 0 1.09.26l2.49-1.43a1 1 0 0 1 .9 0l2.49 1.43a1 1 0 0 0 1.09-.26l2.12-2.12z" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           {featureSupport.swap === 'native_amm' && (
             <NativeBoingTradeHub slippagePercent={settings.slippage} />
           )}
 
-          {/* Swap Interface + Sidebar */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+          {showEvmSwapDesk && (
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+          <div className="xl:col-span-7 order-2 xl:order-1">
+            <Suspense fallback={<ChartSkeleton height="280px" />}>
+              <SwapTokenPriceChart
+                chain="evm"
+                chainId={Number(chainId)}
+                tokenIn={chartTokenIn}
+                tokenOut={chartTokenOut}
+              />
+            </Suspense>
+          </div>
+          <div className="xl:col-span-5 order-1 xl:order-2 xl:sticky xl:top-20">
 
-          {/* Swap Interface - Unified flow */}
           <div
-            className={`rounded-2xl p-4 sm:p-6 shadow-xl mb-4 sm:mb-6 ${featureSupport.swap === 'native_amm' ? 'hidden' : ''}`}
+            className="rounded-2xl p-4 sm:p-5 shadow-xl mb-4 sm:mb-6"
             style={{
               backgroundColor: 'var(--bg-card)',
               border: '1px solid var(--border-color)',
               boxShadow: '0 4px 24px var(--shadow)',
             }}
           >
-            {/* Network Status - Subtle inline badge */}
             <div className="flex justify-end mb-4">
               {(() => {
                 const s = getNetworkStatusMessage();
@@ -2033,299 +2063,18 @@ const Swap = () => {
               })()}
             </div>
 
-            {/* Token Selection */}
-            <div className="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0 sm:space-x-4">
-              <div className="relative flex items-center space-x-2 w-full sm:w-auto token-dropdown-container">
-                <button
-                  onClick={() => setTokenInDropdownOpen(!tokenInDropdownOpen)}
-                  className="flex items-center space-x-2 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg transition-colors w-full sm:w-auto justify-center sm:justify-start"
-                >
-                  <span className="text-xl sm:text-2xl">{getTokenLogo(tokenIn)}</span>
-                  <span className="text-white font-medium text-sm sm:text-base">{getTokenName(tokenIn)}</span>
-                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-
-                {/* Token In Dropdown */}
-                {tokenInDropdownOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-80 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto" style={{
-                    backgroundColor: 'var(--bg-card)',
-                    border: '1px solid var(--border-color)'
-                  }}>
-                    <div className="p-3 border-b border-gray-700">
-                      <h3 className="text-white font-medium mb-2">Select Token</h3>
-                      <div className="relative">
-                        <label htmlFor="swap-token-in-search" className="sr-only">Search tokens</label>
-                        <input
-                          id="swap-token-in-search"
-                          name="tokenInSearch"
-                          type="text"
-                          autoComplete="off"
-                          placeholder="Search tokens..."
-                          className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg text-sm"
-                          onChange={(_e) => {
-                            // Add search functionality if needed
-                          }}
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="p-2">
-                      {/* My Tokens Section */}
-                      <div className="mb-3">
-                        <h4 className="text-gray-400 text-xs font-medium mb-2 px-2">My Tokens</h4>
-                        {isLoadingTokens ? (
-                          <div className="text-gray-400 text-sm px-2 py-1">Loading...</div>
-                        ) : userTokens.length > 0 ? (
-                          userTokens.map((token) => {
-                            // Add defensive checks for token data
-                            if (!token || !token.symbol || !token.name || !token.formattedBalance) {
-                              return null; // Skip invalid tokens
-                            }
-                            
-                            return (
-                              <button
-                                key={token.address}
-                                onClick={() => handleTokenSelect(token, 'tokenIn')}
-                                className="w-full flex items-center justify-between p-2 hover:bg-gray-700 rounded-lg transition-colors"
-                              >
-                                <div className="flex items-center space-x-2">
-                                  <span className="text-lg">{getTokenLogo(token.symbol)}</span>
-                                  <div>
-                                    <div className="text-white text-sm font-medium">{token.symbol}</div>
-                                    <div className="text-gray-400 text-xs">{token.name}</div>
-                                  </div>
-                                </div>
-                                <div className="text-right">
-                                  <div className="text-white text-sm">
-                                    {token.formattedBalance || '0'}
-                                  </div>
-                                </div>
-                              </button>
-                            );
-                          }).filter(Boolean) // Remove null entries
-                        ) : (
-                          <div className="text-gray-400 text-sm px-2 py-1">No tokens found</div>
-                        )}
-                      </div>
-
-                      {customImportOpenFor === 'tokenIn' && (
-                        <div className="mb-2 px-2 space-y-2 border-t border-gray-700 pt-2">
-                          <label htmlFor="swap-custom-token-in" className="sr-only">
-                            Token contract address
-                          </label>
-                          <input
-                            id="swap-custom-token-in"
-                            name="customTokenImportIn"
-                            type="text"
-                            value={customImportAddress}
-                            onChange={(e) => setCustomImportAddress(e.target.value)}
-                            placeholder="0x… token contract"
-                            className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg text-xs font-mono"
-                            autoComplete="off"
-                            spellCheck={false}
-                          />
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              onClick={() => void submitCustomTokenImport()}
-                              className="flex-1 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium"
-                            >
-                              Import
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setCustomImportOpenFor(null);
-                                setCustomImportAddress('');
-                              }}
-                              className="flex-1 py-1.5 rounded-lg bg-gray-600 hover:bg-gray-500 text-white text-xs"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setCustomImportOpenFor((prev) => (prev === 'tokenIn' ? null : 'tokenIn'))
-                        }
-                        className="w-full flex items-center justify-center p-2 text-blue-400 hover:bg-gray-700 rounded-lg transition-colors text-sm"
-                      >
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        {customImportOpenFor === 'tokenIn' ? 'Hide import' : 'Add custom token'}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              <button
-                onClick={switchTokens}
-                className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
-                aria-label="Switch tokens"
-              >
-                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                </svg>
-              </button>
-              
-              <div className="relative flex items-center space-x-2 w-full sm:w-auto token-dropdown-container">
-                <button
-                  onClick={() => setTokenOutDropdownOpen(!tokenOutDropdownOpen)}
-                  className="flex items-center space-x-2 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg transition-colors w-full sm:w-auto justify-center sm:justify-start"
-                >
-                  <span className="text-xl sm:text-2xl">{getTokenLogo(tokenOut)}</span>
-                  <span className="text-white font-medium text-sm sm:text-base">{getTokenName(tokenOut)}</span>
-                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-
-                {/* Token Out Dropdown */}
-                {tokenOutDropdownOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-80 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto" style={{
-                    backgroundColor: 'var(--bg-card)',
-                    border: '1px solid var(--border-color)'
-                  }}>
-                    <div className="p-3 border-b border-gray-700">
-                      <h3 className="text-white font-medium mb-2">Select Token</h3>
-                      <div className="relative">
-                        <label htmlFor="swap-token-out-search" className="sr-only">Search tokens</label>
-                        <input
-                          id="swap-token-out-search"
-                          name="tokenOutSearch"
-                          type="text"
-                          autoComplete="off"
-                          placeholder="Search tokens..."
-                          className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg text-sm"
-                          onChange={(_e) => {
-                            // Add search functionality if needed
-                          }}
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="p-2">
-                      {/* My Tokens Section */}
-                      <div className="mb-3">
-                        <h4 className="text-gray-400 text-xs font-medium mb-2 px-2">My Tokens</h4>
-                        {isLoadingTokens ? (
-                          <div className="text-gray-400 text-sm px-2 py-1">Loading...</div>
-                        ) : userTokens.length > 0 ? (
-                          userTokens.map((token) => {
-                            // Add defensive checks for token data
-                            if (!token || !token.symbol || !token.name || !token.formattedBalance) {
-                              return null; // Skip invalid tokens
-                            }
-                            
-                            return (
-                              <button
-                                key={token.address}
-                                onClick={() => handleTokenSelect(token, 'tokenOut')}
-                                className="w-full flex items-center justify-between p-2 hover:bg-gray-700 rounded-lg transition-colors"
-                              >
-                                <div className="flex items-center space-x-2">
-                                  <span className="text-lg">{getTokenLogo(token.symbol)}</span>
-                                  <div>
-                                    <div className="text-white text-sm font-medium">{token.symbol}</div>
-                                    <div className="text-gray-400 text-xs">{token.name}</div>
-                                  </div>
-                                </div>
-                                <div className="text-right">
-                                  <div className="text-white text-sm">
-                                    {token.formattedBalance || '0'}
-                                  </div>
-                                </div>
-                              </button>
-                            );
-                          }).filter(Boolean) // Remove null entries
-                        ) : (
-                          <div className="text-gray-400 text-sm px-2 py-1">No tokens found</div>
-                        )}
-                      </div>
-
-                      {customImportOpenFor === 'tokenOut' && (
-                        <div className="mb-2 px-2 space-y-2 border-t border-gray-700 pt-2">
-                          <label htmlFor="swap-custom-token-out" className="sr-only">
-                            Token contract address
-                          </label>
-                          <input
-                            id="swap-custom-token-out"
-                            name="customTokenImportOut"
-                            type="text"
-                            value={customImportAddress}
-                            onChange={(e) => setCustomImportAddress(e.target.value)}
-                            placeholder="0x… token contract"
-                            className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg text-xs font-mono"
-                            autoComplete="off"
-                            spellCheck={false}
-                          />
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              onClick={() => void submitCustomTokenImport()}
-                              className="flex-1 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium"
-                            >
-                              Import
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setCustomImportOpenFor(null);
-                                setCustomImportAddress('');
-                              }}
-                              className="flex-1 py-1.5 rounded-lg bg-gray-600 hover:bg-gray-500 text-white text-xs"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setCustomImportOpenFor((prev) => (prev === 'tokenOut' ? null : 'tokenOut'))
-                        }
-                        className="w-full flex items-center justify-center p-2 text-blue-400 hover:bg-gray-700 rounded-lg transition-colors text-sm"
-                      >
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        {customImportOpenFor === 'tokenOut' ? 'Hide import' : 'Add custom token'}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Available Trading Pairs Info */}
-            <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4 mb-4">
-              <div className="flex items-center space-x-2 mb-2">
-                <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="text-blue-400 text-sm font-medium">Available Trading Pairs</span>
-              </div>
-              <div className="text-gray-300 text-xs">
-                {(() => {
-                  const configuredPairs = getConfiguredPairs();
-                  if (configuredPairs.length > 0) {
-                    const pairStrings = configuredPairs.map(p => `${p.tokenA}/${p.tokenB}`).join(', ');
-                    return `Configured pairs: ${pairStrings}. Try swapping these tokens for best results.`;
-                  } else if (routeSource === 'aggregator' && aggregatorQuote?.venue) {
-                    return `Best public route: ${aggregatorQuote.venue}. Tokens without liquidity still cannot be swapped.`;
-                  } else {
-                    return 'Quotes use public DEX aggregators when a market exists. Boing pools appear here after they are funded.';
-                  }
-                })()}
-              </div>
-            </div>
+            <p className="text-xs mb-4" style={{ color: 'var(--text-tertiary)' }}>
+              {(() => {
+                const configuredPairs = getConfiguredPairs();
+                if (configuredPairs.length > 0) {
+                  return `Boing pairs: ${configuredPairs.map((p) => `${p.tokenA}/${p.tokenB}`).join(', ')}`;
+                }
+                if (routeSource === 'aggregator' && aggregatorQuote?.venue) {
+                  return `Route: ${aggregatorQuote.venue}`;
+                }
+                return 'Public DEX route when a market exists.';
+              })()}
+            </p>
 
             {/* Token Input Section */}
             <div className="space-y-4 sm:space-y-6">
@@ -2358,22 +2107,50 @@ const Swap = () => {
                       setAmountIn(e.target.value);
                     }}
                     placeholder="0.0"
-                    className="flex-1 bg-transparent text-xl sm:text-2xl font-bold text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 bg-transparent text-xl sm:text-2xl font-bold text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0"
                   />
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xl sm:text-2xl">{getTokenLogo(tokenIn)}</span>
-                    <span className="text-white font-medium text-sm sm:text-base">{tokenIn}</span>
-                  </div>
+                  <SwapTokenSelect
+                    idPrefix="swap-token-in"
+                    open={tokenInDropdownOpen}
+                    onToggle={() => {
+                      setTokenOutDropdownOpen(false);
+                      setTokenInDropdownOpen((v) => !v);
+                    }}
+                    selectedSymbol={tokenIn}
+                    logo={getTokenLogo(tokenIn)}
+                    tokens={userTokens}
+                    loading={isLoadingTokens}
+                    onSelect={(token) => handleTokenSelect(token, 'tokenIn')}
+                    getTokenLogo={getTokenLogo}
+                    customOpen={customImportOpenFor === 'tokenIn'}
+                    onToggleCustom={() =>
+                      setCustomImportOpenFor((prev) => (prev === 'tokenIn' ? null : 'tokenIn'))
+                    }
+                    customAddress={customImportAddress}
+                    onCustomAddress={setCustomImportAddress}
+                    onImport={submitCustomTokenImport}
+                    onCancelCustom={() => {
+                      setCustomImportOpenFor(null);
+                      setCustomImportAddress('');
+                    }}
+                  />
                 </div>
+                {amountInUsd ? (
+                  <div className="mt-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>≈ {amountInUsd}</div>
+                ) : null}
               </div>
 
-              {/* Swap Direction Indicator */}
-              <div className="flex justify-center">
-                <div className="bg-gray-700 rounded-full p-2">
-                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" className="text-gray-400">
+              <div className="flex justify-center -my-1">
+                <button
+                  type="button"
+                  onClick={switchTokens}
+                  className="bg-gray-700 hover:bg-gray-600 rounded-full p-2 transition-colors"
+                  aria-label="Switch tokens"
+                >
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" className="text-gray-300">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                   </svg>
-                </div>
+                </button>
               </div>
 
               {/* Token Out */}
@@ -2398,11 +2175,35 @@ const Swap = () => {
                     placeholder="0.0"
                     className="flex-1 bg-transparent text-xl sm:text-2xl font-bold text-white placeholder-gray-500 focus:outline-none cursor-not-allowed"
                   />
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xl sm:text-2xl">{getTokenLogo(tokenOut)}</span>
-                    <span className="text-white font-medium text-sm sm:text-base">{tokenOut}</span>
-                  </div>
+                  <SwapTokenSelect
+                    idPrefix="swap-token-out"
+                    open={tokenOutDropdownOpen}
+                    onToggle={() => {
+                      setTokenInDropdownOpen(false);
+                      setTokenOutDropdownOpen((v) => !v);
+                    }}
+                    selectedSymbol={tokenOut}
+                    logo={getTokenLogo(tokenOut)}
+                    tokens={userTokens}
+                    loading={isLoadingTokens}
+                    onSelect={(token) => handleTokenSelect(token, 'tokenOut')}
+                    getTokenLogo={getTokenLogo}
+                    customOpen={customImportOpenFor === 'tokenOut'}
+                    onToggleCustom={() =>
+                      setCustomImportOpenFor((prev) => (prev === 'tokenOut' ? null : 'tokenOut'))
+                    }
+                    customAddress={customImportAddress}
+                    onCustomAddress={setCustomImportAddress}
+                    onImport={submitCustomTokenImport}
+                    onCancelCustom={() => {
+                      setCustomImportOpenFor(null);
+                      setCustomImportAddress('');
+                    }}
+                  />
                 </div>
+                {amountOutUsd ? (
+                  <div className="mt-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>≈ {amountOutUsd}</div>
+                ) : null}
                 {amountOut && parseFloat(amountOut) > 0 && (
                   <div className="mt-2 text-xs text-gray-400">
                     Rate: 1 {tokenIn} = {(parseFloat(amountOut) / parseFloat(amountIn)).toFixed(6)} {tokenOut}
@@ -2484,7 +2285,7 @@ const Swap = () => {
               <button
                 onClick={handleSwap}
                 disabled={isSwapping || !isConnected || !account || !amountIn || parseFloat(amountIn) <= 0 || !tokenIn || !tokenOut || tokenIn === tokenOut}
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none"
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-8 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
               >
                 {isSwapping ? (
                   <div className="flex items-center justify-center space-x-2">
@@ -2523,12 +2324,14 @@ const Swap = () => {
             </div>
           </div>
           </div>
+          </div>
+          )}
 
-          {/* Sidebar - Trending Pairs */}
-          <div className="hidden lg:block">
-            <TrendingPairs />
-          </div>
-          </div>
+          {showEvmSwapDesk && (
+            <div className="mt-6">
+              <TrendingPairs />
+            </div>
+          )}
         </div>
       </div>
       <ShareCardModal
