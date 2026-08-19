@@ -1,0 +1,12 @@
+{
+  "name": "boing-token-hook",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Boing Token-2022 transfer hook (pause, max tx, max wallet, cooldown, anti-bot)",
+  "scripts": {
+    "build": "anchor build",
+    "build:docker": "bash scripts/docker-build.sh",
+    "cost": "node scripts/estimate-deploy-cost.mjs",
+    "mock-deploy:cost": "node scripts/estimate-deploy-cost.mjs"
+  }
+}

@@ -1,0 +1,8 @@
+.anchor
+target/**
+!target/deploy/
+target/deploy/*
+!target/deploy/boing_token_hook-keypair.json
+test-ledger
+node_modules
+.DS_Store

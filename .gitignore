@@ -32,5 +32,9 @@ frontend/.env.local
 !.env.production
 !**/.env.production
 
+solana-programs/**/target/
+solana-programs/**/.anchor/
+solana-programs/**/test-ledger/
+
 # Windows accidental reserved-name file
 nul
