@@ -153,6 +153,7 @@ export default defineConfig(({ mode }) => {
   define: {
     ...envDefine(mode),
     'import.meta.env.VITE_ASSET_VERSION': JSON.stringify(assetVersion),
+    global: 'globalThis',
   },
   resolve: {
     alias: {
@@ -185,20 +186,6 @@ export default defineConfig(({ mode }) => {
     outDir: 'dist',
     sourcemap: true,
     chunkSizeWarningLimit: 1200,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules/recharts')) return 'recharts';
-          if (
-            id.includes('node_modules/@solana') ||
-            id.includes('node_modules/@metaplex-foundation')
-          ) {
-            return 'solana';
-          }
-          return undefined;
-        },
-      },
-    },
   },
   publicDir: 'public',
 };

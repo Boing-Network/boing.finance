@@ -1,5 +1,4 @@
-// Polyfill Buffer for browser (required by Solana/Web3 deps in chunks)
-import { Buffer } from 'buffer';
+import './polyfills';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -7,10 +6,6 @@ import { registerServiceWorker } from './utils/serviceWorkerRegistration';
 import './styles/globals.css';
 import './styles/deep-trade-tokens.css';
 import App from './App';
-
-if (typeof window !== 'undefined') {
-  window.Buffer = Buffer;
-}
 
 if (process.env.NODE_ENV === 'production') {
   // Register service worker - NO AUTO RELOAD
