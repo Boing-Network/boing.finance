@@ -6,6 +6,7 @@
 import {
   Keypair,
   PublicKey,
+  SYSVAR_RENT_PUBKEY,
   SystemProgram,
   Transaction,
 } from '@solana/web3.js';
@@ -25,6 +26,11 @@ import { createCreateMetadataAccountV3Instruction } from '@metaplex-foundation/m
 import { getMetadataPDA } from './solanaMetaplex';
 import { formatSolanaRpcError } from '../config/solanaConfig';
 import { uploadMetadataToR2ForSolana, uploadToR2ForSolana } from '../utils/solanaStorage';
+import {
+  assertSolanaPayerFunded,
+  formatSolanaSimulationError,
+  simulateLegacyTransaction,
+} from './solanaDeployTx';
 
 const NAME_MAX = 32;
 const SYMBOL_MAX = 10;
@@ -46,8 +52,13 @@ function validateNftParams(params) {
  */
 export async function createSPLNFT(connection, ownerAddress, signTransaction, params) {
   validateNftParams(params);
-  const { name, symbol, description, imageFile, attributes = [] } = params;
+  const { name, symbol, description, imageFile, attributes = [], network = 'devnet' } = params;
   const owner = new PublicKey(ownerAddress);
+  try {
+    await assertSolanaPayerFunded(connection, owner, network);
+  } catch (error) {
+    throw new Error(error?.message?.includes('SOL') ? error.message : formatSolanaRpcError(error, network));
+  }
 
   // 1. Upload image to R2
   const imageResult = await uploadToR2ForSolana(imageFile);
@@ -68,7 +79,7 @@ export async function createSPLNFT(connection, ownerAddress, signTransaction, pa
   try {
     lamports = await getMinimumBalanceForRentExemptMint(connection);
   } catch (error) {
-    throw new Error(formatSolanaRpcError(error));
+    throw new Error(formatSolanaRpcError(error, network));
   }
   const [metadataPDA] = getMetadataPDA(mintKeypair.publicKey);
 
@@ -127,6 +138,8 @@ export async function createSPLNFT(connection, ownerAddress, signTransaction, pa
         mintAuthority: owner,
         payer: owner,
         updateAuthority: owner,
+        systemProgram: SystemProgram.programId,
+        rent: SYSVAR_RENT_PUBKEY,
       },
       {
         createMetadataAccountArgsV3: {
@@ -158,23 +171,17 @@ export async function createSPLNFT(connection, ownerAddress, signTransaction, pa
     )
   );
 
-  try {
-    transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-  } catch (error) {
-    throw new Error(formatSolanaRpcError(error));
-  }
   transaction.feePayer = owner;
-  transaction.sign(mintKeypair);
-
   let sim;
   try {
-    sim = await connection.simulateTransaction(transaction);
+    sim = await simulateLegacyTransaction(connection, transaction, [mintKeypair]);
   } catch (error) {
-    throw new Error(formatSolanaRpcError(error));
+    throw new Error(formatSolanaRpcError(error, network));
   }
   if (sim.value.err) {
-    throw new Error(`Simulation failed: ${JSON.stringify(sim.value.err)}`);
+    throw new Error(formatSolanaSimulationError(sim, network));
   }
+  transaction.sign(mintKeypair);
 
   const signed = await signTransaction(transaction);
   try {
@@ -191,6 +198,6 @@ export async function createSPLNFT(connection, ownerAddress, signTransaction, pa
       signature,
     };
   } catch (error) {
-    throw new Error(formatSolanaRpcError(error));
+    throw new Error(formatSolanaRpcError(error, network));
   }
 }

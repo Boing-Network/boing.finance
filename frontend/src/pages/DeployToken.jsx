@@ -101,7 +101,7 @@ async function recordSolanaDeployment({ mintAddress, creatorAddress, network, ty
 
 // Solana SPL Token Deploy (shown when chain type is Solana)
 function DeployTokenSolanaContent() {
-  const { connection, address, connected, connectWallet, signTransaction, network } = useSolanaWallet();
+  const { connection, address, connected, connectWallet, signTransaction, network, balance, setSolanaNetwork } = useSolanaWallet();
   const [name, setName] = useState('');
   const [symbol, setSymbol] = useState('');
   const [decimals, setDecimals] = useState(9);
@@ -137,6 +137,7 @@ function DeployTokenSolanaContent() {
         decimals: Number(decimals) || 9,
         initialSupply: initialSupply || '0',
         logoFile: logoFile || undefined,
+        network,
       });
       setMintAddress(result.mintAddress);
       setSignature(result.signature);
@@ -186,6 +187,29 @@ function DeployTokenSolanaContent() {
             <p className="text-xl" style={{ color: 'var(--text-secondary)' }}>
               Create an SPL token on Solana {solanaNetwork.name}
             </p>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+              {['mainnet', 'devnet'].map((net) => (
+                <button
+                  key={net}
+                  type="button"
+                  onClick={() => setSolanaNetwork?.(net)}
+                  className="px-3 py-1 rounded-full text-sm font-medium"
+                  style={{
+                    backgroundColor: network === net ? 'var(--accent-primary)' : 'var(--bg-card)',
+                    color: network === net ? 'white' : 'var(--text-secondary)',
+                    border: '1px solid var(--border-color)',
+                  }}
+                >
+                  {net === 'mainnet' ? 'Mainnet' : 'Devnet'}
+                </button>
+              ))}
+            </div>
+            {connected && (
+              <p className="text-sm mt-3" style={{ color: balance === 0 ? 'var(--accent-error, #f87171)' : 'var(--text-secondary)' }}>
+                Wallet: {balance == null ? '…' : `${Number(balance).toFixed(4)} SOL`} on {solanaNetwork.name} · rent ~0.014 SOL
+                {balance === 0 ? ` — fund this wallet on ${network === 'mainnet' ? 'Mainnet' : 'Devnet'} or switch cluster.` : ''}
+              </p>
+            )}
           </div>
 
           {!connected ? (
