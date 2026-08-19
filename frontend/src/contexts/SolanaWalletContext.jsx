@@ -4,7 +4,7 @@
  * Separate from EVM WalletContext - use ChainTypeSelector to switch between EVM and Solana
  */
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { getSolanaRpcEndpoints } from '../config/solanaConfig';
+import { getSolanaRpcEndpoints, solanaConnectionConfig } from '../config/solanaConfig';
 
 const SolanaWalletContext = createContext();
 
@@ -90,12 +90,12 @@ export const SolanaWalletProvider = ({ children }) => {
       const endpoints = getSolanaRpcEndpoints(network);
       for (const url of endpoints) {
         try {
-          const conn = new Connection(url, { commitment: 'confirmed', confirmTransactionInitialTimeout: 60_000 });
+          const conn = new Connection(url, solanaConnectionConfig());
           await conn.getLatestBlockhash('confirmed');
           if (!cancelled) setConnection(conn);
           return;
         } catch {
-          // try the next provider — public Solana RPC often 403s; some TLS endpoints fail in-browser
+          // try the next RPC (Worker proxy, then optional dedicated Helius/env URL)
         }
       }
       if (!cancelled) {

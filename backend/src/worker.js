@@ -53,7 +53,13 @@ app.use('*', async (c, next) => {
   return cors({
     origin: allowedOrigins,
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization', 'X-User-Address', 'X-Alchemy-Signature'],
+    allowHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-User-Address',
+      'X-Alchemy-Signature',
+      'solana-client',
+    ],
     credentials: true,
     maxAge: 86400 // Cache preflight for 24 hours
   })(c, next);
