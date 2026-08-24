@@ -110,23 +110,16 @@ export default function BoingNativeL1Section() {
         </h3>
         <ul className="list-disc pl-5 space-y-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
           <li>
-            RPC: <code className="text-xs">https://testnet-rpc.boing.network/</code> (chain id <strong>6913</strong>)
+            RPC: <code className="text-xs">https://testnet-rpc.boing.network/</code> (chain id <strong>6913</strong>, hosted Fly cluster)
           </li>
           <li>
-            Canonical native AMM pool:{' '}
-            <code className="text-xs break-all">
-              0x7247ddc3180fdc4d3fd1e716229bfa16bad334a07d28aa9fda9ad1bfa7bdacc3
-            </code>{' '}
-            (<code className="text-xs">REACT_APP_BOING_NATIVE_AMM_POOL</code> at build time)
+            Canonical native AMM / DEX factory: <strong>not published</strong> on the hosted chain yet.
+            Read <code className="text-xs">boing_getNetworkInfo.end_user</code> (currently null). Set{' '}
+            <code className="text-xs">REACT_APP_BOING_NATIVE_AMM_POOL</code> only after ops bootstraps DEX.
           </li>
           <li>
-            Native DEX factory:{' '}
-            <code className="text-xs break-all">
-              0x58112627fc84618a27b82e9af82bc9a51761c6d3cca1260c93d56d22b6c481a1
-            </code>
-          </li>
-          <li>
-            Bootnode: <code className="text-xs">/ip4/73.84.106.121/tcp/4001</code> — see{' '}
+            Bootnodes: <code className="text-xs">/ip4/169.155.48.188/tcp/4001</code>,{' '}
+            <code className="text-xs">/ip4/109.105.220.118/tcp/4001</code> — see{' '}
             <a href="https://boing.network/testnet/join" target="_blank" rel="noopener noreferrer" className={linkCls}>
               boing.network/testnet/join
             </a>

@@ -1,20 +1,25 @@
 #!/usr/bin/env node
 /**
- * Fail CI when embedded 6913 native CP pool id drifts from live public testnet canon.
- * Expects boing-sdk built (postinstall) and optional Vite env from github-build.*.env.
+ * Guard CI env vs boing-sdk historical 6913 pool hex.
+ * Hosted Fly testnet currently leaves `end_user.canonical_native_cp_pool` unset — when
+ * REACT_APP_BOING_NATIVE_AMM_POOL is empty, skip (do not bake a dead pool id).
  */
 import { CANONICAL_BOING_TESTNET_NATIVE_CP_POOL_HEX } from 'boing-sdk';
 
-const EXPECTED =
-  process.env.REACT_APP_BOING_NATIVE_AMM_POOL?.trim().toLowerCase() ||
-  '0x7247ddc3180fdc4d3fd1e716229bfa16bad334a07d28aa9fda9ad1bfa7bdacc3';
-
+const envPool = process.env.REACT_APP_BOING_NATIVE_AMM_POOL?.trim().toLowerCase() || '';
 const embedded = String(CANONICAL_BOING_TESTNET_NATIVE_CP_POOL_HEX || '').trim().toLowerCase();
 
-if (embedded !== EXPECTED) {
+if (!envPool) {
+  console.log(
+    'verify-canonical-testnet-pool-embed: skipped (REACT_APP_BOING_NATIVE_AMM_POOL unset; hosted testnet has no published pool)',
+  );
+  process.exit(0);
+}
+
+if (embedded !== envPool) {
   console.error('verify-canonical-testnet-pool-embed: mismatch');
   console.error('  boing-sdk CANONICAL_BOING_TESTNET_NATIVE_CP_POOL_HEX:', embedded);
-  console.error('  expected (env or live canon):', EXPECTED);
+  console.error('  REACT_APP_BOING_NATIVE_AMM_POOL:', envPool);
   process.exit(1);
 }
 
