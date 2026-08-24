@@ -1,4 +1,17 @@
-# boing.finance — documentation index
+# 📚 boing.finance — documentation index
+
+> 👋 **Everyday users:** the app is [boing.finance](https://boing.finance). Connect [Boing Express](https://boing.express) for Boing L1; other wallets for EVM/Solana.  
+> 🛠️ **Developers:** this folder is the engineering map. Canonical env: `frontend/.env.example`. Live EVM addresses: `frontend/src/config/contracts.js`.  
+> 🛰️ **Operators:** `cd frontend && npm run smoke:boing-rpc` against public testnet.
+
+```mermaid
+flowchart LR
+  Index[docs/README] --> Native[native-dex.md]
+  Index --> Discover[native-dex-discovery.md]
+  Index --> EVM[contracts.md]
+  Index --> Deploy[deployment.md]
+  Native --> Protocol[boing.network DEX docs]
+```
 
 Canonical **env vars:** `frontend/.env.example`. Canonical **EVM addresses:** `frontend/src/config/contracts.js`.
 

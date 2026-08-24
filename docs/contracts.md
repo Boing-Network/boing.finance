@@ -1,5 +1,9 @@
 # Smart contracts (EVM)
 
+> 👋 **Everyday users:** EVM deploys use a normal EVM wallet. Boing L1 deploys use Boing Express — these Solidity files do **not** run on Boing.  
+> 🛠️ **Developers:** live addresses in `frontend/src/config/contracts.js`. Boing L1: [native-dex.md](./native-dex.md).  
+> 🛰️ **Operators:** DEXFactoryV2 enablement runbook is below.
+
 Which features need on-chain deploys, current status, and how to enable the **DEXFactoryV2** stack on listed EVM networks.
 
 **Live addresses:** `frontend/src/config/contracts.js` (human-readable history: [contract-registry.md](./contract-registry.md)).  

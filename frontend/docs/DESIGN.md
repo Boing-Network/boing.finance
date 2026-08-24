@@ -1,5 +1,9 @@
 # Visual system (boing.finance)
 
+> 👋 **Everyday users:** the app uses a stone + engraved-vein + soft neon shell.  
+> 🛠️ **Developers:** apply this system consistently — not only on isolated pages.  
+> 🛰️ **Operators:** n/a.
+
 Current app chrome is a **stone + engraved-vein + soft neon** shell, not the older aquatic-space `.webp` / canvas engine.
 
 *Last reviewed: August 2026.*

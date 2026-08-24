@@ -1,6 +1,16 @@
 # Deployment & Production Configuration
 
+> 👋 **Everyday users:** production is [boing.finance](https://boing.finance). You do not deploy it.  
+> 🛠️ **Developers:** push `main` → production, `staging` → staging. Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.  
+> 🛰️ **Operators:** frontend output directory is **`dist`**, not `build`.
+
 Complete guide for deploying boing.finance to Cloudflare Workers and Pages, and production checklist.
+
+```mermaid
+flowchart LR
+  Main[push main] --> Prod[Cloudflare Pages + Workers prod]
+  Staging[push staging] --> Stg[staging]
+```
 
 ---
 

@@ -1,6 +1,22 @@
-# boing.finance
+# 💱 boing.finance
 
-Cross-chain DeFi app: **EVM** (TokenFactory, Sepolia DEX, LI.FI aggregator), **Solana** (SPL deploy, Jupiter), and **Boing Network L1** (native VM AMM via Boing Express).
+Cross-chain DeFi: **EVM** (TokenFactory, Sepolia DEX, LI.FI), **Solana** (SPL deploy, Jupiter), and **Boing Network L1** (native VM AMM via Boing Express).
+
+> 👋 **Everyday users:** open [boing.finance](https://boing.finance), connect a wallet, swap or deploy. On Boing L1 you need [Boing Express](https://boing.express) — MetaMask cannot sign 32-byte Boing accounts.  
+> 🛠️ **Developers:** Vite + React frontend, Cloudflare Workers + D1 backend. Boing path is `boing-sdk` + Express, **not** the Solidity tree.  
+> 🛰️ **Operators:** canonical env is `frontend/.env.example`. Live EVM addresses: `frontend/src/config/contracts.js`. Smoke: `cd frontend && npm run smoke:boing-rpc`.
+
+```mermaid
+flowchart TB
+  App[boing.finance]
+  App --> EVM[EVM networks · ethers]
+  App --> SOL[Solana · Jupiter]
+  App --> Boing[Boing L1 6913]
+  Boing --> Express[Boing Express]
+  Boing --> RPC[testnet-rpc.boing.network]
+  EVM --> Contracts[contracts/ Solidity]
+  Boing --> VM[Boing VM programs in protocol repo]
+```
 
 Frontend is **Vite + React 18**. Backend is **Cloudflare Workers + D1**.
 
@@ -10,38 +26,42 @@ Frontend is **Vite + React 18**. Backend is **Cloudflare Workers + D1**.
 ├── frontend/          # Vite React app (build output: dist/)
 ├── backend/           # Cloudflare Workers API (Hono)
 ├── contracts/         # Solidity (EVM only — not loadable on Boing VM)
-└── docs/              # Engineering docs (start at docs/README.md)
+└── docs/              # Start at docs/README.md
 ```
 
 ### Boing Network L1 (chain 6913)
 
-Boing L1 runs the **Boing VM**, not EVM application bytecode. Native swap, pool discovery, and operator handoffs: **[docs/native-dex.md](./docs/native-dex.md)** and **[docs/native-dex-discovery.md](./docs/native-dex-discovery.md)**. Upstream: [HANDOFF-DEPENDENT-PROJECTS.md](https://github.com/Boing-Network/boing.network/blob/main/docs/HANDOFF-DEPENDENT-PROJECTS.md), [THREE-CODEBASE-ALIGNMENT.md](https://github.com/Boing-Network/boing.network/blob/main/docs/THREE-CODEBASE-ALIGNMENT.md).
+Boing L1 runs the **Boing VM**, not EVM application bytecode. There is no compiler switch that turns `contracts/` into Boing bytecode.
+
+Native swap, pool discovery, and operator handoffs: **[docs/native-dex.md](./docs/native-dex.md)** and **[docs/native-dex-discovery.md](./docs/native-dex-discovery.md)**. Upstream: [HANDOFF-DEPENDENT-PROJECTS.md](https://github.com/Boing-Network/boing.network/blob/main/docs/HANDOFF-DEPENDENT-PROJECTS.md).
+
+Hosted Fly testnet currently may have **`end_user.canonical_native_*` = null** — the app must not treat historical SDK hexes as live.
 
 ## Tech stack
 
 - **Frontend:** React 18, Vite, Tailwind CSS, Framer Motion, React Query, ethers.js, `@solana/web3.js`, `boing-sdk`
-- **Backend:** Cloudflare Workers, Hono, D1, Drizzle ORM (Better-SQLite3 locally)
-- **Contracts:** Solidity, Hardhat, OpenZeppelin
+- **Backend:** Cloudflare Workers, Hono, D1, Drizzle ORM
+- **Contracts:** Solidity, Hardhat, OpenZeppelin (EVM only)
 
 ## Quick start
 
-Prerequisites: Node.js 18+, npm, Git. Cloudflare account only if you deploy.
+Prerequisites: Node.js 18+, npm, Git.
 
 ```bash
 git clone <repository-url>
 cd boing.finance
 
-# Backend (Cloudflare Worker via Wrangler)
+# Backend
 cd backend && npm install && npm run dev
 
-# Frontend (separate terminal) — Vite listens on port 3000
+# Frontend (separate terminal) — Vite on port 3000
 cd frontend && npm install && npm start
 # http://localhost:3000
 ```
 
 From the repo root: `npm run dev` runs backend and frontend together.
 
-### Smart contracts (optional)
+### Smart contracts (optional, EVM)
 
 ```bash
 cd contracts
@@ -55,32 +75,26 @@ npm run check:dex
 
 **GitHub Actions:** push to `main` → production; `staging` → staging. Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`. Details: [docs/deployment.md](./docs/deployment.md).
 
-Manual:
-
 ```bash
 ./deploy-backend.sh staging    # or production
-./deploy-frontend.sh staging   # builds frontend/dist, wrangler pages deploy
+./deploy-frontend.sh staging
 ```
 
-Cloudflare Pages (if configuring the dashboard by hand):
-
-- Root: `frontend`
-- Build command: `npm install && npm run build:prod` (or `build:staging`)
-- Output directory: **`dist`** (not `build`)
+Cloudflare Pages (manual): root `frontend`, build `npm install && npm run build:prod`, output **`dist`**.
 
 ## Documentation
 
-See **[docs/README.md](./docs/README.md)** for the full index. Highlights:
+See **[docs/README.md](./docs/README.md)** for the full index.
 
 | Document | Description |
 |----------|-------------|
 | [docs/native-dex.md](./docs/native-dex.md) | Boing L1 vs EVM DEX, roadmap, indexer |
 | [docs/native-dex-discovery.md](./docs/native-dex-discovery.md) | L1 list RPCs + operator handoff |
 | [docs/deployment.md](./docs/deployment.md) | Cloudflare Workers/Pages |
-| [docs/configuration.md](./docs/configuration.md) | Env vars (canonical list: `frontend/.env.example`) |
-| [docs/contracts.md](./docs/contracts.md) | EVM TokenFactory / DEX enablement |
+| [docs/configuration.md](./docs/configuration.md) | Env vars |
+| [docs/contracts.md](./docs/contracts.md) | EVM TokenFactory / DEX |
 | [docs/integration.md](./docs/integration.md) | Networks, Solana, swap market data |
-| [frontend/docs/DESIGN.md](./frontend/docs/DESIGN.md) | Visual system (Colosseum shell) |
+| [frontend/docs/DESIGN.md](./frontend/docs/DESIGN.md) | Visual system |
 
 ## Configuration
 
@@ -93,7 +107,7 @@ REACT_APP_ENV=production
 REACT_APP_BACKEND_URL=https://boing-api-prod.nico-chikuji.workers.dev
 ```
 
-`REACT_APP_ENVIRONMENT` is accepted as an alias (`frontend/vite.config.mjs`). All `REACT_APP_*` values are public in the bundle.
+All `REACT_APP_*` values are public in the bundle.
 
 ## API
 
