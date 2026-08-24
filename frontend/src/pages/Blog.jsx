@@ -26,7 +26,7 @@ const Blog = () => {
         content: 'Boing Finance is a DEX to deploy tokens and trade on EVM and Solana.',
         author: 'Boing Team',
         date: '2025-01-28',
-        image: '/hero-image.png',
+        image: '/preview-image.png',
         category: 'Announcement'
       },
       {
