@@ -3,8 +3,8 @@
  * Requires: sharp (devDependency). Run from frontend/: `npm run generate-brand-assets`
  * Then: `npm run generate-favicon` (uses boing-logo-mark.png as ICO source).
  *
- * The mark is the Boing family hex (outlined paths only, no <text>) so Sharp/librsvg
- * matches in-app Logo.jsx and the boing.network / Express / Observer marks.
+ * The mark is the Boing family rounded square (outlined paths only, no <text>) so Sharp/librsvg
+ * matches in-app Logo.jsx. Same bounce arc + orb as network; square shell instead of hex.
  */
 
 import fs from 'fs';

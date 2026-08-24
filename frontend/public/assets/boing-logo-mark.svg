@@ -16,13 +16,16 @@
       <stop offset="100%" stop-color="#0c1018"/>
     </radialGradient>
   </defs>
-  <!-- Stone hex (family shell used on network / Express / Observer) -->
-  <path
-    d="M32 6 L54 18 L54 46 L32 58 L10 46 L10 18 Z"
+  <!-- Finance shell: rounded square (network uses a hex) -->
+  <rect
+    x="6"
+    y="6"
+    width="52"
+    height="52"
+    rx="14"
     fill="url(#boing-mark-slab)"
     stroke="url(#boing-mark-frame)"
     stroke-width="2.25"
-    stroke-linejoin="round"
   />
   <!-- Recovery arc: dip then spring upward (“always bounces back”) -->
   <path
