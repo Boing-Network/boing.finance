@@ -781,7 +781,7 @@ code, pre, .monospace {
   background-clip: text;
 }
 
-/* Logo wordmark — slate + accent, matches Colosseum-style shell */
+/* Logo wordmark — Comfortaa, slate + accent */
 .logo-wordmark {
   background: linear-gradient(
     115deg,
@@ -793,9 +793,9 @@ code, pre, .monospace {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  font-family: var(--font-display);
+  font-family: var(--font-sans);
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.02em;
 }
 
 .boing-logo-svg {

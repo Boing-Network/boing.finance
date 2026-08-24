@@ -3,7 +3,8 @@ import React, { useId } from 'react';
 const base = process.env.PUBLIC_URL || '';
 
 /**
- * Boing family mark: hex shell + recovery arc + orb (same geometry as boing.network).
+ * Boing family mark: rounded-square shell + recovery arc + orb.
+ * Same bounce language as boing.network; square (not hex) so finance reads as its own site.
  * Keep path geometry in sync with public/assets/boing-logo-mark.svg (rasters / favicons).
  */
 function BoingLogoMark({ size, title }) {
@@ -36,12 +37,15 @@ function BoingLogoMark({ size, title }) {
           <stop offset="100%" stopColor="#0c1018" />
         </radialGradient>
       </defs>
-      <path
-        d="M32 6 L54 18 L54 46 L32 58 L10 46 L10 18 Z"
+      <rect
+        x="6"
+        y="6"
+        width="52"
+        height="52"
+        rx="14"
         fill={`url(#${g}-slab)`}
         stroke={`url(#${g}-frame)`}
         strokeWidth="2.25"
-        strokeLinejoin="round"
       />
       <path
         d="M13 45 C 19 45 21 40 25 33 C 29 26 33 21 38 19 C 43 17 47 20 49 24"
@@ -67,7 +71,7 @@ function BoingLogoMark({ size, title }) {
 }
 
 /**
- * Logo: family hex mark + optional wordmark.
+ * Logo: family rounded-square mark + Comfortaa wordmark.
  * showComic=true uses the official comic asset from the design system.
  */
 const Logo = ({ size = 40, className = '', showText = false, showComic = false }) => {
@@ -77,7 +81,7 @@ const Logo = ({ size = 40, className = '', showText = false, showComic = false }
     <div className={`flex items-center ${className}`}>
       <BoingLogoMark size={size} title={title} />
       {showText && !showComic && (
-        <span className="logo-wordmark ml-2 text-xl font-normal">
+        <span className="logo-wordmark ml-2 text-xl font-semibold">
           boing.finance
         </span>
       )}
