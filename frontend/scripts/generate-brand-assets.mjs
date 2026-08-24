@@ -3,8 +3,8 @@
  * Requires: sharp (devDependency). Run from frontend/: `npm run generate-brand-assets`
  * Then: `npm run generate-favicon` (uses boing-logo-mark.png as ICO source).
  *
- * The mark must use an outlined path for the letter “B”, not <text>: Sharp/librsvg has no Orbitron font,
- * so <text> was rasterizing as a generic font and favicons looked like an “old” logo vs the app.
+ * The mark must use outlined paths (custom B + rebound trail), not <text>: Sharp/librsvg has no app fonts,
+ * so <text> was rasterizing as a generic font and favicons drifted from the in-app Logo.jsx mark.
  */
 
 import fs from 'fs';
@@ -94,6 +94,37 @@ async function buildOgImage() {
   console.log('[brand-assets] preview-image.png (1200×630)');
 }
 
+async function buildHeroImage() {
+  const logoBuf = await sharp(fs.readFileSync(svgPath))
+    .resize(240, 240, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png()
+    .toBuffer();
+  const b64 = logoBuf.toString('base64');
+  const heroSvg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="682" viewBox="0 0 1024 682">
+  <defs>
+    <linearGradient id="hbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#121a24"/>
+      <stop offset="55%" stop-color="#0c1018"/>
+      <stop offset="100%" stop-color="#06080c"/>
+    </linearGradient>
+    <radialGradient id="hglow" cx="38%" cy="42%" r="65%">
+      <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="682" fill="url(#hbg)"/>
+  <rect width="1024" height="682" fill="url(#hglow)"/>
+  <image href="data:image/png;base64,${b64}" width="240" height="240" x="120" y="221"/>
+  <text x="400" y="320" fill="#e9eef5" font-size="52" font-family="Segoe UI, system-ui, sans-serif" font-weight="700">boing.finance</text>
+  <text x="400" y="372" fill="#7eb8ff" font-size="28" font-family="Segoe UI, system-ui, sans-serif">DeFi That Bounces Back</text>
+  <text x="400" y="416" fill="#8b9cb0" font-size="18" font-family="Segoe UI, system-ui, sans-serif">Swap · Deploy · Bridge on EVM &amp; Solana</text>
+</svg>`;
+  const out = path.join(publicDir, 'hero-image.png');
+  await sharp(Buffer.from(heroSvg)).png().toFile(out);
+  console.log('[brand-assets] hero-image.png (1024×682)');
+}
+
 async function buildFacebookBanner() {
   const logoBuf = await sharp(fs.readFileSync(svgPath))
     .resize(200, 200, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
@@ -144,6 +175,7 @@ async function main() {
   copySvgFavicon();
   await buildSplash();
   await buildOgImage();
+  await buildHeroImage();
   await buildFacebookBanner();
 
   console.log('[brand-assets] Done. Run: npm run generate-favicon');
