@@ -54,7 +54,7 @@ export function formatBoingExpressRpcError(e) {
     if (/duplicate transaction/i.test(msg)) {
       return (
         `${msg.trim()} ` +
-        'The same signed deploy is already in the mempool (identical nonce and metadata). Do not resubmit until a block includes it. Native token deploys charge ~200k–400k BOING as an execution fee — request the faucet after the pending tx clears, then retry.'
+        'The same signed deploy is already in the mempool (identical nonce and metadata). Do not resubmit until a block includes it. Native token deploys charge about 10–20 BOING as an execution fee (21,000 gas per BOING). Request the faucet if needed, then retry with a fresh nonce.'
       );
     }
     if (/insufficient balance for fee/i.test(msg)) {
