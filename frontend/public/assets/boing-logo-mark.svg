@@ -1,71 +1,39 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Boing Finance">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="Boing Finance">
   <title>Boing Finance</title>
   <defs>
-    <radialGradient id="boing-mark-disc" cx="32%" cy="26%" r="78%">
-      <stop offset="0%" stop-color="#2a3a52"/>
-      <stop offset="48%" stop-color="#141c28"/>
-      <stop offset="100%" stop-color="#070a10"/>
+    <linearGradient id="boing-mark-frame" x1="8" y1="10" x2="56" y2="54" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7c3aed"/>
+      <stop offset="0.5" stop-color="#06b6d4"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+    <linearGradient id="boing-mark-orb" x1="36" y1="14" x2="52" y2="30" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#c4b5fd"/>
+      <stop offset="0.55" stop-color="#22d3ee"/>
+      <stop offset="1" stop-color="#67e8f9"/>
+    </linearGradient>
+    <radialGradient id="boing-mark-slab" cx="34%" cy="28%" r="78%">
+      <stop offset="0%" stop-color="#1a2434"/>
+      <stop offset="100%" stop-color="#0c1018"/>
     </radialGradient>
-    <linearGradient id="boing-mark-rim" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#9ef6ff"/>
-      <stop offset="42%" stop-color="#00e5ff"/>
-      <stop offset="100%" stop-color="rgba(233,238,245,0.28)"/>
-    </linearGradient>
-    <linearGradient id="boing-mark-b" x1="0%" y1="0%" x2="8%" y2="100%">
-      <stop offset="0%" stop-color="#f4f8fc"/>
-      <stop offset="38%" stop-color="#7af0ff"/>
-      <stop offset="100%" stop-color="#00e5ff"/>
-    </linearGradient>
-    <linearGradient id="boing-mark-bounce" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="rgba(0,229,255,0.22)"/>
-      <stop offset="40%" stop-color="#00e5ff"/>
-      <stop offset="100%" stop-color="#e9eef5"/>
-    </linearGradient>
-    <radialGradient id="boing-mark-orb" cx="38%" cy="32%" r="70%">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="45%" stop-color="#7af0ff"/>
-      <stop offset="100%" stop-color="#00e5ff"/>
-    </radialGradient>
-    <filter id="boing-mark-soft" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="0.45" result="b"/>
-      <feMerge>
-        <feMergeNode in="b"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <filter id="boing-mark-glow" x="-80%" y="-80%" width="260%" height="260%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="1.05" result="g"/>
-      <feMerge>
-        <feMergeNode in="g"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
   </defs>
-
-  <circle cx="32" cy="32" r="30" fill="url(#boing-mark-disc)"/>
-  <circle cx="32" cy="32" r="29.15" fill="none" stroke="url(#boing-mark-rim)" stroke-width="1.45"/>
-  <circle cx="32" cy="32" r="27.4" fill="none" stroke="rgba(0,0,0,0.4)" stroke-width="0.5"/>
-  <ellipse cx="23.5" cy="21.5" rx="13" ry="8.5" fill="rgba(255,255,255,0.05)"/>
-
+  <!-- Stone hex (family shell used on network / Express / Observer) -->
   <path
-    d="M 10.8 36.6 C 15.2 50.2, 25.2 54.8, 32.2 48.8 C 37.8 44.0, 44.6 27.8, 52.6 14.8"
+    d="M32 6 L54 18 L54 46 L32 58 L10 46 L10 18 Z"
+    fill="url(#boing-mark-slab)"
+    stroke="url(#boing-mark-frame)"
+    stroke-width="2.25"
+    stroke-linejoin="round"
+  />
+  <!-- Recovery arc: dip then spring upward (“always bounces back”) -->
+  <path
+    d="M13 45 C 19 45 21 40 25 33 C 29 26 33 21 38 19 C 43 17 47 20 49 24"
     fill="none"
-    stroke="url(#boing-mark-bounce)"
-    stroke-width="1.75"
+    stroke="url(#boing-mark-frame)"
+    stroke-width="2"
     stroke-linecap="round"
-    filter="url(#boing-mark-soft)"
+    stroke-linejoin="round"
+    opacity="0.55"
   />
-  <circle cx="32.2" cy="48.8" r="1.2" fill="#00e5ff" opacity="0.9" filter="url(#boing-mark-glow)"/>
-
-  <path
-    fill="url(#boing-mark-b)"
-    fill-rule="evenodd"
-    d="M20.2 16.8H32.4C40.2 16.8 44.2 20.8 44.2 26.2C44.2 29.7 42.0 31.7 38.9 32.3C43.4 33.1 46.6 36.2 46.6 41.1C46.6 45.9 42.3 47.6 34.0 47.6H21.6L18.2 44.0V19.6C18.2 17.8 19.2 16.8 20.2 16.8ZM24.4 21.0V28.6H32.4C36.2 28.6 37.8 27.2 37.8 24.8C37.8 22.4 36.2 21.0 32.4 21.0H24.4ZM24.4 35.4V43.4H33.8C39.0 43.4 40.6 41.7 40.6 39.4C40.6 37.1 39.0 35.4 33.8 35.4H24.4Z"
-  />
-
-  <circle cx="52.6" cy="14.8" r="3.2" fill="url(#boing-mark-orb)" filter="url(#boing-mark-glow)"/>
-  <path
-    fill="#f8fcff"
-    d="M52.6 12.05 L53.25 14.15 L55.35 14.8 L53.25 15.45 L52.6 17.55 L51.95 15.45 L49.85 14.8 L51.95 14.15 Z"
-  />
+  <circle cx="49" cy="24" r="7.25" fill="url(#boing-mark-orb)"/>
+  <circle cx="49" cy="24" r="7.25" fill="none" stroke="url(#boing-mark-frame)" stroke-width="1.2" opacity="0.45"/>
 </svg>

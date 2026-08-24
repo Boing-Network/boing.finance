@@ -799,7 +799,7 @@ code, pre, .monospace {
 }
 
 .boing-logo-svg {
-  border-radius: 50%;
+  display: block;
   filter: drop-shadow(0 0 10px color-mix(in srgb, var(--primary-color) 28%, transparent));
 }
 
