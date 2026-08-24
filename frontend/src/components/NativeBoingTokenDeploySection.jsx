@@ -380,6 +380,10 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
       {lastTx && !embedInWizard && (
         <div className="text-xs mt-2 space-y-1" style={{ color: 'var(--text-secondary)' }}>
           <p className="font-mono break-all">Submit ack: {lastTx}</p>
+          <p>
+            Explorer token index lists the contract after a block includes this tx. The DEX token directory stays empty
+            until a canonical factory is published.
+          </p>
           {lastDeployedAccount && (
             <a
               href={buildBoingExplorerAccountUrl(explorerBaseUrl, lastDeployedAccount)}
