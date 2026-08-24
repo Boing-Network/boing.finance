@@ -1,8 +1,18 @@
 # Boing.Finance Network Integration
 
+> 👋 **Everyday users:** pick a network in the app. Boing L1 needs Boing Express; EVM needs an EVM wallet; Solana needs a Solana wallet.  
+> 🛠️ **Developers:** prioritize by activity, degrade to aggregators when native contracts are not live. Boing L1: [native-dex.md](./native-dex.md).  
+> 🛰️ **Operators:** add a chain via [adding-a-network.md](./adding-a-network.md).
+
 How we onboard chains: **prioritize by user activity**, aim for full in-app capability, degrade to aggregators/external links when native contracts are not live. Add a chain: [adding-a-network.md](./adding-a-network.md). Boing L1: [native-dex.md](./native-dex.md). EVM DEX: [contracts.md](./contracts.md).
 
 *Last reviewed: August 2026. TVL / address-count figures below are indicative snapshots, not live dashboards.*
+
+```mermaid
+flowchart LR
+  Activity[User activity / TVL] --> Native[In-app native]
+  Native -->|missing contracts| Agg[Aggregator / external link]
+```
 
 ---
 

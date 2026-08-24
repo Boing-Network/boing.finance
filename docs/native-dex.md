@@ -1,5 +1,9 @@
 # Native DEX on Boing L1
 
+> 👋 **Everyday users:** on Boing L1, swap with [Boing Express](https://boing.express). The Swap tab uses the network default constant-product pool when the RPC publishes one.  
+> 🛠️ **Developers:** Solidity in `contracts/` is **EVM only**. Boing L1 uses Boing VM bytecode + `boing-sdk`.  
+> 🛰️ **Operators:** publish `end_user.canonical_native_*` on the node. Do not bake historical SDK hexes as live.
+
 How **boing.finance** treats **Boing Network L1** (chain id **6913**, Boing VM) versus **EVM** chains, what is shipped, and what still belongs to the network team.
 
 **Discovery RPCs, operator handoff, and client wiring:** [native-dex-discovery.md](./native-dex-discovery.md).  
@@ -7,6 +11,19 @@ How **boing.finance** treats **Boing Network L1** (chain id **6913**, Boing VM) 
 **Live EVM addresses:** `frontend/src/config/contracts.js` (see [contracts.md](./contracts.md)).
 
 *Last reviewed: August 2026.*
+
+```mermaid
+flowchart LR
+  subgraph evm [EVM]
+    Sol[contracts/ Solidity] --> Eth[ethers + MetaMask]
+  end
+  subgraph boing [Boing L1]
+    VM[Boing VM programs] --> SDK[boing-sdk]
+    SDK --> Express[Boing Express]
+  end
+  App[boing.finance] --> evm
+  App --> boing
+```
 
 ---
 

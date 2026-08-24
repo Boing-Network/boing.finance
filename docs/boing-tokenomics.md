@@ -1,5 +1,9 @@
 # boing.finance Tokenomics
 
+> 👋 **Everyday users:** most of this page is **planned** narrative economics, not live on-chain state. Protocol-level BOING on Boing L1 is documented in the network repo.  
+> 🛠️ **Developers:** addresses in [contract-registry.md](./contract-registry.md). Governance/staking contracts are **not deployed**.  
+> 🛰️ **Operators:** do not treat placeholder ERC-20 figures as mainnet Boing L1 supply.
+
 Narrative economics for **BOING**. On-chain addresses: [contract-registry.md](./contract-registry.md) and `frontend/src/config/contracts.js`. Governance/staking contracts are **not deployed** (placeholders). Most sections below remain **planned**. *Last reviewed: August 2026.*
 
 ## Token Overview

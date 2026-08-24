@@ -1,5 +1,9 @@
 # Solana integration
 
+> 👋 **Everyday users:** connect a Solana wallet in [boing.finance](https://boing.finance) for SPL deploy and Jupiter swaps.  
+> 🛠️ **Developers:** first-class non-EVM stack beside EVM and Boing L1.  
+> 🛰️ **Operators:** Jupiter API key is optional; see [configuration.md](./configuration.md).
+
 Solana is a first-class non-EVM stack beside EVM and Boing L1. Prioritization: [integration.md](./integration.md).
 
 *Last reviewed: August 2026.*

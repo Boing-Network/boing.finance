@@ -1,5 +1,9 @@
 # Smart Contract Deployment Registry
 
+> 👋 **Everyday users:** skip this historical address list.  
+> 🛠️ **Developers:** live source of truth is `frontend/src/config/contracts.js`.  
+> 🛰️ **Operators:** enablement steps in [contracts.md](./contracts.md).
+
 Historical deployment notes and explorer links. **The live source of truth for the app is** `frontend/src/config/contracts.js`. Enablement and operator steps: [contracts.md](./contracts.md).
 
 ## Overview

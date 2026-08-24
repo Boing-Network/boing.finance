@@ -1,5 +1,9 @@
 # Environment variables & configuration
 
+> 👋 **Everyday users:** skip this.  
+> 🛠️ **Developers:** canonical list is **`frontend/.env.example`**. This page is the production checklist.  
+> 🛰️ **Operators:** all `REACT_APP_*` values are public in the bundle — never put secrets there.
+
 Canonical list of frontend variables: **`frontend/.env.example`**. This page is the production checklist, not a duplicate catalog.
 
 *Last reviewed: August 2026.*

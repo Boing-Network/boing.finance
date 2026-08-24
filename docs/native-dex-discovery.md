@@ -1,5 +1,9 @@
 # Native DEX discovery (L1 RPC + indexer)
 
+> 👋 **Everyday users:** token and pool pickers should show what the chain actually has — not a private spreadsheet.  
+> 🛠️ **Developers:** prefer L1 RPCs (`boing_listDexPools` / `boing_listDexTokens`) for “what exists”; use an indexer only for enrichment.  
+> 🛰️ **Operators:** advertise methods in `boing_rpcSupportedMethods` / `boing_getRpcMethodCatalog`. Factory must be published on `end_user.canonical_native_dex_factory`.
+
 **Audience:** Boing Network core / RPC / indexer, and this repo’s frontend.  
 **Goal:** Token and pool discovery that any client can call **from chain state**, without trusting a single operator-hosted database as the source of truth.
 
@@ -7,6 +11,13 @@ Architecture overview: [native-dex.md](./native-dex.md).
 Env catalog: `frontend/.env.example`.
 
 *Last reviewed: August 2026.*
+
+```mermaid
+flowchart TB
+  L0[L0 Consensus / factory registry] --> L1[L1 JSON-RPC listDexPools / Tokens]
+  L1 --> App[boing.finance pickers]
+  L2[L2 Optional indexer] -.-> App
+```
 
 ---
 
