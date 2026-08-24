@@ -17,16 +17,16 @@ There is **no compiler switch** that turns the Solidity tree in `contracts/` int
 | Stack | Technology | Used on Boing L1 today? |
 |--------|------------|-------------------------|
 | **DEXFactoryV2, DEXRouter, LiquidityLocker, DEXPair** in `contracts/` | Solidity → EVM bytecode | **No.** Targets Ethereum-style VMs (Hardhat, Sepolia). |
-| **Native constant-product AMM** | Built-in Boing execution + `ContractCall` calldata | **Yes** — canonical testnet pool + swap / add liquidity in-app. |
-| **Factory / many pairs / router / locker on L1** | Boing VM programs (new bytecode), not `.sol` artifacts | **Partial.** Testnet module ids are embedded from `boing-sdk` when env is unset. Full Uniswap-class factory UX still depends on protocol + RPC coverage. |
+| **Native constant-product AMM** | Built-in Boing execution + `ContractCall` calldata | **Yes** — swap / add liquidity in-app when a pool id is published (`REACT_APP_BOING_NATIVE_AMM_POOL` or live `end_user.canonical_native_cp_pool`). Hosted Fly testnet currently has none. |
+| **Factory / many pairs / router / locker on L1** | Boing VM programs (new bytecode), not `.sol` artifacts | **Partial.** Module ids come from live RPC `end_user` hints or env; do not bake historical SDK hexes. Full Uniswap-class factory UX still depends on protocol + a published factory. |
 
 ### What the app does today
 
 - **EVM networks:** `ethers`, ABIs under `frontend/src/artifacts/`, addresses from `frontend/src/config/contracts.js`.
 - **Boing L1 (6913):** Boing RPC + Boing Express signing. `contracts.js` defines:
-  - `nativeConstantProductPool` — 32-byte pool `AccountId` (canonical testnet default from `boing-sdk` / `boingCanonicalTestnetPool.js`, overridable by `REACT_APP_BOING_NATIVE_AMM_POOL`).
-  - `nativeVm.dexFactory`, `swapRouter`, `ledgerRouterV2` / `V3`, `liquidityLocker`, plus LP vault / share token ids.
-  - When those ids are still `0x00…00` after env overrides, **`applyBoingNativeDexEmbeddedCanonical6913()`** fills **testnet canon from `boing-sdk`**. Env vars still win when set.
+  - `nativeConstantProductPool` — 32-byte pool `AccountId` from `REACT_APP_BOING_NATIVE_AMM_POOL` when set; otherwise `0x00…00` until the hosted chain publishes `end_user.canonical_native_cp_pool`.
+  - `nativeVm.dexFactory`, `swapRouter`, `ledgerRouterV2` / `V3`, `liquidityLocker`, plus LP vault / share token ids (env or live RPC; zeros when unpublished).
+  - Runtime defaults come from **`fetchNativeDexIntegrationDefaults`** (`boing-sdk`): live `boing_getNetworkInfo.end_user` plus env overrides. Historical SDK-embedded 6913 hexes are **not** treated as live.
 
 The **Swap** tab on 6913 targets the **network default** constant-product pool. Additional factory pairs (including multihop) are surfaced under **Pools** and **Smart route**.
 
@@ -70,7 +70,7 @@ Cross-repo: Boing VM programs must exist before this app can offer full factory/
 ### Phase 0 — shipped
 
 - [x] Native constant-product pool + **NativeAmmSwapPanel** (swap / add liquidity via Boing Express).
-- [x] `nativeVm.*` + env wiring in `contracts.js`; SDK-embedded testnet canon when env is unset.
+- [x] `nativeVm.*` + env wiring in `contracts.js`; live RPC / env only (no historical SDK hex as live).
 - [x] EVM path unchanged: Sepolia / mainnets use **DEXFactoryV2** via ethers.
 
 ### Phase P0 — reliability (shipped in this repo)
@@ -108,7 +108,7 @@ Feature detection: `getFeatureSupport().nativeVmDex` in `frontend/src/config/fea
 
 | Priority | Item | Status |
 |----------|------|--------|
-| **P0** | Canonical pool / factory ids vs ops docs and `boing_getNetworkInfo` | **Done** — `frontend/env/github-build.*.env`, `boingCanonicalTestnetPool.js`, CI `verify-canonical-testnet-pool-embed.mjs`. Re-verify when ops rotates canon. |
+| **P0** | Canonical pool / factory ids vs ops docs and `boing_getNetworkInfo` | **Hosted Fly ledger (2026-08-24):** `end_user` is null — do not bake historical `0x7247ddc3…`. Re-set `frontend/env/github-build.*.env` after ops bootstraps DEX. |
 | **P1** | `fetchNativeDexIntegrationDefaults` / merge | **Wired** — context + `buildNativeDexOverridesFromEnv()`. |
 | **P1** | `nativeDexRouting` | **Wired** — `hydrateCpPoolVenuesFromRpc` + `findBestCpRoute`; optional register-log merge when `REACT_APP_BOING_NATIVE_DEX_REGISTER_LOG_FROM_BLOCK` is set. |
 | **P2** | `providerSupportsBoingNativeRpc` | **Wired** — `WalletContext` blocks connect on 6913 when the injected provider fails the SDK check (steer to Boing Express). |

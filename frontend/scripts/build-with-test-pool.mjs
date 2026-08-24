@@ -2,8 +2,8 @@
  * Ensures REACT_APP_BOING_NATIVE_AMM_POOL is set for vite build (Playwright / CI).
  * Nested `npm run build` on some shells does not inherit cross-env from the parent line.
  *
- * Default below matches public testnet canonical pool in src/config/boingCanonicalTestnetPool.js so E2E
- * builds align with chain 6913 + testnet-rpc; override env for isolated nodes.
+ * Playwright preview needs a non-empty pool env so the 6913 UI compiles. The fallback hex is a
+ * historical fixture (previous tunnel ledger), not a live Fly testnet id — override for isolated nodes.
  */
 import { spawnSync } from 'node:child_process';
 import process from 'node:process';
