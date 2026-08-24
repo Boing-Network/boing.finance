@@ -96,7 +96,8 @@ export function showBoingLaunchDeploySuccessToast(result) {
         </div>
         {celebration ? (
           <p className="text-xs opacity-90" style={{ color: 'var(--text-secondary)' }}>
-            See the celebration dialog for transaction details and explorer links.
+            Mempool accepted the tx. boing.observer lists it on the token index after a block includes it. The DEX token
+            directory stays empty until a canonical factory is published.
           </p>
         ) : deployed ? (
           <a
@@ -109,18 +110,24 @@ export function showBoingLaunchDeploySuccessToast(result) {
             View contract in explorer
           </a>
         ) : txId ? (
-          <a
-            href={buildBoingExplorerTxUrl(base, txId)}
-            className="underline block"
-            style={{ color: 'var(--accent-cyan, #38bdf8)' }}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Track transaction in explorer
-          </a>
+          <>
+            <a
+              href={buildBoingExplorerTxUrl(base, txId)}
+              className="underline block"
+              style={{ color: 'var(--accent-cyan, #38bdf8)' }}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Track transaction in explorer
+            </a>
+            <p className="text-xs opacity-90 mt-1" style={{ color: 'var(--text-secondary)' }}>
+              Token index updates after inclusion. DEX directory needs a published factory.
+            </p>
+          </>
         ) : (
           <p className="text-xs opacity-90" style={{ color: 'var(--text-secondary)' }}>
-            Mempool accepted the tx. Open Native VM or explorer if links are unavailable.
+            Mempool accepted the tx. Open Native VM or explorer if links are unavailable. The token appears on
+            boing.observer after a block includes it.
           </p>
         )}
       </div>
