@@ -1,6 +1,6 @@
 /**
  * Canonical brand asset paths (public/). Keep in sync with scripts/generate-brand-assets.mjs.
- * Default raster accent matches trade theme (#00e5ff); in-app Logo.jsx uses CSS variables.
+ * Family hex mark uses the network purple→cyan gradient; share tiles sit on #06080c.
  */
 
 const DEFAULT_SITE_ORIGIN = 'https://boing.finance';
