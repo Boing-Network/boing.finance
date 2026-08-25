@@ -87,7 +87,9 @@ export default function BoingNativeL1Section() {
         </h3>
         <p className="mb-3" style={{ color: 'var(--text-secondary)' }}>
           On Boing testnet with Boing Express, the <strong>Review</strong> step can <strong>Deploy native collection</strong> using
-          the same QA + Express flow as tokens. The wizard still builds ERC-721-style metadata for exports; on-chain collection
+          the same QA + Express flow as tokens. Upload an image file or paste a public image URL; the wizard stores that URL in
+          collection JSON (R2/IPFS) and commits Blake3 <code className="text-xs">description_hash</code> on deploy. After inclusion
+          it also attempts reference <code className="text-xs">set_metadata_hash</code> for token 1. On-chain collection
           bytecode follows{' '}
           <a href={BOING_NETWORK_BOING_CANONICAL_DEPLOY_ARTIFACTS_URL} target="_blank" rel="noopener noreferrer" className={linkCls}>
             BOING-CANONICAL-DEPLOY-ARTIFACTS.md

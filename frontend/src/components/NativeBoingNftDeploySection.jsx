@@ -10,14 +10,17 @@ import {
   getBundledNativeNftCollectionBytecodeHex,
   preflightBoingLaunchWizardByKind,
 } from '../services/boingNativeLaunchWizardDeploy';
+import { commitReferenceNftMetadataHash } from '../services/boingNftMetadataCommit';
 import { BOING_QA_PURPOSE_OPTIONS, isValidBoingQaPurpose } from '../config/boingQa';
 import { tryParseEvenLengthDeployBytecodeHex } from '../utils/boingDeployBytecodeHex';
+import { isPublicAssetUri } from '../utils/nftCollectionMetadata';
 import {
   showBoingContractIncludedToast,
   showBoingLaunchDeploySuccessToast,
 } from '../utils/boingDeploySuccessToast';
 import { scheduleBoingDeployReceiptFollowup } from '../services/boingDeployReceiptFollowup';
 import { buildBoingExplorerAccountUrl, buildBoingExplorerTxUrl } from '../config/boingExplorerUrls';
+import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
 
 const DEFAULT_NFT_PURPOSE = 'nft';
 
@@ -25,7 +28,16 @@ const DEFAULT_NFT_PURPOSE = 'nft';
  * Native Boing NFT collection deploy for Create NFT review step (Boing Express + testnet).
  */
 const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySection(
-  { collectionName, collectionSymbol, embedInWizard = false, onDeployGateChange },
+  {
+    collectionName,
+    collectionSymbol,
+    embedInWizard = false,
+    onDeployGateChange,
+    metadataUri = '',
+    committedDescriptionHash = '',
+    coverImageUri = '',
+    onEnsureMetadataPublished,
+  },
   ref
 ) {
   const { chainId, walletType, isConnected, getWalletProvider } = useWallet();
@@ -43,18 +55,23 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
   const [lastBoingTxId, setLastBoingTxId] = useState(null);
   const [lastDeployedAccount, setLastDeployedAccount] = useState(null);
   const [qaPoolAcknowledged, setQaPoolAcknowledged] = useState(false);
+  const [publishBusy, setPublishBusy] = useState(false);
 
   const effectiveBytecode = useMemo(
     () => computeEffectiveNativeDeployBytecode(customBytecode, bundledBytecode),
     [customBytecode, bundledBytecode]
   );
 
+  const effectiveDescriptionHash = (descriptionHash.trim() || committedDescriptionHash || '').trim();
+  const hasImage = isPublicAssetUri(coverImageUri);
+  const hasMetadataUri = isPublicAssetUri(metadataUri);
+
   const deployBlocked =
     !effectiveBytecode || (qaResult?.result === 'unsure' && !qaPoolAcknowledged);
 
   useEffect(() => {
     setQaPoolAcknowledged(false);
-  }, [effectiveBytecode, descriptionHash, purpose]);
+  }, [effectiveBytecode, effectiveDescriptionHash, purpose]);
 
   useEffect(() => {
     onDeployGateChange?.({ canSubmit: !deployBlocked && isConnected });
@@ -62,6 +79,36 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
 
   const envHint =
     'Set REACT_APP_BOING_REFERENCE_NFT_COLLECTION_TEMPLATE_BYTECODE_HEX (or BOING_/VITE_ variant), or paste hex under Advanced.';
+
+  const resolvePublished = useCallback(async () => {
+    if (hasImage && hasMetadataUri && effectiveDescriptionHash) {
+      return {
+        metadataUri,
+        descriptionHash: effectiveDescriptionHash,
+        coverImageUri,
+      };
+    }
+    if (typeof onEnsureMetadataPublished !== 'function') {
+      throw new Error('Upload an image or paste an image URL, then publish collection metadata before deploy.');
+    }
+    setPublishBusy(true);
+    try {
+      const published = await onEnsureMetadataPublished();
+      if (!published?.descriptionHash || !isPublicAssetUri(published.coverImageUri || published.image)) {
+        throw new Error('Collection metadata must include a public image URL.');
+      }
+      return published;
+    } finally {
+      setPublishBusy(false);
+    }
+  }, [
+    coverImageUri,
+    effectiveDescriptionHash,
+    hasImage,
+    hasMetadataUri,
+    metadataUri,
+    onEnsureMetadataPublished,
+  ]);
 
   const runQa = async () => {
     const bc = effectiveBytecode;
@@ -77,11 +124,16 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
     setQaResult(null);
     setQaPoolAcknowledged(false);
     try {
+      let hash = effectiveDescriptionHash;
+      if (!hash) {
+        const published = await resolvePublished();
+        hash = published.descriptionHash;
+      }
       const { qa } = await preflightBoingLaunchWizardByKind('nft', {
         collectionName,
         collectionSymbol,
         customBytecode,
-        descriptionHash,
+        descriptionHash: hash,
         purpose,
       });
       setQaResult(qa);
@@ -96,13 +148,21 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
   };
 
   const runDeployInternal = useCallback(async () => {
+    let published;
+    try {
+      published = await resolvePublished();
+    } catch (e) {
+      toast.error(e?.message || 'Could not publish collection metadata.');
+      return null;
+    }
+    const hashForDeploy = descriptionHash.trim() || published.descriptionHash;
     const result = await executeBoingLaunchWizardDeploy({
       kind: 'nft',
       getWalletProvider,
       collectionName,
       collectionSymbol,
       customBytecode,
-      descriptionHash,
+      descriptionHash: hashForDeploy,
       qaPoolAcknowledged,
       purpose,
     });
@@ -125,12 +185,29 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
           { label: 'Collection name', value: String(collectionName || '').trim() || '—' },
           { label: 'Symbol', value: String(collectionSymbol || '').trim().toUpperCase() || '—' },
           { label: 'QA purpose', value: String(purpose || 'nft') },
+          { label: 'Image', value: published.coverImageUri || published.image || '—' },
+          { label: 'Metadata', value: published.metadataUri || '—' },
         ],
       },
     });
     scheduleBoingDeployReceiptFollowup(result.boingTxIdHex, (id) => {
       setLastDeployedAccount(id);
       showBoingContractIncludedToast(id, explorerBaseUrl);
+      void (async () => {
+        try {
+          await commitReferenceNftMetadataHash({
+            getWalletProvider,
+            collectionAccountId: id,
+            metadataHashHex32: hashForDeploy,
+          });
+          toast.success('Collection metadata hash bound on-chain (token 1).');
+        } catch (e) {
+          toast(
+            `Collection deployed. Token metadata slot was not updated yet: ${formatBoingExpressRpcError(e)}`,
+            { icon: '⚠️' }
+          );
+        }
+      })();
     });
     return result.txHash;
   }, [
@@ -142,6 +219,7 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
     purpose,
     qaPoolAcknowledged,
     explorerBaseUrl,
+    resolvePublished,
   ]);
 
   useImperativeHandle(
@@ -176,9 +254,8 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
         Deploy native collection (Boing VM)
       </h3>
       <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-        Deploys a collection contract from this wizard&apos;s <strong>name</strong> and <strong>symbol</strong> (
-        <code className="text-[10px]">contract_deploy_meta</code> + QA). It does not mint token IDs or bind the exported
-        JSON. Export metadata separately for a later minter.{' '}
+        Uploads collection metadata (image URL + token JSON) to network storage, then deploys with that
+        document&apos;s <code className="text-[10px]">description_hash</code>. This does not mint token IDs.{' '}
         <Link to="/docs?section=boing-l1" className="text-green-400 underline text-sm">
           Docs: Boing L1 &amp; Express
         </Link>
@@ -187,6 +264,41 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
           Native VM tools
         </Link>
       </p>
+
+      <div
+        className="text-xs rounded-lg px-3 py-2 mb-3 border space-y-1"
+        style={{
+          borderColor: hasImage ? 'rgba(34, 197, 94, 0.45)' : 'rgba(251, 191, 36, 0.45)',
+          backgroundColor: hasImage ? 'rgba(34, 197, 94, 0.08)' : 'transparent',
+          color: 'var(--text-secondary)',
+        }}
+      >
+        <p>
+          <strong style={{ color: 'var(--text-primary)' }}>Image:</strong>{' '}
+          {hasImage ? (
+            <a href={coverImageUri} target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline break-all">
+              {coverImageUri}
+            </a>
+          ) : (
+            'Upload a file or paste a public image URL so metadata can be committed.'
+          )}
+        </p>
+        <p>
+          <strong style={{ color: 'var(--text-primary)' }}>Metadata JSON:</strong>{' '}
+          {hasMetadataUri ? (
+            <a href={metadataUri} target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline break-all">
+              {metadataUri}
+            </a>
+          ) : (
+            'Will upload on deploy (or when you publish from Review).'
+          )}
+        </p>
+        {effectiveDescriptionHash ? (
+          <p className="font-mono break-all">
+            <strong style={{ color: 'var(--text-primary)' }}>description_hash:</strong> {effectiveDescriptionHash}
+          </p>
+        ) : null}
+      </div>
 
       {hasBundled ? (
         <p
@@ -234,11 +346,11 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
         <button
           type="button"
           onClick={runDeployInternal}
-          disabled={deployBlocked}
+          disabled={deployBlocked || publishBusy}
           className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
           style={{ backgroundColor: 'var(--finance-green-mid)' }}
         >
-          {embedInWizard ? 'Deploy native collection' : 'Deploy collection'}
+          {publishBusy ? 'Publishing metadata…' : embedInWizard ? 'Deploy native collection' : 'Deploy collection'}
         </button>
       </div>
 
@@ -302,13 +414,13 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
           </div>
           <div>
             <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
-              description_hash (optional, 32-byte hex)
+              description_hash override (optional, 32-byte hex)
             </label>
             <input
               type="text"
               value={descriptionHash}
               onChange={(e) => setDescriptionHash(e.target.value)}
-              placeholder="0x… or leave empty"
+              placeholder={committedDescriptionHash || 'Leave empty to use the uploaded metadata hash'}
               className="w-full text-sm p-2 rounded-lg border font-mono"
               style={{
                 backgroundColor: 'var(--bg-secondary)',
@@ -320,11 +432,11 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
           <button
             type="button"
             onClick={runQa}
-            disabled={qaBusy || !effectiveBytecode}
+            disabled={qaBusy || publishBusy || !effectiveBytecode}
             className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
             style={{ backgroundColor: 'var(--finance-primary)' }}
           >
-            {qaBusy ? 'Running QA…' : 'Run QA check'}
+            {qaBusy || publishBusy ? 'Running…' : 'Run QA check'}
           </button>
           {qaResult && (
             <pre
