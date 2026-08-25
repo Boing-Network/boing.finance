@@ -47,7 +47,6 @@ const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveL
     setIsLoading(true);
     try {
       await onCollectFees(pool.address, pool.chainId);
-      toast.success('Fees collected successfully!');
     } catch (error) {
       toast.error('Failed to collect fees');
     } finally {
@@ -59,7 +58,6 @@ const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveL
     setIsLoading(true);
     try {
       await onRemoveLiquidity(pool.address, pool.lpBalance, pool.chainId);
-      toast.success('Liquidity removed successfully!');
     } catch (error) {
       toast.error('Failed to remove liquidity');
     } finally {
@@ -225,7 +223,6 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
     setIsLoading(true);
     try {
       await onAddLiquidity(pool.address, token0Amount, token1Amount, pool.chainId);
-      toast.success('Liquidity added successfully!');
       onLiquiditySuccess?.();
       setToken0Amount('');
       setToken1Amount('');
@@ -241,7 +238,6 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
     setIsLoading(true);
     try {
       await onRemoveLiquidity(pool.address, removePercentage, pool.chainId);
-      toast.success('Liquidity removed successfully!');
       setRemovePercentage(25);
       setActiveTab('details');
     } catch (error) {
@@ -255,7 +251,6 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
     setIsLoading(true);
     try {
       await onCollectFees(pool.address, pool.chainId);
-      toast.success('Fees collected successfully!');
     } catch (error) {
       toast.error('Failed to collect fees: ' + error.message);
     } finally {
@@ -560,7 +555,6 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
     setIsLoading(true);
     try {
       await onCollectFees(poolAddress, chainId);
-      toast.success('Fees collected successfully!');
     } catch (error) {
       toast.error('Failed to collect fees');
     } finally {
@@ -574,7 +568,6 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
     setIsLoading(true);
     try {
       await onRemoveLiquidity(poolAddress, lpAmount, chainId);
-      toast.success('Liquidity removed successfully!');
     } catch (error) {
       toast.error('Failed to remove liquidity');
     } finally {

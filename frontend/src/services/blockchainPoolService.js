@@ -13,8 +13,8 @@ const DEX_FACTORY_ABI = [
   'function allPairsLength() external view returns (uint256)',
   'function getPair(address, address) external view returns (address)',
   'function createPair(address, address) external returns (address)',
-  'function createPairWithLiquidity(address, address, uint256, uint256, uint256, address) external returns (address)',
-  'function createPairWithLiquidityPermit(address, address, uint256, uint256, uint256, address, uint256, uint8, bytes32, bytes32) external returns (address)',
+  'function createPairWithLiquidity(address, address, uint256, uint256, bool, uint256, string) external returns (address, uint256)',
+  'function createPairWithLiquidityPermit(address, address, uint256, uint256, bool, uint256, string, uint256, uint8, bytes32, bytes32, uint256, uint8, bytes32, bytes32) external returns (address, uint256)',
   'function feeTo() external view returns (address)',
   'function feeToSetter() external view returns (address)',
   'function liquidityLocker() external view returns (address)'

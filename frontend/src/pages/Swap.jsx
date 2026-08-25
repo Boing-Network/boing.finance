@@ -29,6 +29,7 @@ import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrat
 import { fetchTradeableEvmTokenAddressesFromDexFactory } from '../services/evmDexTradeableTokens';
 import { tryAccruePoints } from '../utils/tryAccruePoints';
 import { getEvmAggregatorQuote, sendAggregatorSwap, isNativeSwapSymbol } from '../services/aggregatorSwapService';
+import { quoteExactIn } from '../services/evmAmmPairActions';
 
 const SwapTokenPriceChart = lazy(() => import('../components/SwapTokenPriceChart'));
 
@@ -880,10 +881,16 @@ const Swap = () => {
 
       // Get expected output amount
       devLog('handleSwap: Calling getAmountsOut to calculate expected output...');
-      const amountsOut = await routerContract.getAmountsOut(amountInWei, path);
-      devLog('handleSwap: getAmountsOut result:', amountsOut);
-      
-      const expectedAmountOut = amountsOut[1];
+      let expectedAmountOut;
+      try {
+        const quoted = await quoteExactIn(chainId, walletProvider, path[0], path[1], amountInWei);
+        expectedAmountOut = quoted.amountOut;
+        devLog('handleSwap: pair-oriented quote:', expectedAmountOut.toString());
+      } catch (quoteErr) {
+        const amountsOut = await routerContract.getAmountsOut(amountInWei, path);
+        expectedAmountOut = amountsOut[1];
+        devLog('handleSwap: router getAmountsOut fallback:', amountsOut);
+      }
       // eslint-disable-next-line no-undef
       const minAmountOut = expectedAmountOut * BigInt(Math.floor((1 - slippageTolerance) * 1000)) / BigInt(1000);
 
@@ -1482,8 +1489,15 @@ const Swap = () => {
         return;
       }
       
-      const amountsOut = await routerContract.getAmountsOut(amountInWei, path);
-      devLog('calculateExpectedOutput: getAmountsOut result:', amountsOut);
+      let amountsOut;
+      try {
+        const quoted = await quoteExactIn(chainId, walletProvider, path[0], path[1], amountInWei);
+        amountsOut = [amountInWei, quoted.amountOut];
+        devLog('calculateExpectedOutput: pair-oriented quote', quoted.amountOut.toString());
+      } catch (quoteErr) {
+        amountsOut = await routerContract.getAmountsOut(amountInWei, path);
+        devLog('calculateExpectedOutput: router getAmountsOut fallback', amountsOut);
+      }
       
       // Check if the result is valid
       if (!amountsOut || amountsOut.length < 2) {

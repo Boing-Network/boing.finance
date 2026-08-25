@@ -689,7 +689,7 @@ export default function CreateNFT() {
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-6">
             <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Create NFT</h1>
-            <p className="text-theme-tertiary">Upload images from your computer, add metadata, and mint. Supports single, bulk, and dynamic collections up to 10,000.</p>
+            <p className="text-theme-tertiary">Prepare ERC-721-style metadata and, on Boing testnet with Express, deploy a collection contract. On-chain mint of individual tokens is not available on EVM yet. Solana can mint an SPL NFT.</p>
           </div>
 
           {/* Mode: Standard vs Dynamic collection */}
@@ -781,14 +781,17 @@ export default function CreateNFT() {
                       >
                         {DYNAMIC_SIZES.map((s) => (
                           <option key={s.value} value={s.value}>
-                            {s.label} — Service fee: {formatNftServiceFeeLine(network?.chainId, s.value, nativeSymbol)}
+                            {s.label} — future mint reference: {formatNftServiceFeeLine(network?.chainId, s.value, nativeSymbol)}
                           </option>
                         ))}
                       </select>
                     </div>
                     <div className="p-4 rounded-lg bg-cyan-900/20 border border-cyan-500/30">
-                      <p className="text-cyan-200 font-medium">Platform service fee: {dynamicFeeDisplayLine}</p>
-                      <p className="text-cyan-200/80 text-sm mt-1">Charged when you deploy or mint the collection. Fee supports infrastructure and ongoing development.</p>
+                      <p className="text-cyan-200 font-medium">Reference size: {dynamicSize.toLocaleString()} tokens</p>
+                      <p className="text-cyan-200/80 text-sm mt-1">
+                        This wizard exports metadata only. No platform fee is charged here. A future mint contract may
+                        quote a fee separately (reference: {dynamicFeeDisplayLine}).
+                      </p>
                     </div>
                     <div>
                       <label htmlFor="nft-dynamic-description" className="block text-sm font-medium text-gray-300 mb-2">Description (optional)</label>
@@ -916,8 +919,8 @@ export default function CreateNFT() {
                         </div>
                         <p className="text-gray-400 text-sm">
                           {isBoingNativeNftWizard
-                            ? 'Use Deploy native collection when bytecode is configured. Details: '
-                            : `Service fee (${dynamicFeeDisplayLine}) will be charged when you deploy this collection. Export the JSON for use with minting platforms or our contract when available.`}
+                            ? 'Deploy native collection publishes the contract only — it does not mint these tokens or upload art. Details: '
+                            : 'Export the JSON for an external minter. This page does not deploy an EVM collection or charge a fee.'}
                           {isBoingNativeNftWizard && (
                             <Link to="/docs?section=boing-l1" className="text-cyan-400 underline">
                               Documentation → Boing L1 &amp; Express
@@ -1192,9 +1195,9 @@ export default function CreateNFT() {
                       type="button"
                       disabled
                       className="px-4 py-2 rounded-lg bg-cyan-600/50 text-gray-400 font-medium cursor-not-allowed"
-                      title="Minting available when Boing NFT contracts launch"
+                      title="No EVM NFT factory is deployed. Export metadata or use Boing native collection deploy."
                     >
-                      Mint on-chain (Coming soon)
+                      Mint tokens (not available on EVM)
                     </button>
                   )}
                 </div>
@@ -1225,7 +1228,7 @@ export default function CreateNFT() {
                       .
                     </>
                   ) : (
-                    'Metadata follows ERC-721 / OpenSea standards. Export the JSON to use with other minting tools; on-chain minting will be enabled when Boing NFT contracts launch.'
+                    'Metadata follows ERC-721 / OpenSea JSON. Export it for another minter. This app does not mint EVM tokens yet and does not charge the reference fee shown in Dynamic mode.'
                   )}
                 </p>
               </div>

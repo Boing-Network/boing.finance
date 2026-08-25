@@ -4,11 +4,14 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IDEXPair.sol";
 import "./interfaces/ILiquidityLocker.sol";
 import "./DEXPair.sol";
 
 contract DEXFactoryV2 is IDEXFactory, Ownable {
+    using SafeERC20 for IERC20;
+
     error IdenticalTokens();
     error ZeroAddress();
     error PairExists();
@@ -103,8 +106,8 @@ contract DEXFactoryV2 is IDEXFactory, Ownable {
         if (amountA == 0 || amountB == 0) revert InvalidAmounts();
         
         pair = _createPair(tokenA, tokenB);
-        if (!IERC20(tokenA).transferFrom(msg.sender, pair, amountA)) revert TransferFailed();
-        if (!IERC20(tokenB).transferFrom(msg.sender, pair, amountB)) revert TransferFailed();
+        IERC20(tokenA).safeTransferFrom(msg.sender, pair, amountA);
+        IERC20(tokenB).safeTransferFrom(msg.sender, pair, amountB);
         
         liquidity = shouldLockLiquidity
             ? _mintAndLock(pair, msg.sender, lockDuration, lockDescription)
@@ -131,7 +134,7 @@ contract DEXFactoryV2 is IDEXFactory, Ownable {
         uint256 lockFee = (liquidity * 10) / 10000;
         uint256 lockAmount = liquidity - lockFee;
 
-        if (!IERC20(pair).approve(liquidityLocker, lockAmount)) revert ApproveFailed();
+        IERC20(pair).forceApprove(liquidityLocker, lockAmount);
         ILiquidityLocker(liquidityLocker).lockLiquidity(
             pair, user, lockAmount, lockDuration, lockDescription, lockFee
         );
@@ -210,8 +213,8 @@ contract DEXFactoryV2 is IDEXFactory, Ownable {
             }
         }
 
-        if (!IERC20(tokenA).transferFrom(msg.sender, pair, amountA)) revert TransferFailed();
-        if (!IERC20(tokenB).transferFrom(msg.sender, pair, amountB)) revert TransferFailed();
+        IERC20(tokenA).safeTransferFrom(msg.sender, pair, amountA);
+        IERC20(tokenB).safeTransferFrom(msg.sender, pair, amountB);
 
         liquidity = shouldLockLiquidity
             ? _mintAndLock(pair, msg.sender, lockDuration, lockDescription)
@@ -241,33 +244,31 @@ contract DEXFactoryV2 is IDEXFactory, Ownable {
         uint256 lockFee
     ) external {
         if (liquidityLocker == address(0)) revert NoLocker();
-        if (!IERC20(pair).transferFrom(msg.sender, address(this), amount)) revert TransferFailed();
-        if (!IERC20(pair).approve(liquidityLocker, amount)) revert ApproveFailed();
+        IERC20(pair).safeTransferFrom(msg.sender, address(this), amount);
+        IERC20(pair).forceApprove(liquidityLocker, amount);
         ILiquidityLocker(liquidityLocker).lockLiquidity(pair, user, amount, lockDuration, description, lockFee);
     }
     
     function lockInitialLiquidity(
         address pair,
-        address user,
+        uint256 amount,
         uint256 lockDuration,
         string memory description
     ) external {
         if (liquidityLocker == address(0)) revert NoLocker();
         if (pair == address(0)) revert InvalidPair();
+        if (amount == 0) revert NoLpBalance();
 
-        uint256 lpBalance = IERC20(pair).balanceOf(user);
-        if (lpBalance == 0) revert NoLpBalance();
+        uint256 lockFee = (amount * 10) / 10000;
+        uint256 lockAmount = amount - lockFee;
 
-        uint256 lockFee = (lpBalance * 10) / 10000;
-        uint256 lockAmount = lpBalance - lockFee;
-
-        if (!IERC20(pair).transferFrom(user, address(this), lpBalance)) revert TransferFailed();
-        if (!IERC20(pair).approve(liquidityLocker, lockAmount)) revert ApproveFailed();
+        IERC20(pair).safeTransferFrom(msg.sender, address(this), amount);
+        IERC20(pair).forceApprove(liquidityLocker, lockAmount);
         ILiquidityLocker(liquidityLocker).lockLiquidity(
-            pair, user, lockAmount, lockDuration, description, lockFee
+            pair, msg.sender, lockAmount, lockDuration, description, lockFee
         );
 
-        emit InitialLiquidityLocked(pair, user, lockAmount, lockDuration);
+        emit InitialLiquidityLocked(pair, msg.sender, lockAmount, lockDuration);
     }
     
     function unlockLiquidity(address pair, uint256 lockIndex, address user) external {

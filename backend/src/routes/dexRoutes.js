@@ -195,37 +195,17 @@ export function createDEXRoutes() {
 
   // Liquidity routes
   app.post('/liquidity/add', async (c) => {
-    try {
-      const liquidityData = await c.req.json();
-      
-      if (!liquidityData.pairAddress || !liquidityData.provider || !liquidityData.amount0 || !liquidityData.amount1) {
-        return c.json({ success: false, error: 'Missing required liquidity data' }, 400);
-      }
-      
-      const db = c.get('db');
-      const liquidityService = new LiquidityService(db);
-      const result = await liquidityService.addLiquidity(liquidityData);
-      return c.json({ success: true, data: result });
-    } catch (error) {
-      return c.json({ success: false, error: error.message }, 500);
-    }
+    return c.json({
+      success: false,
+      error: 'Liquidity is recorded on-chain only. This API does not mint LP or change reserves.',
+    }, 405);
   });
 
   app.post('/liquidity/remove', async (c) => {
-    try {
-      const liquidityData = await c.req.json();
-      
-      if (!liquidityData.pairAddress || !liquidityData.provider || !liquidityData.liquidityTokens) {
-        return c.json({ success: false, error: 'Missing required liquidity data' }, 400);
-      }
-      
-      const db = c.get('db');
-      const liquidityService = new LiquidityService(db);
-      const result = await liquidityService.removeLiquidity(liquidityData);
-      return c.json({ success: true, data: result });
-    } catch (error) {
-      return c.json({ success: false, error: error.message }, 500);
-    }
+    return c.json({
+      success: false,
+      error: 'Liquidity is recorded on-chain only. This API does not burn LP or change reserves.',
+    }, 405);
   });
 
   app.get('/liquidity/positions/:provider', async (c) => {
@@ -289,20 +269,10 @@ export function createDEXRoutes() {
 
   // Collect fees from pool
   app.post('/liquidity/collect-fees', async (c) => {
-    try {
-      const { poolAddress, chainId } = await c.req.json();
-      
-      if (!poolAddress) {
-        return c.json({ success: false, error: 'Pool address is required' }, 400);
-      }
-      
-      const db = c.get('db');
-      const liquidityService = new LiquidityService(db);
-      const result = await liquidityService.collectFees(poolAddress, chainId);
-      return c.json({ success: true, data: result });
-    } catch (error) {
-      return c.json({ success: false, error: error.message }, 500);
-    }
+    return c.json({
+      success: false,
+      error: 'Constant-product LP fees accrue in the pool share. Remove liquidity to realize them — there is no separate collect.',
+    }, 405);
   });
 
   app.get('/liquidity/pool/:address', async (c) => {
