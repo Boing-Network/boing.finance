@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { uploadToIPFS } from '../utils/ipfsUpload';
+import { publicAssetUri } from '../utils/nftCollectionMetadata';
 import { toast } from 'react-hot-toast';
 
 const LogoUpload = ({ onLogoUpload, onLogoChange, currentLogo, disabled = false }) => {
@@ -52,11 +53,15 @@ const LogoUpload = ({ onLogoUpload, onLogoChange, currentLogo, disabled = false 
       setUploadStatus('Processing image...');
       
       const uploadResult = await uploadToIPFS(file);
-      
+      const publicUrl = publicAssetUri(uploadResult);
+      if (!publicUrl) {
+        throw new Error('Logo upload returned no public URL.');
+      }
+
       console.log('Upload result:', uploadResult);
       
-      // Update uploaded URL
-      setUploadedUrl(uploadResult.url);
+      // Update uploaded URL (keep https R2 links; only raw CIDs become ipfs://)
+      setUploadedUrl(publicUrl);
       
       // Set upload status based on result
       if (uploadResult.isSimulated) {
@@ -69,10 +74,10 @@ const LogoUpload = ({ onLogoUpload, onLogoChange, currentLogo, disabled = false 
       
       // Call parent handlers
       if (onLogoUpload) {
-        onLogoUpload(uploadResult);
+        onLogoUpload({ ...uploadResult, url: publicUrl });
       }
       if (onLogoChange) {
-        onLogoChange(uploadResult.url);
+        onLogoChange(publicUrl);
       }
       
     } catch (error) {

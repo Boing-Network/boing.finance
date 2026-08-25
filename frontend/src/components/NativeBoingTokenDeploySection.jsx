@@ -12,6 +12,7 @@ import {
 } from '../services/boingNativeTokenDeploy';
 import { BOING_QA_PURPOSE_TOKEN, isValidBoingQaPurpose } from '../config/boingQa';
 import { tryParseEvenLengthDeployBytecodeHex } from '../utils/boingDeployBytecodeHex';
+import { isPublicAssetUri } from '../utils/nftCollectionMetadata';
 import {
   showBoingContractIncludedToast,
   showBoingLaunchDeploySuccessToast,
@@ -33,6 +34,10 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
     initialSupply = '',
     tokenDecimals = 18,
     onDeployGateChange,
+    metadataUri = '',
+    committedDescriptionHash = '',
+    logoUri = '',
+    onEnsureMetadataPublished,
   },
   ref
 ) {
@@ -51,11 +56,16 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
   const [lastBoingTxId, setLastBoingTxId] = useState(null);
   const [lastDeployedAccount, setLastDeployedAccount] = useState(null);
   const [qaPoolAcknowledged, setQaPoolAcknowledged] = useState(false);
+  const [publishBusy, setPublishBusy] = useState(false);
 
   const effectiveBytecode = useMemo(
     () => computeEffectiveNativeDeployBytecode(customBytecode, bundledBytecode),
     [customBytecode, bundledBytecode]
   );
+
+  const effectiveDescriptionHash = (descriptionHash.trim() || committedDescriptionHash || '').trim();
+  const hasLogo = isPublicAssetUri(logoUri);
+  const hasMetadataUri = isPublicAssetUri(metadataUri);
 
   const deployBlocked =
     !effectiveBytecode || (qaResult?.result === 'unsure' && !qaPoolAcknowledged);
@@ -78,7 +88,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
 
   useEffect(() => {
     setQaPoolAcknowledged(false);
-  }, [effectiveBytecode, descriptionHash, nativeTokenSecurity]);
+  }, [effectiveBytecode, effectiveDescriptionHash, nativeTokenSecurity]);
 
   useEffect(() => {
     onDeployGateChange?.({
@@ -89,6 +99,35 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
 
   const envHint =
     'Set REACT_APP_BOING_REFERENCE_FUNGIBLE_TEMPLATE_BYTECODE_HEX (or legacy REACT_APP_BOING_REFERENCE_TOKEN_BYTECODE), or paste hex under Advanced.';
+
+  const resolvePublished = useCallback(async () => {
+    if (hasMetadataUri && effectiveDescriptionHash) {
+      return {
+        metadataUri,
+        descriptionHash: effectiveDescriptionHash,
+        logoUri,
+      };
+    }
+    if (typeof onEnsureMetadataPublished !== 'function') {
+      return {
+        metadataUri: metadataUri || '',
+        descriptionHash: effectiveDescriptionHash,
+        logoUri,
+      };
+    }
+    setPublishBusy(true);
+    try {
+      return await onEnsureMetadataPublished();
+    } finally {
+      setPublishBusy(false);
+    }
+  }, [
+    effectiveDescriptionHash,
+    hasMetadataUri,
+    logoUri,
+    metadataUri,
+    onEnsureMetadataPublished,
+  ]);
 
   const runQa = async () => {
     const bc = effectiveBytecode;
@@ -104,11 +143,16 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
     setQaResult(null);
     setQaPoolAcknowledged(false);
     try {
+      let hash = effectiveDescriptionHash;
+      if (!hash && typeof onEnsureMetadataPublished === 'function') {
+        const published = await resolvePublished();
+        hash = published?.descriptionHash || '';
+      }
       const r = await preflightReferenceFungibleDeployQa({
         tokenName,
         tokenSymbol,
         customBytecode,
-        descriptionHash,
+        descriptionHash: hash,
         nativeTokenSecurity,
         initialSupply,
         tokenDecimals,
@@ -126,12 +170,20 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
   };
 
   const runDeployInternal = useCallback(async () => {
+    let published = { metadataUri, descriptionHash: effectiveDescriptionHash, logoUri };
+    try {
+      published = await resolvePublished();
+    } catch (e) {
+      toast.error(e?.message || 'Could not publish token metadata.');
+      return null;
+    }
+    const hashForDeploy = descriptionHash.trim() || published?.descriptionHash || '';
     const result = await executeBoingNativeTokenDeploy({
       getWalletProvider,
       tokenName,
       tokenSymbol,
       customBytecode,
-      descriptionHash,
+      descriptionHash: hashForDeploy,
       nativeTokenSecurity,
       initialSupply,
       tokenDecimals,
@@ -159,6 +211,8 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
           ...(initialSupply !== '' && initialSupply != null
             ? [{ label: 'Initial supply', value: String(initialSupply).trim() }]
             : []),
+          ...(published?.logoUri ? [{ label: 'Logo', value: published.logoUri }] : []),
+          ...(published?.metadataUri ? [{ label: 'Metadata', value: published.metadataUri }] : []),
         ],
       },
     });
@@ -170,13 +224,17 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
   }, [
     customBytecode,
     descriptionHash,
+    effectiveDescriptionHash,
     getWalletProvider,
     initialSupply,
+    logoUri,
+    metadataUri,
     nativeTokenSecurity,
     qaPoolAcknowledged,
     tokenDecimals,
     tokenName,
     tokenSymbol,
+    resolvePublished,
     explorerBaseUrl,
   ]);
 
@@ -228,11 +286,49 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
       {embedInWizard && (
         <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
           <strong style={{ color: 'var(--text-primary)' }}>Boing native deploy:</strong> uses the same name and symbol as
-          this wizard. Boing Express will ask you to approve the deploy transaction (not an ERC-20 factory).{' '}
+          this wizard. Logo and token JSON are uploaded, then committed as <code className="text-[10px]">description_hash</code>.
+          Boing Express will ask you to approve the deploy transaction (not an ERC-20 factory).{' '}
           <Link to="/boing/native-vm" className="text-green-400 underline text-sm">
             Native VM tools
           </Link>
         </p>
+      )}
+
+      {(hasLogo || hasMetadataUri || effectiveDescriptionHash) && (
+        <div
+          className="text-xs rounded-lg px-3 py-2 mb-3 border space-y-1"
+          style={{
+            borderColor: 'rgba(34, 197, 94, 0.45)',
+            backgroundColor: 'rgba(34, 197, 94, 0.08)',
+            color: 'var(--text-secondary)',
+          }}
+        >
+          <p>
+            <strong style={{ color: 'var(--text-primary)' }}>Logo:</strong>{' '}
+            {hasLogo ? (
+              <a href={logoUri} target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline break-all">
+                {logoUri}
+              </a>
+            ) : (
+              'Optional — upload a file or paste a URL in Token Logo to include it in metadata.'
+            )}
+          </p>
+          <p>
+            <strong style={{ color: 'var(--text-primary)' }}>Metadata JSON:</strong>{' '}
+            {hasMetadataUri ? (
+              <a href={metadataUri} target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline break-all">
+                {metadataUri}
+              </a>
+            ) : (
+              'Will upload on deploy.'
+            )}
+          </p>
+          {effectiveDescriptionHash ? (
+            <p className="font-mono break-all">
+              <strong style={{ color: 'var(--text-primary)' }}>description_hash:</strong> {effectiveDescriptionHash}
+            </p>
+          ) : null}
+        </div>
       )}
 
       {hasBundled ? (
@@ -286,7 +382,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
           <button
             type="button"
             onClick={runDeployInternal}
-            disabled={deployBlocked}
+            disabled={deployBlocked || publishBusy}
             className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
             style={{ backgroundColor: 'var(--finance-green-mid)' }}
           >
@@ -339,8 +435,8 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
               description_hash (optional, 32-byte hex)
             </label>
             <p className="text-[10px] mb-1" style={{ color: 'var(--text-tertiary)' }}>
-              Leave empty to let the SDK derive <code className="text-[10px]">description_hash</code> from your wizard security
-              toggles. Filling this field overrides that commitment.
+              Leave empty to commit uploaded token metadata (logo URL + security choices). Filling this field overrides that
+              commitment.
             </p>
             <input
               id="native-boing-token-description-hash"
@@ -348,7 +444,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
               type="text"
               value={descriptionHash}
               onChange={(e) => setDescriptionHash(e.target.value)}
-              placeholder="0x… or leave empty"
+              placeholder={committedDescriptionHash || '0x… or leave empty'}
               className="w-full text-sm p-2 rounded-lg border font-mono"
               style={{
                 backgroundColor: 'var(--bg-secondary)',
@@ -360,7 +456,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
           <button
             type="button"
             onClick={runQa}
-            disabled={qaBusy || !effectiveBytecode}
+            disabled={qaBusy || publishBusy || !effectiveBytecode}
             className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
             style={{ backgroundColor: 'var(--finance-primary)' }}
           >

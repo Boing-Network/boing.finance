@@ -50,7 +50,9 @@ export default function BoingNativeL1Section() {
         <p className="mb-3" style={{ color: 'var(--text-secondary)' }}>
           With Boing testnet + Boing Express, the <strong>Launch wizard</strong> ends in a <strong>native VM</strong> deploy
           (pinned fungible bytecode, <code className="text-xs">contract_deploy_meta</code>, <code className="text-xs">boing_qaCheck</code>
-          ). For a classic <strong>ERC-20</strong> on Sepolia, switch the header to <strong>EVM</strong> and use MetaMask.
+          ). Upload a logo file or paste a public image URL; the wizard stores that URL in token JSON (R2/IPFS) and commits
+          Blake3 <code className="text-xs">description_hash</code> (image + security choices). For a classic{' '}
+          <strong>ERC-20</strong> on Sepolia, switch the header to <strong>EVM</strong> and use MetaMask.
         </p>
         <p className="mb-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
           Example <code className="text-xs">boing_sendTransaction</code> payload shape (from any connected dApp):
