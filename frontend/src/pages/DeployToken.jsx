@@ -16,6 +16,8 @@ import { getContractAddress } from '../config/contracts';
 import { apiPath } from '../config';
 import LogoUpload from '../components/LogoUpload';
 import { uploadMetadataToIPFS, createTokenMetadata } from '../utils/ipfsUpload';
+import { publicAssetUri } from '../utils/nftCollectionMetadata';
+import { buildTokenLaunchMetadataDocument, publishTokenLaunchMetadata } from '../utils/tokenLaunchMetadata';
 import TokenPreview from '../components/TokenPreview';
 import DeploymentProgress from '../components/DeploymentProgress';
 import DeploymentHistory from '../components/DeploymentHistory';
@@ -967,6 +969,8 @@ export default function DeployToken() {
   const [_logoUploadResult, setLogoUploadResult] = useState(null);
   const [metadataUrl, setMetadataUrl] = useState('');
   const [_uploadingMetadata, setUploadingMetadata] = useState(false);
+  const [publishedDescriptionHash, setPublishedDescriptionHash] = useState('');
+  const [publishedFingerprint, setPublishedFingerprint] = useState('');
 
   // Launch Wizard (step-by-step mode) - classic removed, wizard only
   const [useWizardMode] = useState(true);
@@ -1231,11 +1235,14 @@ export default function DeployToken() {
   // Logo upload handlers
   const handleLogoUpload = (uploadResult) => {
     setLogoUploadResult(uploadResult);
-    setLogoUrl(uploadResult.url);
+    const uri = publicAssetUri(uploadResult);
+    setLogoUrl(uri);
+    setPublishedFingerprint('');
   };
 
   const handleLogoChange = (url) => {
-    setLogoUrl(url);
+    setLogoUrl(publicAssetUri(url) || url);
+    setPublishedFingerprint('');
     if (!url) {
       setLogoUploadResult(null);
     }
@@ -1252,7 +1259,7 @@ export default function DeployToken() {
         name,
         symbol,
         description,
-        logoUrl,
+        logoUrl: publicAssetUri(logoUrl) || logoUrl,
         website,
         network: network?.name || 'Unknown',
         decimals,
@@ -1283,6 +1290,64 @@ export default function DeployToken() {
       setUploadingMetadata(false);
     }
   };
+
+  const ensurePublishedTokenMetadata = useCallback(async () => {
+    const image = publicAssetUri(logoUrl) || String(logoUrl || '').trim();
+    const doc = buildTokenLaunchMetadataDocument({
+      name,
+      symbol,
+      description,
+      image,
+      website,
+      socialLinks,
+      decimals,
+      initialSupply,
+      network: network?.name || (isBoingNativeDeployPath ? 'Boing Testnet' : ''),
+      security: nativeTokenSecurityForBoing,
+    });
+    const fingerprint = JSON.stringify(doc);
+    if (
+      fingerprint === publishedFingerprint &&
+      metadataUrl &&
+      publishedDescriptionHash
+    ) {
+      return {
+        metadataUri: metadataUrl,
+        descriptionHash: publishedDescriptionHash,
+        logoUri: image,
+      };
+    }
+    setUploadingMetadata(true);
+    try {
+      const published = await publishTokenLaunchMetadata(doc);
+      setMetadataUrl(published.metadataUri);
+      setPublishedDescriptionHash(published.descriptionHash);
+      setPublishedFingerprint(fingerprint);
+      toast.success('Token metadata uploaded');
+      return {
+        metadataUri: published.metadataUri,
+        descriptionHash: published.descriptionHash,
+        logoUri: image,
+      };
+    } finally {
+      setUploadingMetadata(false);
+    }
+  }, [
+    decimals,
+    description,
+    initialSupply,
+    isBoingNativeDeployPath,
+    logoUrl,
+    metadataUrl,
+    name,
+    nativeTokenSecurityForBoing,
+    network?.name,
+    publishedDescriptionHash,
+    publishedFingerprint,
+    socialLinks,
+    symbol,
+    website,
+  ]);
 
   const handleDeploy = async (e) => {
     e.preventDefault();
@@ -2687,9 +2752,10 @@ export default function DeployToken() {
                   <>
                     <p className="text-sm mb-3 rounded-lg border px-3 py-2" style={{ borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}>
                       <strong style={{ color: 'var(--text-primary)' }}>Native deploy:</strong> the chain uses your{' '}
-                      <strong>name</strong> and <strong>symbol</strong> from this wizard. Your <strong>security feature</strong>{' '}
-                      choices from this wizard are committed in <code className="text-xs">description_hash</code> (unless you
-                      override hex in Advanced). The default reference fungible bytecode is minimal—custom bytecode is required
+                      <strong>name</strong> and <strong>symbol</strong> from this wizard. Logo (if you uploaded one) and token
+                      JSON are stored on the network; that document plus your <strong>security feature</strong> choices are
+                      committed in <code className="text-xs">description_hash</code> (unless you override hex in Advanced).
+                      The default reference fungible bytecode is minimal—custom bytecode is required
                       for on-chain enforcement of those policies; Boing VM now exposes block height and timestamp opcodes for
                       time/block-gated rules.
                     </p>
@@ -2716,6 +2782,10 @@ export default function DeployToken() {
                       initialSupply={initialSupply}
                       tokenDecimals={decimals}
                       nativeTokenSecurity={nativeTokenSecurityForBoing}
+                      metadataUri={metadataUrl}
+                      committedDescriptionHash={publishedDescriptionHash}
+                      logoUri={publicAssetUri(logoUrl) || logoUrl}
+                      onEnsureMetadataPublished={ensurePublishedTokenMetadata}
                       onDeployGateChange={onNativeDeployGateChange}
                     />
                   </>
