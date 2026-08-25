@@ -63,6 +63,16 @@ export function encodeNativeAmmAddLiquidityCalldataHex(amountA, amountB, minLiqu
   return bytesToHex(out);
 }
 
+/** 128-byte `remove_liquidity` calldata (selector 0x12). */
+export function encodeNativeAmmRemoveLiquidityCalldataHex(liquidity, minA = 0n, minB = 0n) {
+  const out = new Uint8Array(128);
+  out.set(selectorWord(SELECTOR_NATIVE_AMM_REMOVE_LIQUIDITY), 0);
+  out.set(amountWord(BigInt(liquidity)), 32);
+  out.set(amountWord(BigInt(minA)), 64);
+  out.set(amountWord(BigInt(minB)), 96);
+  return bytesToHex(out);
+}
+
 /** u128 big-endian in the low 16 bytes of a 32-byte storage word (`0x` + 64 hex). */
 export function parseNativeAmmReserveU128(valueHex) {
   if (!valueHex || typeof valueHex !== 'string') return 0n;

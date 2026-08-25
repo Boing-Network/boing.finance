@@ -15,6 +15,7 @@ import getFeatureSupport from '../config/featureSupport';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import NativeAmmSwapPanel from '../components/NativeAmmSwapPanel';
 import NativeAmmLpVaultPanel from '../components/NativeAmmLpVaultPanel';
+import EvmLiquidityManagePanel from '../components/EvmLiquidityManagePanel';
 import EmptyState from '../components/EmptyState';
 
 const Liquidity = () => {
@@ -104,16 +105,10 @@ const Liquidity = () => {
 
   const getChainName = (id) => getNetworkByChainId(id)?.name || (typeof id === 'string' ? id : `Chain ${id}`);
 
-  const handleCollectFees = (_positionId) => {
-    toast.success('Fees collected successfully!');
-  };
-
-  const handleRemoveLiquidity = (_positionId) => {
-    toast.success('Liquidity removed successfully!');
-  };
-
-  const handleCreatePair = () => {
-    // Implementation needed
+  const handleCollectFees = () => {
+    toast('Fees stay in the pool. Remove LP below to realize them — there is no separate collect.', {
+      duration: 5000,
+    });
   };
 
   const _handleSaveSettings = (newSettings) => {
@@ -192,6 +187,9 @@ const Liquidity = () => {
               <NativeAmmSwapPanel defaultOpenAddLiquidity slippagePercent={_settings.slippage} />
               <NativeAmmLpVaultPanel compact />
             </div>
+          )}
+          {featureSupport.swap !== 'native_amm' && isConnected && (
+            <EvmLiquidityManagePanel />
           )}
           {/* Header */}
           <div className="text-center mb-6 sm:mb-8">
@@ -372,13 +370,13 @@ const Liquidity = () => {
                   <div className="text-2xl sm:text-3xl mb-2 sm:mb-3">💧</div>
                   <h4 className="text-base sm:text-lg font-semibold text-white mb-2">How Liquidity Works</h4>
                   <p className="text-gray-300 text-xs sm:text-sm mb-3 sm:mb-4">
-                    Provide equal values of both tokens to create a trading pair. 
-                    Earn fees from every trade in the pool!
+                    Seed a new pair on Create Pool (one transaction). Add or remove on an
+                    existing pair with the form above. Trading fees stay in the pool until you remove LP.
                   </p>
                   <div className="text-xs text-gray-400 space-y-1">
-                    <p>• Earn 0.3% of every trade</p>
-                    <p>• Withdraw anytime</p>
-                    <p>• No lock-up period</p>
+                    <p>• 0.3% fee is realized on remove</p>
+                    <p>• There is no separate Collect</p>
+                    <p>• Do not transfer tokens to a pair and mint later</p>
                   </div>
                 </div>
               </div>
@@ -389,7 +387,11 @@ const Liquidity = () => {
           {isConnected && liquidityData && (
             <div className="mt-6 sm:mt-8">
               <div className="bg-gray-800 rounded-xl p-4 sm:p-6 border border-gray-700">
-                <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6">Your Liquidity Positions</h3>
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">Indexed positions</h3>
+                <p className="text-sm text-gray-400 mb-4 sm:mb-6">
+                  These rows come from the API indexer, not your wallet. Use Manage an existing pair
+                  above to add or remove on-chain.
+                </p>
                 
                 {liquidityLoading ? (
                   <div className="space-y-3 sm:space-y-4">
@@ -422,16 +424,11 @@ const Liquidity = () => {
                             
                             <div className="flex space-x-2">
                               <button
-                                onClick={() => handleCollectFees(position.id)}
-                                className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-medium py-1 sm:py-2 px-2 sm:px-3 rounded-lg transition-colors"
+                                type="button"
+                                onClick={handleCollectFees}
+                                className="bg-gray-600 hover:bg-gray-500 text-white text-xs sm:text-sm font-medium py-1 sm:py-2 px-2 sm:px-3 rounded-lg transition-colors"
                               >
-                                Collect
-                              </button>
-                              <button
-                                onClick={() => handleRemoveLiquidity(position.id)}
-                                className="bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm font-medium py-1 sm:py-2 px-2 sm:px-3 rounded-lg transition-colors"
-                              >
-                                Remove
+                                About fees
                               </button>
                             </div>
                           </div>
@@ -463,10 +460,10 @@ const Liquidity = () => {
                 ) : (
                   <EmptyState
                     variant="pools"
-                    title="No Liquidity Positions"
-                    description="Start providing liquidity to earn trading fees and rewards."
-                    action={handleCreatePair}
-                    actionLabel="Add Liquidity"
+                    title="No indexed positions"
+                    description="Create a pair or add liquidity on-chain. Indexed rows appear after the API sees the events."
+                    actionHref="/create-pool"
+                    actionLabel="Create Pool"
                   />
                 )}
               </div>

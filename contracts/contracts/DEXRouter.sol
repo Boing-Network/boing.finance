@@ -183,41 +183,34 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         address[] calldata path,
         address to,
         uint256 deadline
-    ) external nonReentrant whenNotPaused notEmergencyStopped rateLimited returns (uint256[] memory amounts) {
+    ) external nonReentrant whenNotPaused notEmergencyStopped returns (uint256[] memory amounts) {
         if (deadline < block.timestamp) revert Expired();
         if (path.length < 2) revert InvalidPath();
         if (to == address(0)) revert InvalidTo();
         if (amountIn == 0) revert InsufficientInputAmount();
-
-        for (uint256 i = 0; i < path.length; i++) {
-            if (path[i] == address(0)) revert InvalidToken();
-            if (blacklistedTokens[path[i]]) revert BlacklistedToken();
-            if (whitelistEnabled && !whitelistedTokens[path[i]]) revert TokenNotWhitelisted();
-        }
+        _validatePath(path);
 
         amounts = getAmountsOut(amountIn, path);
         uint256 amountOut = amounts[amounts.length - 1];
-
-        uint256 slippageTolerance = _getSlippageTolerance(msg.sender);
-        uint256 minAmountOut = amountOutMin > 0 ? amountOutMin :
-            (amountOut * (10000 - slippageTolerance)) / 10000;
-
+        uint256 minAmountOut = _effectiveMinOut(amountOut, amountOutMin);
         if (amountOut < minAmountOut) revert InsufficientOutputAmount();
 
         uint256 priceImpact = _calculatePriceImpact(amountIn, path[0], amountOut, path[path.length - 1]);
         if (priceImpact > maxPriceImpact) revert PriceImpactTooHigh();
-        
-        IERC20(path[0]).safeTransferFrom(msg.sender, address(this), amountIn);
+
+        address firstPair = IDEXFactory(factory).getPairAddress(path[0], path[1]);
+        if (firstPair == address(0)) revert InsufficientLiquidity();
+        IERC20(path[0]).safeTransferFrom(msg.sender, firstPair, amountIn);
         _swap(amounts, path, to);
-        
+
         emit SwapExactTokensForTokens(
-            msg.sender, 
-            amountIn, 
-            minAmountOut, 
-            path, 
-            to, 
-            deadline, 
-            amountOut, 
+            msg.sender,
+            amountIn,
+            minAmountOut,
+            path,
+            to,
+            deadline,
+            amountOut,
             priceImpact
         );
     }
@@ -231,17 +224,12 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         address[] calldata path,
         address to,
         uint256 deadline
-    ) external nonReentrant whenNotPaused notEmergencyStopped rateLimited returns (uint256[] memory amounts) {
+    ) external nonReentrant whenNotPaused notEmergencyStopped returns (uint256[] memory amounts) {
         if (deadline < block.timestamp) revert Expired();
         if (path.length < 2) revert InvalidPath();
         if (to == address(0)) revert InvalidTo();
         if (amountOut == 0) revert InsufficientOutputAmount();
-
-        for (uint256 i = 0; i < path.length; i++) {
-            if (path[i] == address(0)) revert InvalidToken();
-            if (blacklistedTokens[path[i]]) revert BlacklistedToken();
-            if (whitelistEnabled && !whitelistedTokens[path[i]]) revert TokenNotWhitelisted();
-        }
+        _validatePath(path);
 
         amounts = getAmountsIn(amountOut, path);
         uint256 amountIn = amounts[0];
@@ -251,7 +239,9 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         uint256 priceImpact = _calculatePriceImpact(amountIn, path[0], amountOut, path[path.length - 1]);
         if (priceImpact > maxPriceImpact) revert PriceImpactTooHigh();
 
-        IERC20(path[0]).safeTransferFrom(msg.sender, address(this), amountIn);
+        address firstPair = IDEXFactory(factory).getPairAddress(path[0], path[1]);
+        if (firstPair == address(0)) revert InsufficientLiquidity();
+        IERC20(path[0]).safeTransferFrom(msg.sender, firstPair, amountIn);
         _swap(amounts, path, to);
         
         emit SwapTokensForExactTokens(
@@ -274,34 +264,26 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         address[] calldata path,
         address to,
         uint256 deadline
-    ) external payable nonReentrant whenNotPaused notEmergencyStopped rateLimited returns (uint256[] memory amounts) {
+    ) external payable nonReentrant whenNotPaused notEmergencyStopped returns (uint256[] memory amounts) {
         if (deadline < block.timestamp) revert Expired();
         if (path.length < 2) revert InvalidPath();
         if (path[0] != WETH) revert InvalidPath();
         if (to == address(0)) revert InvalidTo();
         if (msg.value == 0) revert InsufficientInputAmount();
-
-        for (uint256 i = 0; i < path.length; i++) {
-            if (path[i] == address(0)) revert InvalidToken();
-            if (blacklistedTokens[path[i]]) revert BlacklistedToken();
-            if (whitelistEnabled && !whitelistedTokens[path[i]]) revert TokenNotWhitelisted();
-        }
+        _validatePath(path);
 
         amounts = getAmountsOut(msg.value, path);
         uint256 amountOut = amounts[amounts.length - 1];
-
-        uint256 slippageTolerance = _getSlippageTolerance(msg.sender);
-        uint256 minAmountOut = amountOutMin > 0 ? amountOutMin :
-            (amountOut * (10000 - slippageTolerance)) / 10000;
-
+        uint256 minAmountOut = _effectiveMinOut(amountOut, amountOutMin);
         if (amountOut < minAmountOut) revert InsufficientOutputAmount();
 
         uint256 priceImpact = _calculatePriceImpact(msg.value, WETH, amountOut, path[path.length - 1]);
         if (priceImpact > maxPriceImpact) revert PriceImpactTooHigh();
-        
-        // Wrap ETH to WETH
+
+        address firstPair = IDEXFactory(factory).getPairAddress(path[0], path[1]);
+        if (firstPair == address(0)) revert InsufficientLiquidity();
         IWETH(WETH).deposit{value: msg.value}();
-        
+        IERC20(WETH).safeTransfer(firstPair, msg.value);
         _swap(amounts, path, to);
         
         emit SwapExactETHForTokens(
@@ -325,18 +307,13 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         address[] calldata path,
         address to,
         uint256 deadline
-    ) external nonReentrant whenNotPaused notEmergencyStopped rateLimited returns (uint256[] memory amounts) {
+    ) external nonReentrant whenNotPaused notEmergencyStopped returns (uint256[] memory amounts) {
         if (deadline < block.timestamp) revert Expired();
         if (path.length < 2) revert InvalidPath();
         if (path[path.length - 1] != WETH) revert InvalidPath();
         if (to == address(0)) revert InvalidTo();
         if (amountOut == 0) revert InsufficientOutputAmount();
-
-        for (uint256 i = 0; i < path.length; i++) {
-            if (path[i] == address(0)) revert InvalidToken();
-            if (blacklistedTokens[path[i]]) revert BlacklistedToken();
-            if (whitelistEnabled && !whitelistedTokens[path[i]]) revert TokenNotWhitelisted();
-        }
+        _validatePath(path);
 
         amounts = getAmountsIn(amountOut, path);
         uint256 amountIn = amounts[0];
@@ -345,8 +322,10 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
 
         uint256 priceImpact = _calculatePriceImpact(amountIn, path[0], amountOut, WETH);
         if (priceImpact > maxPriceImpact) revert PriceImpactTooHigh();
-        
-        IERC20(path[0]).safeTransferFrom(msg.sender, address(this), amountIn);
+
+        address firstPair = IDEXFactory(factory).getPairAddress(path[0], path[1]);
+        if (firstPair == address(0)) revert InsufficientLiquidity();
+        IERC20(path[0]).safeTransferFrom(msg.sender, firstPair, amountIn);
         _swap(amounts, path, address(this));
         
         // Unwrap WETH to ETH
@@ -365,6 +344,41 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
             amountIn, 
             priceImpact
         );
+    }
+
+    /**
+     * @dev Swap exact tokens for ETH
+     */
+    function swapExactTokensForETH(
+        uint256 amountIn,
+        uint256 amountOutMin,
+        address[] calldata path,
+        address to,
+        uint256 deadline
+    ) external nonReentrant whenNotPaused notEmergencyStopped returns (uint256[] memory amounts) {
+        if (deadline < block.timestamp) revert Expired();
+        if (path.length < 2) revert InvalidPath();
+        if (path[path.length - 1] != WETH) revert InvalidPath();
+        if (to == address(0)) revert InvalidTo();
+        if (amountIn == 0) revert InsufficientInputAmount();
+        _validatePath(path);
+
+        amounts = getAmountsOut(amountIn, path);
+        uint256 amountOut = amounts[amounts.length - 1];
+        uint256 minAmountOut = _effectiveMinOut(amountOut, amountOutMin);
+        if (amountOut < minAmountOut) revert InsufficientOutputAmount();
+
+        uint256 priceImpact = _calculatePriceImpact(amountIn, path[0], amountOut, WETH);
+        if (priceImpact > maxPriceImpact) revert PriceImpactTooHigh();
+
+        address firstPair = IDEXFactory(factory).getPairAddress(path[0], path[1]);
+        if (firstPair == address(0)) revert InsufficientLiquidity();
+        IERC20(path[0]).safeTransferFrom(msg.sender, firstPair, amountIn);
+        _swap(amounts, path, address(this));
+
+        IWETH(WETH).withdraw(amountOut);
+        (bool success,) = to.call{value: amountOut}("");
+        if (!success) revert EthTransferFailed();
     }
 
     // ============ LIQUIDITY FUNCTIONS ============
@@ -392,12 +406,15 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         if (blacklistedTokens[tokenB]) revert BlacklistedToken();
         if (whitelistEnabled && !whitelistedTokens[tokenB]) revert TokenNotWhitelisted();
         
-        (amountA, amountB) = _addLiquidity(tokenA, tokenB, amountADesired, amountBDesired, amountAMin, amountBMin);
         address pair = IDEXFactory(factory).getPairAddress(tokenA, tokenB);
-        
+        if (pair == address(0)) {
+            pair = IDEXFactory(factory).createPair(tokenA, tokenB);
+        }
+        (amountA, amountB) = _addLiquidity(tokenA, tokenB, amountADesired, amountBDesired, amountAMin, amountBMin);
+
         IERC20(tokenA).safeTransferFrom(msg.sender, pair, amountA);
         IERC20(tokenB).safeTransferFrom(msg.sender, pair, amountB);
-        
+
         liquidity = IDEXPair(pair).mint(to);
     }
 
@@ -443,7 +460,7 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         amounts[0] = amountIn;
         
         for (uint256 i; i < path.length - 1; i++) {
-            (uint256 reserveIn, uint256 reserveOut,) = IDEXPair(IDEXFactory(factory).getPairAddress(path[i], path[i + 1])).getReserves();
+            (uint256 reserveIn, uint256 reserveOut) = _orientedReserves(path[i], path[i + 1]);
             amounts[i + 1] = getAmountOut(amounts[i], reserveIn, reserveOut);
         }
     }
@@ -458,7 +475,7 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         amounts[amounts.length - 1] = amountOut;
         
         for (uint256 i = path.length - 1; i > 0; i--) {
-            (uint256 reserveIn, uint256 reserveOut,) = IDEXPair(IDEXFactory(factory).getPairAddress(path[i - 1], path[i])).getReserves();
+            (uint256 reserveIn, uint256 reserveOut) = _orientedReserves(path[i - 1], path[i]);
             amounts[i - 1] = getAmountIn(amounts[i], reserveIn, reserveOut);
         }
     }
@@ -511,10 +528,11 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
         uint256 amountAMin,
         uint256 amountBMin
     ) internal view returns (uint256 amountA, uint256 amountB) {
-        if (IDEXFactory(factory).getPairAddress(tokenA, tokenB) == address(0)) {
+        address pair = IDEXFactory(factory).getPairAddress(tokenA, tokenB);
+        if (pair == address(0)) {
             (amountA, amountB) = (amountADesired, amountBDesired);
         } else {
-            (uint256 reserveA, uint256 reserveB,) = IDEXPair(IDEXFactory(factory).getPairAddress(tokenA, tokenB)).getReserves();
+            (uint256 reserveA, uint256 reserveB) = _orientedReserves(tokenA, tokenB);
             if (reserveA == 0 && reserveB == 0) {
                 (amountA, amountB) = (amountADesired, amountBDesired);
             } else {
@@ -553,39 +571,53 @@ contract DEXRouter is ReentrancyGuard, Pausable, Ownable {
     /**
      * @dev Calculate price impact of a swap
      */
+    function _orientedReserves(address tokenA, address tokenB)
+        internal
+        view
+        returns (uint256 reserveA, uint256 reserveB)
+    {
+        address pair = IDEXFactory(factory).getPairAddress(tokenA, tokenB);
+        if (pair == address(0)) revert InsufficientLiquidity();
+        (uint256 reserve0, uint256 reserve1,) = IDEXPair(pair).getReserves();
+        (address token0,) = sortTokens(tokenA, tokenB);
+        (reserveA, reserveB) = tokenA == token0 ? (reserve0, reserve1) : (reserve1, reserve0);
+    }
+
+    function _validatePath(address[] calldata path) internal view {
+        for (uint256 i = 0; i < path.length; i++) {
+            if (path[i] == address(0)) revert InvalidToken();
+            if (blacklistedTokens[path[i]]) revert BlacklistedToken();
+            if (whitelistEnabled && !whitelistedTokens[path[i]]) revert TokenNotWhitelisted();
+        }
+    }
+
+    function _effectiveMinOut(uint256 amountOut, uint256 amountOutMin) internal view returns (uint256) {
+        if (amountOutMin > 0) return amountOutMin;
+        return (amountOut * (10000 - defaultSlippageTolerance)) / 10000;
+    }
+
     function _calculatePriceImpact(
         uint256 amountIn, 
         address tokenIn, 
         uint256 amountOut, 
         address tokenOut
     ) internal view returns (uint256) {
-        // Get reserves for the pair
         address pair = IDEXFactory(factory).getPairAddress(tokenIn, tokenOut);
         if (pair == address(0)) return 0;
-        
-        (uint256 reserveIn, uint256 reserveOut,) = IDEXPair(pair).getReserves();
-        if (reserveIn == 0 || reserveOut == 0) return 0;
-        
-        // Calculate price before and after swap
+
+        (uint256 reserveIn, uint256 reserveOut) = _orientedReserves(tokenIn, tokenOut);
+        if (reserveIn == 0 || reserveOut == 0 || amountOut >= reserveOut) return 0;
+
         uint256 priceBefore = (reserveOut * 1e18) / reserveIn;
         uint256 reserveInAfter = reserveIn + amountIn;
         uint256 reserveOutAfter = reserveOut - amountOut;
+        if (reserveInAfter == 0) return 0;
         uint256 priceAfter = (reserveOutAfter * 1e18) / reserveInAfter;
-        
-        // Calculate price impact
+
         if (priceBefore > priceAfter) {
             return ((priceBefore - priceAfter) * 10000) / priceBefore;
         }
         return 0;
-    }
-    
-    /**
-     * @dev Get slippage tolerance for user (can be customized per user)
-     */
-    function _getSlippageTolerance(address user) internal view returns (uint256) {
-        // For now, return default slippage tolerance
-        // This can be enhanced with user-specific settings
-        return defaultSlippageTolerance;
     }
 
     // ============ ADMIN FUNCTIONS ============

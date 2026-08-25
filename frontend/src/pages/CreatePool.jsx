@@ -775,15 +775,16 @@ function CreatePool() {
           
           // Handle approvals sequentially to avoid confusion
           if (approvalNeeded.token0) {
-            devLog('Approving token0 with maximum allowance');
+            devLog('Approving token0 for exact deposit amount');
             toast(`Approving ${getToken0Symbol()}... Please confirm in your wallet.`, {
               duration: 3000,
               icon: '⏳'
             });
             
             try {
-              await token0Contract.approve(factoryAddress, ethers.MaxUint256);
-              toast.success(`${getToken0Symbol()} approved successfully!`);
+              const approveTx = await token0Contract.approve(factoryAddress, token0AmountWei);
+              await approveTx.wait();
+              toast.success(`${getToken0Symbol()} approved for this deposit.`);
             } catch (error) {
               if (error.code === 'ACTION_REJECTED') {
                 toast.error(`${getToken0Symbol()} approval was rejected. Please try again and approve the transaction.`);
@@ -796,15 +797,16 @@ function CreatePool() {
           }
           
           if (approvalNeeded.token1) {
-            devLog('Approving token1 with maximum allowance');
+            devLog('Approving token1 for exact deposit amount');
             toast(`Approving ${getToken1Symbol()}... Please confirm in your wallet.`, {
               duration: 3000,
               icon: '⏳'
             });
             
             try {
-              await token1Contract.approve(factoryAddress, ethers.MaxUint256);
-              toast.success(`${getToken1Symbol()} approved successfully!`);
+              const approveTx = await token1Contract.approve(factoryAddress, token1AmountWei);
+              await approveTx.wait();
+              toast.success(`${getToken1Symbol()} approved for this deposit.`);
             } catch (error) {
               if (error.code === 'ACTION_REJECTED') {
                 toast.error(`${getToken1Symbol()} approval was rejected. Please try again and approve the transaction.`);
@@ -889,74 +891,9 @@ function CreatePool() {
           );
         }
         devLog('Single transaction approach successful');
-      } catch (error) {
-        devLog('Single transaction approach failed, falling back to separate steps:', error.message);
-        
-        // Fallback: Create pair first, then add liquidity
-        devLog('Creating pair first...');
-        const createPairTx = await dexFactory.createPair(token0, token1, { gasLimit: 4000000 });
-        await createPairTx.wait();
-        
-        // Get the created pair address
-        const pairAddress = await dexFactory.getPair(token0, token1);
-        devLog('Pair created at:', pairAddress);
-        
-        // Add liquidity to the pair
-        devLog('Adding liquidity to pair...');
-        const pairContract = new ethers.Contract(pairAddress, [
-          'function mint(address to) external returns (uint256 liquidity)'
-        ], signer);
-        
-        // Transfer tokens to pair contract
-        const token0Contract = new ethers.Contract(token0, [
-          'function transfer(address to, uint256 amount) external returns (bool)'
-        ], signer);
-        
-        const token1Contract = new ethers.Contract(token1, [
-          'function transfer(address to, uint256 amount) external returns (bool)'
-        ], signer);
-        
-        await token0Contract.transfer(pairAddress, token0AmountWei);
-        await token1Contract.transfer(pairAddress, token1AmountWei);
-        
-        // Mint liquidity
-        const mintTx = await pairContract.mint(account, { gasLimit: 4000000 });
-        await mintTx.wait();
-        
-        devLog('Fallback approach completed successfully');
-        
-        // Set transaction hash for UI
-        setTransactionHash(createPairTx.hash);
-        
-        const fallbackExplorer = getNetworkByChainId(chainId)?.explorer;
-        showDeployCelebration({
-          deploymentKind: 'Liquidity pool (fallback flow)',
-          details: [
-            { label: 'Pair', value: `${getToken0Symbol()} / ${getToken1Symbol()}` },
-            { label: 'Pool address', value: pairAddress },
-            { label: 'Network', value: getNetworkByChainId(chainId)?.name || '—' },
-          ],
-          txHash: createPairTx.hash,
-          contractAddress: pairAddress,
-          evmExplorerBaseUrl: fallbackExplorer,
-        });
-        setTransactionStatus('success');
-        const fallbackPair = `${getToken0Symbol()}/${getToken1Symbol()}`;
-        const fallbackChainName = getNetworkByChainId(chainId)?.name;
-        setShareData({ pair: fallbackPair, chainName: fallbackChainName });
-        setShareModalOpen(true);
-
-        // Reset form and return early
-        setToken0('');
-        setToken1('');
-        setToken0Amount('');
-        setToken1Amount('');
-        setToken0Decimals(18);
-        setToken1Decimals(18);
-        setToken0Info(null);
-        setToken1Info(null);
-        
-        return;
+        } catch (error) {
+        devLog('Single-transaction pool create failed (no fallback — leaving tokens in the pair is unsafe):', error.message);
+        throw error;
       }
       
       setTransactionHash(createPairWithLiquidityTx.hash);
@@ -1878,7 +1815,7 @@ function CreatePool() {
                             )}
                           </ul>
                           <p className="mt-2 text-xs text-yellow-200">
-                            The pool creation will automatically handle token approvals with maximum allowance, but you'll need to confirm them in your wallet. This approval will cover future pool creations with the same tokens.
+                            Approvals are for this deposit amount only. Confirm each token in your wallet.
                           </p>
                         </div>
                       </div>

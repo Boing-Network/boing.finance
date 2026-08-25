@@ -11,6 +11,7 @@ import {
   NATIVE_AMM_RESERVE_B_KEY,
   encodeNativeAmmSwapCalldataHex,
   encodeNativeAmmAddLiquidityCalldataHex,
+  encodeNativeAmmRemoveLiquidityCalldataHex,
   constantProductAmountOut,
   parseNativeAmmReserveU128,
 } from '../services/nativeAmmCalldata';
@@ -116,6 +117,7 @@ export default function NativeAmmSwapPanel({
   const [amountIn, setAmountIn] = useState('');
   const [addAmountA, setAddAmountA] = useState('');
   const [addAmountB, setAddAmountB] = useState('');
+  const [removeLp, setRemoveLp] = useState('');
   const [addLiquiditySectionOpen, setAddLiquiditySectionOpen] = useState(defaultOpenAddLiquidity);
   const [busy, setBusy] = useState(false);
 
@@ -176,6 +178,7 @@ export default function NativeAmmSwapPanel({
 
   const addAmountABn = useMemo(() => parsePositiveBigInt(addAmountA), [addAmountA]);
   const addAmountBBn = useMemo(() => parsePositiveBigInt(addAmountB), [addAmountB]);
+  const removeLpBn = useMemo(() => parsePositiveBigInt(removeLp), [removeLp]);
 
   const expressTxBase = useCallback(() => {
     const accessList = nativeConstantProductPoolAccessListJson(account, pool);
@@ -255,6 +258,43 @@ export default function NativeAmmSwapPanel({
       await loadReserves();
       setAddAmountA('');
       setAddAmountB('');
+    } catch (e) {
+      toast.error(formatBoingExpressRpcError(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onRemoveLiquidity = async () => {
+    if (chainId !== BOING_NATIVE_L1_CHAIN_ID || walletType !== 'boingExpress' || !isConnected) {
+      toast.error('Connect with Boing Express on Boing testnet (6913).');
+      return;
+    }
+    if (!pool) {
+      toast.error('Pool address not configured.');
+      return;
+    }
+    if (removeLpBn == null) {
+      toast.error('Enter a positive LP amount to burn.');
+      return;
+    }
+    const p = pickExpressProvider(getWalletProvider);
+    if (!p) {
+      toast.error('Boing Express provider not found.');
+      return;
+    }
+    const calldata = encodeNativeAmmRemoveLiquidityCalldataHex(removeLpBn, 0n, 0n);
+    setBusy(true);
+    try {
+      const hash = await boingExpressContractCallSignSimulateSubmit(p, {
+        type: 'contract_call',
+        contract: pool,
+        calldata,
+        ...expressTxBase(),
+      });
+      toast.success(typeof hash === 'string' ? `Submitted: ${hash.slice(0, 18)}…` : 'Submitted');
+      await loadReserves();
+      setRemoveLp('');
     } catch (e) {
       toast.error(formatBoingExpressRpcError(e));
     } finally {
@@ -447,8 +487,10 @@ export default function NativeAmmSwapPanel({
           Add liquidity (reserve A + B)
         </summary>
         <p className="text-xs mt-2 mb-3" style={{ color: 'var(--text-tertiary)' }}>
-          Increments on-chain pool reserves (selector <code className="text-[10px]">0x11</code>). No LP shares in this MVP
-          pool.
+          Selector <code className="text-[10px]">0x11</code> increases reserves. The default MVP pool does not mint a
+          withdrawable share for this call — treat it as an irreversible donation unless you use the{' '}
+          <strong>LP vault</strong> below. Prefer vault <code className="text-[10px]">deposit_add</code> when vault and
+          share ids are configured.
         </p>
         <div className="grid gap-3 sm:grid-cols-2 mb-3">
           <div>
@@ -500,8 +542,44 @@ export default function NativeAmmSwapPanel({
           className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
           style={{ backgroundColor: 'var(--finance-green-mid)' }}
         >
-          {busy ? 'Signing…' : 'Add liquidity via Boing Express'}
+          {busy ? 'Signing…' : 'Donate reserves via Boing Express'}
         </button>
+        <div className="mt-4 pt-3 border-t" style={{ borderColor: 'var(--border-color)' }}>
+          <p className="text-xs mb-2" style={{ color: 'var(--text-tertiary)' }}>
+            Remove (selector <code className="text-[10px]">0x12</code>) burns LP if this pool minted shares. Donation-only
+            MVP pools will reject this. Vault withdrawals use the vault panel.
+          </p>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+            LP amount to burn
+          </label>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={removeLp}
+            onChange={(e) => setRemoveLp(e.target.value.replace(/\D/g, ''))}
+            className="w-full text-sm p-2 rounded-lg border font-mono mb-2"
+            style={{
+              backgroundColor: 'var(--bg-secondary)',
+              borderColor: 'var(--border-color)',
+              color: 'var(--text-primary)',
+            }}
+          />
+          <button
+            type="button"
+            onClick={onRemoveLiquidity}
+            disabled={
+              busy ||
+              chainId !== BOING_NATIVE_L1_CHAIN_ID ||
+              walletType !== 'boingExpress' ||
+              !isConnected ||
+              removeLpBn == null
+            }
+            className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
+            style={{ backgroundColor: '#b91c1c' }}
+          >
+            {busy ? 'Signing…' : 'Remove liquidity via Boing Express'}
+          </button>
+        </div>
       </details>
 
       {(chainId !== BOING_NATIVE_L1_CHAIN_ID || walletType !== 'boingExpress' || !isConnected) && (

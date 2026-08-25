@@ -176,8 +176,9 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
         Deploy native collection (Boing VM)
       </h3>
       <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-        Deploy uses this wizard&apos;s <strong>name</strong> and <strong>symbol</strong> with{' '}
-        <code className="text-[10px]">contract_deploy_meta</code> and QA. Export metadata JSON above when needed.{' '}
+        Deploys a collection contract from this wizard&apos;s <strong>name</strong> and <strong>symbol</strong> (
+        <code className="text-[10px]">contract_deploy_meta</code> + QA). It does not mint token IDs or bind the exported
+        JSON. Export metadata separately for a later minter.{' '}
         <Link to="/docs?section=boing-l1" className="text-green-400 underline text-sm">
           Docs: Boing L1 &amp; Express
         </Link>

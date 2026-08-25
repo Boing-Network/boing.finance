@@ -95,9 +95,9 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
         emit SecurityConfigUpdated(_securityConfig);
     }
 
-    function initialize(address _token0, address _token1) external override {
+    function initialize(address _token0, address _token1) external override onlyFactory {
         IDEXFactory.PoolSecurityConfig memory defaultConfig = IDEXFactory.PoolSecurityConfig({
-            emergencyStop: true
+            emergencyStop: false
         });
         _initialize(_token0, _token1, defaultConfig);
     }
@@ -180,6 +180,7 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
         
         _mint(to, liquidity);
         _update(balance0, balance1, _reserve0, _reserve1);
+        emit Mint(msg.sender, amount0, amount1);
     }
     
     /**
@@ -212,6 +213,7 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
         balance1 = IERC20(_token1).balanceOf(address(this));
         
         _update(balance0, balance1, _reserve0, _reserve1);
+        emit Burn(msg.sender, amount0, amount1, to);
     }
     
     /**
@@ -265,11 +267,13 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
         if (totalSupply + value < totalSupply || balanceOf[to] + value < balanceOf[to]) revert Overflow();
         totalSupply += value;
         balanceOf[to] += value;
+        emit Transfer(address(0), to, value);
     }
     
     function _burn(address from, uint256 value) internal {
         balanceOf[from] -= value;
         totalSupply -= value;
+        emit Transfer(from, address(0), value);
     }
     
     // Utility functions
@@ -379,7 +383,7 @@ contract DEXPair is IDEXPair, ReentrancyGuard, Pausable {
             abi.encodePacked("\x19\x01", _DOMAIN_SEPARATOR(), structHash)
         );
         address signer = ecrecover(hash, v, r, s);
-        if (signer != owner) revert InvalidSignature();
+        if (signer == address(0) || signer != owner) revert InvalidSignature();
         allowance[owner][spender] = value;
         emit Approval(owner, spender, value);
     }
