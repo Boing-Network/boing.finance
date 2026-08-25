@@ -9,6 +9,13 @@ import { useWallet } from '../contexts/WalletContext';
 import { useChainType, useSolanaWallet } from '../contexts/SolanaWalletContext';
 import EmptyState from '../components/EmptyState';
 import { uploadToIPFS, validateFile } from '../utils/ipfsUpload';
+import {
+  applyCoverImageToTokens,
+  buildNftCollectionMetadataDocument,
+  isPublicAssetUri,
+  publicAssetUri,
+  publishNftCollectionMetadata,
+} from '../utils/nftCollectionMetadata';
 import { SOLANA_NETWORKS } from '../config/solanaConfig';
 import toast from 'react-hot-toast';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
@@ -81,6 +88,48 @@ function createNFTMetadata({ name, description, imageUri, attributes = [] }) {
   };
 }
 
+function CollectionCoverFields({
+  imageUrl,
+  onImageUrlChange,
+  coverPreview,
+  onCoverFile,
+  requiredHint,
+}) {
+  return (
+    <div className="space-y-3">
+      <label className="block text-sm font-medium text-gray-300">
+        Collection image {requiredHint ? <span className="text-gray-500 font-normal">{requiredHint}</span> : null}
+      </label>
+      <input
+        type="url"
+        value={imageUrl}
+        onChange={(e) => onImageUrlChange(e.target.value)}
+        placeholder="https://… or ipfs://…"
+        className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500"
+      />
+      <label className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium cursor-pointer inline-block">
+        Upload image file
+        <input
+          type="file"
+          accept={ACCEPTED_IMAGE_TYPES}
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = '';
+            if (file) onCoverFile(file);
+          }}
+        />
+      </label>
+      {coverPreview ? (
+        <img src={coverPreview} alt="Collection cover preview" className="w-24 h-24 rounded-lg object-cover border border-gray-600" />
+      ) : null}
+      <p className="text-xs text-gray-500">
+        File uploads go to network storage (R2/IPFS). A public URL is written into collection metadata and hashed on native deploy.
+      </p>
+    </div>
+  );
+}
+
 // Parse CSV: header row, then data. Columns "name", "description" (or "Name", "Description") + any other = trait_type/value
 function parseMetadataCSV(text, maxRows = 10000) {
   const lines = text.split(/\r?\n/).filter((line) => line.trim());
@@ -88,22 +137,21 @@ function parseMetadataCSV(text, maxRows = 10000) {
   const headers = lines[0].split(',').map((h) => h.trim().replace(/^"|"$/g, ''));
   const nameCol = headers.findIndex((h) => /^name$/i.test(h));
   const descCol = headers.findIndex((h) => /^description$/i.test(h));
-  const _traitCols = headers
-    .map((h, i) => (i !== nameCol && i !== descCol && i !== -1 && /^image$/i.test(h) ? -1 : i))
-    .map((i, idx) => (i >= 0 && nameCol !== idx && descCol !== idx && !/^image$/i.test(headers[idx]) ? idx : -1));
+  const imageCol = headers.findIndex((h) => /^image$/i.test(h));
   const list = [];
   for (let r = 1; r < lines.length && list.length < maxRows; r++) {
     const row = lines[r];
     const cells = row.match(/("([^"]|"")*"|[^,]*)/g)?.map((c) => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim()) || row.split(',').map((c) => c.trim());
     const name = (nameCol >= 0 && cells[nameCol]) ? cells[nameCol] : `Token #${r}`;
     const description = (descCol >= 0 && cells[descCol]) ? cells[descCol] : '';
+    const imageUri = (imageCol >= 0 && cells[imageCol]) ? publicAssetUri(cells[imageCol]) : '';
     const attributes = [];
     headers.forEach((h, i) => {
-      if (i === nameCol || i === descCol || /^image$/i.test(h)) return;
+      if (i === nameCol || i === descCol || i === imageCol) return;
       const value = cells[i];
       if (value != null && value !== '') attributes.push({ trait_type: h, value });
     });
-    list.push(createNFTMetadata({ name, description, imageUri: '', attributes }));
+    list.push(createNFTMetadata({ name, description, imageUri, attributes }));
   }
   return list;
 }
@@ -359,6 +407,15 @@ export default function CreateNFT() {
   const [previews, setPreviews] = useState([]);
   const [uploadedUris, setUploadedUris] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [collectionImageUrl, setCollectionImageUrl] = useState('');
+  const [collectionCoverFile, setCollectionCoverFile] = useState(null);
+  const [collectionCoverPreview, setCollectionCoverPreview] = useState('');
+  const [uploadedCoverUri, setUploadedCoverUri] = useState('');
+  const [publishedMetadataUri, setPublishedMetadataUri] = useState('');
+  const [publishedDescriptionHash, setPublishedDescriptionHash] = useState('');
+  const [publishedCoverUri, setPublishedCoverUri] = useState('');
+  const [publishedFingerprint, setPublishedFingerprint] = useState('');
+  const [isPublishingMetadata, setIsPublishingMetadata] = useState(false);
 
   const [tokenMetadata, setTokenMetadata] = useState([]);
   const [useSameMetadata, setUseSameMetadata] = useState(false);
@@ -465,10 +522,34 @@ export default function CreateNFT() {
     });
   }, []);
 
+  const onCollectionCoverFile = useCallback((file) => {
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      toast.error(`Max ${MAX_FILE_SIZE_MB}MB`);
+      return;
+    }
+    setCollectionCoverFile(file);
+    setUploadedCoverUri('');
+    setPublishedFingerprint('');
+    const reader = new FileReader();
+    reader.onload = () => setCollectionCoverPreview(typeof reader.result === 'string' ? reader.result : '');
+    reader.readAsDataURL(file);
+  }, []);
+
+  const resolvedCoverUri = useCallback((tokenImages = uploadedUris) => {
+    if (isPublicAssetUri(uploadedCoverUri)) return uploadedCoverUri;
+    if (isPublicAssetUri(collectionImageUrl)) return publicAssetUri(collectionImageUrl);
+    const first = tokenImages.find((u) => isPublicAssetUri(u));
+    return first || '';
+  }, [collectionImageUrl, uploadedCoverUri, uploadedUris]);
+
   const uploadImages = useCallback(async () => {
     if (files.length === 0) {
       toast.error('Add at least one image');
-      return;
+      return [];
     }
     setIsUploading(true);
     const uris = [];
@@ -481,14 +562,17 @@ export default function CreateNFT() {
           continue;
         }
         const result = await uploadToIPFS(files[i]);
-        const uri = result?.url || result?.gatewayUrls?.[0] || result?.hash;
-        if (uri) uris.push(uri.startsWith('ipfs://') ? uri : `ipfs://${uri}`);
+        const uri = publicAssetUri(result);
+        if (uri) uris.push(uri);
       }
-      setUploadedUris((prev) => prev.length === 0 ? uris : [...prev, ...uris].slice(0, files.length));
+      setUploadedUris(uris);
+      setPublishedFingerprint('');
       if (uris.length > 0) toast.success(`${uris.length} image(s) uploaded`);
       if (uris.length < files.length) toast.error('Some uploads failed');
+      return uris;
     } catch (err) {
       toast.error(err?.message || 'Upload failed');
+      return uris;
     } finally {
       setIsUploading(false);
     }
@@ -507,9 +591,18 @@ export default function CreateNFT() {
   const handleNext = async () => {
     if (step === 'collection') setStep('upload');
     else if (step === 'upload') {
-      if (uploadedUris.length < files.length) await uploadImages();
-      else setStep('metadata');
-    } else if (step === 'metadata') setStep('review');
+      if (files.length === 0) {
+        toast.error('Add at least one image');
+        return;
+      }
+      if (uploadedUris.length < files.length) {
+        const uris = await uploadImages();
+        if (!uris || uris.length < files.length) return;
+      }
+      setStep('metadata');
+    } else if (step === 'metadata') {
+      setStep('review');
+    }
   };
 
   const handleBack = () => {
@@ -536,6 +629,85 @@ export default function CreateNFT() {
     }
     return list;
   };
+
+  const tokenListForPublish = useCallback(() => {
+    if (mode === 'dynamic' && generatedDynamicMetadata.length > 0) {
+      return generatedDynamicMetadata;
+    }
+    return getFinalMetadataList();
+  }, [mode, generatedDynamicMetadata, files, uploadedUris, tokenMetadata, useSameMetadata, bulkName, bulkDescription]);
+
+  const ensurePublishedMetadata = useCallback(async () => {
+    let cover = resolvedCoverUri();
+    if (!cover && collectionCoverFile) {
+      try {
+        validateFile(collectionCoverFile);
+        const uploaded = await uploadToIPFS(collectionCoverFile);
+        cover = publicAssetUri(uploaded);
+        if (cover) setUploadedCoverUri(cover);
+      } catch (e) {
+        throw new Error(e?.message || 'Collection image upload failed');
+      }
+    }
+    if (!isPublicAssetUri(cover)) {
+      throw new Error('Add a collection image file or a public image URL before publishing metadata.');
+    }
+    const tokens = applyCoverImageToTokens(tokenListForPublish(), cover);
+    const fingerprint = JSON.stringify({
+      name: collectionName,
+      symbol: collectionSymbol,
+      description: collectionDescription,
+      cover,
+      tokens,
+    });
+    if (
+      fingerprint === publishedFingerprint &&
+      isPublicAssetUri(publishedMetadataUri) &&
+      publishedDescriptionHash
+    ) {
+      return {
+        metadataUri: publishedMetadataUri,
+        descriptionHash: publishedDescriptionHash,
+        coverImageUri: publishedCoverUri || cover,
+        image: publishedCoverUri || cover,
+      };
+    }
+    setIsPublishingMetadata(true);
+    try {
+      const doc = buildNftCollectionMetadataDocument({
+        name: collectionName,
+        symbol: collectionSymbol,
+        description: collectionDescription,
+        image: cover,
+        tokens,
+      });
+      const published = await publishNftCollectionMetadata(doc);
+      setPublishedMetadataUri(published.metadataUri);
+      setPublishedDescriptionHash(published.descriptionHash);
+      setPublishedCoverUri(cover);
+      setPublishedFingerprint(fingerprint);
+      toast.success('Collection metadata uploaded');
+      return {
+        metadataUri: published.metadataUri,
+        descriptionHash: published.descriptionHash,
+        coverImageUri: cover,
+        image: cover,
+      };
+    } finally {
+      setIsPublishingMetadata(false);
+    }
+  }, [
+    collectionCoverFile,
+    collectionDescription,
+    collectionName,
+    collectionSymbol,
+    publishedCoverUri,
+    publishedDescriptionHash,
+    publishedFingerprint,
+    publishedMetadataUri,
+    resolvedCoverUri,
+    tokenListForPublish,
+  ]);
 
   const exportMetadataJSON = () => {
     const list = mode === 'dynamic' && generatedDynamicMetadata.length > 0 ? generatedDynamicMetadata : getFinalMetadataList();
@@ -640,7 +812,7 @@ export default function CreateNFT() {
         createNFTMetadata({
           name: `${baseName} #${i + 1}`,
           description: collectionDescription.trim() || `${baseName} collection`,
-          imageUri: '',
+          imageUri: resolvedCoverUri([]),
           attributes: attrs
         })
       );
@@ -689,7 +861,7 @@ export default function CreateNFT() {
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-6">
             <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Create NFT</h1>
-            <p className="text-theme-tertiary">Prepare ERC-721-style metadata and, on Boing testnet with Express, deploy a collection contract. On-chain mint of individual tokens is not available on EVM yet. Solana can mint an SPL NFT.</p>
+            <p className="text-theme-tertiary">Upload images or image URLs into collection metadata. On Boing testnet with Express, deploy commits that metadata hash. On-chain mint of individual tokens is not available on EVM yet. Solana can mint an SPL NFT.</p>
           </div>
 
           {/* Mode: Standard vs Dynamic collection */}
@@ -805,6 +977,13 @@ export default function CreateNFT() {
                         className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 resize-none"
                       />
                     </div>
+                    <CollectionCoverFields
+                      imageUrl={collectionImageUrl}
+                      onImageUrlChange={(v) => { setCollectionImageUrl(v); setPublishedFingerprint(''); }}
+                      coverPreview={collectionCoverPreview}
+                      onCoverFile={onCollectionCoverFile}
+                      requiredHint="(file or URL — used in on-chain metadata)"
+                    />
                   </div>
                 )}
                 {step === 'layers' && (
@@ -865,12 +1044,20 @@ export default function CreateNFT() {
                             <input type="file" accept=".csv" onChange={handleCSVUpload} className="hidden" />
                           </label>
                         </div>
-                        <p className="text-gray-400 text-sm">Generate from your trait layers above, or upload a CSV with columns: <code className="bg-gray-700 px-1 rounded">name</code>, <code className="bg-gray-700 px-1 rounded">description</code>, and any trait columns (e.g. Background, Rarity). Max 10,000 rows.</p>
+                        <p className="text-gray-400 text-sm">Generate from your trait layers above, or upload a CSV with columns: <code className="bg-gray-700 px-1 rounded">name</code>, <code className="bg-gray-700 px-1 rounded">description</code>, optional <code className="bg-gray-700 px-1 rounded">image</code> URL, and any trait columns (e.g. Background, Rarity). Max 10,000 rows.</p>
                       </div>
                     ) : (
                       <>
                         <p className="text-green-400">Ready: {generatedDynamicMetadata.length} metadata entries.</p>
                         <div className="flex flex-wrap gap-3">
+                          <button
+                            type="button"
+                            onClick={() => ensurePublishedMetadata().catch((e) => toast.error(e?.message || 'Metadata upload failed'))}
+                            disabled={isPublishingMetadata}
+                            className="px-4 py-2 rounded-lg bg-cyan-700 hover:bg-cyan-600 text-white font-medium disabled:opacity-50"
+                          >
+                            {isPublishingMetadata ? 'Uploading metadata…' : 'Upload metadata to network'}
+                          </button>
                           <button type="button" onClick={exportMetadataJSON} className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium">
                             Export metadata JSON
                           </button>
@@ -882,12 +1069,24 @@ export default function CreateNFT() {
                             <input type="file" accept=".csv" onChange={handleCSVUpload} className="hidden" />
                           </label>
                         </div>
+                        {publishedMetadataUri ? (
+                          <p className="text-sm text-gray-400">
+                            Network metadata:{' '}
+                            <a href={publishedMetadataUri} target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline break-all">
+                              {publishedMetadataUri}
+                            </a>
+                          </p>
+                        ) : null}
                         {isBoingNativeNftWizard && generatedDynamicMetadata.length > 0 && (
                           <>
                             <NativeBoingNftDeploySection
                               embedInWizard
                               collectionName={collectionName}
                               collectionSymbol={collectionSymbol}
+                              metadataUri={publishedMetadataUri}
+                              committedDescriptionHash={publishedDescriptionHash}
+                              coverImageUri={publishedCoverUri || resolvedCoverUri(generatedDynamicMetadata.map((m) => m.image))}
+                              onEnsureMetadataPublished={ensurePublishedMetadata}
                             />
                             <div className="flex flex-wrap gap-3 mt-2">
                               <Link
@@ -909,7 +1108,15 @@ export default function CreateNFT() {
                               onClick={() => setPreviewTokenIndex(mode === 'dynamic' ? `d-${i}` : i)}
                               className="rounded-lg border border-gray-600 overflow-hidden bg-gray-800 text-left hover:border-cyan-500/50 transition-colors"
                             >
-                              <div className="aspect-square bg-gray-700 flex items-center justify-center text-2xl text-gray-500">#{i + 1}</div>
+                              {collectionCoverPreview || isPublicAssetUri(meta.image) ? (
+                                <img
+                                  src={collectionCoverPreview || meta.image}
+                                  alt={meta.name}
+                                  className="w-full aspect-square object-cover"
+                                />
+                              ) : (
+                                <div className="aspect-square bg-gray-700 flex items-center justify-center text-2xl text-gray-500">#{i + 1}</div>
+                              )}
                               <p className="p-2 text-white text-xs font-medium truncate">{meta.name}</p>
                               {meta.attributes?.length > 0 && (
                                 <p className="px-2 pb-2 text-gray-500 text-xs truncate">{meta.attributes.map((a) => `${a.trait_type}: ${a.value}`).join(' · ')}</p>
@@ -1004,6 +1211,13 @@ export default function CreateNFT() {
                     className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-transparent resize-none"
                   />
                 </div>
+                <CollectionCoverFields
+                  imageUrl={collectionImageUrl}
+                  onImageUrlChange={(v) => { setCollectionImageUrl(v); setPublishedFingerprint(''); }}
+                  coverPreview={collectionCoverPreview}
+                  onCoverFile={onCollectionCoverFile}
+                  requiredHint="(optional — first token image is used if empty)"
+                />
               </div>
             )}
 
@@ -1187,9 +1401,27 @@ export default function CreateNFT() {
                   ))}
                 </div>
                 <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => ensurePublishedMetadata().catch((e) => toast.error(e?.message || 'Metadata upload failed'))}
+                    disabled={isPublishingMetadata}
+                    className="px-4 py-2 rounded-lg bg-cyan-700 hover:bg-cyan-600 text-white font-medium disabled:opacity-50"
+                  >
+                    {isPublishingMetadata ? 'Uploading metadata…' : 'Upload metadata to network'}
+                  </button>
                   <button type="button" onClick={exportMetadataJSON} className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium">
                     Export metadata JSON
                   </button>
+                </div>
+                {publishedMetadataUri ? (
+                  <p className="text-sm text-gray-400">
+                    Network metadata:{' '}
+                    <a href={publishedMetadataUri} target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline break-all">
+                      {publishedMetadataUri}
+                    </a>
+                  </p>
+                ) : null}
+                <div className="flex flex-wrap gap-3">
                   {!isBoingNativeNftWizard && (
                     <button
                       type="button"
@@ -1206,6 +1438,10 @@ export default function CreateNFT() {
                     embedInWizard
                     collectionName={collectionName}
                     collectionSymbol={collectionSymbol}
+                    metadataUri={publishedMetadataUri}
+                    committedDescriptionHash={publishedDescriptionHash}
+                    coverImageUri={publishedCoverUri || resolvedCoverUri()}
+                    onEnsureMetadataPublished={ensurePublishedMetadata}
                   />
                 )}
                 {isBoingNativeNftWizard && (
@@ -1221,7 +1457,8 @@ export default function CreateNFT() {
                 <p className="text-gray-400 text-sm">
                   {isBoingNativeNftWizard ? (
                     <>
-                      Metadata matches ERC-721-style JSON for portability. Native deploy behavior:{' '}
+                      Metadata is uploaded with a public image URL and committed as{' '}
+                      <code className="text-xs">description_hash</code> on native deploy.{' '}
                       <Link to="/docs?section=boing-l1" className="text-cyan-400 underline">
                         Documentation → Boing L1 &amp; Express
                       </Link>
@@ -1266,7 +1503,9 @@ export default function CreateNFT() {
           const idx = isDynamic ? parseInt(previewTokenIndex.slice(2), 10) : previewTokenIndex;
           const list = isDynamic ? generatedDynamicMetadata : getFinalMetadataList();
           const meta = list[idx];
-          const imageUrl = !isDynamic && previews[idx] ? previews[idx] : null;
+          const imageUrl = (!isDynamic && previews[idx])
+            || collectionCoverPreview
+            || (isPublicAssetUri(meta?.image) ? meta.image : null);
           if (!meta) return null;
           return (
             <div
