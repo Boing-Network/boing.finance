@@ -118,6 +118,53 @@ function getQueryClient() {
   return queryClientInstance;
 }
 
+/** Default canonical, share image, and icon tags. Page-level Helmet overrides title/description. */
+function DefaultSeoTags() {
+  const { pathname } = useLocation();
+  const canonicalPath = pathname === '/' ? '' : pathname.replace(/\/+$/, '');
+  const canonical = `https://boing.finance${canonicalPath || ''}`;
+  const suffix = getBrandAssetVersionSuffix();
+  return (
+    <Helmet>
+      <link rel="icon" href={`/favicon.ico${suffix}`} sizes="48x48" />
+      <link rel="icon" type="image/svg+xml" href={`/favicon.svg${suffix}`} />
+      <link rel="icon" type="image/png" href={`/favicon-32x32.png${suffix}`} sizes="32x32" />
+      <link rel="icon" type="image/png" href={`/favicon-16x16.png${suffix}`} sizes="16x16" />
+      <link rel="icon" type="image/png" href={`/favicon-96x96.png${suffix}`} sizes="96x96" />
+      <link rel="icon" type="image/png" href={`/favicon.png${suffix}`} sizes="512x512" />
+      <link rel="canonical" href={canonical} />
+
+      {/* Farcaster Mini App Embed Meta Tags */}
+      <meta name="fc:miniapp" content={JSON.stringify({
+        version: '1',
+        imageUrl: brandShareImageAbsolute(),
+        button: {
+          title: 'Open boing.finance',
+          action: { type: 'launch_miniapp', url: 'https://boing.finance' },
+        },
+      })} />
+
+      {/* Open Graph Meta Tags for better sharing */}
+      <meta property="og:title" content="Boing Finance — DeFi That Bounces Back" />
+      <meta property="og:description" content="Deploy tokens, create pools, and trade on EVM and Solana. Swap, bridge, and launch with Boing Finance." />
+      <meta property="og:image" content={brandShareImageAbsolute()} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:image:alt" content="Boing Finance — DeFi That Bounces Back; brand mark on stone-dark background" />
+      <meta property="og:url" content={canonical} />
+      <meta property="og:type" content="website" />
+      <meta property="og:site_name" content="Boing Finance" />
+
+      {/* Twitter Card Meta Tags */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content="Boing Finance — DeFi That Bounces Back" />
+      <meta name="twitter:description" content="Deploy tokens, create pools, and trade on EVM and Solana with ease." />
+      <meta name="twitter:image" content={brandShareImageAbsolute()} />
+      <meta name="twitter:image:alt" content="Boing Finance — DeFi That Bounces Back; brand preview with medallion mark" />
+    </Helmet>
+  );
+}
+
 /** Renders "The Trade" cinematic intro only when loading the landing page (/), once per app load. Use ?noIntro=1 to skip, ?splash=1 to force-show. */
 function InitialAnimationGate({ children }) {
   const location = useLocation();
@@ -809,37 +856,7 @@ function App() {
               <BaseMiniAppWrapper>
                 <Router>
                   <InitialAnimationGate>
-                  <Helmet>
-                    <link rel="icon" type="image/png" href={`/favicon-32x32.png${getBrandAssetVersionSuffix()}`} sizes="32x32" />
-                    <link rel="icon" type="image/png" href={`/favicon-16x16.png${getBrandAssetVersionSuffix()}`} sizes="16x16" />
-                    <link rel="icon" type="image/png" href={`/favicon-96x96.png${getBrandAssetVersionSuffix()}`} sizes="96x96" />
-                    <link rel="icon" type="image/png" href={`/favicon.png${getBrandAssetVersionSuffix()}`} sizes="512x512" />
-                    
-                    {/* Farcaster Mini App Embed Meta Tags */}
-                    <meta name="fc:miniapp" content={JSON.stringify({
-                      version: '1',
-                      imageUrl: brandShareImageAbsolute(),
-                      button: {
-                        title: 'Open boing.finance',
-                        action: { type: 'launch_miniapp', url: 'https://boing.finance' },
-                      },
-                    })} />
-                    
-                    {/* Open Graph Meta Tags for better sharing */}
-                    <meta property="og:title" content="Boing Finance — DeFi That Bounces Back" />
-                    <meta property="og:description" content="Deploy tokens, create pools, and trade on EVM and Solana. Swap, bridge, and launch with Boing Finance." />
-                    <meta property="og:image" content={brandShareImageAbsolute()} />
-                    <meta property="og:image:alt" content="Boing Finance — DeFi That Bounces Back; brand mark on stone-dark background" />
-                    <meta property="og:url" content="https://boing.finance/" />
-                    <meta property="og:type" content="website" />
-                    
-                    {/* Twitter Card Meta Tags */}
-                    <meta name="twitter:card" content="summary_large_image" />
-                    <meta name="twitter:title" content="Boing Finance — DeFi That Bounces Back" />
-                    <meta name="twitter:description" content="Deploy tokens, create pools, and trade on EVM and Solana with ease." />
-                    <meta name="twitter:image" content={brandShareImageAbsolute()} />
-                    <meta name="twitter:image:alt" content="Boing Finance — DeFi That Bounces Back; brand preview with medallion mark" />
-                  </Helmet>
+                  <DefaultSeoTags />
                   <AppContent />
                   </InitialAnimationGate>
                   <Toaster
