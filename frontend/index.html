@@ -2,7 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <!-- PNG-only tab icons (with ?v=): avoids stale CDN /favicon.ico and SVG decode quirks; /favicon.ico still exists for crawlers/bookmarks. -->
+    <!-- Favicons: ICO for crawlers, SVG + PNG with ?v= so tabs stay current. -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=%VITE_ASSET_VERSION%" />
     <link rel="icon" type="image/png" href="/favicon-32x32.png?v=%VITE_ASSET_VERSION%" sizes="32x32" />
     <link rel="icon" type="image/png" href="/favicon-16x16.png?v=%VITE_ASSET_VERSION%" sizes="16x16" />
     <link rel="icon" type="image/png" href="/favicon-96x96.png?v=%VITE_ASSET_VERSION%" sizes="96x96" />
@@ -48,6 +50,8 @@
     <meta property="og:image" content="https://boing.finance/preview-image.png?v=%VITE_ASSET_VERSION%" />
     <meta property="og:image:secure_url" content="https://boing.finance/preview-image.png?v=%VITE_ASSET_VERSION%" />
     <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Boing Finance — DeFi That Bounces Back; brand mark on stone-dark background" />
     <meta property="og:site_name" content="Boing Finance" />
     <meta property="og:locale" content="en_US" />
@@ -75,7 +79,7 @@
         "url": "https://boing.finance",
         "logo": "https://boing.finance/assets/boing-logo-mark.png?v=%VITE_ASSET_VERSION%",
         "description": "Boing Finance — DeFi That Bounces Back. Deploy tokens, create liquidity pools, and trade on EVM and Solana with a user-friendly decentralized exchange (DEX).",
-        "sameAs": ["https://twitter.com/boingfinance", "https://github.com/boingfinance"],
+        "sameAs": ["https://twitter.com/boingfinance", "https://github.com/boingfinance", "https://boing.network", "https://boing.observer", "https://boing.express"],
         "contactPoint": {
           "@type": "ContactPoint",
           "url": "https://boing.finance/contact-us",

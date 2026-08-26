@@ -1,8 +1,10 @@
 {
-  "name": "Boing Finance",
-  "short_name": "boing",
+  "name": "Boing Finance — DeFi That Bounces Back",
+  "short_name": "boing.finance",
+  "description": "Swap, deploy tokens, pools, and bridge on EVM and Solana",
   "icons": [
     { "src": "/assets/boing-logo-mark.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
     { "src": "/favicon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
   ],
   "theme_color": "#06080c",

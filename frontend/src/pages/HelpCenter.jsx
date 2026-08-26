@@ -172,7 +172,8 @@ const HelpCenter = () => {
         <meta property="og:title" content="Help Center | boing.finance" />
         <meta property="og:description" content="Get help with boing.finance - Comprehensive guides and support resources." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://boing.finance/help" />
+        <meta property="og:url" content="https://boing.finance/help-center" />
+        <link rel="canonical" href="https://boing.finance/help-center" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Help Center - boing.finance" />
         <meta name="twitter:description" content="Get help with boing.finance - Support and guides." />
