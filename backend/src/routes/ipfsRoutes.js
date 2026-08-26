@@ -58,13 +58,21 @@ export const createIPFSRoutes = () => {
       const tokenSymbol = formData.get('tokenSymbol') || '';
       const description = formData.get('description') || '';
 
+      const canonicalKey = String(formData.get('canonicalKey') || '');
+      const fileBytes = await file.arrayBuffer();
+      const fileCopy = new File([fileBytes], file.name || 'upload', { type: file.type || 'application/octet-stream' });
+
       // Upload file to R2
-      const uploadResult = await r2Service.uploadFile(file, {
+      const uploadResult = await r2Service.uploadFile(fileCopy, {
         tokenName,
         tokenSymbol,
         description,
         uploadedBy: c.req.header('x-user-address') || 'unknown'
       });
+
+      if (/^metadata\/[a-f0-9]{64}\.json$/.test(canonicalKey)) {
+        await r2Service.putCanonicalJson(canonicalKey, new TextDecoder().decode(fileBytes));
+      }
 
       console.log('R2 upload successful:', uploadResult);
 

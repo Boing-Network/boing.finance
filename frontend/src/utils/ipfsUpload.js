@@ -15,11 +15,14 @@ const IPFS_GATEWAYS = [
 ];
 
 // Upload to Cloudflare R2 (Primary storage)
-const uploadToR2 = async (file) => {
+const uploadToR2 = async (file, options = {}) => {
   try {
     logger.debug('Starting R2 upload...');
     const formData = new FormData();
     formData.append('file', file);
+    if (options.canonicalKey) {
+      formData.append('canonicalKey', options.canonicalKey);
+    }
     
     const response = await fetch(apiPath('r2/upload'), {
       method: 'POST',
@@ -49,7 +52,7 @@ const uploadToR2 = async (file) => {
 };
 
 // Upload file to IPFS using available services
-export const uploadToIPFS = async (file, apiKey = null) => {
+export const uploadToIPFS = async (file, apiKey = null, options = {}) => {
   try {
     // Debug configuration
     debugIPFSConfig();
@@ -69,7 +72,7 @@ export const uploadToIPFS = async (file, apiKey = null) => {
       switch (bestKey.type) {
         case 'r2':
           console.log('Attempting R2 upload...');
-          return await uploadToR2(file);
+          return await uploadToR2(file, options);
         case 'storacha':
           console.log('Attempting Storacha Network upload...');
           return await uploadToStoracha(file, bestKey.key);
@@ -295,7 +298,7 @@ const uploadToStoracha = async (file, apiKey) => {
 };
 
 // Upload metadata to IPFS
-export const uploadMetadataToIPFS = async (metadata, apiKey = null) => {
+export const uploadMetadataToIPFS = async (metadata, apiKey = null, options = {}) => {
   try {
     console.log('Starting metadata upload to IPFS...');
     console.log('Metadata to upload:', metadata);
@@ -310,7 +313,7 @@ export const uploadMetadataToIPFS = async (metadata, apiKey = null) => {
     switch (bestKey.type) {
       case 'r2':
         console.log('Uploading metadata to R2...');
-        return await uploadMetadataToR2(metadata);
+        return await uploadMetadataToR2(metadata, options);
       case 'pinata':
         console.log('Uploading metadata to Pinata...');
         return await uploadMetadataToPinata(metadata, bestKey.key);
@@ -330,7 +333,7 @@ export const uploadMetadataToIPFS = async (metadata, apiKey = null) => {
 };
 
 // Upload metadata to R2
-const uploadMetadataToR2 = async (metadata) => {
+const uploadMetadataToR2 = async (metadata, options = {}) => {
   try {
     console.log('Creating metadata blob...');
     const metadataBlob = new Blob([JSON.stringify(metadata, null, 2)], {
@@ -349,7 +352,7 @@ const uploadMetadataToR2 = async (metadata) => {
     });
     
     console.log('Calling uploadToR2 for metadata...');
-    const result = await uploadToR2(metadataFile);
+    const result = await uploadToR2(metadataFile, options);
     console.log('Metadata upload result:', result);
     
     return result;

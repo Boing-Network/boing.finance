@@ -226,4 +226,35 @@ export class R2UploadService {
   getPublicUrl(fileName) {
     return `${this.baseUrl}/${fileName}`;
   }
+
+  /**
+   * Store compact JSON at a content-addressed key (`metadata/{blake3hex}.json`)
+   * so explorers can resolve on-chain `description_hash` without listing the bucket.
+   */
+  async putCanonicalJson(key, source) {
+    if (!/^metadata\/[a-f0-9]{64}\.json$/.test(key)) {
+      throw new Error('Invalid canonical metadata key');
+    }
+    let compact;
+    if (typeof source === 'string') {
+      compact = source;
+    } else if (source && typeof source.text === 'function') {
+      const text = await source.text();
+      try {
+        compact = JSON.stringify(JSON.parse(text));
+      } catch {
+        compact = text;
+      }
+    } else {
+      compact = JSON.stringify(source);
+    }
+    const jsonBuffer = new TextEncoder().encode(compact);
+    await this.bucket.put(key, jsonBuffer, {
+      httpMetadata: {
+        contentType: 'application/json',
+        cacheControl: 'public, max-age=31536000',
+      },
+    });
+    return `${this.baseUrl}/${key}`;
+  }
 } 
