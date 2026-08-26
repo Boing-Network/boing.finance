@@ -256,7 +256,7 @@ function PageTransitionRoutes() {
 }
 
 function AppContent() {
-  const _location = useLocation();
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [aiChatOpen, setAiChatOpen] = useState(false);
@@ -268,6 +268,7 @@ function AppContent() {
   const [toolsDropdownOpen, setToolsDropdownOpen] = useState(false);
   const [isMediumNavOpen, setIsMediumNavOpen] = useState(false);
   const mediumNavRef = useRef(null);
+  const mobileNavRef = useRef(null);
   const { isDesktopNav, isMobileNav } = useBreakpoint();
 
   useCloseOnPointerOutside(
@@ -275,6 +276,21 @@ function AppContent() {
     (node) => Boolean(mediumNavRef.current?.contains(node)),
     () => setIsMediumNavOpen(false)
   );
+
+  useCloseOnPointerOutside(
+    isMenuOpen,
+    (node) => Boolean(
+      mobileNavRef.current?.contains(node) ||
+      (node instanceof Element && node.closest('[aria-controls="mobile-primary-nav"]'))
+    ),
+    () => setIsMenuOpen(false)
+  );
+
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    document.body.classList.add('nav-scroll-lock');
+    return () => document.body.classList.remove('nav-scroll-lock');
+  }, [isMenuOpen]);
 
   const closeAllDropdowns = () => {
     setTradeAndDeployDropdownOpen(false);
@@ -299,6 +315,12 @@ function AppContent() {
     setToolsDropdownOpen(false);
     setIsMediumNavOpen(false);
   }, [isMobileNav]);
+
+  useEffect(() => {
+    setIsMenuOpen(false);
+    setIsMediumNavOpen(false);
+    closeAllDropdowns();
+  }, [location.pathname]);
   
   // Navigation is already frozen and immutable, no need to memoize
   // Using navigation directly ensures consistency
@@ -341,7 +363,6 @@ function AppContent() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const location = useLocation();
   const prefersReducedMotion = usePrefersReducedMotion();
   const isLandingPage = location.pathname === '/';
   const pageVariant = getPageVariant(location.pathname);
@@ -450,9 +471,12 @@ function AppContent() {
             {/* Mobile menu button - Show below 768px */}
             <div className="md:hidden flex-shrink-0">
               <button
+                type="button"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="text-theme-secondary hover:text-theme-primary focus:outline-none p-2 rounded-md transition-colors"
-                aria-label="Toggle menu"
+                className="text-theme-secondary hover:text-theme-primary focus:outline-none p-2 rounded-md transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
+                aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={isMenuOpen}
+                aria-controls="mobile-primary-nav"
               >
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   {isMenuOpen ? (
@@ -467,7 +491,11 @@ function AppContent() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="dropdown-menu-glass-gradient-h md:hidden border-t border-border shadow-lg">
+          <div
+            id="mobile-primary-nav"
+            ref={mobileNavRef}
+            className="dropdown-menu-glass-gradient-h md:hidden border-t border-border shadow-lg max-h-[min(75vh,calc(100dvh-4.5rem))] overflow-y-auto overscroll-contain"
+          >
             <div className="px-4 py-3 space-y-3">
               {/* Trade & Deploy Section (merged Trading + Deployment) */}
               <div className="dropdown-menu-glass-gradient-strip rounded-lg p-3 border border-border">

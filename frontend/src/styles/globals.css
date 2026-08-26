@@ -704,6 +704,10 @@ code, pre, .monospace {
   background: var(--accent-teal);
 }
 
+body.nav-scroll-lock {
+  overflow: hidden;
+}
+
 /* Medium breakpoint flyout (hamburger) — opaque panel, matches solid nav menus */
 .dropdown-menu-glass-gradient-v {
   background: var(--bg-secondary);
