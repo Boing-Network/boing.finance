@@ -77,11 +77,12 @@ export function descriptionHashHexFromTokenLaunchMetadata(doc) {
 }
 
 export async function publishTokenLaunchMetadata(doc) {
-  const result = await uploadMetadataToIPFS(doc);
+  const descriptionHash = descriptionHashHexFromTokenLaunchMetadata(doc);
+  const hashHex = descriptionHash.replace(/^0x/i, '').toLowerCase();
+  const result = await uploadMetadataToIPFS(doc, null, { canonicalKey: `metadata/${hashHex}.json` });
   const metadataUri = publicAssetUri(result);
   if (!metadataUri) {
     throw new Error('Token metadata upload returned no public URL.');
   }
-  const descriptionHash = descriptionHashHexFromTokenLaunchMetadata(doc);
   return { metadataUri, descriptionHash, doc };
 }

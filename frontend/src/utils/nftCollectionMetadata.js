@@ -69,11 +69,12 @@ export function applyCoverImageToTokens(tokens, coverUri) {
 }
 
 export async function publishNftCollectionMetadata(doc) {
-  const result = await uploadMetadataToIPFS(doc);
+  const descriptionHash = descriptionHashHexFromNftCollectionMetadata(doc);
+  const hashHex = descriptionHash.replace(/^0x/i, '').toLowerCase();
+  const result = await uploadMetadataToIPFS(doc, null, { canonicalKey: `metadata/${hashHex}.json` });
   const metadataUri = publicAssetUri(result);
   if (!metadataUri) {
     throw new Error('Metadata upload returned no public URL.');
   }
-  const descriptionHash = descriptionHashHexFromNftCollectionMetadata(doc);
   return { metadataUri, descriptionHash, doc };
 }
