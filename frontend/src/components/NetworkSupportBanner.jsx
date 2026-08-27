@@ -1,6 +1,6 @@
 import React from 'react';
 import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
-import getFeatureSupport, { getChainsWithDex } from '../config/featureSupport';
+import getFeatureSupport, { getChainsWithCreatePool, getChainsWithDex } from '../config/featureSupport';
 import { getExternalSwapUrl } from '../config/networkExternalLinks';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 
@@ -64,9 +64,11 @@ export function DexFeatureBanner({ featureLabel, currentChainId, onSwitchNetwork
     nativeConstantProductPoolHex: effectivePoolHex,
   }).hasNativeAmm;
   const chainIdsSupported =
-    nativeAmmConfigured && (featureLabel === 'Create Pool' || featureLabel === 'Liquidity')
-      ? Array.from(new Set([...chainsWithDex, BOING_NATIVE_L1_CHAIN_ID]))
-      : chainsWithDex;
+    featureLabel === 'Create Pool'
+      ? getChainsWithCreatePool()
+      : nativeAmmConfigured && featureLabel === 'Liquidity'
+        ? Array.from(new Set([...chainsWithDex, BOING_NATIVE_L1_CHAIN_ID]))
+        : chainsWithDex;
 
   return (
     <NetworkSupportBanner

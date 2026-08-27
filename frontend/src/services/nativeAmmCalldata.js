@@ -6,6 +6,8 @@
 export const SELECTOR_NATIVE_AMM_SWAP = 0x10;
 export const SELECTOR_NATIVE_AMM_ADD_LIQUIDITY = 0x11;
 export const SELECTOR_NATIVE_AMM_REMOVE_LIQUIDITY = 0x12;
+/** v2 pool: one-time `set_tokens(token_a, token_b)`. */
+export const SELECTOR_NATIVE_AMM_SET_TOKENS = 0x13;
 
 /** Storage keys matching `boing_execution::native_amm::reserve_*_key`. */
 export const NATIVE_AMM_RESERVE_A_KEY = `0x${'0'.repeat(62)}01`;
@@ -43,6 +45,19 @@ function bytesToHex(bytes) {
   return s;
 }
 
+function hex32ToBytes(hex) {
+  const t = (hex || '').trim();
+  const body = t.startsWith('0x') || t.startsWith('0X') ? t.slice(2) : t;
+  if (!/^[0-9a-fA-F]{64}$/.test(body)) {
+    throw new Error('Expected a 32-byte hex account id.');
+  }
+  const out = new Uint8Array(32);
+  for (let i = 0; i < 32; i += 1) {
+    out[i] = parseInt(body.slice(i * 2, i * 2 + 2), 16);
+  }
+  return out;
+}
+
 /** @param {bigint | number | string} direction @param {bigint | number | string} amountIn @param {bigint | number | string} minOut */
 export function encodeNativeAmmSwapCalldataHex(direction, amountIn, minOut) {
   const out = new Uint8Array(128);
@@ -60,6 +75,15 @@ export function encodeNativeAmmAddLiquidityCalldataHex(amountA, amountB, minLiqu
   out.set(amountWord(BigInt(amountA)), 32);
   out.set(amountWord(BigInt(amountB)), 64);
   out.set(amountWord(BigInt(minLiquidity)), 96);
+  return bytesToHex(out);
+}
+
+/** 96-byte `set_tokens` calldata (selector 0x13). Use 32-byte zero ids for a ledger-only leg. */
+export function encodeNativeAmmSetTokensCalldataHex(tokenAHex32, tokenBHex32) {
+  const out = new Uint8Array(96);
+  out.set(selectorWord(SELECTOR_NATIVE_AMM_SET_TOKENS), 0);
+  out.set(hex32ToBytes(tokenAHex32), 32);
+  out.set(hex32ToBytes(tokenBHex32), 64);
   return bytesToHex(out);
 }
 

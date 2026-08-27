@@ -5,6 +5,7 @@
  */
 import CONTRACTS, { getContractAddresses, getBoingNativeVmModuleId } from './contracts';
 import { BOING_NATIVE_L1_CHAIN_ID } from './networks';
+import { getUniswapV2Compat } from './uniswapV2Compat';
 
 const ZERO = '0x0000000000000000000000000000000000000000';
 
@@ -30,10 +31,11 @@ const hasDeployed = (addr) => hasDeployedAddress(addr) && addr !== ZERO;
  * @returns {{
  *   swap: 'boing' | 'native_amm' | 'aggregator' | 'external' | false,
  *   liquidity: boolean,
- *   createPool: boolean, // true for EVM DEX or native AMM add-liquidity on Boing L1
+ *   createPool: boolean, // Boing DEX factory, Uniswap/Pancake V2 compat, or native pool deploy on Boing L1
  *   deployToken: boolean,
  *   bridge: 'boing' | 'external' | false,
  *   hasDex: boolean,
+ *   hasUniswapV2: boolean,
  *   hasNativeAmm: boolean,
  *   hasTokenFactory: boolean,
  *   nativeVmDex: {
@@ -60,10 +62,11 @@ export function getFeatureSupport(chainId, options) {
     return {
       swap: onBoingNativeL1 ? false : 'aggregator',
       liquidity: false,
-      createPool: false,
+      createPool: onBoingNativeL1 || Boolean(getUniswapV2Compat(chainId)),
       deployToken: false,
       bridge: 'external',
       hasDex: false,
+      hasUniswapV2: false,
       hasNativeAmm: false,
       hasTokenFactory: false,
       nativeVmDex: emptyVmDex,
@@ -72,6 +75,7 @@ export function getFeatureSupport(chainId, options) {
 
   // EVM-only: Boing L1 (6913) has no `dexFactory` in config — use `nativeVm` + native RPC instead.
   const hasDex = hasDeployed(c.dexFactory) && hasDeployed(c.dexRouter);
+  const hasUniswapV2 = Boolean(getUniswapV2Compat(chainId));
   const hasTokenFactory = hasDeployed(c.tokenFactory);
   const hasBridge = hasDeployed(c.crossChainBridge);
 
@@ -99,12 +103,16 @@ export function getFeatureSupport(chainId, options) {
     swap: hasDex ? 'boing' : hasNativeAmm ? 'native_amm' : onBoingNativeL1 ? false : 'aggregator',
     /** EVM router/factory LP, or native CP pool add-liquidity on Boing L1. */
     liquidity: hasDex || hasNativeAmm,
-    /** EVM factory pair creation, or native pool bootstrap via add-liquidity on Boing L1. */
-    createPool: hasDex || hasNativeAmm,
+    /**
+     * Boing DEXFactory pair create, Uniswap/Pancake V2 `addLiquidity` (creates the pair),
+     * or native pool deploy + seed on Boing L1 (does not require a published canonical pool).
+     */
+    createPool: hasDex || hasUniswapV2 || hasNativeAmm || onBoingNativeL1,
     // Boing L1 uses direct bytecode deploy when TokenFactory is not deployed on-chain.
     deployToken: hasTokenFactory || onBoingNativeL1,
     bridge: hasBridge ? 'boing' : 'external',
     hasDex,
+    hasUniswapV2,
     hasNativeAmm,
     hasTokenFactory,
     nativeVmDex,
@@ -117,6 +125,13 @@ export function getFeatureSupport(chainId, options) {
  */
 export function getChainsWithDex() {
   return EVM_CHAIN_IDS.filter((id) => getFeatureSupport(id).hasDex);
+}
+
+/**
+ * Chains where Create Pool can run in-app (Boing factory, Uniswap/Pancake V2, or Boing L1 native deploy).
+ */
+export function getChainsWithCreatePool() {
+  return EVM_CHAIN_IDS.filter((id) => getFeatureSupport(id).createPool);
 }
 
 /**
@@ -177,7 +192,8 @@ export function getBoingL1FullDexReadiness(chainId, options) {
       id: 'new_pool_deploy',
       label: 'Deploy a new pool contract',
       status: 'partial',
-      detail: 'Launch wizard pool bytecode (env + Advanced); not the EVM factory form.',
+      detail:
+        'Create Pool deploys CP bytecode, set_tokens, and seeds add_liquidity. Registering on the factory needs a published factory id (or an operator).',
     },
     {
       id: 'multihop_factory',

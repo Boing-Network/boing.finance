@@ -26,7 +26,7 @@ Which features need on-chain deploys, current status, and how to enable the **DE
 | Feature | Contracts required | Status |
 |---------|-------------------|--------|
 | Deploy Token | TokenFactory | Live on TokenFactory networks |
-| Create Pool / Liquidity | DEXFactory, DEXRouter | Sepolia live; other EVM (not ETH) scripts ready |
+| Create Pool / Liquidity | DEXFactory, DEXRouter | Sepolia: Boing factory. Other EVM: Uniswap/Pancake V2 Create Pool where mapped. Liquidity page still needs Boing router. |
 | Swap | Optional (DEXRouter) | Boing DEX when factory is set; else **LI.FI** (EVM) / **Jupiter** (Solana) |
 | Bridge | Optional | External bridges / aggregator |
 | Portfolio / Analytics / token browse | No | APIs (CoinGecko, RPC, Etherscan, GeckoTerminal) |
