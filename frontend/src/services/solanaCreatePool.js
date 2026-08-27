@@ -48,7 +48,16 @@ function clusterConfig(network) {
   return network === 'mainnet' ? MAINNET : DEVNET;
 }
 
-function encodeU64LE(value) {
+export function getRaydiumCpmmCluster(network) {
+  return clusterConfig(network);
+}
+
+export function getRaydiumCpmmAuthority(programId) {
+  const [authority] = PublicKey.findProgramAddressSync([AUTH_SEED], programId);
+  return authority;
+}
+
+export function encodeU64LE(value) {
   const n = BigInt(value);
   const out = new Uint8Array(8);
   let x = n;
@@ -84,7 +93,7 @@ function pubkeyCmp(a, b) {
   return 0;
 }
 
-async function loadMint(connection, mint) {
+export async function loadMint(connection, mint) {
   try {
     const info = await getMint(connection, mint, 'confirmed', TOKEN_PROGRAM_ID);
     return { mint: info, programId: TOKEN_PROGRAM_ID };
@@ -131,7 +140,7 @@ function derivePoolKeys(programId, configId, mintA, mintB) {
   return { authority, poolId, lpMint, vaultA, vaultB, observationId };
 }
 
-async function ensureAtaIx(connection, owner, mint, tokenProgram) {
+export async function ensureAtaIx(connection, owner, mint, tokenProgram) {
   const ata = getAssociatedTokenAddressSync(mint, owner, false, tokenProgram);
   try {
     await getAccount(connection, ata, 'confirmed', tokenProgram);

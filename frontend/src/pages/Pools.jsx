@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useWallet } from '../contexts/WalletContext';
 import { useChainType } from '../contexts/SolanaWalletContext';
@@ -18,8 +18,6 @@ import {
 import { useBlockchainPools } from '../hooks/useBlockchainPools';
 import { getNetworkByChainId } from '../config/networks';
 import getFeatureSupport from '../config/featureSupport';
-import { useAchievements } from '../contexts/AchievementContext';
-import ShareCardModal from '../components/ShareCardModal';
 import { getNetworkBadgeBgClass } from '../utils/networkBadgeClasses';
 import useEscapeKey from '../hooks/useEscapeKey';
 
@@ -204,7 +202,7 @@ const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveL
 };
 
 // Pool Details Modal
-const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiquidity, onCollectFees, onLiquiditySuccess }) => {
+const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiquidity, onCollectFees }) => {
   const [activeTab, setActiveTab] = useState('details'); // 'details', 'add', 'remove'
   const [token0Amount, setToken0Amount] = useState('');
   const [token1Amount, setToken1Amount] = useState('');
@@ -223,10 +221,7 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
     setIsLoading(true);
     try {
       await onAddLiquidity(pool.address, token0Amount, token1Amount, pool.chainId);
-      onLiquiditySuccess?.();
-      setToken0Amount('');
-      setToken1Amount('');
-      setActiveTab('details');
+      onClose();
     } catch (error) {
       toast.error('Failed to add liquidity: ' + error.message);
     } finally {
@@ -238,8 +233,7 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
     setIsLoading(true);
     try {
       await onRemoveLiquidity(pool.address, removePercentage, pool.chainId);
-      setRemovePercentage(25);
-      setActiveTab('details');
+      onClose();
     } catch (error) {
       toast.error('Failed to remove liquidity: ' + error.message);
     } finally {
@@ -776,7 +770,6 @@ const Pools = () => {
   const { isConnected, account, connectWallet } = useWalletConnection();
   const { chainId } = useWallet();
   const navigate = useNavigate();
-  const { record: recordAchievement } = useAchievements() || {};
   // Wallet state initialized
   const [activeTab, setActiveTab] = useState('all-pools');
   const [selectedPool, setSelectedPool] = useState(null);
@@ -790,8 +783,6 @@ const Pools = () => {
   const [isSearching, setIsSearching] = useState(false); // Track if search is active
   const [searchPage, setSearchPage] = useState(1); // Search pagination
   const [searchLimit, setSearchLimit] = useState(50); // Initial search limit - increased from 10
-  const [shareModalOpen, setShareModalOpen] = useState(false);
-  const [shareData, setShareData] = useState(null);
   
   // Blockchain pools hook - hooks must be called unconditionally
   const blockchainPoolsHook = useBlockchainPools();
@@ -927,19 +918,33 @@ const Pools = () => {
     setIsModalOpen(true);
   };
 
-  const handleAddLiquidity = async () => {
-    toast('Use Create Pool / Liquidity to add reserves to a pair.', { icon: '💧' });
-    navigate('/create-pool');
+  const handleAddLiquidity = async (poolAddress, amount0, amount1) => {
+    const src =
+      (selectedPool && (!poolAddress || selectedPool.address === poolAddress) && selectedPool) ||
+      (Array.isArray(userPools) ? userPools.find((p) => p.address === poolAddress) : null);
+    const q = new URLSearchParams();
+    if (src?.token0?.address) q.set('tokenA', src.token0.address);
+    if (src?.token1?.address) q.set('tokenB', src.token1.address);
+    if (amount0) q.set('amountA', String(amount0));
+    if (amount1) q.set('amountB', String(amount1));
+    toast('Finish add/remove on the Liquidity page for this pair.', { icon: '💧' });
+    navigate(q.toString() ? `/liquidity?${q.toString()}` : '/liquidity');
   };
 
   const handleCollectFees = async () => {
-    toast('Fee collection from this modal is not wired yet — manage positions from Liquidity.', { icon: 'ℹ️' });
+    toast('Fees stay in the pool until you remove LP — there is no separate collect.', { icon: 'ℹ️' });
     navigate('/liquidity');
   };
 
-  const handleRemoveLiquidity = async () => {
-    toast('Remove liquidity from the Liquidity page for now.', { icon: 'ℹ️' });
-    navigate('/liquidity');
+  const handleRemoveLiquidity = async (poolAddress) => {
+    const src =
+      (selectedPool && (!poolAddress || selectedPool.address === poolAddress) && selectedPool) ||
+      (Array.isArray(userPools) ? userPools.find((p) => p.address === poolAddress) : null);
+    const q = new URLSearchParams();
+    if (src?.token0?.address) q.set('tokenA', src.token0.address);
+    if (src?.token1?.address) q.set('tokenB', src.token1.address);
+    toast('Remove LP from the Liquidity page.', { icon: 'ℹ️' });
+    navigate(q.toString() ? `/liquidity?${q.toString()}` : '/liquidity');
   };
 
   // Handle search execution
@@ -1569,21 +1574,6 @@ const Pools = () => {
         onAddLiquidity={handleAddLiquidity}
         onRemoveLiquidity={handleRemoveLiquidity}
         onCollectFees={handleCollectFees}
-        onLiquiditySuccess={() => {
-          recordAchievement?.(account, 'liquidity_add', 'first_liquidity');
-          if (selectedPool) {
-            const pair = `${selectedPool.token0?.symbol || ''}/${selectedPool.token1?.symbol || ''}`;
-            const chainName = getNetworkByChainId(selectedPool.chainId)?.name;
-            setShareData({ pair, chainName });
-            setShareModalOpen(true);
-          }
-        }}
-      />
-      <ShareCardModal
-        isOpen={shareModalOpen}
-        onClose={() => setShareModalOpen(false)}
-        type="pool"
-        data={shareData}
       />
     </>
   );

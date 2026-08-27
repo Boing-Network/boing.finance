@@ -39,13 +39,13 @@ There is **no compiler switch** that turns the Solidity tree in `contracts/` int
 
 ### What the app does today
 
-- **EVM networks:** `ethers`, ABIs under `frontend/src/artifacts/`, addresses from `frontend/src/config/contracts.js`. **Create Pool** uses Boing DEXFactory when those addresses are live (Sepolia today). On other Uniswap V2–compatible chains it calls that venue’s router `addLiquidity` (which creates the pair). BNB Smart Chain uses PancakeSwap V2.
+- **EVM networks:** `ethers`, ABIs under `frontend/src/artifacts/`, addresses from `frontend/src/config/contracts.js`. **Create Pool** uses Boing DEXFactory when those addresses are live (Sepolia today). On other Uniswap V2–compatible chains it calls that venue’s router `addLiquidity` (which creates the pair). **Liquidity** add/remove on an existing pair uses the same venue (Boing router, else Uniswap/Pancake V2). BNB Smart Chain uses PancakeSwap V2.
 - **Boing L1 (6913):** Boing RPC + Boing Express signing. `contracts.js` defines:
   - `nativeConstantProductPool` — 32-byte pool `AccountId` from `REACT_APP_BOING_NATIVE_AMM_POOL` when set; otherwise `0x00…00` until the hosted chain publishes `end_user.canonical_native_cp_pool`.
   - `nativeVm.dexFactory`, `swapRouter`, `ledgerRouterV2` / `V3`, `liquidityLocker`, plus LP vault / share token ids (env or live RPC; zeros when unpublished).
   - Runtime defaults come from **`fetchNativeDexIntegrationDefaults`** (`boing-sdk`): live `boing_getNetworkInfo.end_user` plus env overrides. Historical SDK-embedded 6913 hexes are **not** treated as live.
 
-The **Swap** tab on 6913 targets the **network default** constant-product pool. **Create Pool** on 6913 deploys a new CP pool, binds token ids, and seeds `add_liquidity`; `register_pair` runs when a factory id is published. Additional factory pairs (including multihop) are surfaced under **Pools** and **Smart route**.
+The **Swap** tab on 6913 targets the **network default** constant-product pool. **Create Pool** on 6913 deploys a new CP pool, binds token ids, and seeds `add_liquidity`; `register_pair` runs when a factory id is published. **Liquidity** add/remove works on the canonical pool, a directory venue, or a pasted pool AccountId. Additional factory pairs (including multihop) are surfaced under **Pools** and **Smart route**.
 
 ### “Deploy the Solidity DEX on Boing” actually means
 
@@ -87,6 +87,7 @@ Cross-repo: Boing VM programs must exist before this app can offer full factory/
 ### Phase 0 — shipped
 
 - [x] Native constant-product pool + **NativeAmmSwapPanel** (swap / add liquidity via Boing Express).
+- [x] **Liquidity** add/remove on existing pairs: EVM Uniswap/Pancake V2 or Boing router, Boing L1 any pool AccountId, Solana Raydium CPMM deposit/withdraw.
 - [x] `nativeVm.*` + env wiring in `contracts.js`; live RPC / env only (no historical SDK hex as live).
 - [x] EVM path unchanged: Sepolia / mainnets use **DEXFactoryV2** via ethers.
 

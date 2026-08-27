@@ -36,8 +36,12 @@ export default function BoingNativeL1Section() {
           <li>
             <strong>DEX / liquidity</strong>: <Link to="/create-pool" className={linkCls}>Create Pool</Link> deploys a new
             native constant-product pool (bytecode + <code className="text-xs">set_tokens</code> + first{' '}
-            <code className="text-xs">add_liquidity</code>) with Boing Express. When a canonical pool id is published, you can
-            also add liquidity from{' '}
+            <code className="text-xs">add_liquidity</code>) with Boing Express.{' '}
+            <Link to="/liquidity" className={linkCls}>
+              Liquidity
+            </Link>{' '}
+            adds or removes on an existing pool (canonical, directory, or a pasted AccountId). When a canonical pool id is
+            published, you can also add liquidity from{' '}
             <Link to="/swap" className={linkCls}>
               Swap
             </Link>

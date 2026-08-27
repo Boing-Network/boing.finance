@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState, lazy, Suspense } from 'react';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import { buildBoingExplorerAccountUrl } from '../config/boingExplorerUrls';
@@ -450,6 +451,13 @@ export default function NativePoolsDirectoryPanel({ onTradeThisPair, focusPoolHe
                     )}
                   </td>
                   <td className="px-3 py-2">
+                    <Link
+                      to={`/liquidity?pool=${encodeURIComponent(v.poolHex)}`}
+                      className="text-cyan-400 text-xs whitespace-nowrap hover:underline"
+                    >
+                      Add / remove
+                    </Link>
+                    {' · '}
                     <a
                       href={buildBoingExplorerAccountUrl(explorerBaseUrl, v.poolHex)}
                       target="_blank"
