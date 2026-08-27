@@ -1,5 +1,6 @@
 import { ethers } from 'ethers';
 import { getContractAddress } from '../config/contracts';
+import { getUniswapV2Compat } from '../config/uniswapV2Compat';
 
 const ERC20_ABI = [
   'function approve(address spender, uint256 amount) returns (bool)',
@@ -37,20 +38,42 @@ export function getAmountOut(amountIn, reserveIn, reserveOut) {
   return (amountInWithFee * reserveOut) / (reserveIn * 1000n + amountInWithFee);
 }
 
-export function getRouterAddress(chainId) {
-  const address = getContractAddress(chainId, 'dexRouter');
-  if (!address || address === ethers.ZeroAddress) {
-    throw new Error('DEX router is not deployed on this network.');
+/**
+ * Boing DEXFactory when live; otherwise the mapped Uniswap/Pancake V2 venue.
+ * @returns {{ factory: string, router: string, venue: string, feePercent: string } | null}
+ */
+export function getAmmVenue(chainId) {
+  const factory = getContractAddress(chainId, 'dexFactory');
+  const router = getContractAddress(chainId, 'dexRouter');
+  if (factory && factory !== ethers.ZeroAddress && router && router !== ethers.ZeroAddress) {
+    return { factory, router, venue: 'Boing DEX', feePercent: '0.3' };
   }
-  return address;
+  return getUniswapV2Compat(chainId);
+}
+
+export function getRouterAddress(chainId) {
+  const venue = getAmmVenue(chainId);
+  if (!venue?.router) {
+    throw new Error('No AMM router on this network.');
+  }
+  return venue.router;
 }
 
 export function getFactoryAddress(chainId) {
-  const address = getContractAddress(chainId, 'dexFactory');
-  if (!address || address === ethers.ZeroAddress) {
-    throw new Error('DEX factory is not deployed on this network.');
+  const venue = getAmmVenue(chainId);
+  if (!venue?.factory) {
+    throw new Error('No AMM factory on this network.');
   }
-  return address;
+  return venue.factory;
+}
+
+/** Constant-product quote for the other side of an add (no fee). */
+export function quoteTokenBForTokenA(amountA, reserveA, reserveB) {
+  const a = BigInt(amountA);
+  const ra = BigInt(reserveA);
+  const rb = BigInt(reserveB);
+  if (a <= 0n || ra <= 0n || rb <= 0n) return 0n;
+  return (a * rb) / ra;
 }
 
 export async function ensureExactAllowance(tokenAddress, spender, amount, signer) {
@@ -195,18 +218,24 @@ export async function removeLiquidityViaRouter({
 export async function readUserLpPosition({ chainId, provider, account, tokenA, tokenB }) {
   const pairAddress = await getPairAddress(chainId, tokenA, tokenB, provider);
   const pair = new ethers.Contract(pairAddress, PAIR_ABI, provider);
-  const [lp, supply, token0, reserves, symbol0, symbol1] = await Promise.all([
+  const tokenAContract = new ethers.Contract(tokenA, ERC20_ABI, provider);
+  const tokenBContract = new ethers.Contract(tokenB, ERC20_ABI, provider);
+  const [lp, supply, token0, reserves, symbol0, symbol1, decimalsA, decimalsB] = await Promise.all([
     pair.balanceOf(account),
     pair.totalSupply(),
     pair.token0(),
     pair.getReserves(),
-    new ethers.Contract(tokenA, ERC20_ABI, provider).symbol().catch(() => 'T0'),
-    new ethers.Contract(tokenB, ERC20_ABI, provider).symbol().catch(() => 'T1'),
+    tokenAContract.symbol().catch(() => 'T0'),
+    tokenBContract.symbol().catch(() => 'T1'),
+    tokenAContract.decimals().catch(() => 18),
+    tokenBContract.decimals().catch(() => 18),
   ]);
   const share = supply > 0n ? (lp * 10000n) / supply : 0n;
   const aIs0 = ethers.getAddress(tokenA) === ethers.getAddress(token0);
-  const amountA = supply > 0n ? (lp * (aIs0 ? reserves[0] : reserves[1])) / supply : 0n;
-  const amountB = supply > 0n ? (lp * (aIs0 ? reserves[1] : reserves[0])) / supply : 0n;
+  const reserveA = aIs0 ? reserves[0] : reserves[1];
+  const reserveB = aIs0 ? reserves[1] : reserves[0];
+  const amountA = supply > 0n ? (lp * reserveA) / supply : 0n;
+  const amountB = supply > 0n ? (lp * reserveB) / supply : 0n;
   return {
     pair: pairAddress,
     lp,
@@ -214,6 +243,10 @@ export async function readUserLpPosition({ chainId, provider, account, tokenA, t
     shareBps: share,
     amountA,
     amountB,
+    reserveA,
+    reserveB,
+    decimalsA: Number(decimalsA),
+    decimalsB: Number(decimalsB),
     symbol0,
     symbol1,
     tokenA,

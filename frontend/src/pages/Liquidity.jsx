@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useWalletConnection } from '../hooks/useWalletConnection';
@@ -7,14 +7,13 @@ import axios from 'axios';
 import { apiPath } from '../config';
 import { useWallet } from '../contexts/WalletContext';
 import { useChainType } from '../contexts/SolanaWalletContext';
-import { LiquiditySolanaContent } from '../components/SolanaFeaturePlaceholder';
+import SolanaLiquidityPanel from '../components/SolanaLiquidityPanel';
 import { Helmet } from 'react-helmet-async';
 import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { DexFeatureBanner } from '../components/NetworkSupportBanner';
-import getFeatureSupport from '../config/featureSupport';
-import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
-import NativeAmmSwapPanel from '../components/NativeAmmSwapPanel';
+import NativeBoingManagePoolPanel from '../components/NativeBoingManagePoolPanel';
 import NativeAmmLpVaultPanel from '../components/NativeAmmLpVaultPanel';
+import NativeLiquidityPositionsPanel from '../components/NativeLiquidityPositionsPanel';
 import EvmLiquidityManagePanel from '../components/EvmLiquidityManagePanel';
 import EmptyState from '../components/EmptyState';
 
@@ -22,15 +21,6 @@ const Liquidity = () => {
   const { isSolana } = useChainType();
   const { isConnected, account, connectWallet } = useWalletConnection();
   const { chainId, switchNetwork } = useWallet();
-  const { effectivePoolHex } = useBoingNativeDexIntegration();
-  const featureSupport = useMemo(
-    () =>
-      getFeatureSupport(Number(chainId) || 0, {
-        nativeConstantProductPoolHex:
-          Number(chainId) === BOING_NATIVE_L1_CHAIN_ID ? effectivePoolHex : undefined,
-      }),
-    [chainId, effectivePoolHex]
-  );
   const [_settingsOpen, _setSettingsOpen] = useState(false);
   const [_settings, setSettings] = useState(() => {
     const saved = localStorage.getItem('swapSettings');
@@ -116,7 +106,7 @@ const Liquidity = () => {
     localStorage.setItem('liquiditySettings', JSON.stringify(newSettings));
   };
 
-  if (isSolana) return <LiquiditySolanaContent />;
+  if (isSolana) return <SolanaLiquidityPanel />;
 
   // Show connect wallet message if not connected
   if (!isConnected || !account) {
@@ -168,28 +158,24 @@ const Liquidity = () => {
       <div className="relative w-full min-w-0">{/* Main Content Container */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <DexFeatureBanner featureLabel="Liquidity" currentChainId={chainId} onSwitchNetwork={switchNetwork} />
-          {featureSupport.swap === 'native_amm' && Number(chainId) === BOING_NATIVE_L1_CHAIN_ID && (
-            <div
-              className="mb-6 rounded-xl border p-5 text-left"
-              style={{
-                borderColor: 'rgba(45, 212, 191, 0.45)',
-                backgroundColor: 'rgba(15, 23, 42, 0.9)',
-              }}
-            >
-              <h2 className="text-lg font-semibold text-white mb-2">Boing testnet — add native pool liquidity</h2>
-              <p className="text-sm text-gray-300 mb-4">
-                Use Boing Express below to add reserves to the configured constant-product pool. Swap from the{' '}
-                <Link to="/swap" className="text-cyan-400 underline font-medium">
-                  Swap
-                </Link>{' '}
-                page uses the same pool.
-              </p>
-              <NativeAmmSwapPanel defaultOpenAddLiquidity slippagePercent={_settings.slippage} />
-              <NativeAmmLpVaultPanel compact />
+          {Number(chainId) === BOING_NATIVE_L1_CHAIN_ID ? (
+            <div className="mb-6">
+              <NativeBoingManagePoolPanel />
+              <NativeLiquidityPositionsPanel />
+              <details className="mt-4">
+                <summary
+                  className="cursor-pointer text-sm font-medium"
+                  style={{ color: 'var(--text-secondary)' }}
+                >
+                  Advanced — LP vault (share token)
+                </summary>
+                <div className="mt-3">
+                  <NativeAmmLpVaultPanel compact />
+                </div>
+              </details>
             </div>
-          )}
-          {featureSupport.swap !== 'native_amm' && isConnected && (
-            <EvmLiquidityManagePanel />
+          ) : (
+            isConnected && <EvmLiquidityManagePanel />
           )}
           {/* Header */}
           <div className="text-center mb-6 sm:mb-8">
@@ -345,9 +331,7 @@ const Liquidity = () => {
                     to="/create-pool"
                     className="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition duration-200 text-center block text-sm sm:text-base"
                   >
-                    {featureSupport.swap === 'native_amm' && Number(chainId) === BOING_NATIVE_L1_CHAIN_ID
-                      ? 'Add pool liquidity'
-                      : 'Create New Pair'}
+                    {Number(chainId) === BOING_NATIVE_L1_CHAIN_ID ? 'Create a new pool' : 'Create New Pair'}
                   </Link>
                   <Link
                     to="/deploy-token"

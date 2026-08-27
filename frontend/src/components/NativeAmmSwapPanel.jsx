@@ -15,7 +15,7 @@ import {
   constantProductAmountOut,
   parseNativeAmmReserveU128,
 } from '../services/nativeAmmCalldata';
-import { nativeConstantProductPoolAccessListJson } from '../services/nativeAmmAccessList';
+import { nativeAccountsAccessListJson } from '../services/nativeAmmAccessList';
 import { boingExpressContractCallSignSimulateSubmit } from '../services/boingExpressNativeTx';
 import { getWindowBoingProvider } from '../utils/boingWalletDiscovery';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
@@ -181,9 +181,14 @@ export default function NativeAmmSwapPanel({
   const removeLpBn = useMemo(() => parsePositiveBigInt(removeLp), [removeLp]);
 
   const expressTxBase = useCallback(() => {
-    const accessList = nativeConstantProductPoolAccessListJson(account, pool);
+    const accessList = nativeAccountsAccessListJson([
+      account,
+      pool,
+      venueForPool?.tokenAHex,
+      venueForPool?.tokenBHex,
+    ]);
     return accessList ? { access_list: accessList } : {};
-  }, [account, pool]);
+  }, [account, pool, venueForPool]);
 
   const onSwap = async () => {
     if (chainId !== BOING_NATIVE_L1_CHAIN_ID || walletType !== 'boingExpress' || !isConnected) {

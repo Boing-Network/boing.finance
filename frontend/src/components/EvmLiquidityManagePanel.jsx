@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ethers } from 'ethers';
 import toast from 'react-hot-toast';
 import { useWallet } from '../contexts/WalletContext';
 import {
   addLiquidityViaRouter,
+  getAmmVenue,
+  quoteTokenBForTokenA,
   readUserLpPosition,
   removeLiquidityViaRouter,
 } from '../services/evmAmmPairActions';
@@ -17,15 +19,23 @@ function isAddr(v) {
   }
 }
 
+function applySlippage(amount, bps = 50) {
+  return (amount * (10_000n - BigInt(bps))) / 10_000n;
+}
+
 /**
- * On-chain add / remove for an existing EVM pair. Fees are realized on remove.
+ * On-chain add / remove for an existing EVM pair (Boing DEX or Uniswap/Pancake V2).
+ * Fees are realized on remove.
  */
 export default function EvmLiquidityManagePanel() {
   const { chainId, account, provider, signer, isConnected } = useWallet();
-  const [tokenA, setTokenA] = useState('');
-  const [tokenB, setTokenB] = useState('');
-  const [amountA, setAmountA] = useState('');
-  const [amountB, setAmountB] = useState('');
+  const [searchParams] = useSearchParams();
+  const venue = useMemo(() => getAmmVenue(Number(chainId) || 0), [chainId]);
+  const [tokenA, setTokenA] = useState(() => searchParams.get('tokenA') || '');
+  const [tokenB, setTokenB] = useState(() => searchParams.get('tokenB') || '');
+  const [amountA, setAmountA] = useState(() => searchParams.get('amountA') || '');
+  const [amountB, setAmountB] = useState(() => searchParams.get('amountB') || '');
+  const [quoteLocked, setQuoteLocked] = useState(() => Boolean(searchParams.get('amountB')));
   const [removePct, setRemovePct] = useState('25');
   const [position, setPosition] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -48,18 +58,54 @@ export default function EvmLiquidityManagePanel() {
       if (pos.lp === 0n) toast('No LP in this pair for the connected wallet.');
     } catch (e) {
       setPosition(null);
-      toast.error(e?.message || 'Could not read pair.');
+      toast.error(e?.message || 'Could not read pair. Create it first if it does not exist.');
     }
   };
+
+  useEffect(() => {
+    if (!isAddr(tokenA) || !isAddr(tokenB) || !account || !provider) return undefined;
+    let cancelled = false;
+    readUserLpPosition({
+      chainId,
+      provider,
+      account,
+      tokenA: ethers.getAddress(tokenA),
+      tokenB: ethers.getAddress(tokenB),
+    })
+      .then((pos) => {
+        if (!cancelled) setPosition(pos);
+      })
+      .catch(() => {
+        if (!cancelled) setPosition(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [tokenA, tokenB, account, provider, chainId]);
+
+  useEffect(() => {
+    if (!position || quoteLocked) return;
+    const decA = position.decimalsA ?? 18;
+    try {
+      const a = ethers.parseUnits(amountA || '0', decA);
+      if (a <= 0n || position.reserveA <= 0n) return;
+      const b = quoteTokenBForTokenA(a, position.reserveA, position.reserveB);
+      setAmountB(ethers.formatUnits(b, position.decimalsB ?? 18));
+    } catch {
+      /* ignore incomplete input */
+    }
+  }, [amountA, position, quoteLocked]);
 
   const onAdd = async () => {
     if (!isConnected) return toast.error('Connect your wallet.');
     if (!isAddr(tokenA) || !isAddr(tokenB)) return toast.error('Enter valid token addresses.');
+    const decA = position?.decimalsA ?? 18;
+    const decB = position?.decimalsB ?? 18;
     let a;
     let b;
     try {
-      a = ethers.parseUnits(amountA || '0', 18);
-      b = ethers.parseUnits(amountB || '0', 18);
+      a = ethers.parseUnits(amountA || '0', decA);
+      b = ethers.parseUnits(amountB || '0', decB);
     } catch {
       toast.error('Enter valid amounts.');
       return;
@@ -68,8 +114,6 @@ export default function EvmLiquidityManagePanel() {
     setBusy(true);
     try {
       if (!signer) throw new Error('Connect an EVM wallet first.');
-      const minA = (a * 95n) / 100n;
-      const minB = (b * 95n) / 100n;
       const result = await addLiquidityViaRouter({
         chainId,
         signer,
@@ -77,8 +121,8 @@ export default function EvmLiquidityManagePanel() {
         tokenB: ethers.getAddress(tokenB),
         amountADesired: a,
         amountBDesired: b,
-        amountAMin: minA,
-        amountBMin: minB,
+        amountAMin: applySlippage(a),
+        amountBMin: applySlippage(b),
       });
       toast.success(`Liquidity added. ${result.hash.slice(0, 10)}…`);
       setAmountA('');
@@ -99,14 +143,16 @@ export default function EvmLiquidityManagePanel() {
     setBusy(true);
     try {
       if (!signer) throw new Error('Connect an EVM wallet first.');
+      const outA = (position.amountA * BigInt(pct)) / 100n;
+      const outB = (position.amountB * BigInt(pct)) / 100n;
       const result = await removeLiquidityViaRouter({
         chainId,
         signer,
         tokenA: position.tokenA,
         tokenB: position.tokenB,
         liquidity,
-        amountAMin: 0n,
-        amountBMin: 0n,
+        amountAMin: applySlippage(outA),
+        amountBMin: applySlippage(outB),
       });
       toast.success(`Removed ${pct}% LP. ${result.hash.slice(0, 10)}…`);
       await loadPosition();
@@ -116,6 +162,17 @@ export default function EvmLiquidityManagePanel() {
       setBusy(false);
     }
   };
+
+  if (!venue) {
+    return (
+      <section
+        className="rounded-xl border p-5 text-left mb-6 text-sm"
+        style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}
+      >
+        This network has no in-app AMM for existing pairs. Switch network or create the pair on that chain’s DEX.
+      </section>
+    );
+  }
 
   const fieldClass = 'w-full text-sm p-2 rounded-lg border font-mono';
   const fieldStyle = {
@@ -133,8 +190,8 @@ export default function EvmLiquidityManagePanel() {
         Manage an existing pair
       </h2>
       <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-        Fees stay in the pool and are realized when you remove LP — there is no separate Collect.
-        New pairs must be created in one transaction on{' '}
+        Add or remove on a live {venue.venue} pair ({venue.feePercent}% swap fee). Fees stay in the pool until you
+        remove LP. New pairs:{' '}
         <Link to="/create-pool" className="text-cyan-400 underline">
           Create Pool
         </Link>
@@ -148,7 +205,10 @@ export default function EvmLiquidityManagePanel() {
             className={`${fieldClass} mt-1`}
             style={fieldStyle}
             value={tokenA}
-            onChange={(e) => setTokenA(e.target.value.trim())}
+            onChange={(e) => {
+              setTokenA(e.target.value.trim());
+              setPosition(null);
+            }}
             placeholder="0x…"
             spellCheck={false}
           />
@@ -159,7 +219,10 @@ export default function EvmLiquidityManagePanel() {
             className={`${fieldClass} mt-1`}
             style={fieldStyle}
             value={tokenB}
-            onChange={(e) => setTokenB(e.target.value.trim())}
+            onChange={(e) => {
+              setTokenB(e.target.value.trim());
+              setPosition(null);
+            }}
             placeholder="0x…"
             spellCheck={false}
           />
@@ -170,7 +233,10 @@ export default function EvmLiquidityManagePanel() {
             className={`${fieldClass} mt-1`}
             style={fieldStyle}
             value={amountA}
-            onChange={(e) => setAmountA(e.target.value)}
+            onChange={(e) => {
+              setQuoteLocked(false);
+              setAmountA(e.target.value);
+            }}
             placeholder="0.0"
           />
         </label>
@@ -180,8 +246,11 @@ export default function EvmLiquidityManagePanel() {
             className={`${fieldClass} mt-1`}
             style={fieldStyle}
             value={amountB}
-            onChange={(e) => setAmountB(e.target.value)}
-            placeholder="0.0"
+            onChange={(e) => {
+              setQuoteLocked(true);
+              setAmountB(e.target.value);
+            }}
+            placeholder={position ? 'quoted from reserves' : '0.0'}
           />
         </label>
       </div>
@@ -218,6 +287,10 @@ export default function EvmLiquidityManagePanel() {
           <p>
             Your LP: {position.lp.toString()} · share {(Number(position.shareBps) / 100).toFixed(2)}% ·{' '}
             {position.symbol0}/{position.symbol1}
+          </p>
+          <p>
+            Your share ≈ {ethers.formatUnits(position.amountA, position.decimalsA)} {position.symbol0} +{' '}
+            {ethers.formatUnits(position.amountB, position.decimalsB)} {position.symbol1}
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <label className="text-xs">

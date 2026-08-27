@@ -61,7 +61,7 @@ export function getFeatureSupport(chainId, options) {
     const onBoingNativeL1 = chainId === BOING_NATIVE_L1_CHAIN_ID;
     return {
       swap: onBoingNativeL1 ? false : 'aggregator',
-      liquidity: false,
+      liquidity: onBoingNativeL1 || Boolean(getUniswapV2Compat(chainId)),
       createPool: onBoingNativeL1 || Boolean(getUniswapV2Compat(chainId)),
       deployToken: false,
       bridge: 'external',
@@ -101,8 +101,8 @@ export function getFeatureSupport(chainId, options) {
 
   return {
     swap: hasDex ? 'boing' : hasNativeAmm ? 'native_amm' : onBoingNativeL1 ? false : 'aggregator',
-    /** EVM router/factory LP, or native CP pool add-liquidity on Boing L1. */
-    liquidity: hasDex || hasNativeAmm,
+    /** Boing DEX, Uniswap/Pancake V2, or native CP add/remove on Boing L1. */
+    liquidity: hasDex || hasUniswapV2 || hasNativeAmm || onBoingNativeL1,
     /**
      * Boing DEXFactory pair create, Uniswap/Pancake V2 `addLiquidity` (creates the pair),
      * or native pool deploy + seed on Boing L1 (does not require a published canonical pool).
@@ -132,6 +132,11 @@ export function getChainsWithDex() {
  */
 export function getChainsWithCreatePool() {
   return EVM_CHAIN_IDS.filter((id) => getFeatureSupport(id).createPool);
+}
+
+/** Chains where in-app add/remove on an existing pair is available. */
+export function getChainsWithLiquidity() {
+  return EVM_CHAIN_IDS.filter((id) => getFeatureSupport(id).liquidity);
 }
 
 /**
@@ -184,9 +189,10 @@ export function getBoingL1FullDexReadiness(chainId, options) {
     },
     {
       id: 'cp_liquidity',
-      label: 'Add liquidity (same pool)',
-      status: fs.hasNativeAmm ? 'live' : 'planned',
-      detail: 'Same flow as the native swap panel / Create Pool (Boing) section.',
+      label: 'Add / remove liquidity',
+      status: 'live',
+      detail:
+        'Liquidity page: pick a directory pool or paste an AccountId, then add_liquidity / remove_liquidity via Boing Express. Canonical-pool add also remains on Swap.',
     },
     {
       id: 'new_pool_deploy',

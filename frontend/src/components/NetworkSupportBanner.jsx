@@ -1,6 +1,6 @@
 import React from 'react';
 import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
-import getFeatureSupport, { getChainsWithCreatePool, getChainsWithDex } from '../config/featureSupport';
+import getFeatureSupport, { getChainsWithCreatePool, getChainsWithDex, getChainsWithLiquidity } from '../config/featureSupport';
 import { getExternalSwapUrl } from '../config/networkExternalLinks';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 
@@ -55,7 +55,7 @@ export default function NetworkSupportBanner({ featureLabel, chainIdsSupported, 
 
 /**
  * Convenience wrapper for DEX features (Create Pool, Liquidity).
- * Boing L1 testnet counts as supported when a native constant-product pool id is configured (add liquidity / swap in-app).
+ * Liquidity / Create Pool include Uniswap/Pancake V2-mapped EVM chains and Boing L1 (6913).
  */
 export function DexFeatureBanner({ featureLabel, currentChainId, onSwitchNetwork }) {
   const { effectivePoolHex } = useBoingNativeDexIntegration();
@@ -66,9 +66,11 @@ export function DexFeatureBanner({ featureLabel, currentChainId, onSwitchNetwork
   const chainIdsSupported =
     featureLabel === 'Create Pool'
       ? getChainsWithCreatePool()
-      : nativeAmmConfigured && featureLabel === 'Liquidity'
-        ? Array.from(new Set([...chainsWithDex, BOING_NATIVE_L1_CHAIN_ID]))
-        : chainsWithDex;
+      : featureLabel === 'Liquidity'
+        ? getChainsWithLiquidity()
+        : nativeAmmConfigured
+          ? Array.from(new Set([...chainsWithDex, BOING_NATIVE_L1_CHAIN_ID]))
+          : chainsWithDex;
 
   return (
     <NetworkSupportBanner
