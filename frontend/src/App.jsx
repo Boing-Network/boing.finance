@@ -25,7 +25,6 @@ import ShootingStars from './components/ShootingStars';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
 import TickerBar from './components/TickerBar';
-import DevnetCurrencyDisclaimer from './components/DevnetCurrencyDisclaimer';
 import AppShellVisualLayer from './components/AppShellVisualLayer';
 import CinematicIntro, { shouldShowCinematicIntro } from './components/CinematicIntro';
 import { getPageVariant } from './utils/pageVariant';
@@ -709,7 +708,6 @@ function AppContent() {
         {/* Page Content with Error Boundary and Suspense — scroll container for long home content */}
         <ErrorBoundary>
           <div className="relative z-10 flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden pb-6 sm:pb-8">
-            <DevnetCurrencyDisclaimer />
             <Suspense fallback={<LoadingSpinner />}>
               <PageTransitionRoutes />
             </Suspense>
