@@ -49,12 +49,13 @@ If you deploy Boing contracts (TokenFactory, DEX, etc.) on this chain, add an en
 - Copy the structure from an existing chain (e.g. Sepolia or Ethereum).
 - Set each deployed contract address; use `'0x0000000000000000000000000000000000000000'` for not-yet-deployed contracts.
 - **TokenFactory / TokenImplementation:** Required for **Deploy Token**.
-- **dexFactory / dexRouter / weth:** Required for **Swap (Boing DEX)**, **Liquidity**, and **Create Pool**. Ethereum is not in the current DEX rollout; see [contracts.md](./contracts.md).
+- **dexFactory / dexRouter / weth:** Required for **Swap (Boing DEX)** and **Liquidity**. **Create Pool** also works on Uniswap V2–compatible venues listed in `frontend/src/config/uniswapV2Compat.js` (PancakeSwap V2 on BNB). Ethereum is not in the Boing DEX rollout; see [contracts.md](./contracts.md).
 
 After this step:
 
 - **Deploy Token** works on this chain if `tokenFactory` (and `tokenImplementation`) are set.
-- **Create Pool** and **Liquidity** use the Boing DEX on this chain only if `dexFactory` and `dexRouter` are non-zero.
+- **Create Pool** uses the Boing DEX when `dexFactory` and `dexRouter` are non-zero; otherwise it uses a mapped Uniswap/Pancake V2 factory if one exists for the chain.
+- **Liquidity** uses the Boing DEX on this chain only if `dexFactory` and `dexRouter` are non-zero.
 - **Feature support** is derived in `frontend/src/config/featureSupport.js` from these addresses (no need to edit that file when adding a chain).
 
 ## 3. Optional: Backend / env
@@ -72,7 +73,7 @@ After this step:
 
 No need to change:
 
-- `featureSupport.js` (reads from `contracts.js`)
+- `featureSupport.js` (reads from `contracts.js`; Create Pool also reads `uniswapV2Compat.js`)
 - `useNetwork.js` (reads from `networks.js`)
 - Bridge or other pages that use `getSupportedNetworks()` or `getNetworkByChainId()`
 

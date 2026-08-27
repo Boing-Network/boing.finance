@@ -34,11 +34,14 @@ export default function BoingNativeL1Section() {
             when you are on Boing testnet with Boing Express connected.
           </li>
           <li>
-            <strong>DEX / liquidity</strong>: when a native constant-product pool is configured, add liquidity and swap from{' '}
+            <strong>DEX / liquidity</strong>: <Link to="/create-pool" className={linkCls}>Create Pool</Link> deploys a new
+            native constant-product pool (bytecode + <code className="text-xs">set_tokens</code> + first{' '}
+            <code className="text-xs">add_liquidity</code>) with Boing Express. When a canonical pool id is published, you can
+            also add liquidity from{' '}
             <Link to="/swap" className={linkCls}>
               Swap
             </Link>
-            ; there is no separate EVM-style factory deploy on that chain in this app.
+            . Extra factory pairs show under Pools / Smart route after <code className="text-xs">register_pair</code>.
           </li>
         </ul>
       </div>
@@ -105,6 +108,19 @@ export default function BoingNativeL1Section() {
             Native VM tools
           </Link>
           .
+        </p>
+      </div>
+
+      <div>
+        <h3 className="text-2xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
+          Native Create Pool
+        </h3>
+        <p className="mb-3" style={{ color: 'var(--text-secondary)' }}>
+          With Boing testnet + Boing Express, <Link to="/create-pool" className={linkCls}>Create Pool</Link> deploys CP pool
+          bytecode, calls <code className="text-xs">set_tokens</code>, then seeds <code className="text-xs">add_liquidity</code>.
+          If a factory module id is published, it also tries <code className="text-xs">register_pair</code>. Operators still
+          need pool bytecode in env (or Advanced paste). Hosted Fly testnet currently has no published canonical pool — new
+          pools you deploy are yours until registered.
         </p>
       </div>
 

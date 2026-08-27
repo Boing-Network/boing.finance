@@ -15,6 +15,25 @@ export function nativeConstantProductPoolAccessListJson(senderAccountHex, poolAc
 }
 
 /**
+ * Access list covering the sender plus every 32-byte account the call reads/writes
+ * (pool, token legs, factory).
+ * @param {Array<string | null | undefined>} accountHexes
+ * @returns {{ read: string[], write: string[] } | null}
+ */
+export function nativeAccountsAccessListJson(accountHexes) {
+  const ids = [];
+  const seen = new Set();
+  for (const raw of accountHexes || []) {
+    const n = normalizeBoingFaucetAccountHex(raw);
+    if (!n || seen.has(n)) continue;
+    seen.add(n);
+    ids.push(n);
+  }
+  if (ids.length < 2) return null;
+  return { read: ids, write: ids };
+}
+
+/**
  * Access list for multihop router `contract_call`: sender + router + every pool touched.
  * @param {string} senderAccountHex
  * @param {string} routerAccountHex

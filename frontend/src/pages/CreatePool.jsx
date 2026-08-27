@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useWallet } from '../contexts/WalletContext';
 import { useChainType } from '../contexts/SolanaWalletContext';
-import { CreatePoolSolanaContent } from '../components/SolanaFeaturePlaceholder';
+import SolanaCreatePoolPanel from '../components/SolanaCreatePoolPanel';
 import toast from 'react-hot-toast';
 import { ethers } from 'ethers';
 import DEXFactoryABI from '../artifacts/DEXFactory.json';
@@ -12,9 +12,12 @@ import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/network
 import { DexFeatureBanner } from '../components/NetworkSupportBanner';
 import { useAchievements } from '../contexts/AchievementContext';
 import ShareCardModal from '../components/ShareCardModal';
-import NativeBoingPoolDeploySection from '../components/NativeBoingPoolDeploySection';
+import NativeBoingCreatePoolPanel from '../components/NativeBoingCreatePoolPanel';
 import NativeAmmSwapPanel from '../components/NativeAmmSwapPanel';
 import getFeatureSupport from '../config/featureSupport';
+import { getUniswapV2Compat } from '../config/uniswapV2Compat';
+import { createUniswapV2PoolWithLiquidity } from '../services/evmUniswapV2CreatePool';
+import { getExternalSwapUrl } from '../config/networkExternalLinks';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import { showDeployCelebration } from '../utils/deployCelebration';
 import { fetchTradeableEvmTokenAddressesFromDexFactory } from '../services/evmDexTradeableTokens';
@@ -68,7 +71,7 @@ function ToggleButton({ enabled, onToggle, disabled, size = "md" }) {
 function CreatePool() {
   const { isSolana } = useChainType();
   const { isConnected, account, connectWallet } = useWalletConnection();
-  const { chainId, switchNetwork } = useWallet();
+  const { chainId, switchNetwork, signer, provider } = useWallet();
   const { record: recordAchievement } = useAchievements() || {};
   const { effectivePoolHex } = useBoingNativeDexIntegration();
   const featureSupport = useMemo(
@@ -79,6 +82,21 @@ function CreatePool() {
       }),
     [chainId, effectivePoolHex]
   );
+  const evmCreateVenue = useMemo(() => {
+    if (Number(chainId) === BOING_NATIVE_L1_CHAIN_ID) return null;
+    if (featureSupport.hasDex) {
+      const factory = getContractAddress(chainId, 'dexFactory');
+      return {
+        kind: 'boing',
+        venue: 'Boing DEX',
+        feePercent: '0.3',
+        factory,
+        router: getContractAddress(chainId, 'dexRouter'),
+        spender: factory,
+      };
+    }
+    return getUniswapV2Compat(Number(chainId));
+  }, [chainId, featureSupport.hasDex]);
 
   // Add CSS for range slider
   useEffect(() => {
@@ -246,51 +264,43 @@ function CreatePool() {
 
   // Get DEXFactory contract instance
   const getDEXFactoryContract = async () => {
-    if (!window.ethereum || !chainId) return null;
+    if (!signer || !chainId) return null;
     if (chainId === BOING_NATIVE_L1_CHAIN_ID) {
-      if (featureSupport.hasNativeAmm) {
-        toast.error(
-          'On Boing testnet, add liquidity via the native pool (Swap page, Boing Express). This factory form is for EVM networks only.'
-        );
-      } else {
-        toast.error(
-          'On Boing testnet, use Deploy Token / Native VM. This factory form requires an EVM-configured network.'
-        );
-      }
+      toast.error(
+        'On Boing testnet, create a pool with the native wizard above (Boing Express). This factory form is for EVM networks only.'
+      );
       return null;
     }
     const factoryAddress = getContractAddress(chainId, 'dexFactory');
     if (!factoryAddress || factoryAddress === ethers.ZeroAddress) {
-      toast.error('DEX factory is not deployed on this network yet. Protocol deploy is required before Create Pool (funding).');
       return null;
     }
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
     return new ethers.Contract(factoryAddress, DEXFactoryABI.abi, signer);
   };
 
-  // Check token allowances for the factory
+  // Check token allowances for the factory or Uniswap-compatible router
   const checkTokenAllowances = async () => {
     if (!token0 || !token1 || !account) return;
+    const spender = evmCreateVenue?.spender;
+    if (!spender || spender === ethers.ZeroAddress) return;
+    const runner = provider || (typeof window !== 'undefined' && window.ethereum
+      ? new ethers.BrowserProvider(window.ethereum)
+      : null);
+    if (!runner) return;
     
     setIsCheckingAllowances(true);
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const factoryAddress = getContractAddress(chainId, 'dexFactory');
-      
-      // Get token contracts
       const token0Contract = new ethers.Contract(token0, [
         'function allowance(address owner, address spender) external view returns (uint256)'
-      ], provider);
+      ], runner);
       
       const token1Contract = new ethers.Contract(token1, [
         'function allowance(address owner, address spender) external view returns (uint256)'
-      ], provider);
+      ], runner);
       
-      // Check allowances
       const [allowance0, allowance1] = await Promise.all([
-        token0Contract.allowance(account, factoryAddress),
-        token1Contract.allowance(account, factoryAddress)
+        token0Contract.allowance(account, spender),
+        token1Contract.allowance(account, spender)
       ]);
       
       setToken0Allowance(allowance0);
@@ -628,7 +638,7 @@ function CreatePool() {
     }
 
     // Validate liquidity lock parameters
-    if (enableLiquidityLock && lockDuration <= 0) {
+    if (featureSupport.hasDex && enableLiquidityLock && lockDuration <= 0) {
       toast.error('Lock duration must be greater than 0 when liquidity locking is enabled');
       return;
     }
@@ -674,14 +684,73 @@ function CreatePool() {
     setTransactionStatus('pending');
 
     try {
-      // Get provider and signer
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      
-      // Get DEXFactory contract
+      if (!signer || !provider) {
+        throw new Error('Connect an EVM wallet to create this pool.');
+      }
+
+      if (!featureSupport.hasDex) {
+        if (!evmCreateVenue) {
+          throw new Error('No AMM factory is available on this network.');
+        }
+        const v2Decimals0 = token0Info ? token0Info.decimals : 18;
+        const v2Decimals1 = token1Info ? token1Info.decimals : 18;
+        const v2Amount0 = ethers.parseUnits(token0Amount, v2Decimals0);
+        const v2Amount1 = ethers.parseUnits(token1Amount, v2Decimals1);
+        toast(`Creating this pair on ${evmCreateVenue.venue}. Confirm approvals and add-liquidity in your wallet.`, {
+          duration: 5000,
+          icon: 'ℹ️',
+        });
+        const created = await createUniswapV2PoolWithLiquidity({
+          signer,
+          factoryAddress: evmCreateVenue.factory,
+          routerAddress: evmCreateVenue.router,
+          tokenA: token0,
+          tokenB: token1,
+          amountADesired: v2Amount0,
+          amountBDesired: v2Amount1,
+          recipient: account,
+        });
+        setTransactionHash(created.txHash);
+        const poolExplorerBase = getNetworkByChainId(chainId)?.explorer;
+        showDeployCelebration({
+          deploymentKind: `${evmCreateVenue.venue} pool`,
+          details: [
+            { label: 'Pair', value: `${getToken0Symbol()} / ${getToken1Symbol()}` },
+            { label: 'Pool address', value: created.pairAddress },
+            { label: 'Network', value: getNetworkByChainId(chainId)?.name || '—' },
+            { label: 'Fee', value: `${evmCreateVenue.feePercent}%` },
+          ],
+          txHash: created.txHash,
+          contractAddress: created.pairAddress,
+          evmExplorerBaseUrl: poolExplorerBase,
+        });
+        setTransactionStatus('success');
+        const pair = `${getToken0Symbol()}/${getToken1Symbol()}`;
+        const chainName = getNetworkByChainId(chainId)?.name;
+        setShareData({ pair, chainName });
+        setShareModalOpen(true);
+        recordAchievement?.(account, 'pool_create', 'first_pool');
+        tryAccruePoints({
+          address: account,
+          action: 'liquidity_add',
+          txHash: created.txHash,
+          chainId,
+          metadata: { pair, pairAddress: created.pairAddress, venue: evmCreateVenue.venue },
+        });
+        setToken0('');
+        setToken1('');
+        setToken0Amount('');
+        setToken1Amount('');
+        setToken0Decimals(18);
+        setToken1Decimals(18);
+        setToken0Info(null);
+        setToken1Info(null);
+        return;
+      }
+
       const dexFactory = await getDEXFactoryContract();
       if (!dexFactory) {
-        return;
+        throw new Error('DEX factory is not available on this network.');
       }
 
       // Get token decimals and convert amounts correctly
@@ -1239,7 +1308,7 @@ function CreatePool() {
     return permitData;
   };
 
-  if (isSolana) return <CreatePoolSolanaContent />;
+  if (isSolana) return <SolanaCreatePoolPanel />;
 
   if (!isConnected) {
     return (
@@ -1282,25 +1351,61 @@ function CreatePool() {
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">
             <DexFeatureBanner featureLabel="Create Pool" currentChainId={chainId} onSwitchNetwork={switchNetwork} />
-            {chainId === BOING_NATIVE_L1_CHAIN_ID && !featureSupport.hasNativeAmm && <NativeBoingPoolDeploySection />}
+            {chainId === BOING_NATIVE_L1_CHAIN_ID && (
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-bold text-white mb-4">Create Liquidity Pool</h1>
+              <p className="text-xl text-gray-300">Deploy a native constant-product pool on Boing L1</p>
+            </div>
+            )}
+            {chainId === BOING_NATIVE_L1_CHAIN_ID && <NativeBoingCreatePoolPanel />}
             {chainId === BOING_NATIVE_L1_CHAIN_ID && featureSupport.hasNativeAmm && (
               <div className="mb-6">
+                <p className="text-sm mb-2 text-gray-300">
+                  Add more liquidity to the published canonical pool:
+                </p>
                 <NativeAmmSwapPanel defaultOpenAddLiquidity slippagePercent={0.5} />
               </div>
             )}
-            {/* Header */}
+            {chainId !== BOING_NATIVE_L1_CHAIN_ID && (
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold text-white mb-4">Create Liquidity Pool</h1>
               <p className="text-xl text-gray-300">Deploy new trading pairs and earn fees from every trade</p>
             </div>
+            )}
 
-            {/* Pool Configuration — hidden on Boing when native AMM is the supported path */}
+            {chainId !== BOING_NATIVE_L1_CHAIN_ID && !evmCreateVenue && (
+              <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 mb-6 text-sm text-gray-300">
+                <p className="mb-3">
+                  This network has no in-app AMM factory. Switch to a supported chain, or create the pair on that
+                  network&apos;s DEX.
+                </p>
+                {getExternalSwapUrl(chainId) && (
+                  <a
+                    href={getExternalSwapUrl(chainId)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-cyan-400 underline"
+                  >
+                    Open external DEX →
+                  </a>
+                )}
+              </div>
+            )}
+
+            {/* Pool Configuration — EVM factory or Uniswap/Pancake V2 */}
             <div
               className={`bg-gray-800 rounded-lg shadow-lg p-6 mb-6 ${
-                chainId === BOING_NATIVE_L1_CHAIN_ID && featureSupport.hasNativeAmm ? 'hidden' : ''
+                chainId === BOING_NATIVE_L1_CHAIN_ID || !evmCreateVenue ? 'hidden' : ''
               }`}
             >
               <h3 className="text-xl font-semibold mb-4 text-white">Pool Configuration</h3>
+              {evmCreateVenue && (
+                <p className="text-sm text-gray-300 mb-4">
+                  {evmCreateVenue.kind === 'boing'
+                    ? 'This pair is created on Boing DEXFactory (optional liquidity lock).'
+                    : `This pair is created on ${evmCreateVenue.venue} (${evmCreateVenue.feePercent}% swap fee). Liquidity lock is only available on Boing DEX (Sepolia).`}
+                </p>
+              )}
               
               {/* Token Selection */}
               <div className="mb-6">
@@ -1572,52 +1677,60 @@ function CreatePool() {
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Trading Fee
                 </label>
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setFeeDropdownOpen(!feeDropdownOpen)}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white text-sm sm:text-base flex items-center justify-between"
-                  >
-                    <span>
-                      {getSelectedFeeOption()?.label} 
-                      <span className="text-cyan-400 ml-2">
-                        ({getSelectedFeeOption()?.platformFee} platform fee)
-                      </span>
-                    </span>
-                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  
-                  {feeDropdownOpen && (
-                    <div className="absolute z-10 w-full mt-1 bg-gray-700 border border-gray-600 rounded-lg shadow-lg">
-                      {feeOptions.map((option) => (
-                        <button
-                          key={option.value}
-                          type="button"
-                          onClick={() => {
-                            setSelectedFee(option.value);
-                            setFeeDropdownOpen(false);
-                          }}
-                          className="w-full px-3 sm:px-4 py-2 sm:py-3 text-left text-white text-sm sm:text-base hover:bg-gray-600 focus:bg-gray-600 focus:outline-none"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span>{option.label}</span>
-                            <span className="text-cyan-400">
-                              ({option.platformFee} platform fee)
-                            </span>
-                          </div>
-                        </button>
-                      ))}
+                {featureSupport.hasDex ? (
+                  <>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setFeeDropdownOpen(!feeDropdownOpen)}
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white text-sm sm:text-base flex items-center justify-between"
+                      >
+                        <span>
+                          {getSelectedFeeOption()?.label}
+                          <span className="text-cyan-400 ml-2">
+                            ({getSelectedFeeOption()?.platformFee} platform fee)
+                          </span>
+                        </span>
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {feeDropdownOpen && (
+                        <div className="absolute z-10 w-full mt-1 bg-gray-700 border border-gray-600 rounded-lg shadow-lg">
+                          {feeOptions.map((option) => (
+                            <button
+                              key={option.value}
+                              type="button"
+                              onClick={() => {
+                                setSelectedFee(option.value);
+                                setFeeDropdownOpen(false);
+                              }}
+                              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-left text-white text-sm sm:text-base hover:bg-gray-600 focus:bg-gray-600 focus:outline-none"
+                            >
+                              <div className="flex items-center justify-between">
+                                <span>{option.label}</span>
+                                <span className="text-cyan-400">
+                                  ({option.platformFee} platform fee)
+                                </span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  Platform earns a share of trading fees. Lower fees attract more volume.
-                </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      This dropdown is informational — live Boing pairs use the 0.3% pair fee.
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-sm text-gray-300">
+                    {evmCreateVenue?.venue || 'AMM'} swap fee is {evmCreateVenue?.feePercent || '0.3'}% (fixed by the venue).
+                  </p>
+                )}
               </div>
 
               {/* Liquidity Locking Configuration */}
+              {featureSupport.hasDex && (
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-4">
                   <label className="block text-sm font-medium text-gray-300">
@@ -1682,19 +1795,25 @@ function CreatePool() {
                   }
                 </div>
               </div>
+              )}
 
               {/* Pool Preview & Tips */}
               <div className="mb-6">
                 <h4 className="text-lg font-semibold mb-2 text-white">Pool Preview & Tips</h4>
                 <div className="bg-gray-700 border border-gray-600 rounded-lg p-4">
                   <ul className="list-disc pl-5 text-sm text-gray-300">
-                    <li>Trading fee: <span className="font-semibold">{selectedFee}%</span></li>
+                    <li>Trading fee: <span className="font-semibold">{evmCreateVenue?.feePercent || selectedFee}%</span></li>
+                    <li>Venue: <span className="font-semibold">{evmCreateVenue?.venue || '—'}</span></li>
+                    {featureSupport.hasDex && (
                     <li>Liquidity lock: <span className="font-semibold">
                       {enableLiquidityLock ? `${Math.round(lockDuration / (24 * 60 * 60))} days` : 'Disabled'}
                     </span></li>
+                    )}
                     <li>Tokens: <span className="font-semibold">{token0 || 'Token A'} / {token1 || 'Token B'}</span></li>
                     <li>Initial liquidity: <span className="font-semibold">{token0Amount || '0'} / {token1Amount || '0'}</span></li>
+                    {featureSupport.hasDex && (
                     <li>Lock description: <span className="font-semibold">{enableLiquidityLock ? (lockDescription || 'None') : 'N/A'}</span></li>
+                    )}
                   </ul>
                 </div>
               </div>
@@ -1731,14 +1850,16 @@ function CreatePool() {
               </div>
               
               <div className="mt-3 text-xs text-cyan-400">
-                Tip: Locking liquidity and using a low trading fee can help attract more users and build trust.
+                {featureSupport.hasDex
+                  ? 'Tip: Locking liquidity and using a low trading fee can help attract more users and build trust.'
+                  : `Tip: Seed both sides carefully — the first deposit sets the ${evmCreateVenue?.venue || 'AMM'} price.`}
               </div>
 
 
             </div>
 
             {/* Token Approval Notice */}
-            {token0 && token1 && token0Amount && token1Amount && (
+            {evmCreateVenue && token0 && token1 && token0Amount && token1Amount && (
               (() => {
                 if (isCheckingAllowances) {
                   return (
@@ -1826,6 +1947,7 @@ function CreatePool() {
             )}
 
             {/* Create Button */}
+            {evmCreateVenue && (
             <button
               onClick={handleCreatePool}
               disabled={isCreating || !token0 || !token1 || !token0Amount || !token1Amount}
@@ -1840,9 +1962,10 @@ function CreatePool() {
                 'Create Pool'
               )}
             </button>
+            )}
 
             {/* Transaction Status */}
-            {(transactionStatus === 'pending' || transactionStatus === 'success' || transactionStatus === 'error') && (
+            {evmCreateVenue && (transactionStatus === 'pending' || transactionStatus === 'success' || transactionStatus === 'error') && (
               <div className="mt-6 bg-gray-800 border border-gray-700 rounded-lg p-4">
                 <h4 className="text-lg font-semibold mb-3 text-white">Transaction Status</h4>
                 
