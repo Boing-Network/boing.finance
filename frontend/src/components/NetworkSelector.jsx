@@ -2,19 +2,19 @@ import React, { useState, useRef } from 'react';
 import { useCloseOnPointerOutside } from '../hooks/useCloseOnPointerOutside';
 import { useWallet } from '../contexts/WalletContext';
 import { useChainType } from '../contexts/SolanaWalletContext';
-import { getMainnetNetworks, getTestnetNetworks } from '../config/networks';
+import { getMainnetNetworks, getTestnetNetworks, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { formatEip155ChainId } from '../config/boingChainIds';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 const NetworkSelector = () => {
   const { isConnected, chainId, switchNetwork, getCurrentNetwork } = useWallet();
-  const { isSolana } = useChainType();
+  const { isSolana, isBoing } = useChainType();
   const [showDropdown, setShowDropdown] = useState(false);
   const networkDropdownRootRef = useRef(null);
 
   const currentNetwork = getCurrentNetwork();
   const mainnetNetworks = getMainnetNetworks();
-  const testnetNetworks = getTestnetNetworks();
+  const testnetNetworks = getTestnetNetworks().filter((n) => n.chainId !== BOING_NATIVE_L1_CHAIN_ID);
 
   useCloseOnPointerOutside(
     showDropdown,
@@ -60,7 +60,7 @@ const NetworkSelector = () => {
     return icons[network.chainId] || '🌐';
   };
 
-  if (isSolana || !isConnected || !currentNetwork) {
+  if (isSolana || isBoing || !isConnected || !currentNetwork) {
     return null;
   }
 

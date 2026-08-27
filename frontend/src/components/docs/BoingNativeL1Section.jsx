@@ -23,9 +23,9 @@ export default function BoingNativeL1Section() {
         </h2>
         <p className="text-lg leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
           Boing testnet (chain id <strong>6913</strong> in this app) uses the <strong>Boing VM</strong> for native contracts and DEX
-          flows. Signing uses <strong>Boing Express</strong> (<code className="text-xs">window.boing</code>,{' '}
-          <code className="text-xs">boing_sendTransaction</code>), not MetaMask, for those paths. The header network toggle still
-          offers <strong>EVM</strong> and <strong>Solana</strong> for Uniswap-style and SPL flows.
+          flows. The header chain toggle offers <strong>EVM</strong>, <strong>Boing</strong>, and <strong>Solana</strong>.
+          Signing uses <strong>Boing Express</strong> (<code className="text-xs">window.boing</code>,{' '}
+          <code className="text-xs">boing_sendTransaction</code>), not MetaMask, for those paths.
         </p>
         <ul className="list-disc pl-5 space-y-2" style={{ color: 'var(--text-secondary)' }}>
           <li>
