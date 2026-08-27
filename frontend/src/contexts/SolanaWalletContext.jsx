@@ -36,13 +36,14 @@ export const useSolanaWallet = () => {
 // Chain type constants
 export const CHAIN_TYPE_EVM = 'evm';
 export const CHAIN_TYPE_SOLANA = 'solana';
+export const CHAIN_TYPE_BOING = 'boing';
 
 export const ChainTypeContext = createContext();
 
 export const useChainType = () => {
   const context = useContext(ChainTypeContext);
   if (!context) {
-    return { chainType: CHAIN_TYPE_EVM, setChainType: () => {} };
+    return { chainType: CHAIN_TYPE_EVM, setChainType: () => {}, isSolana: false, isEVM: true, isBoing: false };
   }
   return context;
 };
@@ -55,7 +56,11 @@ export const SolanaWalletProvider = ({ children }) => {
   const [connection, setConnection] = useState(null);
   const [chainType, setChainTypeState] = useState(() => {
     try {
-      return localStorage.getItem('boing_chain_type') || CHAIN_TYPE_EVM;
+      const stored = localStorage.getItem('boing_chain_type');
+      if (stored === CHAIN_TYPE_SOLANA || stored === CHAIN_TYPE_BOING || stored === CHAIN_TYPE_EVM) {
+        return stored;
+      }
+      return CHAIN_TYPE_EVM;
     } catch {
       return CHAIN_TYPE_EVM;
     }
@@ -207,6 +212,7 @@ export const SolanaWalletProvider = ({ children }) => {
     setChainType,
     isSolana: chainType === CHAIN_TYPE_SOLANA,
     isEVM: chainType === CHAIN_TYPE_EVM,
+    isBoing: chainType === CHAIN_TYPE_BOING,
   };
 
   return (
