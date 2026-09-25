@@ -5,6 +5,7 @@ import NativeAmmLpVaultPanel from './NativeAmmLpVaultPanel';
 import NativeLiquidityPositionsPanel from './NativeLiquidityPositionsPanel';
 import NativeDexDirectoryRoutePanel from './NativeDexDirectoryRoutePanel';
 import NativeDexIndexerSettingsStrip from './NativeDexIndexerSettingsStrip';
+import BoingL1DexReadinessPanel from './BoingL1DexReadinessPanel';
 import NativePoolsDirectoryPanel from './NativePoolsDirectoryPanel';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { useWallet } from '../contexts/WalletContext';
@@ -136,6 +137,9 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
         boxShadow: '0 4px 24px var(--shadow)',
       }}
     >
+      <div className="px-4 pt-4 sm:px-6 sm:pt-5">
+        <BoingL1DexReadinessPanel compact />
+      </div>
       <div
         className="flex flex-nowrap gap-1 p-2 border-b overflow-x-auto overscroll-x-contain"
         style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-secondary)' }}

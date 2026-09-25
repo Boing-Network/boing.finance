@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useNetwork } from '../hooks/useNetwork';
 import toast from 'react-hot-toast';
@@ -9,8 +8,7 @@ import { getApiUrl } from '../config';
 import { getSupportedNetworks } from '../config/networks';
 import TokenManagementModal from '../components/TokenManagementModal';
 import EmptyState from '../components/EmptyState';
-import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
-import { BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL } from '../config/boingNetworkDocsUrls';
+import NativeBoingBridgeBanner from '../components/NativeBoingBridgeBanner';
 
 // Add AnimatedBackground and BoingAstronaut components
 
@@ -256,35 +254,8 @@ export default function Bridge() {
             </p>
           </div>
 
-          {network && Number(network.chainId) === BOING_NATIVE_L1_CHAIN_ID && (
-            <div
-              className="mb-6 rounded-xl border px-4 py-3 text-sm"
-              role="status"
-              style={{
-                borderColor: 'rgba(45, 212, 191, 0.45)',
-                backgroundColor: 'var(--bg-card)',
-                color: 'var(--text-secondary)',
-              }}
-            >
-              <strong style={{ color: 'var(--text-primary)' }}>Boing L1 (6913):</strong> this page’s bridge flow targets{' '}
-              <strong>EVM-style</strong> networks (Boing is excluded from the chain picker). Native BOING transfers use Boing Express;
-              a <strong>full cross-chain bridge</strong> on Boing needs a dedicated VM bridge protocol and UI — tracked as product work
-              alongside operator deployments. See{' '}
-              <Link to="/boing/native-vm" className="text-cyan-400 underline hover:text-cyan-300">
-                Native VM tools
-              </Link>
-              {' '}and{' '}
-              <a
-                href={BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-cyan-400 underline hover:text-cyan-300"
-              >
-                partner handoff
-              </a>
-              .
-            </div>
-          )}
+                    <NativeBoingBridgeBanner />
+
 
           {/* Bridge Interface */}
           <div

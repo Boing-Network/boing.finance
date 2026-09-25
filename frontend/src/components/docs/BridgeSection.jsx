@@ -6,10 +6,24 @@ const BridgeSection = () => {
       <div>
         <h2 className="text-3xl font-bold  mb-6"
           style={{ color: 'var(--text-primary)'  }}>Cross-Chain Bridge Guide</h2>
+        <div
+          className="mb-6 rounded-lg border px-4 py-3 text-sm"
+          role="status"
+          style={{
+            borderColor: 'rgba(251, 191, 36, 0.45)',
+            backgroundColor: 'rgba(251, 191, 36, 0.08)',
+            color: 'var(--text-secondary)',
+          }}
+        >
+          <strong style={{ color: 'var(--text-primary)' }}>Status: planned / not live.</strong> The in-app{' '}
+          <code className="text-xs">/bridge</code> page is an honest scaffold. It does <strong>not</strong> run LI.FI,
+          third-party bridges, or a Boing L1 VM bridge. Same-chain EVM swaps may use aggregators on Swap; that is separate
+          from bridging. A Boing-native bridge needs protocol + operator work first.
+        </div>
         <p className=" text-lg leading-relaxed mb-8"
           style={{ color: 'var(--text-secondary)'  }}>
-          Learn how to transfer tokens between different blockchain networks using boing.finance's cross-chain bridge. 
-          Our bridge infrastructure enables seamless asset movement across 15+ supported networks.
+          This guide describes the intended cross-chain transfer UX for boing.finance once a live bridge is deployed.
+          Until then, treat routes, fees, and timelines below as design reference — not production guarantees.
         </p>
       </div>
 
