@@ -29,7 +29,7 @@ import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrat
 import { fetchTradeableEvmTokenAddressesFromDexFactory } from '../services/evmDexTradeableTokens';
 import { tryAccruePoints } from '../utils/tryAccruePoints';
 import { getEvmAggregatorQuote, sendAggregatorSwap, isNativeSwapSymbol } from '../services/aggregatorSwapService';
-import { quoteExactIn } from '../services/evmAmmPairActions';
+import { getAmmVenue, quoteExactIn } from '../services/evmAmmPairActions';
 
 const SwapTokenPriceChart = lazy(() => import('../components/SwapTokenPriceChart'));
 
@@ -645,22 +645,24 @@ const Swap = () => {
       return;
     }
 
-    // Check if DEX is deployed on current network
-    const swapRouterAddress = getContractAddress(chainId, 'dexRouter');
+    // Boing DEX when live; else Uniswap/Pancake V2 venue (aggregator path already handled above)
+    const ammVenue = getAmmVenue(Number(chainId) || 0);
+    const swapRouterAddress = ammVenue?.router || null;
     devLog('handleSwap: Starting swap with params:', {
       chainId,
       routerAddress: swapRouterAddress,
+      venue: ammVenue?.venue,
       tokenIn,
       tokenOut,
       amountIn,
       account
     });
     
-    if (!swapRouterAddress || swapRouterAddress === '0x0000000000000000000000000000000000000000') {
+    if (!swapRouterAddress) {
       toast.error(
         chainId === BOING_NATIVE_L1_CHAIN_ID
           ? 'On Boing testnet, use the native pool panel or Native VM with Boing Express. This swap box targets EVM routers on other configured networks only.'
-          : 'No aggregator route for this pair. Public DEXs need existing liquidity — try USDC, wrapped native, or a token that already trades.'
+          : 'No aggregator route for this pair, and no in-app AMM router is mapped. Try USDC, wrapped native, or a token that already trades — or create a pool first.'
       );
       return;
     }
@@ -1105,14 +1107,15 @@ const Swap = () => {
       return;
     }
 
-    // Check if DEX is deployed on current network
-    const calcRouterAddress = getContractAddress(chainId, 'dexRouter');
+    // Boing DEXRouter when live; otherwise mapped Uniswap/Pancake V2 router
+    const ammVenue = getAmmVenue(Number(chainId) || 0);
+    const calcRouterAddress = ammVenue?.router || null;
     const wethAddress = getContractAddress(chainId, 'weth');
-    devLog('calculateExpectedOutput: Router address for chainId', chainId, ':', calcRouterAddress);
+    devLog('calculateExpectedOutput: Router address for chainId', chainId, ':', calcRouterAddress, ammVenue?.venue);
     devLog('calculateExpectedOutput: WETH address for chainId', chainId, ':', wethAddress);
     
-    if (!calcRouterAddress || calcRouterAddress === '0x0000000000000000000000000000000000000000') {
-      devLog('calculateExpectedOutput: Router not deployed on this network');
+    if (!calcRouterAddress) {
+      devLog('calculateExpectedOutput: No Boing or Uniswap/Pancake V2 router on this network');
       setAmountOut('');
       return;
     }
@@ -1714,9 +1717,9 @@ const Swap = () => {
   const checkAvailablePairs = useCallback(async () => {
     if (!chainId) return [];
     
-    const routerAddress = getContractAddress(chainId, 'dexRouter');
-    if (!routerAddress || routerAddress === '0x0000000000000000000000000000000000000000') {
-      devLog('checkAvailablePairs: Router not deployed on this network');
+    const routerAddress = getAmmVenue(Number(chainId) || 0)?.router || null;
+    if (!routerAddress) {
+      devLog('checkAvailablePairs: No Boing or Uniswap/Pancake V2 router on this network');
       return [];
     }
 
@@ -1862,6 +1865,7 @@ const Swap = () => {
         void (async () => {
           setAggregatorQuote(null);
           setRouteSource(null);
+          const preferBoingAmm = featureSupport.swap === 'boing';
           let agg = null;
           if (Number(chainId) !== BOING_NATIVE_L1_CHAIN_ID && account) {
             try {
@@ -1878,15 +1882,20 @@ const Swap = () => {
               devLog('Aggregator quote skipped:', e?.message || e);
             }
           }
-          if (agg?.amountOutHuman) {
+          // Docs: Boing DEX when factory is set; else LI.FI (with Uniswap/Pancake V2 pair quote as local fallback).
+          if (preferBoingAmm) {
+            await calculateExpectedOutput(amountIn, tokenIn, tokenOut);
+            setRouteSource('boing');
+            if (agg?.amountOutHuman) setAggregatorQuote(agg);
+          } else if (agg?.amountOutHuman) {
             setAggregatorQuote(agg);
             setAmountOut(agg.amountOutHuman);
             setRouteSource('aggregator');
             setSelectedExternalQuote(null);
-            return;
+          } else {
+            await calculateExpectedOutput(amountIn, tokenIn, tokenOut);
+            if (getAmmVenue(Number(chainId) || 0)) setRouteSource('boing');
           }
-          calculateExpectedOutput(amountIn, tokenIn, tokenOut);
-          if (featureSupport.swap === 'boing') setRouteSource('boing');
           if (isExternalDEXAvailable) {
             fetchExternalQuotes();
           }
