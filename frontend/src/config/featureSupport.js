@@ -235,7 +235,8 @@ export function getBoingL1FullDexReadiness(chainId, options) {
       id: 'bridge',
       label: 'In-app cross-chain bridge',
       status: 'planned',
-      detail: 'This bridge UI targets EVM-style aggregators; a Boing VM bridge needs its own protocol + wallet flow.',
+      detail:
+        'App-wired honest scaffold on /bridge (not LI.FI execution, not a Boing VM bridge). Live transfers need a dedicated protocol + operator work.',
     },
     {
       id: 'explorer_transparency',

@@ -10,7 +10,7 @@ const comingSoon = {
 const createNavigation = () => {
   const trading = Object.freeze([
     Object.freeze({ name: 'Swap', href: '/swap', icon: '🔄', description: 'Trade tokens instantly', isAvailable: true, comingSoon: false, testnetOnly: false }),
-    Object.freeze({ name: 'Bridge', href: '/bridge', icon: '🌉', description: 'Cross-chain transfers', isAvailable: false, comingSoon: true, testnetOnly: false }),
+    Object.freeze({ name: 'Bridge', href: '/bridge', icon: '🌉', description: 'Planned scaffold — not a live Boing VM bridge', isAvailable: false, comingSoon: true, testnetOnly: false }),
     Object.freeze({ name: 'Pools', href: '/pools', icon: '🏊', description: 'Liquidity pools', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Tokens', href: '/tokens', icon: '🪙', description: 'Token management', isAvailable: true, comingSoon: false, testnetOnly: false })
   ]);
