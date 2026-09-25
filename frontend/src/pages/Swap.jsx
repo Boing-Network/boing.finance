@@ -158,7 +158,7 @@ const Swap = () => {
 
   // Get token information
   const getTokenInfo = useCallback(async (address, provider) => {
-    devLog(`🔍 Getting token info for address: ${address}`);
+    devLog(`ðŸ” Getting token info for address: ${address}`);
     try {
       const tokenContract = new ethers.Contract(address, [
         'function name() view returns (string)',
@@ -174,7 +174,7 @@ const Swap = () => {
         tokenContract.balanceOf(account)
       ]);
 
-      devLog(`✅ Token info for ${address}:`, { name, symbol, decimals, balance: balance.toString() });
+      devLog(`âœ… Token info for ${address}:`, { name, symbol, decimals, balance: balance.toString() });
 
       // Format balance with appropriate decimal places based on token value
       const formattedBalance = formatTokenBalance(balance, decimals);
@@ -187,7 +187,7 @@ const Swap = () => {
         formattedBalance 
       };
     } catch (error) {
-      console.warn(`❌ Failed to get token info for ${address}:`, error.message);
+      console.warn(`âŒ Failed to get token info for ${address}:`, error.message);
       return null;
     }
   }, [account]);
@@ -300,7 +300,7 @@ const Swap = () => {
 
   // Handle token selection
   const handleTokenSelect = (token, forToken) => {
-    devLog('🎯 Token selected:', { token: token.symbol, forToken });
+    devLog('ðŸŽ¯ Token selected:', { token: token.symbol, forToken });
     if (forToken === 'tokenIn') {
       setTokenIn(token.symbol);
       setTokenInDropdownOpen(false);
@@ -345,14 +345,14 @@ const Swap = () => {
   // Get token logo
   const getTokenLogo = (symbol) => {
     const logos = {
-      'ETH': '🔵',
-      'WETH': '🔵',
-      'USDC': '💙',
-      'USDT': '💚',
-      'LINK': '🔗',
-      'ENS': '🌐',
-      'BOING': '🚀',
-      'DEFAULT': '🪙'
+      'ETH': 'ðŸ”µ',
+      'WETH': 'ðŸ”µ',
+      'USDC': 'ðŸ’™',
+      'USDT': 'ðŸ’š',
+      'LINK': 'ðŸ”—',
+      'ENS': 'ðŸŒ',
+      'BOING': 'ðŸš€',
+      'DEFAULT': 'ðŸª™'
     };
     return logos[symbol] || logos['DEFAULT'];
   };
@@ -378,7 +378,8 @@ const Swap = () => {
     };
   }, [userTokens, tokenOut, chainId, focusOutAddress]);
 
-  const showEvmSwapDesk = featureSupport.swap !== 'native_amm';
+  const onBoingNativeL1 = Number(chainId) === BOING_NATIVE_L1_CHAIN_ID;
+  const showEvmSwapDesk = !onBoingNativeL1 && featureSupport.swap !== 'native_amm';
   const dexMarkets = useDexMarkets({
     chainId: Number(chainId),
     enabled: showEvmSwapDesk && !isSolana,
@@ -536,7 +537,7 @@ const Swap = () => {
     if (featureSupport.swap === 'native_amm') {
       return {
         type: 'success',
-        message: 'Native pool swap — confirm amounts below, then approve in Boing Express.',
+        message: 'Native pool swap â€” confirm amounts below, then approve in Boing Express.',
       };
     }
 
@@ -605,7 +606,7 @@ const Swap = () => {
           slippagePercent: settings.slippage,
         });
         const toUse = fresh?.transactionRequest ? fresh : aggregatorQuote;
-        toast(`Routing via ${toUse.venue}…`, { duration: 2500 });
+        toast(`Routing via ${toUse.venue}â€¦`, { duration: 2500 });
         const result = await sendAggregatorSwap(toUse, signer);
         toast.success(`Swap sent via ${toUse.venue}`);
         setSwapSuccess(`Swap successful via ${toUse.venue}. Transaction: ${result.txHash}`);
@@ -662,7 +663,7 @@ const Swap = () => {
       toast.error(
         chainId === BOING_NATIVE_L1_CHAIN_ID
           ? 'On Boing testnet, use the native pool panel or Native VM with Boing Express. This swap box targets EVM routers on other configured networks only.'
-          : 'No aggregator route for this pair, and no in-app AMM router is mapped. Try USDC, wrapped native, or a token that already trades — or create a pool first.'
+          : 'No aggregator route for this pair, and no in-app AMM router is mapped. Try USDC, wrapped native, or a token that already trades â€” or create a pool first.'
       );
       return;
     }
@@ -1846,7 +1847,7 @@ const Swap = () => {
 
   // Calculate expected output when input changes
   useEffect(() => {
-    devLog('🔄 useEffect triggered for calculation:', {
+    devLog('ðŸ”„ useEffect triggered for calculation:', {
       amountIn,
       tokenIn,
       tokenOut,
@@ -1860,7 +1861,7 @@ const Swap = () => {
     });
     
     if (amountIn && tokenIn && tokenOut && tokenIn !== tokenOut) {
-      devLog('✅ Starting calculation with:', { amountIn, tokenIn, tokenOut });
+      devLog('âœ… Starting calculation with:', { amountIn, tokenIn, tokenOut });
       const timeoutId = setTimeout(() => {
         void (async () => {
           setAggregatorQuote(null);
@@ -1903,11 +1904,11 @@ const Swap = () => {
       }, 500);
       
       return () => {
-        devLog('🧹 Clearing timeout');
+        devLog('ðŸ§¹ Clearing timeout');
         clearTimeout(timeoutId);
       };
     } else {
-      devLog('❌ Clearing amountOut due to invalid parameters');
+      devLog('âŒ Clearing amountOut due to invalid parameters');
       setAmountOut('');
       setExternalQuotes([]);
       setSelectedExternalQuote(null);
@@ -2050,8 +2051,8 @@ const Swap = () => {
   return (
     <>
       <Helmet>
-        <title>Swap Tokens | boing.finance — Trade on EVM & Solana</title>
-        <meta name="description" content="Swap tokens instantly on EVM and Solana. Get the best rates with boing.finance—the DeFi that always bounces back." />
+        <title>Swap Tokens | boing.finance â€” Trade on EVM & Solana</title>
+        <meta name="description" content="Swap tokens instantly on EVM and Solana. Get the best rates with boing.financeâ€”the DeFi that always bounces back." />
         <meta name="keywords" content="swap tokens, DEX, boing finance, EVM, Solana, token swap, decentralized exchange" />
         <meta property="og:title" content="Swap Tokens | boing.finance" />
         <meta property="og:description" content="Swap tokens on EVM and Solana. Best rates, one interface." />
@@ -2107,7 +2108,7 @@ const Swap = () => {
             </div>
           </div>
 
-          {featureSupport.swap === 'native_amm' && (
+          {onBoingNativeL1 && (
             <NativeBoingTradeHub slippagePercent={settings.slippage} />
           )}
 
@@ -2207,7 +2208,7 @@ const Swap = () => {
                     type="number"
                     value={amountIn}
                     onChange={(e) => {
-                      devLog('📝 Input changed:', e.target.value);
+                      devLog('ðŸ“ Input changed:', e.target.value);
                       setAmountIn(e.target.value);
                     }}
                     placeholder="0.0"
@@ -2240,7 +2241,7 @@ const Swap = () => {
                   />
                 </div>
                 {amountInUsd ? (
-                  <div className="mt-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>≈ {amountInUsd}</div>
+                  <div className="mt-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>â‰ˆ {amountInUsd}</div>
                 ) : null}
               </div>
 
@@ -2306,15 +2307,15 @@ const Swap = () => {
                   />
                 </div>
                 {amountOutUsd ? (
-                  <div className="mt-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>≈ {amountOutUsd}</div>
+                  <div className="mt-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>â‰ˆ {amountOutUsd}</div>
                 ) : null}
                 {amountOut && parseFloat(amountOut) > 0 && (
                   <div className="mt-2 text-xs text-gray-400">
                     Rate: 1 {tokenIn} = {(parseFloat(amountOut) / parseFloat(amountIn)).toFixed(6)} {tokenOut}
                     {routeSource === 'aggregator' && aggregatorQuote?.venue
-                      ? ` · via ${aggregatorQuote.venue}`
+                      ? ` Â· via ${aggregatorQuote.venue}`
                       : routeSource === 'boing'
-                        ? ' · Boing DEX'
+                        ? ' Â· Boing DEX'
                         : ''}
                   </div>
                 )}
@@ -2361,7 +2362,7 @@ const Swap = () => {
                     <span className="text-gray-400 text-sm">...</span>
                   ) : (
                     <span className="text-white text-sm sm:text-base">
-                      ~{estimatedGasCost ?? '—'}
+                      ~{estimatedGasCost ?? 'â€”'}
                     </span>
                   )}
                   <div className={`w-2 h-2 rounded-full ${

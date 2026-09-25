@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useWallet } from '../contexts/WalletContext';
 import { useChainType } from '../contexts/SolanaWalletContext';
 import PortfolioSolanaContent from '../components/PortfolioSolanaContent';
+import PortfolioBoingContent from '../components/PortfolioBoingContent';
 import { Helmet } from 'react-helmet-async';
 import { ethers } from 'ethers';
 import { useBlockchainPools } from '../hooks/useBlockchainPools';
@@ -12,7 +13,7 @@ import externalDexService from '../services/externalDexService';
 import portfolioService from '../services/portfolioService';
 import theGraphService from '../services/theGraphService';
 import alchemyService from '../services/alchemyService';
-import { NETWORKS } from '../config/networks';
+import { NETWORKS, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { exportPortfolio, exportPortfolioPDF } from '../utils/exportData';
 import { notificationService } from '../utils/notifications';
 import { PortfolioSummarySkeleton, TokenBalanceSkeleton, ChartSkeleton } from '../components/SkeletonLoader';
@@ -106,7 +107,7 @@ export default function Portfolio() {
             10: 'optimism',
             8453: 'base',
             11155111: 'ethereum',
-            6913: 'ethereum',
+            // 6913: Boing L1 uses PortfolioBoingContent (not The Graph)
           };
           const network = networkMap[chainId] || 'ethereum';
           const graphPositions = await theGraphService.getUserPositions(account, network);
@@ -235,7 +236,7 @@ export default function Portfolio() {
     retry: 2
   });
 
-  // Calculate portfolio summary from positions + balances (pure reduction — no query thrash)
+  // Calculate portfolio summary from positions + balances (pure reduction Ã¢â‚¬â€ no query thrash)
   const portfolioSummary = useMemo(() => {
     const empty = {
       totalValue: 0,
@@ -422,6 +423,7 @@ export default function Portfolio() {
   }, [enrichedSummary, account]);
 
   if (isSolana) return <PortfolioSolanaContent />;
+  if (Number(chainId) === BOING_NATIVE_L1_CHAIN_ID) return <PortfolioBoingContent />;
 
   if (!account) {
     return (
@@ -459,7 +461,7 @@ export default function Portfolio() {
   return (
     <>
       <Helmet>
-        <title>Exposure Intelligence | boing.finance — Portfolio Research</title>
+        <title>Exposure Intelligence | boing.finance Ã¢â‚¬â€ Portfolio Research</title>
         <meta name="description" content="Multi-chain portfolio research: allocation, movers, performance drift, and actionable exposure decisions from live onchain balances." />
         <meta name="keywords" content="DeFi portfolio, token balances, boing finance, EVM, Solana, portfolio tracking" />
         <meta property="og:title" content="Portfolio | boing.finance" />
@@ -521,7 +523,7 @@ export default function Portfolio() {
                         }}
                         className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
                       >
-                        <span>📥</span> Export CSV
+                        <span>Ã°Å¸â€œÂ¥</span> Export CSV
                       </button>
                       <button
                         onClick={() => {
@@ -539,7 +541,7 @@ export default function Portfolio() {
                         }}
                         className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
                       >
-                        <span>📥</span> Export JSON
+                        <span>Ã°Å¸â€œÂ¥</span> Export JSON
                       </button>
                         </>
                       )}
@@ -555,13 +557,13 @@ export default function Portfolio() {
                         }}
                         className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
                       >
-                        <span>📄</span> Export PDF
+                        <span>Ã°Å¸â€œâ€ž</span> Export PDF
                       </button>
                       <button
                         onClick={() => setShowShareModal(true)}
                         className="px-4 py-2 bg-finance-purple hover:opacity-90 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
                       >
-                        <span>🔗</span> Share
+                        <span>Ã°Å¸â€â€”</span> Share
                       </button>
                     </div>
                   )}
@@ -576,7 +578,7 @@ export default function Portfolio() {
             {blockchainError && !blockchainInitialized && (
               <div className="bg-yellow-900/30 border border-yellow-500/50 rounded-xl p-4 mb-6">
                 <div className="flex items-start space-x-3">
-                  <span className="text-2xl">ℹ️</span>
+                  <span className="text-2xl">Ã¢â€žÂ¹Ã¯Â¸Â</span>
                   <div className="flex-1">
                     <p className="text-yellow-200 font-medium mb-1">API-Only Mode</p>
                     <p className="text-yellow-300/80 text-sm">
@@ -657,10 +659,10 @@ export default function Portfolio() {
                 }}
               >
                 {[
-                  { id: 'overview', label: 'Overview', icon: '📊' },
-                  { id: 'tokens', label: 'Tokens', icon: '🪙' },
-                  { id: 'pools', label: 'Pools', icon: '🏊' },
-                  { id: 'nfts', label: 'Collectibles', icon: '🖼️' }
+                  { id: 'overview', label: 'Overview', icon: 'Ã°Å¸â€œÅ ' },
+                  { id: 'tokens', label: 'Tokens', icon: 'Ã°Å¸Âªâ„¢' },
+                  { id: 'pools', label: 'Pools', icon: 'Ã°Å¸ÂÅ ' },
+                  { id: 'nfts', label: 'Collectibles', icon: 'Ã°Å¸â€“Â¼Ã¯Â¸Â' }
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -852,7 +854,7 @@ export default function Portfolio() {
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
                       <h2 className="text-xl font-bold text-white">Recent Activity</h2>
                       <Link to="/activity" className="text-cyan-400 hover:text-cyan-300 text-sm font-medium">
-                        View all activity →
+                        View all activity Ã¢â€ â€™
                       </Link>
                     </div>
                     {recentTxLoading ? (
@@ -1234,7 +1236,7 @@ export default function Portfolio() {
                                     }}
                                   />
                                 ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-gray-400 text-2xl">🖼️</div>
+                                  <div className="w-full h-full flex items-center justify-center text-gray-400 text-2xl">Ã°Å¸â€“Â¼Ã¯Â¸Â</div>
                                 )}
                               </div>
                               <div className="p-3">
@@ -1261,8 +1263,8 @@ export default function Portfolio() {
                 )}
 
                 <div className="flex flex-wrap gap-4 text-sm pt-2">
-                  <Link to="/activity" className="text-cyan-400 hover:text-cyan-300">Trading activity →</Link>
-                  <Link to="/analytics?section=intelligence" className="text-cyan-400 hover:text-cyan-300">Onchain intelligence →</Link>
+                  <Link to="/activity" className="text-cyan-400 hover:text-cyan-300">Trading activity Ã¢â€ â€™</Link>
+                  <Link to="/analytics?section=intelligence" className="text-cyan-400 hover:text-cyan-300">Onchain intelligence Ã¢â€ â€™</Link>
                 </div>
 
               </div>
