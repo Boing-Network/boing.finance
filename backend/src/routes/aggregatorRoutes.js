@@ -7,7 +7,15 @@ import {
 } from '../services/aggregatorProxy.js';
 
 const EVM_ADDR = /^0x[0-9a-fA-F]{40}$/;
+/** LI.FI native gas-token sentinel (also matches EVM_ADDR). */
+const LIFI_NATIVE = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 const AMOUNT = /^[0-9]+$/;
+
+function isAllowedEvmTokenAddress(addr) {
+  if (!addr || typeof addr !== 'string') return false;
+  if (addr.toLowerCase() === LIFI_NATIVE.toLowerCase()) return true;
+  return EVM_ADDR.test(addr);
+}
 
 export function createAggregatorRoutes() {
   const router = new Hono();
@@ -54,8 +62,8 @@ export function createAggregatorRoutes() {
       if (!Number.isInteger(chainId) || chainId <= 0) {
         return c.json({ success: false, error: 'Invalid chain' }, 400);
       }
-      if (!EVM_ADDR.test(fromToken) || !EVM_ADDR.test(toToken) || !EVM_ADDR.test(fromAddress)) {
-        return c.json({ success: false, error: 'fromToken, toToken, and fromAddress must be 0x addresses' }, 400);
+      if (!isAllowedEvmTokenAddress(fromToken) || !isAllowedEvmTokenAddress(toToken) || !EVM_ADDR.test(fromAddress)) {
+        return c.json({ success: false, error: 'fromToken/toToken must be 0x addresses (or LI.FI native sentinel); fromAddress must be 0x' }, 400);
       }
       if (fromToken.toLowerCase() === toToken.toLowerCase()) {
         return c.json({ success: false, error: 'from and to tokens must differ' }, 400);

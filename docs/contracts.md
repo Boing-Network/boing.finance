@@ -34,7 +34,9 @@ Which features need on-chain deploys, current status, and how to enable the **DE
 
 ### In-app swaps without Boing pools
 
-Swap routes through **LI.FI** on EVM and **Jupiter** on Solana (`GET /api/aggregator/quote`). Optional Worker secrets `LIFI_API_KEY`, `JUPITER_API_KEY`. Tokens with no market still have no route.
+When `dexFactory` / `dexRouter` are non-zero, Swap prefers the **Boing AMM** quote; otherwise Swap uses **LI.FI** on EVM and **Jupiter** on Solana (`GET /api/aggregator/quote`), with a **Uniswap/Pancake V2** pair quote as a local fallback when that venue is mapped in `uniswapV2Compat.js`. Optional Worker secrets `LIFI_API_KEY`, `JUPITER_API_KEY`. Tokens with no market still have no route.
+
+**Create Pool / Liquidity** already use Boing DEXFactory when live, else the mapped Uniswap/Pancake V2 factory+router (never invented addresses). **Deploy Token** requires a live TokenFactory on EVM — there is no silent raw-bytecode fallback on undeployed chains.
 
 ---
 
