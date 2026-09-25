@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+﻿import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import NativeAmmSwapPanel from './NativeAmmSwapPanel';
 import NativeAmmLpVaultPanel from './NativeAmmLpVaultPanel';
@@ -26,8 +26,8 @@ const TABS = [
 
 /**
  * Boing L1 trading surface: swap, pool directory, routing, and LP positions (Uniswap-style tabs).
- * Deep link: `/swap?nativeTradeTab=route&nativeTokenIn=0x…&nativeTokenOut=0x…#boing-native-trade`
- * Pools focus: `?nativePool=0x…64hex…` (consumed; opens Pools tab and selects that pool in the chart).
+ * Deep link: `/swap?nativeTradeTab=route&nativeTokenIn=0xâ€¦&nativeTokenOut=0xâ€¦#boing-native-trade`
+ * Pools focus: `?nativePool=0xâ€¦64hexâ€¦` (consumed; opens Pools tab and selects that pool in the chart).
  *
  * @param {{ slippagePercent?: number }} props
  */
@@ -169,7 +169,7 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
         {tab === 'swap' &&
           (loading ? (
             <p className="text-sm py-6 text-center" style={{ color: 'var(--text-tertiary)' }}>
-              Loading pool…
+              Loading poolâ€¦
             </p>
           ) : effectivePoolHex?.trim() ? (
             <>
@@ -181,7 +181,7 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
                 <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
                   <strong className="text-[var(--text-primary)]">Just deployed a token or pool?</strong> Browse the{' '}
                   <strong>Pools</strong> tab to confirm your pair appears (tap <strong>Refresh</strong> if it just landed on-chain), then
-                  use <strong>Smart route</strong> on a pool row to pre-fill routing, or open <strong>Smart route</strong> here—same Boing
+                  use <strong>Smart route</strong> on a pool row to pre-fill routing, or open <strong>Smart route</strong> hereâ€”same Boing
                   Express signing flow as above, including multihop when the chain exposes factory routes.
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -213,12 +213,45 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
               </div>
             </>
           ) : (
-            <p
-              className="text-sm py-6 text-center rounded-lg border px-4"
-              style={{ borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}
+            <div
+              className="text-sm py-6 rounded-lg border px-4 space-y-3"
+              style={{ borderColor: 'rgba(251, 191, 36, 0.45)', color: 'var(--text-secondary)', backgroundColor: 'rgba(251, 191, 36, 0.06)' }}
+              role="status"
             >
-              No constant-product pool is configured for this RPC. Set build env or node hints, then refresh the page.
-            </p>
+              <p>
+                <strong style={{ color: 'var(--text-primary)' }}>No canonical CP pool published</strong> for this RPC
+                (<code className="text-xs">end_user.canonical_native_cp_pool</code> /{' '}
+                <code className="text-xs">REACT_APP_BOING_NATIVE_AMM_POOL</code> is zero). Swap on the network default
+                pool stays gated until an operator publishes an id.
+              </p>
+              <p>
+                You can still use <strong style={{ color: 'var(--text-primary)' }}>Pools</strong>,{' '}
+                <strong style={{ color: 'var(--text-primary)' }}>Smart route</strong>, and{' '}
+                <strong style={{ color: 'var(--text-primary)' }}>Your liquidity</strong> with a pasted pool AccountId, or{' '}
+                <a href="/create-pool" className="text-cyan-400 underline hover:text-cyan-300">
+                  Create Pool
+                </a>{' '}
+                to deploy + seed a new CP pool via Boing Express.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setTabAndUrl('pools')}
+                  className="text-sm px-4 py-2.5 min-h-[44px] rounded-xl font-medium border"
+                  style={{ borderColor: 'rgba(59, 130, 246, 0.45)', color: 'var(--text-primary)', backgroundColor: 'var(--bg-secondary)' }}
+                >
+                  Open Pools
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTabAndUrl('route')}
+                  className="text-sm px-4 py-2.5 min-h-[44px] rounded-xl font-medium border"
+                  style={{ borderColor: 'rgba(59, 130, 246, 0.45)', color: 'var(--text-primary)', backgroundColor: 'var(--bg-secondary)' }}
+                >
+                  Open Smart route
+                </button>
+              </div>
+            </div>
           ))}
         {tab === 'pools' && (
           <NativePoolsDirectoryPanel onTradeThisPair={onTradeThisPair} focusPoolHex={poolsFocusPoolHex} />
