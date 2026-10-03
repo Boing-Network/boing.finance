@@ -25,6 +25,7 @@ import ShootingStars from './components/ShootingStars';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
 import TickerBar from './components/TickerBar';
+import CollaborationBanner from './components/CollaborationBanner';
 import AppShellVisualLayer from './components/AppShellVisualLayer';
 import CinematicIntro, { shouldShowCinematicIntro } from './components/CinematicIntro';
 import { getPageVariant } from './utils/pageVariant';
@@ -376,6 +377,7 @@ function AppContent() {
       
       {/* Header: nav + ticker (sticky so ticker sits in flow directly under nav) */}
       <header className="site-header sticky top-0 z-30 flex flex-col flex-shrink-0 w-full min-w-0">
+        <CollaborationBanner />
         <nav className="site-nav-bar relative flex-shrink-0 w-full min-w-0" aria-label="Primary navigation">
           <ShootingStars dense />
           {/* Full-width row (no max-w-7xl/mx-auto — avoids centering inset on logo) */}
