@@ -196,7 +196,7 @@ After deployment: update `frontend/src/config/contracts.js`, verify on block exp
 | Feature | Required Contracts | Gas (approx) |
 |---------|--------------------|--------------|
 | Deploy Token | TokenFactory, TokenImplementation | ~2–3M gas |
-| Create NFT | ERC-721 factory or direct mint | ~1–2M gas |
+| Create NFT | ERC-721 factory or direct mint (EVM). Boing L1 uses reference NFT template v2 + optional `mint_batch` (gas metered by Boing VM; needs 3M call budget on the node) | ~1–2M gas (EVM) |
 | Swap | DEXRouter, DEXFactory, WETH | ~3–4M gas |
 | Pools / Liquidity / Create Pool | DEXFactoryV2, DEXRouter, LiquidityLocker | ~4–5M gas |
 | Bridge | CrossChainBridge | ~2–3M gas |
