@@ -288,37 +288,29 @@ const HelpArticle = () => {
       category: 'Cross-Chain Bridge',
       content: `
         <h2>Cross-Chain Token Bridging</h2>
-        <p>Learn how to transfer tokens between different blockchain networks using boing.finance's bridge.</p>
+        <p>Learn how to transfer tokens between EVM networks using boing.finance's LI.FI-powered Bridge. This is not a proprietary Boing custody bridge.</p>
         
         <h3>What is Token Bridging?</h3>
-        <p>Token bridging allows you to move tokens from one blockchain network to another, enabling cross-chain DeFi interactions.</p>
+        <p>Token bridging moves assets from one blockchain to another via third-party routes selected by LI.FI. Boing does not hold destination inventory.</p>
         
         <h3>Supported Networks</h3>
-        <p>boing.finance supports bridging between:</p>
-        <ul>
-          <li>Ethereum ↔ Polygon</li>
-          <li>Ethereum ↔ Arbitrum One</li>
-          <li>Ethereum ↔ Optimism</li>
-          <li>Ethereum ↔ Base</li>
-          <li>Ethereum ↔ BNB Smart Chain</li>
-        </ul>
+        <p>Quotes work for EVM pairs LI.FI supports (for example Ethereum, Polygon, Arbitrum, Optimism, Base, BSC). Solana↔EVM and Boing L1 are not in this UI.</p>
         
         <h3>How to Bridge Tokens</h3>
         <ol>
-          <li>Navigate to the "Bridge" section</li>
-          <li>Select source and destination networks</li>
-          <li>Choose the token you want to bridge</li>
-          <li>Enter the amount to bridge</li>
-          <li>Review bridge fees and estimated time</li>
-          <li>Approve and initiate the bridge transaction</li>
-          <li>Wait for confirmation on both networks</li>
+          <li>Open Bridge in the main navigation</li>
+          <li>Select source and destination EVM networks</li>
+          <li>Choose tokens and enter an amount</li>
+          <li>Review the LI.FI quote (includes a 0.5% platform fee plus gas/bridge fees)</li>
+          <li>Connect a wallet, switch to the source chain if asked, and sign</li>
+          <li>Wait for the aggregator's destination delivery</li>
         </ol>
         
-        <h3>Bridge Fees and Timeframes</h3>
+        <h3>Fees and timeframes</h3>
         <ul>
-          <li><strong>Ethereum to L2:</strong> 5-10 minutes, gas fees apply</li>
-          <li><strong>L2 to Ethereum:</strong> 7 days challenge period, higher fees</li>
-          <li><strong>L2 to L2:</strong> Varies by network, typically faster</li>
+          <li><strong>Platform fee:</strong> 0.5% taken from the sending token via LI.FI integrator fee</li>
+          <li><strong>Other fees:</strong> source gas plus any bridge/DEX fees in the quote</li>
+          <li><strong>Time:</strong> whatever the quote reports (minutes is typical; some L2 exits are slower)</li>
         </ul>
         
         <h3>Security Considerations</h3>
@@ -343,56 +335,20 @@ const HelpArticle = () => {
       category: 'Cross-Chain Bridge',
       content: `
         <h2>Bridge Fees and Processing Times</h2>
-        <p>Understanding the costs and timeframes for cross-chain token bridging on boing.finance.</p>
+        <p>Understanding costs and time for aggregator-powered transfers on boing.finance.</p>
         
         <h3>Bridge Fee Structure</h3>
-        <p>Bridge fees vary based on several factors:</p>
         <ul>
-          <li><strong>Network pair:</strong> Different costs for different routes</li>
-          <li><strong>Token type:</strong> Some tokens have additional fees</li>
-          <li><strong>Transaction size:</strong> Larger amounts may have higher fees</li>
-          <li><strong>Network congestion:</strong> Fees increase during high usage</li>
-        </ul>
-        
-        <h3>Typical Fee Ranges</h3>
-        <ul>
-          <li><strong>Ethereum to Polygon:</strong> $5-15</li>
-          <li><strong>Ethereum to Arbitrum:</strong> $8-20</li>
-          <li><strong>Ethereum to Optimism:</strong> $10-25</li>
-          <li><strong>L2 to L2:</strong> $2-8</li>
+          <li><strong>Platform fee:</strong> 0.5% of the sending amount (LI.FI integrator fee for <code>boing.finance</code>)</li>
+          <li><strong>Network gas:</strong> paid by you on the source chain</li>
+          <li><strong>Route fees:</strong> whatever the selected bridge or DEX charges (shown in the quote)</li>
         </ul>
         
         <h3>Processing Timeframes</h3>
-        <ul>
-          <li><strong>Ethereum to L2:</strong> 5-15 minutes</li>
-          <li><strong>L2 to Ethereum:</strong> 7 days (challenge period)</li>
-          <li><strong>L2 to L2:</strong> 5-30 minutes</li>
-          <li><strong>Emergency exits:</strong> Instant (higher fees)</li>
-        </ul>
-        
-        <h3>Factors Affecting Speed</h3>
-        <ul>
-          <li><strong>Network congestion:</strong> Busy periods take longer</li>
-          <li><strong>Challenge periods:</strong> Security delays for L2 exits</li>
-          <li><strong>Validator activity:</strong> Bridge validator performance</li>
-        </ul>
-        
-        <h3>Cost Optimization Tips</h3>
-        <ul>
-          <li>Bridge during off-peak hours</li>
-          <li>Use L2 networks for lower fees</li>
-          <li>Batch multiple small transfers</li>
-          <li>Monitor gas prices before bridging</li>
-        </ul>
+        <p>Times come from the live LI.FI quote, not a Boing relayer. Some canonical L2 exits can take much longer than L2 deposits.</p>
         
         <h3>Fee Breakdown</h3>
-        <p>Bridge fees typically include:</p>
-        <ul>
-          <li>Network gas fees</li>
-          <li>Bridge protocol fees</li>
-          <li>Validator rewards</li>
-          <li>Security insurance</li>
-        </ul>
+        <p>You are not paying Boing for destination inventory. Fees are: platform 0.5% + gas + third-party route fees.</p>
       `
     },
     'bridge-security': {
@@ -400,58 +356,32 @@ const HelpArticle = () => {
       category: 'Cross-Chain Bridge',
       content: `
         <h2>Cross-Chain Bridge Security</h2>
-        <p>Understanding security measures and best practices for safe cross-chain token bridging.</p>
+        <p>Understanding security for aggregator-powered bridging — not a Boing validator set.</p>
         
         <h3>Security Architecture</h3>
-        <p>boing.finance's bridge implements multiple security layers:</p>
-        <ul>
-          <li><strong>Multi-signature wallets:</strong> Multiple validators required</li>
-          <li><strong>Time locks:</strong> Delays for large transactions</li>
-          <li><strong>Circuit breakers:</strong> Emergency pause mechanisms</li>
-          <li><strong>Audit trails:</strong> Complete transaction logging</li>
-        </ul>
+        <p>The live Bridge UI sends you through LI.FI. Security is that of LI.FI plus the underlying route (Across, Stargate, canonical bridges, DEXs, etc.).</p>
         
-        <h3>Validator Network</h3>
+        <h3>What Boing does not do</h3>
         <ul>
-          <li>Distributed validator network</li>
-          <li>Economic incentives for honest behavior</li>
-          <li>Slashing mechanisms for malicious actors</li>
-          <li>Regular validator rotation</li>
-        </ul>
-        
-        <h3>Smart Contract Security</h3>
-        <ul>
-          <li>Verified smart contracts on all networks</li>
-          <li>Regular security assessments</li>
-          <li>Bug bounty program participation</li>
-          <li>Upgrade mechanisms with timelocks</li>
+          <li>Boing does not custody locked tokens for this MVP</li>
+          <li>There is no in-app Boing relayer or validator network</li>
+          <li>Native <code>CrossChainBridge.sol</code> is not the execution path</li>
         </ul>
         
         <h3>User Security Best Practices</h3>
         <ul>
-          <li><strong>Verify URLs:</strong> Always use official boing.finance links</li>
-          <li><strong>Check contract addresses:</strong> Verify against official sources</li>
-          <li><strong>Start small:</strong> Test with small amounts first</li>
-          <li><strong>Keep records:</strong> Save transaction hashes and details</li>
+          <li><strong>Verify URLs:</strong> use official boing.finance links</li>
+          <li><strong>Read the quote:</strong> venue, output amount, and fees before signing</li>
+          <li><strong>Start small:</strong> test with a small amount first</li>
+          <li><strong>Keep records:</strong> save the source transaction hash</li>
         </ul>
         
         <h3>Risk Factors</h3>
         <ul>
-          <li><strong>Smart contract risk:</strong> Potential for bugs or exploits</li>
-          <li><strong>Validator risk:</strong> Malicious validator behavior</li>
-          <li><strong>Network risk:</strong> Blockchain network issues</li>
-          <li><strong>Liquidity risk:</strong> Insufficient bridge liquidity</li>
+          <li>Smart-contract and bridge risk on the selected route</li>
+          <li>Quote expiry / slippage if you wait too long to sign</li>
+          <li>Wrong destination token or chain if the picker is mis-set</li>
         </ul>
-        
-        <h3>Emergency Procedures</h3>
-        <ul>
-          <li>Bridge can be paused in emergencies</li>
-          <li>User funds remain safe during pauses</li>
-          <li>Emergency exit mechanisms available</li>
-          <li>Contact support for stuck transactions</li>
-        </ul>
-        
-        <p><em>Note: As a solo-founder project, we're actively seeking funding to implement professional security audits and enhance our bridge security measures.</em></p>
       `
     },
     'failed-transactions': {

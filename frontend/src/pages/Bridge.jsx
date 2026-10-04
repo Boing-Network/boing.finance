@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useWalletConnection } from '../hooks/useWalletConnection';
+import { useWallet } from '../contexts/WalletContext';
 import { useNetwork } from '../hooks/useNetwork';
 import toast from 'react-hot-toast';
 import { Helmet } from 'react-helmet-async';
@@ -11,118 +12,81 @@ import TokenManagementModal from '../components/TokenManagementModal';
 import EmptyState from '../components/EmptyState';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL } from '../config/boingNetworkDocsUrls';
+import {
+  PLATFORM_BRIDGE_FEE_LABEL,
+  buildLifiDeepLink,
+  getBridgeFallbackUrl,
+  getBridgeTokensForChain,
+  getLifiFeeRecipient,
+  resolveBridgeToken,
+} from '../config/bridge';
+import { getEvmBridgeQuote, sendAggregatorSwap } from '../services/aggregatorSwapService';
+import { transactionTrackingService } from '../services/transactionTrackingService.js';
 
-// Add AnimatedBackground and BoingAstronaut components
+function formatDuration(seconds) {
+  if (seconds == null || !Number.isFinite(Number(seconds))) return null;
+  const s = Math.max(0, Math.round(Number(seconds)));
+  if (s < 60) return `~${s}s`;
+  const m = Math.round(s / 60);
+  if (m < 60) return `~${m} min`;
+  return `~${(m / 60).toFixed(1)} h`;
+}
 
 export default function Bridge() {
-  const { account } = useWalletConnection();
+  const { account, switchNetworkWithRetry } = useWalletConnection();
+  const { provider: walletProvider, signer: walletSigner, chainId: walletChainId } = useWallet();
   const { network } = useNetwork();
 
-  // Bridge state
   const [amount, setAmount] = useState('');
-  const [fromToken, setFromToken] = useState('ETH');
-  const [toToken, setToToken] = useState('ETH');
-  const [fromChain, setFromChain] = useState(1); // Ethereum
-  const [toChain, setToChain] = useState(137); // Polygon
+  const [fromChain, setFromChain] = useState(1);
+  const [toChain, setToChain] = useState(8453);
+  const [fromAsset, setFromAsset] = useState(() => resolveBridgeToken(1, 'ETH'));
+  const [toAsset, setToAsset] = useState(() => resolveBridgeToken(8453, 'ETH'));
   const [bridgeTransactions, setBridgeTransactions] = useState([]);
   const [tokenModalOpen, setTokenModalOpen] = useState(false);
-  const [selectingToken, setSelectingToken] = useState(null); // 'from' or 'to'
-  const [tokens, setTokens] = useState([]);
-  const [estimatedFee, setEstimatedFee] = useState(0);
-  const [estimatedTime, setEstimatedTime] = useState('5-10 minutes');
-  const [bridgeRoute, setBridgeRoute] = useState(null);
+  const [selectingToken, setSelectingToken] = useState(null);
+  const [quote, setQuote] = useState(null);
+  const [quoteError, setQuoteError] = useState('');
+  const [quoting, setQuoting] = useState(false);
+  const [bridging, setBridging] = useState(false);
   const [recentBridgesExpanded, setRecentBridgesExpanded] = useState(true);
   const [howItWorksExpanded, setHowItWorksExpanded] = useState(false);
 
-  // Supported networks from central config (config/networks.js) – add new chains there.
-  // Exclude Boing L1: not an EVM bridge route for LiFi / aggregators.
-  const supportedNetworks = useMemo(() =>
-    getSupportedNetworks()
-      .filter((n) => !n.features?.includes('boingNativeL1'))
-      .map((n) => ({
-        id: n.chainId,
-        name: n.name,
-        symbol: n.symbol,
-        icon: '🔗',
-        rpcUrl: n.rpcUrl
-      })),
+  const feeRecipient = getLifiFeeRecipient();
+
+  const supportedNetworks = useMemo(
+    () =>
+      getSupportedNetworks()
+        .filter((n) => !n.features?.includes('boingNativeL1') && !n.features?.includes('solana'))
+        .map((n) => ({
+          id: n.chainId,
+          name: n.name,
+          symbol: n.symbol || n.nativeCurrency?.symbol,
+          rpcUrl: n.rpcUrl,
+        })),
     []
   );
 
-  // Load tokens from API
   useEffect(() => {
-    const loadTokens = async () => {
-      try {
-        const apiUrl = getApiUrl();
-        const response = await axios.get(`${apiUrl}/tokens`);
-        if (response.data.success && response.data.data.length > 0) {
-          setTokens(response.data.data);
-        } else {
-          // Set default tokens if API fails
-          setTokens([
-            { symbol: 'ETH', name: 'Ethereum', logo: '🔵', price: 2000 },
-            { symbol: 'USDC', name: 'USD Coin', logo: '🔵', price: 1 },
-            { symbol: 'USDT', name: 'Tether', logo: '🟢', price: 1 },
-            { symbol: 'WBTC', name: 'Wrapped Bitcoin', logo: '🟠', price: 40000 },
-            { symbol: 'MATIC', name: 'Polygon', logo: '🟣', price: 0.8 },
-            { symbol: 'BNB', name: 'Binance Coin', logo: '🟡', price: 300 }
-          ]);
-        }
-      } catch (error) {
-        console.error('Failed to load tokens:', error.message);
-        // Set default tokens as fallback
-        setTokens([
-          { symbol: 'ETH', name: 'Ethereum', logo: '🔵', price: 2000 },
-          { symbol: 'USDC', name: 'USD Coin', logo: '🔵', price: 1 },
-          { symbol: 'USDT', name: 'Tether', logo: '🟢', price: 1 },
-          { symbol: 'WBTC', name: 'Wrapped Bitcoin', logo: '🟠', price: 40000 },
-          { symbol: 'MATIC', name: 'Polygon', logo: '🟣', price: 0.8 },
-          { symbol: 'BNB', name: 'Binance Coin', logo: '🟡', price: 300 }
-        ]);
-      }
-    };
+    const next = resolveBridgeToken(fromChain, fromAsset?.symbol) || getBridgeTokensForChain(fromChain)[0];
+    if (next) setFromAsset(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- rematch symbol when chain changes
+  }, [fromChain]);
 
-    loadTokens();
-  }, []);
-
-  // Calculate bridge fee and time
   useEffect(() => {
-    if (amount && fromChain && toChain) {
-      // Calculate fee based on networks and amount
-      const baseFee = 0.001; // Base fee in ETH
-      const amountFee = parseFloat(amount) * 0.0001; // 0.01% of amount
-      const totalFee = baseFee + amountFee;
-      setEstimatedFee(totalFee);
+    const next = resolveBridgeToken(toChain, toAsset?.symbol) || getBridgeTokensForChain(toChain)[0];
+    if (next) setToAsset(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- rematch symbol when chain changes
+  }, [toChain]);
 
-      // Estimate time based on networks
-      const timeEstimates = {
-        '1-137': '5-10 minutes', // Ethereum to Polygon
-        '1-56': '10-15 minutes',  // Ethereum to BSC
-        '1-42161': '5-10 minutes', // Ethereum to Arbitrum
-        '137-1': '10-15 minutes',  // Polygon to Ethereum
-        '56-1': '15-20 minutes',   // BSC to Ethereum
-        '42161-1': '10-15 minutes' // Arbitrum to Ethereum
-      };
-      
-      const route = `${fromChain}-${toChain}`;
-      setEstimatedTime(timeEstimates[route] || '10-15 minutes');
-      
-      // Set bridge route for UI
-      setBridgeRoute({
-        from: supportedNetworks.find(n => n.id === fromChain),
-        to: supportedNetworks.find(n => n.id === toChain)
-      });
-    }
-  }, [amount, fromChain, toChain, supportedNetworks]);
-
-  // Load bridge transactions
   useEffect(() => {
     const loadTransactions = async () => {
       if (!account) return;
-      
       try {
         const apiUrl = getApiUrl();
-        const response = await axios.get(`${apiUrl}/bridge/transactions/${account}`);
+        const response = await axios.get(`${apiUrl}/bridge/transactions`, {
+          params: { address: account },
+        });
         if (response.data.success) {
           setBridgeTransactions(response.data.data || []);
         }
@@ -131,38 +95,146 @@ export default function Bridge() {
         setBridgeTransactions([]);
       }
     };
-
     loadTransactions();
   }, [account]);
+
+  useEffect(() => {
+    if (!amount || parseFloat(amount) <= 0 || fromChain === toChain || !fromAsset?.address || !toAsset?.address) {
+      setQuote(null);
+      setQuoteError('');
+      setQuoting(false);
+      return undefined;
+    }
+
+    const quoteAddress = account || '0x0000000000000000000000000000000000000001';
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      setQuoting(true);
+      setQuoteError('');
+      try {
+        const next = await getEvmBridgeQuote({
+          fromChain,
+          toChain,
+          fromToken: fromAsset,
+          toToken: toAsset,
+          amountHuman: amount,
+          fromAddress: quoteAddress,
+          signal: controller.signal,
+        });
+        if (controller.signal.aborted) return;
+        if (!next?.transactionRequest) {
+          setQuote(null);
+          setQuoteError('No LI.FI route for this pair. Try USDC, native gas, or open the aggregator.');
+          return;
+        }
+        setQuote(next);
+      } catch (err) {
+        if (controller.signal.aborted) return;
+        setQuote(null);
+        setQuoteError(err?.message || 'Quote failed');
+      } finally {
+        if (!controller.signal.aborted) setQuoting(false);
+      }
+    }, 450);
+
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [account, amount, fromChain, toChain, fromAsset, toAsset]);
+
+  const deepLink = buildLifiDeepLink({
+    fromChain,
+    toChain,
+    fromToken: fromAsset?.address,
+    toToken: toAsset?.address,
+    fromAmount: quote?.fromAmount,
+  });
 
   const handleBridge = async () => {
     if (!account) {
       toast.error('Please connect your wallet first');
       return;
     }
-
     if (!amount || parseFloat(amount) <= 0) {
       toast.error('Please enter a valid amount');
       return;
     }
-
     if (fromChain === toChain) {
       toast.error('Source and destination chains must be different');
       return;
     }
+    if (!walletProvider) {
+      toast.error('Connect an EVM wallet to execute the bridge');
+      return;
+    }
 
-    // Cross-chain bridge execution is not live in this UI yet — do not simulate success.
-    toast.error(
-      'Live bridge transfers are not available in the app yet. Check Status / Docs for network handoffs, or try again after mainnet bridge deployment.'
-    );
+    setBridging(true);
+    try {
+      if (Number(walletChainId) !== Number(fromChain)) {
+        const switched = await switchNetworkWithRetry(fromChain);
+        if (!switched) {
+          toast.error('Switch your wallet to the source network to continue');
+          return;
+        }
+      }
+      const fresh = await getEvmBridgeQuote({
+        fromChain,
+        toChain,
+        fromToken: fromAsset,
+        toToken: toAsset,
+        amountHuman: amount,
+        fromAddress: account,
+      });
+      const toUse = fresh?.transactionRequest ? fresh : quote;
+      if (!toUse?.transactionRequest) {
+        toast.error('No live route. Opening LI.FI instead.');
+        window.open(deepLink, '_blank', 'noopener,noreferrer');
+        return;
+      }
+      const signer = walletSigner ?? (await walletProvider.getSigner());
+      toast(`Routing via ${toUse.venue} (includes ${PLATFORM_BRIDGE_FEE_LABEL} platform fee)…`, { duration: 2500 });
+      const result = await sendAggregatorSwap(toUse, signer);
+      toast.success(`Bridge submitted via ${toUse.venue}`);
+      try {
+        await transactionTrackingService.trackBridgeTransaction(result.txHash, {
+          fromChain,
+          toChain,
+          userAddress: account,
+          token: fromAsset.symbol,
+          amount,
+        });
+      } catch {
+        /* history is best-effort */
+      }
+      setBridgeTransactions((prev) => [
+        {
+          id: result.txHash,
+          txHash: result.txHash,
+          status: 'pending',
+          amount,
+          fromToken: fromAsset.symbol,
+          toToken: toAsset.symbol,
+          fromChain,
+          toChain,
+          timestamp: new Date().toISOString(),
+        },
+        ...prev,
+      ]);
+    } catch (error) {
+      const msg = error?.shortMessage || error?.message || 'Bridge failed';
+      toast.error(msg);
+    } finally {
+      setBridging(false);
+    }
   };
 
   const handleTokenSelect = (token) => {
-    if (selectingToken === 'from') {
-      setFromToken(token.symbol);
-    } else if (selectingToken === 'to') {
-      setToToken(token.symbol);
-    }
+    const chain = selectingToken === 'to' ? toChain : fromChain;
+    const resolved = resolveBridgeToken(chain, token);
+    if (!resolved) return;
+    if (selectingToken === 'from') setFromAsset(resolved);
+    else if (selectingToken === 'to') setToAsset(resolved);
     setTokenModalOpen(false);
   };
 
@@ -172,87 +244,63 @@ export default function Bridge() {
   };
 
   const switchChains = () => {
-    const tempChain = fromChain;
     setFromChain(toChain);
-    setToChain(tempChain);
+    setToChain(fromChain);
+    setFromAsset(toAsset);
+    setToAsset(fromAsset);
   };
 
-  const getTokenLogo = (symbol) => {
-    const token = tokens.find(t => t.symbol === symbol);
-    return token?.logo || '🔵';
-  };
-
-  const getTokenName = (symbol) => {
-    const token = tokens.find(t => t.symbol === symbol);
-    return token?.name || symbol;
-  };
-
-  const getNetworkInfo = (chainId) => {
-    return supportedNetworks.find(n => n.id === chainId);
-  };
+  const getNetworkInfo = (chainId) => supportedNetworks.find((n) => n.id === chainId);
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'completed': return 'text-green-400';
-      case 'pending': return 'text-yellow-400';
-      case 'failed': return 'text-red-400';
-      default: return 'text-gray-400';
+      case 'completed':
+        return 'text-green-400';
+      case 'pending':
+        return 'text-yellow-400';
+      case 'failed':
+        return 'text-red-400';
+      default:
+        return 'text-gray-400';
     }
   };
 
-  // eslint-disable-next-line no-unused-vars
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'completed':
-        return (
-          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-        );
-      case 'pending':
-        return (
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-400"></div>
-        );
-      case 'failed':
-        return (
-          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        );
-      default:
-        return null;
-    }
-  };
+  const canSubmit =
+    Boolean(account) &&
+    Boolean(amount) &&
+    parseFloat(amount) > 0 &&
+    fromChain !== toChain &&
+    !quoting &&
+    !bridging;
+
+  const estimatedTime = formatDuration(quote?.executionDuration);
 
   return (
     <>
       <Helmet>
-        <title>Cross-Chain Bridge | boing.finance — Move Assets Between EVM & Solana</title>
-        <meta name="description" content="Bridge tokens between EVM and Solana securely. Fast, low-cost transfers with boing.finance." />
-        <meta name="keywords" content="cross-chain bridge, token bridge, boing finance, EVM, Solana, DeFi bridge" />
-        <meta property="og:title" content="Cross-Chain Bridge | boing.finance" />
-        <meta property="og:description" content="Bridge tokens between EVM and Solana. Secure and fast." />
+        <title>Bridge | boing.finance — Aggregator-powered cross-chain transfers</title>
+        <meta
+          name="description"
+          content="Bridge EVM tokens through LI.FI routes in boing.finance. 0.5% platform fee. No Boing-held bridge inventory."
+        />
+        <meta name="keywords" content="cross-chain bridge, LI.FI, token bridge, boing finance, EVM" />
+        <meta property="og:title" content="Bridge | boing.finance" />
+        <meta
+          property="og:description"
+          content="Aggregator-powered EVM bridge with a 0.5% platform service fee."
+        />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/bridge" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Bridge | boing.finance" />
-        <meta name="twitter:description" content="Bridge tokens between EVM and Solana." />
       </Helmet>
       <div className="relative w-full min-w-0">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          {/* Header - Compact */}
           <div className="mb-6">
-            <h1
-              className="text-2xl sm:text-3xl font-bold"
-              style={{ color: 'var(--text-primary)' }}
-            >
+            <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
               Bridge
             </h1>
-            <p
-              className="text-sm sm:text-base mt-0.5"
-              style={{ color: 'var(--text-secondary)' }}
-            >
-              Transfer tokens across blockchains
+            <p className="text-sm sm:text-base mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+              EVM transfers routed by LI.FI. Boing takes a {PLATFORM_BRIDGE_FEE_LABEL} platform fee. Liquidity stays with the
+              aggregator's bridges — not a Boing-held inventory.
             </p>
           </div>
 
@@ -266,14 +314,13 @@ export default function Bridge() {
                 color: 'var(--text-secondary)',
               }}
             >
-              <strong style={{ color: 'var(--text-primary)' }}>Boing L1 (6913):</strong> this page’s bridge flow targets{' '}
-              <strong>EVM-style</strong> networks (Boing is excluded from the chain picker). Native BOING transfers use Boing Express;
-              a <strong>full cross-chain bridge</strong> on Boing needs a dedicated VM bridge protocol and UI — tracked as product work
-              alongside operator deployments. See{' '}
+              <strong style={{ color: 'var(--text-primary)' }}>Boing L1 (6913):</strong> this page targets EVM networks
+              (Boing is excluded from the picker). Native BOING transfers use Boing Express; an L1↔EVM protocol bridge is
+              separate work. See{' '}
               <Link to="/boing/native-vm" className="text-cyan-400 underline hover:text-cyan-300">
                 Native VM tools
-              </Link>
-              {' '}and{' '}
+              </Link>{' '}
+              and{' '}
               <a
                 href={BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL}
                 target="_blank"
@@ -286,7 +333,6 @@ export default function Bridge() {
             </div>
           )}
 
-          {/* Bridge Interface */}
           <div
             id="bridge-form"
             className="rounded-2xl p-4 sm:p-6 shadow-xl mb-6"
@@ -296,9 +342,7 @@ export default function Bridge() {
               boxShadow: '0 4px 24px var(--shadow)',
             }}
           >
-            {/* Network Selection */}
             <div className="space-y-4 mb-6">
-              {/* From Network */}
               <div
                 className="rounded-xl p-4"
                 style={{
@@ -307,12 +351,13 @@ export default function Bridge() {
                 }}
               >
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>From</span>
-                  <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Balance: 0.0</span>
+                  <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                    From
+                  </span>
                 </div>
                 <select
                   value={fromChain}
-                  onChange={(e) => setFromChain(parseInt(e.target.value))}
+                  onChange={(e) => setFromChain(parseInt(e.target.value, 10))}
                   className="w-full rounded-xl px-4 py-3 text-sm sm:text-base font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
                   style={{
                     backgroundColor: 'var(--bg-tertiary)',
@@ -320,15 +365,14 @@ export default function Bridge() {
                     color: 'var(--text-primary)',
                   }}
                 >
-                    {supportedNetworks.map((network) => (
-                      <option key={network.id} value={network.id}>
-                        {network.icon} {network.name}
-                      </option>
-                    ))}
+                  {supportedNetworks.map((net) => (
+                    <option key={net.id} value={net.id}>
+                      {net.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
-              {/* Switch Networks Button */}
               <div className="flex justify-center -my-1">
                 <button
                   onClick={switchChains}
@@ -341,12 +385,16 @@ export default function Bridge() {
                   aria-label="Switch networks"
                 >
                   <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
+                    />
                   </svg>
                 </button>
               </div>
 
-              {/* To Network */}
               <div
                 className="rounded-xl p-4"
                 style={{
@@ -355,12 +403,13 @@ export default function Bridge() {
                 }}
               >
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>To</span>
-                  <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Balance: 0.0</span>
+                  <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                    To
+                  </span>
                 </div>
                 <select
                   value={toChain}
-                  onChange={(e) => setToChain(parseInt(e.target.value))}
+                  onChange={(e) => setToChain(parseInt(e.target.value, 10))}
                   className="w-full rounded-xl px-4 py-3 text-sm sm:text-base font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
                   style={{
                     backgroundColor: 'var(--bg-tertiary)',
@@ -368,16 +417,15 @@ export default function Bridge() {
                     color: 'var(--text-primary)',
                   }}
                 >
-                    {supportedNetworks.map((network) => (
-                      <option key={network.id} value={network.id}>
-                        {network.icon} {network.name}
-                      </option>
-                    ))}
+                  {supportedNetworks.map((net) => (
+                    <option key={net.id} value={net.id}>
+                      {net.name}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
 
-            {/* Token Selection */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
               <button
                 onClick={() => openTokenModal('from')}
@@ -388,13 +436,12 @@ export default function Bridge() {
                   color: 'var(--text-primary)',
                 }}
               >
-                  <span className="text-xl sm:text-2xl">{getTokenLogo(fromToken)}</span>
-                  <span className="font-medium text-sm sm:text-base">{getTokenName(fromToken)}</span>
-                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+                <span className="font-medium text-sm sm:text-base">{fromAsset?.symbol || 'From token'}</span>
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
               </button>
-              
+
               <button
                 onClick={() => openTokenModal('to')}
                 className="flex items-center space-x-2 px-4 py-3 rounded-xl transition-colors w-full sm:w-auto justify-center"
@@ -404,15 +451,13 @@ export default function Bridge() {
                   color: 'var(--text-primary)',
                 }}
               >
-                  <span className="text-xl sm:text-2xl">{getTokenLogo(toToken)}</span>
-                  <span className="font-medium text-sm sm:text-base">{getTokenName(toToken)}</span>
-                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+                <span className="font-medium text-sm sm:text-base">{toAsset?.symbol || 'To token'}</span>
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
               </button>
             </div>
 
-            {/* Amount Input */}
             <div
               className="rounded-xl p-4 mb-6"
               style={{
@@ -421,11 +466,14 @@ export default function Bridge() {
               }}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-400 text-sm sm:text-base">Amount</span>
-                <span className="text-gray-400 text-xs sm:text-sm">Balance: 0.0</span>
+                <span className="text-sm sm:text-base" style={{ color: 'var(--text-secondary)' }}>
+                  Amount
+                </span>
               </div>
               <div className="flex items-center space-x-3">
-                <label htmlFor="bridge-amount" className="sr-only">Amount</label>
+                <label htmlFor="bridge-amount" className="sr-only">
+                  Amount
+                </label>
                 <input
                   id="bridge-amount"
                   name="amount"
@@ -433,52 +481,101 @@ export default function Bridge() {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="0.0"
-                  className="flex-1 bg-transparent text-xl sm:text-2xl font-bold text-white placeholder-gray-500 focus:outline-none"
+                  className="flex-1 bg-transparent text-xl sm:text-2xl font-bold placeholder-gray-500 focus:outline-none"
+                  style={{ color: 'var(--text-primary)' }}
                 />
               </div>
             </div>
 
-            {/* Bridge Details - Compact single row */}
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 py-3 mb-6 text-sm" style={{ borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)' }}>
+            <div
+              className="flex flex-wrap items-center gap-x-6 gap-y-2 py-3 mb-4 text-sm"
+              style={{ borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)' }}
+            >
               <div className="flex items-center gap-2">
-                <span style={{ color: 'var(--text-tertiary)' }}>Fee:</span>
-                <span style={{ color: 'var(--text-primary)' }}>{estimatedFee.toFixed(4)} ETH</span>
+                <span style={{ color: 'var(--text-tertiary)' }}>Platform fee:</span>
+                <span style={{ color: 'var(--text-primary)' }}>{PLATFORM_BRIDGE_FEE_LABEL}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span style={{ color: 'var(--text-tertiary)' }}>Time:</span>
-                <span style={{ color: 'var(--text-primary)' }}>{estimatedTime}</span>
-              </div>
-              {bridgeRoute && (
+              {quote?.gasCostUSD != null && (
                 <div className="flex items-center gap-2">
-                  <span style={{ color: 'var(--text-tertiary)' }}>Route:</span>
+                  <span style={{ color: 'var(--text-tertiary)' }}>Est. gas:</span>
+                  <span style={{ color: 'var(--text-primary)' }}>${quote.gasCostUSD}</span>
+                </div>
+              )}
+              {estimatedTime && (
+                <div className="flex items-center gap-2">
+                  <span style={{ color: 'var(--text-tertiary)' }}>Time:</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{estimatedTime}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <span style={{ color: 'var(--text-tertiary)' }}>Route:</span>
+                <span style={{ color: 'var(--text-primary)' }}>
+                  {quoting
+                    ? 'Quoting…'
+                    : quote?.venue
+                      ? `${quote.venue} via LI.FI`
+                      : `${getNetworkInfo(fromChain)?.name || fromChain} → ${getNetworkInfo(toChain)?.name || toChain}`}
+                </span>
+              </div>
+              {quote?.amountOutHuman && (
+                <div className="flex items-center gap-2">
+                  <span style={{ color: 'var(--text-tertiary)' }}>You receive:</span>
                   <span style={{ color: 'var(--text-primary)' }}>
-                    {bridgeRoute.from.name} → {bridgeRoute.to.name}
+                    ~{quote.amountOutHuman} {toAsset?.symbol}
                   </span>
                 </div>
               )}
             </div>
 
-            {/* Bridge Button */}
-            <div className="space-y-3">
-              <p className="text-sm text-amber-200/90 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2">
-                Live cross-chain transfers are not enabled in the app yet. Estimates below are informational only.
+            {quoteError && (
+              <p className="text-sm text-amber-200/90 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2 mb-3">
+                {quoteError}
               </p>
+            )}
+
+            {!feeRecipient && (
+              <p className="text-xs mb-3" style={{ color: 'var(--text-tertiary)' }}>
+                Fee payout wallet is not set in this build. Register integrator <code>boing.finance</code> on{' '}
+                <a href="https://portal.li.fi/" className="underline" target="_blank" rel="noopener noreferrer">
+                  portal.li.fi
+                </a>{' '}
+                and set <code>REACT_APP_LIFI_FEE_RECIPIENT</code> / Worker <code>LIFI_FEE_RECIPIENT</code> to that address.
+              </p>
+            )}
+
+            <div className="space-y-3">
               <button
                 type="button"
                 onClick={handleBridge}
-                disabled={!account || !amount || parseFloat(amount) <= 0 || fromChain === toChain}
+                disabled={!canSubmit}
                 className="w-full font-bold py-4 px-8 rounded-xl transition-all text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   backgroundColor: 'var(--primary-color)',
                   color: 'var(--bg-primary)',
                 }}
               >
-                Bridge not live yet
+                {!account
+                  ? 'Connect wallet'
+                  : bridging
+                    ? 'Bridging…'
+                    : quoting
+                      ? 'Fetching route…'
+                      : quote
+                        ? `Bridge via ${quote.venue}`
+                        : 'Get a route'}
               </button>
+              <a
+                href={quote ? deepLink : getBridgeFallbackUrl(fromChain)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-center text-sm underline"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                Open in LI.FI / Jumper instead
+              </a>
             </div>
           </div>
 
-          {/* Recent Bridges - Collapsible */}
           <div
             className="rounded-2xl shadow-lg mb-6 overflow-hidden"
             style={{
@@ -490,78 +587,81 @@ export default function Bridge() {
               onClick={() => setRecentBridgesExpanded(!recentBridgesExpanded)}
               className="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:opacity-90 transition-opacity"
             >
-              <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Recent bridges</h3>
+              <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
+                Recent bridges
+              </h3>
               <svg
                 className={`w-5 h-5 transition-transform ${recentBridgesExpanded ? 'rotate-180' : ''}`}
                 style={{ color: 'var(--text-secondary)' }}
-                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
             {recentBridgesExpanded && (
-            <div className="px-4 sm:px-6 pb-4 sm:pb-6">
-            {bridgeTransactions.length > 0 ? (
-              <div className="space-y-3 sm:space-y-4">
-                {bridgeTransactions.map((tx) => (
-                  <div
-                    key={tx.id}
-                    className="rounded-xl p-3 sm:p-4 mb-3"
-                    style={{
-                      backgroundColor: 'var(--bg-secondary)',
-                      border: '1px solid var(--border-color)',
-                    }}
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-3 h-3 rounded-full ${getStatusColor(tx.status)}`}></div>
-                        <div>
-                          <p className="text-white font-medium text-sm sm:text-base">
-                            {tx.amount} {tx.fromToken} → {tx.toToken}
-                          </p>
-                          <p className="text-gray-400 text-xs sm:text-sm">
-                            {getNetworkInfo(tx.fromChain).name} → {getNetworkInfo(tx.toChain).name}
-                          </p>
+              <div className="px-4 sm:px-6 pb-4 sm:pb-6">
+                {bridgeTransactions.length > 0 ? (
+                  <div className="space-y-3 sm:space-y-4">
+                    {bridgeTransactions.map((tx) => (
+                      <div
+                        key={tx.id || tx.txHash}
+                        className="rounded-xl p-3 sm:p-4 mb-3"
+                        style={{
+                          backgroundColor: 'var(--bg-secondary)',
+                          border: '1px solid var(--border-color)',
+                        }}
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                          <div className="flex items-center space-x-3">
+                            <div className={`w-3 h-3 rounded-full ${getStatusColor(tx.status)}`}></div>
+                            <div>
+                              <p className="font-medium text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>
+                                {tx.amount} {tx.fromToken || tx.token} → {tx.toToken || tx.token}
+                              </p>
+                              <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>
+                                {getNetworkInfo(tx.fromChain)?.name || tx.fromChain} →{' '}
+                                {getNetworkInfo(tx.toChain)?.name || tx.toChain}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-3">
+                            <span className={`text-xs sm:text-sm font-medium ${getStatusColor(tx.status)}`}>
+                              {tx.status
+                                ? tx.status.charAt(0).toUpperCase() + tx.status.slice(1)
+                                : 'Pending'}
+                            </span>
+                            {tx.timestamp && (
+                              <span className="text-xs sm:text-sm" style={{ color: 'var(--text-tertiary)' }}>
+                                {new Date(tx.timestamp).toLocaleString()}
+                              </span>
+                            )}
+                          </div>
                         </div>
+                        {tx.txHash && (
+                          <div className="mt-2 sm:mt-3 pt-2 sm:pt-3" style={{ borderTop: '1px solid var(--border-color)' }}>
+                            <code className="text-xs font-mono break-all" style={{ color: 'var(--text-secondary)' }}>
+                              {tx.txHash}
+                            </code>
+                          </div>
+                        )}
                       </div>
-                      
-                      <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-3">
-                        <span className={`text-xs sm:text-sm font-medium ${getStatusColor(tx.status)}`}>
-                          {tx.status.charAt(0).toUpperCase() + tx.status.slice(1)}
-                        </span>
-                        <span className="text-gray-400 text-xs sm:text-sm">
-                          {new Date(tx.timestamp).toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    {tx.txHash && (
-                      <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-600">
-                        <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
-                          <span className="text-gray-400 text-xs sm:text-sm">Tx Hash:</span>
-                          <code className="bg-gray-700 px-2 py-1 rounded text-xs font-mono break-all text-gray-200">
-                            {tx.txHash}
-                          </code>
-                        </div>
-                      </div>
-                    )}
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  <EmptyState
+                    variant="bridge"
+                    title="No bridge transactions yet"
+                    description="Complete a transfer to see history here. Destination status is tracked by the aggregator, not a Boing relayer."
+                    actionLabel="Bridge tokens"
+                    actionHref="#bridge-form"
+                  />
+                )}
               </div>
-            ) : (
-              <EmptyState
-                variant="bridge"
-                title="No bridge transactions yet"
-                description="Bridge tokens across networks to see your transaction history here."
-                actionLabel="Bridge tokens"
-                actionHref="#bridge-form"
-              />
-            )}
-            </div>
             )}
           </div>
 
-          {/* How it works - Collapsible */}
           <div
             className="rounded-2xl shadow-lg overflow-hidden"
             style={{
@@ -573,62 +673,81 @@ export default function Bridge() {
               onClick={() => setHowItWorksExpanded(!howItWorksExpanded)}
               className="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:opacity-90 transition-opacity"
             >
-              <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>How it works</h3>
+              <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
+                How it works
+              </h3>
               <svg
                 className={`w-5 h-5 transition-transform ${howItWorksExpanded ? 'rotate-180' : ''}`}
                 style={{ color: 'var(--text-secondary)' }}
-                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
             {howItWorksExpanded && (
-            <div className="px-4 sm:px-6 pb-4 sm:pb-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
-                  style={{ backgroundColor: 'var(--primary-color)' }}
-                >
-                  <span className="text-white font-bold text-lg">1</span>
+              <div className="px-4 sm:px-6 pb-4 sm:pb-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="text-center">
+                    <div
+                      className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
+                      style={{ backgroundColor: 'var(--primary-color)' }}
+                    >
+                      <span className="text-white font-bold text-lg">1</span>
+                    </div>
+                    <h4 className="font-semibold mb-2 text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>
+                      Quote via LI.FI
+                    </h4>
+                    <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>
+                      Routes use third-party bridges and DEXs. You receive whatever the quote shows after fees.
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <div
+                      className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
+                      style={{ backgroundColor: 'var(--primary-color)' }}
+                    >
+                      <span className="text-white font-bold text-lg">2</span>
+                    </div>
+                    <h4 className="font-semibold mb-2 text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>
+                      {PLATFORM_BRIDGE_FEE_LABEL} platform fee
+                    </h4>
+                    <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>
+                      Taken from the sending token by LI.FI's integrator fee. Plus network gas and any bridge/DEX fees.
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <div
+                      className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
+                      style={{ backgroundColor: 'var(--primary-color)' }}
+                    >
+                      <span className="text-white font-bold text-lg">3</span>
+                    </div>
+                    <h4 className="font-semibold mb-2 text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>
+                      Sign once
+                    </h4>
+                    <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>
+                      Your wallet sends the LI.FI transaction on the source chain. Destination arrival is handled by the
+                      route — Boing does not custody tokens.
+                    </p>
+                  </div>
                 </div>
-                <h4 className="font-semibold mb-2 text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>Select networks</h4>
-                <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>Choose source and destination blockchains</p>
               </div>
-              <div className="text-center">
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
-                  style={{ backgroundColor: 'var(--primary-color)' }}
-                >
-                  <span className="text-white font-bold text-lg">2</span>
-                </div>
-                <h4 className="font-semibold mb-2 text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>Enter amount</h4>
-                <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>Specify the amount you want to bridge</p>
-              </div>
-              <div className="text-center">
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
-                  style={{ backgroundColor: 'var(--primary-color)' }}
-                >
-                  <span className="text-white font-bold text-lg">3</span>
-                </div>
-                <h4 className="font-semibold mb-2 text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>Confirm & wait</h4>
-                <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>Confirm transaction and wait for completion</p>
-              </div>
-            </div>
-            </div>
             )}
           </div>
         </div>
 
-        {/* Token Management Modal */}
         <TokenManagementModal
           isOpen={tokenModalOpen}
           onClose={() => setTokenModalOpen(false)}
           onTokenSelect={handleTokenSelect}
-          currentNetwork={network?.chainId}
+          currentNetwork={selectingToken === 'to' ? toChain : fromChain}
+          account={account}
+          provider={walletProvider}
+          chainId={selectingToken === 'to' ? toChain : fromChain}
         />
       </div>
     </>
   );
-} 
+}

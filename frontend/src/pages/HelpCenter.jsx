@@ -68,19 +68,19 @@ const HelpCenter = () => {
         {
           id: 'bridge-tokens',
           title: 'How to Bridge Tokens',
-          content: 'Step-by-step guide to transferring tokens between different blockchains.',
+          content: 'Step-by-step for the LI.FI-powered Bridge (0.5% platform fee, no Boing inventory).',
           tags: ['bridge', 'cross-chain', 'transfer']
         },
         {
           id: 'bridge-fees',
           title: 'Bridge Fees and Timeframes',
-          content: 'Understanding bridge fees, processing times, and gas costs.',
+          content: '0.5% platform fee plus gas and aggregator route fees.',
           tags: ['fees', 'timeframes', 'gas']
         },
         {
           id: 'bridge-security',
           title: 'Bridge Security',
-          content: 'Security measures and best practices for cross-chain transfers.',
+          content: 'You trust LI.FI and the selected route; Boing does not custody bridge funds.',
           tags: ['security', 'safety', 'best-practices']
         }
       ]

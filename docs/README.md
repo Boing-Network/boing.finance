@@ -9,6 +9,7 @@ flowchart LR
   Index[docs/README] --> Native[native-dex.md]
   Index --> Discover[native-dex-discovery.md]
   Index --> EVM[contracts.md]
+  Index --> Bridge[bridge.md]
   Index --> Deploy[deployment.md]
   Native --> Protocol[boing.network DEX docs]
 ```
@@ -21,6 +22,7 @@ Canonical **env vars:** `frontend/.env.example`. Canonical **EVM addresses:** `f
 | [native-dex-discovery.md](./native-dex-discovery.md) | `boing_listDexTokens` / `boing_listDexPools` spec, client wiring, operator definition of done |
 | [contracts.md](./contracts.md) | TokenFactory / DEXFactory status and EVM DEX operator runbook |
 | [contract-registry.md](./contract-registry.md) | Historical addresses and verification links (mirror of `contracts.js`) |
+| [bridge.md](./bridge.md) | LI.FI aggregator Bridge MVP, 0.5% fee, operator portal steps |
 | [deployment.md](./deployment.md) | Cloudflare Workers/Pages, production checklist, cost plan |
 | [configuration.md](./configuration.md) | Production env + optional API keys |
 | [adding-a-network.md](./adding-a-network.md) | Add a chain in `networks.js` + `contracts.js` |

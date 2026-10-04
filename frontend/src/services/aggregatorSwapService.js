@@ -1,9 +1,14 @@
 import { ethers } from 'ethers';
 import { getNetworkByChainId } from '../config/networks';
 import { getApiUrl } from '../config';
+import {
+  LIFI_INTEGRATOR,
+  LIFI_NATIVE,
+  PLATFORM_BRIDGE_FEE,
+  getLifiFeeRecipient,
+} from '../config/bridge';
 
-/** LI.FI native gas token sentinel. */
-export const LIFI_NATIVE = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+export { LIFI_NATIVE };
 
 export const SOL_MINT = 'So11111111111111111111111111111111111111112';
 export const SOLANA_USDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
@@ -20,23 +25,7 @@ async function fetchJson(url, options) {
   return { res, body };
 }
 
-async function fetchLifiQuoteDirect({ chainId, fromToken, toToken, fromAmount, fromAddress, slippage, signal, toDecimals }) {
-  const params = new URLSearchParams({
-    fromChain: String(chainId),
-    toChain: String(chainId),
-    fromToken,
-    toToken,
-    fromAmount: String(fromAmount),
-    fromAddress,
-    integrator: 'boing.finance',
-    order: 'CHEAPEST',
-    slippage: String(slippage ?? 0.005),
-  });
-  const { res, body } = await fetchJson(`https://li.quest/v1/quote?${params}`, {
-    signal,
-    headers: { Accept: 'application/json' },
-  });
-  if (!res.ok || !body.transactionRequest) return null;
+function mapLifiBody(body, toDecimals) {
   const estimate = body.estimate || {};
   const toAmount = estimate.toAmount || '0';
   let amountOutHuman = toAmount;
@@ -45,14 +34,59 @@ async function fetchLifiQuoteDirect({ chainId, fromToken, toToken, fromAmount, f
   } catch {
     /* keep raw */
   }
+  const durationSec = Number(estimate.executionDuration);
   return {
     provider: 'lifi',
     venue: body.toolDetails?.name || body.tool || 'Aggregator',
     amountOutHuman,
     amountOutRaw: toAmount,
+    toAmountMin: estimate.toAmountMin || toAmount,
     approvalAddress: estimate.approvalAddress || null,
     transactionRequest: body.transactionRequest,
+    gasCostUSD: estimate.gasCosts?.[0]?.amountUSD || null,
+    fromAmountUSD: estimate.fromAmountUSD || null,
+    toAmountUSD: estimate.toAmountUSD || null,
+    executionDuration: Number.isFinite(durationSec) ? durationSec : null,
+    feeCosts: Array.isArray(estimate.feeCosts)
+      ? estimate.feeCosts.map((f) => ({
+          name: f.name || 'Fee',
+          percentage: f.percentage || f.percentageFee || null,
+          amountUSD: f.amountUSD || null,
+        }))
+      : [],
   };
+}
+
+async function fetchLifiQuoteDirect({
+  fromChain,
+  toChain,
+  fromToken,
+  toToken,
+  fromAmount,
+  fromAddress,
+  slippage,
+  signal,
+  toDecimals,
+  fee,
+}) {
+  const params = new URLSearchParams({
+    fromChain: String(fromChain),
+    toChain: String(toChain ?? fromChain),
+    fromToken,
+    toToken,
+    fromAmount: String(fromAmount),
+    fromAddress,
+    integrator: LIFI_INTEGRATOR,
+    order: 'CHEAPEST',
+    slippage: String(slippage ?? 0.005),
+  });
+  if (fee != null && Number(fee) > 0) params.set('fee', String(fee));
+  const { res, body } = await fetchJson(`https://li.quest/v1/quote?${params}`, {
+    signal,
+    headers: { Accept: 'application/json' },
+  });
+  if (!res.ok || !body.transactionRequest) return null;
+  return mapLifiBody(body, toDecimals);
 }
 
 export function isNativeSwapSymbol(symbol, chainId) {
@@ -147,7 +181,8 @@ export async function getEvmAggregatorQuote({
   }
 
   const direct = await fetchLifiQuoteDirect({
-    chainId,
+    fromChain: chainId,
+    toChain: chainId,
     fromToken: from.address,
     toToken: to.address,
     fromAmount,
@@ -164,6 +199,83 @@ export async function getEvmAggregatorQuote({
     fromAmount,
     fromIsNative: from.isNative,
   };
+}
+
+function attachBridgeFeeMeta(quote, from, to, fromAmount) {
+  if (!quote) return null;
+  return {
+    ...quote,
+    fromToken: from.address,
+    toToken: to.address,
+    fromAmount,
+    fromIsNative: from.isNative,
+    platformFee: PLATFORM_BRIDGE_FEE,
+    platformFeeBps: Math.round(PLATFORM_BRIDGE_FEE * 10000),
+    feeRecipient: getLifiFeeRecipient() || null,
+    integrator: LIFI_INTEGRATOR,
+  };
+}
+
+/**
+ * Cross-chain LI.FI quote with the 0.5% boing.finance integrator fee.
+ */
+export async function getEvmBridgeQuote({
+  fromChain,
+  toChain,
+  fromToken,
+  toToken,
+  amountHuman,
+  fromAddress,
+  slippagePercent,
+  signal,
+}) {
+  if (!fromToken?.address || !toToken?.address || !fromAddress || !amountHuman) return null;
+  if (Number(fromChain) === Number(toChain) && fromToken.address.toLowerCase() === toToken.address.toLowerCase()) {
+    return null;
+  }
+  let fromAmount;
+  try {
+    fromAmount = ethers.parseUnits(String(amountHuman), fromToken.decimals ?? 18).toString();
+  } catch {
+    return null;
+  }
+  if (fromAmount === '0') return null;
+
+  const slippage = Number(slippagePercent) > 0 ? Number(slippagePercent) / 100 : 0.005;
+  const params = new URLSearchParams({
+    chain: String(fromChain),
+    toChain: String(toChain),
+    fromToken: fromToken.address,
+    toToken: toToken.address,
+    fromAmount,
+    fromAddress,
+    toDecimals: String(toToken.decimals ?? 18),
+    slippage: String(slippage),
+  });
+
+  try {
+    const res = await fetch(`${aggregatorBase()}/quote?${params}`, { signal });
+    const body = await res.json().catch(() => ({}));
+    if (res.ok && body.success && body.data?.transactionRequest) {
+      return attachBridgeFeeMeta(body.data, fromToken, toToken, fromAmount);
+    }
+  } catch {
+    /* public LI.FI */
+  }
+
+  const direct = await fetchLifiQuoteDirect({
+    fromChain,
+    toChain,
+    fromToken: fromToken.address,
+    toToken: toToken.address,
+    fromAmount,
+    fromAddress,
+    slippage,
+    signal,
+    toDecimals: toToken.decimals,
+    fee: PLATFORM_BRIDGE_FEE,
+  });
+  return attachBridgeFeeMeta(direct, fromToken, toToken, fromAmount);
 }
 
 export async function getJupiterQuote({ inputMint, outputMint, amount, slippagePercent, signal }) {

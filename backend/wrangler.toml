@@ -17,6 +17,9 @@ account_id = "10374f367672f4d19db430601db0926b"
 [vars]
 NODE_ENV = "development"
 FRONTEND_URL = "http://localhost:3000"
+# LI.FI integrator fee (0.005 = 0.5%). Recipient is the wallet registered for integrator "boing.finance" on portal.li.fi.
+LIFI_INTEGRATOR_FEE = "0.005"
+# LIFI_FEE_RECIPIENT = "0x..."
 # Worker URL for generating file URLs (auto-detected from request if not set)
 # WORKER_URL = "https://boing-api-staging.nico-chikuji.workers.dev"
 
@@ -30,6 +33,8 @@ binding = "AI"
 NODE_ENV = "production"
 FRONTEND_URL = "https://boing.finance"
 WORKER_URL = "https://boing-api-prod.nico-chikuji.workers.dev"
+LIFI_INTEGRATOR_FEE = "0.005"
+# Set LIFI_FEE_RECIPIENT to the same EVM address registered on https://portal.li.fi/ for integrator boing.finance
 # Set via `wrangler secret`: ALCHEMY_WEBHOOK_SIGNING_KEY, HELIUS_WEBHOOK_SECRET,
 # HELIUS_API_KEY (or SOLANA_MAINNET_RPC / SOLANA_DEVNET_RPC) for the /api/solana/rpc proxy
 # Webhook URLs: /api/webhooks/alchemy and /api/webhooks/helius
@@ -44,6 +49,7 @@ binding = "AI"
 NODE_ENV = "staging"
 FRONTEND_URL = "https://staging.boing.finance"
 WORKER_URL = "https://boing-api-staging.nico-chikuji.workers.dev"
+LIFI_INTEGRATOR_FEE = "0.005"
 
 # D1 Database
 # Staging and production currently share this database_id. Create separate

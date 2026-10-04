@@ -1,5 +1,5 @@
 /**
- * Same-chain swap quotes via LI.FI (EVM) and Jupiter (Solana).
+ * LI.FI (EVM swap + cross-chain) and Jupiter (Solana swap) quotes.
  * Optional secrets: LIFI_API_KEY, JUPITER_API_KEY (higher rate limits).
  */
 
@@ -7,6 +7,21 @@ const LIFI_QUOTE = 'https://li.quest/v1/quote';
 const JUPITER_LITE = 'https://lite-api.jup.ag/swap/v1';
 const JUPITER_FULL = 'https://api.jup.ag/swap/v1';
 const INTEGRATOR = 'boing.finance';
+/** Default platform fee on cross-chain quotes (0.005 = 0.5%). */
+export const DEFAULT_BRIDGE_FEE = 0.005;
+
+export function resolveBridgeFee(env) {
+  const raw = env?.LIFI_INTEGRATOR_FEE;
+  const n = raw != null && raw !== '' ? Number(raw) : DEFAULT_BRIDGE_FEE;
+  if (!Number.isFinite(n) || n < 0 || n >= 1) return DEFAULT_BRIDGE_FEE;
+  return n;
+}
+
+export function resolveFeeRecipient(env) {
+  const addr = String(env?.LIFI_FEE_RECIPIENT || env?.PLATFORM_WALLET || '').trim();
+  if (/^0x[0-9a-fA-F]{40}$/.test(addr) && !/^0x0+$/i.test(addr)) return addr;
+  return '';
+}
 
 function lifiHeaders(env) {
   const headers = {
@@ -23,10 +38,23 @@ function jupiterHeaders(env) {
   return headers;
 }
 
-export async function fetchLifiQuote({ chainId, fromToken, toToken, fromAmount, fromAddress, slippage, env }) {
+export async function fetchLifiQuote({
+  chainId,
+  fromChain,
+  toChain,
+  fromToken,
+  toToken,
+  fromAmount,
+  fromAddress,
+  slippage,
+  env,
+  fee,
+}) {
+  const sourceChain = fromChain ?? chainId;
+  const destChain = toChain ?? chainId;
   const params = new URLSearchParams({
-    fromChain: String(chainId),
-    toChain: String(chainId),
+    fromChain: String(sourceChain),
+    toChain: String(destChain),
     fromToken,
     toToken,
     fromAmount: String(fromAmount),
@@ -36,6 +64,9 @@ export async function fetchLifiQuote({ chainId, fromToken, toToken, fromAmount, 
   });
   if (slippage != null && Number.isFinite(Number(slippage))) {
     params.set('slippage', String(slippage));
+  }
+  if (fee != null && Number.isFinite(Number(fee)) && Number(fee) > 0) {
+    params.set('fee', String(fee));
   }
 
   const res = await fetch(`${LIFI_QUOTE}?${params}`, { headers: lifiHeaders(env) });
@@ -121,6 +152,15 @@ export function summarizeLifiQuote(quote, toDecimals) {
   } catch {
     /* keep raw */
   }
+  const feeCosts = Array.isArray(estimate.feeCosts)
+    ? estimate.feeCosts.map((f) => ({
+        name: f.name || f.token?.symbol || 'Fee',
+        percentage: f.percentage || f.percentageFee || null,
+        amountUSD: f.amountUSD || null,
+        included: f.included !== false,
+      }))
+    : [];
+  const durationSec = Number(estimate.executionDuration);
   return {
     provider: 'lifi',
     venue: tool,
@@ -130,5 +170,9 @@ export function summarizeLifiQuote(quote, toDecimals) {
     approvalAddress: estimate.approvalAddress || null,
     transactionRequest: quote.transactionRequest || null,
     gasCostUSD: estimate.gasCosts?.[0]?.amountUSD || null,
+    fromAmountUSD: estimate.fromAmountUSD || null,
+    toAmountUSD: estimate.toAmountUSD || null,
+    executionDuration: Number.isFinite(durationSec) ? durationSec : null,
+    feeCosts,
   };
 }

@@ -131,7 +131,7 @@ const Whitepaper = () => {
                   <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                     <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Cross-Chain Bridge</h4>
                     <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      Smart contracts that facilitate the transfer of assets between different blockchain networks. Implements security measures including multi-signature validation and time locks.
+                      Live product path is an external aggregator (LI.FI) with a 0.5% platform fee. A proprietary lock/mint bridge is not what the app runs today.
                     </p>
                   </div>
                 </div>
@@ -144,32 +144,30 @@ const Whitepaper = () => {
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
                 <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Bridge Architecture</h3>
                 <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
-                  The cross-chain bridge enables seamless asset transfers between supported networks through a combination of smart contracts and validator nodes.
+                  The live Bridge page on boing.finance is aggregator-powered (LI.FI). Users sign a source-chain transaction; destination liquidity belongs to those third-party routes. Boing does not hold bridge inventory. A 0.5% integrator fee is included in the quote.
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                   <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
-                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Lock & Mint</h4>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>What ships today</h4>
                     <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      Assets are locked on the source chain and equivalent tokens are minted on the destination chain, maintaining the total supply across networks.
+                      In-app LI.FI quotes and execution for EVM↔EVM (plus a Jumper/LI.FI deep link). Solana↔EVM and Boing L1↔EVM are out of this UI.
                     </p>
                   </div>
                   
                   <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
-                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Burn & Release</h4>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>What is not live</h4>
                     <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      When bridging back, tokens are burned on the destination chain and the original assets are released on the source chain.
+                      A Boing-operated CrossChainBridge with validators, lock-and-release inventory, or a native L1 light-client bridge. Those remain optional / protocol work.
                     </p>
                   </div>
                 </div>
                 
-                <h3 className="text-xl font-semibold mb-4 mt-6" style={{ color: 'var(--text-primary)' }}>Security Features</h3>
+                <h3 className="text-xl font-semibold mb-4 mt-6" style={{ color: 'var(--text-primary)' }}>Trust model (live path)</h3>
                 <ul className="list-disc list-inside space-y-2" style={{ color: 'var(--text-secondary)' }}>
-                  <li>Multi-signature validator consensus</li>
-                  <li>Time-locked bridge operations</li>
-                  <li>Emergency pause functionality</li>
-                  <li>Cross-chain transaction verification</li>
-                  <li>Bridge state monitoring and alerts</li>
+                  <li>You trust LI.FI routing plus the underlying bridge/DEX the quote selects</li>
+                  <li>Boing takes a 0.5% platform fee via LI.FI integrator fees (portal-configured wallet)</li>
+                  <li>Users pay source-chain gas; no Boing relayer is required</li>
                 </ul>
               </div>
             </section>
