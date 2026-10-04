@@ -252,7 +252,8 @@ const TokensSection = () => {
           style={{ color: 'var(--text-primary)'  }}>Creating Your Own Token</h3>
         <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
           On <strong style={{ color: 'var(--text-primary)' }}>Boing L1 testnet</strong>, fungible deploys use the Boing VM and{' '}
-          <strong>Boing Express</strong> (not the EVM factory path on this page). NFT collections follow the same pattern. See{' '}
+          <strong>Boing Express</strong> (not the EVM factory path on this page). NFT collections use the same Express deploy path
+          plus template-v2 <code className="text-xs">mint_batch</code> for multi-token mints (see Boing L1 docs). See{' '}
           <Link to="/docs?section=boing-l1" className="text-cyan-400 underline font-medium">
             Boing L1 &amp; Express
           </Link>{' '}
