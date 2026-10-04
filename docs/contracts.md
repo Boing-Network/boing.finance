@@ -10,7 +10,7 @@ Which features need on-chain deploys, current status, and how to enable the **DE
 **Boing L1 (6913)** uses the native VM AMM, not these Solidity contracts — [native-dex.md](./native-dex.md).  
 **Governance (undeployed):** `contracts/GOVERNANCE_CONTRACTS.md`.
 
-*Last reviewed: August 2026.*
+*Last reviewed: October 2026.*
 
 ---
 
@@ -28,13 +28,15 @@ Which features need on-chain deploys, current status, and how to enable the **DE
 | Deploy Token | TokenFactory | Live on TokenFactory networks |
 | Create Pool / Liquidity | DEXFactory, DEXRouter, or Uniswap/Pancake V2 map | Sepolia: Boing factory. Other EVM: Uniswap/Pancake V2 Create Pool **and** add/remove on existing pairs where mapped. Solana: Raydium CPMM in-app. Boing L1: native CP pool. |
 | Swap | Optional (DEXRouter) | Boing DEX when factory is set; else **LI.FI** (EVM) / **Jupiter** (Solana) |
-| Bridge | Optional | External bridges / aggregator |
+| Bridge | Optional | **Live:** external **LI.FI** aggregator (`/bridge`, 0.5% integrator fee). Native CrossChainBridge unused. |
 | Portfolio / Analytics / token browse | No | APIs (CoinGecko, RPC, Etherscan, GeckoTerminal) |
 | Governance / staking | BoingGovernor, Treasury, … | **Not deployed** — placeholders in `contracts.js` |
 
 ### In-app swaps without Boing pools
 
 Swap routes through **LI.FI** on EVM and **Jupiter** on Solana (`GET /api/aggregator/quote`). Optional Worker secrets `LIFI_API_KEY`, `JUPITER_API_KEY`. Tokens with no market still have no route.
+
+Cross-chain Bridge uses the same LI.FI quote endpoint with `toChain` different from `chain`, plus `fee=0.005`. See [bridge.md](./bridge.md). No Boing destination inventory.
 
 ---
 

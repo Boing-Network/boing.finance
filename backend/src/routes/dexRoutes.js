@@ -409,20 +409,32 @@ export function createDEXRoutes() {
   // Bridge status endpoint (dynamic)
   app.get('/bridge/status', async (c) => {
     try {
-      // Check for recent successful transactions (last 24h)
-      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const db = c.get('db');
-      const recent = await db.select().from(schema.bridgeTransactions)
-        .where(schema.bridgeTransactions.status === 'completed' && schema.bridgeTransactions.timestamp > since);
-      const status = recent.length > 0 ? 'operational' : 'degraded';
       return c.json({
         success: true,
         data: {
-          status,
-          supportedChains: [1, 137, 56],
-          message: status === 'operational' ? 'Bridge is operational on all supported chains.' : 'Bridge is experiencing issues.'
+          status: 'operational',
+          mode: 'lifi_aggregator',
+          platformFee: 0.005,
+          inventoryRequired: false,
+          supportedChains: [1, 137, 56, 42161, 10, 8453, 43114],
+          message:
+            'EVM bridge quotes execute via LI.FI. 0.5% boing.finance platform fee. Not a proprietary Boing custody bridge.',
         }
       });
+    } catch (error) {
+      return c.json({ success: false, error: error.message }, 500);
+    }
+  });
+
+  app.get('/bridge/transactions/:address', async (c) => {
+    try {
+      const db = c.get('db');
+      const address = c.req.param('address');
+      const txs = await db.select().from(schema.bridgeTransactions)
+        .where(eq(schema.bridgeTransactions.userAddress, address))
+        .orderBy(desc(schema.bridgeTransactions.timestamp))
+        .limit(50);
+      return c.json({ success: true, data: txs });
     } catch (error) {
       return c.json({ success: false, error: error.message }, 500);
     }

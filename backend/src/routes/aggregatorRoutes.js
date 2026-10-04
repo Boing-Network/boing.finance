@@ -3,6 +3,8 @@ import {
   fetchJupiterQuote,
   fetchJupiterSwapTx,
   fetchLifiQuote,
+  resolveBridgeFee,
+  resolveFeeRecipient,
   summarizeLifiQuote,
 } from '../services/aggregatorProxy.js';
 
@@ -11,6 +13,25 @@ const AMOUNT = /^[0-9]+$/;
 
 export function createAggregatorRoutes() {
   const router = new Hono();
+
+  router.get('/bridge-config', (c) => {
+    c.header('Cache-Control', 'no-store');
+    const fee = resolveBridgeFee(c.env);
+    const feeRecipient = resolveFeeRecipient(c.env);
+    return c.json({
+      success: true,
+      data: {
+        provider: 'lifi',
+        integrator: 'boing.finance',
+        platformFee: fee,
+        platformFeeBps: Math.round(fee * 10000),
+        platformFeeLabel: `${(fee * 100).toFixed(2).replace(/\.?0+$/, '')}%`,
+        feeRecipient: feeRecipient || null,
+        portalUrl: 'https://portal.li.fi/',
+        inventoryRequired: false,
+      },
+    });
+  });
 
   router.get('/quote', async (c) => {
     c.header('Cache-Control', 'no-store');
@@ -51,28 +72,45 @@ export function createAggregatorRoutes() {
       }
 
       const chainId = Number(chain);
+      const toChainRaw = c.req.query('toChain');
+      const toChain = toChainRaw != null && toChainRaw !== '' ? Number(toChainRaw) : chainId;
       if (!Number.isInteger(chainId) || chainId <= 0) {
         return c.json({ success: false, error: 'Invalid chain' }, 400);
+      }
+      if (!Number.isInteger(toChain) || toChain <= 0) {
+        return c.json({ success: false, error: 'Invalid toChain' }, 400);
       }
       if (!EVM_ADDR.test(fromToken) || !EVM_ADDR.test(toToken) || !EVM_ADDR.test(fromAddress)) {
         return c.json({ success: false, error: 'fromToken, toToken, and fromAddress must be 0x addresses' }, 400);
       }
-      if (fromToken.toLowerCase() === toToken.toLowerCase()) {
+      const isBridge = toChain !== chainId;
+      if (!isBridge && fromToken.toLowerCase() === toToken.toLowerCase()) {
         return c.json({ success: false, error: 'from and to tokens must differ' }, 400);
       }
 
+      const bridgeFee = isBridge ? resolveBridgeFee(c.env) : undefined;
       const raw = await fetchLifiQuote({
         chainId,
+        fromChain: chainId,
+        toChain,
         fromToken,
         toToken,
         fromAmount,
         fromAddress,
         slippage: slippage != null ? Number(slippage) : 0.005,
         env: c.env,
+        fee: bridgeFee,
       });
+      const summary = summarizeLifiQuote(raw, toDecimals);
+      if (isBridge) {
+        summary.platformFee = bridgeFee;
+        summary.platformFeeBps = Math.round(bridgeFee * 10000);
+        summary.feeRecipient = resolveFeeRecipient(c.env) || null;
+        summary.integrator = 'boing.finance';
+      }
       return c.json({
         success: true,
-        data: summarizeLifiQuote(raw, toDecimals),
+        data: summary,
       });
     } catch (error) {
       return c.json({ success: false, error: error.message || 'Quote failed' }, 502);

@@ -5,6 +5,7 @@ import SecurityBadges from './SecurityBadges';
 import EmptyState from './EmptyState';
 import walletTokenService from '../services/walletTokenService';
 import useEscapeKey from '../hooks/useEscapeKey';
+import { getBridgeTokensForChain } from '../config/bridge';
 
 const ERC20_META_ABI = [
   'function name() view returns (string)',
@@ -166,7 +167,7 @@ export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, c
       case 'my-tokens':
         return userTokens;
       case 'popular':
-        return popularTokens[currentNetwork] || [];
+        return popularTokens[currentNetwork] || getBridgeTokensForChain(currentNetwork);
       case 'custom':
         return customTokens;
       case 'import':

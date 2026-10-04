@@ -20,10 +20,10 @@ const Status = () => {
     },
     {
       name: 'Cross-Chain Bridge',
-      status: 'maintenance',
+      status: 'operational',
       uptime: 'N/A',
       responseTime: 'N/A',
-      description: 'In-app transfers not live yet — UI is informational only'
+      description: 'LI.FI aggregator for EVM routes (0.5% platform fee). Not a Boing-custody bridge; L1↔EVM is separate.'
     },
     {
       name: 'Liquidity Pools',

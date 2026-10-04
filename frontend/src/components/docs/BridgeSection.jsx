@@ -8,8 +8,7 @@ const BridgeSection = () => {
           style={{ color: 'var(--text-primary)'  }}>Cross-Chain Bridge Guide</h2>
         <p className=" text-lg leading-relaxed mb-8"
           style={{ color: 'var(--text-secondary)'  }}>
-          Learn how to transfer tokens between different blockchain networks using boing.finance's cross-chain bridge. 
-          Our bridge infrastructure enables seamless asset movement across 15+ supported networks.
+          Learn how to transfer tokens between EVM networks on boing.finance. Live routes are provided by the LI.FI aggregator (0.5% platform fee). This is not a Boing-custody bridge and does not require Boing-held inventory.
         </p>
       </div>
 
@@ -37,7 +36,7 @@ const BridgeSection = () => {
               <h4 className=" font-semibold mb-2"
           style={{ color: 'var(--text-primary)'  }}>Secure</h4>
               <p className=" text-sm"
-          style={{ color: 'var(--text-secondary)'  }}>Multi-sig protection and security features</p>
+          style={{ color: 'var(--text-secondary)'  }}>You trust LI.FI plus the route it selects</p>
             </div>
             <div className="text-center p-4">
               <div className="text-2xl mb-2">⚡</div>
@@ -72,16 +71,16 @@ const BridgeSection = () => {
 
           <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <h4 className="text-lg font-semibold  mb-4"
-          style={{ color: 'var(--text-primary)'  }}>Step 2: Lock and Mint</h4>
+          style={{ color: 'var(--text-primary)'  }}>Step 2: Aggregator execution</h4>
             <div className="space-y-3">
               <p className=""
-          style={{ color: 'var(--text-secondary)'  }}>1. Tokens are locked on source network</p>
+          style={{ color: 'var(--text-secondary)'  }}>1. LI.FI returns a quote including the 0.5% boing.finance fee</p>
               <p className=""
-          style={{ color: 'var(--text-secondary)'  }}>2. Validators verify the transaction</p>
+          style={{ color: 'var(--text-secondary)'  }}>2. You approve the token (if needed) and sign on the source chain</p>
               <p className=""
-          style={{ color: 'var(--text-secondary)'  }}>3. Equivalent tokens are minted on destination</p>
+          style={{ color: 'var(--text-secondary)'  }}>3. The selected bridge/DEX moves funds — Boing does not lock or mint</p>
               <p className=""
-          style={{ color: 'var(--text-secondary)'  }}>4. Transaction is recorded on both networks</p>
+          style={{ color: 'var(--text-secondary)'  }}>4. Track the source tx; destination arrival follows the route</p>
             </div>
           </div>
 

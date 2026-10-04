@@ -1,6 +1,6 @@
 # 💱 boing.finance
 
-Cross-chain DeFi: **EVM** (TokenFactory, Sepolia DEX, LI.FI), **Solana** (SPL deploy, Jupiter), and **Boing Network L1** (native VM AMM via Boing Express).
+Cross-chain DeFi: **EVM** (TokenFactory, Sepolia DEX, LI.FI swap **and** Bridge), **Solana** (SPL deploy, Jupiter), and **Boing Network L1** (native VM AMM via Boing Express).
 
 > 👋 **Everyday users:** open [boing.finance](https://boing.finance), connect a wallet, swap or deploy. On Boing L1 you need [Boing Express](https://boing.express) — MetaMask cannot sign 32-byte Boing accounts.  
 > 🛠️ **Developers:** Vite + React frontend, Cloudflare Workers + D1 backend. Boing path is `boing-sdk` + Express, **not** the Solidity tree.  
@@ -92,13 +92,15 @@ See **[docs/README.md](./docs/README.md)** for the full index.
 | [docs/native-dex-discovery.md](./docs/native-dex-discovery.md) | L1 list RPCs + operator handoff |
 | [docs/deployment.md](./docs/deployment.md) | Cloudflare Workers/Pages |
 | [docs/configuration.md](./docs/configuration.md) | Env vars |
+| [docs/bridge.md](./docs/bridge.md) | LI.FI Bridge MVP + 0.5% fee |
 | [docs/contracts.md](./docs/contracts.md) | EVM TokenFactory / DEX |
 | [docs/integration.md](./docs/integration.md) | Networks, Solana, swap market data |
 | [frontend/docs/DESIGN.md](./frontend/docs/DESIGN.md) | Visual system |
 
 ## Configuration
 
-**Backend secrets** (Wrangler): RPC URLs, `JWT_SECRET`, optional `LIFI_API_KEY` / `JUPITER_API_KEY`.
+**Backend secrets** (Wrangler): RPC URLs, `JWT_SECRET`, optional `LIFI_API_KEY` / `JUPITER_API_KEY`.  
+**Public Worker vars:** `LIFI_INTEGRATOR_FEE` (default 0.5%), `LIFI_FEE_RECIPIENT` (same address as LI.FI Partner Portal).
 
 **Frontend** (Cloudflare Pages or `frontend/.env.local`):
 

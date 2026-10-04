@@ -193,19 +193,19 @@ const RESTAPIContent = () => (
           style={{ color: 'var(--text-primary)'  }}>🌉 Bridge</h5>
       <div className="space-y-3">
         <div>
-          <code className="text-green-400">GET /bridge/status/{'{txHash}'}</code>
+          <code className="text-green-400">GET /api/aggregator/quote</code>
           <p className=" text-sm mt-1"
-          style={{ color: 'var(--text-secondary)'  }}>Get bridge transaction status</p>
+          style={{ color: 'var(--text-secondary)'  }}>LI.FI quote (set toChain ≠ chain for bridge; includes 0.5% fee)</p>
         </div>
         <div>
-          <code className="text-green-400">POST /bridge/initiate</code>
+          <code className="text-green-400">GET /api/aggregator/bridge-config</code>
           <p className=" text-sm mt-1"
-          style={{ color: 'var(--text-secondary)'  }}>Initiate cross-chain transfer</p>
+          style={{ color: 'var(--text-secondary)'  }}>Platform fee and fee-recipient config</p>
         </div>
         <div>
-          <code className="text-green-400">GET /bridge/history/{'{address}'}</code>
+          <code className="text-green-400">GET /api/bridge/transactions?address=</code>
           <p className=" text-sm mt-1"
-          style={{ color: 'var(--text-secondary)'  }}>Get bridge history for address</p>
+          style={{ color: 'var(--text-secondary)'  }}>Recorded source-chain bridge txs (optional history)</p>
         </div>
       </div>
     </div>
@@ -396,21 +396,16 @@ console.log('Liquidity added:', result);`}
           style={{ color: 'var(--text-primary)'  }}>🌉 Bridge Example</h5>
       <pre className="p-4 rounded text-sm overflow-x-auto"
           style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
-{`// Initiate cross-chain transfer
-const response = await fetch('https://api.boing.finance/v1/bridge/initiate', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    token: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-    amount: '1000000000000000000',
-    fromChain: 'ethereum',
-    toChain: 'polygon',
-    recipient: '0x...'
-  })
-});
-
-const bridge = await response.json();
-console.log('Bridge initiated:', bridge);`}
+{`// Cross-chain LI.FI quote (0.5% platform fee applied when toChain differs)
+const url = new URL('https://boing-api-prod.nico-chikuji.workers.dev/api/aggregator/quote');
+url.searchParams.set('chain', '1');
+url.searchParams.set('toChain', '8453');
+url.searchParams.set('fromToken', '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE');
+url.searchParams.set('toToken', '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE');
+url.searchParams.set('fromAmount', '10000000000000000');
+url.searchParams.set('fromAddress', '0x...');
+const quote = await (await fetch(url)).json();
+console.log(quote.data.venue, quote.data.transactionRequest);`}
       </pre>
     </div>
   </div>
