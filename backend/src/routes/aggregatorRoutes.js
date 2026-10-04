@@ -4,7 +4,7 @@ import {
   fetchJupiterSwapTx,
   fetchLifiQuote,
   resolveBridgeFee,
-  resolveFeeRecipient,
+  resolveFeeRecipients,
   summarizeLifiQuote,
 } from '../services/aggregatorProxy.js';
 
@@ -17,7 +17,7 @@ export function createAggregatorRoutes() {
   router.get('/bridge-config', (c) => {
     c.header('Cache-Control', 'no-store');
     const fee = resolveBridgeFee(c.env);
-    const feeRecipient = resolveFeeRecipient(c.env);
+    const recipients = resolveFeeRecipients(c.env);
     return c.json({
       success: true,
       data: {
@@ -26,9 +26,12 @@ export function createAggregatorRoutes() {
         platformFee: fee,
         platformFeeBps: Math.round(fee * 10000),
         platformFeeLabel: `${(fee * 100).toFixed(2).replace(/\.?0+$/, '')}%`,
-        feeRecipient: feeRecipient || null,
+        feeRecipient: recipients.evm,
+        feeRecipients: recipients,
+        hasApiKey: Boolean(c.env?.LIFI_API_KEY),
         portalUrl: 'https://portal.li.fi/',
         inventoryRequired: false,
+        inAppRoutes: ['evm'],
       },
     });
   });
@@ -103,10 +106,13 @@ export function createAggregatorRoutes() {
       });
       const summary = summarizeLifiQuote(raw, toDecimals);
       if (isBridge) {
+        const recipients = resolveFeeRecipients(c.env);
         summary.platformFee = bridgeFee;
         summary.platformFeeBps = Math.round(bridgeFee * 10000);
-        summary.feeRecipient = resolveFeeRecipient(c.env) || null;
+        summary.feeRecipient = recipients.evm;
+        summary.feeRecipients = recipients;
         summary.integrator = 'boing.finance';
+        summary.fee = bridgeFee;
       }
       return c.json({
         success: true,

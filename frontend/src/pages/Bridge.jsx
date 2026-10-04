@@ -51,8 +51,7 @@ export default function Bridge() {
   const [bridging, setBridging] = useState(false);
   const [recentBridgesExpanded, setRecentBridgesExpanded] = useState(true);
   const [howItWorksExpanded, setHowItWorksExpanded] = useState(false);
-
-  const feeRecipient = getLifiFeeRecipient();
+  const [feeRecipient, setFeeRecipient] = useState(getLifiFeeRecipient());
 
   const supportedNetworks = useMemo(
     () =>
@@ -66,6 +65,23 @@ export default function Bridge() {
         })),
     []
   );
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const apiUrl = getApiUrl();
+        const response = await axios.get(`${apiUrl}/aggregator/bridge-config`);
+        const evm = response.data?.data?.feeRecipient || response.data?.data?.feeRecipients?.evm;
+        if (!cancelled && evm) setFeeRecipient(evm);
+      } catch {
+        /* keep build-time recipient */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const next = resolveBridgeToken(fromChain, fromAsset?.symbol) || getBridgeTokensForChain(fromChain)[0];

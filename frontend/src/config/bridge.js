@@ -24,6 +24,16 @@ export function getLifiFeeRecipient() {
   return '';
 }
 
+export function getLifiFeeRecipients() {
+  const sol = String(import.meta.env.REACT_APP_LIFI_FEE_RECIPIENT_SOL || '').trim();
+  const btc = String(import.meta.env.REACT_APP_LIFI_FEE_RECIPIENT_BTC || '').trim();
+  return {
+    evm: getLifiFeeRecipient() || null,
+    sol: /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(sol) ? sol : null,
+    btc: /^(bc1|[13])[a-zA-HJ-NP-Z0-9]{24,74}$/.test(btc) ? btc : null,
+  };
+}
+
 /** Popular bridge assets per EVM chain (LI.FI native sentinel for gas tokens). */
 const TOKENS = {
   1: [

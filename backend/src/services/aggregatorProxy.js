@@ -17,10 +17,25 @@ export function resolveBridgeFee(env) {
   return n;
 }
 
+const EVM_RECIPIENT = /^0x[0-9a-fA-F]{40}$/;
+const SOL_RECIPIENT = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+const BTC_RECIPIENT = /^(bc1|[13])[a-zA-HJ-NP-Z0-9]{24,74}$/;
+
 export function resolveFeeRecipient(env) {
   const addr = String(env?.LIFI_FEE_RECIPIENT || env?.PLATFORM_WALLET || '').trim();
-  if (/^0x[0-9a-fA-F]{40}$/.test(addr) && !/^0x0+$/i.test(addr)) return addr;
+  if (EVM_RECIPIENT.test(addr) && !/^0x0+$/i.test(addr)) return addr;
   return '';
+}
+
+export function resolveFeeRecipients(env) {
+  const evm = resolveFeeRecipient(env);
+  const sol = String(env?.LIFI_FEE_RECIPIENT_SOL || '').trim();
+  const btc = String(env?.LIFI_FEE_RECIPIENT_BTC || '').trim();
+  return {
+    evm: evm || null,
+    sol: SOL_RECIPIENT.test(sol) ? sol : null,
+    btc: BTC_RECIPIENT.test(btc) ? btc : null,
+  };
 }
 
 function lifiHeaders(env) {
