@@ -52,6 +52,29 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
+      - name: Sync LI.FI Worker secrets
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event.inputs.environment == 'production')
+        working-directory: backend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          LIFI_API_KEY: ${{ secrets.LIFI_API_KEY }}
+          LIFI_FEE_RECIPIENT: ${{ secrets.LIFI_FEE_RECIPIENT }}
+          LIFI_FEE_RECIPIENT_SOL: ${{ secrets.LIFI_FEE_RECIPIENT_SOL }}
+          LIFI_FEE_RECIPIENT_BTC: ${{ secrets.LIFI_FEE_RECIPIENT_BTC }}
+        run: |
+          put() {
+            name="$1"
+            val="$2"
+            if [ -n "$val" ]; then
+              printf '%s' "$val" | npx wrangler secret put "$name" --env production
+            fi
+          }
+          put LIFI_API_KEY "$LIFI_API_KEY"
+          put LIFI_FEE_RECIPIENT "$LIFI_FEE_RECIPIENT"
+          put LIFI_FEE_RECIPIENT_SOL "$LIFI_FEE_RECIPIENT_SOL"
+          put LIFI_FEE_RECIPIENT_BTC "$LIFI_FEE_RECIPIENT_BTC"
+
       - name: Deploy to Production
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event.inputs.environment == 'production')
         working-directory: backend

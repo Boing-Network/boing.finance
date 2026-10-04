@@ -94,6 +94,9 @@ jobs:
         env:
           REACT_APP_ENV: production
           REACT_APP_BACKEND_URL: https://boing-api-prod.nico-chikuji.workers.dev
+          REACT_APP_LIFI_FEE_RECIPIENT: ${{ secrets.LIFI_FEE_RECIPIENT }}
+          REACT_APP_LIFI_FEE_RECIPIENT_SOL: ${{ secrets.LIFI_FEE_RECIPIENT_SOL }}
+          REACT_APP_LIFI_FEE_RECIPIENT_BTC: ${{ secrets.LIFI_FEE_RECIPIENT_BTC }}
           CI: false
 
       - name: Build for Staging

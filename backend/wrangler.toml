@@ -34,7 +34,8 @@ NODE_ENV = "production"
 FRONTEND_URL = "https://boing.finance"
 WORKER_URL = "https://boing-api-prod.nico-chikuji.workers.dev"
 LIFI_INTEGRATOR_FEE = "0.005"
-# Set LIFI_FEE_RECIPIENT to the same EVM address registered on https://portal.li.fi/ for integrator boing.finance
+# Set via `wrangler secret put` (do not commit values): LIFI_API_KEY,
+# LIFI_FEE_RECIPIENT (EVM), LIFI_FEE_RECIPIENT_SOL, LIFI_FEE_RECIPIENT_BTC.
 # Set via `wrangler secret`: ALCHEMY_WEBHOOK_SIGNING_KEY, HELIUS_WEBHOOK_SECRET,
 # HELIUS_API_KEY (or SOLANA_MAINNET_RPC / SOLANA_DEVNET_RPC) for the /api/solana/rpc proxy
 # Webhook URLs: /api/webhooks/alchemy and /api/webhooks/helius

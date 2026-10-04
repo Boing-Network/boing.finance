@@ -29,18 +29,23 @@ Same-chain Swap quotes are unchanged (no extra 0.5% there).
 
 ## What Nico must set
 
-1. Create / log in at [portal.li.fi](https://portal.li.fi/).
-2. Register integrator string **`boing.finance`** (already sent on every quote).
-3. Set the **fee recipient** wallet to the platform address (can be the same as TokenFactory `PLATFORM_WALLET`).
-4. Optional app config (public address, not a secret):
-   - Frontend: `REACT_APP_LIFI_FEE_RECIPIENT=0x…` (Pages / `frontend/.env.local` / `frontend/env/github-build.*.env`)
-   - Worker: `LIFI_FEE_RECIPIENT` in `backend/wrangler.toml` `[vars]` (or dashboard). Fallback: `PLATFORM_WALLET` if that var exists on the Worker.
-5. Optional: `wrangler secret put LIFI_API_KEY` for higher LI.FI rate limits. Quotes work without it.
-6. Optional override: Worker `LIFI_INTEGRATOR_FEE` (default `0.005`).
+Live values stay **out of git**. Set them on Cloudflare (and optionally GitHub Actions so CI can sync):
 
-**No bridge inventory and no funded fee-wallet gas** is required for users to bridge. The fee wallet only *receives* tokens; it does not send unlock transactions.
+1. Log in at [portal.li.fi](https://portal.li.fi/) and register integrator **`boing.finance`**.
+2. Paste the EVM / Solana / Bitcoin fee wallets in the portal (LI.FI pays those wallets; Sol/BTC are direct payout, no inventory).
+3. Worker secrets (`cd backend`):
 
-Redeploy the API Worker after changing Worker vars; rebuild the frontend after changing `REACT_APP_*`.
+```bash
+printf '%s' "$LIFI_API_KEY" | wrangler secret put LIFI_API_KEY --env production
+printf '%s' "$LIFI_FEE_RECIPIENT" | wrangler secret put LIFI_FEE_RECIPIENT --env production
+printf '%s' "$LIFI_FEE_RECIPIENT_SOL" | wrangler secret put LIFI_FEE_RECIPIENT_SOL --env production
+printf '%s' "$LIFI_FEE_RECIPIENT_BTC" | wrangler secret put LIFI_FEE_RECIPIENT_BTC --env production
+```
+
+4. Optional GitHub Actions secrets with the same names — `deploy-backend.yml` copies them to the Worker on production deploys.
+5. Optional Pages overlay `REACT_APP_LIFI_FEE_RECIPIENT` (build-time). The Bridge UI also reads `/api/aggregator/bridge-config` at runtime.
+
+**No bridge inventory.** Fee wallets only receive payouts.
 
 ## API
 
