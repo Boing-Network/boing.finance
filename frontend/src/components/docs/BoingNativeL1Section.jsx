@@ -103,16 +103,16 @@ export default function BoingNativeL1Section() {
           <a href={BOING_NETWORK_BOING_CANONICAL_DEPLOY_ARTIFACTS_URL} target="_blank" rel="noopener noreferrer" className={linkCls}>
             BOING-CANONICAL-DEPLOY-ARTIFACTS.md
           </a>{' '}
-          (NFT template <strong>v2</strong>, artifact id <code className="text-xs">boing.reference_nft_collection.v0</code>,{' '}
+          (NFT template <strong>v3</strong>, artifact id <code className="text-xs">boing.reference_nft_collection.v0</code>,{' '}
           <code className="text-xs">purpose_category: nft</code>).
         </p>
         <p className="mb-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
-          Template v2 adds atomic <code className="text-xs">mint_batch</code> (selector <code className="text-xs">0x06</code>,
-          layout <code className="text-xs">96+64n</code>, max 50) via{' '}
+          Template v3 ships atomic <code className="text-xs">mint_batch</code> (selector <code className="text-xs">0x06</code>,
+          layout <code className="text-xs">96+64n</code>, max 500) via{' '}
           <code className="text-xs">encodeReferenceMintBatchCalldata</code> — one Express approval (“Mint N NFTs to {'{to}'}”),
-          poll receipt with returned <code className="text-xs">tx_id</code>. Existing v1 collections cannot upgrade in place;
-          redeploy. Large batches need nodes with <code className="text-xs">GAS_PER_CONTRACT_CALL = 3_000_000</code> — hosted Fly
-          testnet redeploy may still be pending. Not JSON-RPC HTTP batching.
+          poll receipt with returned <code className="text-xs">tx_id</code>. Existing v1/v2 collections cannot upgrade in place;
+          redeploy for the higher cap. Full n=500 needs nodes with <code className="text-xs">GAS_PER_CONTRACT_CALL = 40_000_000</code>.
+          For 10k tokens chunk <strong>20×500</strong> — OpenSea-scale media upload is not one Boing consensus tx. Not JSON-RPC HTTP batching.
         </p>
         <p className="mb-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
           Set <code className="text-xs">REACT_APP_BOING_REFERENCE_NFT_COLLECTION_TEMPLATE_BYTECODE_HEX</code> for CI/production
