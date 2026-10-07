@@ -49,6 +49,6 @@
     "concurrently": "^8.2.2"
   },
   "dependencies": {
-    "ethers": "^6.15.0"
+    "ethers": "^6.17.0"
   }
 }
