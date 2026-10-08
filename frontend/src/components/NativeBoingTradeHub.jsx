@@ -5,6 +5,7 @@ import NativeAmmLpVaultPanel from './NativeAmmLpVaultPanel';
 import NativeLiquidityPositionsPanel from './NativeLiquidityPositionsPanel';
 import NativeDexDirectoryRoutePanel from './NativeDexDirectoryRoutePanel';
 import NativeDexIndexerSettingsStrip from './NativeDexIndexerSettingsStrip';
+import BoingL1DexReadinessPanel from './BoingL1DexReadinessPanel';
 import NativePoolsDirectoryPanel from './NativePoolsDirectoryPanel';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { useWallet } from '../contexts/WalletContext';
@@ -136,6 +137,9 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
         boxShadow: '0 4px 24px var(--shadow)',
       }}
     >
+      <div className="px-4 pt-4 sm:px-6 sm:pt-5">
+        <BoingL1DexReadinessPanel compact />
+      </div>
       <div
         className="flex flex-nowrap gap-1 p-2 border-b overflow-x-auto overscroll-x-contain"
         style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-secondary)' }}
@@ -213,12 +217,45 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
               </div>
             </>
           ) : (
-            <p
-              className="text-sm py-6 text-center rounded-lg border px-4"
-              style={{ borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}
+            <div
+              className="text-sm py-6 rounded-lg border px-4 space-y-3"
+              style={{ borderColor: 'rgba(251, 191, 36, 0.45)', color: 'var(--text-secondary)', backgroundColor: 'rgba(251, 191, 36, 0.06)' }}
+              role="status"
             >
-              No constant-product pool is configured for this RPC. Set build env or node hints, then refresh the page.
-            </p>
+              <p>
+                <strong style={{ color: 'var(--text-primary)' }}>No canonical CP pool published</strong> for this RPC
+                (<code className="text-xs">end_user.canonical_native_cp_pool</code> /{' '}
+                <code className="text-xs">REACT_APP_BOING_NATIVE_AMM_POOL</code> is zero). Swap on the network default
+                pool stays gated until an operator publishes an id.
+              </p>
+              <p>
+                You can still use <strong style={{ color: 'var(--text-primary)' }}>Pools</strong>,{' '}
+                <strong style={{ color: 'var(--text-primary)' }}>Smart route</strong>, and{' '}
+                <strong style={{ color: 'var(--text-primary)' }}>Your liquidity</strong> with a pasted pool AccountId, or{' '}
+                <a href="/create-pool" className="text-cyan-400 underline hover:text-cyan-300">
+                  Create Pool
+                </a>{' '}
+                to deploy + seed a new CP pool via Boing Express.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setTabAndUrl('pools')}
+                  className="text-sm px-4 py-2.5 min-h-[44px] rounded-xl font-medium border"
+                  style={{ borderColor: 'rgba(59, 130, 246, 0.45)', color: 'var(--text-primary)', backgroundColor: 'var(--bg-secondary)' }}
+                >
+                  Open Pools
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTabAndUrl('route')}
+                  className="text-sm px-4 py-2.5 min-h-[44px] rounded-xl font-medium border"
+                  style={{ borderColor: 'rgba(59, 130, 246, 0.45)', color: 'var(--text-primary)', backgroundColor: 'var(--bg-secondary)' }}
+                >
+                  Open Smart route
+                </button>
+              </div>
+            </div>
           ))}
         {tab === 'pools' && (
           <NativePoolsDirectoryPanel onTradeThisPair={onTradeThisPair} focusPoolHex={poolsFocusPoolHex} />

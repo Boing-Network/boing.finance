@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useWallet } from '../contexts/WalletContext';
 import { useChainType } from '../contexts/SolanaWalletContext';
 import PortfolioSolanaContent from '../components/PortfolioSolanaContent';
+import PortfolioBoingContent from '../components/PortfolioBoingContent';
 import { Helmet } from 'react-helmet-async';
 import { ethers } from 'ethers';
 import { useBlockchainPools } from '../hooks/useBlockchainPools';
@@ -12,7 +13,7 @@ import externalDexService from '../services/externalDexService';
 import portfolioService from '../services/portfolioService';
 import theGraphService from '../services/theGraphService';
 import alchemyService from '../services/alchemyService';
-import { NETWORKS } from '../config/networks';
+import { NETWORKS, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { exportPortfolio, exportPortfolioPDF } from '../utils/exportData';
 import { notificationService } from '../utils/notifications';
 import { PortfolioSummarySkeleton, TokenBalanceSkeleton, ChartSkeleton } from '../components/SkeletonLoader';
@@ -106,7 +107,7 @@ export default function Portfolio() {
             10: 'optimism',
             8453: 'base',
             11155111: 'ethereum',
-            6913: 'ethereum',
+            // 6913: Boing L1 uses PortfolioBoingContent (not The Graph)
           };
           const network = networkMap[chainId] || 'ethereum';
           const graphPositions = await theGraphService.getUserPositions(account, network);
@@ -422,6 +423,7 @@ export default function Portfolio() {
   }, [enrichedSummary, account]);
 
   if (isSolana) return <PortfolioSolanaContent />;
+  if (Number(chainId) === BOING_NATIVE_L1_CHAIN_ID) return <PortfolioBoingContent />;
 
   if (!account) {
     return (
