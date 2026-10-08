@@ -225,10 +225,18 @@ export function getBoingL1FullDexReadiness(chainId, options) {
         'On Boing testnet, use Swap → Pools for a native pool table and factory pair count. The EVM Pools page lists Solidity-backed pools on other networks.',
     },
     {
+      id: 'portfolio',
+      label: 'Portfolio (native balance + stake)',
+      status: 'live',
+      detail:
+        'Portfolio on chain 6913 uses boing_getAccount via Boing Express (not EVM indexers). LP / token positions: Swap → Your liquidity.',
+    },
+    {
       id: 'bridge',
       label: 'In-app cross-chain bridge',
       status: 'planned',
-      detail: 'This bridge UI targets EVM-style aggregators; a Boing VM bridge needs its own protocol + wallet flow.',
+      detail:
+        'EVM /bridge is live LI.FI. Boing L1 has no VM bridge; native transfers use Boing Express.',
     },
     {
       id: 'explorer_transparency',

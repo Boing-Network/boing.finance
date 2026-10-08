@@ -12,7 +12,8 @@ import AdvancedERC20Artifact from '../artifacts/AdvancedERC20.json';
 import TokenFactoryArtifact from '../artifacts/TokenFactory.json';
 import TokenImplementationArtifact from '../artifacts/TokenImplementation.json';
 import { Helmet } from 'react-helmet-async';
-import { getContractAddress } from '../config/contracts';
+import { getContractAddress, isZeroEvmAddress } from '../config/contracts';
+import getFeatureSupport from '../config/featureSupport';
 import { apiPath } from '../config';
 import LogoUpload from '../components/LogoUpload';
 import { uploadMetadataToIPFS, createTokenMetadata } from '../utils/ipfsUpload';
@@ -1643,7 +1644,7 @@ export default function DeployToken() {
       const tokenFactoryAddress = getContractAddress(network?.chainId, 'tokenFactory');
       const _tokenImplementationAddress = getContractAddress(network?.chainId, 'tokenImplementation');
       
-      if (tokenFactoryAddress && tokenFactoryAddress !== '0x0000000000000000000000000000000000000000') {
+      if (tokenFactoryAddress && !isZeroEvmAddress(tokenFactoryAddress)) {
         // Use TokenFactory system
         console.log('Using TokenFactory system for deployment');
         
@@ -1819,12 +1820,17 @@ export default function DeployToken() {
         }
         
       } else {
-        // Fallback to direct deployment (legacy method)
+        // TokenFactory not live — do not silently fall back to raw bytecode deploy on mainnets.
+        const fs = getFeatureSupport(Number(network?.chainId) || 0);
+        if (!fs.hasTokenFactory) {
+          throw new Error(
+            'TokenFactory is not deployed on this network yet. Switch to Ethereum, Polygon, BSC, Arbitrum, Optimism, Base, or Sepolia — or wait for an operator deploy (see docs/contracts.md).'
+          );
+        }
+        // Legacy direct deploy only if config claims a factory but address lookup failed oddly.
         console.log('Using direct deployment (legacy method)');
         
-        // Try deployment using the working approach directly
         try {
-          // Use the working approach: factory.deploy with value parameter
           const factory = new ethers.ContractFactory(ERC20_ABI, ERC20_BYTECODE, signer);
           
           // Deploy with value parameter (this is the working approach)
@@ -2164,9 +2170,7 @@ export default function DeployToken() {
                   {/* Deployment Method Indicator */}
                   {network && (
                     <div className="mt-2">
-                      {Number(network.chainId) === BOING_NATIVE_L1_CHAIN_ID ? null : getContractAddress(network?.chainId, 'tokenFactory') &&
-                        getContractAddress(network?.chainId, 'tokenFactory') !==
-                          '0x0000000000000000000000000000000000000000' ? (
+                      {Number(network.chainId) === BOING_NATIVE_L1_CHAIN_ID ? null : getFeatureSupport(Number(network.chainId)).hasTokenFactory ? (
                         <div className="flex items-center text-sm text-green-400">
                           <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -2174,11 +2178,11 @@ export default function DeployToken() {
                           TokenFactory System Available
                         </div>
                       ) : (
-                        <div className="flex items-center text-sm text-yellow-400">
+                        <div className="flex items-center text-sm text-amber-400">
                           <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                           </svg>
-                          Using Direct Deployment
+                          TokenFactory not deployed on this network — switch to a TokenFactory chain
                         </div>
                       )}
                     </div>

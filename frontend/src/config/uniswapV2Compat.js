@@ -1,7 +1,10 @@
 /**
- * Permissionless Uniswap V2–compatible factory + router for Create Pool when Boing DEXFactory
- * is not deployed on the chain. Addresses from official Uniswap v2 deployments (docs.uniswap.org)
- * except BNB Smart Chain, which uses PancakeSwap V2 (the chain’s standard constant-product AMM).
+ * Permissionless Uniswap V2–compatible factory + router for Create Pool / Liquidity when Boing
+ * DEXFactory is not deployed. Addresses from official Uniswap v2 deployments
+ * (https://docs.uniswap.org/contracts/v2/reference/smart-contracts/v2-deployments) except BNB
+ * Smart Chain, which uses PancakeSwap V2 (the chain’s standard constant-product AMM).
+ * Avalanche and Polygon share the same CREATE2 factory address by design — do not “fix”
+ * that as a copy-paste error. Do not invent live mainnet addresses here.
  */
 import { ethers } from 'ethers';
 

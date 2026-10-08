@@ -24,6 +24,7 @@ import { getWindowBoingProvider } from '../../utils/boingWalletDiscovery';
 import { buildContractDeployMetaTx } from 'boing-sdk';
 import NativeAmmLpVaultPanel from '../../components/NativeAmmLpVaultPanel';
 import NativeDexLedgerForwardPanel from '../../components/NativeDexLedgerForwardPanel';
+import BoingL1DexReadinessPanel from '../../components/BoingL1DexReadinessPanel';
 import {
   BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL,
   BOING_NETWORK_RPC_API_SPEC_URL,
@@ -499,6 +500,17 @@ export default function BoingNativeVm() {
             <li>Paste a signed tx hex from the CLI here, or build and sign with Express using the section below.</li>
           </ul>
         </PageCard>
+
+        {onBoing ? (
+          <BoingL1DexReadinessPanel defaultOpen />
+        ) : (
+          <PageCard className="mb-6">
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              Switch wallet network to Boing L1 (chain {BOING_NATIVE_L1_CHAIN_ID}) to see the native DEX
+              readiness checklist and Express-backed tools for this chain.
+            </p>
+          </PageCard>
+        )}
 
         <NativeAmmLpVaultPanel />
 

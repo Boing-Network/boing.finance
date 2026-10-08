@@ -618,14 +618,14 @@ export function getBoingNativeVmModuleId(chainId, moduleKey) {
   return `0x${hex}`;
 }
 
-// Helper function to check if contracts are deployed for a network
+/**
+ * True when Boing DEXFactory is live on this chain (not Uniswap/Pancake fallbacks).
+ * For Create Pool / Liquidity / TokenFactory gates, use getFeatureSupport() instead.
+ */
 export const isNetworkSupported = (chainId) => {
   const contracts = getContractAddresses(chainId);
   if (!contracts) return false;
-
-  const df = contracts.dexFactory;
-  if (typeof df !== 'string') return false;
-  return df !== '0x0000000000000000000000000000000000000000';
+  return !isZeroEvmAddress(contracts.dexFactory);
 };
 
 // Helper function to get supported networks
