@@ -92,17 +92,20 @@ export default function BoingNativeL1Section() {
 
       <div>
         <h3 className="text-2xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
-          Linked NFT + token project
+          Linked NFT + token project (on-chain)
         </h3>
         <p className="mb-3" style={{ color: 'var(--text-secondary)' }}>
-          Finance can record a mutable many-to-many link between NFT collection and fungible token AccountIds
-          (display-only MVP). Schema <code className="text-xs">boing.linked_nft_token.v1</code> — same shape the
-          SDK may export — lives under{' '}
+          Finance registers mutable many-to-many NFT collection ↔ fungible token links on an{' '}
+          <strong>on-chain registry</strong> (not browser drafts). Soft-gate prefers the same deployer but does not
+          authorize the link. Optional schema <code className="text-xs">boing.linked_nft_token.v1</code> may accompany
+          metadata. Hub:{' '}
           <Link to="/linked-project" className={linkCls}>
             Linked project
           </Link>
-          . Soft-gate prefers the same deployer wallet on both sides. Create NFT and Deploy Token surface a link
-          step after deploy; existing addresses can be pasted without a 1:1 requirement.
+          . Requires a published registry AccountId (
+          <code className="text-xs">REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY</code> or{' '}
+          <code className="text-xs">end_user.canonical_linked_nft_token_registry</code>) and boing-sdk register/unlink
+          helpers (network PR #42 follow-up). Until then the UI shows a blocked status and will not invent calldata.
         </p>
       </div>
 

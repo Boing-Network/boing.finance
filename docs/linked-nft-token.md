@@ -1,47 +1,53 @@
-# Linked NFT collection + fungible token
+# Linked NFT collection + fungible token (on-chain)
 
-Display-only MVP for pairing NFT collections with project tokens on boing.finance.
+Enforced many-to-many links between NFT collections and project tokens on boing.finance.
 
-## Product rules (2026-10-09)
+## Product rules (updated 2026-10-09)
 
 | Rule | Behavior |
 |------|----------|
-| Cardinality | **Many-to-many** — one token may link to many collections and vice versa |
-| Mutability | Links can be **updated or removed** after create |
-| Enforcement | **Display-only** — no on-chain registry tx yet |
-| Soft-gate | Prefer same wallet/deployer on both sides; warn but do not block |
-| Schema | `boing.linked_nft_token.v1` |
+| Cardinality | **Many-to-many** |
+| Mutability | Links can be **registered and unlinked** after create |
+| Enforcement | **On-chain registry** (not soft-gate, not browser localStorage) |
+| Soft-gate | Prefer same wallet/deployer; **advisory only** before submit |
+| Schema | `boing.linked_nft_token.v1` — optional metadata companion |
+
+Display-only browser drafts are **paused**. Official reads/writes go through the registry.
+
+## Blockers (current)
+
+| Dependency | Status |
+|------------|--------|
+| Registry AccountId | Unpublished — set `REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY` or wait for `end_user.canonical_linked_nft_token_registry` |
+| SDK calldata / list helpers | Pending boing.network [PR #42](https://github.com/Boing-Network/boing.network/pull/42) **follow-up** (on-chain registry). Current #42 is display-only schema helpers. |
+| Finance wiring | Stubbed: refuses to invent selector bytes; UI shows blocked status until both address + SDK encode helpers exist |
+
+Finance looks for SDK names such as:
+
+- `encodeRegisterLinkedNftTokenPairCalldataHex` / `encodeUnlinkLinkedNftTokenPairCalldataHex`
+- `encodeLinkedNftTokenPeersCountCalldataHex` / `encodeLinkedNftTokenGetPeerAtCalldataHex`
+- `resolveLinkedNftTokenRegistryAccountIdHex`
+
+(Aliases with similar shapes are also accepted — see `frontend/src/services/linkedNftTokenRegistry.js`.)
 
 ## Surfaces
 
 | Route | Role |
 |-------|------|
-| `/linked-project` | Hub: paste existing addresses, list/edit all browser-local links |
-| `/create-nft` | After native collection deploy (or on Review for EVM), link step |
-| `/deploy-token` | After native token deploy (or EVM deploy success), link step |
+| `/linked-project` | Hub: paste AccountIds, register/unlink when registry ready |
+| `/create-nft` | After native collection deploy, link step → registry |
+| `/deploy-token` | After native token deploy, link step → registry |
 
 Query helpers: `?collection=` / `?token=` on `/linked-project`; `?linkToken=` on Create NFT; `?linkCollection=` on Deploy Token.
 
-## Schema
+## Env
 
-Canonical JSON (also hashed with Blake3 for optional `description_hash` / indexer use):
-
-```json
-{
-  "schema": "boing.linked_nft_token.v1",
-  "collections": ["0x…"],
-  "tokens": ["0x…"],
-  "linker": "0x…",
-  "updated_at": "2026-10-09T00:00:00.000Z"
-}
+```bash
+# 32-byte registry AccountId (wins until RPC end_user publishes the canonical id)
+# REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY=0x…
 ```
 
-Implementation: `frontend/src/utils/linkedNftToken.js`. Prefers `boing-sdk` exports (`normalizeLinkedNftToken`, `descriptionHashHexFromLinkedNftToken`, …) when present; otherwise uses the local encode above.
+## Related
 
-Browser storage key: `boing.finance.linked_nft_token.v1` (edges). Deployer hints: `boing.finance.asset_deployer_hints.v1`.
-
-## Not in this MVP
-
-- On-chain `register_linked_pair` registry
-- Mint gating by companion token balance
-- Observer / FreshMint discovery of peers (consumers can adopt the same schema later)
+- boing.network docs (when merged): `BOING-LINKED-NFT-TOKEN.md`
+- DEX precedent: factory `register_pair` (fungible–fungible–pool only)

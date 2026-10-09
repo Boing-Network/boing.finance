@@ -869,7 +869,7 @@ export default function CreateNFT() {
               <Link to="/linked-project" className="underline" style={{ color: 'var(--finance-primary)' }}>
                 Linked project
               </Link>
-              <span className="text-theme-tertiary"> — pair this collection with one or more fungible tokens (mutable, many-to-many).</span>
+              <span className="text-theme-tertiary"> — register this collection with one or more fungible tokens on-chain (mutable, many-to-many).</span>
             </p>
           </div>
 
