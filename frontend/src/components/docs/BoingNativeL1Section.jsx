@@ -95,17 +95,17 @@ export default function BoingNativeL1Section() {
           Linked NFT + token project (on-chain)
         </h3>
         <p className="mb-3" style={{ color: 'var(--text-secondary)' }}>
-          Finance registers mutable many-to-many NFT collection ↔ fungible token links on an{' '}
-          <strong>on-chain registry</strong> (not browser drafts). Soft-gate prefers the same deployer but does not
-          authorize the link. Optional schema <code className="text-xs">boing.linked_nft_token.v1</code> may accompany
-          metadata. Hub:{' '}
+          Finance wires mutable many-to-many NFT ↔ token links through the{' '}
+          <strong>on-chain registry</strong>: <code className="text-xs">claim_asset</code> (0xE0) →{' '}
+          <code className="text-xs">register_link</code> (0xE1) / <code className="text-xs">unlink_at</code> (0xE2),
+          query via <code className="text-xs">links_count</code> / <code className="text-xs">get_link_at</code>. Auth =
+          claimer of both sides. Soft-gate is advisory. Hub:{' '}
           <Link to="/linked-project" className={linkCls}>
             Linked project
           </Link>
-          . Requires a published registry AccountId (
-          <code className="text-xs">REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY</code> or{' '}
-          <code className="text-xs">end_user.canonical_linked_nft_token_registry</code>) and boing-sdk register/unlink
-          helpers (network PR #42 follow-up). Until then the UI shows a blocked status and will not invent calldata.
+          . Set <code className="text-xs">REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY</code> (CREATE2 salt{' '}
+          <code className="text-xs">BOING_NFT_TOKEN_LINK_REG_V1</code>). boing-sdk helpers from network PR #42; finance
+          keeps a local 0xE0–0xE6 encode fallback until SDK merge.
         </p>
       </div>
 

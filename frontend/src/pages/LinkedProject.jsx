@@ -6,9 +6,6 @@ import { LINKED_NFT_TOKEN_SCHEMA } from '../utils/linkedNftToken';
 import { getLinkedNftTokenRegistryStatus } from '../services/linkedNftTokenRegistry';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 
-/**
- * Unified hub: create/link NFT collections + fungible tokens via the on-chain registry.
- */
 export default function LinkedProject() {
   const [searchParams] = useSearchParams();
   const collectionQ = searchParams.get('collection') || '';
@@ -28,7 +25,7 @@ export default function LinkedProject() {
         <title>Linked project | boing.finance</title>
         <meta
           name="description"
-          content="Register NFT collections and fungible tokens as mutable many-to-many pairs on the Boing on-chain registry."
+          content="Claim and register NFT collection ↔ fungible token links on the Boing on-chain registry."
         />
       </Helmet>
       <div className="relative z-10 container mx-auto px-4 py-8">
@@ -44,9 +41,9 @@ export default function LinkedProject() {
               Linked project
             </h1>
             <p className="text-theme-tertiary max-w-xl mx-auto">
-              Connect NFT collections and project tokens without forcing a 1:1. Links are mutable,
-              many-to-many, and <strong style={{ color: 'var(--text-primary)' }}>enforced on-chain</strong> via
-              the linked NFT↔token registry.
+              On-chain registry: <code className="text-xs">claim_asset</code> →{' '}
+              <code className="text-xs">register_link</code> / <code className="text-xs">unlink_at</code>.
+              Many-to-many and mutable. Auth = claimer of both sides.
             </p>
           </div>
 
@@ -79,8 +76,9 @@ export default function LinkedProject() {
               </div>
             </div>
             <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-              {status.message} Schema companion: <code className="text-[10px]">{LINKED_NFT_TOKEN_SCHEMA}</code>.
-              Waiting on boing.network PR #42 follow-up for registry calldata helpers when not yet in the SDK.
+              {status.message} Selectors 0xE0–0xE6 · CREATE2 salt{' '}
+              <code className="text-[10px]">BOING_NFT_TOKEN_LINK_REG_V1</code>. Metadata schema{' '}
+              <code className="text-[10px]">{LINKED_NFT_TOKEN_SCHEMA}</code> is cache-only.
             </p>
           </div>
 
@@ -88,7 +86,7 @@ export default function LinkedProject() {
             seedCollectionId={collectionQ}
             seedTokenId={tokenQ}
             showHubLink={false}
-            title="Register or unlink on-chain"
+            title="Claim, register, or unlink"
           />
 
           <section
@@ -96,24 +94,24 @@ export default function LinkedProject() {
             style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
           >
             <h2 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-              How linking works now
+              Operator notes
             </h2>
-            <ol className="list-decimal pl-5 space-y-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-              <li>Deploy (or paste) a collection and a fungible token AccountId.</li>
+            <ul className="list-disc pl-5 space-y-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
               <li>
-                When the registry AccountId is published and boing-sdk exposes register/unlink helpers, submit
-                the registry transaction from this page (or from Create NFT / Deploy Token after deploy).
+                Publish registry AccountId via{' '}
+                <code className="text-xs">REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY</code> (or network{' '}
+                <code className="text-xs">end_user.canonical_linked_nft_token_registry</code>).
               </li>
               <li>
-                Soft-gate may warn if deployers differ — acknowledge to proceed; the registry contract still
-                enforces who may write.
+                Claim assets in the same session as deploy so a third party cannot front-run{' '}
+                <code className="text-xs">claim_asset</code>.
               </li>
-              <li>Unlink is supported (mutable). Many peers per side are allowed (many-to-many).</li>
-            </ol>
-            <p className="text-xs mt-4" style={{ color: 'var(--text-tertiary)' }}>
-              Display-only browser drafts are paused. Env override while ops bootstraps:{' '}
-              <code className="text-[10px]">REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY</code>.
-            </p>
+              <li>
+                Link queries need{' '}
+                <code className="text-xs">REACT_APP_BOING_RPC_UNSIGNED_SIMULATE_METHOD=boing_simulateContractCall</code>{' '}
+                when the node supports it.
+              </li>
+            </ul>
           </section>
         </div>
       </div>

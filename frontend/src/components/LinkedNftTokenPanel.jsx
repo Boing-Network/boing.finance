@@ -11,14 +11,15 @@ import {
   softGateSameDeployer,
 } from '../utils/linkedNftToken';
 import {
+  claimLinkedNftTokenAsset,
   getLinkedNftTokenRegistryStatus,
+  listLinkedNftTokenLinksOnChain,
   registerLinkedNftTokenPairOnChain,
   unlinkLinkedNftTokenPairOnChain,
 } from '../services/linkedNftTokenRegistry';
 
 /**
- * On-chain NFT collection ↔ fungible token link UI (many-to-many, mutable).
- * Soft-gate may warn; registry reads/writes are required for an official link.
+ * On-chain NFT ↔ token link UI: claim → register_link / unlink_at / query.
  */
 export default function LinkedNftTokenPanel({
   seedCollectionId = '',
@@ -40,7 +41,8 @@ export default function LinkedNftTokenPanel({
   const [busy, setBusy] = useState(false);
   const [ackSoftGate, setAckSoftGate] = useState(false);
   const [lastTx, setLastTx] = useState(null);
-  const [onChainPeers, setOnChainPeers] = useState([]);
+  const [links, setLinks] = useState([]);
+  const [listError, setListError] = useState('');
 
   const status = useMemo(
     () => getLinkedNftTokenRegistryStatus({ endUser, networkInfo }),
@@ -74,77 +76,148 @@ export default function LinkedNftTokenPanel({
     }
   }, [schemaPreview]);
 
-  const refreshPeersNote = useCallback(() => {
-    // Full peer listing waits on SDK list ABI + RPC helper; keep empty until ready.
+  const refreshLinks = useCallback(async () => {
     if (!status.canRead) {
-      setOnChainPeers([]);
+      setLinks([]);
+      setListError('');
       return;
     }
-    setOnChainPeers([]);
-  }, [status.canRead]);
+    const seed =
+      (seedCollectionId && isLinkableAssetAddress(seedCollectionId) && seedCollectionId) ||
+      (seedTokenId && isLinkableAssetAddress(seedTokenId) && seedTokenId) ||
+      null;
+    const listed = await listLinkedNftTokenLinksOnChain({
+      endUser,
+      networkInfo,
+      origin: account || null,
+      filterCollectionId:
+        seedCollectionId && isLinkableAssetAddress(seedCollectionId) ? seedCollectionId : null,
+      filterTokenId: seedTokenId && isLinkableAssetAddress(seedTokenId) ? seedTokenId : null,
+    });
+    if (!listed.ok) {
+      // If filters empty, still try unfiltered for hub
+      if (!seed) {
+        const all = await listLinkedNftTokenLinksOnChain({
+          endUser,
+          networkInfo,
+          origin: account || null,
+        });
+        if (all.ok) {
+          setLinks(all.links);
+          setListError('');
+          return;
+        }
+        setLinks([]);
+        setListError(all.message || listed.message || 'Could not query registry');
+        return;
+      }
+      setLinks([]);
+      setListError(listed.message || 'Could not query registry');
+      return;
+    }
+    setLinks(listed.links);
+    setListError('');
+  }, [status.canRead, endUser, networkInfo, account, seedCollectionId, seedTokenId]);
 
   useEffect(() => {
-    refreshPeersNote();
-  }, [refreshPeersNote]);
+    void refreshLinks();
+  }, [refreshLinks]);
 
-  const onRegister = async () => {
+  const expressOk = isConnected && walletType === 'boingExpress';
+
+  const run = async (fn, okMsg) => {
     setBusy(true);
     try {
-      const result = await registerLinkedNftTokenPairOnChain({
-        getWalletProvider,
-        collectionId,
-        tokenId,
-        linker: account,
-        endUser,
-        networkInfo,
-        acknowledgeSoftGate: ackSoftGate || !previewWarning,
-      });
+      const result = await fn();
       if (!result.ok) {
         if (result.code === 'soft_gate') {
           toast(result.message, { icon: '⚠️', duration: 6000 });
-          setAckSoftGate(false);
           return;
         }
-        toast.error(result.message || 'Registry register failed');
+        toast.error(result.message || 'Registry call failed');
         return;
       }
-      setLastTx(result.txHash || null);
+      if (result.txHash) setLastTx(result.txHash);
+      else if (result.txHashes?.length) setLastTx(result.txHashes[result.txHashes.length - 1]);
       if (result.softGateWarning) toast(result.softGateWarning, { icon: '⚠️' });
-      toast.success('Link registered on-chain');
-      refreshPeersNote();
+      toast.success(okMsg);
+      await refreshLinks();
     } finally {
       setBusy(false);
     }
   };
 
-  const onUnlink = async () => {
-    setBusy(true);
-    try {
-      const result = await unlinkLinkedNftTokenPairOnChain({
-        getWalletProvider,
-        collectionId,
-        tokenId,
-        linker: account,
-        endUser,
-        networkInfo,
-      });
-      if (!result.ok) {
-        toast.error(result.message || 'Registry unlink failed');
-        return;
-      }
-      setLastTx(result.txHash || null);
-      toast.success('Link unlinked on-chain');
-      refreshPeersNote();
-    } finally {
-      setBusy(false);
-    }
-  };
+  const onClaimCollection = () =>
+    run(
+      () =>
+        claimLinkedNftTokenAsset({
+          getWalletProvider,
+          assetId: collectionId,
+          linker: account,
+          endUser,
+          networkInfo,
+        }),
+      'Collection claimed'
+    );
+
+  const onClaimToken = () =>
+    run(
+      () =>
+        claimLinkedNftTokenAsset({
+          getWalletProvider,
+          assetId: tokenId,
+          linker: account,
+          endUser,
+          networkInfo,
+        }),
+      'Token claimed'
+    );
+
+  const onRegister = () =>
+    run(
+      () =>
+        registerLinkedNftTokenPairOnChain({
+          getWalletProvider,
+          collectionId,
+          tokenId,
+          linker: account,
+          endUser,
+          networkInfo,
+          acknowledgeSoftGate: ackSoftGate || !previewWarning,
+        }),
+      'Link registered (claim×2 + register_link)'
+    );
+
+  const onUnlinkPair = () =>
+    run(
+      () =>
+        unlinkLinkedNftTokenPairOnChain({
+          getWalletProvider,
+          collectionId,
+          tokenId,
+          linker: account,
+          endUser,
+          networkInfo,
+        }),
+      'Link unlinked'
+    );
+
+  const onUnlinkIndex = (index) =>
+    run(
+      () =>
+        unlinkLinkedNftTokenPairOnChain({
+          getWalletProvider,
+          index,
+          linker: account,
+          endUser,
+          networkInfo,
+        }),
+      `Unlinked slot #${index}`
+    );
 
   const shellClass = compact
     ? 'rounded-xl border p-4 text-left mt-4'
     : 'rounded-2xl border p-5 sm:p-6 text-left';
-
-  const expressOk = isConnected && walletType === 'boingExpress';
 
   return (
     <section
@@ -161,10 +234,9 @@ export default function LinkedNftTokenPanel({
             {title}
           </h3>
           <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-            Register NFT collections and fungible tokens as a mutable many-to-many pair on the{' '}
-            <strong style={{ color: 'var(--text-primary)' }}>on-chain registry</strong>. Soft-gate prefers the
-            same deployer but does not authorize the link. Schema{' '}
-            <code className="text-[10px]">{LINKED_NFT_TOKEN_SCHEMA}</code> may accompany metadata.
+            Claim both AccountIds, then <code className="text-[10px]">register_link</code>. Unlink via{' '}
+            <code className="text-[10px]">unlink_at</code>. Auth = claimer of both sides. Many-to-many and
+            mutable. Schema <code className="text-[10px]">{LINKED_NFT_TOKEN_SCHEMA}</code> is cache-only.
           </p>
         </div>
         {showHubLink ? (
@@ -195,8 +267,8 @@ export default function LinkedNftTokenPanel({
         ) : null}
         {collectionLabel || tokenLabel ? (
           <span className="block mt-1">
-            {collectionLabel ? `Collection label: ${collectionLabel}. ` : ''}
-            {tokenLabel ? `Token label: ${tokenLabel}.` : ''}
+            {collectionLabel ? `Collection: ${collectionLabel}. ` : ''}
+            {tokenLabel ? `Token: ${tokenLabel}.` : ''}
           </span>
         ) : null}
       </div>
@@ -210,7 +282,7 @@ export default function LinkedNftTokenPanel({
             type="text"
             value={collectionId}
             onChange={(e) => setCollectionId(e.target.value.trim())}
-            placeholder="0x… (32-byte Boing AccountId)"
+            placeholder="0x… (32-byte)"
             className="w-full px-3 py-2 rounded-lg text-sm font-mono"
             style={{
               backgroundColor: 'var(--bg-tertiary)',
@@ -228,7 +300,7 @@ export default function LinkedNftTokenPanel({
             type="text"
             value={tokenId}
             onChange={(e) => setTokenId(e.target.value.trim())}
-            placeholder="0x… (32-byte Boing AccountId)"
+            placeholder="0x… (32-byte)"
             className="w-full px-3 py-2 rounded-lg text-sm font-mono"
             style={{
               backgroundColor: 'var(--bg-tertiary)',
@@ -259,12 +331,30 @@ export default function LinkedNftTokenPanel({
               checked={ackSoftGate}
               onChange={(e) => setAckSoftGate(e.target.checked)}
             />
-            <span>I understand soft-gate is advisory; submit the registry tx anyway.</span>
+            <span>Advisory only — registry still requires claimer of both sides.</span>
           </label>
         </div>
       ) : null}
 
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-3">
+        <button
+          type="button"
+          onClick={onClaimCollection}
+          disabled={busy || !status.canWrite || !expressOk || !isLinkableAssetAddress(collectionId)}
+          className="px-3 py-2 rounded-lg text-sm font-medium border disabled:opacity-50"
+          style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+        >
+          Claim collection
+        </button>
+        <button
+          type="button"
+          onClick={onClaimToken}
+          disabled={busy || !status.canWrite || !expressOk || !isLinkableAssetAddress(tokenId)}
+          className="px-3 py-2 rounded-lg text-sm font-medium border disabled:opacity-50"
+          style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+        >
+          Claim token
+        </button>
         <button
           type="button"
           onClick={onRegister}
@@ -279,11 +369,11 @@ export default function LinkedNftTokenPanel({
           className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
           style={{ backgroundColor: 'var(--finance-green-mid)' }}
         >
-          {busy ? 'Submitting…' : 'Register on-chain'}
+          {busy ? 'Submitting…' : 'Claim + register on-chain'}
         </button>
         <button
           type="button"
-          onClick={onUnlink}
+          onClick={onUnlinkPair}
           disabled={
             busy ||
             !status.canWrite ||
@@ -294,13 +384,22 @@ export default function LinkedNftTokenPanel({
           className="px-4 py-2 rounded-lg text-sm font-medium border disabled:opacity-50"
           style={{ borderColor: 'var(--border-color)', color: 'var(--finance-red-light)' }}
         >
-          Unlink on-chain
+          Unlink pair
+        </button>
+        <button
+          type="button"
+          onClick={() => void refreshLinks()}
+          disabled={busy || !status.canRead}
+          className="px-3 py-2 rounded-lg text-sm font-medium border disabled:opacity-50"
+          style={{ borderColor: 'var(--border-color)', color: 'var(--finance-primary)' }}
+        >
+          Refresh links
         </button>
       </div>
 
       {!expressOk ? (
         <p className="text-xs mb-3" style={{ color: 'var(--text-tertiary)' }}>
-          Connect Boing Express on Boing testnet to submit registry transactions.
+          Connect Boing Express on Boing testnet to submit claim / register / unlink.
         </p>
       ) : null}
 
@@ -310,30 +409,57 @@ export default function LinkedNftTokenPanel({
         </p>
       ) : null}
 
-      {onChainPeers.length > 0 ? (
-        <ul className="text-xs space-y-1 mb-3 font-mono" style={{ color: 'var(--text-secondary)' }}>
-          {onChainPeers.map((p) => (
-            <li key={p}>{p}</li>
+      {listError ? (
+        <p className="text-xs mb-3" style={{ color: 'var(--finance-gold)' }}>
+          {listError}
+        </p>
+      ) : null}
+
+      {links.length > 0 ? (
+        <ul className="space-y-2 mb-3">
+          {links.map((row) => (
+            <li
+              key={`${row.index}-${row.collectionId}-${row.tokenId}`}
+              className="rounded-lg border px-3 py-2 text-xs font-mono break-all"
+              style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-tertiary)' }}
+            >
+              <div style={{ color: 'var(--text-secondary)' }}>
+                <span style={{ color: 'var(--text-primary)' }}>#{row.index}</span> NFT{' '}
+                {row.collectionId}
+              </div>
+              <div className="mt-1" style={{ color: 'var(--text-secondary)' }}>
+                Token {row.tokenId}
+              </div>
+              <button
+                type="button"
+                className="mt-2 text-xs underline"
+                style={{ color: 'var(--finance-red-light)' }}
+                disabled={busy || !status.canWrite || !expressOk}
+                onClick={() => onUnlinkIndex(row.index)}
+              >
+                Unlink slot #{row.index}
+              </button>
+            </li>
           ))}
         </ul>
       ) : (
         <p className="text-xs mb-3" style={{ color: 'var(--text-tertiary)' }}>
-          Official peer lists load from the registry once SDK list helpers + a published registry id are
-          available. Browser-only drafts are disabled.
+          No active links loaded yet. Query uses <code className="text-[10px]">links_count</code> /{' '}
+          <code className="text-[10px]">get_link_at</code> (needs unsigned simulate when available).
         </p>
       )}
 
       {schemaPreview && schemaHash ? (
         <details className="rounded-lg border" style={{ borderColor: 'var(--border-color)' }}>
           <summary className="cursor-pointer text-xs font-medium px-3 py-2" style={{ color: 'var(--text-primary)' }}>
-            Optional metadata schema preview ({LINKED_NFT_TOKEN_SCHEMA})
+            Optional metadata cache ({LINKED_NFT_TOKEN_SCHEMA})
           </summary>
           <pre
             className="text-[10px] px-3 pb-3 overflow-x-auto"
             style={{ color: 'var(--text-secondary)' }}
           >
             {JSON.stringify(schemaPreview, null, 2)}
-            {`\n\n// description_hash (metadata only — not a registry substitute)\n${schemaHash}`}
+            {`\n\n// description_hash (not authoritative)\n${schemaHash}`}
           </pre>
         </details>
       ) : null}

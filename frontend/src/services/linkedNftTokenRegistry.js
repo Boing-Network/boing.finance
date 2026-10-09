@@ -1,15 +1,13 @@
 /**
  * On-chain linked NFT collection ↔ fungible token registry (many-to-many, mutable).
  *
- * Authority is the registry contract — not soft-gate and not browser localStorage.
- * Calldata / list helpers come from boing-sdk when the on-chain registry PR lands
- * (boing.network #42 follow-up). Until then this module reports a clear blocked status
- * and refuses to invent selector bytes.
+ * Prefer boing-sdk helpers (`linkedNftTokenRegistry.ts` from network PR #42). Local encode
+ * fallbacks match selectors 0xE0–0xE6 until that SDK lands on main.
  *
- * Address resolution (first non-zero):
- * 1. SDK `resolveLinkedNftTokenRegistryAccountIdHex` / similar
- * 2. `REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY` / `REACT_APP_BOING_NATIVE_VM_LINKED_NFT_TOKEN_REGISTRY`
- * 3. `boing_getNetworkInfo.end_user.canonical_linked_nft_token_registry` (when operators publish it)
+ * Auth: claimer of both sides. Flow: claim_asset ×2 → register_link; unlink via unlink_at(index).
+ *
+ * Registry AccountId: env `REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY`, contracts nativeVm,
+ * or `end_user.canonical_linked_nft_token_registry`. CREATE2 salt `BOING_NFT_TOKEN_LINK_REG_V1`.
  */
 
 import * as boingSdk from 'boing-sdk';
@@ -18,10 +16,102 @@ import { softGateSameDeployer, normalizeLinkableAssetAddress } from '../utils/li
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { getBoingNativeVmModuleId } from '../config/contracts';
 import { boingExpressContractCallSignSimulateSubmit } from './boingExpressNativeTx';
-import { nativeAccountsAccessListJson } from './nativeAmmAccessList';
+import { tryBoingUnsignedContractSimulate } from './boingNativeVm';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
 
 const ZERO32 = `0x${'0'.repeat(64)}`;
+
+/** Local fallbacks (mirror SDK) when installed boing-sdk lacks registry exports. */
+const SELECTOR_CLAIM = 0xe0;
+const SELECTOR_REGISTER = 0xe1;
+const SELECTOR_UNLINK_AT = 0xe2;
+const SELECTOR_LINKS_COUNT = 0xe3;
+const SELECTOR_GET_LINK_AT = 0xe4;
+const SELECTOR_GET_CLAIMER = 0xe5;
+
+function selectorWord(selector) {
+  const w = new Uint8Array(32);
+  w[31] = selector & 0xff;
+  return w;
+}
+
+function u64Word(n) {
+  if (!Number.isInteger(n) || n < 0 || n > Number.MAX_SAFE_INTEGER) {
+    throw new RangeError('index must be a non-negative safe integer');
+  }
+  const w = new Uint8Array(32);
+  new DataView(w.buffer).setBigUint64(24, BigInt(n), false);
+  return w;
+}
+
+function hex32ToBytes(hex) {
+  const t = String(hex || '').trim();
+  const body = t.startsWith('0x') || t.startsWith('0X') ? t.slice(2) : t;
+  if (!/^[0-9a-fA-F]{64}$/.test(body)) throw new Error('Expected a 32-byte hex account id.');
+  const out = new Uint8Array(32);
+  for (let i = 0; i < 32; i += 1) out[i] = parseInt(body.slice(i * 2, i * 2 + 2), 16);
+  return out;
+}
+
+function bytesToHex(bytes) {
+  let s = '0x';
+  for (let i = 0; i < bytes.length; i += 1) s += bytes[i].toString(16).padStart(2, '0');
+  return s;
+}
+
+function concatWords(parts) {
+  const n = parts.reduce((a, p) => a + p.length, 0);
+  const out = new Uint8Array(n);
+  let o = 0;
+  for (const p of parts) {
+    out.set(p, o);
+    o += p.length;
+  }
+  return out;
+}
+
+function localEncodeClaim(asset) {
+  return bytesToHex(concatWords([selectorWord(SELECTOR_CLAIM), hex32ToBytes(asset)]));
+}
+function localEncodeRegister(collection, token) {
+  return bytesToHex(
+    concatWords([selectorWord(SELECTOR_REGISTER), hex32ToBytes(collection), hex32ToBytes(token)])
+  );
+}
+function localEncodeUnlinkAt(index) {
+  return bytesToHex(concatWords([selectorWord(SELECTOR_UNLINK_AT), u64Word(index)]));
+}
+function localEncodeLinksCount() {
+  return bytesToHex(selectorWord(SELECTOR_LINKS_COUNT));
+}
+function localEncodeGetLinkAt(index) {
+  return bytesToHex(concatWords([selectorWord(SELECTOR_GET_LINK_AT), u64Word(index)]));
+}
+function localEncodeGetClaimer(asset) {
+  return bytesToHex(concatWords([selectorWord(SELECTOR_GET_CLAIMER), hex32ToBytes(asset)]));
+}
+
+function localDecodeCount(returnDataHex) {
+  const raw = String(returnDataHex || '')
+    .replace(/^0x/i, '')
+    .toLowerCase();
+  if (raw.length < 16) return 0n;
+  return BigInt(`0x${raw.slice(-16)}`);
+}
+
+function localDecodeLinkAt(returnDataHex) {
+  const raw = String(returnDataHex || '')
+    .replace(/^0x/i, '')
+    .toLowerCase();
+  if (raw.length < 128) throw new Error('get_link_at return data: expected 64 bytes');
+  const collectionHex = `0x${raw.slice(0, 64)}`;
+  const tokenHex = `0x${raw.slice(64, 128)}`;
+  return {
+    collectionHex,
+    tokenHex,
+    active: collectionHex !== ZERO32 && tokenHex !== ZERO32,
+  };
+}
 
 function envRegistryHex() {
   const raw =
@@ -40,46 +130,54 @@ function normalizeRegistryId(hex) {
   return lower;
 }
 
-/** Pick SDK encode/list helpers if the installed boing-sdk exports them. */
+function pickFn(...candidates) {
+  for (const c of candidates) {
+    if (typeof c === 'function') return c;
+  }
+  return null;
+}
+
+/** SDK API + local encode fallbacks (selectors 0xE0–0xE6). */
 export function getLinkedNftTokenRegistrySdkApi() {
+  const encodeClaim =
+    pickFn(boingSdk.encodeLinkedNftTokenClaimAssetCalldataHex) || localEncodeClaim;
   const encodeRegister =
-    boingSdk.encodeRegisterLinkedNftTokenPairCalldataHex ||
-    boingSdk.encodeLinkedNftTokenRegisterCalldataHex ||
-    boingSdk.encodeRegisterLinkedPairCalldataHex ||
-    null;
-  const encodeUnlink =
-    boingSdk.encodeUnlinkLinkedNftTokenPairCalldataHex ||
-    boingSdk.encodeLinkedNftTokenUnlinkCalldataHex ||
-    boingSdk.encodeUnlinkLinkedPairCalldataHex ||
-    null;
-  const encodePeersCount =
-    boingSdk.encodeLinkedNftTokenPeersCountCalldataHex ||
-    boingSdk.encodeListLinkedNftTokenPeersCountCalldataHex ||
-    null;
-  const encodeGetPeerAt =
-    boingSdk.encodeLinkedNftTokenGetPeerAtCalldataHex ||
-    boingSdk.encodeGetLinkedNftTokenPeerAtCalldataHex ||
-    null;
-  const resolveRegistry =
-    boingSdk.resolveLinkedNftTokenRegistryAccountIdHex ||
-    boingSdk.resolveCanonicalLinkedNftTokenRegistryHex ||
-    null;
-  const parsePeersCount =
-    boingSdk.parseLinkedNftTokenPeersCountReturn ||
-    boingSdk.decodeLinkedNftTokenPeersCount ||
-    null;
-  const parsePeerAt =
-    boingSdk.parseLinkedNftTokenPeerAtReturn ||
-    boingSdk.decodeLinkedNftTokenPeerAt ||
-    null;
+    pickFn(boingSdk.encodeLinkedNftTokenRegisterLinkCalldataHex) || localEncodeRegister;
+  const encodeUnlinkAt =
+    pickFn(boingSdk.encodeLinkedNftTokenUnlinkAtCalldataHex) || localEncodeUnlinkAt;
+  const encodeLinksCount =
+    pickFn(boingSdk.encodeLinkedNftTokenLinksCountCalldataHex) || localEncodeLinksCount;
+  const encodeGetLinkAt =
+    pickFn(boingSdk.encodeLinkedNftTokenGetLinkAtCalldataHex) || localEncodeGetLinkAt;
+  const encodeGetClaimer =
+    pickFn(boingSdk.encodeLinkedNftTokenGetAssetClaimerCalldataHex) || localEncodeGetClaimer;
+  const decodeCount =
+    pickFn(boingSdk.decodeLinkedNftTokenLinksCountReturnData) || localDecodeCount;
+  const decodeLinkAt =
+    pickFn(boingSdk.decodeLinkedNftTokenGetLinkAtReturnData) || localDecodeLinkAt;
+  const buildFlowTxs = pickFn(boingSdk.buildLinkedNftTokenRegisterFlowTxs);
+  const buildCallTx = pickFn(boingSdk.buildLinkedNftTokenRegistryContractCallTx);
+  const create2SaltHex =
+    boingSdk.LINKED_NFT_TOKEN_REGISTRY_CREATE2_SALT_V1_HEX ||
+    (() => {
+      const u8 = new Uint8Array(32);
+      u8.set(new TextEncoder().encode('BOING_NFT_TOKEN_LINK_REG_V1'));
+      return bytesToHex(u8);
+    })();
+
   return {
-    encodeRegister: typeof encodeRegister === 'function' ? encodeRegister : null,
-    encodeUnlink: typeof encodeUnlink === 'function' ? encodeUnlink : null,
-    encodePeersCount: typeof encodePeersCount === 'function' ? encodePeersCount : null,
-    encodeGetPeerAt: typeof encodeGetPeerAt === 'function' ? encodeGetPeerAt : null,
-    resolveRegistry: typeof resolveRegistry === 'function' ? resolveRegistry : null,
-    parsePeersCount: typeof parsePeersCount === 'function' ? parsePeersCount : null,
-    parsePeerAt: typeof parsePeerAt === 'function' ? parsePeerAt : null,
+    encodeClaim,
+    encodeRegister,
+    encodeUnlinkAt,
+    encodeLinksCount,
+    encodeGetLinkAt,
+    encodeGetClaimer,
+    decodeCount,
+    decodeLinkAt,
+    buildFlowTxs,
+    buildCallTx,
+    create2SaltHex,
+    fromSdk: typeof boingSdk.encodeLinkedNftTokenRegisterLinkCalldataHex === 'function',
   };
 }
 
@@ -87,15 +185,6 @@ export function getLinkedNftTokenRegistrySdkApi() {
  * @param {{ endUser?: Record<string, unknown>|null, networkInfo?: Record<string, unknown>|null }} [opts]
  */
 export function resolveLinkedNftTokenRegistryId(opts = {}) {
-  const sdk = getLinkedNftTokenRegistrySdkApi();
-  if (sdk.resolveRegistry) {
-    try {
-      const fromSdk = normalizeRegistryId(sdk.resolveRegistry(opts));
-      if (fromSdk) return { registryId: fromSdk, source: 'sdk' };
-    } catch {
-      /* fall through */
-    }
-  }
   const fromEnv = normalizeRegistryId(envRegistryHex());
   if (fromEnv) return { registryId: fromEnv, source: 'env' };
 
@@ -128,13 +217,12 @@ export function resolveLinkedNftTokenRegistryId(opts = {}) {
 }
 
 /**
- * Capability gate for UI + submits.
  * @returns {{
  *   canWrite: boolean,
  *   canRead: boolean,
  *   registryId: string|null,
  *   registrySource: string|null,
- *   code: 'ready'|'registry_unpublished'|'sdk_helpers_pending',
+ *   code: 'ready'|'registry_unpublished',
  *   message: string,
  *   sdk: ReturnType<typeof getLinkedNftTokenRegistrySdkApi>,
  * }}
@@ -142,9 +230,6 @@ export function resolveLinkedNftTokenRegistryId(opts = {}) {
 export function getLinkedNftTokenRegistryStatus(opts = {}) {
   const sdk = getLinkedNftTokenRegistrySdkApi();
   const { registryId, source } = resolveLinkedNftTokenRegistryId(opts);
-  const hasWriteEncoders = Boolean(sdk.encodeRegister && sdk.encodeUnlink);
-  const hasReadEncoders = Boolean(sdk.encodePeersCount && sdk.encodeGetPeerAt);
-
   if (!registryId) {
     return {
       canWrite: false,
@@ -153,41 +238,127 @@ export function getLinkedNftTokenRegistryStatus(opts = {}) {
       registrySource: null,
       code: 'registry_unpublished',
       message:
-        'On-chain linked NFT↔token registry is not published yet. Set REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY or wait for end_user.canonical_linked_nft_token_registry + boing-sdk registry helpers (network PR #42 follow-up). Soft-gate alone is not enough.',
-      sdk,
-    };
-  }
-  if (!hasWriteEncoders) {
-    return {
-      canWrite: false,
-      canRead: hasReadEncoders,
-      registryId,
-      registrySource: source,
-      code: 'sdk_helpers_pending',
-      message:
-        `Registry id resolved (${registryId.slice(0, 12)}… via ${source}), but this boing-sdk build has no on-chain register/unlink calldata helpers yet. Blocked until the SDK on-chain registry API lands.`,
+        'Set REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY to the registry AccountId (CREATE2 salt BOING_NFT_TOKEN_LINK_REG_V1), or wait for end_user.canonical_linked_nft_token_registry. Claimer of both assets can register_link / unlink_at.',
       sdk,
     };
   }
   return {
     canWrite: true,
-    canRead: hasReadEncoders,
+    canRead: true,
     registryId,
     registrySource: source,
     code: 'ready',
-    message: 'Registry ready for on-chain register / unlink.',
+    message: sdk.fromSdk
+      ? 'Registry ready (boing-sdk encode helpers). Claim both assets, then register_link.'
+      : 'Registry ready (local 0xE0–0xE6 encode fallback until SDK merge). Claim both assets, then register_link.',
     sdk,
   };
 }
 
-function accessListFor(accounts) {
-  const list = nativeAccountsAccessListJson(accounts);
-  return list ? { access_list: list } : {};
+function buildTx(sdk, sender, registryId, calldata, extraAccounts = []) {
+  if (sdk.buildCallTx) {
+    return sdk.buildCallTx(sender, registryId, calldata);
+  }
+  const accounts = [sender, registryId, ...extraAccounts].filter(Boolean).map((a) => String(a).toLowerCase());
+  const uniq = [...new Set(accounts)];
+  return {
+    type: 'contract_call',
+    contract: registryId,
+    calldata,
+    access_list: { read: uniq, write: uniq },
+  };
+}
+
+async function submitCall(provider, tx) {
+  return boingExpressContractCallSignSimulateSubmit(provider, tx);
 }
 
 /**
- * Register a mutable many-to-many edge on the registry (enforced).
- * Soft-gate may warn; it does not authorize the link.
+ * Read-only registry call → return_data hex.
+ * Prefers unsigned simulate; returns null when unavailable.
+ */
+export async function simulateRegistryReturnData({
+  registryId,
+  calldata,
+  origin = null,
+} = {}) {
+  const payload = {
+    contract: registryId,
+    calldata,
+    ...(origin ? { origin } : {}),
+  };
+  const r = await tryBoingUnsignedContractSimulate(payload);
+  if (!r.ok) return { ok: false, message: r.message, returnData: null };
+  const result = r.result || {};
+  const returnData =
+    (typeof result.return_data === 'string' && result.return_data) ||
+    (typeof result.returnData === 'string' && result.returnData) ||
+    null;
+  if (!result.success && result.error) {
+    return { ok: false, message: result.error, returnData };
+  }
+  return { ok: true, returnData, result };
+}
+
+export async function claimLinkedNftTokenAsset({
+  getWalletProvider,
+  assetId,
+  linker = null,
+  endUser = null,
+  networkInfo = null,
+} = {}) {
+  const status = getLinkedNftTokenRegistryStatus({ endUser, networkInfo });
+  if (!status.canWrite) {
+    return { ok: false, code: status.code, message: status.message, status };
+  }
+  let asset;
+  try {
+    asset = normalizeLinkableAssetAddress(assetId);
+  } catch (e) {
+    return { ok: false, code: 'invalid_address', message: e?.message || 'Invalid address', status };
+  }
+  if (!isBoingNativeAccountIdHex(asset)) {
+    return {
+      ok: false,
+      code: 'boing_account_required',
+      message: 'claim_asset requires a Boing 32-byte AccountId.',
+      status,
+    };
+  }
+  const provider = typeof getWalletProvider === 'function' ? getWalletProvider() : null;
+  if (!provider?.request) {
+    return {
+      ok: false,
+      code: 'no_provider',
+      message: 'Connect Boing Express to claim the asset.',
+      status,
+    };
+  }
+  if (!linker || !isBoingNativeAccountIdHex(linker)) {
+    return {
+      ok: false,
+      code: 'no_sender',
+      message: 'Connected Boing account required as claimer.',
+      status,
+    };
+  }
+  try {
+    const calldata = status.sdk.encodeClaim(asset);
+    const tx = buildTx(status.sdk, linker, status.registryId, calldata, [asset]);
+    const txHash = await submitCall(provider, tx);
+    return { ok: true, txHash, assetId: asset, registryId: status.registryId, status };
+  } catch (e) {
+    return {
+      ok: false,
+      code: 'submit_failed',
+      message: formatBoingExpressRpcError(e) || e?.message || 'claim_asset failed',
+      status,
+    };
+  }
+}
+
+/**
+ * Claim both sides (if needed) then register_link. Soft-gate may warn; registry enforces claimers.
  */
 export async function registerLinkedNftTokenPairOnChain({
   getWalletProvider,
@@ -197,6 +368,7 @@ export async function registerLinkedNftTokenPairOnChain({
   endUser = null,
   networkInfo = null,
   acknowledgeSoftGate = false,
+  skipClaim = false,
 } = {}) {
   const status = getLinkedNftTokenRegistryStatus({ endUser, networkInfo });
   if (!status.canWrite) {
@@ -214,7 +386,7 @@ export async function registerLinkedNftTokenPairOnChain({
     return {
       ok: false,
       code: 'boing_account_required',
-      message: 'On-chain registry links require Boing 32-byte AccountIds (not EVM 20-byte addresses).',
+      message: 'On-chain registry links require Boing 32-byte AccountIds.',
       status,
     };
   }
@@ -243,33 +415,52 @@ export async function registerLinkedNftTokenPairOnChain({
     return {
       ok: false,
       code: 'no_provider',
-      message: 'Connect Boing Express to submit the registry transaction.',
+      message: 'Connect Boing Express to submit registry transactions.',
       status,
     };
   }
-
-  let calldata;
-  try {
-    calldata = status.sdk.encodeRegister(collection, token);
-  } catch (e) {
+  if (!linker || !isBoingNativeAccountIdHex(linker)) {
     return {
       ok: false,
-      code: 'encode_failed',
-      message: e?.message || 'Failed to encode register calldata',
+      code: 'no_sender',
+      message: 'Connected Boing account required (must be claimer of both assets).',
       status,
     };
   }
 
+  const txHashes = [];
   try {
-    const txHash = await boingExpressContractCallSignSimulateSubmit(provider, {
-      type: 'contract_call',
-      contract: status.registryId,
-      calldata,
-      ...accessListFor([linker, status.registryId, collection, token].filter(Boolean)),
-    });
+    if (!skipClaim && status.sdk.buildFlowTxs) {
+      const flow = status.sdk.buildFlowTxs({
+        senderHex32: linker,
+        registryHex32: status.registryId,
+        collectionHex32: collection,
+        tokenHex32: token,
+      });
+      for (const tx of flow) {
+        txHashes.push(await submitCall(provider, tx));
+      }
+    } else {
+      if (!skipClaim) {
+        for (const asset of [collection, token]) {
+          const calldata = status.sdk.encodeClaim(asset);
+          txHashes.push(
+            await submitCall(provider, buildTx(status.sdk, linker, status.registryId, calldata, [asset]))
+          );
+        }
+      }
+      const regData = status.sdk.encodeRegister(collection, token);
+      txHashes.push(
+        await submitCall(
+          provider,
+          buildTx(status.sdk, linker, status.registryId, regData, [collection, token])
+        )
+      );
+    }
     return {
       ok: true,
-      txHash,
+      txHash: txHashes[txHashes.length - 1] || null,
+      txHashes,
       registryId: status.registryId,
       collectionId: collection,
       tokenId: token,
@@ -281,15 +472,86 @@ export async function registerLinkedNftTokenPairOnChain({
       ok: false,
       code: 'submit_failed',
       message: formatBoingExpressRpcError(e) || e?.message || 'Registry register failed',
+      txHashes,
       status,
     };
   }
 }
 
+/** Scan registry slots; return active links (optionally filtered). */
+export async function listLinkedNftTokenLinksOnChain({
+  endUser = null,
+  networkInfo = null,
+  origin = null,
+  filterCollectionId = null,
+  filterTokenId = null,
+  maxScan = 4096,
+} = {}) {
+  const status = getLinkedNftTokenRegistryStatus({ endUser, networkInfo });
+  if (!status.registryId) {
+    return { ok: false, code: status.code, message: status.message, links: [] };
+  }
+
+  const countCall = await simulateRegistryReturnData({
+    registryId: status.registryId,
+    calldata: status.sdk.encodeLinksCount(),
+    origin,
+  });
+  if (!countCall.ok || !countCall.returnData) {
+    return {
+      ok: false,
+      code: 'read_unavailable',
+      message:
+        countCall.message ||
+        'Set REACT_APP_BOING_RPC_UNSIGNED_SIMULATE_METHOD=boing_simulateContractCall to query links_count / get_link_at.',
+      links: [],
+      status,
+    };
+  }
+
+  let count = Number(status.sdk.decodeCount(countCall.returnData));
+  if (!Number.isFinite(count) || count < 0) count = 0;
+  if (count > maxScan) count = maxScan;
+
+  const filterC = filterCollectionId
+    ? normalizeLinkableAssetAddress(filterCollectionId)
+    : null;
+  const filterT = filterTokenId ? normalizeLinkableAssetAddress(filterTokenId) : null;
+
+  const links = [];
+  for (let i = 0; i < count; i += 1) {
+    const at = await simulateRegistryReturnData({
+      registryId: status.registryId,
+      calldata: status.sdk.encodeGetLinkAt(i),
+      origin,
+    });
+    if (!at.ok || !at.returnData) continue;
+    let decoded;
+    try {
+      decoded = status.sdk.decodeLinkAt(at.returnData);
+    } catch {
+      continue;
+    }
+    if (!decoded.active) continue;
+    const collectionId = String(decoded.collectionHex).toLowerCase();
+    const tokenId = String(decoded.tokenHex).toLowerCase();
+    if (filterC && collectionId !== filterC) continue;
+    if (filterT && tokenId !== filterT) continue;
+    links.push({ index: i, collectionId, tokenId });
+  }
+
+  return { ok: true, links, count, registryId: status.registryId, status };
+}
+
+/**
+ * Unlink by pair: scan for index, then unlink_at.
+ * Or pass `index` directly.
+ */
 export async function unlinkLinkedNftTokenPairOnChain({
   getWalletProvider,
-  collectionId,
-  tokenId,
+  collectionId = null,
+  tokenId = null,
+  index = null,
   linker = null,
   endUser = null,
   networkInfo = null,
@@ -298,117 +560,84 @@ export async function unlinkLinkedNftTokenPairOnChain({
   if (!status.canWrite) {
     return { ok: false, code: status.code, message: status.message, status };
   }
-  let collection;
-  let token;
-  try {
-    collection = normalizeLinkableAssetAddress(collectionId);
-    token = normalizeLinkableAssetAddress(tokenId);
-  } catch (e) {
-    return { ok: false, code: 'invalid_address', message: e?.message || 'Invalid address', status };
-  }
 
   const provider = typeof getWalletProvider === 'function' ? getWalletProvider() : null;
   if (!provider?.request) {
     return {
       ok: false,
       code: 'no_provider',
-      message: 'Connect Boing Express to submit the unlink transaction.',
+      message: 'Connect Boing Express to submit unlink_at.',
       status,
     };
   }
-
-  let calldata;
-  try {
-    calldata = status.sdk.encodeUnlink(collection, token);
-  } catch (e) {
+  if (!linker || !isBoingNativeAccountIdHex(linker)) {
     return {
       ok: false,
-      code: 'encode_failed',
-      message: e?.message || 'Failed to encode unlink calldata',
+      code: 'no_sender',
+      message: 'Connected Boing account required (must be claimer of both assets).',
       status,
     };
   }
 
-  try {
-    const txHash = await boingExpressContractCallSignSimulateSubmit(provider, {
-      type: 'contract_call',
-      contract: status.registryId,
-      calldata,
-      ...accessListFor([linker, status.registryId, collection, token].filter(Boolean)),
+  let slot = index;
+  if (slot == null) {
+    if (!collectionId || !tokenId) {
+      return {
+        ok: false,
+        code: 'need_pair_or_index',
+        message: 'Provide collection+token or a registry slot index.',
+        status,
+      };
+    }
+    const listed = await listLinkedNftTokenLinksOnChain({
+      endUser,
+      networkInfo,
+      origin: linker,
+      filterCollectionId: collectionId,
+      filterTokenId: tokenId,
     });
+    if (!listed.ok) {
+      return {
+        ok: false,
+        code: listed.code || 'scan_failed',
+        message: listed.message || 'Could not scan registry for unlink index.',
+        status,
+      };
+    }
+    const hit = listed.links[0];
+    if (!hit) {
+      return {
+        ok: false,
+        code: 'not_found',
+        message: 'No active registry slot for that collection↔token pair.',
+        status,
+      };
+    }
+    slot = hit.index;
+  }
+
+  try {
+    const calldata = status.sdk.encodeUnlinkAt(Number(slot));
+    const tx = buildTx(status.sdk, linker, status.registryId, calldata);
+    const txHash = await submitCall(provider, tx);
     return {
       ok: true,
       txHash,
+      index: Number(slot),
       registryId: status.registryId,
-      collectionId: collection,
-      tokenId: token,
       status,
     };
   } catch (e) {
     return {
       ok: false,
       code: 'submit_failed',
-      message: formatBoingExpressRpcError(e) || e?.message || 'Registry unlink failed',
+      message: formatBoingExpressRpcError(e) || e?.message || 'unlink_at failed',
       status,
     };
   }
 }
 
-/**
- * Read peers for an asset from the registry when SDK list helpers exist.
- * @returns {Promise<{ ok: boolean, peers?: string[], message?: string, code?: string }>}
- */
-export async function listLinkedNftTokenPeersOnChain({
-  assetId,
-  role = 'nft_collection',
-  endUser = null,
-  networkInfo = null,
-  rpcCall = null,
-} = {}) {
-  const status = getLinkedNftTokenRegistryStatus({ endUser, networkInfo });
-  if (!status.registryId) {
-    return { ok: false, code: status.code, message: status.message, peers: [] };
-  }
-  if (!status.sdk.encodePeersCount || !status.sdk.encodeGetPeerAt) {
-    return {
-      ok: false,
-      code: 'sdk_helpers_pending',
-      message:
-        'Registry id may be set, but peer-list read helpers are not in this boing-sdk build yet.',
-      peers: [],
-    };
-  }
-  if (typeof rpcCall !== 'function') {
-    return {
-      ok: false,
-      code: 'rpc_required',
-      message: 'Peer listing requires an RPC simulate/call helper once SDK list ABI is final.',
-      peers: [],
-    };
-  }
-  // Placeholder wiring: when SDK lands, callers pass rpcCall(contract, calldata) → return hex.
-  try {
-    const id = normalizeLinkableAssetAddress(assetId);
-    const countCalldata = status.sdk.encodePeersCount(id, role);
-    const countRaw = await rpcCall(status.registryId, countCalldata);
-    const count = status.sdk.parsePeersCount
-      ? status.sdk.parsePeersCount(countRaw)
-      : Number.parseInt(String(countRaw).replace(/^0x/i, '').slice(-16), 16) || 0;
-    const peers = [];
-    for (let i = 0; i < count; i += 1) {
-      const peerRaw = await rpcCall(status.registryId, status.sdk.encodeGetPeerAt(id, role, i));
-      const peer = status.sdk.parsePeerAt
-        ? status.sdk.parsePeerAt(peerRaw)
-        : normalizeLinkableAssetAddress(peerRaw);
-      if (peer) peers.push(peer);
-    }
-    return { ok: true, peers, registryId: status.registryId };
-  } catch (e) {
-    return {
-      ok: false,
-      code: 'read_failed',
-      message: e?.message || 'Failed to list registry peers',
-      peers: [],
-    };
-  }
-}
+/** @deprecated use registerLinkedNftTokenPairOnChain */
+export const registerLinkedNftTokenPair = registerLinkedNftTokenPairOnChain;
+/** @deprecated use unlinkLinkedNftTokenPairOnChain */
+export const unlinkLinkedNftTokenPair = unlinkLinkedNftTokenPairOnChain;

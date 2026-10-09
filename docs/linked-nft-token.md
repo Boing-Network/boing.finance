@@ -1,53 +1,52 @@
 # Linked NFT collection + fungible token (on-chain)
 
-Enforced many-to-many links between NFT collections and project tokens on boing.finance.
+Enforced many-to-many links on boing.finance via the Boing VM registry (network PR #42).
 
-## Product rules (updated 2026-10-09)
+## Product rules
 
 | Rule | Behavior |
 |------|----------|
 | Cardinality | **Many-to-many** |
-| Mutability | Links can be **registered and unlinked** after create |
-| Enforcement | **On-chain registry** (not soft-gate, not browser localStorage) |
-| Soft-gate | Prefer same wallet/deployer; **advisory only** before submit |
-| Schema | `boing.linked_nft_token.v1` — optional metadata companion |
+| Mutability | **register_link** / **unlink_at** |
+| Auth | **Claimer of both** AccountIds (`claim_asset` first) |
+| Soft-gate | Advisory only |
+| Metadata schema | `boing.linked_nft_token.v1` — **cache only** |
 
-Display-only browser drafts are **paused**. Official reads/writes go through the registry.
+## Selectors (SDK)
 
-## Blockers (current)
+| Op | Sel | Calldata |
+|----|-----|----------|
+| `claim_asset` | `0xE0` | 64 |
+| `register_link` | `0xE1` | 96 |
+| `unlink_at` | `0xE2` | 64 |
+| `links_count` | `0xE3` | 32 |
+| `get_link_at` | `0xE4` | 64 → 64 |
+| `get_asset_claimer` | `0xE5` | 64 |
+| `transfer_asset_claimer` | `0xE6` | 96 |
 
-| Dependency | Status |
-|------------|--------|
-| Registry AccountId | Unpublished — set `REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY` or wait for `end_user.canonical_linked_nft_token_registry` |
-| SDK calldata / list helpers | Pending boing.network [PR #42](https://github.com/Boing-Network/boing.network/pull/42) **follow-up** (on-chain registry). Current #42 is display-only schema helpers. |
-| Finance wiring | Stubbed: refuses to invent selector bytes; UI shows blocked status until both address + SDK encode helpers exist |
+CREATE2 salt: `BOING_NFT_TOKEN_LINK_REG_V1`.
 
-Finance looks for SDK names such as:
+## Finance wiring
 
-- `encodeRegisterLinkedNftTokenPairCalldataHex` / `encodeUnlinkLinkedNftTokenPairCalldataHex`
-- `encodeLinkedNftTokenPeersCountCalldataHex` / `encodeLinkedNftTokenGetPeerAtCalldataHex`
-- `resolveLinkedNftTokenRegistryAccountIdHex`
+| Path | Role |
+|------|------|
+| `frontend/src/services/linkedNftTokenRegistry.js` | Prefer boing-sdk encode/decode; local 0xE0–0xE6 fallback until SDK merge |
+| `/linked-project` | Claim / register / unlink / query |
+| Create NFT / Deploy Token | Post-deploy panel → same service |
 
-(Aliases with similar shapes are also accepted — see `frontend/src/services/linkedNftTokenRegistry.js`.)
-
-## Surfaces
-
-| Route | Role |
-|-------|------|
-| `/linked-project` | Hub: paste AccountIds, register/unlink when registry ready |
-| `/create-nft` | After native collection deploy, link step → registry |
-| `/deploy-token` | After native token deploy, link step → registry |
-
-Query helpers: `?collection=` / `?token=` on `/linked-project`; `?linkToken=` on Create NFT; `?linkCollection=` on Deploy Token.
-
-## Env
+### Env
 
 ```bash
-# 32-byte registry AccountId (wins until RPC end_user publishes the canonical id)
-# REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY=0x…
+# Required until end_user publishes the id
+REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY=0x…
+
+# Recommended for links_count / get_link_at without Express signing
+REACT_APP_BOING_RPC_UNSIGNED_SIMULATE_METHOD=boing_simulateContractCall
 ```
 
-## Related
+Until `boing-sdk` with `linkedNftTokenRegistry` is on main, point the file dep at network branch `cursor/linked-nft-token-sdk-277c` (SHA `abf8808`) or rely on the local encode fallback.
 
-- boing.network docs (when merged): `BOING-LINKED-NFT-TOKEN.md`
-- DEX precedent: factory `register_pair` (fungible–fungible–pool only)
+## Upstream
+
+- [boing.network PR #42](https://github.com/Boing-Network/boing.network/pull/42)
+- `docs/BOING-LINKED-NFT-TOKEN.md` in boing.network
