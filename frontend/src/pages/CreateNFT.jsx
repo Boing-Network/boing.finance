@@ -4,7 +4,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
 import { useChainType, useSolanaWallet } from '../contexts/SolanaWalletContext';
 import EmptyState from '../components/EmptyState';
@@ -23,6 +23,7 @@ import { apiPath } from '../config';
 import { showDeployCelebration } from '../utils/deployCelebration';
 import { getBoingNativeFeeUsd, formatUsdReferenceLabel, isBoingNativeFeeChain } from '../config/boingEconomics';
 import NativeBoingNftDeploySection from '../components/NativeBoingNftDeploySection';
+import LinkedNftTokenPanel from '../components/LinkedNftTokenPanel';
 import useEscapeKey from '../hooks/useEscapeKey';
 
 const SOLANA_NFT_STEPS = [
@@ -398,6 +399,8 @@ function CreateNFTSolanaContent() {
 export default function CreateNFT() {
   const { isSolana } = useChainType();
   const { account: _account, isConnected, getCurrentNetwork, connectWallet, chainId, walletType } = useWallet();
+  const [searchParams] = useSearchParams();
+  const linkTokenFromQuery = searchParams.get('linkToken') || searchParams.get('token') || '';
   const [step, setStep] = useState('collection');
   const [collectionName, setCollectionName] = useState('');
   const [collectionSymbol, setCollectionSymbol] = useState('');
@@ -839,8 +842,8 @@ export default function CreateNFT() {
                 description="Connect your wallet to create and mint NFTs on EVM or Solana."
                 action={connectWallet}
                 actionLabel="Connect Wallet"
-                secondaryLabel="Deploy Token instead"
-                secondaryHref="/deploy-token"
+                secondaryLabel="Linked project"
+                secondaryHref="/linked-project"
               />
             </div>
           </div>
@@ -862,6 +865,12 @@ export default function CreateNFT() {
           <div className="text-center mb-6">
             <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Create NFT</h1>
             <p className="text-theme-tertiary">Upload images or image URLs into collection metadata. On Boing testnet with Express, deploy commits that metadata hash. On-chain mint of individual tokens is not available on EVM yet. Solana can mint an SPL NFT.</p>
+            <p className="mt-3 text-sm">
+              <Link to="/linked-project" className="underline" style={{ color: 'var(--finance-primary)' }}>
+                Linked project
+              </Link>
+              <span className="text-theme-tertiary"> — pair this collection with one or more fungible tokens (mutable, many-to-many).</span>
+            </p>
           </div>
 
           {/* Mode: Standard vs Dynamic collection */}
@@ -1087,6 +1096,7 @@ export default function CreateNFT() {
                               committedDescriptionHash={publishedDescriptionHash}
                               coverImageUri={publishedCoverUri || resolvedCoverUri(generatedDynamicMetadata.map((m) => m.image))}
                               onEnsureMetadataPublished={ensurePublishedMetadata}
+                              linkTokenId={linkTokenFromQuery}
                             />
                             <div className="flex flex-wrap gap-3 mt-2">
                               <Link
@@ -1442,6 +1452,7 @@ export default function CreateNFT() {
                     committedDescriptionHash={publishedDescriptionHash}
                     coverImageUri={publishedCoverUri || resolvedCoverUri()}
                     onEnsureMetadataPublished={ensurePublishedMetadata}
+                    linkTokenId={linkTokenFromQuery}
                   />
                 )}
                 {isBoingNativeNftWizard && (
@@ -1454,6 +1465,14 @@ export default function CreateNFT() {
                     </Link>
                   </div>
                 )}
+                {!isBoingNativeNftWizard ? (
+                  <LinkedNftTokenPanel
+                    compact
+                    seedTokenId={linkTokenFromQuery}
+                    collectionLabel={collectionName}
+                    title="Link a project token (optional)"
+                  />
+                ) : null}
                 <p className="text-gray-400 text-sm">
                   {isBoingNativeNftWizard ? (
                     <>

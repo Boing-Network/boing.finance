@@ -92,6 +92,22 @@ export default function BoingNativeL1Section() {
 
       <div>
         <h3 className="text-2xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
+          Linked NFT + token project
+        </h3>
+        <p className="mb-3" style={{ color: 'var(--text-secondary)' }}>
+          Finance can record a mutable many-to-many link between NFT collection and fungible token AccountIds
+          (display-only MVP). Schema <code className="text-xs">boing.linked_nft_token.v1</code> — same shape the
+          SDK may export — lives under{' '}
+          <Link to="/linked-project" className={linkCls}>
+            Linked project
+          </Link>
+          . Soft-gate prefers the same deployer wallet on both sides. Create NFT and Deploy Token surface a link
+          step after deploy; existing addresses can be pasted without a 1:1 requirement.
+        </p>
+      </div>
+
+      <div>
+        <h3 className="text-2xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
           Native NFT collection (Create NFT)
         </h3>
         <p className="mb-3" style={{ color: 'var(--text-secondary)' }}>
