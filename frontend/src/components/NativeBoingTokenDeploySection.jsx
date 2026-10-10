@@ -19,6 +19,8 @@ import {
 } from '../utils/boingDeploySuccessToast';
 import { scheduleBoingDeployReceiptFollowup } from '../services/boingDeployReceiptFollowup';
 import { buildBoingExplorerAccountUrl, buildBoingExplorerTxUrl } from '../config/boingExplorerUrls';
+import { rememberAssetDeployer } from '../utils/linkedNftToken';
+import LinkedNftTokenPanel from './LinkedNftTokenPanel';
 
 /**
  * Native Boing token deploy helper for Deploy Token page.
@@ -38,10 +40,12 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
     committedDescriptionHash = '',
     logoUri = '',
     onEnsureMetadataPublished,
+    onDeployed,
+    linkCollectionId = '',
   },
   ref
 ) {
-  const { chainId, walletType, isConnected, getWalletProvider } = useWallet();
+  const { chainId, walletType, isConnected, getWalletProvider, account } = useWallet();
   const { explorerBaseUrl } = useBoingNativeDexIntegration();
   const purpose = BOING_QA_PURPOSE_TOKEN;
 
@@ -219,9 +223,12 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
     scheduleBoingDeployReceiptFollowup(result.boingTxIdHex, (id) => {
       setLastDeployedAccount(id);
       showBoingContractIncludedToast(id, explorerBaseUrl);
+      if (account) rememberAssetDeployer(id, account);
+      onDeployed?.({ accountId: id, kind: 'token', name: tokenName, symbol: tokenSymbol });
     });
     return result.txHash;
   }, [
+    account,
     customBytecode,
     descriptionHash,
     effectiveDescriptionHash,
@@ -230,6 +237,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
     logoUri,
     metadataUri,
     nativeTokenSecurity,
+    onDeployed,
     qaPoolAcknowledged,
     tokenDecimals,
     tokenName,
@@ -473,13 +481,15 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
         </div>
       </details>
 
-      {lastTx && !embedInWizard && (
+      {lastTx && (
         <div className="text-xs mt-2 space-y-1" style={{ color: 'var(--text-secondary)' }}>
           <p className="font-mono break-all">Submit ack: {lastTx}</p>
-          <p>
-            Explorer token index lists the contract after a block includes this tx. The DEX token directory stays empty
-            until a canonical factory is published.
-          </p>
+          {!embedInWizard ? (
+            <p>
+              Explorer token index lists the contract after a block includes this tx. The DEX token directory stays empty
+              until a canonical factory is published.
+            </p>
+          ) : null}
           {lastDeployedAccount && (
             <a
               href={buildBoingExplorerAccountUrl(explorerBaseUrl, lastDeployedAccount)}
@@ -502,6 +512,16 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
           )}
         </div>
       )}
+
+      {lastDeployedAccount ? (
+        <LinkedNftTokenPanel
+          compact
+          seedTokenId={lastDeployedAccount}
+          seedCollectionId={linkCollectionId}
+          tokenLabel={tokenSymbol || tokenName}
+          title="Link an NFT collection"
+        />
+      ) : null}
     </section>
   );
 });

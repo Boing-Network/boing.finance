@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { useWallet } from '../contexts/WalletContext';
 import { useAchievements } from '../contexts/AchievementContext';
@@ -29,12 +29,14 @@ import { notificationService } from '../utils/notifications';
 import ShareCardModal from '../components/ShareCardModal';
 import { isBoingTestnetChainId } from 'boing-sdk';
 import NativeBoingTokenDeploySection from '../components/NativeBoingTokenDeploySection';
+import LinkedNftTokenPanel from '../components/LinkedNftTokenPanel';
 import { BOING_NATIVE_L1_CHAIN_ID, getNetworkByChainId } from '../config/networks';
 import { getBoingNativeFeeUsd, formatUsdReferenceLabel, isBoingNativeFeeChain } from '../config/boingEconomics';
 import { isBoingNativeAccountIdHex } from '../utils/boingWalletDiscovery';
 import { tryAccruePoints } from '../utils/tryAccruePoints';
 import { brandLogoPngAbsolute } from '../config/brandAssets';
 import { showDeployCelebration } from '../utils/deployCelebration';
+import { rememberAssetDeployer } from '../utils/linkedNftToken';
 
 // Import ABI and bytecode from the artifacts
 const ERC20_ABI = AdvancedERC20Artifact.abi;
@@ -882,6 +884,9 @@ async function _manualDeployWithInterface({ signer, ERC20_ABI, ERC20_BYTECODE, c
 
 export default function DeployToken() {
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const linkCollectionFromQuery =
+    searchParams.get('linkCollection') || searchParams.get('collection') || '';
   const chainTypeContext = useChainType();
   const isSolana = chainTypeContext?.isSolana ?? false;
 
@@ -1725,6 +1730,7 @@ export default function DeployToken() {
           const parsedEvent = tokenFactory.interface.parseLog(tokenDeployedEvent);
           const deployedAddress = parsedEvent.args.tokenAddress;
           setTokenAddress(deployedAddress);
+          if (account) rememberAssetDeployer(deployedAddress, account);
           
           // Step 5: Finalize
           setCurrentStepIndex(4);
@@ -1843,6 +1849,7 @@ export default function DeployToken() {
           await contract.waitForDeployment();
           const deployedAddress = contract.target;
           setTokenAddress(deployedAddress);
+          if (account) rememberAssetDeployer(deployedAddress, account);
           
           // Create contract instance
           const deployedContract = new ethers.Contract(deployedAddress, ERC20_ABI, signer);
@@ -2048,6 +2055,17 @@ export default function DeployToken() {
               </p>
               {/* Quick Actions */}
               <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
+                <Link
+                  to="/linked-project"
+                  className="px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+                  style={{
+                    backgroundColor: 'var(--bg-tertiary)',
+                    color: 'var(--finance-primary)',
+                    border: '1px solid var(--border-color)'
+                  }}
+                >
+                  Linked project
+                </Link>
                 <button
                   onClick={() => setShowPreview(!showPreview)}
                   className="px-4 py-2 rounded-lg transition-colors text-sm font-medium"
@@ -2791,6 +2809,7 @@ export default function DeployToken() {
                       logoUri={publicAssetUri(logoUrl) || logoUrl}
                       onEnsureMetadataPublished={ensurePublishedTokenMetadata}
                       onDeployGateChange={onNativeDeployGateChange}
+                      linkCollectionId={linkCollectionFromQuery}
                     />
                   </>
                 )}
@@ -2899,6 +2918,17 @@ export default function DeployToken() {
                 />
               </div>
             )}
+
+            {tokenAddress && !isBoingNativeDeployPath ? (
+              <div className="mt-6 sm:mt-8">
+                <LinkedNftTokenPanel
+                  seedTokenId={tokenAddress}
+                  seedCollectionId={linkCollectionFromQuery}
+                  tokenLabel={symbol || name}
+                  title="Link an NFT collection"
+                />
+              </div>
+            ) : null}
 
             {/* Metadata Information */}
             {metadataUrl && (
