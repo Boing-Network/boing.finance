@@ -842,8 +842,8 @@ export default function CreateNFT() {
                 description="Connect your wallet to create and mint NFTs on EVM or Solana."
                 action={connectWallet}
                 actionLabel="Connect Wallet"
-                secondaryLabel="Linked project"
-                secondaryHref="/linked-project"
+                secondaryLabel="Project pack"
+                secondaryHref="/project-pack"
               />
             </div>
           </div>
@@ -866,10 +866,17 @@ export default function CreateNFT() {
             <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Create NFT</h1>
             <p className="text-theme-tertiary">Upload images or image URLs into collection metadata. On Boing testnet with Express, deploy commits that metadata hash. On-chain mint of individual tokens is not available on EVM yet. Solana can mint an SPL NFT.</p>
             <p className="mt-3 text-sm">
-              <Link to="/linked-project" className="underline" style={{ color: 'var(--finance-primary)' }}>
-                Linked project
+              <Link to="/project-pack" className="underline" style={{ color: 'var(--finance-primary)' }}>
+                Project pack
               </Link>
-              <span className="text-theme-tertiary"> — register this collection with one or more fungible tokens on-chain (mutable, many-to-many).</span>
+              <span className="text-theme-tertiary">
+                {' '}
+                — create a collection, token, and companions in one guided flow.{' '}
+              </span>
+              <Link to="/linked-project" className="underline" style={{ color: 'var(--finance-primary)' }}>
+                Manage links
+              </Link>
+              <span className="text-theme-tertiary"> for existing pairs.</span>
             </p>
           </div>
 

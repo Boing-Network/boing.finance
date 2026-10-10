@@ -100,11 +100,16 @@ export default function BoingNativeL1Section() {
           <code className="text-xs">register_link</code> (0xE1) / <code className="text-xs">unlink_at</code> (0xE2),
           query via <code className="text-xs">links_count</code> / <code className="text-xs">get_link_at</code>. Auth =
           claimer of both sides (dual claimer). Soft-gate and{' '}
-          <code className="text-xs">boing.linked_nft_token.v1</code> metadata are cache/advisory only. Hub:{' '}
-          <Link to="/linked-project" className={linkCls}>
-            Linked project
+          <code className="text-xs">boing.linked_nft_token.v1</code> metadata are cache/advisory only. Guided create:{' '}
+          <Link to="/project-pack" className={linkCls}>
+            Project pack
           </Link>
-          . Env <code className="text-xs">REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY</code> (CREATE2 salt{' '}
+          ; manage:{' '}
+          <Link to="/linked-project" className={linkCls}>
+            Manage links
+          </Link>
+          . Prefer SDK <code className="text-xs">buildLinkedNftTokenProjectPack</code> (network PR #48). Env{' '}
+          <code className="text-xs">REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY</code> (CREATE2 salt{' '}
           <code className="text-xs">BOING_NFT_TOKEN_LINK_REG_V1</code>). Public testnet registry:{' '}
           <code className="text-xs break-all">
             0xebf9f0190f415852f90d0e60343126201248ab96273fdbf8acc5fe5fa03c3dd8

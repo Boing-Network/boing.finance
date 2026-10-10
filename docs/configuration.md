@@ -29,7 +29,7 @@ Copy `frontend/.env.example` to `frontend/.env.local`. **Do not commit `.env.loc
 
 Native DEX / Boing RPC flags are documented in [native-dex.md](./native-dex.md) and [native-dex-discovery.md](./native-dex-discovery.md); they are listed in `.env.example`.
 
-Linked NFT↔token registry (Boing L1): `REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY` — public testnet AccountId is baked in `frontend/env/github-build.production.env` / `github-build.staging.env`. See [linked-nft-token.md](./linked-nft-token.md).
+Linked NFT↔token registry (Boing L1): `REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY` — public testnet AccountId is baked in `frontend/env/github-build.production.env` / `github-build.staging.env`. Guided create: `/project-pack` (SDK `buildLinkedNftTokenProjectPack` when available). See [linked-nft-token.md](./linked-nft-token.md).
 
 ## IPFS / RPC
 

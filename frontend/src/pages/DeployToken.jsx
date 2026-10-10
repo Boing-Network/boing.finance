@@ -2056,7 +2056,7 @@ export default function DeployToken() {
               {/* Quick Actions */}
               <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
                 <Link
-                  to="/linked-project"
+                  to="/project-pack"
                   className="px-4 py-2 rounded-lg transition-colors text-sm font-medium"
                   style={{
                     backgroundColor: 'var(--bg-tertiary)',
@@ -2064,7 +2064,18 @@ export default function DeployToken() {
                     border: '1px solid var(--border-color)'
                   }}
                 >
-                  Linked project
+                  Project pack
+                </Link>
+                <Link
+                  to="/linked-project"
+                  className="px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+                  style={{
+                    backgroundColor: 'var(--bg-tertiary)',
+                    color: 'var(--text-secondary)',
+                    border: '1px solid var(--border-color)'
+                  }}
+                >
+                  Manage links
                 </Link>
                 <button
                   onClick={() => setShowPreview(!showPreview)}
