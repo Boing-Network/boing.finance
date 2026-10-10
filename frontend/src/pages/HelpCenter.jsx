@@ -91,11 +91,18 @@ const HelpCenter = () => {
       icon: '🔗',
       articles: [
         {
+          id: 'project-pack',
+          title: 'Launch a Project Pack',
+          content:
+            'Guided flow: create an NFT collection and a token, then link them as companions. Start at /project-pack. Manage existing pairs at /linked-project.',
+          tags: ['nft', 'token', 'companions', 'project pack', 'linked', 'boing']
+        },
+        {
           id: 'linked-project',
           title: 'Link an NFT Collection and Token',
           content:
-            'On-chain registry on Boing L1: claim assets, register a many-to-many mutable NFT↔token pair, or unlink. Hub at /linked-project.',
-          tags: ['nft', 'token', 'linked', 'registry', 'claim', 'boing']
+            'Link or unlink companions for collections and tokens you already created. Prefer Project pack (/project-pack) to create both together. Manage links at /linked-project.',
+          tags: ['nft', 'token', 'linked', 'companions', 'claim', 'boing']
         }
       ]
     },

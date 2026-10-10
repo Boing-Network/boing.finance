@@ -49,6 +49,7 @@ const Activity = lazy(() => import('./pages/Activity'));
 const Bridge = lazy(() => import('./pages/Bridge'));
 const DeployToken = lazy(() => import('./pages/DeployToken'));
 const CreateNFT = lazy(() => import('./pages/CreateNFT'));
+const ProjectPack = lazy(() => import('./pages/ProjectPack'));
 const LinkedProject = lazy(() => import('./pages/LinkedProject'));
 const CreatePool = lazy(() => import('./pages/CreatePool'));
 const Tokens = lazy(() => import('./pages/Tokens'));
@@ -228,6 +229,7 @@ function PageTransitionRoutes() {
         <Route path="/blog" element={<Blog />} />
         <Route path="/deploy-token" element={<DeployToken />} />
         <Route path="/create-nft" element={<CreateNFT />} />
+        <Route path="/project-pack" element={<ProjectPack />} />
         <Route path="/linked-project" element={<LinkedProject />} />
         <Route path="/create-pool" element={<CreatePool />} />
         <Route path="/whitepaper" element={<Whitepaper />} />

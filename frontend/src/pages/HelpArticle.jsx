@@ -719,49 +719,66 @@ const HelpArticle = () => {
         </ul>
       `
     },
+    'project-pack': {
+      title: 'Launch a Project Pack',
+      category: 'Launch',
+      content: `
+        <h2>Project pack</h2>
+        <p>
+          Project pack is the guided way to launch a collection and a token together, then link them as
+          <strong>companions</strong> so other apps can show the connection.
+        </p>
+
+        <h3>Steps</h3>
+        <ol>
+          <li>Name your collection and token</li>
+          <li>Create the collection</li>
+          <li>Create the token</li>
+          <li>Link companions</li>
+        </ol>
+        <p>Open <a href="/project-pack">Project pack</a>. You can pause between wallet confirms and come back later in the same browser session.</p>
+
+        <h3>Already have both?</h3>
+        <p>Use <a href="/linked-project">Manage links</a> to link or unlink companions without creating new assets.</p>
+
+        <h3>Tips</h3>
+        <ul>
+          <li>Connect Boing Express on Boing testnet</li>
+          <li>Link soon after create so companions stay under your control</li>
+          <li>Adding a trading pool is optional and can wait</li>
+        </ul>
+      `
+    },
     'linked-project': {
       title: 'Link an NFT Collection and Token',
       category: 'Launch',
       content: `
-        <h2>On-chain linked NFT ↔ token pairs</h2>
+        <h2>Manage companion links</h2>
         <p>
-          boing.finance registers NFT collection and fungible token pairs on the Boing L1
-          <strong>linked NFT–token registry</strong>. Links are <strong>on-chain</strong> (not a display-only MVP):
-          many-to-many, mutable, and authorized by the claimer of both assets.
+          Link a collection and a token as companions, or unlink a pair you already created.
+          Starting from scratch? Prefer <a href="/project-pack">Project pack</a>.
         </p>
 
         <h3>Where to go</h3>
         <ul>
-          <li><strong>Hub:</strong> <a href="/linked-project">Linked project</a> (<code>/linked-project</code>)</li>
-          <li><strong>After deploy:</strong> Create NFT and Deploy Token show the same claim/register panel</li>
+          <li><strong>Manage links:</strong> <a href="/linked-project">/linked-project</a></li>
+          <li><strong>Guided create:</strong> <a href="/project-pack">/project-pack</a></li>
+          <li><strong>After a separate deploy:</strong> Create NFT and Deploy Token also offer companion linking</li>
         </ul>
 
-        <h3>Flow</h3>
+        <h3>What you do</h3>
         <ol>
-          <li><strong>Claim</strong> each asset AccountId (<code>claim_asset</code>, selector 0xE0) — first claimer wins</li>
-          <li><strong>Register</strong> the pair (<code>register_link</code>, 0xE1) — you must be claimer of both sides</li>
-          <li><strong>Unlink</strong> later if needed (<code>unlink_at</code>, 0xE2) — same dual-claimer auth</li>
+          <li>Paste the collection id and token id</li>
+          <li>Claim each side if needed</li>
+          <li>Link companions — or unlink when you want to remove the pair</li>
         </ol>
-        <p>Query existing links with <code>links_count</code> / <code>get_link_at</code> on the hub.</p>
-
-        <h3>Public testnet registry</h3>
-        <ul>
-          <li><strong>AccountId:</strong> <code>0xebf9f0190f415852f90d0e60343126201248ab96273fdbf8acc5fe5fa03c3dd8</code></li>
-          <li><strong>Env:</strong> <code>REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY</code> (baked for production/staging Pages builds)</li>
-          <li><strong>Wallet:</strong> connect Boing Express on Boing testnet</li>
-        </ul>
-
-        <h3>What is not authority</h3>
-        <ul>
-          <li>Same-deployer soft-gate — advisory only</li>
-          <li><code>boing.linked_nft_token.v1</code> metadata — optional cache, not consensus</li>
-        </ul>
+        <p>One collection can have many companion tokens, and one token can accompany many collections. Links can change later.</p>
 
         <h3>Tips</h3>
         <ul>
-          <li>Claim soon after deploy so another wallet cannot front-run <code>claim_asset</code></li>
-          <li>One collection can link to many tokens and vice versa</li>
-          <li>Engineering reference: <code>docs/linked-nft-token.md</code> in the boing.finance repo</li>
+          <li>Connect Boing Express on Boing testnet</li>
+          <li>Claim soon after you create an asset</li>
+          <li>Engineering detail: <code>docs/linked-nft-token.md</code> in the boing.finance repo</li>
         </ul>
       `
     },

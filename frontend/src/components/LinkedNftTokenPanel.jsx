@@ -4,7 +4,6 @@ import toast from 'react-hot-toast';
 import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import {
-  LINKED_NFT_TOKEN_SCHEMA,
   buildLinkedDocumentFromPair,
   descriptionHashHexFromLinkedNftToken,
   isLinkableAssetAddress,
@@ -28,7 +27,7 @@ export default function LinkedNftTokenPanel({
   tokenLabel = '',
   compact = false,
   showHubLink = true,
-  title = 'Linked project (on-chain)',
+  title = 'Companions',
 }) {
   const { account, getWalletProvider, walletType, isConnected } = useWallet();
   const dexIntegration = useBoingNativeDexIntegration();
@@ -185,7 +184,7 @@ export default function LinkedNftTokenPanel({
           networkInfo,
           acknowledgeSoftGate: ackSoftGate || !previewWarning,
         }),
-      'Link registered (claim×2 + register_link)'
+      'Companions linked'
     );
 
   const onUnlinkPair = () =>
@@ -234,18 +233,16 @@ export default function LinkedNftTokenPanel({
             {title}
           </h3>
           <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-            Claim both AccountIds, then <code className="text-[10px]">register_link</code>. Unlink via{' '}
-            <code className="text-[10px]">unlink_at</code>. Auth = claimer of both sides. Many-to-many and
-            mutable. Schema <code className="text-[10px]">{LINKED_NFT_TOKEN_SCHEMA}</code> is cache-only.
+            Link a collection and a token as companions, or unlink a pair. Starting fresh? Use Project pack.
           </p>
         </div>
         {showHubLink ? (
           <Link
-            to="/linked-project"
+            to="/project-pack"
             className="text-sm underline shrink-0"
             style={{ color: 'var(--finance-primary)' }}
           >
-            Open Linked project →
+            Project pack →
           </Link>
         ) : null}
       </div>
@@ -261,10 +258,12 @@ export default function LinkedNftTokenPanel({
         }}
         role="status"
       >
-        <strong style={{ color: 'var(--text-primary)' }}>Registry:</strong> {status.message}
-        {status.registryId ? (
-          <span className="block font-mono mt-1 break-all">{status.registryId}</span>
-        ) : null}
+        <strong style={{ color: 'var(--text-primary)' }}>
+          {status.code === 'ready' ? 'Ready to link' : 'Not available yet'}
+        </strong>
+        {status.code === 'ready'
+          ? ' — claim each side if needed, then register companions.'
+          : ' — companion linking is not set up on this network yet.'}
         {collectionLabel || tokenLabel ? (
           <span className="block mt-1">
             {collectionLabel ? `Collection: ${collectionLabel}. ` : ''}
@@ -276,7 +275,7 @@ export default function LinkedNftTokenPanel({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
         <div>
           <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
-            NFT collection AccountId
+            Collection id
           </label>
           <input
             type="text"
@@ -294,7 +293,7 @@ export default function LinkedNftTokenPanel({
         </div>
         <div>
           <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
-            Fungible token AccountId
+            Token id
           </label>
           <input
             type="text"
@@ -322,7 +321,7 @@ export default function LinkedNftTokenPanel({
           }}
         >
           <p>
-            <strong style={{ color: 'var(--text-primary)' }}>Soft-gate:</strong> {previewWarning}
+            <strong style={{ color: 'var(--text-primary)' }}>Note:</strong> {previewWarning}
           </p>
           <label className="flex items-start gap-2 mt-2 cursor-pointer">
             <input
@@ -331,7 +330,7 @@ export default function LinkedNftTokenPanel({
               checked={ackSoftGate}
               onChange={(e) => setAckSoftGate(e.target.checked)}
             />
-            <span>Advisory only — registry still requires claimer of both sides.</span>
+            <span>I understand — continue linking anyway.</span>
           </label>
         </div>
       ) : null}
@@ -369,7 +368,7 @@ export default function LinkedNftTokenPanel({
           className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
           style={{ backgroundColor: 'var(--finance-green-mid)' }}
         >
-          {busy ? 'Submitting…' : 'Claim + register on-chain'}
+          {busy ? 'Linking…' : 'Link companions'}
         </button>
         <button
           type="button"
@@ -384,7 +383,7 @@ export default function LinkedNftTokenPanel({
           className="px-4 py-2 rounded-lg text-sm font-medium border disabled:opacity-50"
           style={{ borderColor: 'var(--border-color)', color: 'var(--finance-red-light)' }}
         >
-          Unlink pair
+          Unlink
         </button>
         <button
           type="button"
@@ -393,13 +392,13 @@ export default function LinkedNftTokenPanel({
           className="px-3 py-2 rounded-lg text-sm font-medium border disabled:opacity-50"
           style={{ borderColor: 'var(--border-color)', color: 'var(--finance-primary)' }}
         >
-          Refresh links
+          Refresh
         </button>
       </div>
 
       {!expressOk ? (
         <p className="text-xs mb-3" style={{ color: 'var(--text-tertiary)' }}>
-          Connect Boing Express on Boing testnet to submit claim / register / unlink.
+          Connect Boing Express to link or unlink companions.
         </p>
       ) : null}
 
@@ -411,7 +410,7 @@ export default function LinkedNftTokenPanel({
 
       {listError ? (
         <p className="text-xs mb-3" style={{ color: 'var(--finance-gold)' }}>
-          {listError}
+          Could not load companions right now. You can still link a pair below.
         </p>
       ) : null}
 
@@ -444,15 +443,14 @@ export default function LinkedNftTokenPanel({
         </ul>
       ) : (
         <p className="text-xs mb-3" style={{ color: 'var(--text-tertiary)' }}>
-          No active links loaded yet. Query uses <code className="text-[10px]">links_count</code> /{' '}
-          <code className="text-[10px]">get_link_at</code> (needs unsigned simulate when available).
+          No companions loaded yet. Refresh after you link a pair.
         </p>
       )}
 
       {schemaPreview && schemaHash ? (
         <details className="rounded-lg border" style={{ borderColor: 'var(--border-color)' }}>
           <summary className="cursor-pointer text-xs font-medium px-3 py-2" style={{ color: 'var(--text-primary)' }}>
-            Optional metadata cache ({LINKED_NFT_TOKEN_SCHEMA})
+            Advanced: optional metadata cache
           </summary>
           <pre
             className="text-[10px] px-3 pb-3 overflow-x-auto"

@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useSearchParams } from 'react-router-dom';
 import LinkedNftTokenPanel from '../components/LinkedNftTokenPanel';
-import { LINKED_NFT_TOKEN_SCHEMA } from '../utils/linkedNftToken';
 import { getLinkedNftTokenRegistryStatus } from '../services/linkedNftTokenRegistry';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 
@@ -22,10 +21,10 @@ export default function LinkedProject() {
   return (
     <>
       <Helmet>
-        <title>Linked project | boing.finance</title>
+        <title>Manage links | boing.finance</title>
         <meta
           name="description"
-          content="Claim and register NFT collection ↔ fungible token links on the Boing on-chain registry."
+          content="Link or unlink NFT collections and tokens as companions. Prefer Project pack to create both in one flow."
         />
       </Helmet>
       <div className="relative z-10 container mx-auto px-4 py-8">
@@ -38,12 +37,14 @@ export default function LinkedProject() {
               Launch
             </p>
             <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-              Linked project
+              Manage links
             </h1>
             <p className="text-theme-tertiary max-w-xl mx-auto">
-              On-chain registry: <code className="text-xs">claim_asset</code> →{' '}
-              <code className="text-xs">register_link</code> / <code className="text-xs">unlink_at</code>.
-              Many-to-many and mutable. Auth = claimer of both sides.
+              Link an existing collection and token as companions, or unlink a pair. Starting fresh? Use{' '}
+              <Link to="/project-pack" className="underline" style={{ color: 'var(--finance-primary)' }}>
+                Project pack
+              </Link>
+              .
             </p>
           </div>
 
@@ -53,12 +54,19 @@ export default function LinkedProject() {
           >
             <div className="flex flex-wrap gap-4 justify-between items-center">
               <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                Status:{' '}
+                Companions:{' '}
                 <strong style={{ color: 'var(--text-primary)' }}>
-                  {status.code === 'ready' ? 'Registry ready' : status.code.replace(/_/g, ' ')}
+                  {status.code === 'ready' ? 'Ready to link' : 'Not available yet'}
                 </strong>
               </div>
               <div className="flex flex-wrap gap-2">
+                <Link
+                  to="/project-pack"
+                  className="px-4 py-2 rounded-lg text-sm font-semibold"
+                  style={{ backgroundColor: 'var(--finance-primary)', color: '#041018' }}
+                >
+                  Project pack
+                </Link>
                 <Link
                   to="/create-nft"
                   className="px-4 py-2 rounded-lg text-sm font-medium text-white"
@@ -68,17 +76,17 @@ export default function LinkedProject() {
                 </Link>
                 <Link
                   to="/deploy-token"
-                  className="px-4 py-2 rounded-lg text-sm font-medium"
-                  style={{ backgroundColor: 'var(--finance-primary)', color: '#041018' }}
+                  className="px-4 py-2 rounded-lg text-sm font-medium border"
+                  style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
                 >
                   Deploy token
                 </Link>
               </div>
             </div>
             <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-              {status.message} Selectors 0xE0–0xE6 · CREATE2 salt{' '}
-              <code className="text-[10px]">BOING_NFT_TOKEN_LINK_REG_V1</code>. Metadata schema{' '}
-              <code className="text-[10px]">{LINKED_NFT_TOKEN_SCHEMA}</code> is cache-only.
+              {status.code === 'ready'
+                ? 'You can claim each side, register companions, or unlink. Links are many-to-many and can change later.'
+                : 'Companion linking is not available on this network yet.'}
             </p>
           </div>
 
@@ -86,40 +94,8 @@ export default function LinkedProject() {
             seedCollectionId={collectionQ}
             seedTokenId={tokenQ}
             showHubLink={false}
-            title="Claim, register, or unlink"
+            title="Link or unlink companions"
           />
-
-          <section
-            className="rounded-2xl border p-5 sm:p-6 mt-6"
-            style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
-          >
-            <h2 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-              Operator notes
-            </h2>
-            <ul className="list-disc pl-5 space-y-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-              <li>
-                Public testnet registry:{' '}
-                <code className="text-xs break-all">
-                  0xebf9f0190f415852f90d0e60343126201248ab96273fdbf8acc5fe5fa03c3dd8
-                </code>
-                {' '}via <code className="text-xs">REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY</code> (or network{' '}
-                <code className="text-xs">end_user.canonical_linked_nft_token_registry</code> when published).
-              </li>
-              <li>
-                Flow is on-chain: claim → register → unlink (many-to-many, mutable). Dual claimer auth — claimer of both
-                assets required for register/unlink.
-              </li>
-              <li>
-                Claim assets in the same session as deploy so a third party cannot front-run{' '}
-                <code className="text-xs">claim_asset</code>.
-              </li>
-              <li>
-                Link queries need{' '}
-                <code className="text-xs">REACT_APP_BOING_RPC_UNSIGNED_SIMULATE_METHOD=boing_simulateContractCall</code>{' '}
-                when the node supports it.
-              </li>
-            </ul>
-          </section>
         </div>
       </div>
     </>

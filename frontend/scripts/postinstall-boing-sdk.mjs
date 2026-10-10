@@ -41,6 +41,13 @@ function sdkDistNeedsRebuild() {
     if (!src.includes('buildNativeDexIndexerStatsForClient')) return true;
     if (!src.includes('buildDexOverridesFromPlainEnv')) return true;
     if (!src.includes('collectAllNativeDexDirectoryPools')) return true;
+    // Prefer SDK project-pack helper (network PR #48); rebuild when source has it but dist is stale.
+    if (
+      existsSync(join(sdkRoot, 'src', 'linkedNftTokenProjectPack.ts')) &&
+      !src.includes('buildLinkedNftTokenProjectPack')
+    ) {
+      return true;
+    }
   } catch {
     return true;
   }
