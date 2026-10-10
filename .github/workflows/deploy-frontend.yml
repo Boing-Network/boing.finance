@@ -47,13 +47,13 @@ jobs:
         run: npm ci
 
       # postinstall installs sdk deps too; explicit step documents CI requirement for Wrangler’s Function bundle.
-      - name: Install boing-sdk dependencies
+      - name: Install and build boing-sdk (lockfile install; dist for Pages Functions)
         working-directory: boing.network/boing-sdk
-        run: npm install --no-audit --no-fund
-
-      - name: Build boing-sdk (dist must include indexer exports for Pages Functions)
-        working-directory: boing.network/boing-sdk
-        run: npm run build
+        run: |
+          # npm install has hit intermittent arborist edgesOut crashes on runners;
+          # package-lock.json is present — prefer npm ci for a deterministic tree.
+          npm ci --no-audit --no-fund
+          npm run build
 
       - name: Verify boing-sdk canonical testnet pool hex
         working-directory: frontend
