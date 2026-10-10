@@ -40,16 +40,24 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: |
+            frontend/package-lock.json
+            boing.network/boing-sdk/package-lock.json
 
       - name: Install dependencies
         working-directory: frontend
         run: npm ci
 
-      # postinstall installs sdk deps too; explicit step documents CI requirement for Wrangler’s Function bundle.
+      # postinstall may already install sdk deps; use lockfile-aligned npm ci (not npm install)
+      # to avoid npm arborist "edgesOut" crashes on a second incremental install.
       - name: Install boing-sdk dependencies
         working-directory: boing.network/boing-sdk
-        run: npm install --no-audit --no-fund
+        run: |
+          if [ -f node_modules/@noble/hashes/package.json ] && [ -f node_modules/@noble/ed25519/package.json ]; then
+            echo "boing-sdk runtime deps already present (frontend postinstall); skipping reinstall"
+          else
+            npm ci --no-audit --no-fund
+          fi
 
       - name: Build boing-sdk (dist must include indexer exports for Pages Functions)
         working-directory: boing.network/boing-sdk
