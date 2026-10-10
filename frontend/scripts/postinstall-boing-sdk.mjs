@@ -18,9 +18,17 @@ if (!existsSync(sdkRoot)) {
 /** Wrangler bundles `boing-sdk/dist/*.js` and resolves `@noble/*` from `boing-sdk/node_modules`. */
 const nobleHashes = join(sdkRoot, 'node_modules', '@noble', 'hashes', 'package.json');
 if (!existsSync(nobleHashes)) {
-  const r = spawnSync('npm', ['install', '--no-audit', '--no-fund'], { cwd: sdkRoot, stdio: 'inherit', shell: true });
+  // Prefer lockfile-aligned `npm ci` when present; plain `npm install` has hit arborist
+  // `Cannot read properties of null (reading 'edgesOut')` in Cloudflare Pages CI.
+  const lockfile = join(sdkRoot, 'package-lock.json');
+  const npmArgs = existsSync(lockfile)
+    ? ['ci', '--no-audit', '--no-fund']
+    : ['install', '--no-audit', '--no-fund'];
+  const r = spawnSync('npm', npmArgs, { cwd: sdkRoot, stdio: 'inherit', shell: true });
   if (r.status !== 0) {
-    console.error('[postinstall-boing-sdk] npm install in boing-sdk failed (needed for @noble/* resolution).');
+    console.error(
+      `[postinstall-boing-sdk] npm ${npmArgs[0]} in boing-sdk failed (needed for @noble/* resolution).`,
+    );
     process.exit(1);
   }
 }
