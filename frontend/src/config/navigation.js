@@ -15,9 +15,10 @@ const createNavigation = () => {
     Object.freeze({ name: 'Tokens', href: '/tokens', icon: '🪙', description: 'Token management', isAvailable: true, comingSoon: false, testnetOnly: false })
   ]);
   const deployment = Object.freeze([
+    Object.freeze({ name: 'Project pack', href: '/project-pack', icon: '📦', description: 'Collection + token + companions', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Deploy Token', href: '/deploy-token', icon: '🚀', description: 'Create your own tokens', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Create NFT', href: '/create-nft', icon: '🖼️', description: 'Mint NFTs', isAvailable: true, comingSoon: false, testnetOnly: false }),
-    Object.freeze({ name: 'Linked project', href: '/linked-project', icon: '🔗', description: 'Link NFT collections & tokens', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Manage links', href: '/linked-project', icon: '🔗', description: 'Link or unlink companions', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Create Pool', href: '/create-pool', icon: '🏊', description: 'Create liquidity pools', isAvailable: true, comingSoon: false, testnetOnly: false })
   ]);
   return Object.freeze({

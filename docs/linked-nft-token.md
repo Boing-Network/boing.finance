@@ -28,7 +28,9 @@ Optional later: `end_user.canonical_linked_nft_token_registry` on `boing_getNetw
 
 ## UX (boing.finance)
 
-Hub: **[`/linked-project`](https://boing.finance/linked-project)** (nav: Launch → Linked project).
+**Guided create:** **[`/project-pack`](https://boing.finance/project-pack)** (nav: Launch → Project pack) — collection + token + companions in one flow. Product UI stays plain-language (companions / link); selectors and registry AccountId stay in this doc.
+
+**Manage existing:** **[`/linked-project`](https://boing.finance/linked-project)** (nav: Launch → Manage links).
 
 | Step | Action | Selector |
 |------|--------|----------|
@@ -37,7 +39,9 @@ Hub: **[`/linked-project`](https://boing.finance/linked-project)** (nav: Launch 
 | 3 | **Unlink** when needed (`unlink_at`) | `0xE2` |
 | Query | List links (`links_count` / `get_link_at`) | `0xE3` / `0xE4` |
 
-Post-deploy panels on **Create NFT** and **Deploy Token** (and native Boing create sections) reuse the same `LinkedNftTokenPanel` → `linkedNftTokenRegistry` service. Claim soon after deploy so a third party cannot front-run `claim_asset`.
+Project pack prefers SDK `buildLinkedNftTokenProjectPack` ([boing.network #48](https://github.com/Boing-Network/boing.network/pull/48); branch `cursor/sdk-project-pack` until merge) — joint CREATE2 deploys + claim×2 + `register_link`. Falls back to composing `buildLinkedNftTokenPairDeploys` + register flow on older SDK installs.
+
+Post-deploy panels on **Create NFT** and **Deploy Token** reuse `LinkedNftTokenPanel` → `linkedNftTokenRegistry`. Claim soon after deploy so a third party cannot front-run `claim_asset`.
 
 ## Selectors (SDK)
 
@@ -55,11 +59,14 @@ Post-deploy panels on **Create NFT** and **Deploy Token** (and native Boing crea
 
 | Path | Role |
 |------|------|
+| `frontend/src/services/projectPackDeploy.js` | Guided pack: prefer `buildLinkedNftTokenProjectPack`, QA + Express submit |
+| `frontend/src/pages/ProjectPack.jsx` | Plain-language wizard at `/project-pack` |
 | `frontend/src/services/linkedNftTokenRegistry.js` | Prefer boing-sdk encode/decode; local 0xE0–0xE6 fallback for stale installs |
-| `frontend/src/components/LinkedNftTokenPanel.jsx` | Claim / register / unlink / query UI |
-| `/linked-project` | Dedicated hub |
-| Create NFT / Deploy Token | Post-deploy panel → same service |
-| In-app docs | Developer Tools → Boing L1 section; Help Center → Linked project |
+| `frontend/src/components/LinkedNftTokenPanel.jsx` | Claim / register / unlink / query UI (Manage links) |
+| `/project-pack` | Guided create (collection + token + companions) |
+| `/linked-project` | Manage / unlink existing companions |
+| Create NFT / Deploy Token | Post-deploy panel → same service; CTA to Project pack |
+| In-app docs | Developer Tools → Boing L1 section; Help Center |
 
 ### Env
 
