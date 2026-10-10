@@ -98,9 +98,16 @@ export default function LinkedProject() {
             </h2>
             <ul className="list-disc pl-5 space-y-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
               <li>
-                Publish registry AccountId via{' '}
-                <code className="text-xs">REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY</code> (or network{' '}
-                <code className="text-xs">end_user.canonical_linked_nft_token_registry</code>).
+                Public testnet registry:{' '}
+                <code className="text-xs break-all">
+                  0xebf9f0190f415852f90d0e60343126201248ab96273fdbf8acc5fe5fa03c3dd8
+                </code>
+                {' '}via <code className="text-xs">REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY</code> (or network{' '}
+                <code className="text-xs">end_user.canonical_linked_nft_token_registry</code> when published).
+              </li>
+              <li>
+                Flow is on-chain: claim → register → unlink (many-to-many, mutable). Dual claimer auth — claimer of both
+                assets required for register/unlink.
               </li>
               <li>
                 Claim assets in the same session as deploy so a third party cannot front-run{' '}

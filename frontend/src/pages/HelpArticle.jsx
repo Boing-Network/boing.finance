@@ -719,6 +719,52 @@ const HelpArticle = () => {
         </ul>
       `
     },
+    'linked-project': {
+      title: 'Link an NFT Collection and Token',
+      category: 'Launch',
+      content: `
+        <h2>On-chain linked NFT ↔ token pairs</h2>
+        <p>
+          boing.finance registers NFT collection and fungible token pairs on the Boing L1
+          <strong>linked NFT–token registry</strong>. Links are <strong>on-chain</strong> (not a display-only MVP):
+          many-to-many, mutable, and authorized by the claimer of both assets.
+        </p>
+
+        <h3>Where to go</h3>
+        <ul>
+          <li><strong>Hub:</strong> <a href="/linked-project">Linked project</a> (<code>/linked-project</code>)</li>
+          <li><strong>After deploy:</strong> Create NFT and Deploy Token show the same claim/register panel</li>
+        </ul>
+
+        <h3>Flow</h3>
+        <ol>
+          <li><strong>Claim</strong> each asset AccountId (<code>claim_asset</code>, selector 0xE0) — first claimer wins</li>
+          <li><strong>Register</strong> the pair (<code>register_link</code>, 0xE1) — you must be claimer of both sides</li>
+          <li><strong>Unlink</strong> later if needed (<code>unlink_at</code>, 0xE2) — same dual-claimer auth</li>
+        </ol>
+        <p>Query existing links with <code>links_count</code> / <code>get_link_at</code> on the hub.</p>
+
+        <h3>Public testnet registry</h3>
+        <ul>
+          <li><strong>AccountId:</strong> <code>0xebf9f0190f415852f90d0e60343126201248ab96273fdbf8acc5fe5fa03c3dd8</code></li>
+          <li><strong>Env:</strong> <code>REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY</code> (baked for production/staging Pages builds)</li>
+          <li><strong>Wallet:</strong> connect Boing Express on Boing testnet</li>
+        </ul>
+
+        <h3>What is not authority</h3>
+        <ul>
+          <li>Same-deployer soft-gate — advisory only</li>
+          <li><code>boing.linked_nft_token.v1</code> metadata — optional cache, not consensus</li>
+        </ul>
+
+        <h3>Tips</h3>
+        <ul>
+          <li>Claim soon after deploy so another wallet cannot front-run <code>claim_asset</code></li>
+          <li>One collection can link to many tokens and vice versa</li>
+          <li>Engineering reference: <code>docs/linked-nft-token.md</code> in the boing.finance repo</li>
+        </ul>
+      `
+    },
     'private-keys': {
       title: 'Protecting Your Private Keys',
       category: 'Security',
