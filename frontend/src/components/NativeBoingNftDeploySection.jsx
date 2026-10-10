@@ -21,6 +21,8 @@ import {
 import { scheduleBoingDeployReceiptFollowup } from '../services/boingDeployReceiptFollowup';
 import { buildBoingExplorerAccountUrl, buildBoingExplorerTxUrl } from '../config/boingExplorerUrls';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
+import { rememberAssetDeployer } from '../utils/linkedNftToken';
+import LinkedNftTokenPanel from './LinkedNftTokenPanel';
 
 const DEFAULT_NFT_PURPOSE = 'nft';
 
@@ -37,10 +39,12 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
     committedDescriptionHash = '',
     coverImageUri = '',
     onEnsureMetadataPublished,
+    onDeployed,
+    linkTokenId = '',
   },
   ref
 ) {
-  const { chainId, walletType, isConnected, getWalletProvider } = useWallet();
+  const { chainId, walletType, isConnected, getWalletProvider, account } = useWallet();
   const { explorerBaseUrl } = useBoingNativeDexIntegration();
   const [purpose, setPurpose] = useState(DEFAULT_NFT_PURPOSE);
 
@@ -193,6 +197,8 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
     scheduleBoingDeployReceiptFollowup(result.boingTxIdHex, (id) => {
       setLastDeployedAccount(id);
       showBoingContractIncludedToast(id, explorerBaseUrl);
+      if (account) rememberAssetDeployer(id, account);
+      onDeployed?.({ accountId: id, kind: 'nft', name: collectionName, symbol: collectionSymbol });
       void (async () => {
         try {
           await commitReferenceNftMetadataHash({
@@ -211,11 +217,13 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
     });
     return result.txHash;
   }, [
+    account,
     collectionName,
     collectionSymbol,
     customBytecode,
     descriptionHash,
     getWalletProvider,
+    onDeployed,
     purpose,
     qaPoolAcknowledged,
     explorerBaseUrl,
@@ -449,7 +457,7 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
         </div>
       </details>
 
-      {lastTx && !embedInWizard && (
+      {lastTx && (
         <div className="text-xs mt-2 space-y-1" style={{ color: 'var(--text-secondary)' }}>
           <p className="font-mono break-all">Submit ack: {lastTx}</p>
           {lastDeployedAccount && (
@@ -474,6 +482,16 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
           )}
         </div>
       )}
+
+      {lastDeployedAccount ? (
+        <LinkedNftTokenPanel
+          compact
+          seedCollectionId={lastDeployedAccount}
+          seedTokenId={linkTokenId}
+          collectionLabel={collectionName}
+          title="Link a project token"
+        />
+      ) : null}
     </section>
   );
 });

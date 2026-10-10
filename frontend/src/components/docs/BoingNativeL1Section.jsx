@@ -92,6 +92,25 @@ export default function BoingNativeL1Section() {
 
       <div>
         <h3 className="text-2xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
+          Linked NFT + token project (on-chain)
+        </h3>
+        <p className="mb-3" style={{ color: 'var(--text-secondary)' }}>
+          Finance wires mutable many-to-many NFT ↔ token links through the{' '}
+          <strong>on-chain registry</strong>: <code className="text-xs">claim_asset</code> (0xE0) →{' '}
+          <code className="text-xs">register_link</code> (0xE1) / <code className="text-xs">unlink_at</code> (0xE2),
+          query via <code className="text-xs">links_count</code> / <code className="text-xs">get_link_at</code>. Auth =
+          claimer of both sides. Soft-gate is advisory. Hub:{' '}
+          <Link to="/linked-project" className={linkCls}>
+            Linked project
+          </Link>
+          . Set <code className="text-xs">REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY</code> (CREATE2 salt{' '}
+          <code className="text-xs">BOING_NFT_TOKEN_LINK_REG_V1</code>). boing-sdk registry helpers are on network main
+          (PR #42); finance keeps a local 0xE0–0xE6 encode fallback for stale installs.
+        </p>
+      </div>
+
+      <div>
+        <h3 className="text-2xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
           Native NFT collection (Create NFT)
         </h3>
         <p className="mb-3" style={{ color: 'var(--text-secondary)' }}>
