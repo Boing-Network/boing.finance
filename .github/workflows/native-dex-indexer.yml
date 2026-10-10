@@ -49,7 +49,7 @@ jobs:
 
       - name: "Install and build boing-sdk (linked package; dist must include indexer helpers)"
         working-directory: boing.network/boing-sdk
-        run: npm install --no-audit --no-fund && npm run build
+        run: npm ci --no-audit --no-fund && npm run build
 
       - name: Verify boing-sdk indexer dist
         run: test -f boing.network/boing-sdk/dist/nativeDexIndexerStats.js
