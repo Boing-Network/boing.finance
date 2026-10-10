@@ -32,6 +32,8 @@ Optional later: `end_user.canonical_linked_nft_token_registry` on `boing_getNetw
 
 **Manage existing:** **[`/linked-project`](https://boing.finance/linked-project)** (nav: Launch → Manage links).
 
+**Link-gated actions (v1):** After companions are verified on-chain, **Add a pool** unlocks on Project pack success and Manage links. Create pool with `?collection=&token=&requireCompanions=1` blocks native pool create until the pair is linked. Plain Create pool (no query) stays ungated. See project store `docs/link-gated-actions.md`.
+
 | Step | Action | Selector |
 |------|--------|----------|
 | 1 | **Claim** each asset AccountId (`claim_asset`) | `0xE0` |
@@ -61,8 +63,11 @@ Post-deploy panels on **Create NFT** and **Deploy Token** reuse `LinkedNftTokenP
 |------|------|
 | `frontend/src/services/projectPackDeploy.js` | Guided pack: prefer `buildLinkedNftTokenProjectPack`, QA + Express submit |
 | `frontend/src/pages/ProjectPack.jsx` | Plain-language wizard at `/project-pack` |
-| `frontend/src/services/linkedNftTokenRegistry.js` | Prefer boing-sdk encode/decode; local 0xE0–0xE6 fallback for stale installs |
+| `frontend/src/services/linkedNftTokenRegistry.js` | Prefer boing-sdk encode/decode; local 0xE0–0xE6 fallback; `areCompanionsLinkedOnChain` / `buildProjectPoolPath` |
+| `frontend/src/components/CompanionLinkGate.jsx` | Plain-language lock/unlock for link-gated actions |
+| `frontend/src/hooks/useCompanionsLinked.js` | Live registry companion check |
 | `frontend/src/components/LinkedNftTokenPanel.jsx` | Claim / register / unlink / query UI (Manage links) |
+| `frontend/src/components/NativeBoingCreatePoolPanel.jsx` | Project-pool query gate (`requireCompanions=1`) |
 | `/project-pack` | Guided create (collection + token + companions) |
 | `/linked-project` | Manage / unlink existing companions |
 | Create NFT / Deploy Token | Post-deploy panel → same service; CTA to Project pack |

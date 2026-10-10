@@ -544,6 +544,96 @@ export async function listLinkedNftTokenLinksOnChain({
 }
 
 /**
+ * True when the collection↔token pair has an active on-chain companion link.
+ * Authority is the registry scan — not soft-gate or local wizard flags.
+ */
+export async function areCompanionsLinkedOnChain({
+  collectionId,
+  tokenId,
+  endUser = null,
+  networkInfo = null,
+  origin = null,
+} = {}) {
+  let collection;
+  let token;
+  try {
+    collection = normalizeLinkableAssetAddress(collectionId);
+    token = normalizeLinkableAssetAddress(tokenId);
+  } catch (e) {
+    return {
+      ok: false,
+      linked: false,
+      code: 'invalid_address',
+      message: e?.message || 'Invalid collection or token id',
+      links: [],
+    };
+  }
+  if (!isBoingNativeAccountIdHex(collection) || !isBoingNativeAccountIdHex(token)) {
+    return {
+      ok: false,
+      linked: false,
+      code: 'boing_account_required',
+      message: 'Companion checks need Boing 32-byte ids for both sides.',
+      links: [],
+    };
+  }
+  if (collection === token) {
+    return {
+      ok: false,
+      linked: false,
+      code: 'same_address',
+      message: 'Collection and token must differ.',
+      links: [],
+    };
+  }
+
+  const listed = await listLinkedNftTokenLinksOnChain({
+    endUser,
+    networkInfo,
+    origin,
+    filterCollectionId: collection,
+    filterTokenId: token,
+  });
+  if (!listed.ok) {
+    return {
+      ok: false,
+      linked: false,
+      code: listed.code || 'read_unavailable',
+      message: listed.message || 'Could not verify companions on-chain.',
+      links: [],
+      status: listed.status,
+    };
+  }
+  const links = listed.links || [];
+  return {
+    ok: true,
+    linked: links.length > 0,
+    code: links.length > 0 ? 'linked' : 'not_linked',
+    message:
+      links.length > 0
+        ? 'Companions are linked on-chain.'
+        : 'These are not linked as companions yet.',
+    links,
+    count: listed.count,
+    registryId: listed.registryId,
+    status: listed.status,
+  };
+}
+
+/**
+ * Deep-link to Create pool with a project companion gate.
+ * Plain Create pool (no query) stays ungated.
+ */
+export function buildProjectPoolPath({ collectionId, tokenId } = {}) {
+  const params = new URLSearchParams();
+  if (collectionId) params.set('collection', String(collectionId).trim());
+  if (tokenId) params.set('token', String(tokenId).trim());
+  params.set('requireCompanions', '1');
+  const q = params.toString();
+  return q ? `/create-pool?${q}` : '/create-pool';
+}
+
+/**
  * Unlink by pair: scan for index, then unlink_at.
  * Or pass `index` directly.
  */
