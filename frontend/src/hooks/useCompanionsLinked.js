@@ -42,29 +42,52 @@ export function useCompanionsLinked({
 
     setState('checking');
     setMessage('Checking companions…');
-    const result = await areCompanionsLinkedOnChain({
-      collectionId: c,
-      tokenId: t,
-      endUser,
-      networkInfo,
-      origin,
-    });
-    if (!result.ok) {
-      const next =
-        result.code === 'invalid_address' ||
-        result.code === 'boing_account_required' ||
-        result.code === 'same_address'
-          ? 'invalid'
-          : 'unavailable';
-      setState(next);
-      setMessage(result.message || 'Could not verify companions.');
-      setLinks([]);
+    try {
+      const result = await Promise.race([
+        areCompanionsLinkedOnChain({
+          collectionId: c,
+          tokenId: t,
+          endUser,
+          networkInfo,
+          origin,
+        }),
+        new Promise((resolve) => {
+          window.setTimeout(
+            () =>
+              resolve({
+                ok: false,
+                linked: false,
+                code: 'timeout',
+                message: 'Could not verify companions right now.',
+                links: [],
+              }),
+            20000
+          );
+        }),
+      ]);
+      if (!result.ok) {
+        const next =
+          result.code === 'invalid_address' ||
+          result.code === 'boing_account_required' ||
+          result.code === 'same_address'
+            ? 'invalid'
+            : 'unavailable';
+        setState(next);
+        setMessage(result.message || 'Could not verify companions.');
+        setLinks([]);
+        return result;
+      }
+      setState(result.linked ? 'linked' : 'not_linked');
+      setMessage(result.message || '');
+      setLinks(result.links || []);
       return result;
+    } catch (e) {
+      const message = e?.message || 'Could not verify companions.';
+      setState('unavailable');
+      setMessage(message);
+      setLinks([]);
+      return { ok: false, linked: false, code: 'error', message, links: [] };
     }
-    setState(result.linked ? 'linked' : 'not_linked');
-    setMessage(result.message || '');
-    setLinks(result.links || []);
-    return result;
   }, [collectionId, tokenId, endUser, networkInfo, origin, enabled]);
 
   useEffect(() => {
