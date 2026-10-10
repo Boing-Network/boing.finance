@@ -18,6 +18,8 @@ import {
 } from '../config/boingExplorerUrls';
 import { isBoingNativeAccountIdHex } from '../utils/boingWalletDiscovery';
 import { rememberAssetDeployer } from '../utils/linkedNftToken';
+import CompanionLinkGate from '../components/CompanionLinkGate';
+import { buildProjectPoolPath } from '../services/linkedNftTokenRegistry';
 
 const STEPS = [
   { id: 'details', label: 'Details' },
@@ -722,6 +724,17 @@ export default function ProjectPack() {
                           ) : null}
                         </div>
                       </div>
+                      <div className="mb-5">
+                        <CompanionLinkGate
+                          collectionId={collectionId || predictedCollection}
+                          tokenId={tokenId || predictedToken}
+                          actionLabel="Add a pool"
+                          unlockedHref={buildProjectPoolPath({
+                            collectionId: collectionId || predictedCollection,
+                            tokenId: tokenId || predictedToken,
+                          })}
+                        />
+                      </div>
                       <div className="flex flex-wrap gap-3">
                         <a
                           href={buildBoingExplorerAccountUrl(
@@ -735,13 +748,6 @@ export default function ProjectPack() {
                         >
                           View on Observer
                         </a>
-                        <Link
-                          to="/create-pool"
-                          className="px-4 py-2.5 rounded-lg text-sm font-medium border"
-                          style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
-                        >
-                          Add a pool later
-                        </Link>
                         <button
                           type="button"
                           onClick={() => {
