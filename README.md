@@ -90,6 +90,7 @@ See **[docs/README.md](./docs/README.md)** for the full index.
 |----------|-------------|
 | [docs/native-dex.md](./docs/native-dex.md) | Boing L1 vs EVM DEX, roadmap, indexer |
 | [docs/native-dex-discovery.md](./docs/native-dex-discovery.md) | L1 list RPCs + operator handoff |
+| [docs/linked-nft-token.md](./docs/linked-nft-token.md) | On-chain NFT↔token registry (`/linked-project`) |
 | [docs/deployment.md](./docs/deployment.md) | Cloudflare Workers/Pages |
 | [docs/configuration.md](./docs/configuration.md) | Env vars |
 | [docs/bridge.md](./docs/bridge.md) | LI.FI Bridge MVP + 0.5% fee |

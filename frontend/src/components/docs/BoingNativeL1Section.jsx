@@ -96,16 +96,21 @@ export default function BoingNativeL1Section() {
         </h3>
         <p className="mb-3" style={{ color: 'var(--text-secondary)' }}>
           Finance wires mutable many-to-many NFT ↔ token links through the{' '}
-          <strong>on-chain registry</strong>: <code className="text-xs">claim_asset</code> (0xE0) →{' '}
+          <strong>on-chain registry</strong> (not display-only): <code className="text-xs">claim_asset</code> (0xE0) →{' '}
           <code className="text-xs">register_link</code> (0xE1) / <code className="text-xs">unlink_at</code> (0xE2),
           query via <code className="text-xs">links_count</code> / <code className="text-xs">get_link_at</code>. Auth =
-          claimer of both sides. Soft-gate is advisory. Hub:{' '}
+          claimer of both sides (dual claimer). Soft-gate and{' '}
+          <code className="text-xs">boing.linked_nft_token.v1</code> metadata are cache/advisory only. Hub:{' '}
           <Link to="/linked-project" className={linkCls}>
             Linked project
           </Link>
-          . Set <code className="text-xs">REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY</code> (CREATE2 salt{' '}
-          <code className="text-xs">BOING_NFT_TOKEN_LINK_REG_V1</code>). boing-sdk registry helpers are on network main
-          (PR #42); finance keeps a local 0xE0–0xE6 encode fallback for stale installs.
+          . Env <code className="text-xs">REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY</code> (CREATE2 salt{' '}
+          <code className="text-xs">BOING_NFT_TOKEN_LINK_REG_V1</code>). Public testnet registry:{' '}
+          <code className="text-xs break-all">
+            0xebf9f0190f415852f90d0e60343126201248ab96273fdbf8acc5fe5fa03c3dd8
+          </code>
+          . boing-sdk helpers are on network main (PR #42); finance keeps a local 0xE0–0xE6 encode fallback for stale
+          installs. Engineering notes: <code className="text-xs">docs/linked-nft-token.md</code>.
         </p>
       </div>
 

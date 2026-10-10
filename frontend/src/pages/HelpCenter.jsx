@@ -86,6 +86,20 @@ const HelpCenter = () => {
       ]
     },
     {
+      id: 'launch',
+      title: 'Launch',
+      icon: '🔗',
+      articles: [
+        {
+          id: 'linked-project',
+          title: 'Link an NFT Collection and Token',
+          content:
+            'On-chain registry on Boing L1: claim assets, register a many-to-many mutable NFT↔token pair, or unlink. Hub at /linked-project.',
+          tags: ['nft', 'token', 'linked', 'registry', 'claim', 'boing']
+        }
+      ]
+    },
+    {
       id: 'keyboard-shortcuts',
       title: 'Keyboard Shortcuts',
       icon: '⌨️',
@@ -167,8 +181,8 @@ const HelpCenter = () => {
     <>
       <Helmet>
         <title>Help Center | boing.finance — Guides, FAQs & Support</title>
-        <meta name="description" content="Get help with boing.finance. Guides for swap, liquidity, bridge, deploy token, and wallet. FAQs and support." />
-        <meta name="keywords" content="help center, support, FAQ, guides, boing.finance, DEX, troubleshooting" />
+        <meta name="description" content="Get help with boing.finance. Guides for swap, liquidity, bridge, linked NFT↔token pairs, deploy token, and wallet. FAQs and support." />
+        <meta name="keywords" content="help center, support, FAQ, guides, boing.finance, DEX, linked project, NFT, troubleshooting" />
         <meta property="og:title" content="Help Center | boing.finance" />
         <meta property="og:description" content="Get help with boing.finance - Comprehensive guides and support resources." />
         <meta property="og:type" content="website" />

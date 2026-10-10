@@ -19,7 +19,7 @@ Canonical **env vars:** `frontend/.env.example`. Canonical **EVM addresses:** `f
 | Doc | Description |
 |-----|-------------|
 | [native-dex.md](./native-dex.md) | Boing L1 vs EVM, VM deploy/Observer, roadmap, Uniswap-parity matrix, indexer |
-| [linked-nft-token.md](./linked-nft-token.md) | Display-only many-to-many NFT↔token links (`boing.linked_nft_token.v1`) |
+| [linked-nft-token.md](./linked-nft-token.md) | On-chain many-to-many NFT↔token registry (`/linked-project`, claim → register → unlink) |
 | [native-dex-discovery.md](./native-dex-discovery.md) | `boing_listDexTokens` / `boing_listDexPools` spec, client wiring, operator definition of done |
 | [contracts.md](./contracts.md) | TokenFactory / DEXFactory status and EVM DEX operator runbook |
 | [contract-registry.md](./contract-registry.md) | Historical addresses and verification links (mirror of `contracts.js`) |
