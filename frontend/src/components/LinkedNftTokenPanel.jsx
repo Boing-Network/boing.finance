@@ -410,7 +410,7 @@ export default function LinkedNftTokenPanel({
 
       {listError ? (
         <p className="text-xs mb-3" style={{ color: 'var(--finance-gold)' }}>
-          {listError}
+          Could not load companions right now. You can still link a pair below.
         </p>
       ) : null}
 
