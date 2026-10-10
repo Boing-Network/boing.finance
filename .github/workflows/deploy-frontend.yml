@@ -33,8 +33,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Boing-Network/boing.network
-          # Prefer SDK buildLinkedNftTokenProjectPack (PR #48). Revert to default branch after merge.
-          ref: cursor/sdk-project-pack
           path: boing.network
 
       - name: Setup Node.js
