@@ -104,8 +104,8 @@ export default function BoingNativeL1Section() {
             Linked project
           </Link>
           . Set <code className="text-xs">REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY</code> (CREATE2 salt{' '}
-          <code className="text-xs">BOING_NFT_TOKEN_LINK_REG_V1</code>). boing-sdk helpers from network PR #42; finance
-          keeps a local 0xE0–0xE6 encode fallback until SDK merge.
+          <code className="text-xs">BOING_NFT_TOKEN_LINK_REG_V1</code>). boing-sdk registry helpers are on network main
+          (PR #42); finance keeps a local 0xE0–0xE6 encode fallback for stale installs.
         </p>
       </div>
 

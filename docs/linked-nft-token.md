@@ -44,9 +44,9 @@ REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY=0x…
 REACT_APP_BOING_RPC_UNSIGNED_SIMULATE_METHOD=boing_simulateContractCall
 ```
 
-Until `boing-sdk` with `linkedNftTokenRegistry` is on main, point the file dep at network branch `cursor/linked-nft-token-sdk-277c` (SHA `abf8808`) or rely on the local encode fallback.
+`boing-sdk` registry helpers are on **boing.network main** (merged [PR #42](https://github.com/Boing-Network/boing.network/pull/42)). Finance still keeps a local 0xE0–0xE6 encode fallback for stale installs.
 
 ## Upstream
 
-- [boing.network PR #42](https://github.com/Boing-Network/boing.network/pull/42)
+- [boing.network PR #42](https://github.com/Boing-Network/boing.network/pull/42) (merged)
 - `docs/BOING-LINKED-NFT-TOKEN.md` in boing.network
