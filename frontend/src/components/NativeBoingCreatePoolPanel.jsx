@@ -1,10 +1,11 @@
-import React, { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { isBoingTestnetChainId } from 'boing-sdk';
 import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import NativeVmTokenPickerField from './NativeVmTokenPickerField';
+import CompanionLinkGate from './CompanionLinkGate';
 import {
   computeEffectiveNativeDeployBytecode,
   getBundledNativePoolBytecodeHex,
@@ -14,6 +15,7 @@ import { createBoingNativeConstantProductPool } from '../services/boingNativeCre
 import { BOING_QA_PURPOSE_OPTIONS, isValidBoingQaPurpose } from '../config/boingQa';
 import { showDeployCelebration } from '../utils/deployCelebration';
 import { buildBoingExplorerAccountUrl, buildBoingExplorerTxUrl } from '../config/boingExplorerUrls';
+import { isBoingNativeAccountIdHex } from '../utils/boingWalletDiscovery';
 
 const DEFAULT_POOL_PURPOSE = 'dapp';
 
@@ -30,6 +32,15 @@ function shortHex(h) {
 export default function NativeBoingCreatePoolPanel() {
   const { chainId, walletType, isConnected, getWalletProvider, account } = useWallet();
   const { explorerBaseUrl, venues, indexerPickerTokens, effectiveFactoryHex } = useBoingNativeDexIntegration();
+  const [searchParams] = useSearchParams();
+
+  const projectCollection = String(searchParams.get('collection') || '').trim();
+  const projectToken = String(searchParams.get('token') || '').trim();
+  const requireCompanions = searchParams.get('requireCompanions') === '1';
+  const projectGateActive =
+    requireCompanions &&
+    isBoingNativeAccountIdHex(projectCollection) &&
+    isBoingNativeAccountIdHex(projectToken);
 
   const [tokenA, setTokenA] = useState('');
   const [tokenB, setTokenB] = useState('');
@@ -46,13 +57,27 @@ export default function NativeBoingCreatePoolPanel() {
   const [qaPoolAcknowledged, setQaPoolAcknowledged] = useState(false);
   const [busy, setBusy] = useState(false);
   const [lastResult, setLastResult] = useState(null);
+  const [companionsLinked, setCompanionsLinked] = useState(!projectGateActive);
+
+  useEffect(() => {
+    if (isBoingNativeAccountIdHex(projectToken) && !tokenA) {
+      setTokenA(projectToken);
+    }
+  }, [projectToken, tokenA]);
+
+  useEffect(() => {
+    if (!projectGateActive) setCompanionsLinked(true);
+  }, [projectGateActive]);
 
   const bundledBytecode = useMemo(() => getBundledNativePoolBytecodeHex(), []);
   const effectiveBytecode = useMemo(
     () => computeEffectiveNativeDeployBytecode(customBytecode, bundledBytecode),
     [customBytecode, bundledBytecode]
   );
-  const deployBlocked = !effectiveBytecode || (qaResult?.result === 'unsure' && !qaPoolAcknowledged);
+  const deployBlocked =
+    !effectiveBytecode ||
+    (qaResult?.result === 'unsure' && !qaPoolAcknowledged) ||
+    (projectGateActive && !companionsLinked);
 
   if (!isBoingTestnetChainId(chainId)) return null;
 
@@ -109,11 +134,17 @@ export default function NativeBoingCreatePoolPanel() {
   };
 
   const onCreate = async () => {
+    if (projectGateActive && !companionsLinked) {
+      toast.error('Link companions for this project before creating the pool.');
+      return;
+    }
     if (deployBlocked) {
       toast.error(
         !effectiveBytecode
           ? 'Pool bytecode is not available in this build. Operators: publish native AMM bytecode, or paste it under Advanced.'
-          : 'QA returned unsure — acknowledge the community pool checkbox first.'
+          : projectGateActive && !companionsLinked
+            ? 'Link companions for this project before creating the pool.'
+            : 'QA returned unsure — acknowledge the community pool checkbox first.'
       );
       return;
     }
@@ -177,6 +208,21 @@ export default function NativeBoingCreatePoolPanel() {
           Native VM
         </Link>
       </p>
+
+      {projectGateActive ? (
+        <div className="mb-4">
+          <CompanionLinkGate
+            collectionId={projectCollection}
+            tokenId={projectToken}
+            actionLabel="Create pool"
+            showUnlockLink={false}
+            onStateChange={({ linked }) => setCompanionsLinked(Boolean(linked))}
+          />
+          <p className="mt-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>
+            Project pool — your token is prefilled as Token A. Pick a base token for Token B.
+          </p>
+        </div>
+      ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2 mb-3">
         <NativeVmTokenPickerField
@@ -266,11 +312,23 @@ export default function NativeBoingCreatePoolPanel() {
         <button
           type="button"
           onClick={onCreate}
-          disabled={busy || deployBlocked || !tokenA || !tokenB || !amountA || !amountB}
+          disabled={
+            busy ||
+            deployBlocked ||
+            !tokenA ||
+            !tokenB ||
+            !amountA ||
+            !amountB ||
+            (projectGateActive && !companionsLinked)
+          }
           className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
           style={{ background: 'var(--accent-teal, #0891b2)' }}
         >
-          {busy ? 'Creating pool…' : 'Create native pool'}
+          {busy
+            ? 'Creating pool…'
+            : projectGateActive && !companionsLinked
+              ? 'Link companions to create'
+              : 'Create native pool'}
         </button>
         <button
           type="button"

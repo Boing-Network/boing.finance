@@ -10,12 +10,14 @@ import {
   softGateSameDeployer,
 } from '../utils/linkedNftToken';
 import {
+  buildProjectPoolPath,
   claimLinkedNftTokenAsset,
   getLinkedNftTokenRegistryStatus,
   listLinkedNftTokenLinksOnChain,
   registerLinkedNftTokenPairOnChain,
   unlinkLinkedNftTokenPairOnChain,
 } from '../services/linkedNftTokenRegistry';
+import CompanionLinkGate from './CompanionLinkGate';
 
 /**
  * On-chain NFT ↔ token link UI: claim → register_link / unlink_at / query.
@@ -414,6 +416,18 @@ export default function LinkedNftTokenPanel({
         </p>
       ) : null}
 
+      {isLinkableAssetAddress(collectionId) && isLinkableAssetAddress(tokenId) ? (
+        <div className="mb-3">
+          <CompanionLinkGate
+            collectionId={collectionId}
+            tokenId={tokenId}
+            actionLabel="Add a pool"
+            unlockedHref={buildProjectPoolPath({ collectionId, tokenId })}
+            compact
+          />
+        </div>
+      ) : null}
+
       {links.length > 0 ? (
         <ul className="space-y-2 mb-3">
           {links.map((row) => (
@@ -423,21 +437,36 @@ export default function LinkedNftTokenPanel({
               style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-tertiary)' }}
             >
               <div style={{ color: 'var(--text-secondary)' }}>
-                <span style={{ color: 'var(--text-primary)' }}>#{row.index}</span> NFT{' '}
-                {row.collectionId}
+                <span style={{ color: 'var(--text-primary)' }}>Linked pair</span>{' '}
+                <span className="opacity-70">#{row.index}</span>
+              </div>
+              <div className="mt-1" style={{ color: 'var(--text-secondary)' }}>
+                Collection {row.collectionId}
               </div>
               <div className="mt-1" style={{ color: 'var(--text-secondary)' }}>
                 Token {row.tokenId}
               </div>
-              <button
-                type="button"
-                className="mt-2 text-xs underline"
-                style={{ color: 'var(--finance-red-light)' }}
-                disabled={busy || !status.canWrite || !expressOk}
-                onClick={() => onUnlinkIndex(row.index)}
-              >
-                Unlink slot #{row.index}
-              </button>
+              <div className="mt-2 flex flex-wrap gap-3">
+                <Link
+                  to={buildProjectPoolPath({
+                    collectionId: row.collectionId,
+                    tokenId: row.tokenId,
+                  })}
+                  className="text-xs underline"
+                  style={{ color: 'var(--finance-primary)' }}
+                >
+                  Add a pool
+                </Link>
+                <button
+                  type="button"
+                  className="text-xs underline"
+                  style={{ color: 'var(--finance-red-light)' }}
+                  disabled={busy || !status.canWrite || !expressOk}
+                  onClick={() => onUnlinkIndex(row.index)}
+                >
+                  Unlink
+                </button>
+              </div>
             </li>
           ))}
         </ul>
