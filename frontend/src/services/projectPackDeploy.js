@@ -8,7 +8,11 @@
 
 import * as boingSdk from 'boing-sdk';
 import { createBoingBrowserRpcClient } from './boingTestnetRpc';
-import { boingExpressSendTransaction, boingExpressContractCallSignSimulateSubmit } from './boingExpressNativeTx';
+import {
+  boingExpressSendTransaction,
+  boingExpressContractCallSignSimulateSubmit,
+  isBoingInvalidNonceError,
+} from './boingExpressNativeTx';
 import { pickExpressProviderForDeploy } from './boingNativeLaunchWizardDeploy';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
 import { isBoingNativeAccountIdHex } from '../utils/boingWalletDiscovery';
@@ -174,11 +178,13 @@ export async function preflightProjectPackDeployTx(tx) {
  * @param {() => unknown} opts.getWalletProvider
  * @param {import('boing-sdk').ContractDeployMetaTxObject} opts.tx
  * @param {boolean} [opts.qaPoolAcknowledged]
+ * @param {string} [opts.senderHex] — deployer account; used to refresh nonce + wait for inclusion
  */
 export async function executeProjectPackDeployTx({
   getWalletProvider,
   tx,
   qaPoolAcknowledged = false,
+  senderHex = null,
 }) {
   if (!tx || tx.type !== 'contract_deploy_meta') {
     return { ok: false, code: 'invalid_tx', message: 'Missing deploy transaction.' };
@@ -222,8 +228,16 @@ export async function executeProjectPackDeployTx({
     };
   }
 
+  const sender =
+    senderHex && isBoingNativeAccountIdHex(senderHex) ? String(senderHex).toLowerCase() : null;
+
   try {
-    const sendRes = await boingExpressSendTransaction(provider, tx, { returnSubmitMeta: true });
+    const sendRes = await boingExpressSendTransaction(provider, tx, {
+      returnSubmitMeta: true,
+      senderHex: sender,
+      refreshNonce: Boolean(sender),
+      waitForInclusion: Boolean(sender),
+    });
     const txHash = typeof sendRes === 'string' ? sendRes : String(sendRes.txHash);
     const boingTxIdHex =
       typeof sendRes === 'object' && sendRes.boingTxIdHex ? sendRes.boingTxIdHex : null;
@@ -231,7 +245,7 @@ export async function executeProjectPackDeployTx({
   } catch (e) {
     return {
       ok: false,
-      code: 'send_failed',
+      code: isBoingInvalidNonceError(e) ? 'invalid_nonce' : 'send_failed',
       message: formatBoingExpressRpcError(e) || e?.message || 'Deploy failed',
       qaResult: qa,
     };
@@ -302,8 +316,17 @@ export async function linkProjectPackCompanions({
         status,
       };
     }
+    const sender = String(linker).toLowerCase();
     for (const tx of flow) {
-      txHashes.push(await boingExpressContractCallSignSimulateSubmit(provider, tx));
+      // Fresh app-RPC nonce + wait for inclusion between claim×2 and register_link so the
+      // wallet never signs with a nonce from before the prior guided-flow deploy/link step.
+      const hash = await boingExpressContractCallSignSimulateSubmit(provider, tx, {
+        senderHex: sender,
+        refreshNonce: true,
+        waitForInclusion: true,
+        retryOnInvalidNonce: true,
+      });
+      txHashes.push(typeof hash === 'string' ? hash : String(hash?.txHash || hash));
     }
     return {
       ok: true,
@@ -317,7 +340,7 @@ export async function linkProjectPackCompanions({
   } catch (e) {
     return {
       ok: false,
-      code: 'submit_failed',
+      code: isBoingInvalidNonceError(e) ? 'invalid_nonce' : 'submit_failed',
       message: formatBoingExpressRpcError(e) || e?.message || 'Could not link companions',
       txHashes,
       status,

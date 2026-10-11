@@ -1,4 +1,13 @@
 import { fetchBoingTransactionReceipt } from './boingTestnetRpc';
+import { fetchBoingNativeAccount } from './boingNativeVm';
+
+/**
+ * @param {number} ms
+ * @returns {Promise<void>}
+ */
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
 
 /**
  * @param {unknown} receipt — `boing_getTransactionReceipt` result
@@ -69,4 +78,54 @@ export function scheduleBoingDeployReceiptFollowup(txIdHex, onDeployedAccount) {
       /* non-fatal */
     }
   })();
+}
+
+/**
+ * Poll until `boing_getTransactionReceipt` returns a receipt (included), or attempts exhausted.
+ * @param {string} txIdHex
+ * @param {{ maxAttempts?: number, delayMs?: number, signal?: AbortSignal }} [options]
+ * @returns {Promise<Record<string, unknown> | null>}
+ */
+export async function waitForBoingTxReceipt(txIdHex, options = {}) {
+  if (!txIdHex || typeof txIdHex !== 'string') return null;
+  const maxAttempts = options.maxAttempts ?? 40;
+  const delayMs = options.delayMs ?? 1200;
+  for (let i = 0; i < maxAttempts; i += 1) {
+    if (i > 0) await sleep(delayMs);
+    if (options.signal?.aborted) return null;
+    try {
+      const receipt = await fetchBoingTransactionReceipt(txIdHex, { signal: options.signal });
+      if (receipt != null) return /** @type {Record<string, unknown>} */ (receipt);
+    } catch {
+      /* retry */
+    }
+  }
+  return null;
+}
+
+/**
+ * Wait until `boing_getAccount` reports `nonce >= minNonce` (after a prior submit consumed lower nonces).
+ * Prefer this over wallet-local nonce caches when chaining Express txs on the same account.
+ * @param {string} accountHex
+ * @param {number|bigint|string} minNonce
+ * @param {{ maxAttempts?: number, delayMs?: number, signal?: AbortSignal }} [options]
+ * @returns {Promise<number | null>} latest nonce, or null if timed out
+ */
+export async function waitForBoingAccountNonceAtLeast(accountHex, minNonce, options = {}) {
+  const want = Number(minNonce);
+  if (!Number.isFinite(want) || want < 0) return null;
+  const maxAttempts = options.maxAttempts ?? 40;
+  const delayMs = options.delayMs ?? 1200;
+  for (let i = 0; i < maxAttempts; i += 1) {
+    if (i > 0) await sleep(delayMs);
+    if (options.signal?.aborted) return null;
+    try {
+      const acc = await fetchBoingNativeAccount(accountHex, { signal: options.signal });
+      const n = Number(acc?.nonce);
+      if (Number.isFinite(n) && n >= want) return n;
+    } catch {
+      /* retry */
+    }
+  }
+  return null;
 }
