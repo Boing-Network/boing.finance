@@ -31,6 +31,8 @@ Native DEX / Boing RPC flags are documented in [native-dex.md](./native-dex.md) 
 
 Linked NFT↔token registry (Boing L1): `REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY` — public testnet AccountId is baked in `frontend/env/github-build.production.env` / `github-build.staging.env`. Guided create: `/project-pack` (SDK `buildLinkedNftTokenProjectPack` when available). See [linked-nft-token.md](./linked-nft-token.md).
 
+Builder attestation registry (Boing L1): `REACT_APP_BOING_BUILDER_ATTESTATION_REGISTRY` — public testnet AccountId `0x734077a9f926077d39e84ec278b77b7b600c840f7101809646d8797a6a9e1816` (CREATE2 salt `BOING_BUILDER_ATTEST_REG_V1`, selectors `0xE0`–`0xE6`) is baked in the same `github-build.*.env` files. Optional **Attest as builder** after companions are linked; on-chain registry is authority (not soft wallet-proof JSON). See [linked-nft-token.md](./linked-nft-token.md#builder-attestation-on-chain).
+
 ## IPFS / RPC
 
 - IPFS keys (Pinata, Storacha, etc.) — optional; R2 is primary storage.

@@ -756,11 +756,13 @@ const HelpArticle = () => {
         <h2>Builder attestation</h2>
         <p>
           After your collection and token are linked as <strong>companions</strong>, you can
-          <strong>attest as builder</strong> — a short statement signed with Boing Express.
+          <strong>attest as builder</strong> on-chain with Boing Express. The app shows
+          <strong>Builder attested</strong> when the live registry has an active record for that pair.
         </p>
         <p>
-          The proof is checkable and shareable. It is <strong>not</strong> stored on-chain;
-          companion links remain the on-chain record for the project.
+          Companion links remain the on-chain record for the project structure.
+          Attestation is a separate <strong>builder signal</strong> — it does not create or replace companions.
+          Soft wallet-signed JSON proofs are not network authority.
         </p>
 
         <h3>Where</h3>
@@ -772,8 +774,8 @@ const HelpArticle = () => {
         <h3>Tips</h3>
         <ul>
           <li>Link companions first — attest unlocks after that</li>
-          <li>Copy the proof if you want others to verify it</li>
-          <li>Anyone can paste a proof under “Check a proof”</li>
+          <li>Confirm the transaction in your wallet — the registry stores the attestation on-chain</li>
+          <li>You can revoke when you are the recorded builder</li>
         </ul>
       `
     },
