@@ -426,7 +426,12 @@ export default function LinkedNftTokenPanel({
             unlockedHref={buildProjectPoolPath({ collectionId, tokenId })}
             compact
           />
-          <BuilderAttestationPanel collectionId={collectionId} tokenId={tokenId} compact />
+          <BuilderAttestationPanel
+            collectionId={collectionId}
+            tokenId={tokenId}
+            compact
+            requireCompanions
+          />
         </div>
       ) : null}
 

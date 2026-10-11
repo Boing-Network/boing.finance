@@ -34,8 +34,7 @@ Optional later: `end_user.canonical_linked_nft_token_registry` on `boing_getNetw
 
 **Link-gated actions (v1):** After companions are verified on-chain, **Add a pool** unlocks on Project pack success and Manage links. Create pool with `?collection=&token=&requireCompanions=1` blocks native pool create until the pair is linked. Plain Create pool (no query) stays ungated. See project store `docs/link-gated-actions.md`.
 
-**Builder attestations (v1):** After companions are linked, Project pack success and Manage links offer **Attest as builder** — a wallet-signed statement (`boing_signMessage`, Ed25519 over BLAKE3) that is cryptographically checkable and exportable as JSON. **Not** an on-chain attestation registry; companion links remain on-chain authority. Schema `boing.builder_attestation.v1`. See project store `docs/builder-attestations.md`.
-
+**Builder attestation (optional, on-chain):** After companions are linked, Project pack success and Manage links offer **Attest as builder** / show **Builder attested** (revoke when you are the builder). Separate registry + claimer from companions — see [Builder attestation](#builder-attestation-on-chain) below. Soft wallet-proof helpers from [#23](https://github.com/Boing-Network/boing.finance/pull/23) may remain in-tree; the primary panel is on-chain.
 | Step | Action | Selector |
 |------|--------|----------|
 | 1 | **Claim** each asset AccountId (`claim_asset`) | `0xE0` |
@@ -68,9 +67,9 @@ Post-deploy panels on **Create NFT** and **Deploy Token** reuse `LinkedNftTokenP
 | `frontend/src/services/linkedNftTokenRegistry.js` | Prefer boing-sdk encode/decode; local 0xE0–0xE6 fallback; `areCompanionsLinkedOnChain` / `buildProjectPoolPath` |
 | `frontend/src/components/CompanionLinkGate.jsx` | Plain-language lock/unlock for link-gated actions |
 | `frontend/src/hooks/useCompanionsLinked.js` | Live registry companion check |
-| `frontend/src/utils/builderAttestation.js` | Proof schema, verify, local store |
-| `frontend/src/services/builderAttestationSign.js` | Wallet sign via Boing Express |
-| `frontend/src/components/BuilderAttestationPanel.jsx` | Attest / export / verify UI |
+| `frontend/src/components/BuilderAttestationPanel.jsx` | On-chain attest / status / revoke (see [Builder attestation](#builder-attestation-on-chain)) |
+| `frontend/src/utils/builderAttestation.js` | Soft wallet-proof helpers (optional; not primary UI) |
+| `frontend/src/services/builderAttestationSign.js` | Soft `boing_signMessage` path (optional; not primary UI) |
 | `frontend/src/components/LinkedNftTokenPanel.jsx` | Claim / register / unlink / query UI (Manage links) |
 | `frontend/src/components/NativeBoingCreatePoolPanel.jsx` | Project-pool query gate (`requireCompanions=1`) |
 | `/project-pack` | Guided create (collection + token + companions) |
@@ -108,3 +107,42 @@ Expect `success: true` and a zero word for empty `links_count`.
 - Network PR: [boing.network#42](https://github.com/Boing-Network/boing.network/pull/42)
 - Finance PR: [boing.finance#15](https://github.com/Boing-Network/boing.finance/pull/15) (`21035a0`)
 - Deploy / env ops handoff: project store `docs/linked-nft-token-registry-deploy.md`
+
+## Builder attestation (on-chain)
+
+Optional builder signal for a companion project. **Authority is on-chain** via a dedicated attestation registry (not companions, not wallet-signed JSON). Soft wallet-proof UX from [#23](https://github.com/Boing-Network/boing.finance/pull/23) is secondary; this panel reads/writes the live registry.
+
+| Field | Value |
+|-------|--------|
+| Network | Boing public testnet (`https://testnet-rpc.boing.network/`) |
+| Registry AccountId | `0x734077a9f926077d39e84ec278b77b7b600c840f7101809646d8797a6a9e1816` |
+| CREATE2 salt | `BOING_BUILDER_ATTEST_REG_V1` |
+| Env (Pages CI) | `REACT_APP_BOING_BUILDER_ATTESTATION_REGISTRY` in `frontend/env/github-build.*.env` |
+| SDK | `builderAttestationRegistry.ts` on **boing.network main** ([#49](https://github.com/Boing-Network/boing.network/pull/49)) |
+| Mainnet | Not deployed |
+
+### Product rules
+
+| Rule | Behavior |
+|------|----------|
+| When to offer CTA | App policy: after companions linked (Project pack success + Manage links) |
+| Auth | Separate dual asset-claimer on **this** registry (claim×2 then attest) |
+| Revoke | Recorded builder **or** current dual claimer |
+| Note | Hash on-chain OK; finance chrome omits note field |
+| Copy | **Attest as builder** / **Builder attested** — no registry jargon in chrome |
+
+### Finance wiring
+
+| Path | Role |
+|------|------|
+| `frontend/src/services/builderAttestationRegistry.js` | Prefer SDK encode/decode; local 0xE0–0xE6 fallback; claim / attest / revoke / list |
+| `frontend/src/hooks/useBuilderAttested.js` | Live registry scan for a pair |
+| `frontend/src/components/BuilderAttestationPanel.jsx` | Plain-language CTA + status |
+| `/project-pack` (done) | Optional attest after companions linked |
+| `/linked-project` | Same panel under Manage links |
+
+```bash
+REACT_APP_BOING_BUILDER_ATTESTATION_REGISTRY=0x734077a9f926077d39e84ec278b77b7b600c840f7101809646d8797a6a9e1816
+```
+
+Protocol: `docs/BOING-BUILDER-ATTESTATION.md` in boing.network. Design/ops: project store `docs/builder-attestations-onchain.md` · `docs/builder-attestation-registry-deploy.md`.
