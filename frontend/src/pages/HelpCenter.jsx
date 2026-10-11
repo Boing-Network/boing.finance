@@ -108,8 +108,8 @@ const HelpCenter = () => {
           id: 'builder-attestation',
           title: 'Attest as Builder',
           content:
-            'After companions are linked, sign a short builder statement with Boing Express. Others can check the exported proof. Available on Project pack success and Manage links. Not an on-chain registry — a checkable wallet proof.',
-          tags: ['builder', 'attestation', 'companions', 'project', 'proof', 'boing']
+            'After companions are linked, attest as builder on-chain with Boing Express. The app shows Builder attested when the live registry has an active record. Available on Project pack success and Manage links. Companions remain the project link; attestation is a builder signal.',
+          tags: ['builder', 'attestation', 'companions', 'project', 'on-chain', 'boing']
         }
       ]
     },
