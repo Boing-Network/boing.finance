@@ -34,6 +34,8 @@ Optional later: `end_user.canonical_linked_nft_token_registry` on `boing_getNetw
 
 **Link-gated actions (v1):** After companions are verified on-chain, **Add a pool** unlocks on Project pack success and Manage links. Create pool with `?collection=&token=&requireCompanions=1` blocks native pool create until the pair is linked. Plain Create pool (no query) stays ungated. See project store `docs/link-gated-actions.md`.
 
+**Builder attestations (v1):** After companions are linked, Project pack success and Manage links offer **Attest as builder** — a wallet-signed statement (`boing_signMessage`, Ed25519 over BLAKE3) that is cryptographically checkable and exportable as JSON. **Not** an on-chain attestation registry; companion links remain on-chain authority. Schema `boing.builder_attestation.v1`. See project store `docs/builder-attestations.md`.
+
 | Step | Action | Selector |
 |------|--------|----------|
 | 1 | **Claim** each asset AccountId (`claim_asset`) | `0xE0` |
@@ -66,6 +68,9 @@ Post-deploy panels on **Create NFT** and **Deploy Token** reuse `LinkedNftTokenP
 | `frontend/src/services/linkedNftTokenRegistry.js` | Prefer boing-sdk encode/decode; local 0xE0–0xE6 fallback; `areCompanionsLinkedOnChain` / `buildProjectPoolPath` |
 | `frontend/src/components/CompanionLinkGate.jsx` | Plain-language lock/unlock for link-gated actions |
 | `frontend/src/hooks/useCompanionsLinked.js` | Live registry companion check |
+| `frontend/src/utils/builderAttestation.js` | Proof schema, verify, local store |
+| `frontend/src/services/builderAttestationSign.js` | Wallet sign via Boing Express |
+| `frontend/src/components/BuilderAttestationPanel.jsx` | Attest / export / verify UI |
 | `frontend/src/components/LinkedNftTokenPanel.jsx` | Claim / register / unlink / query UI (Manage links) |
 | `frontend/src/components/NativeBoingCreatePoolPanel.jsx` | Project-pool query gate (`requireCompanions=1`) |
 | `/project-pack` | Guided create (collection + token + companions) |

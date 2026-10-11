@@ -18,6 +18,7 @@ import {
   unlinkLinkedNftTokenPairOnChain,
 } from '../services/linkedNftTokenRegistry';
 import CompanionLinkGate from './CompanionLinkGate';
+import BuilderAttestationPanel from './BuilderAttestationPanel';
 
 /**
  * On-chain NFT ↔ token link UI: claim → register_link / unlink_at / query.
@@ -417,7 +418,7 @@ export default function LinkedNftTokenPanel({
       ) : null}
 
       {isLinkableAssetAddress(collectionId) && isLinkableAssetAddress(tokenId) ? (
-        <div className="mb-3">
+        <div className="mb-3 space-y-3">
           <CompanionLinkGate
             collectionId={collectionId}
             tokenId={tokenId}
@@ -425,6 +426,7 @@ export default function LinkedNftTokenPanel({
             unlockedHref={buildProjectPoolPath({ collectionId, tokenId })}
             compact
           />
+          <BuilderAttestationPanel collectionId={collectionId} tokenId={tokenId} compact />
         </div>
       ) : null}
 

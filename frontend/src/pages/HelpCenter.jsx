@@ -103,6 +103,13 @@ const HelpCenter = () => {
           content:
             'Link or unlink companions for collections and tokens you already created. Prefer Project pack (/project-pack) to create both together. Manage links at /linked-project.',
           tags: ['nft', 'token', 'linked', 'companions', 'claim', 'boing']
+        },
+        {
+          id: 'builder-attestation',
+          title: 'Attest as Builder',
+          content:
+            'After companions are linked, sign a short builder statement with Boing Express. Others can check the exported proof. Available on Project pack success and Manage links. Not an on-chain registry — a checkable wallet proof.',
+          tags: ['builder', 'attestation', 'companions', 'project', 'proof', 'boing']
         }
       ]
     },
