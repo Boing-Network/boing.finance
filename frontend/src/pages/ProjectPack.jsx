@@ -215,6 +215,7 @@ export default function ProjectPack() {
         getWalletProvider,
         tx: plan.collectionDeployTx,
         qaPoolAcknowledged: qaAck,
+        senderHex: account,
       });
       if (!result.ok) {
         if (result.code === 'qa_unsure_unack') setQaAck(false);
@@ -252,6 +253,7 @@ export default function ProjectPack() {
         getWalletProvider,
         tx: plan.tokenDeployTx,
         qaPoolAcknowledged: qaAck,
+        senderHex: account,
       });
       if (!result.ok) {
         toast.error(result.message);
@@ -303,7 +305,9 @@ export default function ProjectPack() {
         toast.error(
           result.code === 'registry_unpublished'
             ? 'Companion linking is not available on this network yet.'
-            : result.message || 'Could not link companions'
+            : result.code === 'invalid_nonce'
+              ? 'A previous step is still settling. Wait a moment, then try Link companions again.'
+              : result.message || 'Could not link companions'
         );
         return;
       }
@@ -431,7 +435,7 @@ export default function ProjectPack() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.28 }}
-                className="rounded-2xl border p-5 sm:p-7"
+                className="rounded-2xl border p-5 sm:p-7 min-w-0 overflow-x-hidden"
                 style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
               >
                 {step === 'details' ? (
@@ -567,14 +571,26 @@ export default function ProjectPack() {
                       ({collectionSymbol.toUpperCase()}). Your collection id is ready below.
                     </p>
                     <CopyField label="Collection id (preview)" value={predictedCollection} />
-                    <label className="flex items-start gap-2 mt-4 text-sm cursor-pointer" style={{ color: 'var(--text-secondary)' }}>
+                    <label
+                      htmlFor="project-pack-qa-ack"
+                      className="flex items-start gap-2.5 mt-4 text-sm cursor-pointer rounded-lg border px-3 py-2.5 min-w-0 w-full overflow-hidden"
+                      style={{
+                        borderColor: 'rgba(251, 191, 36, 0.45)',
+                        color: 'var(--text-secondary)',
+                        backgroundColor: 'rgba(251, 191, 36, 0.06)',
+                      }}
+                    >
                       <input
+                        id="project-pack-qa-ack"
                         type="checkbox"
-                        className="mt-0.5"
+                        className="mt-0.5 h-4 w-4 shrink-0 rounded border"
+                        style={{ accentColor: 'var(--finance-primary)' }}
                         checked={qaAck}
                         onChange={(e) => setQaAck(e.target.checked)}
                       />
-                      <span>I understand this may need an extra review before it goes live.</span>
+                      <span className="min-w-0 flex-1 break-words leading-snug">
+                        I understand this may need an extra review before it goes live.
+                      </span>
                     </label>
                     <div className="mt-6 flex flex-wrap gap-3 justify-between">
                       <button

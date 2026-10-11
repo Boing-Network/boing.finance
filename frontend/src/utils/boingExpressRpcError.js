@@ -51,6 +51,10 @@ export function formatBoingExpressRpcError(e) {
       );
     }
 
+    if (/invalid nonce/i.test(msg)) {
+      return 'A previous transaction is still settling. Wait a moment and try again.';
+    }
+
     if (/duplicate transaction/i.test(msg)) {
       return (
         `${msg.trim()} ` +
@@ -91,6 +95,9 @@ export function formatBoingExpressRpcError(e) {
   }
   if (e && typeof e === 'object' && typeof e.message === 'string') {
     const m = e.message;
+    if (/invalid nonce/i.test(m)) {
+      return 'A previous transaction is still settling. Wait a moment and try again.';
+    }
     if (/invalid opcode at offset 0/i.test(m)) {
       return (
         `${m.trim()} ` +
