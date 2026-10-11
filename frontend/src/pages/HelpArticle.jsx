@@ -749,6 +749,34 @@ const HelpArticle = () => {
         </ul>
       `
     },
+    'builder-attestation': {
+      title: 'Attest as Builder',
+      category: 'Launch',
+      content: `
+        <h2>Builder attestation</h2>
+        <p>
+          After your collection and token are linked as <strong>companions</strong>, you can
+          <strong>attest as builder</strong> — a short statement signed with Boing Express.
+        </p>
+        <p>
+          The proof is checkable and shareable. It is <strong>not</strong> stored on-chain;
+          companion links remain the on-chain record for the project.
+        </p>
+
+        <h3>Where</h3>
+        <ul>
+          <li><a href="/project-pack">Project pack</a> success screen</li>
+          <li><a href="/linked-project">Manage links</a> for an existing pair</li>
+        </ul>
+
+        <h3>Tips</h3>
+        <ul>
+          <li>Link companions first — attest unlocks after that</li>
+          <li>Copy the proof if you want others to verify it</li>
+          <li>Anyone can paste a proof under “Check a proof”</li>
+        </ul>
+      `
+    },
     'linked-project': {
       title: 'Link an NFT Collection and Token',
       category: 'Launch',
