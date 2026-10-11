@@ -7,8 +7,16 @@
  */
 
 import { BOING_QA_PLACEHOLDER_DESCRIPTION_HASH_HEX, bytesToHex, transactionIdFromSignedTransactionHex } from 'boing-sdk';
-import { simulateBoingSignedTransaction, submitBoingSignedTransaction } from './boingNativeVm';
+import {
+  fetchBoingNativeAccount,
+  simulateBoingSignedTransaction,
+  submitBoingSignedTransaction,
+} from './boingNativeVm';
 import { normalizeBoingFaucetAccountHex } from './boingTestnetRpc';
+import {
+  waitForBoingAccountNonceAtLeast,
+  waitForBoingTxReceipt,
+} from './boingDeployReceiptFollowup';
 
 /**
  * @param {string} addr
@@ -84,6 +92,88 @@ function normalizeContractDeployMetaForSign(tx) {
 }
 
 const TX_DECODE_ERR_RE = /unexpected end of file|Invalid transaction:\s*io error:/i;
+const INVALID_NONCE_RE = /invalid nonce/i;
+
+/**
+ * @param {unknown} err
+ * @returns {boolean}
+ */
+export function isBoingInvalidNonceError(err) {
+  const msg = err instanceof Error ? err.message : String(err ?? '');
+  return INVALID_NONCE_RE.test(msg);
+}
+
+/**
+ * Fetch the next account nonce from the app RPC (same path as submit), as a decimal string for Express.
+ * @param {string} accountHex
+ * @param {{ signal?: AbortSignal }} [options]
+ * @returns {Promise<string>}
+ */
+export async function fetchBoingAccountNonceString(accountHex, options = {}) {
+  const acc = await fetchBoingNativeAccount(accountHex, options);
+  const n = Number(acc?.nonce);
+  if (!Number.isFinite(n) || n < 0) {
+    throw new Error('Could not read account nonce from the network.');
+  }
+  return String(Math.trunc(n));
+}
+
+/**
+ * Attach an explicit `nonce` so Boing Express does not rely on a possibly-stale wallet RPC cache.
+ * @param {Record<string, unknown>} txObject
+ * @param {string|number|bigint} nonce
+ * @returns {Record<string, unknown>}
+ */
+export function withBoingAccountNonce(txObject, nonce) {
+  return { ...txObject, nonce: String(nonce) };
+}
+
+/**
+ * Refresh `txObject.nonce` from `boing_getAccount` when `senderHex` is provided.
+ * @param {Record<string, unknown>} txObject
+ * @param {string | null | undefined} senderHex
+ * @param {{ signal?: AbortSignal }} [options]
+ * @returns {Promise<Record<string, unknown>>}
+ */
+export async function refreshBoingTxNonce(txObject, senderHex, options = {}) {
+  if (!senderHex || !isLikelyAccountHex(senderHex)) return { ...txObject };
+  const nonce = await fetchBoingAccountNonceString(senderHex, options);
+  return withBoingAccountNonce(txObject, nonce);
+}
+
+/**
+ * @param {unknown} hex
+ * @returns {boolean}
+ */
+function isLikelyAccountHex(hex) {
+  return typeof hex === 'string' && normalizeBoingFaucetAccountHex(hex) != null;
+}
+
+/**
+ * After submit: prefer receipt inclusion, then ensure account nonce advanced past the signed nonce.
+ * @param {{
+ *   boingTxIdHex?: string | null,
+ *   senderHex?: string | null,
+ *   signedNonce?: string | number | null,
+ *   signal?: AbortSignal,
+ * }} opts
+ */
+async function settleAfterBoingSubmit(opts = {}) {
+  const { boingTxIdHex, senderHex, signedNonce, signal } = opts;
+  if (boingTxIdHex) {
+    await waitForBoingTxReceipt(boingTxIdHex, { signal, maxAttempts: 36, delayMs: 1200 });
+  }
+  if (senderHex && signedNonce != null && String(signedNonce).trim() !== '') {
+    const used = Number(signedNonce);
+    if (Number.isFinite(used)) {
+      await waitForBoingAccountNonceAtLeast(senderHex, used + 1, {
+        signal,
+        maxAttempts: 36,
+        delayMs: 1200,
+      });
+    }
+  }
+}
 
 /**
  * Union explicit read/write with `boing_simulateTransaction` `suggested_access_list` (matches boing-sdk `mergeAccessListWithSimulation`).
@@ -142,7 +232,14 @@ export async function boingExpressSignTransaction(provider, txObject) {
  *
  * @param {{ request: Function }} provider
  * @param {Record<string, unknown>} txObject
- * @param {{ returnSubmitMeta?: boolean }} [options] — when true and `type === 'contract_deploy_meta'`, returns `{ txHash, boingTxIdHex }` for receipt / Observer follow-up
+ * @param {{
+ *   returnSubmitMeta?: boolean,
+ *   senderHex?: string | null,
+ *   refreshNonce?: boolean,
+ *   waitForInclusion?: boolean,
+ *   signal?: AbortSignal,
+ * }} [options] — when true and `type === 'contract_deploy_meta'`, returns `{ txHash, boingTxIdHex }` for receipt / Observer follow-up.
+ *   Prefer `refreshNonce` + `waitForInclusion` when chaining multiple on-chain steps for the same account.
  * @returns {Promise<string | { txHash: string, boingTxIdHex: string | null }>}
  */
 export async function boingExpressSendTransaction(provider, txObject, options = {}) {
@@ -150,9 +247,21 @@ export async function boingExpressSendTransaction(provider, txObject, options = 
     throw new Error('Boing Express provider not available');
   }
   const returnSubmitMeta = options.returnSubmitMeta === true;
+  const senderHex = options.senderHex || null;
+  const refreshNonce = options.refreshNonce === true;
+  const waitForInclusion = options.waitForInclusion === true;
 
-  if (txObject && txObject.type === 'contract_deploy_meta') {
-    const forSign = normalizeContractDeployMetaForSign(txObject);
+  let workingTx = txObject;
+  if (refreshNonce && senderHex) {
+    workingTx = await refreshBoingTxNonce(txObject, senderHex, { signal: options.signal });
+  }
+  const signedNonce =
+    workingTx && workingTx.nonce != null && String(workingTx.nonce).trim() !== ''
+      ? String(workingTx.nonce)
+      : null;
+
+  if (workingTx && workingTx.type === 'contract_deploy_meta') {
+    const forSign = normalizeContractDeployMetaForSign(workingTx);
     const signedHex = await boingExpressSignTransaction(provider, forSign);
     let boingTxIdHex = null;
     try {
@@ -164,6 +273,14 @@ export async function boingExpressSendTransaction(provider, txObject, options = 
     try {
       const sub = await submitBoingSignedTransaction(signedHex);
       const txHash = sub && typeof sub === 'object' && sub.tx_hash != null ? String(sub.tx_hash) : String(sub);
+      if (waitForInclusion) {
+        await settleAfterBoingSubmit({
+          boingTxIdHex,
+          senderHex,
+          signedNonce,
+          signal: options.signal,
+        });
+      }
       return pack(txHash);
     } catch (subErr) {
       const m = subErr instanceof Error ? subErr.message : String(subErr);
@@ -173,7 +290,17 @@ export async function boingExpressSendTransaction(provider, txObject, options = 
             method: 'boing_sendTransaction',
             params: [forSign],
           });
-          if (typeof hash === 'string') return pack(hash);
+          if (typeof hash === 'string') {
+            if (waitForInclusion) {
+              await settleAfterBoingSubmit({
+                boingTxIdHex,
+                senderHex,
+                signedNonce,
+                signal: options.signal,
+              });
+            }
+            return pack(hash);
+          }
         } catch {
           /* fall through to original error */
         }
@@ -183,7 +310,7 @@ export async function boingExpressSendTransaction(provider, txObject, options = 
   }
   const out = await provider.request({
     method: 'boing_sendTransaction',
-    params: [txObject],
+    params: [workingTx],
   });
   return typeof out === 'string' ? out : String(out);
 }
@@ -246,17 +373,78 @@ export async function boingExpressContractCallSignSimulateUntilOk(provider, txOb
  *
  * @param {{ request: Function }} provider
  * @param {Record<string, unknown>} txObject — must include `type`, `contract`, `calldata`, and usually `access_list`
- * @param {{ maxSimulationRetries?: number }} [options]
- * @returns {Promise<string>} tx hash from `boing_submitTransaction`
+ * @param {{
+ *   maxSimulationRetries?: number,
+ *   senderHex?: string | null,
+ *   refreshNonce?: boolean,
+ *   waitForInclusion?: boolean,
+ *   retryOnInvalidNonce?: boolean,
+ *   signal?: AbortSignal,
+ *   returnSubmitMeta?: boolean,
+ * }} [options]
+ * @returns {Promise<string | { txHash: string, boingTxIdHex: string | null }>}
  */
 export async function boingExpressContractCallSignSimulateSubmit(provider, txObject, options = {}) {
-  const { signedHex, simulation } = await boingExpressContractCallSignSimulateUntilOk(provider, txObject, options);
-  if (!simulation?.success) {
-    const e = new Error(simulation?.error || 'Simulation failed');
-    e.simulation = simulation;
-    throw e;
+  const returnSubmitMeta = options.returnSubmitMeta === true;
+  const senderHex = options.senderHex || null;
+  const refreshNonce = options.refreshNonce !== false && Boolean(senderHex);
+  const waitForInclusion = options.waitForInclusion === true;
+  const retryOnInvalidNonce = options.retryOnInvalidNonce !== false;
+  const maxAttempts = retryOnInvalidNonce ? 2 : 1;
+
+  let lastErr = null;
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    try {
+      let workingTx = txObject;
+      if (refreshNonce && senderHex) {
+        workingTx = await refreshBoingTxNonce(txObject, senderHex, { signal: options.signal });
+      }
+      const signedNonce =
+        workingTx && workingTx.nonce != null && String(workingTx.nonce).trim() !== ''
+          ? String(workingTx.nonce)
+          : null;
+
+      const { signedHex, simulation } = await boingExpressContractCallSignSimulateUntilOk(
+        provider,
+        workingTx,
+        options
+      );
+      if (!simulation?.success) {
+        const e = new Error(simulation?.error || 'Simulation failed');
+        e.simulation = simulation;
+        throw e;
+      }
+
+      let boingTxIdHex = null;
+      try {
+        boingTxIdHex = transactionIdFromSignedTransactionHex(signedHex);
+      } catch {
+        boingTxIdHex = null;
+      }
+
+      const sub = await submitBoingSignedTransaction(signedHex);
+      const txHash =
+        sub && typeof sub === 'object' && sub.tx_hash != null ? String(sub.tx_hash) : String(sub);
+
+      if (waitForInclusion) {
+        await settleAfterBoingSubmit({
+          boingTxIdHex,
+          senderHex,
+          signedNonce,
+          signal: options.signal,
+        });
+      }
+
+      return returnSubmitMeta ? { txHash, boingTxIdHex } : txHash;
+    } catch (e) {
+      lastErr = e;
+      if (attempt + 1 < maxAttempts && isBoingInvalidNonceError(e) && senderHex) {
+        // Prior step may have just landed — brief settle, then resign with a fresh app-RPC nonce.
+        await new Promise((r) => setTimeout(r, 1500));
+        continue;
+      }
+      throw e;
+    }
   }
-  const sub = await submitBoingSignedTransaction(signedHex);
-  if (sub && typeof sub === 'object' && sub.tx_hash) return sub.tx_hash;
-  return String(sub);
+  throw lastErr || new Error('Could not submit transaction');
 }
