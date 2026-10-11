@@ -738,6 +738,7 @@ export default function ProjectPack() {
                         <BuilderAttestationPanel
                           collectionId={collectionId || predictedCollection}
                           tokenId={tokenId || predictedToken}
+                          requireCompanions
                         />
                       </div>
                       <div className="flex flex-wrap gap-3">

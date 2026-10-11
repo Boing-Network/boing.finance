@@ -48,6 +48,8 @@ export const CONTRACTS = {
       ledgerRouterV3: BOING_VM_ZERO_32,
       /** Linked NFT↔token registry — `REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY` when published. */
       linkedNftTokenRegistry: BOING_VM_ZERO_32,
+      /** Builder attestation registry — `REACT_APP_BOING_BUILDER_ATTESTATION_REGISTRY` when published. */
+      builderAttestationRegistry: BOING_VM_ZERO_32,
     },
     tokens: {},
     pairs: {},
@@ -537,6 +539,11 @@ export const CONTRACTS = {
         'linkedNftTokenRegistry',
         process.env.REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY ||
           process.env.REACT_APP_BOING_NATIVE_VM_LINKED_NFT_TOKEN_REGISTRY,
+      ],
+      [
+        'builderAttestationRegistry',
+        process.env.REACT_APP_BOING_BUILDER_ATTESTATION_REGISTRY ||
+          process.env.REACT_APP_BOING_NATIVE_VM_BUILDER_ATTESTATION_REGISTRY,
       ],
     ];
     for (const [key, envRaw] of entries) {
