@@ -1,28 +1,33 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import { useCompanionsLinked } from '../hooks/useCompanionsLinked';
+import { useBuilderAttested } from '../hooks/useBuilderAttested';
 import { isLinkableAssetAddress } from '../utils/linkedNftToken';
 import {
-  clearStoredBuilderAttestation,
-  exportBuilderAttestationJson,
-  loadStoredBuilderAttestation,
-  pairStorageKey,
-  saveBuilderAttestationProof,
-  verifyBuilderAttestationProof,
-} from '../utils/builderAttestation';
-import { signBuilderAttestation } from '../services/builderAttestationSign';
+  attestAsBuilderOnChain,
+  getBuilderAttestationRegistryStatus,
+  revokeBuilderAttestationOnChain,
+} from '../services/builderAttestationRegistry';
+
+function shortId(hex) {
+  const t = String(hex || '');
+  if (t.length < 14) return t;
+  return `${t.slice(0, 8)}…${t.slice(-6)}`;
+}
 
 /**
- * Plain-language builder attestation: sign, show status, export, verify.
- * Prefer companions linked before offering the primary attest CTA.
+ * Optional on-chain builder attestation CTA (app policy: prefer after companions linked).
+ * Plain language only — no registry / selector jargon.
  */
 export default function BuilderAttestationPanel({
   collectionId = '',
   tokenId = '',
   compact = false,
   className = '',
+  /** When true, hide Attest CTA unless companions are linked (product default). */
+  requireCompanions = true,
 }) {
   const { account, getWalletProvider, walletType, isConnected } = useWallet();
   const dexIntegration = useBoingNativeDexIntegration();
@@ -30,270 +35,201 @@ export default function BuilderAttestationPanel({
   const endUser = defaults?.endUser || defaults?.end_user || null;
   const networkInfo = defaults?.networkInfo || null;
 
-  const idsReady =
-    isLinkableAssetAddress(collectionId) && isLinkableAssetAddress(tokenId);
+  const idsOk = isLinkableAssetAddress(collectionId) && isLinkableAssetAddress(tokenId);
+  const [busy, setBusy] = useState(false);
+  const [lastTx, setLastTx] = useState(null);
 
-  const { state: companionState, linked } = useCompanionsLinked({
+  const status = getBuilderAttestationRegistryStatus({ endUser, networkInfo });
+  const companions = useCompanionsLinked({
     collectionId,
     tokenId,
     endUser,
     networkInfo,
     origin: account || null,
-    enabled: idsReady,
+    enabled: Boolean(idsOk && requireCompanions),
+  });
+  const {
+    state,
+    attested,
+    message,
+    attestations,
+    ownAttestation,
+    refresh,
+  } = useBuilderAttested({
+    collectionId,
+    tokenId,
+    builderId: account || null,
+    endUser,
+    networkInfo,
+    origin: account || null,
+    enabled: idsOk,
   });
 
-  const [proof, setProof] = useState(null);
-  const [note, setNote] = useState('');
-  const [paste, setPaste] = useState('');
-  const [verifyResult, setVerifyResult] = useState(null);
-  const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    if (!idsReady) {
-      setProof(null);
-      return;
-    }
-    setProof(loadStoredBuilderAttestation(collectionId, tokenId));
-  }, [collectionId, tokenId, idsReady]);
+  if (!idsOk) return null;
 
   const expressOk = isConnected && walletType === 'boingExpress';
-  const canAttest = expressOk && idsReady && linked;
-
-  const status = useMemo(() => {
-    if (!idsReady) {
-      return {
-        title: 'Builder attestation',
-        body: 'Add a collection and token to attest this project.',
-        tone: 'neutral',
-      };
-    }
-    if (proof) {
-      return {
-        title: 'Builder attested',
-        body: 'Signed by your wallet. Share the proof so others can check it.',
-        tone: 'ok',
-      };
-    }
-    if (companionState === 'checking' || companionState === 'idle') {
-      return {
-        title: 'Builder attestation',
-        body: 'Checking companions before you can attest…',
-        tone: 'neutral',
-      };
-    }
-    if (!linked) {
-      return {
-        title: 'Link companions first',
-        body: 'Attest as builder after this collection and token are linked as companions.',
-        tone: 'warn',
-      };
-    }
-    return {
-      title: 'Attest as builder',
-      body: 'Sign a short statement that you are the builder of this project. Not an on-chain record — a checkable wallet proof.',
-      tone: 'ready',
-    };
-  }, [idsReady, proof, companionState, linked]);
+  const companionsReady = !requireCompanions || companions.linked;
+  const companionsChecking = requireCompanions && companions.checking;
+  const canAttest =
+    status.canWrite &&
+    expressOk &&
+    companionsReady &&
+    !ownAttestation &&
+    !busy &&
+    state !== 'checking';
+  const canRevoke =
+    status.canWrite && expressOk && Boolean(ownAttestation) && !busy;
 
   const border =
-    status.tone === 'ok'
+    attested || ownAttestation
       ? 'rgba(16, 185, 129, 0.45)'
-      : status.tone === 'warn'
-        ? 'rgba(245, 158, 11, 0.5)'
-        : 'var(--border-color)';
+      : state === 'checking' || companionsChecking
+        ? 'var(--border-color)'
+        : state === 'unavailable' || !status.canWrite
+          ? 'rgba(245, 158, 11, 0.5)'
+          : 'rgba(0, 229, 255, 0.28)';
   const bg =
-    status.tone === 'ok'
+    attested || ownAttestation
       ? 'rgba(16, 185, 129, 0.08)'
-      : status.tone === 'warn'
+      : state === 'unavailable' || !status.canWrite
         ? 'rgba(245, 158, 11, 0.08)'
         : 'var(--bg-tertiary)';
 
-  const onAttest = async () => {
-    if (!canAttest) return;
+  let title = 'Builder';
+  let body = message || 'Optional: attest as the builder of this project.';
+  if (ownAttestation) {
+    title = 'Builder attested';
+    body = `You attested as builder${ownAttestation.builderId ? ` (${shortId(ownAttestation.builderId)})` : ''}.`;
+  } else if (attested) {
+    title = 'Builder attested';
+    const latest = attestations[0];
+    body = latest
+      ? `Active attestation from ${shortId(latest.builderId)}.`
+      : 'This project has an active builder attestation.';
+  } else if (!companionsReady && requireCompanions) {
+    title = 'Attest as builder';
+    body = companionsChecking
+      ? 'Checking companions…'
+      : 'Link companions first, then you can attest as builder.';
+  } else if (state === 'not_attested') {
+    title = 'Attest as builder';
+    body = 'Optional. Sign in your wallet to confirm on-chain.';
+  } else if (state === 'checking') {
+    title = 'Checking builder…';
+    body = 'Reading on-chain builder attestation for this project.';
+  } else if (state === 'unavailable' || !status.canWrite) {
+    title = 'Builder attestation';
+    body = 'Could not reach builder attestation right now. Try again in a moment.';
+  }
+
+  const run = async (fn, okMsg) => {
     setBusy(true);
     try {
-      const result = await signBuilderAttestation({
-        getWalletProvider,
-        builder: account,
-        collectionId,
-        tokenId,
-        note,
-        persist: true,
-      });
+      const result = await fn();
       if (!result.ok) {
-        toast.error(result.message || 'Could not attest');
+        toast.error(result.message || 'Something went wrong');
         return;
       }
-      setProof(result.proof);
-      toast.success('Builder attested');
+      if (result.txHash) setLastTx(result.txHash);
+      else if (result.txHashes?.length) setLastTx(result.txHashes[result.txHashes.length - 1]);
+      toast.success(okMsg);
+      await refresh();
     } finally {
       setBusy(false);
     }
   };
 
-  const onCopyProof = async () => {
-    if (!proof) return;
-    const text = exportBuilderAttestationJson(proof);
-    try {
-      await navigator.clipboard.writeText(text);
-      toast.success('Proof copied');
-    } catch {
-      toast.error('Could not copy proof');
-    }
-  };
+  const onAttest = () =>
+    run(
+      () =>
+        attestAsBuilderOnChain({
+          getWalletProvider,
+          collectionId,
+          tokenId,
+          linker: account,
+          endUser,
+          networkInfo,
+        }),
+      'Builder attested'
+    );
 
-  const onClearLocal = () => {
-    clearStoredBuilderAttestation(collectionId, tokenId);
-    setProof(null);
-    toast.success('Local proof cleared');
-  };
-
-  const onVerifyPaste = () => {
-    const checked = verifyBuilderAttestationProof(paste);
-    setVerifyResult(checked);
-    if (checked.ok && checked.proof) {
-      const pasteKey = pairStorageKey(checked.proof.collection, checked.proof.token);
-      const panelKey = idsReady ? pairStorageKey(collectionId, tokenId) : '';
-      if (pasteKey && panelKey && pasteKey === panelKey) {
-        const saved = saveBuilderAttestationProof(checked.proof);
-        if (saved.ok) setProof(saved.proof);
-      }
-      toast.success(checked.message);
-    } else {
-      toast.error(checked.message || 'Could not verify');
-    }
-  };
+  const onRevoke = () =>
+    run(
+      () =>
+        revokeBuilderAttestationOnChain({
+          getWalletProvider,
+          index: ownAttestation?.index ?? null,
+          collectionId,
+          tokenId,
+          linker: account,
+          endUser,
+          networkInfo,
+        }),
+      'Attestation revoked'
+    );
 
   return (
-    <section
+    <div
       className={`${compact ? 'rounded-lg px-3 py-2.5' : 'rounded-xl px-3 py-3'} border text-sm ${className}`}
       style={{ borderColor: border, backgroundColor: bg, color: 'var(--text-secondary)' }}
       data-testid="builder-attestation-panel"
-      data-attest-tone={status.tone}
+      data-attest-state={ownAttestation ? 'own' : state}
+      data-companions-ready={companionsReady ? '1' : '0'}
+      role="status"
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-            {status.title}
+            {title}
           </p>
-          <p className="mt-1 text-xs sm:text-sm">{status.body}</p>
+          <p className="mt-1 text-xs sm:text-sm">{body}</p>
         </div>
+        <button
+          type="button"
+          onClick={() => void refresh()}
+          className="text-xs underline shrink-0"
+          style={{ color: 'var(--finance-primary)' }}
+          disabled={busy}
+        >
+          Refresh
+        </button>
       </div>
 
-      {proof ? (
-        <div className="mt-3 space-y-2">
-          <p className="text-xs font-mono break-all" style={{ color: 'var(--text-tertiary)' }}>
-            Builder {proof.builder}
-          </p>
-          {proof.note ? (
-            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-              Note: {proof.note}
-            </p>
-          ) : null}
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => void onCopyProof()}
-              className="inline-flex px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold"
-              style={{ backgroundColor: 'var(--finance-primary)', color: '#041018' }}
-              data-testid="builder-attest-copy"
-            >
-              Copy proof
-            </button>
-            <button
-              type="button"
-              onClick={onClearLocal}
-              className="inline-flex px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium border"
-              style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
-            >
-              Clear local
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="mt-3 space-y-2">
-          {linked ? (
-            <>
-              <label className="block text-xs" style={{ color: 'var(--text-tertiary)' }}>
-                Optional note
-                <input
-                  type="text"
-                  value={note}
-                  maxLength={280}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="Short note (optional)"
-                  className="mt-1 w-full px-3 py-2 rounded-lg text-sm"
-                  style={{
-                    backgroundColor: 'var(--bg-card)',
-                    border: '1px solid var(--border-color)',
-                    color: 'var(--text-primary)',
-                  }}
-                  disabled={busy || !canAttest}
-                />
-              </label>
-              <button
-                type="button"
-                onClick={() => void onAttest()}
-                disabled={busy || !canAttest}
-                className="inline-flex px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold disabled:opacity-50"
-                style={{ backgroundColor: 'var(--finance-primary)', color: '#041018' }}
-                data-testid="builder-attest-sign"
-              >
-                {busy ? 'Waiting for wallet…' : 'Attest as builder'}
-              </button>
-              {!expressOk ? (
-                <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-                  Connect Boing Express to sign.
-                </p>
-              ) : null}
-            </>
-          ) : null}
-        </div>
-      )}
-
-      <details className="mt-3">
-        <summary
-          className="cursor-pointer text-xs font-medium"
-          style={{ color: 'var(--text-primary)' }}
-        >
-          Check a proof
-        </summary>
-        <div className="mt-2 space-y-2">
-          <textarea
-            value={paste}
-            onChange={(e) => setPaste(e.target.value)}
-            rows={4}
-            placeholder="Paste a builder proof JSON…"
-            className="w-full px-3 py-2 rounded-lg text-xs font-mono"
-            style={{
-              backgroundColor: 'var(--bg-card)',
-              border: '1px solid var(--border-color)',
-              color: 'var(--text-primary)',
-            }}
-            data-testid="builder-attest-paste"
-          />
+      <div className="mt-3 flex flex-wrap gap-2">
+        {canAttest ? (
           <button
             type="button"
-            onClick={onVerifyPaste}
-            className="inline-flex px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium border"
-            style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
-            data-testid="builder-attest-verify"
+            onClick={onAttest}
+            className="inline-flex px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold"
+            style={{ backgroundColor: 'var(--finance-primary)', color: '#041018' }}
+            data-testid="builder-attest-cta"
           >
-            Verify
+            {busy ? 'Attesting…' : 'Attest as builder'}
           </button>
-          {verifyResult ? (
-            <p
-              className="text-xs"
-              style={{
-                color: verifyResult.ok ? 'var(--finance-green-mid)' : 'var(--finance-gold)',
-              }}
-              data-testid="builder-attest-verify-result"
-            >
-              {verifyResult.ok ? 'Proof checks out.' : verifyResult.message}
-            </p>
-          ) : null}
-        </div>
-      </details>
-    </section>
+        ) : null}
+        {canRevoke ? (
+          <button
+            type="button"
+            onClick={onRevoke}
+            className="inline-flex px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium border"
+            style={{ borderColor: 'var(--border-color)', color: 'var(--finance-red-light)' }}
+            data-testid="builder-revoke-cta"
+          >
+            {busy ? 'Revoking…' : 'Revoke attestation'}
+          </button>
+        ) : null}
+        {!expressOk && companionsReady && !ownAttestation ? (
+          <p className="text-xs w-full" style={{ color: 'var(--text-tertiary)' }}>
+            Connect Boing Express to attest as builder.
+          </p>
+        ) : null}
+      </div>
+
+      {lastTx ? (
+        <p className="text-xs font-mono break-all mt-2" style={{ color: 'var(--text-tertiary)' }}>
+          Last tx: {shortId(lastTx)}
+        </p>
+      ) : null}
+    </div>
   );
 }
