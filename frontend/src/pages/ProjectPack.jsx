@@ -19,6 +19,7 @@ import {
 import { isBoingNativeAccountIdHex } from '../utils/boingWalletDiscovery';
 import { rememberAssetDeployer } from '../utils/linkedNftToken';
 import CompanionLinkGate from '../components/CompanionLinkGate';
+import BuilderAttestationPanel from '../components/BuilderAttestationPanel';
 import { buildProjectPoolPath } from '../services/linkedNftTokenRegistry';
 
 const STEPS = [
@@ -724,7 +725,7 @@ export default function ProjectPack() {
                           ) : null}
                         </div>
                       </div>
-                      <div className="mb-5">
+                      <div className="mb-5 space-y-3">
                         <CompanionLinkGate
                           collectionId={collectionId || predictedCollection}
                           tokenId={tokenId || predictedToken}
@@ -733,6 +734,10 @@ export default function ProjectPack() {
                             collectionId: collectionId || predictedCollection,
                             tokenId: tokenId || predictedToken,
                           })}
+                        />
+                        <BuilderAttestationPanel
+                          collectionId={collectionId || predictedCollection}
+                          tokenId={tokenId || predictedToken}
                         />
                       </div>
                       <div className="flex flex-wrap gap-3">
