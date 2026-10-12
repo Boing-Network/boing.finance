@@ -83,7 +83,9 @@ Post-deploy panels on **Create NFT** and **Deploy Token** reuse `LinkedNftTokenP
 # Public testnet (baked in github-build production/staging env)
 REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY=0xebf9f0190f415852f90d0e60343126201248ab96273fdbf8acc5fe5fa03c3dd8
 
-# Recommended for links_count / get_link_at without Express signing
+# Required for Manage links / companion list reads (links_count / get_link_at) without Express signing.
+# Baked in github-build production/staging env — without it the UI shows "Ready to link" but
+# "Could not load companions right now" because unsigned simulate never runs.
 REACT_APP_BOING_RPC_UNSIGNED_SIMULATE_METHOD=boing_simulateContractCall
 ```
 

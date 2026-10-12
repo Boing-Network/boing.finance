@@ -125,6 +125,13 @@ export default function LinkedNftTokenPanel({
     void refreshLinks();
   }, [refreshLinks]);
 
+  useEffect(() => {
+    if (listError) {
+      // Real cause is often missing REACT_APP_BOING_RPC_UNSIGNED_SIMULATE_METHOD or RPC simulate failure.
+      console.warn('[companions] list load failed:', listError);
+    }
+  }, [listError]);
+
   const expressOk = isConnected && walletType === 'boingExpress';
 
   const run = async (fn, okMsg) => {
