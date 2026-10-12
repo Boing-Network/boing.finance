@@ -22,7 +22,7 @@ const OnboardingTour = ({ onComplete }) => {
   const steps = [
     {
       id: 'welcome',
-      title: 'Welcome to boing.finance! 🚀',
+      title: 'Welcome to boing.finance!',
       content: 'Your all-in-one DeFi platform for token deployment, trading, and portfolio management.',
       position: 'center',
       action: () => {
