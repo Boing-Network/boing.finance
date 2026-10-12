@@ -77,6 +77,8 @@ export default function LinkedProject() {
           seedCollectionId={collectionQ}
           seedTokenId={tokenQ}
           showHubLink={false}
+          hideStatus
+          hideIntro
           title="Link or unlink companions"
         />
       </TradeDeployShell>

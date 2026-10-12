@@ -54,6 +54,13 @@ const BOING_LOGO_URL = brandLogoPngAbsolute();
 
 // MochiAstronaut component
 
+function riskClass(risk) {
+  const r = String(risk || '').toLowerCase();
+  if (r.includes('medium') || r.includes('high')) return 'td-risk--medium';
+  if (r.includes('very')) return 'td-risk--low';
+  return 'td-risk--low';
+}
+
 // Toggle Button Component
 function ToggleButton({ enabled, onToggle, disabled, size = "md", ariaLabel, ariaLabelledBy }) {
   const sizeClasses = {
@@ -77,20 +84,10 @@ function ToggleButton({ enabled, onToggle, disabled, size = "md", ariaLabel, ari
       aria-labelledby={ariaLabelledBy}
       onClick={onToggle}
       disabled={disabled}
-      className={`
-        ${sizeClasses[size]} relative inline-flex items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900
-        ${enabled 
-          ? 'bg-blue-600 hover:bg-blue-700' 
-          : 'bg-gray-600 hover:bg-gray-500'
-        }
-        ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-      `}
+      className={`td-toggle ${sizeClasses[size]} ${enabled ? 'td-toggle--on' : 'td-toggle--off'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
     >
       <span
-        className={`
-          ${dotSizeClasses[size]} inline-block transform transition-transform duration-200 ease-in-out bg-white rounded-full shadow-lg
-          ${enabled ? 'translate-x-7' : 'translate-x-1'}
-        `}
+        className={`td-toggle__dot ${dotSizeClasses[size]} ${enabled ? 'translate-x-7' : 'translate-x-1'}`}
       />
     </button>
   );
@@ -102,7 +99,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Mint Authority Removal',
     description: 'Revoke mint authority after the initial supply so no more tokens can be created.',
     risk: 'Low',
-    icon: '🔒',
     available: true,
   },
   {
@@ -110,7 +106,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Freezing Authority',
     description: 'Keep freeze authority so you can freeze token accounts in an emergency.',
     risk: 'Medium',
-    icon: '❄️',
     available: true,
   },
   {
@@ -118,7 +113,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Blacklist Function',
     description: 'SPL equivalent of a blacklist: freeze authority can freeze a wallet’s token account.',
     risk: 'Medium',
-    icon: '🚫',
     available: true,
   },
   {
@@ -126,7 +120,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Immutable Metadata',
     description: 'Lock name, symbol, and URI on-chain so they cannot be changed later.',
     risk: 'Very Low',
-    icon: '📝',
     available: true,
   },
   {
@@ -134,7 +127,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Ownership Renouncement',
     description: 'Remove mint and freeze authority and lock metadata in one step (fixed, decentralized mint).',
     risk: 'Very Low',
-    icon: '🔐',
     available: true,
   },
   {
@@ -142,7 +134,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Transaction Limits',
     description: 'Cap how many tokens can move in one transfer.',
     risk: 'Low',
-    icon: '📊',
     available: false,
     unavailableReason: 'Needs a custom transfer-hook program, not standard SPL.',
   },
@@ -151,7 +142,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Anti-Bot Protection',
     description: 'Throttle bots and MEV around launch.',
     risk: 'Low',
-    icon: '🤖',
     available: false,
     unavailableReason: 'Needs a custom transfer-hook program, not standard SPL.',
   },
@@ -160,7 +150,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Cooldown Period',
     description: 'Require a delay between transfers.',
     risk: 'Low',
-    icon: '⏰',
     available: false,
     unavailableReason: 'Needs a custom transfer-hook program, not standard SPL.',
   },
@@ -169,7 +158,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Anti-Whale Protection',
     description: 'Limit how large a single wallet can become.',
     risk: 'Low',
-    icon: '🐋',
     available: false,
     unavailableReason: 'Needs a custom transfer-hook program, not standard SPL.',
   },
@@ -178,7 +166,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Pause Functionality',
     description: 'Emergency pause of all transfers.',
     risk: 'Medium',
-    icon: '⏸️',
     available: false,
     unavailableReason: 'Needs Token-2022 pausable or a custom program.',
   },
@@ -187,7 +174,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Timelock Contract',
     description: 'Delay administrative changes.',
     risk: 'Very Low',
-    icon: '⏳',
     available: false,
     unavailableReason: 'Needs a separate timelock program.',
   },
@@ -196,7 +182,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Max Wallet Limit',
     description: 'Set a maximum token balance per wallet.',
     risk: 'Low',
-    icon: '💼',
     available: false,
     unavailableReason: 'Needs a custom transfer-hook program, not standard SPL.',
   },
@@ -458,37 +443,30 @@ function DeployTokenSolanaContent() {
                 <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
                   Same choices as EVM deploy, mapped onto SPL mint / freeze / Metaplex authorities. Transfer limits, anti-bot, and pause need a custom Solana program.
                 </p>
-                <div className="space-y-3">
+                <div className="td-feature-matrix">
                   {SOLANA_DEPLOY_FEATURES.map((feature) => {
                     const enabled = Boolean(features[feature.key]);
                     return (
                       <div
                         key={feature.key}
-                        className="p-3 sm:p-4 rounded-lg border"
-                        style={{
-                          backgroundColor: 'var(--bg-secondary)',
-                          borderColor: 'var(--border-color)',
-                          opacity: feature.available ? 1 : 0.72,
-                        }}
+                        className="td-feature-row"
+                        style={{ opacity: feature.available ? 1 : 0.72 }}
                       >
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                          <div className="flex items-start space-x-3 min-w-0">
-                            <span className="text-xl flex-shrink-0">{feature.icon}</span>
-                            <div className="min-w-0">
-                              <h3 id={`deploy-solana-${feature.key}`} className="font-medium text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>
+                        <div className="td-feature-row__top">
+                          <div className="td-feature-row__meta">
+                              <h3 id={`deploy-solana-${feature.key}`} className="td-feature-row__title">
                                 {feature.name}
                               </h3>
-                              <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{feature.description}</p>
+                              <p className="td-feature-row__desc">{feature.description}</p>
                               {feature.available ? (
-                                <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-900 text-blue-200 rounded-full mt-1">
-                                  {feature.risk} Risk
+                                <span className={`td-risk ${riskClass(feature.risk)}`}>
+                                  {feature.risk} risk
                                 </span>
                               ) : (
-                                <span className="inline-block px-2 py-1 text-xs font-medium rounded-full mt-1" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-secondary)' }}>
+                                <span className="td-risk td-risk--medium">
                                   {feature.unavailableReason}
                                 </span>
                               )}
-                            </div>
                           </div>
                           <ToggleButton
                             enabled={feature.available && enabled}
@@ -543,7 +521,6 @@ const SECURITY_FEATURES = [
     description: "Remove ability to create new tokens after deployment",
     enabled: true,
     risk: "Low",
-    icon: "🔒",
     featureKey: "renounceMint"
   },
   {
@@ -551,7 +528,6 @@ const SECURITY_FEATURES = [
     description: "Allow freezing specific addresses (emergency control)",
     enabled: false,
     risk: "Medium",
-    icon: "❄️",
     featureKey: "enableFreezing"
   },
   {
@@ -559,7 +535,6 @@ const SECURITY_FEATURES = [
     description: "Block specific addresses from trading",
     enabled: false,
     risk: "Medium",
-    icon: "🚫",
     featureKey: "enableBlacklist"
   },
   {
@@ -567,7 +542,6 @@ const SECURITY_FEATURES = [
     description: "Set maximum transaction amounts",
     enabled: false,
     risk: "Low",
-    icon: "📊",
     featureKey: "maxTxAmount"
   },
   {
@@ -575,7 +549,6 @@ const SECURITY_FEATURES = [
     description: "Transfer ownership to zero address (decentralization)",
     enabled: false,
     risk: "Very Low",
-    icon: "🔒🔒🔒🔒",
     featureKey: "renounceOwnership"
   },
   {
@@ -583,7 +556,6 @@ const SECURITY_FEATURES = [
     description: "Prevent automated trading bots and MEV attacks",
     enabled: false,
     risk: "Low",
-    icon: "🤖",
     featureKey: "antiBot"
   },
   {
@@ -591,7 +563,6 @@ const SECURITY_FEATURES = [
     description: "Add delay between transactions to prevent rapid trading",
     enabled: false,
     risk: "Low",
-    icon: "⏰",
     featureKey: "cooldown"
   },
   {
@@ -599,7 +570,6 @@ const SECURITY_FEATURES = [
     description: "Limit maximum wallet holdings to prevent concentration",
     enabled: false,
     risk: "Low",
-    icon: "🐋",
     featureKey: "antiWhale"
   },
   {
@@ -607,7 +577,6 @@ const SECURITY_FEATURES = [
     description: "Emergency pause all trading (owner only)",
     enabled: false,
     risk: "Medium",
-    icon: "⏸️",
     featureKey: "pauseFunction"
   },
   {
@@ -615,7 +584,6 @@ const SECURITY_FEATURES = [
     description: "Add delay to administrative functions",
     enabled: false,
     risk: "Very Low",
-    icon: "⏳",
     featureKey: "timelock"
   },
   {
@@ -623,7 +591,6 @@ const SECURITY_FEATURES = [
     description: "Set maximum tokens per wallet address",
     enabled: false,
     risk: "Low",
-    icon: "💼",
     featureKey: "maxWallet"
   }
 ];
@@ -2160,7 +2127,7 @@ export default function DeployToken() {
                   <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Choose Your Service Plan</h2>
                   {network && (
                     <p className="text-sm mt-1" style={{ color: 'var(--text-tertiary)' }}>
-                      Pricing for <span className="text-blue-400 font-medium">{network.name}</span> network
+                      Pricing for <span className="font-medium" style={{ color: 'var(--finance-primary)' }}>{network.name}</span> network
                     </p>
                   )}
                   {!network && !isConnected && (
@@ -2195,12 +2162,13 @@ export default function DeployToken() {
                   )}
                 </div>
                 <div className="flex items-center space-x-4">
-                  <p className="text-xs text-gray-500">
-                    💡 Switch networks to see different pricing
+                  <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                    Switch networks to see different pricing
                   </p>
                   <button
+                    type="button"
                     onClick={() => setShowPricing(!showPricing)}
-                    className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                    className="td-btn td-btn--link text-sm"
                   >
                     {showPricing ? 'Hide Details' : 'View Details'}
                   </button>
@@ -2214,14 +2182,11 @@ export default function DeployToken() {
                   <label
                     key={key}
                     htmlFor={`deploy-service-plan-${key}`}
-                    className={`relative block p-6 rounded-xl border-2 cursor-pointer transition-all ${
-                      selectedPlan === key
-                        ? 'border-blue-500'
-                        : 'hover:border-gray-500'
-                    }`}
+                    className="relative block p-6 rounded-xl border-2 cursor-pointer transition-all"
                     style={{
                       backgroundColor: 'var(--bg-card)',
-                      borderColor: selectedPlan === key ? 'var(--accent-cyan)' : 'var(--border-color)'
+                      borderColor: selectedPlan === key ? 'var(--finance-primary)' : 'var(--border-color)',
+                      boxShadow: selectedPlan === key ? '0 0 0 1px color-mix(in srgb, var(--finance-primary) 35%, transparent)' : undefined,
                     }}
                   >
                     <input
@@ -2234,8 +2199,12 @@ export default function DeployToken() {
                       className="sr-only"
                     />
                     {selectedPlan === key && (
-                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center pointer-events-none" aria-hidden="true">
-                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <div
+                        className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center pointer-events-none"
+                        style={{ backgroundColor: 'var(--finance-primary)', color: '#041018' }}
+                        aria-hidden="true"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                       </div>
@@ -2243,7 +2212,7 @@ export default function DeployToken() {
                     
                     <div className="text-center">
                       <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>{plan.name}</h3>
-                      <div className="text-3xl font-bold text-blue-400 mb-4">
+                      <div className="text-3xl font-bold mb-4" style={{ color: 'var(--finance-primary)' }}>
                         {(() => {
                           const row = plan.prices[network?.chainId] || plan.prices[1];
                           const feeUsd = isBoingNativeFeeChain(network?.chainId) ? getBoingNativeFeeUsd(row?.amount) : null;
@@ -2280,11 +2249,11 @@ export default function DeployToken() {
               {/* Wizard step 2 nav */}
               {useWizardMode && wizardStep === 2 && (
                 <div className="flex justify-between mt-6 pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
-                  <button type="button" onClick={() => setWizardStep(1)} className="interactive-button px-6 py-2 bg-gray-600 hover:bg-gray-500 text-white font-medium rounded-lg">
-                    ← Back
+                  <button type="button" onClick={() => setWizardStep(1)} className="td-btn td-btn--ghost">
+                    Back
                   </button>
-                  <button type="button" onClick={() => setWizardStep(3)} className="interactive-button px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg">
-                    Next: Security & Info →
+                  <button type="button" onClick={() => setWizardStep(3)} className="td-btn td-btn--primary">
+                    Next: Security & Info
                   </button>
                 </div>
               )}
@@ -2303,7 +2272,8 @@ export default function DeployToken() {
               >
                 {/* Step 1: Basic Information + Logo */}
                 <div style={{ display: !useWizardMode || wizardStep === 1 ? 'block' : 'none' }}>
-                  <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: 'var(--text-primary)' }}>Basic Token Information</h3>
+                  <h3 className="td-section-title">Basic Token Information</h3>
+                  <p className="td-section-sub">Name, symbol, supply, and logo for your token.</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <div>
                       <label htmlFor="deploy-evm-name" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
@@ -2406,8 +2376,8 @@ export default function DeployToken() {
                 {/* Wizard step 1 nav */}
                 {useWizardMode && wizardStep === 1 && (
                   <div className="flex justify-end mt-6">
-                    <button type="button" onClick={() => setWizardStep(2)} className="interactive-button px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg">
-                      Next: Network & Plan →
+                    <button type="button" onClick={() => setWizardStep(2)} className="td-btn td-btn--primary">
+                      Next: Network & Plan
                     </button>
                   </div>
                 )}
@@ -2416,7 +2386,8 @@ export default function DeployToken() {
                 <div style={{ display: !useWizardMode || wizardStep === 3 ? 'block' : 'none' }}>
                 {/* Project Information */}
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: 'var(--text-primary)' }}>Project Information</h3>
+                  <h3 className="td-section-title">Project Information</h3>
+                  <p className="td-section-sub">Website and short description shown with your token.</p>
                   <div className="space-y-4 sm:space-y-6">
                     <div>
                       <label htmlFor="deploy-evm-website" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
@@ -2465,32 +2436,27 @@ export default function DeployToken() {
 
                 {/* Security Features */}
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: 'var(--text-primary)' }}>Security Features</h3>
-                  <div className="space-y-3 sm:space-y-4">
+                  <h3 className="td-section-title">Security Features</h3>
+                  <p className="td-section-sub">Toggle protections for this token. Risk labels are plain guidance — not legal advice.</p>
+                  <div className="td-feature-matrix">
                     {SECURITY_FEATURES.map((feature, index) => {
                       const isAllowed = isFeatureAllowed(feature.featureKey);
                       const restrictionMessage = getFeatureRestrictionMessage(feature.featureKey);
                       
                       return (
-                        <div key={index} className="p-3 sm:p-4 rounded-lg border" style={{
-                          backgroundColor: 'var(--bg-card)',
-                          borderColor: 'var(--border-color)'
-                        }}>
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-                            <div className="flex items-start sm:items-center space-x-3">
-                              <span className="text-xl sm:text-2xl flex-shrink-0">{feature.icon}</span>
-                              <div className="min-w-0 flex-1">
-                                <h4 id={`deploy-security-${feature.featureKey}`} className="font-medium text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>{feature.name}</h4>
-                                <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{feature.description}</p>
-                                <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-900 text-blue-200 rounded-full mt-1">
-                                  {feature.risk} Risk
+                        <div key={index} className="td-feature-row">
+                          <div className="td-feature-row__top">
+                            <div className="td-feature-row__meta">
+                                <h4 id={`deploy-security-${feature.featureKey}`} className="td-feature-row__title">{feature.name}</h4>
+                                <p className="td-feature-row__desc">{feature.description}</p>
+                                <span className={`td-risk ${riskClass(feature.risk)}`}>
+                                  {feature.risk} risk
                                 </span>
-                              </div>
                             </div>
                             
-                            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                            <div className="flex flex-col items-end gap-2 shrink-0">
                               {!isAllowed && restrictionMessage && (
-                                <span className="text-xs sm:text-sm text-red-400">{restrictionMessage}</span>
+                                <span className="text-xs" style={{ color: 'var(--finance-red-light)' }}>{restrictionMessage}</span>
                               )}
                               
                               {feature.featureKey === "renounceMint" && (
@@ -2610,8 +2576,7 @@ export default function DeployToken() {
                                 type="text"
                                 value={freezingAuthority}
                                 onChange={(e) => setFreezingAuthority(e.target.value)}
-                                className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-sm"
-                                style={{ color: 'var(--text-primary)' }}
+                                className="td-field__input text-sm"
                                 placeholder="0x..."
                               />
                             </div>
@@ -2626,8 +2591,7 @@ export default function DeployToken() {
                                 type="number"
                                 value={cooldownPeriod}
                                 onChange={(e) => setCooldownPeriod(e.target.value)}
-                                className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-sm"
-                                style={{ color: 'var(--text-primary)' }}
+                                className="td-field__input text-sm"
                                 placeholder="30"
                                 min="1"
                                 max="3600"
@@ -2635,7 +2599,9 @@ export default function DeployToken() {
                               />
                               <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-tertiary)' }}>
                                 Cooldown period between transactions in seconds (1-3600)
-                                {cooldownPeriod === '30' && <span className="text-blue-400 ml-1">• Default: 30 seconds</span>}
+                                {cooldownPeriod === '30' && (
+                                  <span className="ml-1" style={{ color: 'var(--finance-primary)' }}>· Default: 30 seconds</span>
+                                )}
                               </p>
                             </div>
                           )}
@@ -2659,7 +2625,9 @@ export default function DeployToken() {
                               </div>
                               <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-tertiary)' }}>
                                 Maximum wallet holdings as percentage of total supply (0.1% - 5%)
-                                {maxWalletPercentage === '2' && <span className="text-blue-400 ml-1">• Default: 2%</span>}
+                                {maxWalletPercentage === '2' && (
+                                  <span className="ml-1" style={{ color: 'var(--finance-primary)' }}>· Default: 2%</span>
+                                )}
                               </p>
                             </div>
                           )}
@@ -2682,7 +2650,7 @@ export default function DeployToken() {
                               </div>
                               <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-tertiary)' }}>
                                 Timelock delay for administrative functions (1-168 hours)
-                                {timelockDelay === '24' && <span className="text-blue-400 ml-1">• Default: 24 hours</span>}
+                                {timelockDelay === '24' && <span className="ml-1" style={{ color: 'var(--finance-primary)' }}>• Default: 24 hours</span>}
                               </p>
                             </div>
                           )}
@@ -2696,8 +2664,7 @@ export default function DeployToken() {
                                 type="number"
                                 value={maxTxAmount}
                                 onChange={(e) => setMaxTxAmount(e.target.value)}
-                                className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-sm"
-                                style={{ color: 'var(--text-primary)' }}
+                                className="td-field__input text-sm"
                                 placeholder="1.0"
                                 min="0.1"
                                 max="10"
@@ -2705,7 +2672,7 @@ export default function DeployToken() {
                               />
                               <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-tertiary)' }}>
                                 Maximum transaction amount as percentage of total supply (0.1% - 10%)
-                                {maxTxAmount === '1' && <span className="text-blue-400 ml-1">• Default: 1%</span>}
+                                {maxTxAmount === '1' && <span className="ml-1" style={{ color: 'var(--finance-primary)' }}>• Default: 1%</span>}
                               </p>
                             </div>
                           )}
@@ -2717,7 +2684,8 @@ export default function DeployToken() {
 
                 {/* Social Links */}
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: 'var(--text-primary)' }}>Social Links</h3>
+                  <h3 className="td-section-title">Social Links</h3>
+                  <p className="td-section-sub">Optional. Add project links builders and traders can verify.</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     {Object.entries(socialLinks).map(([platform, value]) => (
                       <div key={platform}>
@@ -2746,11 +2714,11 @@ export default function DeployToken() {
                 {/* Wizard step 3 nav */}
                 {useWizardMode && wizardStep === 3 && (
                   <div className="flex justify-between mt-6">
-                    <button type="button" onClick={() => setWizardStep(2)} className="interactive-button px-6 py-2 bg-gray-600 hover:bg-gray-500 text-white font-medium rounded-lg">
-                      ← Back
+                    <button type="button" onClick={() => setWizardStep(2)} className="td-btn td-btn--ghost">
+                      Back
                     </button>
-                    <button type="button" onClick={() => setWizardStep(4)} className="interactive-button px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg">
-                      Next: Review & Deploy →
+                    <button type="button" onClick={() => setWizardStep(4)} className="td-btn td-btn--primary">
+                      Next: Review & Deploy
                     </button>
                   </div>
                 )}
@@ -2810,7 +2778,7 @@ export default function DeployToken() {
                       !isConnected ||
                       (isBoingNativeDeployPath ? !nativeWizardGate.canSubmit : !signer)
                     }
-                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-lg transition-colors text-base sm:text-lg"
+                    className="td-btn td-btn--primary w-full sm:w-auto py-3 sm:py-4 px-6 sm:px-8 text-base sm:text-lg disabled:opacity-50"
                   >
                     {deploying ? (
                       <div className="flex items-center justify-center">
@@ -2826,7 +2794,7 @@ export default function DeployToken() {
                 {/* Wizard step 4 nav (Back only) */}
                 {useWizardMode && wizardStep === 4 && (
                   <div className="flex justify-start mt-6 pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
-                    <button type="button" onClick={() => setWizardStep(3)} className="interactive-button px-6 py-2 bg-gray-600 hover:bg-gray-500 text-white font-medium rounded-lg">
+                    <button type="button" onClick={() => setWizardStep(3)} className="td-btn td-btn--ghost">
                       ← Back
                     </button>
                   </div>

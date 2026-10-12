@@ -30,6 +30,10 @@ export default function LinkedNftTokenPanel({
   tokenLabel = '',
   compact = false,
   showHubLink = true,
+  /** When true, hide the ready/not-available status strip (page already shows it). */
+  hideStatus = false,
+  /** When true, hide the intro blurb under the title (page hero already covers it). */
+  hideIntro = false,
   title = 'Companions',
 }) {
   const { account, getWalletProvider, walletType, isConnected } = useWallet();
@@ -241,9 +245,17 @@ export default function LinkedNftTokenPanel({
           <h3 className="text-base sm:text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
             {title}
           </h3>
-          <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-            Link a collection and a token as companions, or unlink a pair. Starting fresh? Use Project pack.
-          </p>
+          {!hideIntro ? (
+            <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
+              Link a collection and a token as companions, or unlink a pair. Starting fresh? Use Project pack.
+            </p>
+          ) : null}
+          {(collectionLabel || tokenLabel) && hideStatus ? (
+            <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
+              {collectionLabel ? `Collection: ${collectionLabel}. ` : ''}
+              {tokenLabel ? `Token: ${tokenLabel}.` : ''}
+            </p>
+          ) : null}
         </div>
         {showHubLink ? (
           <Link to="/project-pack" className="td-btn td-btn--link text-sm shrink-0">
@@ -252,23 +264,25 @@ export default function LinkedNftTokenPanel({
         ) : null}
       </div>
 
-      <div
-        className={`td-status text-xs mb-4 ${status.code === 'ready' ? 'td-status--success' : 'td-status--warn'}`}
-        role="status"
-      >
-        <strong className="td-status__title" style={{ display: 'inline', margin: 0 }}>
-          {status.code === 'ready' ? 'Ready to link' : 'Not available yet'}
-        </strong>
-        {status.code === 'ready'
-          ? ' — claim each side if needed, then register companions.'
-          : ' — companion linking is not set up on this network yet.'}
-        {collectionLabel || tokenLabel ? (
-          <span className="block mt-1">
-            {collectionLabel ? `Collection: ${collectionLabel}. ` : ''}
-            {tokenLabel ? `Token: ${tokenLabel}.` : ''}
-          </span>
-        ) : null}
-      </div>
+      {!hideStatus ? (
+        <div
+          className={`td-status text-xs mb-4 ${status.code === 'ready' ? 'td-status--success' : 'td-status--warn'}`}
+          role="status"
+        >
+          <strong className="td-status__title" style={{ display: 'inline', margin: 0 }}>
+            {status.code === 'ready' ? 'Ready to link' : 'Not available yet'}
+          </strong>
+          {status.code === 'ready'
+            ? ' — claim each side if needed, then register companions.'
+            : ' — companion linking is not set up on this network yet.'}
+          {collectionLabel || tokenLabel ? (
+            <span className="block mt-1">
+              {collectionLabel ? `Collection: ${collectionLabel}. ` : ''}
+              {tokenLabel ? `Token: ${tokenLabel}.` : ''}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         <label className="td-field">

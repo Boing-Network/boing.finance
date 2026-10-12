@@ -9,6 +9,7 @@ import {
   getBrandAssetVersionSuffix,
 } from '../config/brandAssets';
 import { navigation } from '../config/navigation';
+import NavIcon from '../components/NavIcon';
 
 function Home() {
   // Use useMemo to ensure stable reference
@@ -291,19 +292,11 @@ function Home() {
                   <a key={item.name} href={item.href} className="block">{CardContent}</a>
                 );
               })}
-              {memoizedNav.deployment.map((item) => {
-                const getIcon = () => {
-                  if (item.name === 'Deploy Token') return <DeployTokenIcon />;
-                  if (item.name === 'Create NFT') return <span className="text-2xl">🖼️</span>;
-                  if (item.name === 'Create Pool') return <LiquidityIcon />;
-                  return <DeployTokenIcon />;
-                };
-                return (
+              {memoizedNav.deployment.map((item) => (
                   <a key={item.name} href={item.href} className="block">
-                    <FeatureCard title={item.name} icon={getIcon()} description={item.description || ''} />
+                    <FeatureCard title={item.name} icon={<NavIcon icon={item.icon} size={22} />} description={item.description || ''} />
                   </a>
-                );
-              })}
+              ))}
             </div>
 
             {/* 4. Governance & BOING */}
@@ -315,7 +308,7 @@ function Home() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {memoizedNav.governance.slice(0, 4).map((item) => (
                     <a key={item.name} href={item.href} className="block">
-                      <FeatureCard title={item.name} icon={<span className="text-xl">{item.icon}</span>} description={item.description || ''} />
+                      <FeatureCard title={item.name} icon={<NavIcon icon={item.icon} size={22} />} description={item.description || ''} />
                     </a>
                   ))}
                 </div>
@@ -325,7 +318,7 @@ function Home() {
                 <div className="space-y-4">
                   {memoizedNav.boing.map((item) => (
                     <a key={item.name} href={item.href} className="block">
-                      <FeatureCard title={item.name} icon={<span className="text-xl">{item.icon}</span>} description={item.description || ''} />
+                      <FeatureCard title={item.name} icon={<NavIcon icon={item.icon} size={22} />} description={item.description || ''} />
                     </a>
                   ))}
                 </div>
