@@ -225,19 +225,18 @@ export default function LinkedNftTokenPanel({
     );
 
   const shellClass = compact
-    ? 'rounded-xl border p-4 text-left mt-4'
-    : 'rounded-2xl border p-5 sm:p-6 text-left';
+    ? 'td-card td-card--quiet text-left mt-4 p-4'
+    : 'td-card text-left';
 
   return (
     <section
       className={shellClass}
       style={{
-        backgroundColor: 'var(--bg-card)',
-        borderColor: 'rgba(0, 229, 255, 0.28)',
+        borderColor: 'color-mix(in srgb, var(--finance-primary) 28%, transparent)',
       }}
       data-tour="linked-nft-token-panel"
     >
-      <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
+      <div className="flex flex-wrap items-start justify-between gap-2 mb-4">
         <div>
           <h3 className="text-base sm:text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
             {title}
@@ -247,28 +246,17 @@ export default function LinkedNftTokenPanel({
           </p>
         </div>
         {showHubLink ? (
-          <Link
-            to="/project-pack"
-            className="text-sm underline shrink-0"
-            style={{ color: 'var(--finance-primary)' }}
-          >
+          <Link to="/project-pack" className="td-btn td-btn--link text-sm shrink-0">
             Project pack →
           </Link>
         ) : null}
       </div>
 
       <div
-        className="text-xs rounded-lg border px-3 py-2 mb-3"
-        style={{
-          borderColor:
-            status.code === 'ready' ? 'rgba(16, 185, 129, 0.45)' : 'rgba(245, 158, 11, 0.5)',
-          backgroundColor:
-            status.code === 'ready' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(245, 158, 11, 0.08)',
-          color: 'var(--text-secondary)',
-        }}
+        className={`td-status text-xs mb-4 ${status.code === 'ready' ? 'td-status--success' : 'td-status--warn'}`}
         role="status"
       >
-        <strong style={{ color: 'var(--text-primary)' }}>
+        <strong className="td-status__title" style={{ display: 'inline', margin: 0 }}>
           {status.code === 'ready' ? 'Ready to link' : 'Not available yet'}
         </strong>
         {status.code === 'ready'
@@ -282,43 +270,29 @@ export default function LinkedNftTokenPanel({
         ) : null}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-        <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
-            Collection id
-          </label>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+        <label className="td-field">
+          <span className="td-field__label">Collection id</span>
           <input
             type="text"
             value={collectionId}
             onChange={(e) => setCollectionId(e.target.value.trim())}
             placeholder="0x… (32-byte)"
-            className="w-full px-3 py-2 rounded-lg text-sm font-mono"
-            style={{
-              backgroundColor: 'var(--bg-tertiary)',
-              border: '1px solid var(--border-color)',
-              color: 'var(--text-primary)',
-            }}
+            className="td-field__input font-mono"
             disabled={Boolean(seedCollectionId)}
           />
-        </div>
-        <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
-            Token id
-          </label>
+        </label>
+        <label className="td-field">
+          <span className="td-field__label">Token id</span>
           <input
             type="text"
             value={tokenId}
             onChange={(e) => setTokenId(e.target.value.trim())}
             placeholder="0x… (32-byte)"
-            className="w-full px-3 py-2 rounded-lg text-sm font-mono"
-            style={{
-              backgroundColor: 'var(--bg-tertiary)',
-              border: '1px solid var(--border-color)',
-              color: 'var(--text-primary)',
-            }}
+            className="td-field__input font-mono"
             disabled={Boolean(seedTokenId)}
           />
-        </div>
+        </label>
       </div>
 
       {previewWarning ? (
@@ -345,13 +319,12 @@ export default function LinkedNftTokenPanel({
         </div>
       ) : null}
 
-      <div className="flex flex-wrap gap-2 mb-3">
+      <div className="flex flex-wrap gap-2 mb-4">
         <button
           type="button"
           onClick={onClaimCollection}
           disabled={busy || !status.canWrite || !expressOk || !isLinkableAssetAddress(collectionId)}
-          className="px-3 py-2 rounded-lg text-sm font-medium border disabled:opacity-50"
-          style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+          className="td-btn td-btn--ghost text-sm disabled:opacity-50"
         >
           Claim collection
         </button>
@@ -359,8 +332,7 @@ export default function LinkedNftTokenPanel({
           type="button"
           onClick={onClaimToken}
           disabled={busy || !status.canWrite || !expressOk || !isLinkableAssetAddress(tokenId)}
-          className="px-3 py-2 rounded-lg text-sm font-medium border disabled:opacity-50"
-          style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+          className="td-btn td-btn--ghost text-sm disabled:opacity-50"
         >
           Claim token
         </button>
@@ -375,8 +347,7 @@ export default function LinkedNftTokenPanel({
             !isLinkableAssetAddress(tokenId) ||
             (Boolean(previewWarning) && !ackSoftGate)
           }
-          className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
-          style={{ backgroundColor: 'var(--finance-green-mid)' }}
+          className="td-btn td-btn--green text-sm disabled:opacity-50"
         >
           {busy ? 'Linking…' : 'Link companions'}
         </button>
@@ -390,8 +361,8 @@ export default function LinkedNftTokenPanel({
             !isLinkableAssetAddress(collectionId) ||
             !isLinkableAssetAddress(tokenId)
           }
-          className="px-4 py-2 rounded-lg text-sm font-medium border disabled:opacity-50"
-          style={{ borderColor: 'var(--border-color)', color: 'var(--finance-red-light)' }}
+          className="td-btn td-btn--ghost text-sm disabled:opacity-50"
+          style={{ color: 'var(--finance-red-light)' }}
         >
           Unlink
         </button>
@@ -399,8 +370,8 @@ export default function LinkedNftTokenPanel({
           type="button"
           onClick={() => void refreshLinks()}
           disabled={busy || !status.canRead}
-          className="px-3 py-2 rounded-lg text-sm font-medium border disabled:opacity-50"
-          style={{ borderColor: 'var(--border-color)', color: 'var(--finance-primary)' }}
+          className="td-btn td-btn--ghost text-sm disabled:opacity-50"
+          style={{ color: 'var(--finance-primary)' }}
         >
           Refresh
         </button>

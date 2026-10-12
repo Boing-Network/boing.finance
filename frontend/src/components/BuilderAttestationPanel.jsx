@@ -168,10 +168,17 @@ export default function BuilderAttestationPanel({
       'Attestation revoked'
     );
 
+  const statusVariant =
+    attested || ownAttestation
+      ? 'td-status--success'
+      : state === 'unavailable' || !status.canWrite
+        ? 'td-status--warn'
+        : 'td-status--info';
+
   return (
     <div
-      className={`${compact ? 'rounded-lg px-3 py-2.5' : 'rounded-xl px-3 py-3'} border text-sm ${className}`}
-      style={{ borderColor: border, backgroundColor: bg, color: 'var(--text-secondary)' }}
+      className={`td-status ${statusVariant} ${compact ? 'px-3 py-2.5' : ''} text-sm ${className}`}
+      style={{ borderColor: border, backgroundColor: bg }}
       data-testid="builder-attestation-panel"
       data-attest-state={ownAttestation ? 'own' : state}
       data-companions-ready={companionsReady ? '1' : '0'}
@@ -179,16 +186,13 @@ export default function BuilderAttestationPanel({
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-            {title}
-          </p>
+          <p className="td-status__title">{title}</p>
           <p className="mt-1 text-xs sm:text-sm">{body}</p>
         </div>
         <button
           type="button"
           onClick={() => void refresh()}
-          className="text-xs underline shrink-0"
-          style={{ color: 'var(--finance-primary)' }}
+          className="td-btn td-btn--link text-xs shrink-0"
           disabled={busy}
         >
           Refresh
@@ -200,8 +204,7 @@ export default function BuilderAttestationPanel({
           <button
             type="button"
             onClick={onAttest}
-            className="inline-flex px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold"
-            style={{ backgroundColor: 'var(--finance-primary)', color: '#041018' }}
+            className="td-btn td-btn--primary text-xs sm:text-sm"
             data-testid="builder-attest-cta"
           >
             {busy ? 'Attesting…' : 'Attest as builder'}
@@ -211,8 +214,8 @@ export default function BuilderAttestationPanel({
           <button
             type="button"
             onClick={onRevoke}
-            className="inline-flex px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium border"
-            style={{ borderColor: 'var(--border-color)', color: 'var(--finance-red-light)' }}
+            className="td-btn td-btn--ghost text-xs sm:text-sm"
+            style={{ color: 'var(--finance-red-light)' }}
             data-testid="builder-revoke-cta"
           >
             {busy ? 'Revoking…' : 'Revoke attestation'}

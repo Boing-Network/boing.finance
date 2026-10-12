@@ -37,6 +37,11 @@ import { tryAccruePoints } from '../utils/tryAccruePoints';
 import { brandLogoPngAbsolute } from '../config/brandAssets';
 import { showDeployCelebration } from '../utils/deployCelebration';
 import { rememberAssetDeployer } from '../utils/linkedNftToken';
+import {
+  TradeDeployShell,
+  TradeDeployHero,
+  TradeDeployButton,
+} from '../components/PageLayout';
 
 // Import ABI and bytecode from the artifacts
 const ERC20_ABI = AdvancedERC20Artifact.abi;
@@ -320,29 +325,25 @@ function DeployTokenSolanaContent() {
 
   return (
     <div className="relative w-full min-w-0">
-      <div className="relative z-10 container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
+      <TradeDeployShell width="medium">
           <Helmet>
             <title>Deploy SPL Token - Solana | Boing Finance</title>
           </Helmet>
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
-              Deploy SPL Token
-            </h1>
-            <p className="text-xl" style={{ color: 'var(--text-secondary)' }}>
-              Create an SPL token on Solana {solanaNetwork.name}
-            </p>
+          <TradeDeployHero
+            eyebrow="Launch"
+            title="Deploy SPL Token"
+            subtitle={`Create an SPL token on Solana ${solanaNetwork.name}`}
+          >
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
               {['mainnet', 'devnet'].map((net) => (
                 <button
                   key={net}
                   type="button"
                   onClick={() => setSolanaNetwork?.(net)}
-                  className="px-3 py-1 rounded-full text-sm font-medium"
+                  className={`td-segmented__btn ${network === net ? 'td-segmented__btn--active' : ''}`}
                   style={{
-                    backgroundColor: network === net ? 'var(--accent-primary)' : 'var(--bg-card)',
-                    color: network === net ? 'white' : 'var(--text-secondary)',
                     border: '1px solid var(--border-color)',
+                    backgroundColor: network === net ? undefined : 'var(--bg-card)',
                   }}
                 >
                   {net === 'mainnet' ? 'Mainnet' : 'Devnet'}
@@ -355,7 +356,7 @@ function DeployTokenSolanaContent() {
                 {balance === 0 ? ` — fund this wallet on ${network === 'mainnet' ? 'Mainnet' : 'Devnet'} or switch cluster.` : ''}
               </p>
             )}
-          </div>
+          </TradeDeployHero>
 
           {!connected ? (
             <div className="rounded-xl border p-8 text-center" style={{
@@ -530,8 +531,7 @@ function DeployTokenSolanaContent() {
               )}
             </form>
           )}
-        </div>
-      </div>
+      </TradeDeployShell>
     </div>
   );
 }
@@ -2042,65 +2042,42 @@ export default function DeployToken() {
         </script>
       </Helmet>
       <div className="relative w-full min-w-0">
-        <div className="relative z-10 container mx-auto px-4 py-8">
-          <div className="max-w-6xl mx-auto">
-            {/* Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
-                Deploy Your Token
-              </h1>
-              <p className="text-xl max-w-3xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
-                Create and deploy your own ERC-20 token with advanced security features, 
-                comprehensive documentation, and professional-grade infrastructure.
-              </p>
-              {/* Quick Actions */}
-              <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
-                <Link
-                  to="/project-pack"
-                  className="px-4 py-2 rounded-lg transition-colors text-sm font-medium"
-                  style={{
-                    backgroundColor: 'var(--bg-tertiary)',
-                    color: 'var(--finance-primary)',
-                    border: '1px solid var(--border-color)'
-                  }}
-                >
+        <TradeDeployShell width="wide">
+            <TradeDeployHero
+              eyebrow="Launch"
+              title="Deploy Your Token"
+              subtitle="Create and deploy your own ERC-20 token with security features and clear launch steps."
+              actions={
+                <>
+                <TradeDeployButton as={Link} to="/project-pack" variant="ghost">
                   Project pack
-                </Link>
-                <Link
-                  to="/linked-project"
-                  className="px-4 py-2 rounded-lg transition-colors text-sm font-medium"
-                  style={{
-                    backgroundColor: 'var(--bg-tertiary)',
-                    color: 'var(--text-secondary)',
-                    border: '1px solid var(--border-color)'
-                  }}
-                >
+                </TradeDeployButton>
+                <TradeDeployButton as={Link} to="/linked-project" variant="ghost">
                   Manage links
-                </Link>
-                <button
+                </TradeDeployButton>
+                <TradeDeployButton
+                  type="button"
+                  variant="ghost"
                   onClick={() => setShowPreview(!showPreview)}
-                  className="px-4 py-2 rounded-lg transition-colors text-sm font-medium"
                   style={{
-                    backgroundColor: showPreview ? 'var(--bg-secondary)' : 'var(--bg-tertiary)',
-                    color: 'var(--text-primary)',
-                    border: '1px solid var(--border-color)'
+                    backgroundColor: showPreview ? 'var(--bg-secondary)' : undefined,
                   }}
                 >
                   {showPreview ? 'Hide' : 'Show'} Preview
-                </button>
-                <button
+                </TradeDeployButton>
+                <TradeDeployButton
+                  type="button"
+                  variant="ghost"
                   onClick={() => setShowHistory(!showHistory)}
-                  className="px-4 py-2 rounded-lg transition-colors text-sm font-medium"
                   style={{
-                    backgroundColor: showHistory ? 'var(--bg-secondary)' : 'var(--bg-tertiary)',
-                    color: 'var(--text-primary)',
-                    border: '1px solid var(--border-color)'
+                    backgroundColor: showHistory ? 'var(--bg-secondary)' : undefined,
                   }}
                 >
                   Deployment History
-                </button>
-              </div>
-            </div>
+                </TradeDeployButton>
+                </>
+              }
+            />
 
             {/* Token Preview */}
             {showPreview && (
@@ -3123,8 +3100,7 @@ export default function DeployToken() {
                 </div>
               </div>
             )}
-          </div>
-        </div>
+        </TradeDeployShell>
       </div>
       <ShareCardModal
         isOpen={shareModalOpen}

@@ -387,33 +387,31 @@ const Tokens = () => {
       </Helmet>
       <div className="relative w-full min-w-0">
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          {/* Header */}
-          <div className="mb-6 sm:mb-8">
-            <h1 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              Trending Tokens
-            </h1>
-            <p className="text-gray-300 text-base sm:text-lg">
+          <header className="td-hero mb-6 sm:mb-8">
+            <span className="td-hero__eyebrow">Trade</span>
+            <h1 className="td-hero__title">Trending Tokens</h1>
+            <p className="td-hero__subtitle">
               Discover recently deployed tokens across different networks
             </p>
             {selectedChain === BOING_NATIVE_L1_CHAIN_ID && (
-              <p className="mt-3 text-sm text-teal-200/95 rounded-lg border border-teal-500/35 bg-teal-950/40 px-3 py-2">
+              <p className="td-status td-status--info mt-3 text-sm">
                 Boing testnet: explorer scans use RPC. CoinGecko does not price BOING; the app uses a{' '}
                 <span className="font-semibold">$5</span> reference per BOING for portfolio and fee estimates.
               </p>
             )}
-          </div>
+          </header>
 
           <LiveDeploymentsPanel />
 
           {/* Network Selection and Controls */}
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 border border-gray-700">
+          <div className="td-panel-surface mb-6 sm:mb-8">
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-4">
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 min-w-0 w-full md:flex-1 md:max-w-xl">
-                <span className="text-gray-300 text-sm sm:text-base shrink-0">Network:</span>
+                <span className="text-sm sm:text-base shrink-0" style={{ color: 'var(--text-secondary)' }}>Network:</span>
                 <select
                   value={selectedChain}
                   onChange={(e) => handleNetworkChange(parseInt(e.target.value))}
-                  className="w-full sm:min-w-[12rem] sm:max-w-md bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+                  className="td-field__input w-full sm:min-w-[12rem] sm:max-w-md text-sm sm:text-base"
                 >
                   {Object.entries(NETWORKS).map(([id, network]) => (
                     <option key={id} value={id}>
@@ -427,7 +425,7 @@ const Tokens = () => {
                 <button
                   type="button"
                   onClick={syncWithWallet}
-                  className="flex-1 compact:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition-colors text-sm sm:text-base whitespace-nowrap"
+                  className="td-btn td-btn--ghost flex-1 compact:flex-none text-sm sm:text-base whitespace-nowrap"
                 >
                   Sync with Wallet
                 </button>
@@ -435,7 +433,7 @@ const Tokens = () => {
                   type="button"
                   onClick={scanTokens}
                   disabled={isScanning}
-                  className="flex-1 compact:flex-none bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white px-4 sm:px-6 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base whitespace-nowrap"
+                  className="td-btn td-btn--primary flex-1 compact:flex-none text-sm sm:text-base whitespace-nowrap disabled:opacity-50"
                 >
                   {isScanning ? (
                     <>
@@ -457,9 +455,9 @@ const Tokens = () => {
           </div>
 
           {/* Search and Filters Section */}
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 border border-gray-700">
+          <div className="td-panel-surface mb-6 sm:mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg sm:text-xl font-semibold text-white">Search & Filters</h2>
+              <h2 className="text-lg sm:text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>Search & Filters</h2>
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className="px-3 py-1 rounded-lg transition-colors text-sm"

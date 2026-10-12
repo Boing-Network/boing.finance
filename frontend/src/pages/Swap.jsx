@@ -2070,13 +2070,14 @@ const Swap = () => {
           initialSettings={settings}
         />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+        <div className="td-shell td-shell--full">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-6 td-hero" style={{ animationDelay: '0s' }}>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
+              <span className="td-hero__eyebrow">Trade</span>
+              <h1 className="td-hero__title" style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)' }}>
                 Spot
               </h1>
-              <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+              <p className="td-hero__subtitle">
                 Discover trending tokens on this chain and swap on-chain
               </p>
             </div>

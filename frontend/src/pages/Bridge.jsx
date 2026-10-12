@@ -309,16 +309,15 @@ export default function Bridge() {
         <meta property="og:url" content="https://boing.finance/bridge" />
       </Helmet>
       <div className="relative w-full min-w-0">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <div className="mb-6">
-            <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-              Bridge
-            </h1>
-            <p className="text-sm sm:text-base mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+        <div className="td-shell td-shell--narrow">
+          <header className="td-hero">
+            <span className="td-hero__eyebrow">Trade</span>
+            <h1 className="td-hero__title">Bridge</h1>
+            <p className="td-hero__subtitle">
               EVM transfers routed by LI.FI. Boing takes a {PLATFORM_BRIDGE_FEE_LABEL} platform fee. Liquidity stays with the
-              aggregator's bridges — not a Boing-held inventory.
+              aggregator&apos;s bridges — not a Boing-held inventory.
             </p>
-          </div>
+          </header>
 
           {network && Number(network.chainId) === BOING_NATIVE_L1_CHAIN_ID && (
             <div

@@ -1121,16 +1121,16 @@ const Pools = () => {
       <div className="relative w-full min-w-0">
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold text-white mb-4">Liquidity Pools</h1>
-              <p className="text-xl text-gray-300">
+            <header className="td-hero td-hero--center mb-8">
+              <span className="td-hero__eyebrow">Trade</span>
+              <h1 className="td-hero__title">Liquidity Pools</h1>
+              <p className="td-hero__subtitle">
                 Manage your liquidity positions and explore available pools
               </p>
-            </div>
+            </header>
 
             {/* Tabs */}
-            <div className="bg-gray-800 rounded-xl p-2 mb-8 border border-gray-700">
+            <div className="td-panel-surface p-2 mb-8">
               <div
                 className="flex space-x-2"
                 role="tablist"
@@ -1157,14 +1157,23 @@ const Pools = () => {
                     tabIndex={activeTab === tab.id ? 0 : -1}
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
-                      activeTab === tab.id
-                        ? 'bg-cyan-600 text-white'
-                        : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                      activeTab === tab.id ? 'td-segmented__btn--active' : ''
                     }`}
+                    style={
+                      activeTab === tab.id
+                        ? undefined
+                        : { color: 'var(--text-secondary)' }
+                    }
                   >
                     {tab.name}
                     {tab.count > 0 && (
-                      <span className="ml-2 bg-gray-600 text-white text-xs px-2 py-1 rounded-full">
+                      <span
+                        className="ml-2 text-xs px-2 py-1 rounded-full"
+                        style={{
+                          backgroundColor: 'var(--bg-tertiary)',
+                          color: 'var(--text-primary)',
+                        }}
+                      >
                         {tab.count}
                       </span>
                     )}

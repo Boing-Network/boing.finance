@@ -1352,10 +1352,11 @@ function CreatePool() {
           <div className="max-w-6xl mx-auto">
             <DexFeatureBanner featureLabel="Create Pool" currentChainId={chainId} onSwitchNetwork={switchNetwork} />
             {chainId === BOING_NATIVE_L1_CHAIN_ID && (
-            <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold text-white mb-4">Create Liquidity Pool</h1>
-              <p className="text-xl text-gray-300">Deploy a native constant-product pool on Boing L1</p>
-            </div>
+            <header className="td-hero td-hero--center mb-8">
+              <span className="td-hero__eyebrow">Deploy</span>
+              <h1 className="td-hero__title">Create Liquidity Pool</h1>
+              <p className="td-hero__subtitle">Deploy a native constant-product pool on Boing L1</p>
+            </header>
             )}
             {chainId === BOING_NATIVE_L1_CHAIN_ID && <NativeBoingCreatePoolPanel />}
             {chainId === BOING_NATIVE_L1_CHAIN_ID && featureSupport.hasNativeAmm && (
@@ -1367,14 +1368,15 @@ function CreatePool() {
               </div>
             )}
             {chainId !== BOING_NATIVE_L1_CHAIN_ID && (
-            <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold text-white mb-4">Create Liquidity Pool</h1>
-              <p className="text-xl text-gray-300">Deploy new trading pairs and earn fees from every trade</p>
-            </div>
+            <header className="td-hero td-hero--center mb-8">
+              <span className="td-hero__eyebrow">Deploy</span>
+              <h1 className="td-hero__title">Create Liquidity Pool</h1>
+              <p className="td-hero__subtitle">Deploy new trading pairs and earn fees from every trade</p>
+            </header>
             )}
 
             {chainId !== BOING_NATIVE_L1_CHAIN_ID && !evmCreateVenue && (
-              <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 mb-6 text-sm text-gray-300">
+              <div className="td-status td-status--warn mb-6 text-sm">
                 <p className="mb-3">
                   This network has no in-app AMM factory. Switch to a supported chain, or create the pair on that
                   network&apos;s DEX.
