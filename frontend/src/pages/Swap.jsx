@@ -2150,7 +2150,7 @@ const Swap = () => {
                 const s = getNetworkStatusMessage();
                 const map = { success: 'bg-green-500/15 text-green-400', warning: 'bg-yellow-500/15 text-yellow-400', error: 'bg-red-500/15 text-red-400' };
                 return (
-                  <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${map[s.type] || 'bg-gray-500/15 text-gray-400'}`}>
+                  <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${map[s.type] || ''}`} style={map[s.type] ? undefined : { backgroundColor: 'color-mix(in srgb, var(--text-tertiary) 18%, transparent)', color: 'var(--text-secondary)' }}>
                     {s.type === 'success' && <span className="w-1.5 h-1.5 rounded-full bg-green-400" />}
                     {s.type === 'warning' && <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />}
                     {s.type === 'error' && <span className="w-1.5 h-1.5 rounded-full bg-red-400" />}
@@ -2176,11 +2176,11 @@ const Swap = () => {
             {/* Token Input Section */}
             <div className="space-y-4 sm:space-y-6">
               {/* Token In */}
-              <div className="bg-gray-750 rounded-xl p-4">
+              <div className="td-trade-panel">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-gray-400 text-sm">You Pay</span>
+                  <span className="td-trade-panel__label">You Pay</span>
                   <div className="flex items-center space-x-2">
-                    <span className="text-gray-400 text-xs">
+                    <span className="td-trade-panel__meta">
                       Balance: {getTokenInBalance() !== null ? getTokenInBalance().toFixed(4) : '0.0000'}
                     </span>
                     <button
@@ -2204,7 +2204,8 @@ const Swap = () => {
                       setAmountIn(e.target.value);
                     }}
                     placeholder="0.0"
-                    className="flex-1 bg-transparent text-xl sm:text-2xl font-bold text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0"
+                    className="flex-1 bg-transparent text-xl sm:text-2xl font-bold min-w-0 focus:outline-none"
+                    style={{ color: 'var(--text-primary)' }}
                   />
                   <SwapTokenSelect
                     idPrefix="swap-token-in"
@@ -2241,21 +2242,21 @@ const Swap = () => {
                 <button
                   type="button"
                   onClick={switchTokens}
-                  className="bg-gray-700 hover:bg-gray-600 rounded-full p-2 transition-colors"
+                  className="td-icon-btn"
                   aria-label="Switch tokens"
                 >
-                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" className="text-gray-300">
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                   </svg>
                 </button>
               </div>
 
               {/* Token Out */}
-              <div className="bg-gray-750 rounded-xl p-4">
+              <div className="td-trade-panel">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-gray-400 text-sm">You Receive</span>
+                  <span className="td-trade-panel__label">You Receive</span>
                   <div className="flex items-center space-x-2">
-                    <span className="text-gray-400 text-xs">
+                    <span className="td-trade-panel__meta">
                       Balance: {getTokenOutBalance() !== null ? getTokenOutBalance().toFixed(4) : '0.0000'}
                     </span>
                     {/* Remove the Max button for output - it should be calculated automatically */}
@@ -2270,7 +2271,8 @@ const Swap = () => {
                     value={amountOut}
                     readOnly
                     placeholder="0.0"
-                    className="flex-1 bg-transparent text-xl sm:text-2xl font-bold text-white placeholder-gray-500 focus:outline-none cursor-not-allowed"
+                    className="flex-1 bg-transparent text-xl sm:text-2xl font-bold min-w-0 focus:outline-none cursor-not-allowed"
+                    style={{ color: 'var(--text-primary)' }}
                   />
                   <SwapTokenSelect
                     idPrefix="swap-token-out"
@@ -2302,7 +2304,7 @@ const Swap = () => {
                   <div className="mt-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>≈ {amountOutUsd}</div>
                 ) : null}
                 {amountOut && parseFloat(amountOut) > 0 && (
-                  <div className="mt-2 text-xs text-gray-400">
+                  <div className="mt-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
                     Rate: 1 {tokenIn} = {(parseFloat(amountOut) / parseFloat(amountIn)).toFixed(6)} {tokenOut}
                     {routeSource === 'aggregator' && aggregatorQuote?.venue
                       ? ` · via ${aggregatorQuote.venue}`
@@ -2315,13 +2317,13 @@ const Swap = () => {
             </div>
 
             {/* Swap Details with Gas Info */}
-            <div className="mt-4 sm:mt-6 bg-gray-750 rounded-xl p-4 space-y-3">
+            <div className="td-trade-panel mt-4 sm:mt-6 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <span className="text-gray-400 text-sm">Exchange Rate</span>
+                  <span className="td-trade-panel__label">Exchange Rate</span>
                   <InfoTooltip content="The current exchange rate between the selected tokens. This rate is calculated from the DEX liquidity pools." />
                 </div>
-                <span className="text-white text-sm sm:text-base">
+                <span className="text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>
                   {amountIn && amountOut && parseFloat(amountIn) > 0 && parseFloat(amountOut) > 0 
                     ? `1 ${tokenIn} = ${(parseFloat(amountOut) / parseFloat(amountIn)).toFixed(6)} ${tokenOut}`
                     : 'Enter amount to see rate'
@@ -2331,14 +2333,14 @@ const Swap = () => {
               
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <span className="text-gray-400 text-sm">Price Impact</span>
+                  <span className="td-trade-panel__label">Price Impact</span>
                   <WarningTooltip content="The percentage change in price caused by your trade. Higher impact means larger price movement." />
                 </div>
                 <span className={`font-medium text-sm sm:text-base ${
                   amountOut && parseFloat(amountOut) > 0 
                     ? (parseFloat(amountOut) * 0.995 > 5 ? 'text-red-400' : parseFloat(amountOut) * 0.995 > 2 ? 'text-yellow-400' : 'text-green-400')
-                    : 'text-gray-400'
-                }`}>
+                    : ''
+                }`} style={!amountOut || parseFloat(amountOut) <= 0 ? { color: 'var(--text-secondary)' } : undefined}>
                   {amountOut && parseFloat(amountOut) > 0 ? (parseFloat(amountOut) * 0.995).toFixed(2) : '0.00'}%
                 </span>
               </div>
@@ -2346,14 +2348,14 @@ const Swap = () => {
               {/* Gas Fee Estimation (EIP-1559 when supported) */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <span className="text-gray-400 text-sm">Estimated Gas Fee</span>
+                  <span className="td-trade-panel__label">Estimated Gas Fee</span>
                   <InfoTooltip content={`Estimated gas fee for this transaction. Current priority: ${getGasPriorityLabel()} (${getGasFeeMultiplier()}x). Simulated before sending.`} />
                 </div>
                 <div className="flex items-center space-x-2">
                   {estimatedGasCostLoading ? (
-                    <span className="text-gray-400 text-sm">...</span>
+                    <span className="td-trade-panel__meta">…</span>
                   ) : (
-                    <span className="text-white text-sm sm:text-base">
+                    <span className="text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>
                       ~{estimatedGasCost ?? '—'}
                     </span>
                   )}
@@ -2382,7 +2384,7 @@ const Swap = () => {
               <button
                 onClick={handleSwap}
                 disabled={isSwapping || !isConnected || !account || !amountIn || parseFloat(amountIn) <= 0 || !tokenIn || !tokenOut || tokenIn === tokenOut}
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-8 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                className="td-btn td-btn--primary w-full py-4 text-base sm:text-lg"
               >
                 {isSwapping ? (
                   <div className="flex items-center justify-center space-x-2">

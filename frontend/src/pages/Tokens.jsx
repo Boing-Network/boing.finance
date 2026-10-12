@@ -549,38 +549,38 @@ const Tokens = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div className="space-y-2 sm:space-y-3">
                       <div className="flex flex-col sm:flex-row sm:justify-between">
-                        <span className=" text-xs sm:text-sm">Address:</span>
-                        <span className="font-mono text-gray-300 text-xs sm:text-sm break-all">{formatAddress(searchedToken.address)}</span>
+                        <span className="text-xs sm:text-sm" style={{ color: 'var(--text-primary)' }}>Address:</span>
+                        <span className="font-mono text-xs sm:text-sm break-all" style={{ color: 'var(--text-primary)' }}>{formatAddress(searchedToken.address)}</span>
                       </div>
                       
                       <div className="flex flex-col sm:flex-row sm:justify-between">
-                        <span className=" text-xs sm:text-sm">Network:</span>
-                        <span className="text-gray-300 text-xs sm:text-sm">{getNetworkName(searchedToken.chainId)}</span>
+                        <span className="text-xs sm:text-sm" style={{ color: 'var(--text-primary)' }}>Network:</span>
+                        <span className="text-xs sm:text-sm" style={{ color: 'var(--text-primary)' }}>{getNetworkName(searchedToken.chainId)}</span>
                       </div>
                       
                       <div className="flex flex-col sm:flex-row sm:justify-between">
-                        <span className=" text-xs sm:text-sm">Decimals:</span>
-                        <span className="text-gray-300 text-xs sm:text-sm">{searchedToken.decimals}</span>
+                        <span className="text-xs sm:text-sm" style={{ color: 'var(--text-primary)' }}>Decimals:</span>
+                        <span className="text-xs sm:text-sm" style={{ color: 'var(--text-primary)' }}>{searchedToken.decimals}</span>
                       </div>
                     </div>
                     
                     <div className="space-y-2 sm:space-y-3">
                       <div className="flex flex-col sm:flex-row sm:justify-between">
-                        <span className=" text-xs sm:text-sm">Total Supply:</span>
-                        <span className="text-gray-300 text-xs sm:text-sm">
+                        <span className="text-xs sm:text-sm" style={{ color: 'var(--text-primary)' }}>Total Supply:</span>
+                        <span className="text-xs sm:text-sm" style={{ color: 'var(--text-primary)' }}>
                           {formatNumber(parseFloat(ethers.formatUnits(searchedToken.totalSupply, searchedToken.decimals)))}
                         </span>
                       </div>
                       
                       {searchedToken.owner && (
                         <div className="flex flex-col sm:flex-row sm:justify-between">
-                          <span className=" text-xs sm:text-sm">Owner:</span>
-                          <span className="font-mono text-gray-300 text-xs sm:text-sm break-all">{formatAddress(searchedToken.owner)}</span>
+                          <span className="text-xs sm:text-sm" style={{ color: 'var(--text-primary)' }}>Owner:</span>
+                          <span className="font-mono text-xs sm:text-sm break-all" style={{ color: 'var(--text-primary)' }}>{formatAddress(searchedToken.owner)}</span>
                         </div>
                       )}
                       
                       <div className="flex flex-col sm:flex-row sm:justify-between">
-                        <span className=" text-xs sm:text-sm">Trending Score:</span>
+                        <span className="text-xs sm:text-sm" style={{ color: 'var(--text-primary)' }}>Trending Score:</span>
                         <span className="text-green-400 text-xs sm:text-sm">{searchedToken.trendingScore}</span>
                       </div>
                     </div>
@@ -610,14 +610,17 @@ const Tokens = () => {
           {loading && (
             <div className="text-center py-8 sm:py-12">
               <div className="w-6 sm:w-8 h-6 sm:h-8 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-3 sm:mb-4" style={{ borderColor: 'var(--finance-primary)', borderTopColor: 'transparent' }}></div>
-              <p className="text-gray-300 mb-2 text-sm sm:text-base">{scanProgress.message}</p>
+              <p className="mb-2 text-sm sm:text-base" style={{ color: 'var(--text-secondary)' }}>{scanProgress.message}</p>
               {scanProgress.total > 0 && (
                 <div className="w-full max-w-md mx-auto">
                   <div className="rounded-full h-2 mb-2" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
-                    <div 
-                      className="h-2 rounded-full transition-all duration-300" style={{ backgroundColor: 'var(--finance-primary)' }}
-                      style={{ width: `${(scanProgress.current / scanProgress.total) * 100}%` }}
-                    ></div>
+                    <div
+                      className="h-2 rounded-full transition-all duration-300"
+                      style={{
+                        backgroundColor: 'var(--finance-primary)',
+                        width: `${(scanProgress.current / scanProgress.total) * 100}%`,
+                      }}
+                    />
                   </div>
                   <p className="text-xs sm:text-sm" style={{ color: 'var(--text-tertiary)' }}>
                     {scanProgress.current} of {scanProgress.total} tokens processed
@@ -630,7 +633,7 @@ const Tokens = () => {
           {/* Tokens Grid */}
           {!loading && filteredTokens.length > 0 && (
             <div className="mb-4">
-              <p className="text-sm ">
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                 Showing {filteredTokens.length} of {tokens.length} tokens
               </p>
             </div>
@@ -710,17 +713,17 @@ const Tokens = () => {
                   <div className="space-y-2 text-xs sm:text-sm">
                     <div className="flex justify-between">
                       <span style={{ color: 'var(--text-tertiary)' }}>Address:</span>
-                      <span className="font-mono text-gray-300 truncate ml-2">{formatAddress(token.address)}</span>
+                      <span className="font-mono truncate ml-2" style={{ color: 'var(--text-primary)' }}>{formatAddress(token.address)}</span>
                     </div>
                     
                     <div className="flex justify-between">
                       <span style={{ color: 'var(--text-tertiary)' }}>Network:</span>
-                      <span className="text-gray-300">{getNetworkName(token.chainId)}</span>
+                      <span style={{ color: 'var(--text-primary)' }}>{getNetworkName(token.chainId)}</span>
                     </div>
                     
                     <div className="flex justify-between">
                       <span style={{ color: 'var(--text-tertiary)' }}>Supply:</span>
-                      <span className="text-gray-300">
+                      <span style={{ color: 'var(--text-primary)' }}>
                         {formatNumber(parseFloat(ethers.formatUnits(token.totalSupply, token.decimals)))}
                       </span>
                     </div>
@@ -728,15 +731,15 @@ const Tokens = () => {
                     {token.owner && (
                       <div className="flex justify-between">
                         <span style={{ color: 'var(--text-tertiary)' }}>Owner:</span>
-                        <span className="font-mono text-gray-300 truncate ml-2">{formatAddress(token.owner)}</span>
+                        <span className="font-mono truncate ml-2" style={{ color: 'var(--text-primary)' }}>{formatAddress(token.owner)}</span>
                       </div>
                     )}
                   </div>
 
                   <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-600">
                     <div className="flex justify-between items-center">
-                      <span className="text-xs sm:text-sm ">Deployed</span>
-                      <span className="text-xs sm:text-sm text-gray-300">
+                      <span className="text-xs sm:text-sm" style={{ color: 'var(--text-primary)' }}>Deployed</span>
+                      <span className="text-xs sm:text-sm" style={{ color: 'var(--text-primary)' }}>
                         {token.timestamp ? new Date(token.timestamp).toLocaleDateString() : 'Unknown'}
                       </span>
                     </div>

@@ -246,31 +246,22 @@ function Home() {
             <h2 className="text-2xl font-bold text-center" style={{ color: 'var(--text-primary)' }}>What you can do</h2>
             {/* First row - 6 cards in 3 columns - dynamically generated from navigation */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {memoizedNav.trading.map((item) => {
-                // Explicit boolean checks with logging
+              {[...memoizedNav.trading, ...memoizedNav.deployment].map((item) => {
                 const isComingSoon = Boolean(item.comingSoon);
                 const isAvailable = Boolean(item.isAvailable);
                 const shouldShowComingSoon = isComingSoon || !isAvailable;
-                
-                const getIcon = () => {
-                  if (item.name === 'Swap') return <SwapIcon />;
-                  if (item.name === 'Pools') return <LiquidityIcon />;
-                  if (item.name === 'Tokens') return <TokensIcon />;
-                  if (item.name === 'Bridge') return <BridgeIcon />;
-                  return null;
-                };
                 const CardContent = (
-                  <FeatureCard 
-                    title={item.name} 
-                    icon={getIcon()}
-                    description={item.description || ''} 
+                  <TradeDeployEntryCard
+                    title={item.name}
+                    icon={<NavIcon icon={item.icon} size={22} />}
+                    description={item.description || ''}
                     comingSoon={shouldShowComingSoon}
                   />
                 );
                 return shouldShowComingSoon ? (
                   <div key={item.name}>{CardContent}</div>
                 ) : (
-                  <a key={item.name} href={item.href} className="block">{CardContent}</a>
+                  <a key={item.name} href={item.href} className="block h-full">{CardContent}</a>
                 );
               })}
               {memoizedNav.analytics.map((item) => {
@@ -278,10 +269,10 @@ function Home() {
                 const isAvailable = Boolean(item.isAvailable);
                 const shouldShowComingSoon = isComingSoon || !isAvailable;
                 const getIcon = () => {
-                  if (item.name === 'Analytics') return <AnalyticsIcon />;
+                  if (item.name === 'Analytics' || item.name === 'Intelligence') return <AnalyticsIcon />;
                   if (item.name === 'Portfolio') return <PortfolioIcon />;
-                  if (item.name === 'Activity') return <ActivityIcon />;
-                  return null;
+                  if (item.name === 'Activity' || item.name === 'Wallet Flow') return <ActivityIcon />;
+                  return <NavIcon icon={item.icon} size={22} />;
                 };
                 const CardContent = (
                   <FeatureCard title={item.name} icon={getIcon()} description={item.description || ''} comingSoon={shouldShowComingSoon} />
@@ -292,11 +283,6 @@ function Home() {
                   <a key={item.name} href={item.href} className="block">{CardContent}</a>
                 );
               })}
-              {memoizedNav.deployment.map((item) => (
-                  <a key={item.name} href={item.href} className="block">
-                    <FeatureCard title={item.name} icon={<NavIcon icon={item.icon} size={22} />} description={item.description || ''} />
-                  </a>
-              ))}
             </div>
 
             {/* 4. Governance & BOING */}
@@ -510,25 +496,42 @@ function DeployTokenIcon() {
   );
 }
 
-// Feature Card Component (updated)
+/** Trade & Deploy entry card — kit-aligned, no pulse/glow. */
+function TradeDeployEntryCard({ title, icon, description, comingSoon }) {
+  return (
+    <div
+      className={`td-entry-card ${comingSoon ? 'td-entry-card--disabled' : ''}`}
+      title={comingSoon ? 'This feature will be available after mainnet launch.' : undefined}
+    >
+      <div className="td-entry-card__icon" aria-hidden="true">
+        {icon}
+      </div>
+      <h3 className="td-entry-card__title">
+        {title}
+        {comingSoon ? <span className="td-entry-card__soon">Coming soon</span> : null}
+      </h3>
+      <p className="td-entry-card__desc">{description}</p>
+    </div>
+  );
+}
+
+// Feature Card Component (updated) — used for Analytics / Governance / tools
 function FeatureCard({ title, icon, description, comingSoon }) {
   return (
     <div
-      className={`group relative backdrop-blur-sm border border-border rounded-xl p-6 transition-all duration-500 overflow-hidden h-full flex flex-col ${comingSoon ? 'opacity-60 cursor-not-allowed' : 'hover:border-border-hover hover:scale-105 hover:shadow-xl'}`}
+      className={`group relative backdrop-blur-sm border border-border rounded-xl p-6 transition-all duration-300 overflow-hidden h-full flex flex-col ${comingSoon ? 'opacity-60 cursor-not-allowed' : 'hover:border-border-hover hover:shadow-xl'}`}
       style={{
         background: 'linear-gradient(to bottom right, var(--bg-card), var(--bg-secondary))',
-        boxShadow: comingSoon ? undefined : '0 0 20px var(--glow-cyan)'
       }}
       title={comingSoon ? 'This feature will be available after mainnet launch.' : ''}
     >
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: 'linear-gradient(to right, var(--secondary-bg), var(--accent-cyan-bg))' }}></div>
       <div className="relative z-10 text-center flex flex-col flex-1 min-h-0">
         <div className="flex items-center justify-center mb-4">
-          <span className="text-2xl mr-3 transition-colors duration-300 animate-pulse group-hover:text-secondary" style={{ color: 'var(--accent-teal)' }}>{icon}</span>
+          <span className="text-2xl mr-3 transition-colors duration-300" style={{ color: 'var(--accent-teal)' }}>{icon}</span>
           <h3 className="text-lg font-semibold transition-colors duration-300 flex items-center" style={{ color: 'var(--text-primary)' }}>
             {title}
             {comingSoon && (
-              <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">Coming Soon</span>
+              <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold border" style={{ color: 'var(--text-secondary)', borderColor: 'color-mix(in srgb, var(--finance-amber, #e8b84a) 40%, transparent)', backgroundColor: 'color-mix(in srgb, var(--finance-amber, #e8b84a) 14%, transparent)' }}>Coming Soon</span>
             )}
           </h3>
         </div>

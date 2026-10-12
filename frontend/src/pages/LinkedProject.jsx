@@ -59,7 +59,7 @@ export default function LinkedProject() {
               <TradeDeployButton as={Link} to="/project-pack" variant="primary">
                 Project pack
               </TradeDeployButton>
-              <TradeDeployButton as={Link} to="/create-nft" variant="green">
+              <TradeDeployButton as={Link} to="/create-nft" variant="ghost">
                 Create NFT
               </TradeDeployButton>
               <TradeDeployButton as={Link} to="/deploy-token" variant="ghost">

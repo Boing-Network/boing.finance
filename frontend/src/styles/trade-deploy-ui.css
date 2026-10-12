@@ -269,7 +269,7 @@
   font-size: 0.875rem;
   font-weight: 600;
   padding: 0.625rem 1.15rem;
-  transition: filter 0.15s ease, transform 0.15s ease, background-color 0.15s ease;
+  transition: filter 0.15s ease, transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
   border: 1px solid transparent;
   text-decoration: none;
   cursor: pointer;
@@ -279,9 +279,21 @@
   transform: scale(0.98);
 }
 
-.td-btn:disabled {
-  opacity: 0.55;
+.td-btn:focus {
+  outline: none;
+}
+
+.td-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--finance-primary) 35%, transparent);
+}
+
+.td-btn:disabled,
+.td-btn[aria-disabled='true'] {
+  opacity: 0.48;
   cursor: not-allowed;
+  filter: saturate(0.7);
+  box-shadow: none;
 }
 
 .td-btn--primary {
@@ -412,7 +424,17 @@
 
 .td-mint-form .text-gray-400,
 .td-mint-form .text-gray-500 {
-  color: var(--text-tertiary) !important;
+  /* Prefer secondary for muted copy contrast on dark panels */
+  color: var(--text-secondary) !important;
+}
+
+.td-mint-form button:focus-visible,
+.td-mint-form a:focus-visible,
+.td-mint-form input:focus-visible,
+.td-mint-form textarea:focus-visible,
+.td-mint-form select:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--finance-primary) 32%, transparent);
 }
 
 .td-mint-form .bg-gray-700,
@@ -529,9 +551,9 @@
 
 .td-field__label {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 500;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   margin-bottom: 0.35rem;
 }
 
@@ -743,7 +765,185 @@
 
 .td-toggle:focus {
   outline: none;
+}
+
+.td-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--finance-primary) 40%, transparent);
+}
+
+.td-segmented__btn:focus {
+  outline: none;
+}
+
+.td-segmented__btn:focus-visible {
+  outline: none;
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--finance-primary) 40%, transparent);
+}
+
+.td-field__input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  color: var(--text-secondary);
+}
+
+/* Swap / Bridge amount rows */
+.td-trade-panel {
+  border-radius: 0.75rem;
+  padding: 1rem;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+}
+
+.td-trade-panel__label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.td-trade-panel__meta {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.td-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.td-icon-btn:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--finance-primary) 45%, transparent);
+  color: var(--finance-primary);
+  background-color: color-mix(in srgb, var(--finance-primary) 10%, transparent);
+}
+
+.td-icon-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--finance-primary) 35%, transparent);
+}
+
+/* Home / directory entry cards (Trade & Deploy kit) */
+.td-entry-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.25rem 1.35rem;
+  border-radius: var(--radius-xl, 1rem);
+  border: 1px solid var(--border-color);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--bg-card) 92%, transparent),
+    color-mix(in srgb, var(--bg-secondary) 88%, transparent)
+  );
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.td-entry-card:hover {
+  border-color: color-mix(in srgb, var(--finance-primary) 45%, var(--border-color));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--finance-primary) 18%, transparent);
+  transform: translateY(-2px);
+}
+
+.td-entry-card--disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.td-entry-card--disabled:hover {
+  transform: none;
+  border-color: var(--border-color);
+  box-shadow: none;
+}
+
+.td-entry-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  margin-bottom: 0.85rem;
+  color: var(--finance-primary);
+  background-color: color-mix(in srgb, var(--finance-primary) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--finance-primary) 28%, transparent);
+}
+
+.td-entry-card__title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.4rem;
+}
+
+.td-entry-card__desc {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  margin: 0;
+  flex: 1;
+}
+
+.td-entry-card__soon {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border: 1px solid color-mix(in srgb, var(--finance-amber, #e8b84a) 40%, transparent);
+  background-color: color-mix(in srgb, var(--finance-amber, #e8b84a) 14%, transparent);
+}
+
+/* LI.FI / third-party deep-link strip inside Bridge */
+.td-lifi-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px dashed color-mix(in srgb, var(--finance-primary) 30%, var(--border-color));
+  background-color: color-mix(in srgb, var(--finance-primary) 6%, var(--bg-tertiary));
+}
+
+.td-lifi-strip__label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.td-status-dot {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.td-status-dot--ok {
+  background-color: var(--finance-green, #22c55e);
+}
+
+.td-status-dot--pending {
+  background-color: var(--finance-amber, #e8b84a);
+}
+
+.td-status-dot--fail {
+  background-color: var(--finance-red);
+}
+
+.td-status-dot--idle {
+  background-color: var(--text-tertiary);
 }
 
 .td-toggle--on {
