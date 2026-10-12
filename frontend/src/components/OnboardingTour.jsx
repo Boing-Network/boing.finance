@@ -22,7 +22,7 @@ const OnboardingTour = ({ onComplete }) => {
   const steps = [
     {
       id: 'welcome',
-      title: 'Welcome to boing.finance! 🚀',
+      title: 'Welcome to boing.finance!',
       content: 'Your all-in-one DeFi platform for token deployment, trading, and portfolio management.',
       position: 'center',
       action: () => {
@@ -107,25 +107,17 @@ const OnboardingTour = ({ onComplete }) => {
   // Welcome modal style
   if (currentStep === 0) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 backdrop-blur-sm p-4 sm:p-6">
-        <div className="bg-gray-800 rounded-2xl p-4 sm:p-8 max-w-md w-full border border-cyan-500 shadow-2xl">
-          <div className="text-center mb-6">
-            <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-transparent">
-              {currentStepData.title}
-            </h2>
-            <p className="text-gray-300 mt-4">{currentStepData.content}</p>
-          </div>
-          <div className="flex gap-4">
-            <button
-              onClick={handleSkip}
-              className="flex-1 px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-            >
+      <div className="td-modal-backdrop backdrop-blur-sm">
+        <div className="td-modal text-center">
+          <h2 className="td-modal__title" style={{ fontSize: '1.5rem' }}>
+            {currentStepData.title}
+          </h2>
+          <p className="td-modal__body">{currentStepData.content}</p>
+          <div className="td-modal__actions" style={{ justifyContent: 'stretch' }}>
+            <button type="button" onClick={handleSkip} className="td-btn td-btn--ghost flex-1">
               Skip Tour
             </button>
-            <button
-              onClick={handleNext}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-lg transition-colors font-semibold"
-            >
+            <button type="button" onClick={handleNext} className="td-btn td-btn--primary flex-1">
               Get Started
             </button>
           </div>

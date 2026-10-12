@@ -82,26 +82,32 @@ export default function CompanionLinkGate({
     body = 'Reading on-chain links for this project.';
   }
 
+  const statusVariant =
+    state === 'linked'
+      ? 'td-status--success'
+      : state === 'unavailable' || state === 'invalid'
+        ? 'td-status--warn'
+        : state === 'not_linked'
+          ? 'td-status--locked'
+          : 'td-status--info';
+
   return (
     <div
-      className={`${compact ? 'rounded-lg px-3 py-2.5' : 'rounded-xl px-3 py-3'} border text-sm ${className}`}
-      style={{ borderColor: border, backgroundColor: bg, color: 'var(--text-secondary)' }}
+      className={`td-status ${statusVariant} ${compact ? 'px-3 py-2.5' : ''} text-sm ${className}`}
+      style={{ borderColor: border, backgroundColor: bg }}
       data-testid="companion-link-gate"
       data-gate-state={state}
       role="status"
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-            {title}
-          </p>
+          <p className="td-status__title">{title}</p>
           <p className="mt-1 text-xs sm:text-sm">{body}</p>
         </div>
         <button
           type="button"
           onClick={() => void refresh()}
-          className="text-xs underline shrink-0"
-          style={{ color: 'var(--finance-primary)' }}
+          className="td-btn td-btn--link text-xs shrink-0"
         >
           Refresh
         </button>
@@ -111,8 +117,7 @@ export default function CompanionLinkGate({
         {state === 'linked' && showUnlockLink ? (
           <Link
             to={href}
-            className="inline-flex px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold"
-            style={{ backgroundColor: 'var(--finance-primary)', color: '#041018' }}
+            className="td-btn td-btn--primary text-xs sm:text-sm"
             data-testid="companion-gate-unlocked-cta"
           >
             {actionLabel}
@@ -120,28 +125,16 @@ export default function CompanionLinkGate({
         ) : null}
         {state === 'not_linked' || state === 'invalid' ? (
           <>
-            <Link
-              to="/project-pack"
-              className="inline-flex px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium border"
-              style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
-            >
+            <Link to="/project-pack" className="td-btn td-btn--ghost text-xs sm:text-sm">
               Project pack
             </Link>
-            <Link
-              to="/linked-project"
-              className="inline-flex px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium underline"
-              style={{ color: 'var(--finance-primary)' }}
-            >
+            <Link to="/linked-project" className="td-btn td-btn--link text-xs sm:text-sm">
               Manage links
             </Link>
           </>
         ) : null}
         {state === 'unavailable' ? (
-          <Link
-            to="/linked-project"
-            className="inline-flex px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium underline"
-            style={{ color: 'var(--finance-primary)' }}
-          >
+          <Link to="/linked-project" className="td-btn td-btn--link text-xs sm:text-sm">
             Manage links
           </Link>
         ) : null}

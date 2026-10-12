@@ -35,7 +35,7 @@ export default function SwapMarketsBoard({
           <h2 className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
             Markets
           </h2>
-          <span className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>
+          <span className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--text-secondary)' }}>
             {networkName}
           </span>
         </div>
@@ -48,22 +48,19 @@ export default function SwapMarketsBoard({
           value={queryText}
           onChange={(e) => onQueryText(e.target.value)}
           placeholder="Search coin"
-          className="w-full text-xs rounded-lg px-2.5 py-2 bg-gray-800 text-white placeholder-gray-500 outline-none"
-          style={{ border: '1px solid var(--border-color)' }}
+          className="td-field__input text-xs"
         />
-        <div className="flex mt-2 rounded-lg overflow-hidden" style={{ border: '1px solid var(--border-color)' }}>
+        <div className="td-segmented w-full mt-2" role="tablist" aria-label="Market sort">
           {TABS.map((t) => {
             const on = tab === t.id;
             return (
               <button
                 key={t.id}
                 type="button"
+                role="tab"
+                aria-selected={on}
                 onClick={() => onTab(t.id)}
-                className="flex-1 py-1.5 text-[11px] font-semibold"
-                style={{
-                  backgroundColor: on ? 'rgba(240, 185, 11, 0.14)' : 'transparent',
-                  color: on ? '#f0b90b' : 'var(--text-secondary)',
-                }}
+                className={`td-segmented__btn flex-1 py-1.5 text-[11px] ${on ? 'td-segmented__btn--active' : ''}`}
               >
                 {t.label}
               </button>
@@ -72,7 +69,7 @@ export default function SwapMarketsBoard({
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-1 px-3 py-1.5 text-[10px] uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>
+      <div className="grid grid-cols-12 gap-1 px-3 py-1.5 text-[10px] uppercase tracking-wide" style={{ color: 'var(--text-secondary)' }}>
         <span className="col-span-5">Pair</span>
         <span className="col-span-3 text-right">Last</span>
         <span className="col-span-4 text-right">24h</span>
@@ -80,7 +77,7 @@ export default function SwapMarketsBoard({
 
       <div className="flex-1 overflow-y-auto">
         {isLoading && !rows.length ? (
-          <p className="px-3 py-6 text-xs text-center" style={{ color: 'var(--text-tertiary)' }}>
+          <p className="px-3 py-6 text-xs text-center" style={{ color: 'var(--text-secondary)' }}>
             Loading {networkName} markets…
           </p>
         ) : !rows.length ? (
@@ -98,17 +95,32 @@ export default function SwapMarketsBoard({
                   <button
                     type="button"
                     onClick={() => onSelect(m)}
-                    className="w-full grid grid-cols-12 gap-1 px-3 py-2 text-left hover:bg-white/5"
+                    className="w-full grid grid-cols-12 gap-1 px-3 py-2 text-left transition-colors"
                     style={{
-                      backgroundColor: selected ? 'rgba(240, 185, 11, 0.08)' : 'transparent',
-                      borderLeft: selected ? '2px solid #f0b90b' : '2px solid transparent',
+                      backgroundColor: selected
+                        ? 'color-mix(in srgb, var(--finance-primary) 10%, transparent)'
+                        : 'transparent',
+                      borderLeft: selected
+                        ? '2px solid var(--finance-primary)'
+                        : '2px solid transparent',
                     }}
                   >
                     <span className="col-span-5 flex items-center gap-2 min-w-0">
                       {m.logo ? (
-                        <img src={m.logo} alt="" className="w-5 h-5 rounded-full shrink-0 bg-gray-700" />
+                        <img
+                          src={m.logo}
+                          alt=""
+                          className="w-5 h-5 rounded-full shrink-0"
+                          style={{ backgroundColor: 'var(--bg-tertiary)' }}
+                        />
                       ) : (
-                        <span className="w-5 h-5 rounded-full bg-gray-700 shrink-0 text-[10px] flex items-center justify-center text-gray-300">
+                        <span
+                          className="w-5 h-5 rounded-full shrink-0 text-[10px] flex items-center justify-center font-semibold"
+                          style={{
+                            backgroundColor: 'color-mix(in srgb, var(--finance-primary) 18%, var(--bg-tertiary))',
+                            color: 'var(--finance-primary)',
+                          }}
+                        >
                           {m.symbol.slice(0, 1)}
                         </span>
                       )}
@@ -116,7 +128,7 @@ export default function SwapMarketsBoard({
                         <span className="block text-xs font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
                           {m.pair}
                         </span>
-                        <span className="block text-[10px] truncate" style={{ color: 'var(--text-tertiary)' }}>
+                        <span className="block text-[10px] truncate" style={{ color: 'var(--text-secondary)' }}>
                           {formatMarketVolume(m.volume24h)} vol
                         </span>
                       </span>
@@ -125,9 +137,15 @@ export default function SwapMarketsBoard({
                       {formatMarketPrice(m.priceUsd)}
                     </span>
                     <span
-                      className={`col-span-4 text-right text-xs tabular-nums font-semibold self-center ${
-                        change == null ? 'text-gray-500' : up ? 'text-green-400' : 'text-red-400'
-                      }`}
+                      className="col-span-4 text-right text-xs tabular-nums font-semibold self-center"
+                      style={{
+                        color:
+                          change == null
+                            ? 'var(--text-secondary)'
+                            : up
+                              ? 'var(--finance-green, #22c55e)'
+                              : 'var(--finance-red)',
+                      }}
                     >
                       {change || '—'}
                     </span>
@@ -138,7 +156,7 @@ export default function SwapMarketsBoard({
           </ul>
         )}
       </div>
-      <p className="px-3 py-2 text-[10px] border-t" style={{ color: 'var(--text-tertiary)', borderColor: 'var(--border-color)' }}>
+      <p className="px-3 py-2 text-[10px] border-t" style={{ color: 'var(--text-secondary)', borderColor: 'var(--border-color)' }}>
         Live DEX pools on this chain. Swap is on-chain — you keep the keys.
       </p>
     </div>

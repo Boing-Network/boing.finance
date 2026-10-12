@@ -21,6 +21,13 @@ import { rememberAssetDeployer } from '../utils/linkedNftToken';
 import CompanionLinkGate from '../components/CompanionLinkGate';
 import BuilderAttestationPanel from '../components/BuilderAttestationPanel';
 import { buildProjectPoolPath } from '../services/linkedNftTokenRegistry';
+import {
+  TradeDeployShell,
+  TradeDeployHero,
+  StepRail,
+  PageCard,
+  TradeDeployButton,
+} from '../components/PageLayout';
 
 const STEPS = [
   { id: 'details', label: 'Details' },
@@ -321,8 +328,6 @@ export default function ProjectPack() {
     }
   };
 
-  const stepIndex = STEPS.findIndex((s) => s.id === step);
-
   const detailsReady =
     collectionName.trim() &&
     collectionSymbol.trim() &&
@@ -338,80 +343,31 @@ export default function ProjectPack() {
           content="Launch a project: create an NFT collection, a token, and link them as companions in one guided flow."
         />
       </Helmet>
-      <div className="relative z-10 container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <motion.div
-            className="text-center mb-8"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45 }}
-          >
-            <p
-              className="text-xs font-semibold tracking-wide uppercase mb-2"
-              style={{ color: 'var(--finance-primary)' }}
-            >
-              Launch
-            </p>
-            <h1
-              className="text-4xl sm:text-5xl font-bold mb-3"
-              style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}
-            >
-              Project pack
-            </h1>
-            <p className="text-theme-tertiary max-w-lg mx-auto">
-              Create a collection and a token, then link them as companions — one guided path.
-            </p>
-          </motion.div>
+      <TradeDeployShell width="narrow">
+          <TradeDeployHero
+            eyebrow="Launch"
+            title="Project pack"
+            subtitle="Create a collection and a token, then link them as companions — one guided path."
+          />
 
-          {/* Progress */}
           {step !== 'done' ? (
-            <nav aria-label="Project pack steps" className="flex justify-center gap-1.5 sm:gap-2 mb-8">
-              {STEPS.filter((s) => s.id !== 'done').map((s, i) => {
-                const active = i === stepIndex;
-                const done = i < stepIndex;
-                return (
-                  <div key={s.id} className="flex flex-col items-center min-w-[3.5rem] sm:min-w-[4.5rem]">
-                    <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold mb-1 transition-colors"
-                      style={{
-                        backgroundColor: active || done ? 'var(--finance-primary)' : 'var(--bg-tertiary)',
-                        color: active || done ? '#041018' : 'var(--text-tertiary)',
-                        boxShadow: active ? '0 0 0 2px rgba(0, 229, 255, 0.35)' : undefined,
-                      }}
-                    >
-                      {done ? '✓' : i + 1}
-                    </div>
-                    <span
-                      className="text-[10px] sm:text-xs text-center"
-                      style={{ color: active ? 'var(--text-primary)' : 'var(--text-tertiary)' }}
-                    >
-                      {s.label}
-                    </span>
-                  </div>
-                );
-              })}
-            </nav>
+            <StepRail
+              steps={STEPS.filter((s) => s.id !== 'done')}
+              currentId={step}
+            />
           ) : null}
 
           {!isConnected ? (
-            <div
-              className="rounded-2xl border p-6 sm:p-8 text-center"
-              style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
-            >
+            <PageCard className="text-center">
               <h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
                 Connect to start
               </h2>
               <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>
                 Use Boing Express so you can create your collection, token, and companions in one place.
               </p>
-              <button
-                type="button"
-                onClick={() => connectWallet?.()}
-                className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white"
-                style={{ backgroundColor: 'var(--finance-green-mid)' }}
-              >
+              <TradeDeployButton type="button" variant="green" onClick={() => connectWallet?.()}>
                 Connect wallet
-              </button>
+              </TradeDeployButton>
               <p className="mt-4 text-xs" style={{ color: 'var(--text-tertiary)' }}>
                 Prefer separate screens?{' '}
                 <Link to="/create-nft" className="underline" style={{ color: 'var(--finance-primary)' }}>
@@ -426,7 +382,7 @@ export default function ProjectPack() {
                   Manage links
                 </Link>
               </p>
-            </div>
+            </PageCard>
           ) : (
             <AnimatePresence mode="wait">
               <motion.div
@@ -435,8 +391,7 @@ export default function ProjectPack() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.28 }}
-                className="rounded-2xl border p-5 sm:p-7 min-w-0 overflow-x-hidden"
-                style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
+                className="td-card min-w-0 overflow-x-hidden"
               >
                 {step === 'details' ? (
                   <>
@@ -825,8 +780,7 @@ export default function ProjectPack() {
               Manage links
             </Link>
           </p>
-        </div>
-      </div>
+      </TradeDeployShell>
     </>
   );
 }
