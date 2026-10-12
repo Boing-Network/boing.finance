@@ -37,6 +37,11 @@ import { tryAccruePoints } from '../utils/tryAccruePoints';
 import { brandLogoPngAbsolute } from '../config/brandAssets';
 import { showDeployCelebration } from '../utils/deployCelebration';
 import { rememberAssetDeployer } from '../utils/linkedNftToken';
+import {
+  TradeDeployShell,
+  TradeDeployHero,
+  TradeDeployButton,
+} from '../components/PageLayout';
 
 // Import ABI and bytecode from the artifacts
 const ERC20_ABI = AdvancedERC20Artifact.abi;
@@ -48,6 +53,13 @@ const _TOKEN_IMPLEMENTATION_ABI = TokenImplementationArtifact.abi;
 const BOING_LOGO_URL = brandLogoPngAbsolute();
 
 // MochiAstronaut component
+
+function riskClass(risk) {
+  const r = String(risk || '').toLowerCase();
+  if (r.includes('medium') || r.includes('high')) return 'td-risk--medium';
+  if (r.includes('very')) return 'td-risk--low';
+  return 'td-risk--low';
+}
 
 // Toggle Button Component
 function ToggleButton({ enabled, onToggle, disabled, size = "md", ariaLabel, ariaLabelledBy }) {
@@ -72,20 +84,10 @@ function ToggleButton({ enabled, onToggle, disabled, size = "md", ariaLabel, ari
       aria-labelledby={ariaLabelledBy}
       onClick={onToggle}
       disabled={disabled}
-      className={`
-        ${sizeClasses[size]} relative inline-flex items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900
-        ${enabled 
-          ? 'bg-blue-600 hover:bg-blue-700' 
-          : 'bg-gray-600 hover:bg-gray-500'
-        }
-        ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-      `}
+      className={`td-toggle ${sizeClasses[size]} ${enabled ? 'td-toggle--on' : 'td-toggle--off'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
     >
       <span
-        className={`
-          ${dotSizeClasses[size]} inline-block transform transition-transform duration-200 ease-in-out bg-white rounded-full shadow-lg
-          ${enabled ? 'translate-x-7' : 'translate-x-1'}
-        `}
+        className={`td-toggle__dot ${dotSizeClasses[size]} ${enabled ? 'translate-x-7' : 'translate-x-1'}`}
       />
     </button>
   );
@@ -97,7 +99,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Mint Authority Removal',
     description: 'Revoke mint authority after the initial supply so no more tokens can be created.',
     risk: 'Low',
-    icon: '🔒',
     available: true,
   },
   {
@@ -105,7 +106,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Freezing Authority',
     description: 'Keep freeze authority so you can freeze token accounts in an emergency.',
     risk: 'Medium',
-    icon: '❄️',
     available: true,
   },
   {
@@ -113,7 +113,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Blacklist Function',
     description: 'SPL equivalent of a blacklist: freeze authority can freeze a wallet’s token account.',
     risk: 'Medium',
-    icon: '🚫',
     available: true,
   },
   {
@@ -121,7 +120,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Immutable Metadata',
     description: 'Lock name, symbol, and URI on-chain so they cannot be changed later.',
     risk: 'Very Low',
-    icon: '📝',
     available: true,
   },
   {
@@ -129,7 +127,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Ownership Renouncement',
     description: 'Remove mint and freeze authority and lock metadata in one step (fixed, decentralized mint).',
     risk: 'Very Low',
-    icon: '🔐',
     available: true,
   },
   {
@@ -137,7 +134,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Transaction Limits',
     description: 'Cap how many tokens can move in one transfer.',
     risk: 'Low',
-    icon: '📊',
     available: false,
     unavailableReason: 'Needs a custom transfer-hook program, not standard SPL.',
   },
@@ -146,7 +142,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Anti-Bot Protection',
     description: 'Throttle bots and MEV around launch.',
     risk: 'Low',
-    icon: '🤖',
     available: false,
     unavailableReason: 'Needs a custom transfer-hook program, not standard SPL.',
   },
@@ -155,7 +150,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Cooldown Period',
     description: 'Require a delay between transfers.',
     risk: 'Low',
-    icon: '⏰',
     available: false,
     unavailableReason: 'Needs a custom transfer-hook program, not standard SPL.',
   },
@@ -164,7 +158,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Anti-Whale Protection',
     description: 'Limit how large a single wallet can become.',
     risk: 'Low',
-    icon: '🐋',
     available: false,
     unavailableReason: 'Needs a custom transfer-hook program, not standard SPL.',
   },
@@ -173,7 +166,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Pause Functionality',
     description: 'Emergency pause of all transfers.',
     risk: 'Medium',
-    icon: '⏸️',
     available: false,
     unavailableReason: 'Needs Token-2022 pausable or a custom program.',
   },
@@ -182,7 +174,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Timelock Contract',
     description: 'Delay administrative changes.',
     risk: 'Very Low',
-    icon: '⏳',
     available: false,
     unavailableReason: 'Needs a separate timelock program.',
   },
@@ -191,7 +182,6 @@ const SOLANA_DEPLOY_FEATURES = [
     name: 'Max Wallet Limit',
     description: 'Set a maximum token balance per wallet.',
     risk: 'Low',
-    icon: '💼',
     available: false,
     unavailableReason: 'Needs a custom transfer-hook program, not standard SPL.',
   },
@@ -320,29 +310,25 @@ function DeployTokenSolanaContent() {
 
   return (
     <div className="relative w-full min-w-0">
-      <div className="relative z-10 container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
+      <TradeDeployShell width="medium">
           <Helmet>
             <title>Deploy SPL Token - Solana | Boing Finance</title>
           </Helmet>
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
-              Deploy SPL Token
-            </h1>
-            <p className="text-xl" style={{ color: 'var(--text-secondary)' }}>
-              Create an SPL token on Solana {solanaNetwork.name}
-            </p>
+          <TradeDeployHero
+            eyebrow="Launch"
+            title="Deploy SPL Token"
+            subtitle={`Create an SPL token on Solana ${solanaNetwork.name}`}
+          >
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
               {['mainnet', 'devnet'].map((net) => (
                 <button
                   key={net}
                   type="button"
                   onClick={() => setSolanaNetwork?.(net)}
-                  className="px-3 py-1 rounded-full text-sm font-medium"
+                  className={`td-segmented__btn ${network === net ? 'td-segmented__btn--active' : ''}`}
                   style={{
-                    backgroundColor: network === net ? 'var(--accent-primary)' : 'var(--bg-card)',
-                    color: network === net ? 'white' : 'var(--text-secondary)',
                     border: '1px solid var(--border-color)',
+                    backgroundColor: network === net ? undefined : 'var(--bg-card)',
                   }}
                 >
                   {net === 'mainnet' ? 'Mainnet' : 'Devnet'}
@@ -355,7 +341,7 @@ function DeployTokenSolanaContent() {
                 {balance === 0 ? ` — fund this wallet on ${network === 'mainnet' ? 'Mainnet' : 'Devnet'} or switch cluster.` : ''}
               </p>
             )}
-          </div>
+          </TradeDeployHero>
 
           {!connected ? (
             <div className="rounded-xl border p-8 text-center" style={{
@@ -457,37 +443,30 @@ function DeployTokenSolanaContent() {
                 <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
                   Same choices as EVM deploy, mapped onto SPL mint / freeze / Metaplex authorities. Transfer limits, anti-bot, and pause need a custom Solana program.
                 </p>
-                <div className="space-y-3">
+                <div className="td-feature-matrix">
                   {SOLANA_DEPLOY_FEATURES.map((feature) => {
                     const enabled = Boolean(features[feature.key]);
                     return (
                       <div
                         key={feature.key}
-                        className="p-3 sm:p-4 rounded-lg border"
-                        style={{
-                          backgroundColor: 'var(--bg-secondary)',
-                          borderColor: 'var(--border-color)',
-                          opacity: feature.available ? 1 : 0.72,
-                        }}
+                        className="td-feature-row"
+                        style={{ opacity: feature.available ? 1 : 0.72 }}
                       >
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                          <div className="flex items-start space-x-3 min-w-0">
-                            <span className="text-xl flex-shrink-0">{feature.icon}</span>
-                            <div className="min-w-0">
-                              <h3 id={`deploy-solana-${feature.key}`} className="font-medium text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>
+                        <div className="td-feature-row__top">
+                          <div className="td-feature-row__meta">
+                              <h3 id={`deploy-solana-${feature.key}`} className="td-feature-row__title">
                                 {feature.name}
                               </h3>
-                              <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{feature.description}</p>
+                              <p className="td-feature-row__desc">{feature.description}</p>
                               {feature.available ? (
-                                <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-900 text-blue-200 rounded-full mt-1">
-                                  {feature.risk} Risk
+                                <span className={`td-risk ${riskClass(feature.risk)}`}>
+                                  {feature.risk} risk
                                 </span>
                               ) : (
-                                <span className="inline-block px-2 py-1 text-xs font-medium rounded-full mt-1" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-secondary)' }}>
+                                <span className="td-risk td-risk--medium">
                                   {feature.unavailableReason}
                                 </span>
                               )}
-                            </div>
                           </div>
                           <ToggleButton
                             enabled={feature.available && enabled}
@@ -522,7 +501,7 @@ function DeployTokenSolanaContent() {
                     href={`${solanaNetwork.explorer}/tx/${signature}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-blue-500 hover:underline"
+                    className="td-btn--link text-sm"
                   >
                     View on Explorer
                   </a>
@@ -530,8 +509,7 @@ function DeployTokenSolanaContent() {
               )}
             </form>
           )}
-        </div>
-      </div>
+      </TradeDeployShell>
     </div>
   );
 }
@@ -543,7 +521,6 @@ const SECURITY_FEATURES = [
     description: "Remove ability to create new tokens after deployment",
     enabled: true,
     risk: "Low",
-    icon: "🔒",
     featureKey: "renounceMint"
   },
   {
@@ -551,7 +528,6 @@ const SECURITY_FEATURES = [
     description: "Allow freezing specific addresses (emergency control)",
     enabled: false,
     risk: "Medium",
-    icon: "❄️",
     featureKey: "enableFreezing"
   },
   {
@@ -559,7 +535,6 @@ const SECURITY_FEATURES = [
     description: "Block specific addresses from trading",
     enabled: false,
     risk: "Medium",
-    icon: "🚫",
     featureKey: "enableBlacklist"
   },
   {
@@ -567,7 +542,6 @@ const SECURITY_FEATURES = [
     description: "Set maximum transaction amounts",
     enabled: false,
     risk: "Low",
-    icon: "📊",
     featureKey: "maxTxAmount"
   },
   {
@@ -575,7 +549,6 @@ const SECURITY_FEATURES = [
     description: "Transfer ownership to zero address (decentralization)",
     enabled: false,
     risk: "Very Low",
-    icon: "🔒🔒🔒🔒",
     featureKey: "renounceOwnership"
   },
   {
@@ -583,7 +556,6 @@ const SECURITY_FEATURES = [
     description: "Prevent automated trading bots and MEV attacks",
     enabled: false,
     risk: "Low",
-    icon: "🤖",
     featureKey: "antiBot"
   },
   {
@@ -591,7 +563,6 @@ const SECURITY_FEATURES = [
     description: "Add delay between transactions to prevent rapid trading",
     enabled: false,
     risk: "Low",
-    icon: "⏰",
     featureKey: "cooldown"
   },
   {
@@ -599,7 +570,6 @@ const SECURITY_FEATURES = [
     description: "Limit maximum wallet holdings to prevent concentration",
     enabled: false,
     risk: "Low",
-    icon: "🐋",
     featureKey: "antiWhale"
   },
   {
@@ -607,7 +577,6 @@ const SECURITY_FEATURES = [
     description: "Emergency pause all trading (owner only)",
     enabled: false,
     risk: "Medium",
-    icon: "⏸️",
     featureKey: "pauseFunction"
   },
   {
@@ -615,7 +584,6 @@ const SECURITY_FEATURES = [
     description: "Add delay to administrative functions",
     enabled: false,
     risk: "Very Low",
-    icon: "⏳",
     featureKey: "timelock"
   },
   {
@@ -623,7 +591,6 @@ const SECURITY_FEATURES = [
     description: "Set maximum tokens per wallet address",
     enabled: false,
     risk: "Low",
-    icon: "💼",
     featureKey: "maxWallet"
   }
 ];
@@ -635,49 +602,42 @@ const _SOCIAL_STANDARDS = [
     description: "Official project website",
     required: true,
     placeholder: "https://yourproject.com",
-    icon: "🌐"
   },
   {
     name: "Twitter/X",
     description: "Official social media account",
     required: false,
     placeholder: "https://twitter.com/yourproject",
-    icon: "🐦"
   },
   {
     name: "Telegram",
     description: "Community chat group",
     required: false,
     placeholder: "https://t.me/yourproject",
-    icon: "📱"
   },
   {
     name: "Discord",
     description: "Community server",
     required: false,
     placeholder: "https://discord.gg/yourproject",
-    icon: "🎮"
   },
   {
     name: "GitHub",
     description: "Source code repository",
     required: false,
     placeholder: "https://github.com/yourproject",
-    icon: "💻"
   },
   {
     name: "Medium",
     description: "Project blog/updates",
     required: false,
     placeholder: "https://medium.com/@yourproject",
-    icon: "📝"
   },
   {
     name: "Reddit",
     description: "Community subreddit",
     required: false,
     placeholder: "https://reddit.com/r/yourproject",
-    icon: "🤖"
   }
 ];
 
@@ -827,41 +787,22 @@ function deployCtaLabel(selectedPlan, network) {
 
 // Deployment Tips
 const DEPLOYMENT_TIPS = [
-  // Basic Token Information
-  "Choose a memorable name that reflects your token's purpose",
-  "Keep symbol short (3-8 characters) and unique",
-  "18 decimals is standard for most tokens",
-  "Consider initial supply carefully - it affects tokenomics",
-  
-  // Pre-deployment Security
-  "Test on testnet before mainnet deployment",
-  "Verify your contract on block explorers after deployment",
-  "Set up social media accounts before deployment",
-  "Provide clear project description and website",
-  
-  // Critical Security Features
-  "🔒 Enable mint authority removal for security",
-  "🛡️ Consider freezing authority for emergency control",
-  "🚫 Enable blacklist function for compliance",
-  "📊 Set maximum transaction limits (0.1-10%)",
-  
-  // Liquidity & Trading Security
-  "💧 Lock liquidity for 90+ days minimum",
-  "🔐 Use timelock contracts for ownership changes",
-  "📈 Consider renouncing ownership for decentralization",
-  "⚡ Set reasonable gas limits for transactions",
-  
-  // Community & Transparency
-  "🌐 Provide official website and social links",
-  "📝 Maintain clear documentation and roadmap",
-  "🔍 Make source code open source and verified",
-  "📊 Regular updates and community engagement",
-  
-  // Post-deployment Actions
-  "✅ Verify contract on Etherscan immediately",
-  "🔗 Add liquidity to DEX for trading",
-  "📢 Announce deployment on social media",
-  "📋 Document all security features implemented"
+  'Choose a memorable name that reflects your token’s purpose',
+  'Keep the symbol short (3–8 characters) and unique',
+  '18 decimals is standard for most tokens',
+  'Set initial supply carefully — it shapes tokenomics',
+  'Test on testnet before mainnet deployment',
+  'Verify the contract on a block explorer after deployment',
+  'Set up social accounts and a clear project description first',
+  'Remove mint authority when you want a fixed supply',
+  'Keep freeze authority only if you need emergency control',
+  'Use blacklist or transfer limits when compliance requires it',
+  'Lock liquidity for 90+ days when listing publicly',
+  'Use a timelock for ownership changes when you keep admin keys',
+  'Renounce ownership only after you no longer need admin controls',
+  'Add website and social links so explorers and users can verify you',
+  'Keep docs and a short roadmap public',
+  'Verify the contract, then add liquidity and announce the deploy',
 ];
 
 // Utility: Manual deployment using Interface encoding (Hardhat-style)
@@ -1211,30 +1152,12 @@ export default function DeployToken() {
 
   // Logo handling information (reserved for future use)
   const _LogoInfo = () => (
-    <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
-      <div className="flex items-start">
-        <div className="flex-shrink-0">
-          <svg className="w-5 h-5 text-blue-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-          </svg>
-        </div>
-        <div className="ml-3">
-          <h3 className="text-sm font-medium text-blue-300">Token Logo Information</h3>
-          <div className="mt-2 text-sm text-blue-200">
-            <p className="mb-2">
-              <strong>Decentralized Approach:</strong> For true decentralization, consider these options:
-            </p>
-            <ul className="list-disc list-inside space-y-1 ml-2">
-              <li><strong>IPFS:</strong> Upload to IPFS and use the hash (e.g., ipfs://QmXxxx...)</li>
-              <li><strong>Arweave:</strong> Permanent decentralized storage</li>
-              <li><strong>On-chain:</strong> Store base64 data (expensive but truly decentralized)</li>
-            </ul>
-            <p className="mt-2 text-xs text-blue-300">
-              <strong>Note:</strong> This app does not provide a logo upload feature. If you want your token to have a logo, you must handle it manually after deployment. Most projects use decentralized storage (like IPFS or Arweave) and submit the logo to token lists or explorers. See the docs of your preferred explorer for how to add a logo.
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="td-callout mb-6">
+      <h3 className="td-callout__title">Token logo</h3>
+      <p className="td-callout__body">
+        Prefer IPFS or Arweave URIs for a lasting logo. On-chain base64 works but is expensive.
+        After deploy, submit the logo to explorers or token lists if needed.
+      </p>
     </div>
   );
 
@@ -1585,37 +1508,33 @@ export default function DeployToken() {
         isFeatureAllowed('timelock') ? ethers.toBigInt((timelockDelay || 0) * 3600) : 0n, // Convert hours to seconds
         network?.chainId || 1 // Add chainId parameter for network-aware service fee validation
       ];
-      // Validate parameter count
+      // Validate parameter count / types (plain errors for the UI)
       if (constructorParams.length !== 27) {
-        throw new Error(`Parameter count mismatch: expected 27, got ${constructorParams.length}`);
+        throw new Error('Token setup is incomplete. Refresh and try again.');
       }
-      // Validate BigInt parameters
       const bigIntParams = [3, 16, 18, 20, 22, 25]; // supply, maxTx, serviceChargeWei, cooldownPeriod, maxWallet, timelockDelay
-      bigIntParams.forEach(index => {
+      bigIntParams.forEach((index) => {
         if (typeof constructorParams[index] !== 'bigint') {
-          throw new Error(`Parameter ${index} must be BigInt, got ${typeof constructorParams[index]}: ${constructorParams[index]}`);
+          throw new Error('One of the amount fields is invalid. Check supply and limits, then try again.');
         }
       });
-      // Validate address parameters
       const addressParams = [4, 17]; // freezingAuthority, platformWallet
-      addressParams.forEach(index => {
+      addressParams.forEach((index) => {
         if (typeof constructorParams[index] !== 'string' || !constructorParams[index].startsWith('0x')) {
-          throw new Error(`Parameter ${index} must be valid address, got: ${constructorParams[index]}`);
+          throw new Error('A wallet address is missing or invalid. Check freeze authority and try again.');
         }
       });
-      // Validate boolean parameters
       const booleanParams = [14, 15, 19, 21, 23, 24]; // renounceMint, enableBlacklist, antiBotEnabled, antiWhaleEnabled, pauseFunctionEnabled, timelockEnabled
-      booleanParams.forEach(index => {
+      booleanParams.forEach((index) => {
         if (typeof constructorParams[index] !== 'boolean') {
-          throw new Error(`Parameter ${index} must be boolean, got ${typeof constructorParams[index]}: ${constructorParams[index]}`);
+          throw new Error('A security toggle is in a bad state. Toggle it off and on, then try again.');
         }
       });
-      // Validate number parameters
-      if (typeof constructorParams[2] !== 'number') { // decimals
-        throw new Error(`Parameter 2 (decimals) must be number, got ${typeof constructorParams[2]}: ${constructorParams[2]}`);
+      if (typeof constructorParams[2] !== 'number') {
+        throw new Error('Decimals must be a number between 0 and 18.');
       }
-      if (typeof constructorParams[26] !== 'number') { // chainId
-        throw new Error(`Parameter 26 (chainId) must be number, got ${typeof constructorParams[26]}: ${constructorParams[26]}`);
+      if (typeof constructorParams[26] !== 'number') {
+        throw new Error('Network could not be read. Switch chain in your wallet and try again.');
       }
       
       // Debug logging
@@ -2042,65 +1961,42 @@ export default function DeployToken() {
         </script>
       </Helmet>
       <div className="relative w-full min-w-0">
-        <div className="relative z-10 container mx-auto px-4 py-8">
-          <div className="max-w-6xl mx-auto">
-            {/* Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
-                Deploy Your Token
-              </h1>
-              <p className="text-xl max-w-3xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
-                Create and deploy your own ERC-20 token with advanced security features, 
-                comprehensive documentation, and professional-grade infrastructure.
-              </p>
-              {/* Quick Actions */}
-              <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
-                <Link
-                  to="/project-pack"
-                  className="px-4 py-2 rounded-lg transition-colors text-sm font-medium"
-                  style={{
-                    backgroundColor: 'var(--bg-tertiary)',
-                    color: 'var(--finance-primary)',
-                    border: '1px solid var(--border-color)'
-                  }}
-                >
+        <TradeDeployShell width="wide">
+            <TradeDeployHero
+              eyebrow="Launch"
+              title="Deploy Your Token"
+              subtitle="Create and deploy your own ERC-20 token with security features and clear launch steps."
+              actions={
+                <>
+                <TradeDeployButton as={Link} to="/project-pack" variant="ghost">
                   Project pack
-                </Link>
-                <Link
-                  to="/linked-project"
-                  className="px-4 py-2 rounded-lg transition-colors text-sm font-medium"
-                  style={{
-                    backgroundColor: 'var(--bg-tertiary)',
-                    color: 'var(--text-secondary)',
-                    border: '1px solid var(--border-color)'
-                  }}
-                >
+                </TradeDeployButton>
+                <TradeDeployButton as={Link} to="/linked-project" variant="ghost">
                   Manage links
-                </Link>
-                <button
+                </TradeDeployButton>
+                <TradeDeployButton
+                  type="button"
+                  variant="ghost"
                   onClick={() => setShowPreview(!showPreview)}
-                  className="px-4 py-2 rounded-lg transition-colors text-sm font-medium"
                   style={{
-                    backgroundColor: showPreview ? 'var(--bg-secondary)' : 'var(--bg-tertiary)',
-                    color: 'var(--text-primary)',
-                    border: '1px solid var(--border-color)'
+                    backgroundColor: showPreview ? 'var(--bg-secondary)' : undefined,
                   }}
                 >
                   {showPreview ? 'Hide' : 'Show'} Preview
-                </button>
-                <button
+                </TradeDeployButton>
+                <TradeDeployButton
+                  type="button"
+                  variant="ghost"
                   onClick={() => setShowHistory(!showHistory)}
-                  className="px-4 py-2 rounded-lg transition-colors text-sm font-medium"
                   style={{
-                    backgroundColor: showHistory ? 'var(--bg-secondary)' : 'var(--bg-tertiary)',
-                    color: 'var(--text-primary)',
-                    border: '1px solid var(--border-color)'
+                    backgroundColor: showHistory ? 'var(--bg-secondary)' : undefined,
                   }}
                 >
                   Deployment History
-                </button>
-              </div>
-            </div>
+                </TradeDeployButton>
+                </>
+              }
+            />
 
             {/* Token Preview */}
             {showPreview && (
@@ -2183,7 +2079,7 @@ export default function DeployToken() {
                   <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Choose Your Service Plan</h2>
                   {network && (
                     <p className="text-sm mt-1" style={{ color: 'var(--text-tertiary)' }}>
-                      Pricing for <span className="text-blue-400 font-medium">{network.name}</span> network
+                      Pricing for <span className="font-medium" style={{ color: 'var(--finance-primary)' }}>{network.name}</span> network
                     </p>
                   )}
                   {!network && !isConnected && (
@@ -2218,12 +2114,13 @@ export default function DeployToken() {
                   )}
                 </div>
                 <div className="flex items-center space-x-4">
-                  <p className="text-xs text-gray-500">
-                    💡 Switch networks to see different pricing
+                  <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                    Switch networks to see different pricing
                   </p>
                   <button
+                    type="button"
                     onClick={() => setShowPricing(!showPricing)}
-                    className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                    className="td-btn td-btn--link text-sm"
                   >
                     {showPricing ? 'Hide Details' : 'View Details'}
                   </button>
@@ -2237,14 +2134,11 @@ export default function DeployToken() {
                   <label
                     key={key}
                     htmlFor={`deploy-service-plan-${key}`}
-                    className={`relative block p-6 rounded-xl border-2 cursor-pointer transition-all ${
-                      selectedPlan === key
-                        ? 'border-blue-500'
-                        : 'hover:border-gray-500'
-                    }`}
+                    className="relative block p-6 rounded-xl border-2 cursor-pointer transition-all"
                     style={{
                       backgroundColor: 'var(--bg-card)',
-                      borderColor: selectedPlan === key ? 'var(--accent-cyan)' : 'var(--border-color)'
+                      borderColor: selectedPlan === key ? 'var(--finance-primary)' : 'var(--border-color)',
+                      boxShadow: selectedPlan === key ? '0 0 0 1px color-mix(in srgb, var(--finance-primary) 35%, transparent)' : undefined,
                     }}
                   >
                     <input
@@ -2257,8 +2151,12 @@ export default function DeployToken() {
                       className="sr-only"
                     />
                     {selectedPlan === key && (
-                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center pointer-events-none" aria-hidden="true">
-                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <div
+                        className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center pointer-events-none"
+                        style={{ backgroundColor: 'var(--finance-primary)', color: '#041018' }}
+                        aria-hidden="true"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                       </div>
@@ -2266,7 +2164,7 @@ export default function DeployToken() {
                     
                     <div className="text-center">
                       <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>{plan.name}</h3>
-                      <div className="text-3xl font-bold text-blue-400 mb-4">
+                      <div className="text-3xl font-bold mb-4" style={{ color: 'var(--finance-primary)' }}>
                         {(() => {
                           const row = plan.prices[network?.chainId] || plan.prices[1];
                           const feeUsd = isBoingNativeFeeChain(network?.chainId) ? getBoingNativeFeeUsd(row?.amount) : null;
@@ -2274,7 +2172,7 @@ export default function DeployToken() {
                             <>
                               {row?.amount} {row?.currency}
                               {feeUsd != null && (
-                                <span className="block text-sm font-semibold text-gray-400 mt-1">
+                                <span className="block text-sm font-semibold mt-1" style={{ color: 'var(--text-tertiary)' }}>
                                   {formatUsdReferenceLabel(feeUsd)}
                                 </span>
                               )}
@@ -2303,11 +2201,11 @@ export default function DeployToken() {
               {/* Wizard step 2 nav */}
               {useWizardMode && wizardStep === 2 && (
                 <div className="flex justify-between mt-6 pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
-                  <button type="button" onClick={() => setWizardStep(1)} className="interactive-button px-6 py-2 bg-gray-600 hover:bg-gray-500 text-white font-medium rounded-lg">
-                    ← Back
+                  <button type="button" onClick={() => setWizardStep(1)} className="td-btn td-btn--ghost">
+                    Back
                   </button>
-                  <button type="button" onClick={() => setWizardStep(3)} className="interactive-button px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg">
-                    Next: Security & Info →
+                  <button type="button" onClick={() => setWizardStep(3)} className="td-btn td-btn--primary">
+                    Next: Security & Info
                   </button>
                 </div>
               )}
@@ -2326,7 +2224,8 @@ export default function DeployToken() {
               >
                 {/* Step 1: Basic Information + Logo */}
                 <div style={{ display: !useWizardMode || wizardStep === 1 ? 'block' : 'none' }}>
-                  <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: 'var(--text-primary)' }}>Basic Token Information</h3>
+                  <h3 className="td-section-title">Basic Token Information</h3>
+                  <p className="td-section-sub">Name, symbol, supply, and logo for your token.</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <div>
                       <label htmlFor="deploy-evm-name" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
@@ -2339,7 +2238,7 @@ export default function DeployToken() {
                         autoComplete="off"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                        className="td-field__input"
                         style={{
                           backgroundColor: 'var(--bg-tertiary)',
                           border: '1px solid var(--border-color)',
@@ -2361,7 +2260,7 @@ export default function DeployToken() {
                         autoComplete="off"
                         value={symbol}
                         onChange={(e) => setSymbol(e.target.value)}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                        className="td-field__input"
                         style={{
                           backgroundColor: 'var(--bg-tertiary)',
                           border: '1px solid var(--border-color)',
@@ -2383,7 +2282,7 @@ export default function DeployToken() {
                         autoComplete="off"
                         value={decimals}
                         onChange={(e) => setDecimals(parseInt(e.target.value))}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                        className="td-field__input" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
                       >
                         <option value={18}>18 (Standard)</option>
                         <option value={6}>6 (USDC style)</option>
@@ -2401,7 +2300,7 @@ export default function DeployToken() {
                         type="number"
                         value={initialSupply}
                         onChange={(e) => setInitialSupply(e.target.value)}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                        className="td-field__input"
                         style={{
                           backgroundColor: 'var(--bg-tertiary)',
                           border: '1px solid var(--border-color)',
@@ -2429,8 +2328,8 @@ export default function DeployToken() {
                 {/* Wizard step 1 nav */}
                 {useWizardMode && wizardStep === 1 && (
                   <div className="flex justify-end mt-6">
-                    <button type="button" onClick={() => setWizardStep(2)} className="interactive-button px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg">
-                      Next: Network & Plan →
+                    <button type="button" onClick={() => setWizardStep(2)} className="td-btn td-btn--primary">
+                      Next: Network & Plan
                     </button>
                   </div>
                 )}
@@ -2439,7 +2338,8 @@ export default function DeployToken() {
                 <div style={{ display: !useWizardMode || wizardStep === 3 ? 'block' : 'none' }}>
                 {/* Project Information */}
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: 'var(--text-primary)' }}>Project Information</h3>
+                  <h3 className="td-section-title">Project Information</h3>
+                  <p className="td-section-sub">Website and short description shown with your token.</p>
                   <div className="space-y-4 sm:space-y-6">
                     <div>
                       <label htmlFor="deploy-evm-website" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
@@ -2452,7 +2352,7 @@ export default function DeployToken() {
                         autoComplete="url"
                         value={website}
                         onChange={(e) => setWebsite(e.target.value)}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                        className="td-field__input"
                         style={{
                           backgroundColor: 'var(--bg-tertiary)',
                           border: '1px solid var(--border-color)',
@@ -2473,7 +2373,7 @@ export default function DeployToken() {
                         autoComplete="off"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                        className="td-field__input"
                         style={{
                           backgroundColor: 'var(--bg-tertiary)',
                           border: '1px solid var(--border-color)',
@@ -2488,32 +2388,27 @@ export default function DeployToken() {
 
                 {/* Security Features */}
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: 'var(--text-primary)' }}>Security Features</h3>
-                  <div className="space-y-3 sm:space-y-4">
+                  <h3 className="td-section-title">Security Features</h3>
+                  <p className="td-section-sub">Toggle protections for this token. Risk labels are plain guidance — not legal advice.</p>
+                  <div className="td-feature-matrix">
                     {SECURITY_FEATURES.map((feature, index) => {
                       const isAllowed = isFeatureAllowed(feature.featureKey);
                       const restrictionMessage = getFeatureRestrictionMessage(feature.featureKey);
                       
                       return (
-                        <div key={index} className="p-3 sm:p-4 rounded-lg border" style={{
-                          backgroundColor: 'var(--bg-card)',
-                          borderColor: 'var(--border-color)'
-                        }}>
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-                            <div className="flex items-start sm:items-center space-x-3">
-                              <span className="text-xl sm:text-2xl flex-shrink-0">{feature.icon}</span>
-                              <div className="min-w-0 flex-1">
-                                <h4 id={`deploy-security-${feature.featureKey}`} className="font-medium text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>{feature.name}</h4>
-                                <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{feature.description}</p>
-                                <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-900 text-blue-200 rounded-full mt-1">
-                                  {feature.risk} Risk
+                        <div key={index} className="td-feature-row">
+                          <div className="td-feature-row__top">
+                            <div className="td-feature-row__meta">
+                                <h4 id={`deploy-security-${feature.featureKey}`} className="td-feature-row__title">{feature.name}</h4>
+                                <p className="td-feature-row__desc">{feature.description}</p>
+                                <span className={`td-risk ${riskClass(feature.risk)}`}>
+                                  {feature.risk} risk
                                 </span>
-                              </div>
                             </div>
                             
-                            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                            <div className="flex flex-col items-end gap-2 shrink-0">
                               {!isAllowed && restrictionMessage && (
-                                <span className="text-xs sm:text-sm text-red-400">{restrictionMessage}</span>
+                                <span className="text-xs" style={{ color: 'var(--finance-red-light)' }}>{restrictionMessage}</span>
                               )}
                               
                               {feature.featureKey === "renounceMint" && (
@@ -2633,8 +2528,7 @@ export default function DeployToken() {
                                 type="text"
                                 value={freezingAuthority}
                                 onChange={(e) => setFreezingAuthority(e.target.value)}
-                                className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-sm"
-                                style={{ color: 'var(--text-primary)' }}
+                                className="td-field__input text-sm"
                                 placeholder="0x..."
                               />
                             </div>
@@ -2649,8 +2543,7 @@ export default function DeployToken() {
                                 type="number"
                                 value={cooldownPeriod}
                                 onChange={(e) => setCooldownPeriod(e.target.value)}
-                                className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-sm"
-                                style={{ color: 'var(--text-primary)' }}
+                                className="td-field__input text-sm"
                                 placeholder="30"
                                 min="1"
                                 max="3600"
@@ -2658,7 +2551,9 @@ export default function DeployToken() {
                               />
                               <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-tertiary)' }}>
                                 Cooldown period between transactions in seconds (1-3600)
-                                {cooldownPeriod === '30' && <span className="text-blue-400 ml-1">• Default: 30 seconds</span>}
+                                {cooldownPeriod === '30' && (
+                                  <span className="ml-1" style={{ color: 'var(--finance-primary)' }}>· Default: 30 seconds</span>
+                                )}
                               </p>
                             </div>
                           )}
@@ -2682,7 +2577,9 @@ export default function DeployToken() {
                               </div>
                               <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-tertiary)' }}>
                                 Maximum wallet holdings as percentage of total supply (0.1% - 5%)
-                                {maxWalletPercentage === '2' && <span className="text-blue-400 ml-1">• Default: 2%</span>}
+                                {maxWalletPercentage === '2' && (
+                                  <span className="ml-1" style={{ color: 'var(--finance-primary)' }}>· Default: 2%</span>
+                                )}
                               </p>
                             </div>
                           )}
@@ -2705,7 +2602,7 @@ export default function DeployToken() {
                               </div>
                               <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-tertiary)' }}>
                                 Timelock delay for administrative functions (1-168 hours)
-                                {timelockDelay === '24' && <span className="text-blue-400 ml-1">• Default: 24 hours</span>}
+                                {timelockDelay === '24' && <span className="ml-1" style={{ color: 'var(--finance-primary)' }}>• Default: 24 hours</span>}
                               </p>
                             </div>
                           )}
@@ -2719,8 +2616,7 @@ export default function DeployToken() {
                                 type="number"
                                 value={maxTxAmount}
                                 onChange={(e) => setMaxTxAmount(e.target.value)}
-                                className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-sm"
-                                style={{ color: 'var(--text-primary)' }}
+                                className="td-field__input text-sm"
                                 placeholder="1.0"
                                 min="0.1"
                                 max="10"
@@ -2728,7 +2624,7 @@ export default function DeployToken() {
                               />
                               <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-tertiary)' }}>
                                 Maximum transaction amount as percentage of total supply (0.1% - 10%)
-                                {maxTxAmount === '1' && <span className="text-blue-400 ml-1">• Default: 1%</span>}
+                                {maxTxAmount === '1' && <span className="ml-1" style={{ color: 'var(--finance-primary)' }}>• Default: 1%</span>}
                               </p>
                             </div>
                           )}
@@ -2740,7 +2636,8 @@ export default function DeployToken() {
 
                 {/* Social Links */}
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: 'var(--text-primary)' }}>Social Links</h3>
+                  <h3 className="td-section-title">Social Links</h3>
+                  <p className="td-section-sub">Optional. Add project links builders and traders can verify.</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     {Object.entries(socialLinks).map(([platform, value]) => (
                       <div key={platform}>
@@ -2753,7 +2650,7 @@ export default function DeployToken() {
                           type="url"
                           value={value}
                           onChange={(e) => handleSocialLinkChange(platform, e.target.value)}
-                          className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                          className="td-field__input"
                         style={{
                           backgroundColor: 'var(--bg-tertiary)',
                           border: '1px solid var(--border-color)',
@@ -2769,11 +2666,11 @@ export default function DeployToken() {
                 {/* Wizard step 3 nav */}
                 {useWizardMode && wizardStep === 3 && (
                   <div className="flex justify-between mt-6">
-                    <button type="button" onClick={() => setWizardStep(2)} className="interactive-button px-6 py-2 bg-gray-600 hover:bg-gray-500 text-white font-medium rounded-lg">
-                      ← Back
+                    <button type="button" onClick={() => setWizardStep(2)} className="td-btn td-btn--ghost">
+                      Back
                     </button>
-                    <button type="button" onClick={() => setWizardStep(4)} className="interactive-button px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg">
-                      Next: Review & Deploy →
+                    <button type="button" onClick={() => setWizardStep(4)} className="td-btn td-btn--primary">
+                      Next: Review & Deploy
                     </button>
                   </div>
                 )}
@@ -2833,7 +2730,7 @@ export default function DeployToken() {
                       !isConnected ||
                       (isBoingNativeDeployPath ? !nativeWizardGate.canSubmit : !signer)
                     }
-                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-lg transition-colors text-base sm:text-lg"
+                    className="td-btn td-btn--primary w-full sm:w-auto py-3 sm:py-4 px-6 sm:px-8 text-base sm:text-lg disabled:opacity-50"
                   >
                     {deploying ? (
                       <div className="flex items-center justify-center">
@@ -2849,7 +2746,7 @@ export default function DeployToken() {
                 {/* Wizard step 4 nav (Back only) */}
                 {useWizardMode && wizardStep === 4 && (
                   <div className="flex justify-start mt-6 pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
-                    <button type="button" onClick={() => setWizardStep(3)} className="interactive-button px-6 py-2 bg-gray-600 hover:bg-gray-500 text-white font-medium rounded-lg">
+                    <button type="button" onClick={() => setWizardStep(3)} className="td-btn td-btn--ghost">
                       ← Back
                     </button>
                   </div>
@@ -2879,7 +2776,7 @@ export default function DeployToken() {
                       </code>
                       <button
                         onClick={() => navigator.clipboard.writeText(txHash)}
-                        className="text-blue-400 hover:text-blue-300 transition-colors text-sm"
+                        className="td-btn--link text-sm"
                       >
                         Copy
                       </button>
@@ -2899,7 +2796,7 @@ export default function DeployToken() {
                       </code>
                       <button
                         onClick={() => navigator.clipboard.writeText(tokenAddress)}
-                        className="text-blue-400 hover:text-blue-300 transition-colors text-sm"
+                        className="td-btn--link text-sm"
                       >
                         Copy
                       </button>
@@ -2960,7 +2857,7 @@ export default function DeployToken() {
                       </code>
                       <button
                         onClick={() => navigator.clipboard.writeText(metadataUrl)}
-                        className="text-blue-400 hover:text-blue-300 transition-colors text-sm"
+                        className="td-btn--link text-sm"
                       >
                         Copy
                       </button>
@@ -2979,7 +2876,7 @@ export default function DeployToken() {
                         </code>
                         <button
                           onClick={() => navigator.clipboard.writeText(logoUrl)}
-                          className="text-blue-400 hover:text-blue-300 transition-colors text-sm"
+                          className="td-btn--link text-sm"
                         >
                           Copy
                         </button>
@@ -2987,13 +2884,11 @@ export default function DeployToken() {
                     </div>
                   )}
                   
-                  <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
-                    <h4 className="text-sm font-medium text-blue-300 mb-2">Metadata Information</h4>
-                    <div className="space-y-2 text-xs text-blue-200">
-                      <p><strong>Status:</strong> Stored on IPFS (decentralized storage)</p>
-                      <p><strong>Content:</strong> Token name, symbol, description, logo, social links, and security features</p>
-                      <p><strong>Accessibility:</strong> Available through multiple IPFS gateways</p>
-                      <p><strong>Blockchain Integration:</strong> Logo URL and metadata are stored in the smart contract</p>
+                  <div className="td-callout">
+                    <h4 className="td-callout__title">Metadata</h4>
+                    <div className="td-callout__body space-y-1.5">
+                      <p>Stored on IPFS with name, symbol, description, logo, and social links.</p>
+                      <p>Logo URL and metadata URI are written into the contract at deploy.</p>
                     </div>
                   </div>
                 </div>
@@ -3005,22 +2900,26 @@ export default function DeployToken() {
               backgroundColor: 'var(--bg-card)',
               borderColor: 'var(--border-color)'
             }}>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-2 sm:space-y-0">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-2 sm:space-y-0 gap-2">
                 <h3 className="text-xl sm:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Deployment Tips</h3>
                 <button
+                  type="button"
                   onClick={() => setShowGuide(!showGuide)}
-                  className="text-blue-400 hover:text-blue-300 font-medium transition-colors text-sm sm:text-base"
+                  className="td-btn--link text-sm sm:text-base self-start sm:self-auto"
                 >
-                  {showGuide ? 'Hide Tips' : 'Show Tips'}
+                  {showGuide ? 'Hide tips' : 'Show tips'}
                 </button>
               </div>
               
               {showGuide && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   {DEPLOYMENT_TIPS.map((tip, index) => (
-                    <div key={index} className="flex items-start space-x-3">
-                      <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                      <p className="text-sm sm:text-base" style={{ color: 'var(--text-secondary)' }}>{tip}</p>
+                    <div key={index} className="flex items-start gap-3">
+                      <div
+                        className="flex-shrink-0 w-1.5 h-1.5 rounded-full mt-2"
+                        style={{ backgroundColor: 'var(--finance-primary)' }}
+                      />
+                      <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{tip}</p>
                     </div>
                   ))}
                 </div>
@@ -3029,61 +2928,37 @@ export default function DeployToken() {
 
             {/* Ownership Renouncement Notice Modal */}
             {showOwnershipRenounceModal && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
-                <div className="rounded-xl p-4 sm:p-8 shadow-xl max-w-md w-full" style={{
-                  backgroundColor: 'var(--bg-card)',
-                  border: '1px solid var(--border-color)'
-                }}>
-                  <div className="flex items-start space-x-3 mb-4">
-                    <span className="text-yellow-400 text-2xl">⚠️</span>
-                    <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Ownership Renouncement Notice</h3>
-                  </div>
-                  
-                  <div className="space-y-4 text-sm sm:text-base mb-6" style={{ color: 'var(--text-secondary)' }}>
+              <div className="td-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="ownership-notice-title">
+                <div className="td-modal">
+                  <h3 id="ownership-notice-title" className="td-modal__title">Renounce ownership</h3>
+                  <div className="td-modal__body space-y-3">
                     <p>
-                      <strong>Important:</strong> Ownership renouncement is <strong>not automatic</strong> during deployment.
+                      This is not automatic at deploy. After the token is live, you send a second transaction to renounce ownership.
                     </p>
-                    <p>
-                      After your token is deployed, you must <strong>manually call the renounceOwnership() function</strong> to fully decentralize your token.
-                    </p>
-                    <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-3">
-                      <p className="text-yellow-200 font-medium">
-                        <strong>⚠️ This action is irreversible!</strong>
+                    <div className="td-callout td-callout--warn">
+                      <p className="td-callout__title">Irreversible</p>
+                      <p className="td-callout__body">
+                        You will lose admin controls: security settings, pause, and other owner-only actions.
                       </p>
-                      <p className="text-yellow-200 text-sm mt-1">
-                        Once ownership is renounced, you will no longer be able to:
-                      </p>
-                      <ul className="text-yellow-200 text-sm mt-2 space-y-1">
-                        <li>• Modify security settings</li>
-                        <li>• Pause/unpause trading</li>
-                        <li>• Update contract parameters</li>
-                        <li>• Perform administrative functions</li>
-                      </ul>
                     </div>
                   </div>
-                  
-                  <div className="flex justify-end space-x-4">
+                  <div className="td-modal__actions">
                     <button
+                      type="button"
                       onClick={() => setShowOwnershipRenounceModal(false)}
-                      className="px-4 py-2 rounded transition-colors"
-                      style={{
-                        backgroundColor: 'var(--bg-tertiary)',
-                        color: 'var(--text-primary)',
-                        border: '1px solid var(--border-color)'
-                      }}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--bg-secondary)'}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = 'var(--bg-tertiary)'}
+                      className="td-btn td-btn--ghost"
                     >
                       Cancel
                     </button>
                     <button
+                      type="button"
                       onClick={() => {
                         setRenounceOwnership(true);
                         setShowOwnershipRenounceModal(false);
                       }}
-                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                      className="td-btn td-btn--primary"
                     >
-                      Enable Feature
+                      Enable
                     </button>
                   </div>
                 </div>
@@ -3092,39 +2967,32 @@ export default function DeployToken() {
 
             {/* Renounce Ownership Confirmation Modal */}
             {showRenounceModal && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
-                <div className="rounded-xl p-4 sm:p-8 shadow-xl max-w-md w-full" style={{
-                  backgroundColor: 'var(--bg-card)',
-                  border: '1px solid var(--border-color)'
-                }}>
-                  <h3 className="text-lg sm:text-xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Renounce Ownership Confirmation</h3>
-                  <p className="text-sm sm:text-base mb-6" style={{ color: 'var(--text-secondary)' }}>
-                    You have selected <span className="font-semibold text-blue-400">Renounce Ownership</span>.<br/>
-                    This requires a <span className="font-semibold text-yellow-400">second on-chain transaction</span> after deployment.<br/>
-                    Are you sure you want to proceed?
+              <div className="td-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="renounce-confirm-title">
+                <div className="td-modal">
+                  <h3 id="renounce-confirm-title" className="td-modal__title">Confirm renounce</h3>
+                  <p className="td-modal__body">
+                    Renounce ownership needs a second on-chain transaction after deploy. Continue?
                   </p>
-                  <div className="flex justify-end space-x-4">
+                  <div className="td-modal__actions">
                     <button
+                      type="button"
                       onClick={() => { setShowRenounceModal(false); setPendingRenounceContract(null); }}
-                      className="px-4 py-2 rounded transition-colors"
-                      style={{
-                        backgroundColor: 'var(--bg-tertiary)',
-                        color: 'var(--text-primary)',
-                        border: '1px solid var(--border-color)'
-                      }}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--bg-secondary)'}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = 'var(--bg-tertiary)'}
-                    >Cancel</button>
+                      className="td-btn td-btn--ghost"
+                    >
+                      Cancel
+                    </button>
                     <button
+                      type="button"
                       onClick={handleConfirmRenounce}
-                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                    >Yes, Renounce Ownership</button>
+                      className="td-btn td-btn--danger"
+                    >
+                      Renounce ownership
+                    </button>
                   </div>
                 </div>
               </div>
             )}
-          </div>
-        </div>
+        </TradeDeployShell>
       </div>
       <ShareCardModal
         isOpen={shareModalOpen}

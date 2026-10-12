@@ -71,18 +71,18 @@ const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveL
   const getChainColor = (chainId) => getNetworkBadgeBgClass(chainId);
 
   return (
-    <div className="rounded-xl p-6 border transition-colors hover:opacity-95" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+    <div className="td-card td-card--quiet p-5 sm:p-6 transition-colors hover:border-[var(--border-hover)]">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
           <div className="flex -space-x-2">
-            <div className="w-8 h-8 bg-cyan-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--finance-primary)', color: '#041018' }}>
+              <span className="font-bold text-sm">
                 {pool.token0?.symbol?.charAt(0) || 'T'}
               </span>
             </div>
-            <div className="w-8 h-8 bg-finance-green rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--finance-green-mid)', color: '#041018' }}>
+              <span className="font-bold text-sm">
                 {pool.token1?.symbol?.charAt(0) || 'T'}
               </span>
             </div>
@@ -91,19 +91,29 @@ const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveL
             <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
               {pool.token0?.symbol}/{pool.token1?.symbol}
             </h3>
-            <div className="flex items-center space-x-2">
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getChainColor(pool.chainId)} text-white`}>
+            <div className="flex flex-wrap items-center gap-1.5 mt-1">
+              <span className={`td-badge ${getChainColor(pool.chainId)}`}>
                 {getChainName(pool.chainId)}
               </span>
               {pool.source && (
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  pool.isYourPool ? 'bg-finance-green' : 'bg-cyan-600'
-                } text-white`}>
+                <span
+                  className="td-badge"
+                  style={{
+                    backgroundColor: pool.isYourPool ? 'var(--finance-green-mid)' : 'var(--finance-primary)',
+                  }}
+                >
                   {pool.source}
                 </span>
               )}
               {type === 'created' && (
-                <span className="px-2 py-1 rounded-full text-xs font-medium bg-finance-purple text-white">
+                <span
+                  className="td-badge"
+                  style={{
+                    backgroundColor: 'color-mix(in srgb, var(--finance-primary) 25%, transparent)',
+                    color: 'var(--finance-primary)',
+                    border: '1px solid color-mix(in srgb, var(--finance-primary) 40%, transparent)',
+                  }}
+                >
                   Created
                 </span>
               )}
@@ -171,26 +181,30 @@ const PoolCard = ({ pool, type = 'user', onViewDetails, onCollectFees, onRemoveL
       </div>
 
       {/* Actions */}
-      <div className="flex space-x-2">
+      <div className="flex flex-wrap gap-2">
         <button
+          type="button"
           onClick={() => onViewDetails(pool)}
-          className="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
+          className="td-btn td-btn--primary flex-1 text-sm"
         >
           View Details
         </button>
         {type === 'user' && (
           <>
             <button
+              type="button"
               onClick={handleCollectFees}
               disabled={isLoading}
-              className="bg-finance-green hover:opacity-90 disabled:bg-gray-600 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
+              className="td-btn td-btn--green text-sm disabled:opacity-50"
             >
               {isLoading ? '...' : 'Collect Fees'}
             </button>
             <button
+              type="button"
               onClick={handleRemoveLiquidity}
               disabled={isLoading}
-              className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
+              className="td-btn td-btn--ghost text-sm disabled:opacity-50"
+              style={{ color: 'var(--finance-red-light)' }}
             >
               {isLoading ? '...' : 'Remove'}
             </button>
@@ -275,8 +289,7 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
       onClick={onClose}
     >
       <div
-        className="rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto border"
-        style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
+        className="td-modal td-modal--wide p-5 sm:p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
@@ -293,40 +306,34 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex space-x-1 mb-6 rounded-lg p-1" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+        <div className="td-segmented w-full mb-6" role="tablist" aria-label="Pool actions">
           <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'details'}
             onClick={() => setActiveTab('details')}
-            className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
-              activeTab === 'details'
-                ? 'bg-cyan-600 text-white'
-                : ''
-            }`}
-            style={activeTab !== 'details' ? { color: 'var(--text-secondary)' } : {}}
+            className={`td-segmented__btn flex-1 ${activeTab === 'details' ? 'td-segmented__btn--active' : ''}`}
           >
             Details
           </button>
           <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'add'}
             onClick={() => setActiveTab('add')}
-            className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
-              activeTab === 'add'
-                ? 'bg-finance-green text-white'
-                : ''
-            }`}
-            style={activeTab !== 'add' ? { color: 'var(--text-secondary)' } : {}}
+            className={`td-segmented__btn flex-1 ${activeTab === 'add' ? 'td-segmented__btn--active' : ''}`}
           >
             Add Liquidity
           </button>
           {pool.userShare && (
             <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'remove'}
               onClick={() => setActiveTab('remove')}
-              className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
-                activeTab === 'remove'
-                  ? 'bg-red-600 text-white'
-                  : ''
-              }`}
-              style={activeTab !== 'remove' ? { color: 'var(--text-secondary)' } : {}}
+              className={`td-segmented__btn flex-1 ${activeTab === 'remove' ? 'td-segmented__btn--active' : ''}`}
             >
-              Remove Liquidity
+              Remove
             </button>
           )}
         </div>
@@ -419,11 +426,12 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
                 {/* Quick Actions */}
                 <div className="flex space-x-3">
                   <button
+                    type="button"
                     onClick={handleCollectFees}
                     disabled={isLoading}
-                    className="bg-finance-green hover:opacity-90 disabled:bg-gray-600 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                    className="td-btn td-btn--green disabled:opacity-50"
                   >
-                    {isLoading ? 'Collecting...' : 'Collect Fees'}
+                    {isLoading ? 'Collecting…' : 'Collect Fees'}
                   </button>
                 </div>
               </div>
@@ -449,8 +457,7 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
                     value={token0Amount}
                     onChange={(e) => handleToken0AmountChange(e.target.value)}
                     placeholder="0.0"
-                    className="w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                    style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+                    className="td-field__input"
                   />
                 </div>
                 
@@ -465,17 +472,17 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
                     value={token1Amount}
                     onChange={(e) => setToken1Amount(e.target.value)}
                     placeholder="0.0"
-                    className="w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                    style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+                    className="td-field__input"
                   />
                 </div>
                 
                 <button
+                  type="button"
                   onClick={handleAddLiquidity}
                   disabled={isLoading || !token0Amount || !token1Amount}
-                  className="w-full bg-finance-green hover:opacity-90 disabled:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium transition-colors"
+                  className="td-btn td-btn--green w-full disabled:opacity-50"
                 >
-                  {isLoading ? 'Adding Liquidity...' : 'Add Liquidity'}
+                  {isLoading ? 'Adding liquidity…' : 'Add Liquidity'}
                 </button>
               </div>
             </div>
@@ -498,12 +505,9 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
                       <button
                         key={percent}
                         onClick={() => setRemovePercentage(percent)}
-                        className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                          removePercentage === percent
-                            ? 'bg-red-600 text-white'
-                            : ''
-                        }`}
-                        style={removePercentage !== percent ? { backgroundColor: 'var(--bg-secondary)', color: 'var(--text-secondary)' } : {}}
+                        type="button"
+                        className={`td-segmented__btn ${removePercentage === percent ? 'td-segmented__btn--active' : ''}`}
+                        style={removePercentage === percent ? { color: 'var(--finance-red-light)', boxShadow: 'inset 0 0 0 1px color-mix(in srgb, var(--finance-red) 45%, transparent)' } : undefined}
                       >
                         {percent}%
                       </button>
@@ -522,11 +526,12 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
                 </div>
                 
                 <button
+                  type="button"
                   onClick={handleRemoveLiquidity}
                   disabled={isLoading}
-                  className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium transition-colors"
+                  className="td-btn td-btn--danger w-full disabled:opacity-50"
                 >
-                  {isLoading ? 'Removing Liquidity...' : `Remove ${removePercentage}% Liquidity`}
+                  {isLoading ? 'Removing…' : `Remove ${removePercentage}%`}
                 </button>
               </div>
             </div>
@@ -586,13 +591,13 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
 
   const renderPoolAvatars = (pool) => (
     <div className="flex -space-x-2 shrink-0">
-      <div className="w-8 h-8 bg-cyan-600 rounded-full flex items-center justify-center">
-        <span className="text-white font-bold text-sm">
+      <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--finance-primary)', color: '#041018' }}>
+        <span className="font-bold text-sm">
           {pool.token0?.symbol?.charAt(0) || 'T'}
         </span>
       </div>
-      <div className="w-8 h-8 bg-finance-green rounded-full flex items-center justify-center">
-        <span className="text-white font-bold text-sm">
+      <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--finance-green-mid)', color: '#041018' }}>
+        <span className="font-bold text-sm">
           {pool.token1?.symbol?.charAt(0) || 'T'}
         </span>
       </div>
@@ -601,13 +606,16 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
 
   const renderPoolBadges = (pool) => (
     <div className="flex flex-wrap items-center gap-1.5 mt-1">
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getChainColorForTable(pool.chainId)} text-white`}>
+      <span className={`td-badge ${getChainColorForTable(pool.chainId)}`}>
         {getChainNameForTable(pool.chainId)}
       </span>
       {pool.source && (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          pool.isYourPool ? 'bg-finance-green' : 'bg-cyan-600'
-        } text-white`}>
+        <span
+          className="td-badge"
+          style={{
+            backgroundColor: pool.isYourPool ? 'var(--finance-green-mid)' : 'var(--finance-primary)',
+          }}
+        >
           {pool.source}
         </span>
       )}
@@ -615,14 +623,14 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
   );
 
   return (
-    <div className="rounded-xl overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
+    <div className="td-pool-list">
       {/* Mobile card list */}
       <div className="lg:hidden divide-y" style={{ borderColor: 'var(--border-color)' }}>
         {pools.map((pool, index) => (
           <button
             key={`mobile-${pool.address}-${index}`}
             type="button"
-            className="w-full text-left px-4 py-4 hover:bg-cyan-500/5 transition-colors"
+            className="td-pool-row w-full text-left"
             onClick={() => handleRowClick(pool)}
           >
             <div className="flex items-start gap-3 min-w-0">
@@ -633,28 +641,28 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
                 </div>
                 {renderPoolBadges(pool)}
               </div>
-              <span className="shrink-0 text-cyan-400" aria-hidden>→</span>
+              <span className="shrink-0" style={{ color: 'var(--finance-primary)' }} aria-hidden>→</span>
             </div>
             <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
               <div>
                 <dt className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Total Liquidity</dt>
-                <dd className="font-medium text-white">{pool.formattedTvl ? pool.formattedTvl : '$0'}</dd>
+                <dd className="font-medium" style={{ color: 'var(--text-primary)' }}>{pool.formattedTvl ? pool.formattedTvl : '$0'}</dd>
               </div>
               <div>
                 <dt className="text-xs" style={{ color: 'var(--text-tertiary)' }}>APY</dt>
-                <dd className="font-medium text-finance-green">
+                <dd className="font-medium" style={{ color: 'var(--finance-green)' }}>
                   {pool.apy && pool.apy > 0 ? `${pool.apy.toFixed(2)}%` : 'No data'}
                 </dd>
               </div>
               <div>
                 <dt className="text-xs" style={{ color: 'var(--text-tertiary)' }}>24h Volume</dt>
-                <dd className="font-medium text-white">
+                <dd className="font-medium" style={{ color: 'var(--text-primary)' }}>
                   {pool.formattedVolume24h && pool.volume24h > 0 ? pool.formattedVolume24h : 'No data'}
                 </dd>
               </div>
               <div>
                 <dt className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Fee</dt>
-                <dd className="font-medium text-white">
+                <dd className="font-medium" style={{ color: 'var(--text-primary)' }}>
                   {pool.fee ? `${(pool.fee * 100).toFixed(2)}%` : '0.3%'}
                 </dd>
               </div>
@@ -665,8 +673,7 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
 
       {/* Desktop table */}
       <div className="hidden lg:block">
-      {/* Table Header */}
-      <div className="px-6 py-4 border-b transition-colors duration-200" style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border-color)' }}>
+      <div className="td-pool-list__head">
         <div className="grid grid-cols-11 gap-4 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
           <div className="col-span-3">Pool</div>
           <div className="col-span-2">Total Liquidity</div>
@@ -676,87 +683,61 @@ const PoolList = ({ pools, type = 'all', onViewDetails, onCollectFees, onRemoveL
         </div>
       </div>
 
-      {/* Table Body */}
       <div className="divide-y" style={{ borderColor: 'var(--border-color)' }}>
         {pools.map((pool, index) => (
-          <div 
-            key={`${pool.address}-${index}`} 
-            className="px-6 py-2 hover:shadow-lg hover:border-l-4 hover:border-l-cyan-500 transition-all duration-200 cursor-pointer group relative"
-            style={{ borderLeftColor: 'transparent' }}
+          <div
+            key={`${pool.address}-${index}`}
+            className="td-pool-row group"
             onClick={() => handleRowClick(pool)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleRowClick(pool);
+              }
+            }}
+            role="button"
+            tabIndex={0}
           >
-            {/* Hover overlay for better visual feedback */}
-            <div className="absolute inset-0 bg-cyan-500 opacity-0 group-hover:opacity-5 transition-opacity duration-200 pointer-events-none"></div>
-            
             <div className="grid grid-cols-11 gap-4 items-center relative z-10">
-              {/* Pool Info */}
               <div className="col-span-3">
                 <div className="flex items-center space-x-3">
-                  <div className="flex -space-x-2">
-                    <div className="w-8 h-8 bg-cyan-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                      <span className="text-white font-bold text-sm">
-                        {pool.token0?.symbol?.charAt(0) || 'T'}
-                      </span>
-                    </div>
-                    <div className="w-8 h-8 bg-finance-green rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                      <span className="text-white font-bold text-sm">
-                        {pool.token1?.symbol?.charAt(0) || 'T'}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium flex items-center group-hover:text-cyan-300 transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>
+                  {renderPoolAvatars(pool)}
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium flex items-center truncate" style={{ color: 'var(--text-primary)' }}>
                       {pool.token0?.symbol}/{pool.token1?.symbol}
-                      <span className="ml-2 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all duration-200" style={{ color: 'var(--text-tertiary)' }}>
+                      <span className="ml-2 transition-transform group-hover:translate-x-0.5" style={{ color: 'var(--text-tertiary)' }}>
                         →
                       </span>
                     </div>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getChainColorForTable(pool.chainId)} text-white group-hover:shadow-md transition-shadow duration-200`}>
-                        {getChainNameForTable(pool.chainId)}
-                      </span>
-                      {pool.source && (
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          pool.isYourPool ? 'bg-finance-green' : 'bg-cyan-600'
-                        } text-white group-hover:shadow-md transition-shadow duration-200`}>
-                          {pool.source}
-                        </span>
-                      )}
-                    </div>
+                    {renderPoolBadges(pool)}
                   </div>
                 </div>
               </div>
 
-              {/* TVL */}
               <div className="col-span-2">
-                <div className="text-white font-medium group-hover:text-cyan-300 transition-colors duration-200">
+                <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
                   {pool.formattedTvl ? pool.formattedTvl : '$0'}
                 </div>
               </div>
 
-              {/* APY */}
               <div className="col-span-2">
-                <div className="text-finance-green font-medium group-hover:text-cyan-300 transition-colors duration-200">
+                <div className="font-medium" style={{ color: 'var(--finance-green)' }}>
                   {pool.apy && pool.apy > 0 ? `${pool.apy.toFixed(2)}%` : 'No data'}
                 </div>
               </div>
 
-              {/* 24h Volume */}
               <div className="col-span-2">
-                <div className="text-white font-medium group-hover:text-cyan-300 transition-colors duration-200">
+                <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
                   {pool.formattedVolume24h && pool.volume24h > 0 ? pool.formattedVolume24h : 'No data'}
                 </div>
               </div>
 
-              {/* Fee */}
               <div className="col-span-2">
-                <div className="text-white font-medium group-hover:text-cyan-300 transition-colors duration-200">
+                <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
                   {pool.fee ? `${(pool.fee * 100).toFixed(2)}%` : '0.3%'}
                 </div>
               </div>
             </div>
-
-            {/* User-specific info row (expanded) */}
           </div>
         ))}
       </div>
@@ -927,7 +908,7 @@ const Pools = () => {
     if (src?.token1?.address) q.set('tokenB', src.token1.address);
     if (amount0) q.set('amountA', String(amount0));
     if (amount1) q.set('amountB', String(amount1));
-    toast('Finish add/remove on the Liquidity page for this pair.', { icon: '💧' });
+    toast('Finish add/remove on the Liquidity page for this pair.');
     navigate(q.toString() ? `/liquidity?${q.toString()}` : '/liquidity');
   };
 
@@ -1093,9 +1074,12 @@ const Pools = () => {
         <div className="relative w-full min-w-0">
           <div className="relative z-10 container mx-auto px-4 py-8">
             <div className="max-w-2xl mx-auto text-center">
-              <h1 className="text-3xl font-bold text-white mb-4">Liquidity Pools</h1>
-              <p className="text-gray-300 mb-8">Connect your wallet to see your pools and positions.</p>
-              <div className="bg-gray-800 rounded-xl p-8 border border-gray-700">
+              <header className="td-hero td-hero--center mb-8">
+                <span className="td-hero__eyebrow">Trade</span>
+                <h1 className="td-hero__title">Liquidity Pools</h1>
+                <p className="td-hero__subtitle">Connect your wallet to see your pools and positions.</p>
+              </header>
+              <div className="td-card p-8">
                 <EmptyState
                   variant="pools"
                   title="Wallet Required"
@@ -1121,16 +1105,16 @@ const Pools = () => {
       <div className="relative w-full min-w-0">
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold text-white mb-4">Liquidity Pools</h1>
-              <p className="text-xl text-gray-300">
+            <header className="td-hero td-hero--center mb-8">
+              <span className="td-hero__eyebrow">Trade</span>
+              <h1 className="td-hero__title">Liquidity Pools</h1>
+              <p className="td-hero__subtitle">
                 Manage your liquidity positions and explore available pools
               </p>
-            </div>
+            </header>
 
             {/* Tabs */}
-            <div className="bg-gray-800 rounded-xl p-2 mb-8 border border-gray-700">
+            <div className="td-panel-surface p-2 mb-8">
               <div
                 className="flex space-x-2"
                 role="tablist"
@@ -1157,14 +1141,23 @@ const Pools = () => {
                     tabIndex={activeTab === tab.id ? 0 : -1}
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
-                      activeTab === tab.id
-                        ? 'bg-cyan-600 text-white'
-                        : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                      activeTab === tab.id ? 'td-segmented__btn--active' : ''
                     }`}
+                    style={
+                      activeTab === tab.id
+                        ? undefined
+                        : { color: 'var(--text-secondary)' }
+                    }
                   >
                     {tab.name}
                     {tab.count > 0 && (
-                      <span className="ml-2 bg-gray-600 text-white text-xs px-2 py-1 rounded-full">
+                      <span
+                        className="ml-2 text-xs px-2 py-1 rounded-full"
+                        style={{
+                          backgroundColor: 'var(--bg-tertiary)',
+                          color: 'var(--text-primary)',
+                        }}
+                      >
                         {tab.count}
                       </span>
                     )}
@@ -1179,29 +1172,23 @@ const Pools = () => {
               {activeTab === 'user' && (
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-white">My Liquidity Positions</h2>
+                    <h2 className="td-section-title mb-0">My Liquidity Positions</h2>
                     
                     {/* View Toggle */}
                     <div className="flex items-center space-x-2">
-                      <label className="text-sm text-gray-400">View:</label>
-                      <div className="flex bg-gray-700 rounded-lg p-1">
+                      <label className="text-sm" style={{ color: 'var(--text-tertiary)' }}>View:</label>
+                      <div className="td-segmented">
                         <button
+                          type="button"
                           onClick={() => setViewMode('list')}
-                          className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                            viewMode === 'list'
-                              ? 'bg-cyan-600 text-white'
-                              : 'text-gray-400 hover:text-white'
-                          }`}
+                          className={`td-segmented__btn ${viewMode === 'list' ? 'td-segmented__btn--active' : ''}`}
                         >
                           List
                         </button>
                         <button
+                          type="button"
                           onClick={() => setViewMode('cards')}
-                          className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                            viewMode === 'cards'
-                              ? 'bg-cyan-600 text-white'
-                              : 'text-gray-400 hover:text-white'
-                          }`}
+                          className={`td-segmented__btn ${viewMode === 'cards' ? 'td-segmented__btn--active' : ''}`}
                         >
                           Cards
                         </button>
@@ -1212,10 +1199,10 @@ const Pools = () => {
                   {userPoolsLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {[...Array(6)].map((_, i) => (
-                        <div key={i} className="bg-gray-800 rounded-xl p-6 border border-gray-700 animate-pulse">
-                          <div className="h-4 bg-gray-700 rounded mb-4"></div>
-                          <div className="h-3 bg-gray-700 rounded mb-2"></div>
-                          <div className="h-3 bg-gray-700 rounded"></div>
+                        <div key={i} className="td-card td-card--quiet p-6 animate-pulse">
+                          <div className="h-4 rounded mb-4" style={{ backgroundColor: 'var(--bg-tertiary)' }}></div>
+                          <div className="h-3 rounded mb-2" style={{ backgroundColor: 'var(--bg-tertiary)' }}></div>
+                          <div className="h-3 rounded" style={{ backgroundColor: 'var(--bg-tertiary)' }}></div>
                         </div>
                       ))}
                     </div>
@@ -1258,29 +1245,23 @@ const Pools = () => {
               {activeTab === 'created' && (
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-white">Pools You Created</h2>
+                    <h2 className="td-section-title mb-0">Pools You Created</h2>
                     
                     {/* View Toggle */}
                     <div className="flex items-center space-x-2">
-                      <label className="text-sm text-gray-400">View:</label>
-                      <div className="flex bg-gray-700 rounded-lg p-1">
+                      <label className="text-sm" style={{ color: 'var(--text-tertiary)' }}>View:</label>
+                      <div className="td-segmented">
                         <button
+                          type="button"
                           onClick={() => setViewMode('list')}
-                          className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                            viewMode === 'list'
-                              ? 'bg-cyan-600 text-white'
-                              : 'text-gray-400 hover:text-white'
-                          }`}
+                          className={`td-segmented__btn ${viewMode === 'list' ? 'td-segmented__btn--active' : ''}`}
                         >
                           List
                         </button>
                         <button
+                          type="button"
                           onClick={() => setViewMode('cards')}
-                          className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                            viewMode === 'cards'
-                              ? 'bg-cyan-600 text-white'
-                              : 'text-gray-400 hover:text-white'
-                          }`}
+                          className={`td-segmented__btn ${viewMode === 'cards' ? 'td-segmented__btn--active' : ''}`}
                         >
                           Cards
                         </button>
@@ -1291,10 +1272,10 @@ const Pools = () => {
                   {createdPoolsLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {[...Array(6)].map((_, i) => (
-                        <div key={i} className="bg-gray-800 rounded-xl p-6 border border-gray-700 animate-pulse">
-                          <div className="h-4 bg-gray-700 rounded mb-4"></div>
-                          <div className="h-3 bg-gray-700 rounded mb-2"></div>
-                          <div className="h-3 bg-gray-700 rounded"></div>
+                        <div key={i} className="td-card td-card--quiet p-6 animate-pulse">
+                          <div className="h-4 rounded mb-4" style={{ backgroundColor: 'var(--bg-tertiary)' }}></div>
+                          <div className="h-3 rounded mb-2" style={{ backgroundColor: 'var(--bg-tertiary)' }}></div>
+                          <div className="h-3 rounded" style={{ backgroundColor: 'var(--bg-tertiary)' }}></div>
                         </div>
                       ))}
                     </div>
@@ -1318,19 +1299,13 @@ const Pools = () => {
                       </div>
                     )
                   ) : (
-                    <div className="text-center py-12">
-                      <div className="text-6xl mb-4">🏭</div>
-                      <h3 className="text-xl font-semibold text-white mb-2">No Created Pools</h3>
-                      <p className="text-gray-400 mb-6">
-                        You haven't created any pools yet.
-                      </p>
-                      <button
-                        onClick={() => window.location.href = '/create-pool'}
-                        className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded-lg transition duration-200"
-                      >
-                        Create Your First Pool
-                      </button>
-                    </div>
+                    <EmptyState
+                      variant="pools"
+                      title="No created pools"
+                      description="You haven't created any pools yet."
+                      actionHref="/create-pool"
+                      actionLabel="Create Your First Pool"
+                    />
                   )}
                 </div>
               )}
@@ -1339,7 +1314,7 @@ const Pools = () => {
               {activeTab === 'all-pools' && (
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-white">All Available Pools</h2>
+                    <h2 className="td-section-title mb-0">All Available Pools</h2>
                   </div>
 
                   {/* Search Bar */}
@@ -1355,18 +1330,20 @@ const Pools = () => {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onKeyDown={handleKeyPress}
-                        className="w-full bg-gray-700 text-white px-4 py-3 pl-12 pr-20 rounded-lg border border-gray-600 focus:outline-none focus:border-cyan-500 placeholder-gray-400"
+                        className="td-field__input w-full py-3 pl-12 pr-28"
                       />
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none" style={{ color: 'var(--text-tertiary)' }}>
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                       </div>
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-1">
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-1 gap-1">
                         {searchQuery && (
                           <button
+                            type="button"
                             onClick={handleClearSearch}
-                            className="p-2 text-gray-400 hover:text-white mr-1"
+                            className="p-2"
+                            style={{ color: 'var(--text-tertiary)' }}
                           >
                             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1374,16 +1351,17 @@ const Pools = () => {
                           </button>
                         )}
                         <button
+                          type="button"
                           onClick={handleSearch}
-                          className="bg-cyan-600 hover:bg-cyan-500 text-white px-3 py-1 rounded-md text-sm font-medium transition-colors"
+                          className="td-btn td-btn--primary text-sm py-1.5"
                         >
                           Search
                         </button>
                       </div>
                     </div>
                     {isSearching && searchTerm && (
-                      <p className="text-sm text-gray-400 mt-2">
-                        Searching for: <span className="text-cyan-400">{searchTerm}</span>
+                      <p className="text-sm mt-2" style={{ color: 'var(--text-tertiary)' }}>
+                        Searching for: <span style={{ color: 'var(--finance-primary)' }}>{searchTerm}</span>
                         {searchTerm.trim() && allPoolsForSearch ? (
                           <span className="ml-2">
                             (Showing {Math.min(getSortedPools(allPools).length, searchLimit)} of {allPoolsForSearch.filter(pool => {
@@ -1415,11 +1393,11 @@ const Pools = () => {
                     {/* Sort Controls */}
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center space-x-2">
-                        <label className="text-sm text-gray-400">Sort by:</label>
+                        <label className="text-sm" style={{ color: 'var(--text-tertiary)' }}>Sort by:</label>
                         <select
                           value={sortBy}
                           onChange={(e) => handleSortChange(e.target.value)}
-                          className="bg-gray-700 text-white px-3 py-2 rounded-lg text-sm border border-gray-600 focus:outline-none focus:border-cyan-500"
+                          className="td-field__input text-sm py-2 w-auto"
                         >
                           <option value="tvl">TVL</option>
                           <option value="apy">APY</option>
@@ -1429,8 +1407,9 @@ const Pools = () => {
                         </select>
                       </div>
                       <button
+                        type="button"
                         onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                        className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-lg text-sm border border-gray-600 transition-colors"
+                        className="td-btn td-btn--ghost text-sm"
                       >
                         {sortOrder === 'asc' ? '↑' : '↓'}
                       </button>
@@ -1438,25 +1417,19 @@ const Pools = () => {
 
                     {/* View Toggle */}
                     <div className="flex items-center space-x-2">
-                      <label className="text-sm text-gray-400">View:</label>
-                      <div className="flex bg-gray-700 rounded-lg p-1">
+                      <label className="text-sm" style={{ color: 'var(--text-tertiary)' }}>View:</label>
+                      <div className="td-segmented">
                         <button
+                          type="button"
                           onClick={() => setViewMode('list')}
-                          className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                            viewMode === 'list'
-                              ? 'bg-cyan-600 text-white'
-                              : 'text-gray-400 hover:text-white'
-                          }`}
+                          className={`td-segmented__btn ${viewMode === 'list' ? 'td-segmented__btn--active' : ''}`}
                         >
                           List
                         </button>
                         <button
+                          type="button"
                           onClick={() => setViewMode('cards')}
-                          className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                            viewMode === 'cards'
-                              ? 'bg-cyan-600 text-white'
-                              : 'text-gray-400 hover:text-white'
-                          }`}
+                          className={`td-segmented__btn ${viewMode === 'cards' ? 'td-segmented__btn--active' : ''}`}
                         >
                           Cards
                         </button>
@@ -1467,10 +1440,10 @@ const Pools = () => {
                   {allPoolsLoading || (isSearching && searchTerm.trim() && searchPoolsLoading) ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {[...Array(9)].map((_, i) => (
-                        <div key={i} className="bg-gray-800 rounded-xl p-6 border border-gray-700 animate-pulse">
-                          <div className="h-4 bg-gray-700 rounded mb-4"></div>
-                          <div className="h-3 bg-gray-700 rounded mb-2"></div>
-                          <div className="h-3 bg-gray-700 rounded"></div>
+                        <div key={i} className="td-card td-card--quiet p-6 animate-pulse">
+                          <div className="h-4 rounded mb-4" style={{ backgroundColor: 'var(--bg-tertiary)' }}></div>
+                          <div className="h-3 rounded mb-2" style={{ backgroundColor: 'var(--bg-tertiary)' }}></div>
+                          <div className="h-3 rounded" style={{ backgroundColor: 'var(--bg-tertiary)' }}></div>
                         </div>
                       ))}
                     </div>
@@ -1499,8 +1472,7 @@ const Pools = () => {
                     )
                   ) : (
                     <EmptyState
-                      variant="pools"
-                      icon={isSearching && searchTerm.trim() ? '🔍' : '🏊'}
+                      variant={isSearching && searchTerm.trim() ? 'search' : 'pools'}
                       title={isSearching && searchTerm.trim() ? 'No pools found' : 'No pools available'}
                       description={
                         isSearching && searchTerm.trim()
@@ -1538,7 +1510,7 @@ const Pools = () => {
                           <button
                             onClick={handleLoadMore}
                             disabled={searchPoolsLoading}
-                            className="bg-cyan-600 hover:bg-cyan-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-lg transition duration-200"
+                            className="td-btn td-btn--primary disabled:opacity-50"
                           >
                             {searchPoolsLoading ? (
                               <span className="flex items-center justify-center">

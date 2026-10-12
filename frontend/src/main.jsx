@@ -5,6 +5,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { registerServiceWorker } from './utils/serviceWorkerRegistration';
 import './styles/globals.css';
 import './styles/deep-trade-tokens.css';
+import './styles/trade-deploy-ui.css';
 import App from './App';
 
 if (process.env.NODE_ENV === 'production') {

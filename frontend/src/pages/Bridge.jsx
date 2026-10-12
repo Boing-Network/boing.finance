@@ -268,16 +268,16 @@ export default function Bridge() {
 
   const getNetworkInfo = (chainId) => supportedNetworks.find((n) => n.id === chainId);
 
-  const getStatusColor = (status) => {
+  const getStatusTone = (status) => {
     switch (status) {
       case 'completed':
-        return 'text-green-400';
+        return { text: 'var(--finance-green, #22c55e)', dot: 'td-status-dot--ok' };
       case 'pending':
-        return 'text-yellow-400';
+        return { text: 'var(--finance-amber, #e8b84a)', dot: 'td-status-dot--pending' };
       case 'failed':
-        return 'text-red-400';
+        return { text: 'var(--finance-red)', dot: 'td-status-dot--fail' };
       default:
-        return 'text-gray-400';
+        return { text: 'var(--text-tertiary)', dot: 'td-status-dot--idle' };
     }
   };
 
@@ -309,16 +309,15 @@ export default function Bridge() {
         <meta property="og:url" content="https://boing.finance/bridge" />
       </Helmet>
       <div className="relative w-full min-w-0">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <div className="mb-6">
-            <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-              Bridge
-            </h1>
-            <p className="text-sm sm:text-base mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+        <div className="td-shell td-shell--narrow">
+          <header className="td-hero">
+            <span className="td-hero__eyebrow">Trade</span>
+            <h1 className="td-hero__title">Bridge</h1>
+            <p className="td-hero__subtitle">
               EVM transfers routed by LI.FI. Boing takes a {PLATFORM_BRIDGE_FEE_LABEL} platform fee. Liquidity stays with the
-              aggregator's bridges — not a Boing-held inventory.
+              aggregator&apos;s bridges — not a Boing-held inventory.
             </p>
-          </div>
+          </header>
 
           {network && Number(network.chainId) === BOING_NATIVE_L1_CHAIN_ID && (
             <div
@@ -333,7 +332,7 @@ export default function Bridge() {
               <strong style={{ color: 'var(--text-primary)' }}>Boing L1 (6913):</strong> this page targets EVM networks
               (Boing is excluded from the picker). Native BOING transfers use Boing Express; an L1↔EVM protocol bridge is
               separate work. See{' '}
-              <Link to="/boing/native-vm" className="text-cyan-400 underline hover:text-cyan-300">
+              <Link to="/boing/native-vm" className="td-btn--link">
                 Native VM tools
               </Link>{' '}
               and{' '}
@@ -341,7 +340,7 @@ export default function Bridge() {
                 href={BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-cyan-400 underline hover:text-cyan-300"
+                className="td-btn--link"
               >
                 partner handoff
               </a>
@@ -374,7 +373,7 @@ export default function Bridge() {
                 <select
                   value={fromChain}
                   onChange={(e) => setFromChain(parseInt(e.target.value, 10))}
-                  className="w-full rounded-xl px-4 py-3 text-sm sm:text-base font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="td-field__input text-sm sm:text-base font-medium"
                   style={{
                     backgroundColor: 'var(--bg-tertiary)',
                     border: '1px solid var(--border-color)',
@@ -391,13 +390,9 @@ export default function Bridge() {
 
               <div className="flex justify-center -my-1">
                 <button
+                  type="button"
                   onClick={switchChains}
-                  className="p-2 rounded-xl transition-colors border-2"
-                  style={{
-                    backgroundColor: 'var(--bg-primary)',
-                    borderColor: 'var(--primary-color)',
-                    color: 'var(--primary-color)',
-                  }}
+                  className="td-icon-btn"
                   aria-label="Switch networks"
                 >
                   <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -426,7 +421,7 @@ export default function Bridge() {
                 <select
                   value={toChain}
                   onChange={(e) => setToChain(parseInt(e.target.value, 10))}
-                  className="w-full rounded-xl px-4 py-3 text-sm sm:text-base font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="td-field__input text-sm sm:text-base font-medium"
                   style={{
                     backgroundColor: 'var(--bg-tertiary)',
                     border: '1px solid var(--border-color)',
@@ -445,12 +440,9 @@ export default function Bridge() {
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
               <button
                 onClick={() => openTokenModal('from')}
-                className="flex items-center space-x-2 px-4 py-3 rounded-xl transition-colors w-full sm:w-auto justify-center"
-                style={{
-                  backgroundColor: 'var(--bg-secondary)',
-                  border: '1px solid var(--border-color)',
-                  color: 'var(--text-primary)',
-                }}
+                type="button"
+                className="td-btn td-btn--ghost w-full sm:w-auto justify-center"
+
               >
                 <span className="font-medium text-sm sm:text-base">{fromAsset?.symbol || 'From token'}</span>
                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -460,12 +452,9 @@ export default function Bridge() {
 
               <button
                 onClick={() => openTokenModal('to')}
-                className="flex items-center space-x-2 px-4 py-3 rounded-xl transition-colors w-full sm:w-auto justify-center"
-                style={{
-                  backgroundColor: 'var(--bg-secondary)',
-                  border: '1px solid var(--border-color)',
-                  color: 'var(--text-primary)',
-                }}
+                type="button"
+                className="td-btn td-btn--ghost w-full sm:w-auto justify-center"
+
               >
                 <span className="font-medium text-sm sm:text-base">{toAsset?.symbol || 'To token'}</span>
                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -497,7 +486,7 @@ export default function Bridge() {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="0.0"
-                  className="flex-1 bg-transparent text-xl sm:text-2xl font-bold placeholder-gray-500 focus:outline-none"
+                  className="flex-1 bg-transparent text-xl sm:text-2xl font-bold focus:outline-none min-w-0"
                   style={{ color: 'var(--text-primary)' }}
                 />
               </div>
@@ -544,9 +533,9 @@ export default function Bridge() {
             </div>
 
             {quoteError && (
-              <p className="text-sm text-amber-200/90 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2 mb-3">
-                {quoteError}
-              </p>
+              <div className="td-callout td-callout--warn mb-3" role="alert">
+                <p className="td-callout__body">{quoteError}</p>
+              </div>
             )}
 
             {!feeRecipient && (
@@ -564,11 +553,7 @@ export default function Bridge() {
                 type="button"
                 onClick={handleBridge}
                 disabled={!canSubmit}
-                className="w-full font-bold py-4 px-8 rounded-xl transition-all text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  backgroundColor: 'var(--primary-color)',
-                  color: 'var(--bg-primary)',
-                }}
+                className="td-btn td-btn--primary w-full py-4 text-base sm:text-lg"
               >
                 {!account
                   ? 'Connect wallet'
@@ -580,15 +565,17 @@ export default function Bridge() {
                         ? `Bridge via ${quote.venue}`
                         : 'Get a route'}
               </button>
-              <a
-                href={quote ? deepLink : getBridgeFallbackUrl(fromChain)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-center text-sm underline"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                Open in LI.FI / Jumper instead
-              </a>
+              <div className="td-lifi-strip">
+                <p className="td-lifi-strip__label">Prefer the aggregator UI?</p>
+                <a
+                  href={quote ? deepLink : getBridgeFallbackUrl(fromChain)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="td-btn td-btn--ghost text-sm"
+                >
+                  Open LI.FI / Jumper
+                </a>
+              </div>
             </div>
           </div>
 
@@ -631,7 +618,7 @@ export default function Bridge() {
                       >
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
                           <div className="flex items-center space-x-3">
-                            <div className={`w-3 h-3 rounded-full ${getStatusColor(tx.status)}`}></div>
+                            <div className={`td-status-dot ${getStatusTone(tx.status).dot}`} aria-hidden="true" />
                             <div>
                               <p className="font-medium text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>
                                 {tx.amount} {tx.fromToken || tx.token} → {tx.toToken || tx.token}
@@ -643,7 +630,7 @@ export default function Bridge() {
                             </div>
                           </div>
                           <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-3">
-                            <span className={`text-xs sm:text-sm font-medium ${getStatusColor(tx.status)}`}>
+                            <span className="text-xs sm:text-sm font-medium" style={{ color: getStatusTone(tx.status).text }}>
                               {tx.status
                                 ? tx.status.charAt(0).toUpperCase() + tx.status.slice(1)
                                 : 'Pending'}
@@ -708,9 +695,9 @@ export default function Bridge() {
                   <div className="text-center">
                     <div
                       className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
-                      style={{ backgroundColor: 'var(--primary-color)' }}
+                      style={{ backgroundColor: 'var(--finance-primary)', color: '#041018' }}
                     >
-                      <span className="text-white font-bold text-lg">1</span>
+                      <span className="font-bold text-lg">1</span>
                     </div>
                     <h4 className="font-semibold mb-2 text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>
                       Quote via LI.FI
@@ -722,9 +709,9 @@ export default function Bridge() {
                   <div className="text-center">
                     <div
                       className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
-                      style={{ backgroundColor: 'var(--primary-color)' }}
+                      style={{ backgroundColor: 'var(--finance-primary)', color: '#041018' }}
                     >
-                      <span className="text-white font-bold text-lg">2</span>
+                      <span className="font-bold text-lg">2</span>
                     </div>
                     <h4 className="font-semibold mb-2 text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>
                       {PLATFORM_BRIDGE_FEE_LABEL} platform fee
@@ -736,9 +723,9 @@ export default function Bridge() {
                   <div className="text-center">
                     <div
                       className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
-                      style={{ backgroundColor: 'var(--primary-color)' }}
+                      style={{ backgroundColor: 'var(--finance-primary)', color: '#041018' }}
                     >
-                      <span className="text-white font-bold text-lg">3</span>
+                      <span className="font-bold text-lg">3</span>
                     </div>
                     <h4 className="font-semibold mb-2 text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>
                       Sign once

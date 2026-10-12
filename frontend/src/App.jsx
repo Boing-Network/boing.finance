@@ -38,6 +38,7 @@ import {
   getBrandAssetVersionSuffix,
 } from './config/brandAssets';
 import { comingSoon, navigation } from './config/navigation';
+import NavIcon from './components/NavIcon';
 
 // Lazy load all page components for code splitting
 const Swap = lazy(() => import('./pages/Swap'));
@@ -532,7 +533,7 @@ function AppContent() {
                       disabled={item.comingSoon || !item.isAvailable}
                       title={item.comingSoon ? comingSoon.tooltip : (item.testnetOnly ? 'Available on Sepolia testnet only' : '')}
                     >
-                      <span className="text-lg">{item.icon}</span>
+                      <NavIcon icon={item.icon} size={18} className="opacity-90" />
                       <div>
                         <div className="flex items-center space-x-2">
                           <span>{item.name}</span>
@@ -582,7 +583,7 @@ function AppContent() {
                       disabled={item.comingSoon || !item.isAvailable}
                       title={item.comingSoon ? comingSoon.tooltip : (item.testnetOnly ? 'Available on Sepolia testnet only' : '')}
                     >
-                      <span className="text-lg">{item.icon}</span>
+                      <NavIcon icon={item.icon} size={18} className="opacity-90" />
                       <div>
                         <div className="flex items-center space-x-2">
                           <span>{item.name}</span>
@@ -611,7 +612,7 @@ function AppContent() {
                       className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${(item.comingSoon || !item.isAvailable) ? 'cursor-not-allowed opacity-60' : ''}`}
                       style={{ color: (item.comingSoon || !item.isAvailable) ? 'var(--text-tertiary)' : 'var(--text-secondary)' }}
                       disabled={item.comingSoon || !item.isAvailable} title={item.comingSoon ? comingSoon.tooltip : ''}>
-                      <span className="text-lg">{item.icon}</span>
+                      <NavIcon icon={item.icon} size={18} className="opacity-90" />
                       <div>
                         <div className="flex items-center space-x-2">
                           <span>{item.name}</span>
@@ -633,7 +634,7 @@ function AppContent() {
                       className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${(item.comingSoon || !item.isAvailable) ? 'cursor-not-allowed opacity-60' : ''}`}
                       style={{ color: (item.comingSoon || !item.isAvailable) ? 'var(--text-tertiary)' : 'var(--text-secondary)' }}
                       disabled={item.comingSoon || !item.isAvailable} title={item.comingSoon ? comingSoon.tooltip : ''}>
-                      <span className="text-lg">{item.icon}</span>
+                      <NavIcon icon={item.icon} size={18} className="opacity-90" />
                       <div>
                         <div className="flex items-center space-x-2">
                           <span>{item.name}</span>
@@ -1018,7 +1019,7 @@ function MediumNavPanel({ navigation, onNavigate, comingSoon }) {
             disabled={item.comingSoon || !item.isAvailable}
             title={item.comingSoon ? comingSoon.tooltip : ''}
           >
-            <span className="text-base">{item.icon}</span>
+            <NavIcon icon={item.icon} size={16} className="opacity-90" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span>{item.name}</span>
@@ -1117,7 +1118,7 @@ function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
                   disabled={shouldDisable}
                   title={shouldDisable ? comingSoon.tooltip : (item.testnetOnly ? 'Available on Sepolia testnet only' : '')}
                 >
-                  <span className="text-lg">{item.icon}</span>
+                  <NavIcon icon={item.icon} size={18} className="opacity-90" />
                   <div>
                     <div className="flex items-center space-x-2">
                       <span>{item.name}</span>

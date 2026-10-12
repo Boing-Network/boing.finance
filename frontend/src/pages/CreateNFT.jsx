@@ -8,6 +8,13 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
 import { useChainType, useSolanaWallet } from '../contexts/SolanaWalletContext';
 import EmptyState from '../components/EmptyState';
+import {
+  TradeDeployShell,
+  TradeDeployHero,
+  StepRail,
+  SegmentedControl,
+  PageCard,
+} from '../components/PageLayout';
 import { uploadToIPFS, validateFile } from '../utils/ipfsUpload';
 import {
   applyCoverImageToTokens,
@@ -27,15 +34,15 @@ import LinkedNftTokenPanel from '../components/LinkedNftTokenPanel';
 import useEscapeKey from '../hooks/useEscapeKey';
 
 const SOLANA_NFT_STEPS = [
-  { id: 'upload', label: 'Image & Details', icon: '🖼️' },
-  { id: 'review', label: 'Review & Mint', icon: '✅' },
+  { id: 'upload', label: 'Image & Details' },
+  { id: 'review', label: 'Review & Mint' },
 ];
 
 const STEPS = [
-  { id: 'collection', label: 'Collection', icon: '📦' },
-  { id: 'upload', label: 'Images', icon: '🖼️' },
-  { id: 'metadata', label: 'Metadata', icon: '📝' },
-  { id: 'review', label: 'Review & Mint', icon: '✅' }
+  { id: 'collection', label: 'Collection' },
+  { id: 'upload', label: 'Images' },
+  { id: 'metadata', label: 'Metadata' },
+  { id: 'review', label: 'Review & Mint' },
 ];
 
 const ACCEPTED_IMAGE_TYPES = 'image/jpeg,image/png,image/gif,image/webp';
@@ -73,9 +80,9 @@ function formatNftServiceFeeLine(chainId, collectionSize, nativeSymbol) {
 }
 
 const DYNAMIC_STEPS = [
-  { id: 'collection', label: 'Collection & size', icon: '📦' },
-  { id: 'layers', label: 'Trait layers', icon: '🎲' },
-  { id: 'review', label: 'Review & export', icon: '✅' }
+  { id: 'collection', label: 'Collection & size' },
+  { id: 'layers', label: 'Trait layers' },
+  { id: 'review', label: 'Review & export' },
 ];
 
 // ERC-721 / OpenSea standard metadata shape
@@ -261,43 +268,33 @@ function CreateNFTSolanaContent() {
         <title>Create SPL NFT - Solana | Boing Finance</title>
         <meta name="description" content="Mint SPL NFTs on Solana. Image + metadata stored on Cloudflare R2." />
       </Helmet>
-      <div className="relative z-10 container mx-auto px-4 py-8">
-        <div className="max-w-xl mx-auto">
-          <div className="text-center mb-6">
-            <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Create SPL NFT</h1>
-            <p className="text-theme-tertiary">Mint an NFT on Solana {solanaNetwork.name}. Image + metadata stored on Cloudflare R2.</p>
-          </div>
+      <TradeDeployShell width="narrow">
+          <TradeDeployHero
+            eyebrow="Launch"
+            title="Create SPL NFT"
+            subtitle={`Mint an NFT on Solana ${solanaNetwork.name}. Image and metadata stored on Cloudflare R2.`}
+          />
 
           {!connected ? (
-            <div className="rounded-xl border p-8 text-center" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-              <p className="mb-4 text-theme-tertiary">Connect your Solana wallet to mint NFTs.</p>
+            <PageCard className="td-mint-form text-center">
+              <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>Connect your Solana wallet to mint NFTs.</p>
               <button
+                type="button"
                 onClick={connectWallet}
-                className="px-6 py-3 rounded-lg font-medium bg-cyan-600 text-white hover:bg-cyan-500"
+                className="td-btn td-btn--primary"
               >
                 Connect Solana Wallet
               </button>
-            </div>
+            </PageCard>
           ) : (
             <>
-              <div className="flex justify-center gap-2 mb-6">
-                {SOLANA_NFT_STEPS.map((s, _i) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => setStep(s.id)}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${
-                      step === s.id ? 'bg-cyan-500/30 text-cyan-300 border border-cyan-400/50' : 'border border-transparent'
-                    }`}
-                    style={step !== s.id ? { backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-tertiary)' } : {}}
-                  >
-                    <span>{s.icon}</span>
-                    <span>{s.label}</span>
-                  </button>
-                ))}
-              </div>
+              <StepRail
+                steps={SOLANA_NFT_STEPS}
+                currentId={step}
+                onStepClick={(id) => setStep(id)}
+              />
 
-              <div className="rounded-2xl border p-6" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+              <PageCard className="td-mint-form">
                 {step === 'upload' && (
                   <div className="space-y-4">
                     <div>
@@ -387,11 +384,10 @@ function CreateNFTSolanaContent() {
                     )}
                   </div>
                 )}
-              </div>
+              </PageCard>
             </>
           )}
-        </div>
-      </div>
+      </TradeDeployShell>
     </>
   );
 }
@@ -833,26 +829,27 @@ export default function CreateNFT() {
           <title>Create NFT | boing.finance — Mint on EVM & Solana</title>
           <meta name="description" content="Create and mint NFTs on EVM or Solana. Upload images, add metadata, bulk mint. No code with boing.finance." />
         </Helmet>
-        <div className="relative z-10 container mx-auto px-4 py-8">
-          <div className="max-w-2xl mx-auto">
-            <div className="rounded-2xl border p-6 sm:p-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-              <EmptyState
-                variant="nfts"
-                title="Connect your wallet"
-                description="Connect your wallet to create and mint NFTs on EVM or Solana."
-                action={connectWallet}
-                actionLabel="Connect Wallet"
-                secondaryLabel="Project pack"
-                secondaryHref="/project-pack"
-              />
-            </div>
-          </div>
-        </div>
+        <TradeDeployShell width="medium">
+          <TradeDeployHero
+            eyebrow="Launch"
+            title="Create NFT"
+            subtitle="Upload images or image URLs into collection metadata. Connect a wallet to continue."
+          />
+          <PageCard className="td-mint-form">
+            <EmptyState
+              variant="nfts"
+              title="Connect your wallet"
+              description="Connect your wallet to create and mint NFTs on EVM or Solana."
+              action={connectWallet}
+              actionLabel="Connect Wallet"
+              secondaryLabel="Project pack"
+              secondaryHref="/project-pack"
+            />
+          </PageCard>
+        </TradeDeployShell>
       </>
     );
   }
-
-  const _currentStepIndex = STEPS.findIndex((s) => s.id === step);
 
   return (
     <>
@@ -860,68 +857,46 @@ export default function CreateNFT() {
         <title>Create NFT | boing.finance — Mint on EVM & Solana</title>
         <meta name="description" content="Mint NFTs on EVM or Solana. Upload images, add metadata, bulk mint. IPFS storage with boing.finance." />
       </Helmet>
-      <div className="relative z-10 container mx-auto px-4 py-8">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-6">
-            <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Create NFT</h1>
-            <p className="text-theme-tertiary">Upload images or image URLs into collection metadata. On Boing testnet with Express, deploy commits that metadata hash. On-chain mint of individual tokens is not available on EVM yet. Solana can mint an SPL NFT.</p>
-            <p className="mt-3 text-sm">
+      <TradeDeployShell width="medium">
+          <TradeDeployHero
+            eyebrow="Launch"
+            title="Create NFT"
+            subtitle="Upload images or image URLs into collection metadata. On Boing testnet with Express, deploy commits that metadata hash. Solana can mint an SPL NFT."
+          >
+            <p className="mt-3 text-sm" style={{ color: 'var(--text-tertiary)' }}>
               <Link to="/project-pack" className="underline" style={{ color: 'var(--finance-primary)' }}>
                 Project pack
               </Link>
-              <span className="text-theme-tertiary">
-                {' '}
-                — create a collection, token, and companions in one guided flow.{' '}
-              </span>
+              {' — create a collection, token, and companions in one guided flow. '}
               <Link to="/linked-project" className="underline" style={{ color: 'var(--finance-primary)' }}>
                 Manage links
               </Link>
-              <span className="text-theme-tertiary"> for existing pairs.</span>
+              {' for existing pairs.'}
             </p>
+          </TradeDeployHero>
+
+          <div className="flex justify-center mb-6">
+            <SegmentedControl
+              aria-label="Mint mode"
+              value={mode}
+              onChange={(next) => {
+                setMode(next);
+                setStep('collection');
+              }}
+              options={[
+                { value: 'standard', label: 'Standard mint' },
+                { value: 'dynamic', label: 'Dynamic (up to 10k)' },
+              ]}
+            />
           </div>
 
-          {/* Mode: Standard vs Dynamic collection */}
-          <div className="flex justify-center gap-2 mb-6">
-            <button
-              type="button"
-              onClick={() => { setMode('standard'); setStep('collection'); }}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${mode === 'standard' ? 'bg-cyan-600 text-white' : ''}`}
-              style={mode !== 'standard' ? { backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' } : {}}
-            >
-              Standard mint
-            </button>
-            <button
-              type="button"
-              onClick={() => { setMode('dynamic'); setStep('collection'); }}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${mode === 'dynamic' ? 'bg-cyan-600 text-white' : ''}`}
-              style={mode !== 'dynamic' ? { backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' } : {}}
-            >
-              Dynamic collection (up to 10k)
-            </button>
-          </div>
+          <StepRail
+            steps={mode === 'dynamic' ? DYNAMIC_STEPS : STEPS}
+            currentId={step}
+            onStepClick={(id) => setStep(id)}
+          />
 
-          {/* Step indicator */}
-          <div className="flex justify-center gap-2 mb-8">
-            {(mode === 'dynamic' ? DYNAMIC_STEPS : STEPS).map((s, i) => {
-              const steps = mode === 'dynamic' ? DYNAMIC_STEPS : STEPS;
-              const currentStepIndex = steps.findIndex((x) => x.id === step);
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => currentStepIndex > i && setStep(s.id)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    step === s.id ? 'bg-cyan-500/30 text-cyan-300 border border-cyan-400/50' : i < currentStepIndex ? 'bg-gray-600/50 text-gray-300 hover:bg-gray-600' : 'bg-gray-700/50 text-gray-500'
-                  }`}
-                >
-                  <span>{s.icon}</span>
-                  <span className="hidden sm:inline">{s.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="rounded-2xl border p-6 sm:p-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+          <PageCard className="td-mint-form">
             {/* ========== Dynamic collection flow ========== */}
             {mode === 'dynamic' && (
               <>
@@ -1038,7 +1013,7 @@ export default function CreateNFT() {
                         </div>
                       </div>
                     ))}
-                    <button type="button" onClick={addTraitLayer} className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium">
+                    <button type="button" onClick={addTraitLayer} className="td-btn td-btn--ghost">
                       + Add trait layer
                     </button>
                   </div>
@@ -1074,10 +1049,10 @@ export default function CreateNFT() {
                           >
                             {isPublishingMetadata ? 'Uploading metadata…' : 'Upload metadata to network'}
                           </button>
-                          <button type="button" onClick={exportMetadataJSON} className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium">
+                          <button type="button" onClick={exportMetadataJSON} className="td-btn td-btn--ghost">
                             Export metadata JSON
                           </button>
-                          <button type="button" onClick={() => setGeneratedDynamicMetadata([])} className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium">
+                          <button type="button" onClick={() => setGeneratedDynamicMetadata([])} className="td-btn td-btn--ghost">
                             Clear & re-import
                           </button>
                           <label className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium cursor-pointer">
@@ -1161,7 +1136,7 @@ export default function CreateNFT() {
                     type="button"
                     onClick={() => setStep(step === 'layers' ? 'collection' : 'layers')}
                     disabled={step === 'collection'}
-                    className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium disabled:opacity-50"
+                    className="td-btn td-btn--ghost disabled:opacity-50"
                   >
                     Back
                   </button>
@@ -1258,8 +1233,7 @@ export default function CreateNFT() {
                     className="hidden"
                     onChange={(e) => addFiles(e.target.files)}
                   />
-                  <span className="text-4xl mb-2">🖼️</span>
-                  <span className="text-gray-300">Drag & drop images or click to browse</span>
+                                    <span style={{ color: 'var(--text-secondary)' }}>Drag & drop images or click to browse</span>
                   <span className="text-gray-500 text-sm mt-1">JPEG, PNG, GIF, WebP · max {MAX_FILE_SIZE_MB}MB each</span>
                 </label>
                 {files.length > 0 && (
@@ -1426,7 +1400,7 @@ export default function CreateNFT() {
                   >
                     {isPublishingMetadata ? 'Uploading metadata…' : 'Upload metadata to network'}
                   </button>
-                  <button type="button" onClick={exportMetadataJSON} className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium">
+                  <button type="button" onClick={exportMetadataJSON} className="td-btn td-btn--ghost">
                     Export metadata JSON
                   </button>
                 </div>
@@ -1503,7 +1477,7 @@ export default function CreateNFT() {
                 type="button"
                 onClick={handleBack}
                 disabled={step === 'collection'}
-                className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="td-btn td-btn--ghost disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Back
               </button>
@@ -1512,7 +1486,7 @@ export default function CreateNFT() {
                   type="button"
                   onClick={handleNext}
                   disabled={step === 'upload' ? (files.length === 0 || isUploading) : !canProceed()}
-                  className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="td-btn td-btn--primary disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {step === 'upload' && files.length > 0 && uploadedUris.length < files.length ? (isUploading ? 'Uploading…' : 'Upload images & Next') : 'Next'}
                 </button>
@@ -1520,8 +1494,7 @@ export default function CreateNFT() {
             </div>
               </>
             )}
-          </div>
-        </div>
+          </PageCard>
 
         {/* Token preview modal */}
         {previewTokenIndex != null && (() => {
@@ -1542,36 +1515,51 @@ export default function CreateNFT() {
               aria-label="Token preview"
             >
               <div
-                className="rounded-2xl border bg-gray-800 border-gray-600 shadow-xl max-w-md w-full max-h-[90vh] overflow-hidden flex flex-col"
+                className="td-card max-w-md w-full max-h-[90vh] overflow-hidden flex flex-col p-0"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="p-4 border-b border-gray-700 flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-white">Token preview</h3>
-                  <button type="button" onClick={() => setPreviewTokenIndex(null)} className="p-2 rounded-lg hover:bg-gray-700 text-gray-400 hover:text-white">
+                <div
+                  className="p-4 flex items-center justify-between"
+                  style={{ borderBottom: '1px solid var(--border-color)' }}
+                >
+                  <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Token preview</h3>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewTokenIndex(null)}
+                    className="p-2 rounded-lg"
+                    style={{ color: 'var(--text-tertiary)' }}
+                  >
                     <span className="sr-only">Close</span>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
                 </div>
                 <div className="overflow-y-auto flex-1 p-4 space-y-4">
-                  <div className="aspect-square rounded-lg overflow-hidden bg-gray-700">
-                    {imageUrl ? <img src={imageUrl} alt={meta.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-500 text-4xl">#{idx + 1}</div>}
+                  <div
+                    className="aspect-square rounded-lg overflow-hidden"
+                    style={{ backgroundColor: 'var(--bg-tertiary)' }}
+                  >
+                    {imageUrl ? <img src={imageUrl} alt={meta.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-4xl" style={{ color: 'var(--text-tertiary)' }}>#{idx + 1}</div>}
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 mb-1">Name</p>
-                    <p className="text-white font-medium">{meta.name}</p>
+                    <p className="text-xs mb-1" style={{ color: 'var(--text-tertiary)' }}>Name</p>
+                    <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{meta.name}</p>
                   </div>
                   {meta.description && (
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">Description</p>
-                      <p className="text-gray-300 text-sm whitespace-pre-wrap">{meta.description}</p>
+                      <p className="text-xs mb-1" style={{ color: 'var(--text-tertiary)' }}>Description</p>
+                      <p className="text-sm whitespace-pre-wrap" style={{ color: 'var(--text-secondary)' }}>{meta.description}</p>
                     </div>
                   )}
                   {meta.attributes?.length > 0 && (
                     <div>
-                      <p className="text-xs text-gray-500 mb-2">Attributes</p>
+                      <p className="text-xs mb-2" style={{ color: 'var(--text-tertiary)' }}>Attributes</p>
                       <div className="flex flex-wrap gap-2">
                         {meta.attributes.map((a, i) => (
-                          <span key={i} className="px-2 py-1 rounded bg-gray-700 text-gray-300 text-sm">
+                          <span
+                            key={i}
+                            className="px-2 py-1 rounded text-sm"
+                            style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}
+                          >
                             {a.trait_type}: {String(a.value)}
                           </span>
                         ))}
@@ -1583,7 +1571,7 @@ export default function CreateNFT() {
             </div>
           );
         })()}
-      </div>
+      </TradeDeployShell>
     </>
   );
 }
