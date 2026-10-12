@@ -10,17 +10,17 @@ const comingSoon = {
 // `icon` values are NavIcon keys (SVG), not emoji.
 const createNavigation = () => {
   const trading = Object.freeze([
-    Object.freeze({ name: 'Swap', href: '/swap', icon: 'swap', description: 'Trade tokens instantly', isAvailable: true, comingSoon: false, testnetOnly: false }),
-    Object.freeze({ name: 'Bridge', href: '/bridge', icon: 'bridge', description: 'LI.FI aggregator transfers (0.5% fee)', isAvailable: true, comingSoon: false, testnetOnly: false }),
-    Object.freeze({ name: 'Pools', href: '/pools', icon: 'pools', description: 'Liquidity pools', isAvailable: true, comingSoon: false, testnetOnly: false }),
-    Object.freeze({ name: 'Tokens', href: '/tokens', icon: 'tokens', description: 'Token management', isAvailable: true, comingSoon: false, testnetOnly: false })
+    Object.freeze({ name: 'Swap', href: '/swap', icon: 'swap', description: 'Trade tokens on this network', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Bridge', href: '/bridge', icon: 'bridge', description: 'Move tokens between EVM networks', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Pools', href: '/pools', icon: 'pools', description: 'Browse pools and your liquidity', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Tokens', href: '/tokens', icon: 'tokens', description: 'Browse tokens on this network', isAvailable: true, comingSoon: false, testnetOnly: false })
   ]);
   const deployment = Object.freeze([
-    Object.freeze({ name: 'Project pack', href: '/project-pack', icon: 'project-pack', description: 'Collection + token + companions', isAvailable: true, comingSoon: false, testnetOnly: false }),
-    Object.freeze({ name: 'Deploy Token', href: '/deploy-token', icon: 'deploy-token', description: 'Create your own tokens', isAvailable: true, comingSoon: false, testnetOnly: false }),
-    Object.freeze({ name: 'Create NFT', href: '/create-nft', icon: 'create-nft', description: 'Mint NFTs', isAvailable: true, comingSoon: false, testnetOnly: false }),
-    Object.freeze({ name: 'Manage links', href: '/linked-project', icon: 'manage-links', description: 'Link or unlink companions', isAvailable: true, comingSoon: false, testnetOnly: false }),
-    Object.freeze({ name: 'Create Pool', href: '/create-pool', icon: 'create-pool', description: 'Create liquidity pools', isAvailable: true, comingSoon: false, testnetOnly: false })
+    Object.freeze({ name: 'Project pack', href: '/project-pack', icon: 'project-pack', description: 'Create NFT + token together, then connect them', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Deploy Token', href: '/deploy-token', icon: 'deploy-token', description: 'Create your own token', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Create NFT', href: '/create-nft', icon: 'create-nft', description: 'Create an NFT collection', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Manage links', href: '/linked-project', icon: 'manage-links', description: 'Connect an existing collection and token', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Create Pool', href: '/create-pool', icon: 'create-pool', description: 'Start a new trading pool', isAvailable: true, comingSoon: false, testnetOnly: false })
   ]);
   return Object.freeze({
   trading,

@@ -1303,8 +1303,8 @@ function CreatePool() {
         <TradeDeployShell width="medium">
           <TradeDeployHero
             eyebrow="Deploy"
-            title="Create Liquidity Pool"
-            subtitle="Connect your wallet to deploy trading pairs and earn fees."
+            title="Create a pool"
+            subtitle="Connect your wallet, pick two tokens, and add the first liquidity."
           />
           <PageCard>
             <EmptyState
@@ -1336,8 +1336,8 @@ function CreatePool() {
             {chainId === BOING_NATIVE_L1_CHAIN_ID && (
             <header className="td-hero td-hero--center mb-8">
               <span className="td-hero__eyebrow">Deploy</span>
-              <h1 className="td-hero__title">Create Liquidity Pool</h1>
-              <p className="td-hero__subtitle">Deploy a native constant-product pool on Boing L1</p>
+              <h1 className="td-hero__title">Create a pool</h1>
+              <p className="td-hero__subtitle">Pick two tokens and add the first liquidity on Boing</p>
             </header>
             )}
             {chainId === BOING_NATIVE_L1_CHAIN_ID && <NativeBoingCreatePoolPanel />}
@@ -1352,8 +1352,8 @@ function CreatePool() {
             {chainId !== BOING_NATIVE_L1_CHAIN_ID && (
             <header className="td-hero td-hero--center mb-8">
               <span className="td-hero__eyebrow">Deploy</span>
-              <h1 className="td-hero__title">Create Liquidity Pool</h1>
-              <p className="td-hero__subtitle">Deploy new trading pairs and earn fees from every trade</p>
+              <h1 className="td-hero__title">Create a pool</h1>
+              <p className="td-hero__subtitle">Pick two tokens and add the first liquidity</p>
             </header>
             )}
 

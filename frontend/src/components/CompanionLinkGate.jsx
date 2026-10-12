@@ -63,23 +63,23 @@ export default function CompanionLinkGate({
           ? 'rgba(239, 68, 68, 0.06)'
           : 'var(--bg-tertiary)';
 
-  let title = 'Companions';
-  let body = message || 'Checking whether this collection and token are linked.';
+  let title = 'Collection & token';
+  let body = message || 'Checking whether this collection and token are connected.';
   if (state === 'linked') {
-    title = 'Companions linked';
+    title = 'Connected';
     body = `${actionLabel} is unlocked for this project.`;
   } else if (state === 'not_linked') {
-    title = 'Link companions to unlock';
-    body = `${actionLabel} stays locked until this collection and token are linked as companions.`;
+    title = 'Link to unlock';
+    body = `${actionLabel} stays locked until this collection and token are linked as one project.`;
   } else if (state === 'unavailable') {
-    title = 'Could not verify companions';
-    body = 'Try again in a moment. Linking still happens from Project pack or Manage links.';
+    title = 'Could not verify link';
+    body = 'Try again in a moment. You can still link from Project pack or Manage links.';
   } else if (state === 'invalid') {
     title = 'Need both ids';
-    body = message || 'A collection id and token id are required to check companions.';
+    body = message || 'A collection id and token id are required to check the link.';
   } else if (state === 'checking') {
-    title = 'Checking companions…';
-    body = 'Reading on-chain links for this project.';
+    title = 'Checking link…';
+    body = 'Confirming this collection and token are connected on-chain.';
   }
 
   const statusVariant =

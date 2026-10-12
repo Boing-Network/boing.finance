@@ -1076,8 +1076,8 @@ const Pools = () => {
             <div className="max-w-2xl mx-auto text-center">
               <header className="td-hero td-hero--center mb-8">
                 <span className="td-hero__eyebrow">Trade</span>
-                <h1 className="td-hero__title">Liquidity Pools</h1>
-                <p className="td-hero__subtitle">Connect your wallet to see your pools and positions.</p>
+                <h1 className="td-hero__title">Pools</h1>
+                <p className="td-hero__subtitle">Connect your wallet to see pools and your liquidity.</p>
               </header>
               <div className="td-card p-8">
                 <EmptyState
@@ -1107,9 +1107,16 @@ const Pools = () => {
           <div className="max-w-7xl mx-auto">
             <header className="td-hero td-hero--center mb-8">
               <span className="td-hero__eyebrow">Trade</span>
-              <h1 className="td-hero__title">Liquidity Pools</h1>
+              <h1 className="td-hero__title">Pools</h1>
               <p className="td-hero__subtitle">
-                Manage your liquidity positions and explore available pools
+                See available pools and manage your liquidity
+              </p>
+              <p className="text-xs mt-2" style={{ color: 'var(--text-tertiary)' }}>
+                On Boing, factory pairs also appear under{' '}
+                <a href="/swap?tab=pools" className="underline" style={{ color: 'var(--finance-primary)' }}>
+                  Swap → Pools
+                </a>
+                .
               </p>
             </header>
 

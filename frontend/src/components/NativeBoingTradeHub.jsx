@@ -183,10 +183,8 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
                 style={{ borderColor: 'var(--border-color)' }}
               >
                 <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-                  <strong className="text-[var(--text-primary)]">Just deployed a token or pool?</strong> Browse the{' '}
-                  <strong>Pools</strong> tab to confirm your pair appears (tap <strong>Refresh</strong> if it just landed on-chain), then
-                  use <strong>Smart route</strong> on a pool row to pre-fill routing, or open <strong>Smart route</strong> here—same Boing
-                  Express signing flow as above, including multihop when the chain exposes factory routes.
+                  Looking for another pair? Open <strong style={{ color: 'var(--text-primary)' }}>Pools</strong>, then
+                  use Smart route when you need a multi-hop path.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <button
@@ -199,7 +197,7 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
                       backgroundColor: 'var(--bg-secondary)',
                     }}
                   >
-                    Open Pools
+                    Browse pools
                   </button>
                   <button
                     type="button"
@@ -211,7 +209,7 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
                       backgroundColor: 'var(--bg-secondary)',
                     }}
                   >
-                    Open Smart route
+                    Smart route
                   </button>
                 </div>
               </div>
@@ -223,19 +221,8 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
               role="status"
             >
               <p>
-                <strong style={{ color: 'var(--text-primary)' }}>No canonical CP pool published</strong> for this RPC
-                (<code className="text-xs">end_user.canonical_native_cp_pool</code> /{' '}
-                <code className="text-xs">REACT_APP_BOING_NATIVE_AMM_POOL</code> is zero). Swap on the network default
-                pool stays gated until an operator publishes an id.
-              </p>
-              <p>
-                You can still use <strong style={{ color: 'var(--text-primary)' }}>Pools</strong>,{' '}
-                <strong style={{ color: 'var(--text-primary)' }}>Smart route</strong>, and{' '}
-                <strong style={{ color: 'var(--text-primary)' }}>Your liquidity</strong> with a pasted pool AccountId, or{' '}
-                <a href="/create-pool" className="text-cyan-400 underline hover:text-cyan-300">
-                  Create Pool
-                </a>{' '}
-                to deploy + seed a new CP pool via Boing Express.
+                <strong style={{ color: 'var(--text-primary)' }}>Default pool isn&apos;t published yet</strong> on this
+                network. Browse pools, create one, or use Smart route for other pairs.
               </p>
               <div className="flex flex-wrap gap-2">
                 <button
@@ -244,16 +231,15 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
                   className="text-sm px-4 py-2.5 min-h-[44px] rounded-xl font-medium border"
                   style={{ borderColor: 'rgba(59, 130, 246, 0.45)', color: 'var(--text-primary)', backgroundColor: 'var(--bg-secondary)' }}
                 >
-                  Open Pools
+                  Browse pools
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setTabAndUrl('route')}
-                  className="text-sm px-4 py-2.5 min-h-[44px] rounded-xl font-medium border"
+                <a
+                  href="/create-pool"
+                  className="text-sm px-4 py-2.5 min-h-[44px] rounded-xl font-medium border inline-flex items-center"
                   style={{ borderColor: 'rgba(59, 130, 246, 0.45)', color: 'var(--text-primary)', backgroundColor: 'var(--bg-secondary)' }}
                 >
-                  Open Smart route
-                </button>
+                  Create a pool
+                </a>
               </div>
             </div>
           ))}

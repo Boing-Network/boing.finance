@@ -11,7 +11,6 @@ import { getSupportedNetworks } from '../config/networks';
 import TokenManagementModal from '../components/TokenManagementModal';
 import EmptyState from '../components/EmptyState';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
-import { BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL } from '../config/boingNetworkDocsUrls';
 import {
   PLATFORM_BRIDGE_FEE_LABEL,
   buildLifiDeepLink,
@@ -314,8 +313,7 @@ export default function Bridge() {
             <span className="td-hero__eyebrow">Trade</span>
             <h1 className="td-hero__title">Bridge</h1>
             <p className="td-hero__subtitle">
-              EVM transfers routed by LI.FI. Boing takes a {PLATFORM_BRIDGE_FEE_LABEL} platform fee. Liquidity stays with the
-              aggregator&apos;s bridges — not a Boing-held inventory.
+              Move tokens between EVM networks. A {PLATFORM_BRIDGE_FEE_LABEL} platform fee applies.
             </p>
           </header>
 
@@ -329,21 +327,11 @@ export default function Bridge() {
                 color: 'var(--text-secondary)',
               }}
             >
-              <strong style={{ color: 'var(--text-primary)' }}>Boing L1 (6913):</strong> this page targets EVM networks
-              (Boing is excluded from the picker). Native BOING transfers use Boing Express; an L1↔EVM protocol bridge is
-              separate work. See{' '}
-              <Link to="/boing/native-vm" className="td-btn--link">
-                Native VM tools
-              </Link>{' '}
-              and{' '}
-              <a
-                href={BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="td-btn--link"
-              >
-                partner handoff
-              </a>
+              <strong style={{ color: 'var(--text-primary)' }}>On Boing L1:</strong> bridging here is for EVM chains.
+              Move BOING with Boing Express for now.{' '}
+              <Link to="/docs" className="td-btn--link">
+                Learn more
+              </Link>
               .
             </div>
           )}
@@ -538,16 +526,6 @@ export default function Bridge() {
               </div>
             )}
 
-            {!feeRecipient && (
-              <p className="text-xs mb-3" style={{ color: 'var(--text-tertiary)' }}>
-                Fee payout wallet is not set in this build. Register integrator <code>boing.finance</code> on{' '}
-                <a href="https://portal.li.fi/" className="underline" target="_blank" rel="noopener noreferrer">
-                  portal.li.fi
-                </a>{' '}
-                and set <code>REACT_APP_LIFI_FEE_RECIPIENT</code> / Worker <code>LIFI_FEE_RECIPIENT</code> to that address.
-              </p>
-            )}
-
             <div className="space-y-3">
               <button
                 type="button"
@@ -565,17 +543,17 @@ export default function Bridge() {
                         ? `Bridge via ${quote.venue}`
                         : 'Get a route'}
               </button>
-              <div className="td-lifi-strip">
-                <p className="td-lifi-strip__label">Prefer the aggregator UI?</p>
+              <details className="td-lifi-strip">
+                <summary className="td-lifi-strip__label cursor-pointer">Prefer the advanced bridge UI?</summary>
                 <a
                   href={quote ? deepLink : getBridgeFallbackUrl(fromChain)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="td-btn td-btn--ghost text-sm"
+                  className="td-btn td-btn--ghost text-sm mt-2 inline-flex"
                 >
-                  Open LI.FI / Jumper
+                  Open external bridge
                 </a>
-              </div>
+              </details>
             </div>
           </div>
 

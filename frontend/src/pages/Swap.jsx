@@ -2066,10 +2066,10 @@ const Swap = () => {
             <div>
               <span className="td-hero__eyebrow">Trade</span>
               <h1 className="td-hero__title" style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)' }}>
-                Spot
+                Swap
               </h1>
               <p className="td-hero__subtitle">
-                Discover trending tokens on this chain and swap on-chain
+                Trade tokens on this network
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">

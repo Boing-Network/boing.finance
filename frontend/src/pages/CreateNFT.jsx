@@ -271,8 +271,8 @@ function CreateNFTSolanaContent() {
       <TradeDeployShell width="narrow">
           <TradeDeployHero
             eyebrow="Launch"
-            title="Create SPL NFT"
-            subtitle={`Mint an NFT on Solana ${solanaNetwork.name}. Image and metadata stored on Cloudflare R2.`}
+            title="Create NFT"
+            subtitle={`Mint on Solana (${solanaNetwork.name}). Name your collection, add art, then publish.`}
           />
 
           {!connected ? (
@@ -833,15 +833,15 @@ export default function CreateNFT() {
           <TradeDeployHero
             eyebrow="Launch"
             title="Create NFT"
-            subtitle="Upload images or image URLs into collection metadata. Connect a wallet to continue."
+            subtitle="Name your collection, add art, then publish. Connect a wallet to continue."
           />
           <PageCard className="td-mint-form">
             <EmptyState
               variant="nfts"
               title="Connect your wallet"
-              description="Connect your wallet to create and mint NFTs on EVM or Solana."
+              description="Connect to create a collection. Want a token too? Use Project pack."
               action={connectWallet}
-              actionLabel="Connect Wallet"
+              actionLabel="Connect wallet"
               secondaryLabel="Project pack"
               secondaryHref="/project-pack"
             />
@@ -861,17 +861,13 @@ export default function CreateNFT() {
           <TradeDeployHero
             eyebrow="Launch"
             title="Create NFT"
-            subtitle="Upload images or image URLs into collection metadata. On Boing testnet with Express, deploy commits that metadata hash. Solana can mint an SPL NFT."
+            subtitle="Name your collection, add art, then publish."
           >
             <p className="mt-3 text-sm" style={{ color: 'var(--text-tertiary)' }}>
+              Want collection + token together?{' '}
               <Link to="/project-pack" className="underline" style={{ color: 'var(--finance-primary)' }}>
                 Project pack
               </Link>
-              {' — create a collection, token, and companions in one guided flow. '}
-              <Link to="/linked-project" className="underline" style={{ color: 'var(--finance-primary)' }}>
-                Manage links
-              </Link>
-              {' for existing pairs.'}
             </p>
           </TradeDeployHero>
 
@@ -1080,14 +1076,17 @@ export default function CreateNFT() {
                               onEnsureMetadataPublished={ensurePublishedMetadata}
                               linkTokenId={linkTokenFromQuery}
                             />
-                            <div className="flex flex-wrap gap-3 mt-2">
+                            <details className="mt-2">
+                              <summary className="cursor-pointer text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                                Advanced tools
+                              </summary>
                               <Link
                                 to="/boing/native-vm"
-                                className="px-4 py-2 rounded-lg border border-cyan-500/50 text-cyan-300 text-sm font-medium inline-flex items-center hover:bg-cyan-950/40"
+                                className="mt-2 px-4 py-2 rounded-lg border border-cyan-500/50 text-cyan-300 text-sm font-medium inline-flex items-center hover:bg-cyan-950/40"
                               >
-                                Native VM — advanced bytecode / RPC
+                                Native VM tools
                               </Link>
-                            </div>
+                            </details>
                           </>
                         )}
                         <h3 className="text-lg font-semibold text-white mt-4">Preview — what you’re minting</h3>
@@ -1437,14 +1436,17 @@ export default function CreateNFT() {
                   />
                 )}
                 {isBoingNativeNftWizard && (
-                  <div className="flex flex-wrap gap-3 mt-4">
+                  <details className="mt-4">
+                    <summary className="cursor-pointer text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                      Advanced tools
+                    </summary>
                     <Link
                       to="/boing/native-vm"
-                      className="px-4 py-2 rounded-lg border border-cyan-500/50 text-cyan-300 text-sm font-medium inline-flex items-center hover:bg-cyan-950/40"
+                      className="mt-2 px-4 py-2 rounded-lg border border-cyan-500/50 text-cyan-300 text-sm font-medium inline-flex items-center hover:bg-cyan-950/40"
                     >
-                      Native VM — advanced bytecode / RPC
+                      Native VM tools
                     </Link>
-                  </div>
+                  </details>
                 )}
                 {!isBoingNativeNftWizard ? (
                   <LinkedNftTokenPanel
