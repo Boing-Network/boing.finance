@@ -386,7 +386,7 @@ const Tokens = () => {
         <meta name="twitter:description" content="Explore and manage tokens." />
       </Helmet>
       <div className="relative w-full min-w-0">
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="td-mint-form relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <header className="td-hero mb-6 sm:mb-8">
             <span className="td-hero__eyebrow">Trade</span>
             <h1 className="td-hero__title">Trending Tokens</h1>
@@ -448,7 +448,7 @@ const Tokens = () => {
             </div>
 
             {lastScanTime && (
-              <p className="text-xs sm:text-sm text-gray-400">
+              <p className="text-xs sm:text-sm" style={{ color: 'var(--text-tertiary)' }}>
                 Last scanned: {lastScanTime.toLocaleString()}
               </p>
             )}
@@ -486,7 +486,7 @@ const Tokens = () => {
                   }}
                   onKeyPress={handleSearchKeyPress}
                   placeholder="Search by name, symbol, or address..."
-                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 sm:px-4 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+                  className="td-field__input text-sm sm:text-base"
                 />
               </div>
 
@@ -495,7 +495,7 @@ const Tokens = () => {
                   type="button"
                   onClick={searchToken}
                   disabled={searching || !searchAddress.trim()}
-                  className="flex-1 min-w-[8rem] sm:flex-none sm:min-w-[10rem] bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white px-4 sm:px-6 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
+                  className="td-btn td-btn--green flex-1 min-w-[8rem] sm:flex-none sm:min-w-[10rem] text-sm sm:text-base disabled:opacity-50"
                 >
                   {searching ? (
                     <>
@@ -510,7 +510,7 @@ const Tokens = () => {
                   <button
                     type="button"
                     onClick={clearSearch}
-                    className="shrink-0 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2.5 rounded-lg transition-colors text-sm sm:text-base"
+                    className="td-btn td-btn--ghost shrink-0 text-sm sm:text-base"
                   >
                     Clear
                   </button>
@@ -533,7 +533,7 @@ const Tokens = () => {
             {searchedToken && (
               <div className="mt-4 sm:mt-6">
                 <h3 className="text-base sm:text-lg font-semibold mb-3 text-white">Search Result</h3>
-                <div className="bg-gray-700/50 rounded-xl p-4 sm:p-6 border border-gray-600">
+                <div className="td-panel-surface">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 space-y-2 sm:space-y-0">
                     <div>
                       <h4 className="text-lg sm:text-xl font-semibold text-white mb-1">{searchedToken.name}</h4>
@@ -549,24 +549,24 @@ const Tokens = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div className="space-y-2 sm:space-y-3">
                       <div className="flex flex-col sm:flex-row sm:justify-between">
-                        <span className="text-gray-400 text-xs sm:text-sm">Address:</span>
+                        <span className=" text-xs sm:text-sm">Address:</span>
                         <span className="font-mono text-gray-300 text-xs sm:text-sm break-all">{formatAddress(searchedToken.address)}</span>
                       </div>
                       
                       <div className="flex flex-col sm:flex-row sm:justify-between">
-                        <span className="text-gray-400 text-xs sm:text-sm">Network:</span>
+                        <span className=" text-xs sm:text-sm">Network:</span>
                         <span className="text-gray-300 text-xs sm:text-sm">{getNetworkName(searchedToken.chainId)}</span>
                       </div>
                       
                       <div className="flex flex-col sm:flex-row sm:justify-between">
-                        <span className="text-gray-400 text-xs sm:text-sm">Decimals:</span>
+                        <span className=" text-xs sm:text-sm">Decimals:</span>
                         <span className="text-gray-300 text-xs sm:text-sm">{searchedToken.decimals}</span>
                       </div>
                     </div>
                     
                     <div className="space-y-2 sm:space-y-3">
                       <div className="flex flex-col sm:flex-row sm:justify-between">
-                        <span className="text-gray-400 text-xs sm:text-sm">Total Supply:</span>
+                        <span className=" text-xs sm:text-sm">Total Supply:</span>
                         <span className="text-gray-300 text-xs sm:text-sm">
                           {formatNumber(parseFloat(ethers.formatUnits(searchedToken.totalSupply, searchedToken.decimals)))}
                         </span>
@@ -574,13 +574,13 @@ const Tokens = () => {
                       
                       {searchedToken.owner && (
                         <div className="flex flex-col sm:flex-row sm:justify-between">
-                          <span className="text-gray-400 text-xs sm:text-sm">Owner:</span>
+                          <span className=" text-xs sm:text-sm">Owner:</span>
                           <span className="font-mono text-gray-300 text-xs sm:text-sm break-all">{formatAddress(searchedToken.owner)}</span>
                         </div>
                       )}
                       
                       <div className="flex flex-col sm:flex-row sm:justify-between">
-                        <span className="text-gray-400 text-xs sm:text-sm">Trending Score:</span>
+                        <span className=" text-xs sm:text-sm">Trending Score:</span>
                         <span className="text-green-400 text-xs sm:text-sm">{searchedToken.trendingScore}</span>
                       </div>
                     </div>
@@ -589,7 +589,7 @@ const Tokens = () => {
                   <div className="mt-4 pt-4 border-t border-gray-600">
                     <button
                       onClick={() => window.open(`https://sepolia.etherscan.io/address/${searchedToken.address}`, '_blank')}
-                      className="w-full bg-gray-600 hover:bg-gray-500 text-white py-2 rounded-lg transition-colors text-sm"
+                      className="td-btn td-btn--ghost w-full text-sm"
                     >
                       View on Explorer
                     </button>
@@ -609,17 +609,17 @@ const Tokens = () => {
           {/* Loading State */}
           {loading && (
             <div className="text-center py-8 sm:py-12">
-              <div className="w-6 sm:w-8 h-6 sm:h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-3 sm:mb-4"></div>
+              <div className="w-6 sm:w-8 h-6 sm:h-8 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-3 sm:mb-4" style={{ borderColor: 'var(--finance-primary)', borderTopColor: 'transparent' }}></div>
               <p className="text-gray-300 mb-2 text-sm sm:text-base">{scanProgress.message}</p>
               {scanProgress.total > 0 && (
                 <div className="w-full max-w-md mx-auto">
-                  <div className="bg-gray-700 rounded-full h-2 mb-2">
+                  <div className="rounded-full h-2 mb-2" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
                     <div 
-                      className="bg-purple-500 h-2 rounded-full transition-all duration-300"
+                      className="h-2 rounded-full transition-all duration-300" style={{ backgroundColor: 'var(--finance-primary)' }}
                       style={{ width: `${(scanProgress.current / scanProgress.total) * 100}%` }}
                     ></div>
                   </div>
-                  <p className="text-xs sm:text-sm text-gray-400">
+                  <p className="text-xs sm:text-sm" style={{ color: 'var(--text-tertiary)' }}>
                     {scanProgress.current} of {scanProgress.total} tokens processed
                   </p>
                 </div>
@@ -630,7 +630,7 @@ const Tokens = () => {
           {/* Tokens Grid */}
           {!loading && filteredTokens.length > 0 && (
             <div className="mb-4">
-              <p className="text-sm text-gray-400">
+              <p className="text-sm ">
                 Showing {filteredTokens.length} of {tokens.length} tokens
               </p>
             </div>
@@ -662,7 +662,7 @@ const Tokens = () => {
                 return (
                 <div
                   key={index}
-                  className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 pt-12 sm:pt-14 pr-12 sm:pr-14 border border-gray-700 hover:border-purple-500 transition-all duration-200 cursor-pointer group relative"
+                  className="td-panel-surface pt-12 sm:pt-14 pr-12 sm:pr-14 transition-all duration-200 cursor-pointer group relative hover:border-[color:var(--finance-primary)]"
                   onClick={() => openTokenDetails(token)}
                 >
                   {/* Favorite & watchlist — top-right, clear of title/score */}
@@ -677,22 +677,28 @@ const Tokens = () => {
                     <button
                       type="button"
                       onClick={handleWatchlistToggle}
-                      className={`p-1.5 rounded-md transition-colors ${isWatched ? 'bg-blue-500/20' : 'hover:bg-gray-700'}`}
+                      className="p-1.5 rounded-md transition-colors" style={{ backgroundColor: isWatched ? 'color-mix(in srgb, var(--finance-primary) 20%, transparent)' : 'transparent' }}
                       title={isWatched ? 'Remove from watchlist' : 'Add to watchlist'}
                     >
-                      <svg className={`w-5 h-5 ${isWatched ? 'text-blue-400 fill-current' : 'text-gray-400'}`} fill={isWatched ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="w-5 h-5"
+                        style={{ color: isWatched ? 'var(--finance-primary)' : 'var(--text-tertiary)' }}
+                        fill={isWatched ? 'currentColor' : 'none'}
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
                     </button>
                   </div>
                   <div className="flex items-start gap-3 mb-3 sm:mb-4 min-w-0">
-                    <div className="w-8 sm:w-10 h-8 sm:h-10 shrink-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base">
+                    <div className="w-8 sm:w-10 h-8 sm:h-10 shrink-0 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base" style={{ background: 'linear-gradient(135deg, var(--finance-primary), var(--finance-green))' }}>
                       {token.symbol?.charAt(0) || 'T'}
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="text-white font-semibold text-sm sm:text-base truncate pr-1">{token.name}</h3>
-                      <p className="text-purple-400 font-mono text-xs sm:text-sm truncate">{token.symbol}</p>
+                      <p className="font-mono text-xs sm:text-sm truncate" style={{ color: 'var(--finance-primary)' }}>{token.symbol}</p>
                       <div className="mt-2">
                         <span className="inline-block bg-green-600 text-white text-xs px-2 py-1 rounded-full tabular-nums">
                           Score {token.trendingScore}
@@ -703,17 +709,17 @@ const Tokens = () => {
 
                   <div className="space-y-2 text-xs sm:text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Address:</span>
+                      <span style={{ color: 'var(--text-tertiary)' }}>Address:</span>
                       <span className="font-mono text-gray-300 truncate ml-2">{formatAddress(token.address)}</span>
                     </div>
                     
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Network:</span>
+                      <span style={{ color: 'var(--text-tertiary)' }}>Network:</span>
                       <span className="text-gray-300">{getNetworkName(token.chainId)}</span>
                     </div>
                     
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Supply:</span>
+                      <span style={{ color: 'var(--text-tertiary)' }}>Supply:</span>
                       <span className="text-gray-300">
                         {formatNumber(parseFloat(ethers.formatUnits(token.totalSupply, token.decimals)))}
                       </span>
@@ -721,7 +727,7 @@ const Tokens = () => {
                     
                     {token.owner && (
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Owner:</span>
+                        <span style={{ color: 'var(--text-tertiary)' }}>Owner:</span>
                         <span className="font-mono text-gray-300 truncate ml-2">{formatAddress(token.owner)}</span>
                       </div>
                     )}
@@ -729,7 +735,7 @@ const Tokens = () => {
 
                   <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-600">
                     <div className="flex justify-between items-center">
-                      <span className="text-xs sm:text-sm text-gray-400">Deployed</span>
+                      <span className="text-xs sm:text-sm ">Deployed</span>
                       <span className="text-xs sm:text-sm text-gray-300">
                         {token.timestamp ? new Date(token.timestamp).toLocaleDateString() : 'Unknown'}
                       </span>

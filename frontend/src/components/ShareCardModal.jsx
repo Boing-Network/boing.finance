@@ -35,7 +35,7 @@ export default function ShareCardModal({ isOpen, onClose, type, data }) {
   const getCardContent = () => {
     if (type === 'swap') {
       return (
-        <div className="rounded-xl p-4 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+        <div className="td-panel-surface">
           <p className="text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--text-tertiary)' }}>Swap on boing.finance</p>
           <p className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
             {data.amountIn} {data.tokenIn} → {data.amountOut} {data.tokenOut}
@@ -46,7 +46,7 @@ export default function ShareCardModal({ isOpen, onClose, type, data }) {
     }
     if (type === 'pool') {
       return (
-        <div className="rounded-xl p-4 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+        <div className="td-panel-surface">
           <p className="text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--text-tertiary)' }}>Liquidity on boing.finance</p>
           <p className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>{data.pair}</p>
           {data.chainName && <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{data.chainName}</p>}
@@ -56,8 +56,8 @@ export default function ShareCardModal({ isOpen, onClose, type, data }) {
     }
     if (type === 'deploy') {
       return (
-        <div className="rounded-xl p-4 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-          <p className="text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--text-tertiary)' }}>Token deployed on boing.finance</p>
+        <div className="td-panel-surface">
+          <p className="text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--text-tertiary)' }}>Token deployed</p>
           <p className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>{data.name} ({data.symbol})</p>
           <p className="text-xs mt-1 font-mono truncate" style={{ color: 'var(--text-tertiary)' }}>{data.address}</p>
           <p className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>Share your token</p>
@@ -69,35 +69,33 @@ export default function ShareCardModal({ isOpen, onClose, type, data }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
+      className="td-modal-backdrop"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="share-card-title"
     >
       <div
-        className="rounded-2xl p-6 max-w-sm w-full shadow-xl"
-        style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid' }}
+        className="td-modal"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-4">
-          <h3 id="share-card-title" className="font-semibold text-lg" style={{ color: 'var(--text-primary)' }}>Share</h3>
-          <button type="button" onClick={onClose} className="p-1 rounded hover:bg-white/10" aria-label="Close">&times;</button>
+        <div className="flex items-center justify-between mb-3">
+          <h3 id="share-card-title" className="td-modal__title">Share</h3>
+          <button type="button" onClick={onClose} className="text-2xl leading-none hover:opacity-80" style={{ color: 'var(--text-tertiary)' }} aria-label="Close">&times;</button>
         </div>
         <div className="mb-4">{getCardContent()}</div>
-        <div className="flex gap-2">
+        <div className="td-modal__actions" style={{ justifyContent: 'stretch' }}>
           <button
             type="button"
             onClick={handleTwitter}
-            className="flex-1 py-2 rounded-lg font-medium bg-[#1DA1F2] hover:bg-[#1a8cd8] text-white transition-colors"
+            className="td-btn td-btn--primary flex-1"
           >
             Share on X
           </button>
           <button
             type="button"
             onClick={handleCopy}
-            className="flex-1 py-2 rounded-lg font-medium border transition-colors"
-            style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+            className="td-btn td-btn--ghost flex-1"
           >
             Copy
           </button>

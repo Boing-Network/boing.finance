@@ -276,7 +276,7 @@ function CreateNFTSolanaContent() {
           />
 
           {!connected ? (
-            <PageCard className="text-center">
+            <PageCard className="td-mint-form text-center">
               <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>Connect your Solana wallet to mint NFTs.</p>
               <button
                 type="button"
@@ -294,7 +294,7 @@ function CreateNFTSolanaContent() {
                 onStepClick={(id) => setStep(id)}
               />
 
-              <PageCard>
+              <PageCard className="td-mint-form">
                 {step === 'upload' && (
                   <div className="space-y-4">
                     <div>
@@ -835,7 +835,7 @@ export default function CreateNFT() {
             title="Create NFT"
             subtitle="Upload images or image URLs into collection metadata. Connect a wallet to continue."
           />
-          <PageCard>
+          <PageCard className="td-mint-form">
             <EmptyState
               variant="nfts"
               title="Connect your wallet"
@@ -896,7 +896,7 @@ export default function CreateNFT() {
             onStepClick={(id) => setStep(id)}
           />
 
-          <PageCard>
+          <PageCard className="td-mint-form">
             {/* ========== Dynamic collection flow ========== */}
             {mode === 'dynamic' && (
               <>
@@ -1013,7 +1013,7 @@ export default function CreateNFT() {
                         </div>
                       </div>
                     ))}
-                    <button type="button" onClick={addTraitLayer} className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium">
+                    <button type="button" onClick={addTraitLayer} className="td-btn td-btn--ghost">
                       + Add trait layer
                     </button>
                   </div>
@@ -1049,10 +1049,10 @@ export default function CreateNFT() {
                           >
                             {isPublishingMetadata ? 'Uploading metadata…' : 'Upload metadata to network'}
                           </button>
-                          <button type="button" onClick={exportMetadataJSON} className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium">
+                          <button type="button" onClick={exportMetadataJSON} className="td-btn td-btn--ghost">
                             Export metadata JSON
                           </button>
-                          <button type="button" onClick={() => setGeneratedDynamicMetadata([])} className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium">
+                          <button type="button" onClick={() => setGeneratedDynamicMetadata([])} className="td-btn td-btn--ghost">
                             Clear & re-import
                           </button>
                           <label className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium cursor-pointer">
@@ -1136,7 +1136,7 @@ export default function CreateNFT() {
                     type="button"
                     onClick={() => setStep(step === 'layers' ? 'collection' : 'layers')}
                     disabled={step === 'collection'}
-                    className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium disabled:opacity-50"
+                    className="td-btn td-btn--ghost disabled:opacity-50"
                   >
                     Back
                   </button>
@@ -1233,8 +1233,7 @@ export default function CreateNFT() {
                     className="hidden"
                     onChange={(e) => addFiles(e.target.files)}
                   />
-                  <span className="text-4xl mb-2">🖼️</span>
-                  <span className="text-gray-300">Drag & drop images or click to browse</span>
+                                    <span style={{ color: 'var(--text-secondary)' }}>Drag & drop images or click to browse</span>
                   <span className="text-gray-500 text-sm mt-1">JPEG, PNG, GIF, WebP · max {MAX_FILE_SIZE_MB}MB each</span>
                 </label>
                 {files.length > 0 && (
@@ -1401,7 +1400,7 @@ export default function CreateNFT() {
                   >
                     {isPublishingMetadata ? 'Uploading metadata…' : 'Upload metadata to network'}
                   </button>
-                  <button type="button" onClick={exportMetadataJSON} className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium">
+                  <button type="button" onClick={exportMetadataJSON} className="td-btn td-btn--ghost">
                     Export metadata JSON
                   </button>
                 </div>

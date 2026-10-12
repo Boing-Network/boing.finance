@@ -501,7 +501,7 @@ function DeployTokenSolanaContent() {
                     href={`${solanaNetwork.explorer}/tx/${signature}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-blue-500 hover:underline"
+                    className="td-btn--link text-sm"
                   >
                     View on Explorer
                   </a>
@@ -602,49 +602,42 @@ const _SOCIAL_STANDARDS = [
     description: "Official project website",
     required: true,
     placeholder: "https://yourproject.com",
-    icon: "🌐"
   },
   {
     name: "Twitter/X",
     description: "Official social media account",
     required: false,
     placeholder: "https://twitter.com/yourproject",
-    icon: "🐦"
   },
   {
     name: "Telegram",
     description: "Community chat group",
     required: false,
     placeholder: "https://t.me/yourproject",
-    icon: "📱"
   },
   {
     name: "Discord",
     description: "Community server",
     required: false,
     placeholder: "https://discord.gg/yourproject",
-    icon: "🎮"
   },
   {
     name: "GitHub",
     description: "Source code repository",
     required: false,
     placeholder: "https://github.com/yourproject",
-    icon: "💻"
   },
   {
     name: "Medium",
     description: "Project blog/updates",
     required: false,
     placeholder: "https://medium.com/@yourproject",
-    icon: "📝"
   },
   {
     name: "Reddit",
     description: "Community subreddit",
     required: false,
     placeholder: "https://reddit.com/r/yourproject",
-    icon: "🤖"
   }
 ];
 
@@ -794,41 +787,22 @@ function deployCtaLabel(selectedPlan, network) {
 
 // Deployment Tips
 const DEPLOYMENT_TIPS = [
-  // Basic Token Information
-  "Choose a memorable name that reflects your token's purpose",
-  "Keep symbol short (3-8 characters) and unique",
-  "18 decimals is standard for most tokens",
-  "Consider initial supply carefully - it affects tokenomics",
-  
-  // Pre-deployment Security
-  "Test on testnet before mainnet deployment",
-  "Verify your contract on block explorers after deployment",
-  "Set up social media accounts before deployment",
-  "Provide clear project description and website",
-  
-  // Critical Security Features
-  "🔒 Enable mint authority removal for security",
-  "🛡️ Consider freezing authority for emergency control",
-  "🚫 Enable blacklist function for compliance",
-  "📊 Set maximum transaction limits (0.1-10%)",
-  
-  // Liquidity & Trading Security
-  "💧 Lock liquidity for 90+ days minimum",
-  "🔐 Use timelock contracts for ownership changes",
-  "📈 Consider renouncing ownership for decentralization",
-  "⚡ Set reasonable gas limits for transactions",
-  
-  // Community & Transparency
-  "🌐 Provide official website and social links",
-  "📝 Maintain clear documentation and roadmap",
-  "🔍 Make source code open source and verified",
-  "📊 Regular updates and community engagement",
-  
-  // Post-deployment Actions
-  "✅ Verify contract on Etherscan immediately",
-  "🔗 Add liquidity to DEX for trading",
-  "📢 Announce deployment on social media",
-  "📋 Document all security features implemented"
+  'Choose a memorable name that reflects your token’s purpose',
+  'Keep the symbol short (3–8 characters) and unique',
+  '18 decimals is standard for most tokens',
+  'Set initial supply carefully — it shapes tokenomics',
+  'Test on testnet before mainnet deployment',
+  'Verify the contract on a block explorer after deployment',
+  'Set up social accounts and a clear project description first',
+  'Remove mint authority when you want a fixed supply',
+  'Keep freeze authority only if you need emergency control',
+  'Use blacklist or transfer limits when compliance requires it',
+  'Lock liquidity for 90+ days when listing publicly',
+  'Use a timelock for ownership changes when you keep admin keys',
+  'Renounce ownership only after you no longer need admin controls',
+  'Add website and social links so explorers and users can verify you',
+  'Keep docs and a short roadmap public',
+  'Verify the contract, then add liquidity and announce the deploy',
 ];
 
 // Utility: Manual deployment using Interface encoding (Hardhat-style)
@@ -1178,30 +1152,12 @@ export default function DeployToken() {
 
   // Logo handling information (reserved for future use)
   const _LogoInfo = () => (
-    <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
-      <div className="flex items-start">
-        <div className="flex-shrink-0">
-          <svg className="w-5 h-5 text-blue-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-          </svg>
-        </div>
-        <div className="ml-3">
-          <h3 className="text-sm font-medium text-blue-300">Token Logo Information</h3>
-          <div className="mt-2 text-sm text-blue-200">
-            <p className="mb-2">
-              <strong>Decentralized Approach:</strong> For true decentralization, consider these options:
-            </p>
-            <ul className="list-disc list-inside space-y-1 ml-2">
-              <li><strong>IPFS:</strong> Upload to IPFS and use the hash (e.g., ipfs://QmXxxx...)</li>
-              <li><strong>Arweave:</strong> Permanent decentralized storage</li>
-              <li><strong>On-chain:</strong> Store base64 data (expensive but truly decentralized)</li>
-            </ul>
-            <p className="mt-2 text-xs text-blue-300">
-              <strong>Note:</strong> This app does not provide a logo upload feature. If you want your token to have a logo, you must handle it manually after deployment. Most projects use decentralized storage (like IPFS or Arweave) and submit the logo to token lists or explorers. See the docs of your preferred explorer for how to add a logo.
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="td-callout mb-6">
+      <h3 className="td-callout__title">Token logo</h3>
+      <p className="td-callout__body">
+        Prefer IPFS or Arweave URIs for a lasting logo. On-chain base64 works but is expensive.
+        After deploy, submit the logo to explorers or token lists if needed.
+      </p>
     </div>
   );
 
@@ -1552,37 +1508,33 @@ export default function DeployToken() {
         isFeatureAllowed('timelock') ? ethers.toBigInt((timelockDelay || 0) * 3600) : 0n, // Convert hours to seconds
         network?.chainId || 1 // Add chainId parameter for network-aware service fee validation
       ];
-      // Validate parameter count
+      // Validate parameter count / types (plain errors for the UI)
       if (constructorParams.length !== 27) {
-        throw new Error(`Parameter count mismatch: expected 27, got ${constructorParams.length}`);
+        throw new Error('Token setup is incomplete. Refresh and try again.');
       }
-      // Validate BigInt parameters
       const bigIntParams = [3, 16, 18, 20, 22, 25]; // supply, maxTx, serviceChargeWei, cooldownPeriod, maxWallet, timelockDelay
-      bigIntParams.forEach(index => {
+      bigIntParams.forEach((index) => {
         if (typeof constructorParams[index] !== 'bigint') {
-          throw new Error(`Parameter ${index} must be BigInt, got ${typeof constructorParams[index]}: ${constructorParams[index]}`);
+          throw new Error('One of the amount fields is invalid. Check supply and limits, then try again.');
         }
       });
-      // Validate address parameters
       const addressParams = [4, 17]; // freezingAuthority, platformWallet
-      addressParams.forEach(index => {
+      addressParams.forEach((index) => {
         if (typeof constructorParams[index] !== 'string' || !constructorParams[index].startsWith('0x')) {
-          throw new Error(`Parameter ${index} must be valid address, got: ${constructorParams[index]}`);
+          throw new Error('A wallet address is missing or invalid. Check freeze authority and try again.');
         }
       });
-      // Validate boolean parameters
       const booleanParams = [14, 15, 19, 21, 23, 24]; // renounceMint, enableBlacklist, antiBotEnabled, antiWhaleEnabled, pauseFunctionEnabled, timelockEnabled
-      booleanParams.forEach(index => {
+      booleanParams.forEach((index) => {
         if (typeof constructorParams[index] !== 'boolean') {
-          throw new Error(`Parameter ${index} must be boolean, got ${typeof constructorParams[index]}: ${constructorParams[index]}`);
+          throw new Error('A security toggle is in a bad state. Toggle it off and on, then try again.');
         }
       });
-      // Validate number parameters
-      if (typeof constructorParams[2] !== 'number') { // decimals
-        throw new Error(`Parameter 2 (decimals) must be number, got ${typeof constructorParams[2]}: ${constructorParams[2]}`);
+      if (typeof constructorParams[2] !== 'number') {
+        throw new Error('Decimals must be a number between 0 and 18.');
       }
-      if (typeof constructorParams[26] !== 'number') { // chainId
-        throw new Error(`Parameter 26 (chainId) must be number, got ${typeof constructorParams[26]}: ${constructorParams[26]}`);
+      if (typeof constructorParams[26] !== 'number') {
+        throw new Error('Network could not be read. Switch chain in your wallet and try again.');
       }
       
       // Debug logging
@@ -2220,7 +2172,7 @@ export default function DeployToken() {
                             <>
                               {row?.amount} {row?.currency}
                               {feeUsd != null && (
-                                <span className="block text-sm font-semibold text-gray-400 mt-1">
+                                <span className="block text-sm font-semibold mt-1" style={{ color: 'var(--text-tertiary)' }}>
                                   {formatUsdReferenceLabel(feeUsd)}
                                 </span>
                               )}
@@ -2286,7 +2238,7 @@ export default function DeployToken() {
                         autoComplete="off"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                        className="td-field__input"
                         style={{
                           backgroundColor: 'var(--bg-tertiary)',
                           border: '1px solid var(--border-color)',
@@ -2308,7 +2260,7 @@ export default function DeployToken() {
                         autoComplete="off"
                         value={symbol}
                         onChange={(e) => setSymbol(e.target.value)}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                        className="td-field__input"
                         style={{
                           backgroundColor: 'var(--bg-tertiary)',
                           border: '1px solid var(--border-color)',
@@ -2330,7 +2282,7 @@ export default function DeployToken() {
                         autoComplete="off"
                         value={decimals}
                         onChange={(e) => setDecimals(parseInt(e.target.value))}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                        className="td-field__input" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
                       >
                         <option value={18}>18 (Standard)</option>
                         <option value={6}>6 (USDC style)</option>
@@ -2348,7 +2300,7 @@ export default function DeployToken() {
                         type="number"
                         value={initialSupply}
                         onChange={(e) => setInitialSupply(e.target.value)}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                        className="td-field__input"
                         style={{
                           backgroundColor: 'var(--bg-tertiary)',
                           border: '1px solid var(--border-color)',
@@ -2400,7 +2352,7 @@ export default function DeployToken() {
                         autoComplete="url"
                         value={website}
                         onChange={(e) => setWebsite(e.target.value)}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                        className="td-field__input"
                         style={{
                           backgroundColor: 'var(--bg-tertiary)',
                           border: '1px solid var(--border-color)',
@@ -2421,7 +2373,7 @@ export default function DeployToken() {
                         autoComplete="off"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                        className="td-field__input"
                         style={{
                           backgroundColor: 'var(--bg-tertiary)',
                           border: '1px solid var(--border-color)',
@@ -2698,7 +2650,7 @@ export default function DeployToken() {
                           type="url"
                           value={value}
                           onChange={(e) => handleSocialLinkChange(platform, e.target.value)}
-                          className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                          className="td-field__input"
                         style={{
                           backgroundColor: 'var(--bg-tertiary)',
                           border: '1px solid var(--border-color)',
@@ -2824,7 +2776,7 @@ export default function DeployToken() {
                       </code>
                       <button
                         onClick={() => navigator.clipboard.writeText(txHash)}
-                        className="text-blue-400 hover:text-blue-300 transition-colors text-sm"
+                        className="td-btn--link text-sm"
                       >
                         Copy
                       </button>
@@ -2844,7 +2796,7 @@ export default function DeployToken() {
                       </code>
                       <button
                         onClick={() => navigator.clipboard.writeText(tokenAddress)}
-                        className="text-blue-400 hover:text-blue-300 transition-colors text-sm"
+                        className="td-btn--link text-sm"
                       >
                         Copy
                       </button>
@@ -2905,7 +2857,7 @@ export default function DeployToken() {
                       </code>
                       <button
                         onClick={() => navigator.clipboard.writeText(metadataUrl)}
-                        className="text-blue-400 hover:text-blue-300 transition-colors text-sm"
+                        className="td-btn--link text-sm"
                       >
                         Copy
                       </button>
@@ -2924,7 +2876,7 @@ export default function DeployToken() {
                         </code>
                         <button
                           onClick={() => navigator.clipboard.writeText(logoUrl)}
-                          className="text-blue-400 hover:text-blue-300 transition-colors text-sm"
+                          className="td-btn--link text-sm"
                         >
                           Copy
                         </button>
@@ -2932,13 +2884,11 @@ export default function DeployToken() {
                     </div>
                   )}
                   
-                  <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
-                    <h4 className="text-sm font-medium text-blue-300 mb-2">Metadata Information</h4>
-                    <div className="space-y-2 text-xs text-blue-200">
-                      <p><strong>Status:</strong> Stored on IPFS (decentralized storage)</p>
-                      <p><strong>Content:</strong> Token name, symbol, description, logo, social links, and security features</p>
-                      <p><strong>Accessibility:</strong> Available through multiple IPFS gateways</p>
-                      <p><strong>Blockchain Integration:</strong> Logo URL and metadata are stored in the smart contract</p>
+                  <div className="td-callout">
+                    <h4 className="td-callout__title">Metadata</h4>
+                    <div className="td-callout__body space-y-1.5">
+                      <p>Stored on IPFS with name, symbol, description, logo, and social links.</p>
+                      <p>Logo URL and metadata URI are written into the contract at deploy.</p>
                     </div>
                   </div>
                 </div>
@@ -2950,22 +2900,26 @@ export default function DeployToken() {
               backgroundColor: 'var(--bg-card)',
               borderColor: 'var(--border-color)'
             }}>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-2 sm:space-y-0">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-2 sm:space-y-0 gap-2">
                 <h3 className="text-xl sm:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Deployment Tips</h3>
                 <button
+                  type="button"
                   onClick={() => setShowGuide(!showGuide)}
-                  className="text-blue-400 hover:text-blue-300 font-medium transition-colors text-sm sm:text-base"
+                  className="td-btn--link text-sm sm:text-base self-start sm:self-auto"
                 >
-                  {showGuide ? 'Hide Tips' : 'Show Tips'}
+                  {showGuide ? 'Hide tips' : 'Show tips'}
                 </button>
               </div>
               
               {showGuide && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   {DEPLOYMENT_TIPS.map((tip, index) => (
-                    <div key={index} className="flex items-start space-x-3">
-                      <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                      <p className="text-sm sm:text-base" style={{ color: 'var(--text-secondary)' }}>{tip}</p>
+                    <div key={index} className="flex items-start gap-3">
+                      <div
+                        className="flex-shrink-0 w-1.5 h-1.5 rounded-full mt-2"
+                        style={{ backgroundColor: 'var(--finance-primary)' }}
+                      />
+                      <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{tip}</p>
                     </div>
                   ))}
                 </div>
@@ -2974,61 +2928,37 @@ export default function DeployToken() {
 
             {/* Ownership Renouncement Notice Modal */}
             {showOwnershipRenounceModal && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
-                <div className="rounded-xl p-4 sm:p-8 shadow-xl max-w-md w-full" style={{
-                  backgroundColor: 'var(--bg-card)',
-                  border: '1px solid var(--border-color)'
-                }}>
-                  <div className="flex items-start space-x-3 mb-4">
-                    <span className="text-yellow-400 text-2xl">⚠️</span>
-                    <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Ownership Renouncement Notice</h3>
-                  </div>
-                  
-                  <div className="space-y-4 text-sm sm:text-base mb-6" style={{ color: 'var(--text-secondary)' }}>
+              <div className="td-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="ownership-notice-title">
+                <div className="td-modal">
+                  <h3 id="ownership-notice-title" className="td-modal__title">Renounce ownership</h3>
+                  <div className="td-modal__body space-y-3">
                     <p>
-                      <strong>Important:</strong> Ownership renouncement is <strong>not automatic</strong> during deployment.
+                      This is not automatic at deploy. After the token is live, you send a second transaction to renounce ownership.
                     </p>
-                    <p>
-                      After your token is deployed, you must <strong>manually call the renounceOwnership() function</strong> to fully decentralize your token.
-                    </p>
-                    <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-3">
-                      <p className="text-yellow-200 font-medium">
-                        <strong>⚠️ This action is irreversible!</strong>
+                    <div className="td-callout td-callout--warn">
+                      <p className="td-callout__title">Irreversible</p>
+                      <p className="td-callout__body">
+                        You will lose admin controls: security settings, pause, and other owner-only actions.
                       </p>
-                      <p className="text-yellow-200 text-sm mt-1">
-                        Once ownership is renounced, you will no longer be able to:
-                      </p>
-                      <ul className="text-yellow-200 text-sm mt-2 space-y-1">
-                        <li>• Modify security settings</li>
-                        <li>• Pause/unpause trading</li>
-                        <li>• Update contract parameters</li>
-                        <li>• Perform administrative functions</li>
-                      </ul>
                     </div>
                   </div>
-                  
-                  <div className="flex justify-end space-x-4">
+                  <div className="td-modal__actions">
                     <button
+                      type="button"
                       onClick={() => setShowOwnershipRenounceModal(false)}
-                      className="px-4 py-2 rounded transition-colors"
-                      style={{
-                        backgroundColor: 'var(--bg-tertiary)',
-                        color: 'var(--text-primary)',
-                        border: '1px solid var(--border-color)'
-                      }}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--bg-secondary)'}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = 'var(--bg-tertiary)'}
+                      className="td-btn td-btn--ghost"
                     >
                       Cancel
                     </button>
                     <button
+                      type="button"
                       onClick={() => {
                         setRenounceOwnership(true);
                         setShowOwnershipRenounceModal(false);
                       }}
-                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                      className="td-btn td-btn--primary"
                     >
-                      Enable Feature
+                      Enable
                     </button>
                   </div>
                 </div>
@@ -3037,33 +2967,27 @@ export default function DeployToken() {
 
             {/* Renounce Ownership Confirmation Modal */}
             {showRenounceModal && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
-                <div className="rounded-xl p-4 sm:p-8 shadow-xl max-w-md w-full" style={{
-                  backgroundColor: 'var(--bg-card)',
-                  border: '1px solid var(--border-color)'
-                }}>
-                  <h3 className="text-lg sm:text-xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Renounce Ownership Confirmation</h3>
-                  <p className="text-sm sm:text-base mb-6" style={{ color: 'var(--text-secondary)' }}>
-                    You have selected <span className="font-semibold text-blue-400">Renounce Ownership</span>.<br/>
-                    This requires a <span className="font-semibold text-yellow-400">second on-chain transaction</span> after deployment.<br/>
-                    Are you sure you want to proceed?
+              <div className="td-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="renounce-confirm-title">
+                <div className="td-modal">
+                  <h3 id="renounce-confirm-title" className="td-modal__title">Confirm renounce</h3>
+                  <p className="td-modal__body">
+                    Renounce ownership needs a second on-chain transaction after deploy. Continue?
                   </p>
-                  <div className="flex justify-end space-x-4">
+                  <div className="td-modal__actions">
                     <button
+                      type="button"
                       onClick={() => { setShowRenounceModal(false); setPendingRenounceContract(null); }}
-                      className="px-4 py-2 rounded transition-colors"
-                      style={{
-                        backgroundColor: 'var(--bg-tertiary)',
-                        color: 'var(--text-primary)',
-                        border: '1px solid var(--border-color)'
-                      }}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--bg-secondary)'}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = 'var(--bg-tertiary)'}
-                    >Cancel</button>
+                      className="td-btn td-btn--ghost"
+                    >
+                      Cancel
+                    </button>
                     <button
+                      type="button"
                       onClick={handleConfirmRenounce}
-                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                    >Yes, Renounce Ownership</button>
+                      className="td-btn td-btn--danger"
+                    >
+                      Renounce ownership
+                    </button>
                   </div>
                 </div>
               </div>

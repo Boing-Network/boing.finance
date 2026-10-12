@@ -313,6 +313,206 @@
   background-color: color-mix(in srgb, var(--finance-primary) 6%, transparent);
 }
 
+.td-btn--danger {
+  background-color: color-mix(in srgb, var(--finance-red) 85%, #041018);
+  color: #fff;
+  border-color: color-mix(in srgb, var(--finance-red) 50%, transparent);
+}
+
+.td-btn--danger:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.td-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.65);
+}
+
+.td-modal {
+  width: 100%;
+  max-width: 28rem;
+  max-height: min(90vh, 40rem);
+  overflow-y: auto;
+  border-radius: var(--radius-xl, 1rem);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-card);
+  box-shadow: var(--shadow-card, 0 8px 40px rgba(0, 0, 0, 0.45));
+  padding: 1.25rem 1.35rem;
+  animation: tdCardIn 0.28s ease-out both;
+}
+
+@media (min-width: 640px) {
+  .td-modal {
+    padding: 1.75rem 2rem;
+  }
+}
+
+.td-modal--wide {
+  max-width: 56rem;
+}
+
+.td-modal__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.td-modal__body {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: 0.85rem 0 1.25rem;
+}
+
+.td-modal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.td-callout {
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--finance-primary) 35%, var(--border-color));
+  background-color: color-mix(in srgb, var(--finance-primary) 10%, var(--bg-tertiary));
+  padding: 0.85rem 1rem;
+}
+
+.td-callout--warn {
+  border-color: color-mix(in srgb, var(--finance-red) 40%, var(--border-color));
+  background-color: color-mix(in srgb, var(--finance-red) 12%, var(--bg-tertiary));
+}
+
+.td-callout__title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.35rem;
+}
+
+.td-callout__body {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Soften leftover Tailwind gray chrome inside Trade & Deploy forms */
+.td-mint-form label.text-gray-300,
+.td-mint-form .text-gray-300 {
+  color: var(--text-secondary) !important;
+}
+
+.td-mint-form .text-gray-400,
+.td-mint-form .text-gray-500 {
+  color: var(--text-tertiary) !important;
+}
+
+.td-mint-form .bg-gray-700,
+.td-mint-form .bg-gray-700\/50,
+.td-mint-form .bg-gray-800 {
+  background-color: var(--bg-tertiary) !important;
+}
+
+.td-mint-form .bg-gray-600,
+.td-mint-form .hover\:bg-gray-500:hover {
+  background-color: color-mix(in srgb, var(--finance-primary) 18%, var(--bg-tertiary)) !important;
+  color: var(--text-primary) !important;
+}
+
+.td-mint-form .border-gray-600,
+.td-mint-form .border-gray-700 {
+  border-color: var(--border-color) !important;
+}
+
+.td-mint-form input.bg-gray-700,
+.td-mint-form textarea.bg-gray-700,
+.td-mint-form select.bg-gray-700,
+.td-mint-form input.bg-gray-600,
+.td-mint-form textarea.bg-gray-600 {
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.td-mint-form input:focus,
+.td-mint-form textarea:focus,
+.td-mint-form select:focus {
+  --tw-ring-color: color-mix(in srgb, var(--finance-primary) 45%, transparent);
+  border-color: color-mix(in srgb, var(--finance-primary) 55%, transparent) !important;
+}
+
+/* Mobile form density for Trade & Deploy */
+@media (max-width: 639px) {
+  .td-shell {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .td-card {
+    padding: 0.9rem 0.95rem;
+  }
+
+  .td-feature-matrix {
+    gap: 0.5rem;
+  }
+
+  .td-feature-row {
+    padding: 0.7rem 0.75rem;
+  }
+
+  .td-feature-row__top {
+    gap: 0.65rem;
+  }
+
+  .td-field__input {
+    font-size: 1rem; /* avoid iOS zoom */
+    padding: 0.7rem 0.8rem;
+  }
+
+  .td-hero__title {
+    font-size: 1.55rem;
+  }
+
+  .td-hero__subtitle {
+    font-size: 0.875rem;
+  }
+
+  .td-btn {
+    min-height: 2.75rem;
+  }
+
+  .td-modal {
+    padding: 1.1rem 1.15rem;
+    max-height: min(88vh, 36rem);
+  }
+
+  .td-modal__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .td-modal__actions .td-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .td-mint-form .grid {
+    gap: 0.75rem;
+  }
+
+  .td-step-rail {
+    gap: 0.35rem;
+  }
+}
+
 .td-btn--link {
   background: none;
   border: none;

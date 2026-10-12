@@ -342,19 +342,10 @@ const Swap = () => {
     setTokenOut(temp);
   };
 
-  // Get token logo
+  // Letter mark when no image logo is available
   const getTokenLogo = (symbol) => {
-    const logos = {
-      'ETH': '🔵',
-      'WETH': '🔵',
-      'USDC': '💙',
-      'USDT': '💚',
-      'LINK': '🔗',
-      'ENS': '🌐',
-      'BOING': '🚀',
-      'DEFAULT': '🪙'
-    };
-    return logos[symbol] || logos['DEFAULT'];
+    const s = String(symbol || '?').trim();
+    return (s.slice(0, 1) || '?').toUpperCase();
   };
 
   const chartTokenIn = useMemo(() => {
@@ -2194,7 +2185,7 @@ const Swap = () => {
                     </span>
                     <button
                       onClick={setTokenInFullBalance}
-                      className="text-blue-400 text-xs hover:text-blue-300 transition-colors cursor-pointer px-2 py-1 rounded hover:bg-gray-600 border border-blue-400 hover:border-blue-300"
+                      className="td-btn td-btn--ghost text-xs px-2 py-1"
                       title="Click to set maximum balance"
                     >
                       Max

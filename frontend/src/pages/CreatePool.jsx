@@ -22,6 +22,8 @@ import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrat
 import { showDeployCelebration } from '../utils/deployCelebration';
 import { fetchTradeableEvmTokenAddressesFromDexFactory } from '../services/evmDexTradeableTokens';
 import { tryAccruePoints } from '../utils/tryAccruePoints';
+import EmptyState from '../components/EmptyState';
+import { TradeDeployShell, TradeDeployHero, PageCard } from '../components/PageLayout';
 
 const devLog = (...args) => {
   if (import.meta.env.DEV) console.log(...args);
@@ -29,7 +31,7 @@ const devLog = (...args) => {
 
 
 // Toggle Button Component
-function ToggleButton({ enabled, onToggle, disabled, size = "md" }) {
+function ToggleButton({ enabled, onToggle, disabled, size = "md", ariaLabel }) {
   const sizeClasses = {
     sm: "w-11 h-6",
     md: "w-14 h-7",
@@ -45,22 +47,15 @@ function ToggleButton({ enabled, onToggle, disabled, size = "md" }) {
   return (
     <button
       type="button"
+      role="switch"
+      aria-checked={enabled}
+      aria-label={ariaLabel ?? 'Toggle'}
       onClick={onToggle}
       disabled={disabled}
-      className={`
-        ${sizeClasses[size]} relative inline-flex items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900
-        ${enabled 
-          ? 'bg-blue-600 hover:bg-blue-700' 
-          : 'bg-gray-600 hover:bg-gray-500'
-        }
-        ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-      `}
+      className={`td-toggle ${sizeClasses[size]} ${enabled ? 'td-toggle--on' : 'td-toggle--off'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
     >
       <span
-        className={`
-          ${dotSizeClasses[size]} inline-block transform transition-transform duration-200 ease-in-out bg-white rounded-full shadow-lg
-          ${enabled ? 'translate-x-7' : 'translate-x-1'}
-        `}
+        className={`td-toggle__dot ${dotSizeClasses[size]} ${enabled ? 'translate-x-7' : 'translate-x-1'}`}
       />
     </button>
   );
@@ -698,7 +693,7 @@ function CreatePool() {
         const v2Amount1 = ethers.parseUnits(token1Amount, v2Decimals1);
         toast(`Creating this pair on ${evmCreateVenue.venue}. Confirm approvals and add-liquidity in your wallet.`, {
           duration: 5000,
-          icon: 'ℹ️',
+          icon: '',
         });
         const created = await createUniswapV2PoolWithLiquidity({
           signer,
@@ -810,10 +805,7 @@ function CreatePool() {
           if (permitData.deadlineA > 0 || permitData.deadlineB > 0) {
             usePermitSignatures = true;
             devLog('Permit signatures generated successfully - will use gasless approval');
-            toast('Using gasless approval with permit signatures!', {
-              duration: 3000,
-              icon: '⚡'
-            });
+            toast('Using gasless approval with permit signatures!', { duration: 3000 });
           } else {
             devLog('Permit signatures not available - falling back to regular approvals');
           }
@@ -837,18 +829,12 @@ function CreatePool() {
           ], signer);
           
           // Show approval notification
-          toast('Token approvals required. Please approve both tokens in your wallet.', {
-            duration: 5000,
-            icon: 'ℹ️'
-          });
+          toast('Token approvals required. Please approve both tokens in your wallet.', { duration: 5000 });
           
           // Handle approvals sequentially to avoid confusion
           if (approvalNeeded.token0) {
             devLog('Approving token0 for exact deposit amount');
-            toast(`Approving ${getToken0Symbol()}... Please confirm in your wallet.`, {
-              duration: 3000,
-              icon: '⏳'
-            });
+            toast(`Approving ${getToken0Symbol()}... Please confirm in your wallet.`, { duration: 3000 });
             
             try {
               const approveTx = await token0Contract.approve(factoryAddress, token0AmountWei);
@@ -867,10 +853,7 @@ function CreatePool() {
           
           if (approvalNeeded.token1) {
             devLog('Approving token1 for exact deposit amount');
-            toast(`Approving ${getToken1Symbol()}... Please confirm in your wallet.`, {
-              duration: 3000,
-              icon: '⏳'
-            });
+            toast(`Approving ${getToken1Symbol()}... Please confirm in your wallet.`, { duration: 3000 });
             
             try {
               const approveTx = await token1Contract.approve(factoryAddress, token1AmountWei);
@@ -1317,25 +1300,24 @@ function CreatePool() {
           <title>Create Pool | boing.finance — New Liquidity Pools on EVM & Solana</title>
           <meta name="description" content="Create new liquidity pools on EVM and Solana. Deploy trading pairs and earn fees with boing.finance." />
         </Helmet>
-        <div className="relative w-full min-w-0">
-          <div className="relative z-10 container mx-auto px-4 py-8">
-            <div className="max-w-2xl mx-auto text-center">
-              <h1 className="text-3xl font-bold text-white mb-4">Create Liquidity Pool</h1>
-              <p className="text-gray-300 mb-8">Connect your wallet to create new pools and earn fees.</p>
-              <div className="bg-gray-800 rounded-xl p-8 border border-gray-700">
-                <div className="text-6xl mb-4">🔗</div>
-                <h2 className="text-xl font-semibold text-white mb-2">Wallet Required</h2>
-                <p className="text-gray-400 mb-6">Connect your wallet to create liquidity pools and start earning.</p>
-                <button 
-                  onClick={connectWallet}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200"
-                >
-                  Connect Wallet
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <TradeDeployShell width="medium">
+          <TradeDeployHero
+            eyebrow="Deploy"
+            title="Create Liquidity Pool"
+            subtitle="Connect your wallet to deploy trading pairs and earn fees."
+          />
+          <PageCard>
+            <EmptyState
+              variant="pools"
+              title="Connect your wallet"
+              description="Connect your wallet to create liquidity pools on EVM or Solana."
+              action={connectWallet}
+              actionLabel="Connect Wallet"
+              secondaryLabel="Pools"
+              secondaryHref="/pools"
+            />
+          </PageCard>
+        </TradeDeployShell>
       </>
     );
   }
@@ -1349,7 +1331,7 @@ function CreatePool() {
       </Helmet>
       <div className="relative w-full min-w-0">
         <div className="relative z-10 container mx-auto px-4 py-8">
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-6xl mx-auto td-mint-form">
             <DexFeatureBanner featureLabel="Create Pool" currentChainId={chainId} onSwitchNetwork={switchNetwork} />
             {chainId === BOING_NATIVE_L1_CHAIN_ID && (
             <header className="td-hero td-hero--center mb-8">
@@ -1361,7 +1343,7 @@ function CreatePool() {
             {chainId === BOING_NATIVE_L1_CHAIN_ID && <NativeBoingCreatePoolPanel />}
             {chainId === BOING_NATIVE_L1_CHAIN_ID && featureSupport.hasNativeAmm && (
               <div className="mb-6">
-                <p className="text-sm mb-2 text-gray-300">
+                <p className="text-sm mb-2 ">
                   Add more liquidity to the published canonical pool:
                 </p>
                 <NativeAmmSwapPanel defaultOpenAddLiquidity slippagePercent={0.5} />
@@ -1396,13 +1378,13 @@ function CreatePool() {
 
             {/* Pool Configuration — EVM factory or Uniswap/Pancake V2 */}
             <div
-              className={`bg-gray-800 rounded-lg shadow-lg p-6 mb-6 ${
+              className={`td-panel-surface shadow-lg mb-6 ${
                 chainId === BOING_NATIVE_L1_CHAIN_ID || !evmCreateVenue ? 'hidden' : ''
               }`}
             >
               <h3 className="text-xl font-semibold mb-4 text-white">Pool Configuration</h3>
               {evmCreateVenue && (
-                <p className="text-sm text-gray-300 mb-4">
+                <p className="text-sm  mb-4">
                   {evmCreateVenue.kind === 'boing'
                     ? 'This pair is created on Boing DEXFactory (optional liquidity lock).'
                     : `This pair is created on ${evmCreateVenue.venue} (${evmCreateVenue.feePercent}% swap fee). Liquidity lock is only available on Boing DEX (Sepolia).`}
@@ -1411,7 +1393,7 @@ function CreatePool() {
               
               {/* Token Selection */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium  mb-2">
                   Select Tokens
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1460,7 +1442,7 @@ function CreatePool() {
                                 <button
                                   type="submit"
                                   disabled={isAddingCustomToken || !customTokenAddress}
-                                  className="flex-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white text-xs rounded"
+                                  className="td-btn td-btn--primary"
                                 >
                                   {isAddingCustomToken ? 'Adding...' : 'Add Token'}
                                 </button>
@@ -1560,7 +1542,7 @@ function CreatePool() {
                                 <button
                                   type="submit"
                                   disabled={isAddingCustomToken || !customTokenAddress}
-                                  className="flex-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white text-xs rounded"
+                                  className="td-btn td-btn--primary"
                                 >
                                   {isAddingCustomToken ? 'Adding...' : 'Add Token'}
                                 </button>
@@ -1619,7 +1601,7 @@ function CreatePool() {
 
               {/* Initial Liquidity */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium  mb-2">
                   Initial Liquidity
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1676,7 +1658,7 @@ function CreatePool() {
 
               {/* Fee Selection */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium  mb-2">
                   Trading Fee
                 </label>
                 {featureSupport.hasDex ? (
@@ -1725,7 +1707,7 @@ function CreatePool() {
                     </div>
                   </>
                 ) : (
-                  <p className="text-sm text-gray-300">
+                  <p className="text-sm ">
                     {evmCreateVenue?.venue || 'AMM'} swap fee is {evmCreateVenue?.feePercent || '0.3'}% (fixed by the venue).
                   </p>
                 )}
@@ -1735,7 +1717,7 @@ function CreatePool() {
               {featureSupport.hasDex && (
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-4">
-                  <label className="block text-sm font-medium text-gray-300">
+                  <label className="block text-sm font-medium ">
                     Liquidity Locking (Optional)
                   </label>
                   <ToggleButton
@@ -1803,7 +1785,7 @@ function CreatePool() {
               <div className="mb-6">
                 <h4 className="text-lg font-semibold mb-2 text-white">Pool Preview & Tips</h4>
                 <div className="bg-gray-700 border border-gray-600 rounded-lg p-4">
-                  <ul className="list-disc pl-5 text-sm text-gray-300">
+                  <ul className="list-disc pl-5 text-sm ">
                     <li>Trading fee: <span className="font-semibold">{evmCreateVenue?.feePercent || selectedFee}%</span></li>
                     <li>Venue: <span className="font-semibold">{evmCreateVenue?.venue || '—'}</span></li>
                     {featureSupport.hasDex && (
@@ -1822,12 +1804,12 @@ function CreatePool() {
 
               {/* Approval Process Info */}
               <div className="mb-6">
-                <h4 className="text-lg font-semibold mb-2 text-white">⚠️ Important: Token Approvals</h4>
+                <h4 className="text-lg font-semibold mb-2 text-white">Important: Token Approvals</h4>
                 <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
-                  <p className="text-sm text-gray-300 mb-3">
+                  <p className="text-sm  mb-3">
                     When creating a pool, you'll need to approve token spending for both tokens. This allows the DEX to transfer your tokens to create the pool.
                   </p>
-                  <ul className="text-sm text-gray-300 space-y-2">
+                  <ul className="text-sm  space-y-2">
                     <li className="flex items-start">
                       <span className="text-blue-400 mr-2">•</span>
                       You'll see separate approval requests for each token
@@ -1953,7 +1935,7 @@ function CreatePool() {
             <button
               onClick={handleCreatePool}
               disabled={isCreating || !token0 || !token1 || !token0Amount || !token1Amount}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center"
+              className="td-btn td-btn--primary"
             >
               {isCreating ? (
                 <>
@@ -2001,7 +1983,7 @@ function CreatePool() {
                           <code className="text-green-400 text-sm break-all">{transactionHash}</code>
                           <button
                             onClick={() => window.open(`https://sepolia.etherscan.io/tx/${transactionHash}`, '_blank')}
-                            className="ml-2 px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded"
+                            className="td-btn td-btn--primary"
                           >
                             View
                           </button>
@@ -2025,7 +2007,7 @@ function CreatePool() {
                         <div className="text-red-400 text-sm">{transactionError}</div>
                         {(transactionError.includes('Failed to fetch') || transactionError.includes('UNKNOWN_ERROR')) && (
                           <div className="mt-2 text-xs text-yellow-300">
-                            💡 Tip: If you have a transaction hash, check it on Etherscan to see if the transaction was actually successful.
+                            If you have a transaction hash, check it on Etherscan to see if the transaction was actually successful.
                           </div>
                         )}
                       </div>

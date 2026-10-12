@@ -289,8 +289,7 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
       onClick={onClose}
     >
       <div
-        className="rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto border"
-        style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
+        className="td-modal td-modal--wide p-5 sm:p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
@@ -307,40 +306,34 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex space-x-1 mb-6 rounded-lg p-1" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+        <div className="td-segmented w-full mb-6" role="tablist" aria-label="Pool actions">
           <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'details'}
             onClick={() => setActiveTab('details')}
-            className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
-              activeTab === 'details'
-                ? 'bg-cyan-600 text-white'
-                : ''
-            }`}
-            style={activeTab !== 'details' ? { color: 'var(--text-secondary)' } : {}}
+            className={`td-segmented__btn flex-1 ${activeTab === 'details' ? 'td-segmented__btn--active' : ''}`}
           >
             Details
           </button>
           <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'add'}
             onClick={() => setActiveTab('add')}
-            className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
-              activeTab === 'add'
-                ? 'bg-finance-green text-white'
-                : ''
-            }`}
-            style={activeTab !== 'add' ? { color: 'var(--text-secondary)' } : {}}
+            className={`td-segmented__btn flex-1 ${activeTab === 'add' ? 'td-segmented__btn--active' : ''}`}
           >
             Add Liquidity
           </button>
           {pool.userShare && (
             <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'remove'}
               onClick={() => setActiveTab('remove')}
-              className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
-                activeTab === 'remove'
-                  ? 'bg-red-600 text-white'
-                  : ''
-              }`}
-              style={activeTab !== 'remove' ? { color: 'var(--text-secondary)' } : {}}
+              className={`td-segmented__btn flex-1 ${activeTab === 'remove' ? 'td-segmented__btn--active' : ''}`}
             >
-              Remove Liquidity
+              Remove
             </button>
           )}
         </div>
@@ -433,11 +426,12 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
                 {/* Quick Actions */}
                 <div className="flex space-x-3">
                   <button
+                    type="button"
                     onClick={handleCollectFees}
                     disabled={isLoading}
-                    className="bg-finance-green hover:opacity-90 disabled:bg-gray-600 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                    className="td-btn td-btn--green disabled:opacity-50"
                   >
-                    {isLoading ? 'Collecting...' : 'Collect Fees'}
+                    {isLoading ? 'Collecting…' : 'Collect Fees'}
                   </button>
                 </div>
               </div>
@@ -463,8 +457,7 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
                     value={token0Amount}
                     onChange={(e) => handleToken0AmountChange(e.target.value)}
                     placeholder="0.0"
-                    className="w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                    style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+                    className="td-field__input"
                   />
                 </div>
                 
@@ -479,17 +472,17 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
                     value={token1Amount}
                     onChange={(e) => setToken1Amount(e.target.value)}
                     placeholder="0.0"
-                    className="w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                    style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+                    className="td-field__input"
                   />
                 </div>
                 
                 <button
+                  type="button"
                   onClick={handleAddLiquidity}
                   disabled={isLoading || !token0Amount || !token1Amount}
-                  className="w-full bg-finance-green hover:opacity-90 disabled:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium transition-colors"
+                  className="td-btn td-btn--green w-full disabled:opacity-50"
                 >
-                  {isLoading ? 'Adding Liquidity...' : 'Add Liquidity'}
+                  {isLoading ? 'Adding liquidity…' : 'Add Liquidity'}
                 </button>
               </div>
             </div>
@@ -512,12 +505,9 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
                       <button
                         key={percent}
                         onClick={() => setRemovePercentage(percent)}
-                        className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                          removePercentage === percent
-                            ? 'bg-red-600 text-white'
-                            : ''
-                        }`}
-                        style={removePercentage !== percent ? { backgroundColor: 'var(--bg-secondary)', color: 'var(--text-secondary)' } : {}}
+                        type="button"
+                        className={`td-segmented__btn ${removePercentage === percent ? 'td-segmented__btn--active' : ''}`}
+                        style={removePercentage === percent ? { color: 'var(--finance-red-light)', boxShadow: 'inset 0 0 0 1px color-mix(in srgb, var(--finance-red) 45%, transparent)' } : undefined}
                       >
                         {percent}%
                       </button>
@@ -536,11 +526,12 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
                 </div>
                 
                 <button
+                  type="button"
                   onClick={handleRemoveLiquidity}
                   disabled={isLoading}
-                  className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium transition-colors"
+                  className="td-btn td-btn--danger w-full disabled:opacity-50"
                 >
-                  {isLoading ? 'Removing Liquidity...' : `Remove ${removePercentage}% Liquidity`}
+                  {isLoading ? 'Removing…' : `Remove ${removePercentage}%`}
                 </button>
               </div>
             </div>
@@ -917,7 +908,7 @@ const Pools = () => {
     if (src?.token1?.address) q.set('tokenB', src.token1.address);
     if (amount0) q.set('amountA', String(amount0));
     if (amount1) q.set('amountB', String(amount1));
-    toast('Finish add/remove on the Liquidity page for this pair.', { icon: '💧' });
+    toast('Finish add/remove on the Liquidity page for this pair.');
     navigate(q.toString() ? `/liquidity?${q.toString()}` : '/liquidity');
   };
 
@@ -1481,8 +1472,7 @@ const Pools = () => {
                     )
                   ) : (
                     <EmptyState
-                      variant="pools"
-                      icon={isSearching && searchTerm.trim() ? '🔍' : '🏊'}
+                      variant={isSearching && searchTerm.trim() ? 'search' : 'pools'}
                       title={isSearching && searchTerm.trim() ? 'No pools found' : 'No pools available'}
                       description={
                         isSearching && searchTerm.trim()
@@ -1520,7 +1510,7 @@ const Pools = () => {
                           <button
                             onClick={handleLoadMore}
                             disabled={searchPoolsLoading}
-                            className="bg-cyan-600 hover:bg-cyan-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-lg transition duration-200"
+                            className="td-btn td-btn--primary disabled:opacity-50"
                           >
                             {searchPoolsLoading ? (
                               <span className="flex items-center justify-center">
