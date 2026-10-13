@@ -149,7 +149,6 @@ export default function Analytics() {
     data: analytics,
     isLoading,
     isError: analyticsError,
-    error: analyticsErrorObj,
     isFetching: analyticsFetching,
     dataUpdatedAt,
   } = useQuery({

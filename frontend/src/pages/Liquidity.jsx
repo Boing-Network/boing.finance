@@ -42,7 +42,10 @@ const Liquidity = () => {
         }
       } catch (error) {
         console.error('Failed to fetch pools:', error);
-        toast.error('Could not load liquidity pools from the API.');
+        // Avoid toast spam on the disconnected empty screen; connected users get a plain next step.
+        if (account) {
+          toast.error('Couldn’t load pools. Try Browse pools, or refresh.');
+        }
         setPairs([]);
       } finally {
         setLoading(false);
@@ -50,7 +53,7 @@ const Liquidity = () => {
     };
 
     fetchPools();
-  }, []);
+  }, [account]);
 
   // Fetch user's liquidity positions - React Query v5 API
   const { data: liquidityData, isLoading: liquidityLoading } = useQuery({
