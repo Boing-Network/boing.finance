@@ -17,7 +17,7 @@ export default function GovernanceCommunity() {
         <meta name="description" content="Join the boing.finance community. Discord, Telegram, Twitter, and governance forum." />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <PageHeader title="Governance Community" subtitle="Connect with the community, discuss proposals, and participate in governance." />
+        <PageHeader title="Community" subtitle="Forum and social links for governance discussion." />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {SOCIAL_LINKS.map((link) => {

@@ -33,7 +33,7 @@ const STEPS = [
   { id: 'details', label: 'Details' },
   { id: 'collection', label: 'Collection' },
   { id: 'token', label: 'Token' },
-  { id: 'link', label: 'Companions' },
+  { id: 'link', label: 'Link' },
   { id: 'done', label: 'Done' },
 ];
 
@@ -340,14 +340,14 @@ export default function ProjectPack() {
         <title>Project pack | boing.finance</title>
         <meta
           name="description"
-          content="Launch a project: create an NFT collection, a token, and link them as companions in one guided flow."
+          content="Launch a project: create an NFT collection and a token, then connect them in one guided flow."
         />
       </Helmet>
       <TradeDeployShell width="narrow">
           <TradeDeployHero
             eyebrow="Launch"
             title="Project pack"
-            subtitle="Create a collection and a token, then link them as companions — one guided path."
+            subtitle="Create an NFT collection and a project token, then connect them so wallets and explorers show them as one project."
           />
 
           {step !== 'done' ? (
@@ -363,25 +363,11 @@ export default function ProjectPack() {
                 Connect to start
               </h2>
               <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>
-                Use Boing Express so you can create your collection, token, and companions in one place.
+                Use Boing Express so you can create your collection and token, then connect them in one place.
               </p>
               <TradeDeployButton type="button" variant="green" onClick={() => connectWallet?.()}>
                 Connect wallet
               </TradeDeployButton>
-              <p className="mt-4 text-xs" style={{ color: 'var(--text-tertiary)' }}>
-                Prefer separate screens?{' '}
-                <Link to="/create-nft" className="underline" style={{ color: 'var(--finance-primary)' }}>
-                  Create NFT
-                </Link>
-                {' · '}
-                <Link to="/deploy-token" className="underline" style={{ color: 'var(--finance-primary)' }}>
-                  Deploy token
-                </Link>
-                {' · '}
-                <Link to="/linked-project" className="underline" style={{ color: 'var(--finance-primary)' }}>
-                  Manage links
-                </Link>
-              </p>
             </PageCard>
           ) : (
             <AnimatePresence mode="wait">
@@ -607,11 +593,10 @@ export default function ProjectPack() {
                 {step === 'link' ? (
                   <>
                     <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
-                      Link companions
+                      Connect collection &amp; token
                     </h2>
                     <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>
-                      Make this collection and token official companions of each other. Other apps can show the link
-                      once it is on-chain.
+                      Link them as companions — one project. Other apps can show the connection once it is on-chain.
                     </p>
                     <div className="space-y-3 mb-4">
                       <CopyField label="Collection" value={collectionId || predictedCollection} />
@@ -626,7 +611,7 @@ export default function ProjectPack() {
                           color: 'var(--text-secondary)',
                         }}
                       >
-                        Companion linking is not available on this network yet. You can finish linking later from{' '}
+                        Linking is not available on this network yet. You can finish later from{' '}
                         <Link to="/linked-project" className="underline" style={{ color: 'var(--finance-primary)' }}>
                           Manage links
                         </Link>
@@ -649,7 +634,7 @@ export default function ProjectPack() {
                         className="px-5 py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50"
                         style={{ backgroundColor: 'var(--finance-primary)', color: '#041018' }}
                       >
-                        {busy ? 'Linking…' : 'Link companions'}
+                        {busy ? 'Linking…' : 'Link collection & token'}
                       </button>
                     </div>
                   </>
@@ -675,7 +660,7 @@ export default function ProjectPack() {
                         {displayProject}
                       </h2>
                       <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
-                        Companions are linked. Explorer and wallet apps can show them once they read the chain.
+                        Your collection and token are connected. Next: view the project, or add a pool so people can trade.
                       </p>
                       <div className="space-y-3 mb-6">
                         <CopyField label="Collection" value={collectionId || predictedCollection} />
@@ -688,7 +673,7 @@ export default function ProjectPack() {
                             color: 'var(--text-primary)',
                           }}
                         >
-                          Companions: <strong>Linked</strong>
+                          Status: <strong>Linked</strong>
                           {linkTx ? (
                             <span className="block text-xs mt-1 font-mono" style={{ color: 'var(--text-tertiary)' }}>
                               {shortId(linkTx)}
@@ -696,23 +681,7 @@ export default function ProjectPack() {
                           ) : null}
                         </div>
                       </div>
-                      <div className="mb-5 space-y-3">
-                        <CompanionLinkGate
-                          collectionId={collectionId || predictedCollection}
-                          tokenId={tokenId || predictedToken}
-                          actionLabel="Add a pool"
-                          unlockedHref={buildProjectPoolPath({
-                            collectionId: collectionId || predictedCollection,
-                            tokenId: tokenId || predictedToken,
-                          })}
-                        />
-                        <BuilderAttestationPanel
-                          collectionId={collectionId || predictedCollection}
-                          tokenId={tokenId || predictedToken}
-                          requireCompanions
-                        />
-                      </div>
-                      <div className="flex flex-wrap gap-3">
+                      <div className="flex flex-wrap gap-3 mb-5">
                         <a
                           href={buildBoingExplorerAccountUrl(
                             explorerBaseUrl,
@@ -723,7 +692,7 @@ export default function ProjectPack() {
                           className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white"
                           style={{ backgroundColor: 'var(--finance-green-mid)' }}
                         >
-                          View on Observer
+                          View project
                         </a>
                         <button
                           type="button"
@@ -753,6 +722,32 @@ export default function ProjectPack() {
                           Start another project
                         </button>
                       </div>
+                      <div className="mb-5 space-y-3">
+                        <CompanionLinkGate
+                          collectionId={collectionId || predictedCollection}
+                          tokenId={tokenId || predictedToken}
+                          actionLabel="Add a pool"
+                          unlockedHref={buildProjectPoolPath({
+                            collectionId: collectionId || predictedCollection,
+                            tokenId: tokenId || predictedToken,
+                          })}
+                        />
+                        <details className="rounded-lg border" style={{ borderColor: 'var(--border-color)' }}>
+                          <summary
+                            className="cursor-pointer text-xs font-medium px-3 py-2"
+                            style={{ color: 'var(--text-primary)' }}
+                          >
+                            Optional: show you&apos;re the builder
+                          </summary>
+                          <div className="px-3 pb-3">
+                            <BuilderAttestationPanel
+                              collectionId={collectionId || predictedCollection}
+                              tokenId={tokenId || predictedToken}
+                              requireCompanions
+                            />
+                          </div>
+                        </details>
+                      </div>
                       {(collectionTx || tokenTx) && (
                         <p className="mt-5 text-xs" style={{ color: 'var(--text-tertiary)' }}>
                           Collection tx {shortId(collectionTx)}
@@ -767,7 +762,7 @@ export default function ProjectPack() {
           )}
 
           <p className="mt-6 text-center text-xs" style={{ color: 'var(--text-tertiary)' }}>
-            Advanced:{' '}
+            Prefer separate steps?{' '}
             <Link to="/create-nft" className="underline" style={{ color: 'var(--finance-primary)' }}>
               Create NFT
             </Link>

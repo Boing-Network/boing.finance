@@ -227,13 +227,13 @@ export function softGateSameDeployer({ collectionId, tokenId, linker } = {}) {
   }
   const link = linker ? lowerHex(linker) : null;
   if (cDep && tDep && cDep !== tDep) {
-    return 'Deployers differ for this collection and token. Soft-gate warning only — the on-chain registry still decides whether the link is accepted.';
+    return 'These may have been created by different wallets. You can still link — the network will accept or reject the link.';
   }
   if (link && cDep && link !== cDep) {
-    return 'Connected wallet does not match the known collection deployer. Soft-gate warning only.';
+    return 'Your connected wallet may not match the collection creator. You can still try to link.';
   }
   if (link && tDep && link !== tDep) {
-    return 'Connected wallet does not match the known token deployer. Soft-gate warning only.';
+    return 'Your connected wallet may not match the token creator. You can still try to link.';
   }
   return null;
 }

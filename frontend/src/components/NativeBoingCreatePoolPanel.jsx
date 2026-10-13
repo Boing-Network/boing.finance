@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { isBoingTestnetChainId } from 'boing-sdk';
 import { useWallet } from '../contexts/WalletContext';
@@ -197,16 +197,11 @@ export default function NativeBoingCreatePoolPanel() {
       style={{ backgroundColor: 'var(--bg-card)', borderColor: 'rgba(59, 130, 246, 0.45)' }}
     >
       <h3 className="text-lg font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
-        Create a native pool
+        Create a pool
       </h3>
       <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-        Deploys constant-product pool bytecode, calls <code className="text-[10px]">set_tokens</code>, then{' '}
-        <code className="text-[10px]">add_liquidity</code> with your amounts (that first deposit sets the ratio). If a
-        factory id is published, the app also tries <code className="text-[10px]">register_pair</code>. First-seed
-        liquidity is an MVP donation into the pool — there is no Uniswap-style LP NFT on this path.{' '}
-        <Link to="/boing/native-vm" className="text-cyan-400 underline">
-          Native VM
-        </Link>
+        Pick two tokens and deposit the first liquidity. That first deposit sets the starting price. Express will ask you
+        to approve each step.
       </p>
 
       {projectGateActive ? (
@@ -247,7 +242,7 @@ export default function NativeBoingCreatePoolPanel() {
 
       <div className="grid gap-3 sm:grid-cols-2 mb-3">
         <label className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-          Token A amount (integer units)
+          Amount of Token A
           <input
             type="text"
             inputMode="numeric"
@@ -257,9 +252,12 @@ export default function NativeBoingCreatePoolPanel() {
             style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
             placeholder="1000000"
           />
+          <span className="block text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
+            Whole numbers only (no decimals in this flow).
+          </span>
         </label>
         <label className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-          Token B amount (integer units)
+          Amount of Token B
           <input
             type="text"
             inputMode="numeric"
@@ -269,6 +267,9 @@ export default function NativeBoingCreatePoolPanel() {
             style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
             placeholder="1000000"
           />
+          <span className="block text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
+            Whole numbers only (no decimals in this flow).
+          </span>
         </label>
       </div>
 
@@ -295,20 +296,13 @@ export default function NativeBoingCreatePoolPanel() {
         </label>
       </div>
 
-      <p className="text-xs mb-3" style={{ color: 'var(--text-tertiary)' }}>
-        Factory: {effectiveFactoryHex ? shortHex(effectiveFactoryHex) : 'not published — pair will not be listed until an operator registers it'}
-      </p>
+      {!effectiveFactoryHex ? (
+        <p className="text-xs mb-3" style={{ color: 'var(--text-tertiary)' }}>
+          Listing may take a moment after create — refresh Pools if your pair doesn&apos;t appear right away.
+        </p>
+      ) : null}
 
       <div className="flex flex-wrap gap-2 mb-3">
-        <button
-          type="button"
-          onClick={runQa}
-          disabled={qaBusy || busy}
-          className="px-4 py-2 rounded-lg text-sm font-medium border"
-          style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
-        >
-          {qaBusy ? 'Checking QA…' : 'Run QA'}
-        </button>
         <button
           type="button"
           onClick={onCreate}
@@ -327,8 +321,8 @@ export default function NativeBoingCreatePoolPanel() {
           {busy
             ? 'Creating pool…'
             : projectGateActive && !companionsLinked
-              ? 'Link companions to create'
-              : 'Create native pool'}
+              ? 'Link collection & token first'
+              : 'Create pool'}
         </button>
         <button
           type="button"
@@ -336,7 +330,7 @@ export default function NativeBoingCreatePoolPanel() {
           className="px-4 py-2 rounded-lg text-sm border"
           style={{ borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}
         >
-          {showAdvanced ? 'Hide advanced' : 'Advanced bytecode'}
+          {showAdvanced ? 'Hide advanced' : 'Advanced'}
         </button>
       </div>
 
@@ -353,8 +347,17 @@ export default function NativeBoingCreatePoolPanel() {
 
       {showAdvanced && (
         <div className="space-y-3 mb-3">
+          <button
+            type="button"
+            onClick={runQa}
+            disabled={qaBusy || busy}
+            className="px-4 py-2 rounded-lg text-sm font-medium border"
+            style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+          >
+            {qaBusy ? 'Checking…' : 'Run review check'}
+          </button>
           <label className="block text-sm" style={{ color: 'var(--text-secondary)' }}>
-            QA purpose
+            Review purpose
             <select
               value={purposeCategory}
               onChange={(e) => setPurposeCategory(e.target.value)}

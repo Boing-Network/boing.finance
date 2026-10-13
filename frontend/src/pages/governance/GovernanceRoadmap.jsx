@@ -17,7 +17,7 @@ export default function GovernanceRoadmap() {
         <meta name="description" content="Governance roadmap and milestones for the boing.finance DAO." />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <PageHeader title="Governance Roadmap" subtitle="Illustrative path toward decentralized governance — not a live milestone tracker." />
+        <PageHeader title="Governance roadmap" subtitle="Planned path to on-chain voting (illustrative — not a live tracker)." />
 
         <div className="mb-6 rounded-lg border border-amber-500/30 bg-amber-900/20 px-4 py-3 text-sm text-amber-100">
           <strong>Planned / illustrative:</strong> Phases below are planning labels. On-chain Governor milestones are not marked complete until contracts ship.

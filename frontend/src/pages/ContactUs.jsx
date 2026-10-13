@@ -139,13 +139,8 @@ const ContactUs = () => {
                 Contact Us
               </h1>
               <p className="text-xl mb-6" style={{ color: 'var(--text-secondary)' }}>
-                Get in touch with our team. We're here to help!
+                Email the team — your mail app opens with the message ready
               </p>
-              <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
-                <p className="text-blue-200 text-sm">
-                  <strong>Note:</strong> boing.finance is a solo-founder project. While we provide direct support, response times may vary as we're currently seeking funding for team expansion.
-                </p>
-              </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

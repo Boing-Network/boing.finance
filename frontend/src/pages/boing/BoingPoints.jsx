@@ -5,7 +5,7 @@ import { useWalletConnection } from '../../hooks/useWalletConnection';
 import { getPoints, getPointsActivity } from '../../services/boingApi';
 
 export default function BoingPoints() {
-  const { account } = useWalletConnection();
+  const { account, connectWallet } = useWalletConnection();
   const [pointsData, setPointsData] = useState({ points: 0, updatedAt: null });
   const [activity, setActivity] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,10 +47,13 @@ export default function BoingPoints() {
         <meta name="description" content="Earn Boing points when you use boing.finance. Redeem for rewards and perks." />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <PageHeader title="Boing Points" subtitle="Track points earned from protocol usage. Accrual runs after confirmed swap, liquidity, and deploy actions when the API is reachable." />
+        <PageHeader
+          title="Boing Points"
+          subtitle="Points you earn from swaps, pools, and deploys (when the API is up)."
+        />
 
         <div className="mb-6 rounded-lg border border-cyan-500/30 bg-cyan-900/20 px-4 py-3 text-sm text-cyan-100">
-          <strong>How earning works:</strong> After a confirmed swap, pool create, or token deploy, the app requests point accrual from the Boing API (fire-and-forget). Rates below are the planned amounts; balances still depend on API availability.
+          <strong>How earning works:</strong> We add points after a confirmed swap, pool, or deploy when the points API is reachable. Rates below are planned amounts.
         </div>
 
         {account ? (
@@ -63,7 +66,7 @@ export default function BoingPoints() {
                 <p className="text-xs mt-2" style={{ color: 'var(--text-tertiary)' }}>
                   {pointsData.updatedAt
                     ? `Last API update: ${new Date(pointsData.updatedAt).toLocaleString()}`
-                    : 'No on-chain accrual receipt in the app yet — balance reflects API data only.'}
+                    : 'Balance comes from the points API (not an on-chain receipt).'}
                 </p>
               </PageCard>
               <PageCard>
@@ -100,17 +103,26 @@ export default function BoingPoints() {
             </PageCard>
 
             <PageCard>
-              <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Redeem Points</h3>
-              <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>Point redemption for BOING tokens, NFT discounts, and exclusive perks will be available soon.</p>
-              <div className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-400/30">Coming Soon</div>
+              <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Redeem points</h3>
+              <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+                Redeem for BOING, NFT discounts, and perks when this feature goes live.
+              </p>
+              <div className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-400/30">Coming soon</div>
             </PageCard>
           </>
         ) : (
           <PageCard className="text-center py-12">
-            <div className="text-5xl mb-4">⭐</div>
-            <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Connect Wallet to View Points</h3>
-            <p className="text-sm mb-6 max-w-md mx-auto" style={{ color: 'var(--text-secondary)' }}>Connect your wallet to see your Boing points balance and earning history.</p>
-            <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Start trading, bridging, and deploying to earn points!</p>
+            <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Connect wallet to view points</h3>
+            <p className="text-sm mb-6 max-w-md mx-auto" style={{ color: 'var(--text-secondary)' }}>
+              See your points balance and recent earning history.
+            </p>
+            <button
+              type="button"
+              onClick={() => connectWallet?.()}
+              className="px-4 py-2 rounded-lg font-medium bg-cyan-500 hover:bg-cyan-600 text-white transition-colors"
+            >
+              Connect wallet
+            </button>
           </PageCard>
         )}
       </div>

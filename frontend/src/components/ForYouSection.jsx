@@ -14,13 +14,15 @@ export default function ForYouSection() {
     return (
       <div className="rounded-xl p-4 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
         <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>For you</h3>
-        <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>Connect your wallet to get personalized suggestions.</p>
+        <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
+          Connect your wallet to see suggested next steps.
+        </p>
         <Link
           to="/swap"
           className="text-sm font-medium"
           style={{ color: 'var(--primary-color)' }}
         >
-          Get started →
+          Connect wallet →
         </Link>
       </div>
     );

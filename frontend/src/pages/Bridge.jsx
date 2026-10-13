@@ -11,7 +11,6 @@ import { getSupportedNetworks } from '../config/networks';
 import TokenManagementModal from '../components/TokenManagementModal';
 import EmptyState from '../components/EmptyState';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
-import { BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL } from '../config/boingNetworkDocsUrls';
 import {
   PLATFORM_BRIDGE_FEE_LABEL,
   buildLifiDeepLink,
@@ -140,7 +139,7 @@ export default function Bridge() {
         if (controller.signal.aborted) return;
         if (!next?.transactionRequest) {
           setQuote(null);
-          setQuoteError('No LI.FI route for this pair. Try USDC, native gas, or open the aggregator.');
+          setQuoteError('No route for this pair. Try USDC or the network’s gas token, or open the advanced bridge.');
           return;
         }
         setQuote(next);
@@ -204,7 +203,7 @@ export default function Bridge() {
       });
       const toUse = fresh?.transactionRequest ? fresh : quote;
       if (!toUse?.transactionRequest) {
-        toast.error('No live route. Opening LI.FI instead.');
+        toast.error('No route in-app. Opening the advanced bridge…');
         window.open(deepLink, '_blank', 'noopener,noreferrer');
         return;
       }
@@ -297,13 +296,13 @@ export default function Bridge() {
         <title>Bridge | boing.finance — Aggregator-powered cross-chain transfers</title>
         <meta
           name="description"
-          content="Bridge EVM tokens through LI.FI routes in boing.finance. 0.5% platform fee. No Boing-held bridge inventory."
+          content="Move tokens between EVM networks on boing.finance. A small platform fee applies."
         />
-        <meta name="keywords" content="cross-chain bridge, LI.FI, token bridge, boing finance, EVM" />
+        <meta name="keywords" content="cross-chain bridge, token bridge, boing finance, EVM" />
         <meta property="og:title" content="Bridge | boing.finance" />
         <meta
           property="og:description"
-          content="Aggregator-powered EVM bridge with a 0.5% platform service fee."
+          content="Move tokens between EVM networks. A small platform fee applies."
         />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/bridge" />
@@ -314,8 +313,7 @@ export default function Bridge() {
             <span className="td-hero__eyebrow">Trade</span>
             <h1 className="td-hero__title">Bridge</h1>
             <p className="td-hero__subtitle">
-              EVM transfers routed by LI.FI. Boing takes a {PLATFORM_BRIDGE_FEE_LABEL} platform fee. Liquidity stays with the
-              aggregator&apos;s bridges — not a Boing-held inventory.
+              Move tokens between EVM networks. A {PLATFORM_BRIDGE_FEE_LABEL} platform fee applies.
             </p>
           </header>
 
@@ -329,21 +327,11 @@ export default function Bridge() {
                 color: 'var(--text-secondary)',
               }}
             >
-              <strong style={{ color: 'var(--text-primary)' }}>Boing L1 (6913):</strong> this page targets EVM networks
-              (Boing is excluded from the picker). Native BOING transfers use Boing Express; an L1↔EVM protocol bridge is
-              separate work. See{' '}
-              <Link to="/boing/native-vm" className="td-btn--link">
-                Native VM tools
-              </Link>{' '}
-              and{' '}
-              <a
-                href={BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="td-btn--link"
-              >
-                partner handoff
-              </a>
+              <strong style={{ color: 'var(--text-primary)' }}>On Boing L1:</strong> bridging here is for EVM chains.
+              Move BOING with Boing Express for now.{' '}
+              <Link to="/docs" className="td-btn--link">
+                Learn more
+              </Link>
               .
             </div>
           )}
@@ -518,7 +506,7 @@ export default function Bridge() {
                   {quoting
                     ? 'Quoting…'
                     : quote?.venue
-                      ? `${quote.venue} via LI.FI`
+                      ? quote.venue
                       : `${getNetworkInfo(fromChain)?.name || fromChain} → ${getNetworkInfo(toChain)?.name || toChain}`}
                 </span>
               </div>
@@ -538,16 +526,6 @@ export default function Bridge() {
               </div>
             )}
 
-            {!feeRecipient && (
-              <p className="text-xs mb-3" style={{ color: 'var(--text-tertiary)' }}>
-                Fee payout wallet is not set in this build. Register integrator <code>boing.finance</code> on{' '}
-                <a href="https://portal.li.fi/" className="underline" target="_blank" rel="noopener noreferrer">
-                  portal.li.fi
-                </a>{' '}
-                and set <code>REACT_APP_LIFI_FEE_RECIPIENT</code> / Worker <code>LIFI_FEE_RECIPIENT</code> to that address.
-              </p>
-            )}
-
             <div className="space-y-3">
               <button
                 type="button"
@@ -565,17 +543,17 @@ export default function Bridge() {
                         ? `Bridge via ${quote.venue}`
                         : 'Get a route'}
               </button>
-              <div className="td-lifi-strip">
-                <p className="td-lifi-strip__label">Prefer the aggregator UI?</p>
+              <details className="td-lifi-strip">
+                <summary className="td-lifi-strip__label cursor-pointer">Prefer the advanced bridge UI?</summary>
                 <a
                   href={quote ? deepLink : getBridgeFallbackUrl(fromChain)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="td-btn td-btn--ghost text-sm"
+                  className="td-btn td-btn--ghost text-sm mt-2 inline-flex"
                 >
-                  Open LI.FI / Jumper
+                  Open external bridge
                 </a>
-              </div>
+              </details>
             </div>
           </div>
 
@@ -656,7 +634,7 @@ export default function Bridge() {
                   <EmptyState
                     variant="bridge"
                     title="No bridge transactions yet"
-                    description="Complete a transfer to see history here. Destination status is tracked by the aggregator, not a Boing relayer."
+                    description="Complete a transfer to see it here. Arrival on the destination network is handled by the route."
                     actionLabel="Bridge tokens"
                     actionHref="#bridge-form"
                   />
@@ -700,10 +678,10 @@ export default function Bridge() {
                       <span className="font-bold text-lg">1</span>
                     </div>
                     <h4 className="font-semibold mb-2 text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>
-                      Quote via LI.FI
+                      Get a quote
                     </h4>
                     <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      Routes use third-party bridges and DEXs. You receive whatever the quote shows after fees.
+                      We find a route across bridges and exchanges. You receive what the quote shows after fees.
                     </p>
                   </div>
                   <div className="text-center">
@@ -717,7 +695,7 @@ export default function Bridge() {
                       {PLATFORM_BRIDGE_FEE_LABEL} platform fee
                     </h4>
                     <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      Taken from the sending token by LI.FI's integrator fee. Plus network gas and any bridge/DEX fees.
+                      Taken from the amount you send. Network gas and any bridge fees may apply on top.
                     </p>
                   </div>
                   <div className="text-center">
@@ -731,8 +709,7 @@ export default function Bridge() {
                       Sign once
                     </h4>
                     <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      Your wallet sends the LI.FI transaction on the source chain. Destination arrival is handled by the
-                      route — Boing does not custody tokens.
+                      Confirm in your wallet on the sending network. Arrival is handled by the route — Boing does not hold your tokens.
                     </p>
                   </div>
                 </div>

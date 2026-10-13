@@ -210,21 +210,20 @@ export default function NativePoolsDirectoryPanel({ onTradeThisPair, focusPoolHe
       </div>
 
       <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-        Pools below are loaded from your configured main pool plus any extra pairs the app discovers from the factory.
-        When the factory reports more pairs, register them on-chain so they appear here after the next refresh.
+        These are the pools the app can see. Refresh after you create one if it doesn&apos;t appear yet.
       </p>
 
       {(venues.length > 0 ||
         dexDirectoryExtras.registerPairLogCount != null ||
         remoteIndexerStats ||
         (process.env.REACT_APP_BOING_NATIVE_DEX_INDEXER_STATS_URL || '').trim()) && (
-        <div
+        <details
           className="rounded-xl border px-4 py-3 text-xs space-y-1"
           style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-secondary)' }}
         >
-          <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-            Indexer-style stats
-          </p>
+          <summary className="font-semibold cursor-pointer" style={{ color: 'var(--text-primary)' }}>
+            Developer stats
+          </summary>
           {dexDirectoryExtras.registerPairLogCount != null && (
             <p style={{ color: 'var(--text-secondary)' }}>
               <strong>register_pair</strong> logs in configured scan:{' '}
@@ -262,7 +261,7 @@ export default function NativePoolsDirectoryPanel({ onTradeThisPair, focusPoolHe
           {oracleUsdError && !oracleUsdLoading && (
             <p className="text-amber-400/90 text-[11px]">{oracleUsdError}</p>
           )}
-        </div>
+        </details>
       )}
 
       {venues.length > 0 && !loading && (

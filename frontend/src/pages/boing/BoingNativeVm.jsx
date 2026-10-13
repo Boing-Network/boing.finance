@@ -459,46 +459,52 @@ export default function BoingNativeVm() {
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <PageHeader
-          title="Boing Native VM & RPC"
-          subtitle="Call the public Boing JSON-RPC through this site (same-origin proxy). Boing is not EVM: contracts use the native VM; txs are bincode + Ed25519, not MetaMask EIP-155."
+          title="Boing developer tools"
+          subtitle="Read chain state and submit Boing transactions. For builders — not required for Swap."
         />
 
         <PageCard className="mb-6">
           <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-            RPC methods match{' '}
-            <a
-              href={BOING_NETWORK_RPC_API_SPEC_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-cyan-400 hover:underline"
-            >
-              RPC-API-SPEC.md
+            Use Boing Express to approve reads and sends from this page. Everyday trading lives on{' '}
+            <a href="/swap" className="text-cyan-400 hover:underline">
+              Swap
             </a>
-            ; cross-repo handoff for Express / Observer / partners:{' '}
-            <a
-              href={BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-cyan-400 hover:underline"
-            >
-              HANDOFF-DEPENDENT-PROJECTS.md
-            </a>
-            . With{' '}
-            <strong className="text-[var(--text-primary)]">Boing Express</strong>, this site can call{' '}
-            <code className="text-xs">boing_signTransaction</code> and{' '}
-            <code className="text-xs">boing_sendTransaction</code> (approval popup in the extension). Amounts are whole
-            BOING / native units (u128 strings), not 10⁻¹⁸. The Boing VM is not EVM or Solana: full “DeFi parity”
-            (tokens, AMMs, program standards) is a multi-milestone roadmap on top of this RPC + execution model.
+            .
           </p>
-          <ul className="text-xs space-y-1 list-disc pl-5" style={{ color: 'var(--text-tertiary)' }}>
-            <li>Use chain {BOING_NATIVE_L1_CHAIN_ID} (0x1b01) for native balance and mempool behavior.</li>
-            <li>
-              Contract deployments are checked by <strong className="text-[var(--text-primary)]">protocol QA</strong> in
-              the mempool; this UI runs the same <code className="text-[10px]">boing_qaCheck</code> before Express
-              signing so you fail fast.
-            </li>
-            <li>Paste a signed tx hex from the CLI here, or build and sign with Express using the section below.</li>
-          </ul>
+          <details className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
+            <summary className="cursor-pointer text-cyan-400/90">Advanced — RPC &amp; protocol notes</summary>
+            <p className="mt-2 mb-2">
+              RPC methods match{' '}
+              <a
+                href={BOING_NETWORK_RPC_API_SPEC_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-400 hover:underline"
+              >
+                RPC-API-SPEC.md
+              </a>
+              ; partner handoff:{' '}
+              <a
+                href={BOING_NETWORK_HANDOFF_DEPENDENT_PROJECTS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-400 hover:underline"
+              >
+                HANDOFF-DEPENDENT-PROJECTS.md
+              </a>
+              . Express can call <code className="text-xs">boing_signTransaction</code> /{' '}
+              <code className="text-xs">boing_sendTransaction</code>. Amounts are whole BOING units (not 10⁻¹⁸). Boing is
+              not EVM: native VM + Ed25519, not MetaMask EIP-155.
+            </p>
+            <ul className="text-xs space-y-1 list-disc pl-5 mt-2">
+              <li>Use chain {BOING_NATIVE_L1_CHAIN_ID} (0x1b01) for native balance and mempool behavior.</li>
+              <li>
+                Deployments are checked by protocol QA (<code className="text-[10px]">boing_qaCheck</code>) before Express
+                signing.
+              </li>
+              <li>Paste a signed tx hex from the CLI, or build and sign with Express below.</li>
+            </ul>
+          </details>
         </PageCard>
 
         {onBoing ? (

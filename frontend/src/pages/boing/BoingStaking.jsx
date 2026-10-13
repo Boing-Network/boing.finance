@@ -16,7 +16,7 @@ export default function BoingStaking() {
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         <PageHeader
           title="NFT Staking"
-          subtitle="Stake Boing NFTs for rewards and analytics unlocks — coming with live staking contracts."
+          subtitle="Coming soon — stake Boing NFTs for rewards when staking goes live."
         />
 
         <div className="mb-6 rounded-lg border border-amber-500/30 bg-amber-900/20 px-4 py-3 text-sm text-amber-100">
@@ -37,8 +37,8 @@ export default function BoingStaking() {
               <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Planned benefits</h3>
               <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
                 <li>• Earn BOING rewards for staking your NFTs</li>
-                <li>• Unlock Pro Analytics features (advanced charts, insights)</li>
-                <li>• Governance weight multiplier for staked NFT holders</li>
+                <li>• Extra Analytics charts for stakers</li>
+                <li>• Extra weight in governance when voting goes live</li>
               </ul>
             </PageCard>
           </>

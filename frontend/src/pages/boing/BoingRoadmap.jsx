@@ -17,7 +17,7 @@ export default function BoingRoadmap() {
         <meta name="description" content="Boing ecosystem roadmap: NFT staking, points, and community growth." />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <PageHeader title="Boing Roadmap" subtitle="Illustrative community roadmap for NFT staking, points, and ecosystem growth." />
+        <PageHeader title="Boing roadmap" subtitle="Illustrative community roadmap — not a live milestone tracker." />
 
         <div className="mb-6 rounded-lg border border-amber-500/30 bg-amber-900/20 px-4 py-3 text-sm text-amber-100">
           <strong>Planned / illustrative:</strong> This is not a live delivery tracker. Milestone statuses are planning labels, not shipped guarantees.

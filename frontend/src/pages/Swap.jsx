@@ -15,7 +15,6 @@ import { transactionTrackingService } from '../services/transactionTrackingServi
 import externalSwapService from '../services/externalSwapService';
 import ExternalDEXQuotes from '../components/ExternalDEXQuotes';
 import ShareCardModal from '../components/ShareCardModal';
-import ProactiveTipsBanner from '../components/ProactiveTipsBanner';
 import NativeBoingTradeHub from '../components/NativeBoingTradeHub';
 import SwapTokenSelect from '../components/SwapTokenSelect';
 import SwapMarketsBoard from '../components/SwapMarketsBoard';
@@ -2066,36 +2065,22 @@ const Swap = () => {
             <div>
               <span className="td-hero__eyebrow">Trade</span>
               <h1 className="td-hero__title" style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)' }}>
-                Spot
+                Swap
               </h1>
               <p className="td-hero__subtitle">
-                Discover trending tokens on this chain and swap on-chain
+                Trade tokens on this network
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <ProactiveTipsBanner />
-              <div
-                className="px-3 py-2 rounded-lg"
-                style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
-              >
-                <div className="flex items-center space-x-2">
-                  <div className={`w-2 h-2 rounded-full ${
-                    settings.gasPriority === 'high' ? 'bg-red-400' :
-                    settings.gasPriority === 'medium' ? 'bg-yellow-400' : 'bg-green-400'
-                  }`} />
-                  <span className="text-white text-xs font-medium">{getGasPriorityLabel()}</span>
-                </div>
-              </div>
               <button
                 type="button"
-                className="p-2 rounded-lg"
-                style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
+                className="px-3 py-2 rounded-lg text-sm font-medium"
+                style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}
                 onClick={() => setSettingsOpen(true)}
                 aria-label="Open settings"
+                title={`Gas: ${getGasPriorityLabel()}`}
               >
-                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7zm7.94-2.06a1 1 0 0 0 .26-1.09l-1.43-2.49a1 1 0 0 1 0-.9l1.43-2.49a1 1 0 0 0-.26-1.09l-2.12-2.12a1 1 0 0 0-1.09-.26l-2.49 1.43a1 1 0 0 1 .9 0l-2.49-1.43a1 1 0 0 0-1.09.26l-2.12 2.12a1 1 0 0 0-.26 1.09l1.43 2.49a1 1 0 0 1 0 .9l-1.43 2.49a1 1 0 0 0 .26 1.09l2.12 2.12a1 1 0 0 0 1.09.26l2.49-1.43a1 1 0 0 1 .9 0l2.49 1.43a1 1 0 0 0 1.09-.26l2.12-2.12z" />
-                </svg>
+                Settings
               </button>
             </div>
           </div>

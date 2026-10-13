@@ -60,11 +60,11 @@ const OnboardingChecklist = ({ compact = false }) => {
 
   const steps = [
     { id: 1, label: 'Connect wallet', done: step1Done, action: () => connectWallet && connectWallet() },
-    { id: 2, label: 'View portfolio', done: step2Done, action: () => navigate('/portfolio') },
-    { id: 3, label: 'Set price alert', done: step3Done, action: () => navigate('/tokens') },
-    { id: 4, label: 'Deploy token', done: stepDeployDone, action: () => navigate('/deploy-token') },
-    { id: 5, label: 'Create liquidity pool', done: stepLiquidityDone, action: () => navigate('/pools') },
-    { id: 6, label: 'Swap', done: stepSwapDone, action: () => navigate('/swap') }
+    { id: 2, label: 'Try a swap', done: stepSwapDone, action: () => navigate('/swap') },
+    { id: 3, label: 'Explore tokens', done: step3Done, action: () => navigate('/tokens') },
+    { id: 4, label: 'View portfolio', done: step2Done, action: () => navigate('/portfolio') },
+    { id: 5, label: 'Deploy a token', done: stepDeployDone, action: () => navigate('/deploy-token') },
+    { id: 6, label: 'Add liquidity', done: stepLiquidityDone, action: () => navigate('/create-pool') }
   ];
 
   const doneCount = steps.filter(s => s.done).length;

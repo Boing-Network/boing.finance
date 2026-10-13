@@ -40,8 +40,8 @@ export default function SmartFlowsView({ rows = [] }) {
   if (isTableLayout) {
     return (
       <div className="overflow-x-auto">
-        <table className="min-w-full text-sm" aria-label="Smart flow signals">
-          <caption className="sr-only">Smart flow pair signals by volume-to-liquidity ratio</caption>
+        <table className="min-w-full text-sm" aria-label="Busy trading pairs">
+          <caption className="sr-only">Trading pairs by volume-to-liquidity ratio</caption>
           <thead>
             <tr className="text-left text-gray-400 border-b border-gray-700">
               <th scope="col" className="py-2 pr-4">

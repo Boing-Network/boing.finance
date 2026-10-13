@@ -55,8 +55,8 @@ export default function FearGreedPanel() {
     >
       <div className="flex flex-col lg:flex-row lg:items-start gap-6">
         <div className="lg:w-64 shrink-0">
-          <h2 className="text-xl font-bold text-white mb-1">Fear & Greed Index</h2>
-          <p className="text-xs text-gray-400 mb-4">Market sentiment · Alternative.me</p>
+          <h2 className="text-xl font-bold text-white mb-1">Market mood</h2>
+          <p className="text-xs text-gray-400 mb-4">Fear &amp; Greed index (0–100)</p>
           <div className={`rounded-xl p-5 border ${colors.bg} ${colors.border}`}>
             <p className={`text-5xl font-bold ${colors.text}`}>{latest.value}</p>
             <p className={`text-lg font-semibold mt-1 ${colors.text}`}>

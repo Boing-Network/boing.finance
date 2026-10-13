@@ -45,9 +45,9 @@ test.describe('Native AMM panel (build with REACT_APP_BOING_NATIVE_AMM_POOL)', (
     test.setTimeout(120_000);
     await page.goto('/swap');
     await expect(page.getByTestId('native-amm-panel')).toBeVisible({ timeout: 90_000 });
-    // Swap embeds the panel in NativeBoingTradeHub with embedded=true → title is "Pool swap".
+    // Embedded panel title is "Swap" (non-embedded: "Swap on the main pool").
     await expect(
-      page.getByRole('heading', { name: /Pool swap|Native constant-product pool/i })
+      page.getByTestId('native-amm-panel').getByRole('heading', { name: /Swap/i })
     ).toBeVisible();
   });
 

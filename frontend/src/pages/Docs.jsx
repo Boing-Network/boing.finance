@@ -21,23 +21,23 @@ const BoingSection = lazy(() => import('../components/docs/BoingSection'));
 const BoingNativeL1Section = lazy(() => import('../components/docs/BoingNativeL1Section'));
 
 const DOC_NAV = [
-  { id: 'overview', title: 'Overview', icon: '📖' },
-  { id: 'features', title: 'Features', icon: '🚀' },
-  { id: 'networks', title: 'Supported Networks', icon: '🌐' },
-  { id: 'boing-l1', title: 'Boing L1 & Express', icon: '⚡' },
-  { id: 'contracts', title: 'Smart Contracts', icon: '📜' },
-  { id: 'trading', title: 'Trading Guide', icon: '💱' },
-  { id: 'liquidity', title: 'Liquidity Provision', icon: '💧' },
-  { id: 'bridge', title: 'Cross-Chain Bridge', icon: '🌉' },
-  { id: 'tokens', title: 'Token Management', icon: '🪙' },
-  { id: 'analytics', title: 'Analytics & Data', icon: '📊' },
-  { id: 'portfolio', title: 'Portfolio Management', icon: '💼' },
-  { id: 'governance', title: 'Governance', icon: '📜' },
-  { id: 'boing', title: 'BOING Ecosystem', icon: '🎯' },
-  { id: 'technical', title: 'Technical Specs', icon: '⚙️' },
-  { id: 'api', title: 'API Reference', icon: '🔌' },
-  { id: 'security', title: 'Security', icon: '🔒' },
-  { id: 'faq', title: 'FAQ', icon: '❓' },
+  { id: 'overview', title: 'Overview' },
+  { id: 'features', title: 'Features' },
+  { id: 'networks', title: 'Supported networks' },
+  { id: 'boing-l1', title: 'Boing L1 & Express' },
+  { id: 'contracts', title: 'Smart contracts' },
+  { id: 'trading', title: 'Trading guide' },
+  { id: 'liquidity', title: 'Liquidity' },
+  { id: 'bridge', title: 'Bridge' },
+  { id: 'tokens', title: 'Tokens' },
+  { id: 'analytics', title: 'Analytics' },
+  { id: 'portfolio', title: 'Portfolio' },
+  { id: 'governance', title: 'Governance' },
+  { id: 'boing', title: 'BOING' },
+  { id: 'technical', title: 'Technical' },
+  { id: 'api', title: 'API' },
+  { id: 'security', title: 'Security' },
+  { id: 'faq', title: 'FAQ' },
 ];
 
 const SECTION_MAP = {
@@ -112,7 +112,7 @@ const Docs = () => {
               boing.finance Documentation
             </h1>
             <p className="text-lg sm:text-xl max-w-3xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
-              Complete guide to the boing.finance decentralized exchange platform - your gateway to cross-chain trading
+              How to swap, bridge, add liquidity, and launch tokens or NFTs
             </p>
           </div>
 
@@ -143,9 +143,6 @@ const Docs = () => {
                           activeSection === section.id ? 'var(--text-primary)' : 'var(--text-secondary)',
                       }}
                     >
-                      <span className="mr-2" aria-hidden>
-                        {section.icon}
-                      </span>
                       {section.title}
                     </button>
                   ))}

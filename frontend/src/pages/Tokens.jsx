@@ -389,14 +389,13 @@ const Tokens = () => {
         <div className="td-mint-form relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <header className="td-hero mb-6 sm:mb-8">
             <span className="td-hero__eyebrow">Trade</span>
-            <h1 className="td-hero__title">Trending Tokens</h1>
+            <h1 className="td-hero__title">Tokens</h1>
             <p className="td-hero__subtitle">
-              Discover recently deployed tokens across different networks
+              Browse tokens on the selected network
             </p>
             {selectedChain === BOING_NATIVE_L1_CHAIN_ID && (
               <p className="td-status td-status--info mt-3 text-sm">
-                Boing testnet: explorer scans use RPC. CoinGecko does not price BOING; the app uses a{' '}
-                <span className="font-semibold">$5</span> reference per BOING for portfolio and fee estimates.
+                USD values use an approximate BOING price for estimates.
               </p>
             )}
           </header>

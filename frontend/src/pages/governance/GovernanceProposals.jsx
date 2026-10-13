@@ -60,8 +60,8 @@ export default function GovernanceProposals() {
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         <PageHeader
-          title="Governance Proposals"
-          subtitle="Off-chain proposal registry for shaping boing.finance — on-chain Governor voting is not live yet."
+          title="Proposals"
+          subtitle="Community proposals for signaling — not on-chain voting yet."
         >
           {account && (
             <Link to="/governance/vote" className="px-4 py-2 rounded-lg font-medium bg-cyan-500 hover:bg-cyan-600 text-white transition-colors">

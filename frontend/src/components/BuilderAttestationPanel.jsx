@@ -96,30 +96,30 @@ export default function BuilderAttestationPanel({
         : 'var(--bg-tertiary)';
 
   let title = 'Builder';
-  let body = message || 'Optional: attest as the builder of this project.';
+  let body = message || 'Optional: confirm on-chain that you built this project.';
   if (ownAttestation) {
-    title = 'Builder attested';
-    body = `You attested as builder${ownAttestation.builderId ? ` (${shortId(ownAttestation.builderId)})` : ''}.`;
+    title = "You're listed as builder";
+    body = `Signed${ownAttestation.builderId ? ` (${shortId(ownAttestation.builderId)})` : ''}.`;
   } else if (attested) {
-    title = 'Builder attested';
+    title = 'Builder confirmed';
     const latest = attestations[0];
     body = latest
-      ? `Active attestation from ${shortId(latest.builderId)}.`
-      : 'This project has an active builder attestation.';
+      ? `Someone attested as builder (${shortId(latest.builderId)}).`
+      : 'This project has a builder confirmation on-chain.';
   } else if (!companionsReady && requireCompanions) {
-    title = 'Attest as builder';
+    title = "Show you're the builder";
     body = companionsChecking
-      ? 'Checking companions…'
-      : 'Link companions first, then you can attest as builder.';
+      ? 'Checking link…'
+      : "Link your collection and token first, then you can confirm you're the builder.";
   } else if (state === 'not_attested') {
-    title = 'Attest as builder';
+    title = "Show you're the builder";
     body = 'Optional. Sign in your wallet to confirm on-chain.';
   } else if (state === 'checking') {
-    title = 'Checking builder…';
-    body = 'Reading on-chain builder attestation for this project.';
+    title = 'Checking…';
+    body = 'Looking up builder confirmation for this project.';
   } else if (state === 'unavailable' || !status.canWrite) {
-    title = 'Builder attestation';
-    body = 'Could not reach builder attestation right now. Try again in a moment.';
+    title = 'Builder confirmation';
+    body = 'Could not check this right now. Try again in a moment.';
   }
 
   const run = async (fn, okMsg) => {
@@ -207,7 +207,7 @@ export default function BuilderAttestationPanel({
             className="td-btn td-btn--primary text-xs sm:text-sm"
             data-testid="builder-attest-cta"
           >
-            {busy ? 'Attesting…' : 'Attest as builder'}
+            {busy ? 'Signing…' : 'Confirm as builder'}
           </button>
         ) : null}
         {canRevoke ? (

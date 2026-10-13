@@ -1964,39 +1964,34 @@ export default function DeployToken() {
         <TradeDeployShell width="wide">
             <TradeDeployHero
               eyebrow="Launch"
-              title="Deploy Your Token"
-              subtitle="Create and deploy your own ERC-20 token with security features and clear launch steps."
-              actions={
-                <>
-                <TradeDeployButton as={Link} to="/project-pack" variant="ghost">
+              title="Deploy token"
+              subtitle="Create a token on this network."
+            >
+              <p className="mt-3 text-sm" style={{ color: 'var(--text-tertiary)' }}>
+                Need an NFT too?{' '}
+                <Link to="/project-pack" className="underline" style={{ color: 'var(--finance-primary)' }}>
                   Project pack
-                </TradeDeployButton>
-                <TradeDeployButton as={Link} to="/linked-project" variant="ghost">
-                  Manage links
-                </TradeDeployButton>
-                <TradeDeployButton
+                </Link>
+                {' · '}
+                <button
                   type="button"
-                  variant="ghost"
+                  className="underline"
+                  style={{ color: 'var(--finance-primary)' }}
                   onClick={() => setShowPreview(!showPreview)}
-                  style={{
-                    backgroundColor: showPreview ? 'var(--bg-secondary)' : undefined,
-                  }}
                 >
-                  {showPreview ? 'Hide' : 'Show'} Preview
-                </TradeDeployButton>
-                <TradeDeployButton
+                  {showPreview ? 'Hide preview' : 'Preview'}
+                </button>
+                {' · '}
+                <button
                   type="button"
-                  variant="ghost"
+                  className="underline"
+                  style={{ color: 'var(--finance-primary)' }}
                   onClick={() => setShowHistory(!showHistory)}
-                  style={{
-                    backgroundColor: showHistory ? 'var(--bg-secondary)' : undefined,
-                  }}
                 >
-                  Deployment History
-                </TradeDeployButton>
-                </>
-              }
-            />
+                  History
+                </button>
+              </p>
+            </TradeDeployHero>
 
             {/* Token Preview */}
             {showPreview && (
@@ -2681,13 +2676,9 @@ export default function DeployToken() {
                 {isBoingNativeDeployPath && (
                   <>
                     <p className="text-sm mb-3 rounded-lg border px-3 py-2" style={{ borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}>
-                      <strong style={{ color: 'var(--text-primary)' }}>Native deploy:</strong> the chain uses your{' '}
-                      <strong>name</strong> and <strong>symbol</strong> from this wizard. Logo (if you uploaded one) and token
-                      JSON are stored on the network; that document plus your <strong>security feature</strong> choices are
-                      committed in <code className="text-xs">description_hash</code> (unless you override hex in Advanced).
-                      The default reference fungible bytecode is minimal—custom bytecode is required
-                      for on-chain enforcement of those policies; Boing VM now exposes block height and timestamp opcodes for
-                      time/block-gated rules.
+                      We&apos;ll publish your token with the <strong style={{ color: 'var(--text-primary)' }}>name</strong> and{' '}
+                      <strong style={{ color: 'var(--text-primary)' }}>symbol</strong> above. Express will ask you to approve.
+                      Open Advanced only if you need overrides.
                     </p>
                     {!nativeWizardGate.canSubmit && (
                       <div
@@ -2699,9 +2690,8 @@ export default function DeployToken() {
                           color: 'var(--text-secondary)',
                         }}
                       >
-                        <strong style={{ color: 'var(--text-primary)' }}>Deploy not ready:</strong>{' '}
-                        {nativeWizardGate.blockedReason ||
-                          'Configure reference fungible bytecode (build env or Advanced) or complete QA steps below.'}
+                        <strong style={{ color: 'var(--text-primary)' }}>Deployment isn&apos;t ready on this build yet.</strong>{' '}
+                        Try again later, or open Advanced if an operator asked you to paste a template.
                       </div>
                     )}
                     <NativeBoingTokenDeploySection

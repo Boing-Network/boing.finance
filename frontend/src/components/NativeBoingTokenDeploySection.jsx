@@ -1,5 +1,4 @@
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { isBoingTestnetChainId, REFERENCE_FUNGIBLE_TEMPLATE_VERSION } from 'boing-sdk';
 import { useWallet } from '../contexts/WalletContext';
@@ -277,28 +276,17 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
       {!embedInWizard && (
         <>
           <h2 className="text-lg font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
-            Deploy on Boing testnet (native token)
+            Deploy on Boing
           </h2>
           <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-            Enter <strong>name</strong> and <strong>symbol</strong> in the main form above, then <strong>Deploy token</strong>.
-            Boing Express will open for approval—same rhythm as EVM deploy, with a Boing wallet instead of MetaMask. This is
-            a native VM contract with QA metadata, not an ERC-20.{' '}
-            <Link to="/boing/native-vm" className="text-green-400 underline text-sm">
-              Native VM tools
-            </Link>{' '}
-            for low-level bytecode and other transaction kinds.
+            Use the name and symbol from the form above, then deploy. Express will ask you to approve.
           </p>
         </>
       )}
 
       {embedInWizard && (
         <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-          <strong style={{ color: 'var(--text-primary)' }}>Boing native deploy:</strong> uses the same name and symbol as
-          this wizard. Logo and token JSON are uploaded, then committed as <code className="text-[10px]">description_hash</code>.
-          Boing Express will ask you to approve the deploy transaction (not an ERC-20 factory).{' '}
-          <Link to="/boing/native-vm" className="text-green-400 underline text-sm">
-            Native VM tools
-          </Link>
+          Uses the same name and symbol as this wizard. Express will ask you to approve the deploy.
         </p>
       )}
 

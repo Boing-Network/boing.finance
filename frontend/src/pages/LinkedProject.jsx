@@ -32,16 +32,17 @@ export default function LinkedProject() {
         <title>Manage links | boing.finance</title>
         <meta
           name="description"
-          content="Link or unlink NFT collections and tokens as companions. Prefer Project pack to create both in one flow."
+          content="Connect an NFT collection to its project token, or disconnect a pair. Prefer Project pack to create both in one flow."
         />
       </Helmet>
       <TradeDeployShell width="medium">
         <TradeDeployHero
           eyebrow="Launch"
-          title="Manage links"
+          title="Link collection & token"
           subtitle={
             <>
-              Link an existing collection and token as companions, or unlink a pair. Starting fresh? Use{' '}
+              Connect an NFT collection to its project token so apps treat them as one project — or disconnect a pair.
+              Starting fresh? Use{' '}
               <Link to="/project-pack" className="underline" style={{ color: 'var(--finance-primary)' }}>
                 Project pack
               </Link>
@@ -53,24 +54,18 @@ export default function LinkedProject() {
         <StatusBanner
           className="mb-6"
           variant={ready ? 'success' : 'warn'}
-          title={ready ? 'Companions ready to link' : 'Companions not available yet'}
+          title={ready ? 'Ready to link' : 'Linking not available yet'}
           actions={
-            <>
+            ready ? null : (
               <TradeDeployButton as={Link} to="/project-pack" variant="primary">
-                Project pack
+                Try Project pack
               </TradeDeployButton>
-              <TradeDeployButton as={Link} to="/create-nft" variant="ghost">
-                Create NFT
-              </TradeDeployButton>
-              <TradeDeployButton as={Link} to="/deploy-token" variant="ghost">
-                Deploy token
-              </TradeDeployButton>
-            </>
+            )
           }
         >
           {ready
-            ? 'You can claim each side, register companions, or unlink. Links are many-to-many and can change later.'
-            : 'Companion linking is not available on this network yet.'}
+            ? 'Paste your collection and token ids below, then link. Next step after linking: add a pool if you want trading.'
+            : 'This network is not set up for linking yet. Create both assets with Project pack when it is available.'}
         </StatusBanner>
 
         <LinkedNftTokenPanel
@@ -79,7 +74,7 @@ export default function LinkedProject() {
           showHubLink={false}
           hideStatus
           hideIntro
-          title="Link or unlink companions"
+          title="Your collection and token"
         />
       </TradeDeployShell>
     </>
