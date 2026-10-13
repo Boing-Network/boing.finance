@@ -37,8 +37,8 @@ export default function BoingStaking() {
               <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Planned benefits</h3>
               <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
                 <li>• Earn BOING rewards for staking your NFTs</li>
-                <li>• Unlock Pro Analytics features (advanced charts, insights)</li>
-                <li>• Governance weight multiplier for staked NFT holders</li>
+                <li>• Extra Analytics charts for stakers</li>
+                <li>• Extra weight in governance when voting goes live</li>
               </ul>
             </PageCard>
           </>

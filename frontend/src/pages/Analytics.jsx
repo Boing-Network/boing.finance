@@ -115,7 +115,12 @@ export default function Analytics() {
     const stored = getStored(STORAGE_KEYS.timeRange, '24h');
     return isValidAnalyticsRange(stored) ? stored : '24h';
   });
-  const [activeSection, setActiveSection] = useState(() => getStored(STORAGE_KEYS.section, 'intelligence'));
+  const [activeSection, setActiveSection] = useState(() => {
+    const stored = getStored(STORAGE_KEYS.section, 'overview');
+    // Prefer Overview for average users; keep Research available as a tab.
+    if (stored === 'intelligence') return 'overview';
+    return ['overview', 'market', 'trending', 'intelligence'].includes(stored) ? stored : 'overview';
+  });
   const [selectedNetwork, setSelectedNetwork] = useState('all');
 
   const isIntelligence = activeSection === 'intelligence';
@@ -349,7 +354,7 @@ export default function Analytics() {
     enabled: isIntelligence || isMarket,
   });
 
-  const sections = ['intelligence', 'overview', 'market', 'trending'];
+  const sections = ['overview', 'market', 'trending', 'intelligence'];
   const handleSectionKeyDown = (e) => {
     const i = sections.indexOf(activeSection);
     if (e.key === 'ArrowRight' && i < sections.length - 1) {
@@ -401,10 +406,10 @@ export default function Analytics() {
     <>
       <Helmet>
         <title>Analytics | boing.finance</title>
-        <meta name="description" content="Live onchain intelligence dashboard: liquidity migration, narrative tracking, smart-flow signals, and actionable crypto research across Solana, Base, L2s, and EVM." />
-        <meta name="keywords" content="onchain intelligence, DeFi research, smart money, liquidity migration, crypto analytics, boing finance" />
+        <meta name="description" content="Market volume, trending tokens, and network activity on boing.finance." />
+        <meta name="keywords" content="DeFi analytics, market volume, trending tokens, crypto analytics, boing finance" />
         <meta property="og:title" content="Analytics | boing.finance" />
-        <meta property="og:description" content="Multi-chain research dashboard with actionable trading insights from live onchain data." />
+        <meta property="og:description" content="Market volume, trending tokens, and network activity on EVM and Solana." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/analytics" />
         <meta name="twitter:card" content="summary_large_image" />
@@ -481,14 +486,14 @@ export default function Analytics() {
 
             {/* Unified Toolbar - Sections + Time Range */}
             <div
-              className="rounded-2xl shadow-xl p-4 sm:p-5 mb-6"
+              className="rounded-2xl shadow-xl p-3 sm:p-5 mb-6"
               style={{
                 backgroundColor: 'var(--bg-card)',
                 border: '1px solid var(--border-color)',
               }}
             >
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex flex-wrap gap-2" role="tablist" aria-label="Analytics sections" onKeyDown={handleSectionKeyDown}>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2" role="tablist" aria-label="Analytics sections" onKeyDown={handleSectionKeyDown}>
                   {sections.map((section) => (
                     <button
                       key={section}
@@ -499,7 +504,7 @@ export default function Analytics() {
                       id={`tab-${section}`}
                       tabIndex={activeSection === section ? 0 : -1}
                       onClick={() => setActiveSection(section)}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                         activeSection === section
                           ? 'bg-blue-500 text-white'
                           : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -509,12 +514,12 @@ export default function Analytics() {
                     </button>
                   ))}
                 </div>
-                <div className="flex flex-wrap gap-2 items-center">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center">
                   {timeRanges.map((range) => (
                     <button
                       key={range.id}
                       onClick={() => setTimeRange(range.id)}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                         timeRange === range.id
                           ? 'bg-blue-500 text-white'
                           : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -523,7 +528,7 @@ export default function Analytics() {
                       {range.shortLabel}
                     </button>
                   ))}
-                  <MetricTooltip content="Time range filters volume charts, network stats, trending pairs, platform activity, and research briefs. Market cap uses live CoinGecko data.">
+                  <MetricTooltip content="Time range filters volume charts, network stats, and trending pairs. Market cap uses live CoinGecko data.">
                     <span className="text-gray-500 cursor-help ml-1 text-sm">ⓘ</span>
                   </MetricTooltip>
                 </div>
@@ -532,7 +537,7 @@ export default function Analytics() {
 
             <LiveMarketPulse />
 
-            <ResearchBriefBanner page="analytics" />
+            {activeSection === 'intelligence' && <ResearchBriefBanner page="analytics" />}
 
             {/* Analytics Content - section-level loading; no full-page block */}
             {analyticsError ? (
@@ -733,14 +738,11 @@ export default function Analytics() {
                   ) : (
                     <div className="text-center py-12">
                       <div className="bg-gray-700/50 rounded-lg p-6 max-w-md mx-auto">
-                        <p className="text-gray-300 mb-2">Trading Pairs Data Unavailable</p>
+                        <p className="text-gray-300 mb-2">No top pairs yet</p>
                         <p className="text-sm text-gray-400 mb-4">
-                          {analytics && Object.keys(analytics).length > 0 
-                            ? 'Top trading pairs are being fetched from the backend. If this persists, the backend may not have collected data yet or The Graph API may be rate-limited.'
-                            : 'Top trading pairs data requires backend API integration. The backend endpoint is available but may need time to collect initial data.'}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          Data source: GeckoTerminal, DefiLlama
+                          {analytics && Object.keys(analytics).length > 0
+                            ? 'Pairs are still loading. Try Refresh, or check back shortly.'
+                            : 'Pair volume will show here when market data is available. Try Refresh.'}
                         </p>
                       </div>
                     </div>
@@ -754,7 +756,7 @@ export default function Analytics() {
                     className="rounded-2xl shadow-xl p-6 mb-6"
                     style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
                   >
-                    <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">📰 Crypto & DeFi News</h2>
+                    <h2 className="text-xl font-bold text-white mb-4">Crypto & DeFi news</h2>
                     <div className="grid gap-3 sm:grid-cols-2">
                       {cryptoNews.articles.slice(0, 6).map((article, idx) => (
                         <a
@@ -835,8 +837,7 @@ export default function Analytics() {
                         <FearGreedPanel />
                         <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-6">
                           <p className="text-sm text-blue-300">
-                            <span className="font-semibold">Note:</span> Market data shows current global cryptocurrency statistics. 
-                            Time range selection affects the Overview chart visualization but market statistics reflect real-time data from CoinGecko.
+                            Global market stats update live. The time range above mainly affects Overview charts.
                           </p>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

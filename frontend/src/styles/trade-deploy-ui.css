@@ -476,6 +476,11 @@
   .td-shell {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
+    padding-top: 1.1rem;
+  }
+
+  .td-hero {
+    margin-bottom: 1.15rem;
   }
 
   .td-card {

@@ -27,7 +27,7 @@ const createNavigation = () => {
   deployment,
   tradeAndDeploy: Object.freeze([...trading, ...deployment]),
   analytics: Object.freeze([
-    Object.freeze({ name: 'Analytics', href: '/analytics?section=intelligence', icon: 'intelligence', description: 'Market volume, trends, and network activity', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Analytics', href: '/analytics', icon: 'intelligence', description: 'Market volume, trends, and network activity', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Portfolio', href: '/portfolio', icon: 'portfolio', description: 'Balances, pools, and NFTs for your wallet', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Activity', href: '/activity', icon: 'wallet-flow', description: 'Your swaps, liquidity, and bridge history', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Watchlist', href: '/watchlist', icon: 'watchlist', description: 'Track tokens you care about', isAvailable: true, comingSoon: false, testnetOnly: false })

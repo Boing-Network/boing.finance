@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import TokenWatchlist from '../components/TokenWatchlist';
 import LiveMarketPulse from '../components/LiveMarketPulse';
-import ResearchBriefBanner from '../components/research/ResearchBriefBanner';
 
 export default function Watchlist() {
   return (
@@ -23,8 +22,6 @@ export default function Watchlist() {
                 Track tokens you care about — prices and 24h change
               </p>
             </div>
-
-            <ResearchBriefBanner page="watchlist" compact />
 
             <LiveMarketPulse />
 

@@ -32,7 +32,6 @@ import {
   computePeriodChange,
 } from '../utils/portfolioInsights';
 import LiveMarketPulse from '../components/LiveMarketPulse';
-import ResearchBriefBanner from '../components/research/ResearchBriefBanner';
 import PortfolioResearchPanel from '../components/research/PortfolioResearchPanel';
 import { computePortfolioResearchInsights } from '../utils/researchIntelligence';
 import PortfolioTokenBalancesView from '../components/PortfolioTokenBalancesView';
@@ -582,19 +581,12 @@ export default function Portfolio() {
             {/* Info Banner - Show when blockchain services not available */}
             {blockchainError && !blockchainInitialized && (
               <div className="bg-yellow-900/30 border border-yellow-500/50 rounded-xl p-4 mb-6">
-                <div className="flex items-start space-x-3">
-                  <span className="text-2xl">ℹ️</span>
-                  <div className="flex-1">
-                    <p className="text-yellow-200 font-medium mb-1">Pool data may be incomplete</p>
-                    <p className="text-yellow-300/80 text-sm">
-                      Some pool positions may be missing on this network. Switch to a supported testnet for fuller pool data.
-                    </p>
-                  </div>
-                </div>
+                <p className="text-yellow-200 font-medium mb-1">Pool data may be incomplete</p>
+                <p className="text-yellow-300/80 text-sm">
+                  Some pool positions may be missing on this network. Switch to a supported testnet for fuller pool data.
+                </p>
               </div>
             )}
-
-            <ResearchBriefBanner page="portfolio" compact />
 
             <LiveMarketPulse />
 
@@ -636,7 +628,7 @@ export default function Portfolio() {
 
             {/* Tabs + Network Filter - Inline */}
             <div
-              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-xl mb-6"
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl mb-6"
               style={{
                 backgroundColor: 'var(--bg-card)',
                 border: '1px solid var(--border-color)',
@@ -663,10 +655,10 @@ export default function Portfolio() {
                 }}
               >
                 {[
-                  { id: 'overview', label: 'Overview', icon: '📊' },
-                  { id: 'tokens', label: 'Tokens', icon: '🪙' },
-                  { id: 'pools', label: 'Pools', icon: '🏊' },
-                  { id: 'nfts', label: 'Collectibles', icon: '🖼️' }
+                  { id: 'overview', label: 'Overview' },
+                  { id: 'tokens', label: 'Tokens' },
+                  { id: 'pools', label: 'Pools' },
+                  { id: 'nfts', label: 'Collectibles' }
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -676,7 +668,7 @@ export default function Portfolio() {
                     id={`portfolio-tab-${tab.id}`}
                     tabIndex={activeTab === tab.id ? 0 : -1}
                     onClick={() => { setActiveTab(tab.id); setSearchParams(tab.id === 'overview' ? {} : { tab: tab.id }); }}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                       activeTab === tab.id ? 'shadow-md' : 'hover:opacity-80'
                     }`}
                     style={
@@ -685,7 +677,6 @@ export default function Portfolio() {
                         : { color: 'var(--text-secondary)' }
                     }
                   >
-                    <span className="mr-1.5" aria-hidden>{tab.icon}</span>
                     {tab.label}
                   </button>
                 ))}
@@ -1267,8 +1258,8 @@ export default function Portfolio() {
                 )}
 
                 <div className="flex flex-wrap gap-4 text-sm pt-2">
-                  <Link to="/activity" className="text-cyan-400 hover:text-cyan-300">Trading activity →</Link>
-                  <Link to="/analytics?section=intelligence" className="text-cyan-400 hover:text-cyan-300">Onchain intelligence →</Link>
+                  <Link to="/activity" className="text-cyan-400 hover:text-cyan-300">Activity →</Link>
+                  <Link to="/analytics" className="text-cyan-400 hover:text-cyan-300">Analytics →</Link>
                 </div>
 
               </div>

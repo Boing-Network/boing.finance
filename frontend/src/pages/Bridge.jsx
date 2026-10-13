@@ -296,9 +296,9 @@ export default function Bridge() {
         <title>Bridge | boing.finance — Aggregator-powered cross-chain transfers</title>
         <meta
           name="description"
-          content="Bridge EVM tokens through LI.FI routes in boing.finance. 0.5% platform fee. No Boing-held bridge inventory."
+          content="Move tokens between EVM networks on boing.finance. A small platform fee applies."
         />
-        <meta name="keywords" content="cross-chain bridge, LI.FI, token bridge, boing finance, EVM" />
+        <meta name="keywords" content="cross-chain bridge, token bridge, boing finance, EVM" />
         <meta property="og:title" content="Bridge | boing.finance" />
         <meta
           property="og:description"

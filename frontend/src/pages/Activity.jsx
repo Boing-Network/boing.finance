@@ -20,7 +20,6 @@ import { collectSwapCoinIds, computeTradingPnl, formatUsd } from '../utils/tradi
 import { downloadCSV } from '../utils/exportData';
 import LiveMarketPulse from '../components/LiveMarketPulse';
 import LiveDeploymentsPanel from '../components/LiveDeploymentsPanel';
-import ResearchBriefBanner from '../components/research/ResearchBriefBanner';
 import WalletBehaviorPanel from '../components/research/WalletBehaviorPanel';
 import toast from 'react-hot-toast';
 import TransactionHistoryList from '../components/TransactionHistoryList';
@@ -179,8 +178,6 @@ export default function Activity() {
               </button>
             </div>
           </div>
-
-          <ResearchBriefBanner page="activity" compact />
 
           <LiveDeploymentsPanel />
           <LiveMarketPulse />
@@ -346,8 +343,8 @@ export default function Activity() {
           </div>
 
           <div className="flex flex-wrap gap-4 mt-6 text-sm">
-            <Link to="/portfolio" className="text-cyan-400 hover:text-cyan-300">View portfolio →</Link>
-            <Link to="/analytics?section=intelligence" className="text-cyan-400 hover:text-cyan-300">Analytics →</Link>
+            <Link to="/portfolio" className="text-cyan-400 hover:text-cyan-300">Portfolio →</Link>
+            <Link to="/analytics" className="text-cyan-400 hover:text-cyan-300">Analytics →</Link>
             <Link to="/watchlist" className="text-cyan-400 hover:text-cyan-300">Watchlist →</Link>
           </div>
         </div>
