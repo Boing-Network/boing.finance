@@ -16,7 +16,7 @@ export default function BoingStaking() {
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         <PageHeader
           title="NFT Staking"
-          subtitle="Stake Boing NFTs for rewards and analytics unlocks — coming with live staking contracts."
+          subtitle="Coming soon — stake Boing NFTs for rewards when staking goes live."
         />
 
         <div className="mb-6 rounded-lg border border-amber-500/30 bg-amber-900/20 px-4 py-3 text-sm text-amber-100">

@@ -7,7 +7,7 @@ import { useNetwork } from '../../hooks/useNetwork';
 import { createProposal } from '../../services/governanceApi';
 
 export default function GovernanceVote() {
-  const { account } = useWalletConnection();
+  const { account, connectWallet } = useWalletConnection();
   const { chainId } = useNetwork();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -37,7 +37,7 @@ export default function GovernanceVote() {
         <meta name="description" content="Vote on proposals and create your own. Participate in boing.finance DAO governance." />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <PageHeader title="Governance Vote" subtitle="Submit proposals to the off-chain registry. On-chain BOING thresholds are not enforced yet." />
+        <PageHeader title="Create a proposal" subtitle="Submit a proposal for community signaling. On-chain voting thresholds are not enforced yet." />
 
         <div className="mb-6 rounded-lg border border-amber-500/30 bg-amber-900/20 px-4 py-3 text-sm text-amber-100">
           <strong>Signaling only:</strong> Creating a proposal does not check a 10,000 BOING balance on-chain. Submissions go to the governance API for review.
@@ -77,9 +77,17 @@ export default function GovernanceVote() {
         ) : (
           <PageCard className="text-center py-12">
             <div className="text-5xl mb-4">🔐</div>
-            <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Connect Wallet to Vote</h3>
-            <p className="text-sm mb-6 max-w-md mx-auto" style={{ color: 'var(--text-secondary)' }}>Connect your wallet to submit proposals to the off-chain registry. On-chain voting power is not live yet.</p>
-            <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Use the Connect Wallet button in the navigation bar.</p>
+            <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Connect wallet to submit</h3>
+            <p className="text-sm mb-6 max-w-md mx-auto" style={{ color: 'var(--text-secondary)' }}>
+              Connect your wallet to submit a proposal for community signaling.
+            </p>
+            <button
+              type="button"
+              onClick={() => connectWallet?.()}
+              className="px-4 py-2 rounded-lg font-medium bg-cyan-500 hover:bg-cyan-600 text-white transition-colors"
+            >
+              Connect wallet
+            </button>
           </PageCard>
         )}
       </div>

@@ -112,7 +112,7 @@ const Docs = () => {
               boing.finance Documentation
             </h1>
             <p className="text-lg sm:text-xl max-w-3xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
-              Complete guide to the boing.finance decentralized exchange platform - your gateway to cross-chain trading
+              How to swap, bridge, add liquidity, and launch tokens or NFTs
             </p>
           </div>
 

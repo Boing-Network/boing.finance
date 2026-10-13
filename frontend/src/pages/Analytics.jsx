@@ -400,10 +400,10 @@ export default function Analytics() {
   return (
     <>
       <Helmet>
-        <title>Onchain Intelligence | boing.finance — Research & Trading Analytics</title>
+        <title>Analytics | boing.finance</title>
         <meta name="description" content="Live onchain intelligence dashboard: liquidity migration, narrative tracking, smart-flow signals, and actionable crypto research across Solana, Base, L2s, and EVM." />
         <meta name="keywords" content="onchain intelligence, DeFi research, smart money, liquidity migration, crypto analytics, boing finance" />
-        <meta property="og:title" content="Onchain Intelligence | boing.finance" />
+        <meta property="og:title" content="Analytics | boing.finance" />
         <meta property="og:description" content="Multi-chain research dashboard with actionable trading insights from live onchain data." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/analytics" />
@@ -419,10 +419,10 @@ export default function Analytics() {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                    Onchain Intelligence
+                    Analytics
                   </h1>
                   <p className="text-sm sm:text-base mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-                    Research dashboard · liquidity, narratives, smart flow & actionable briefs
+                    Market volume, trending tokens, and network activity
                   </p>
                   {dataUpdatedAt > 0 && (
                     <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
@@ -470,9 +470,9 @@ export default function Analytics() {
                         exportAnalytics(analyticsData, 'json');
                         toast.success('Analytics data exported as JSON!');
                       }}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+                      className="px-4 py-2 border border-gray-600 hover:bg-gray-700/60 text-gray-200 rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
                     >
-                      <span>📥</span> Export JSON
+                      Export
                     </button>
                   )}
                 </div>
@@ -505,7 +505,7 @@ export default function Analytics() {
                           : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                       }`}
                     >
-                      {section === 'intelligence' ? 'Intelligence' : section.charAt(0).toUpperCase() + section.slice(1)}
+                      {section === 'intelligence' ? 'Research' : section.charAt(0).toUpperCase() + section.slice(1)}
                     </button>
                   ))}
                 </div>
@@ -790,18 +790,20 @@ export default function Analytics() {
                     </div>
                   </div>
                 )}
-                <div className="interactive-card bg-gradient-to-r from-purple-900/40 to-blue-900/40 rounded-2xl p-6 border border-purple-500/30 mb-6">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">✨ Pro Analytics <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-purple-500/30 text-purple-300">NFT Holders</span></h2>
-                      <p className="text-sm text-gray-300 mb-2">Unlock advanced analytics when you hold Boing NFTs.</p>
-                      <a href="/create-nft" className="inline-block px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium">Learn more →</a>
-                    </div>
-                  </div>
-                </div>
+                <details className="mb-6 rounded-xl border border-purple-500/25 px-4 py-3" style={{ backgroundColor: 'rgba(88,28,135,0.15)' }}>
+                  <summary className="cursor-pointer text-sm font-medium text-purple-200">
+                    Extra charts for Boing NFT holders
+                  </summary>
+                  <p className="text-sm text-gray-300 mt-2 mb-2">
+                    Some advanced charts unlock when you hold Boing NFTs.
+                  </p>
+                  <a href="/boing/staking" className="text-sm underline text-cyan-400 hover:text-cyan-300">
+                    NFT staking (coming soon)
+                  </a>
+                </details>
                 {priceInsights && priceInsights.length > 0 && (
                   <div className="rounded-2xl shadow-xl p-6" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                    <h2 className="text-2xl font-bold text-white mb-4">Price Insights (7-Day Forecast)</h2>
+                    <h2 className="text-2xl font-bold text-white mb-4">Price trends (estimate)</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {priceInsights.map((insight) => (
                         <div key={insight.symbol} className="bg-gray-700 rounded-xl p-4 border border-gray-600">

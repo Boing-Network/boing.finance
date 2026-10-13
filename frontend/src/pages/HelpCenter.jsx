@@ -94,21 +94,21 @@ const HelpCenter = () => {
           id: 'project-pack',
           title: 'Launch a Project Pack',
           content:
-            'Guided flow: create an NFT collection and a token, then link them as companions. Start at /project-pack. Manage existing pairs at /linked-project.',
+            'Guided flow: create an NFT collection and a token, then connect them so apps show them as one project. Start at /project-pack. Manage existing pairs at /linked-project.',
           tags: ['nft', 'token', 'companions', 'project pack', 'linked', 'boing']
         },
         {
           id: 'linked-project',
           title: 'Link an NFT Collection and Token',
           content:
-            'Link or unlink companions for collections and tokens you already created. Prefer Project pack (/project-pack) to create both together. Manage links at /linked-project.',
+            'Connect or disconnect a collection and project token you already created. Prefer Project pack (/project-pack) to create both together. Manage links at /linked-project.',
           tags: ['nft', 'token', 'linked', 'companions', 'claim', 'boing']
         },
         {
           id: 'builder-attestation',
-          title: 'Attest as Builder',
+          title: "Show you're the builder",
           content:
-            'After companions are linked, attest as builder on-chain with Boing Express. The app shows Builder attested when the live registry has an active record. Available on Project pack success and Manage links. Companions remain the project link; attestation is a builder signal.',
+            'Optional: after your collection and token are linked, mark yourself as the builder with Boing Express (Project pack success or Manage links).',
           tags: ['builder', 'attestation', 'companions', 'project', 'on-chain', 'boing']
         }
       ]
@@ -216,17 +216,12 @@ const HelpCenter = () => {
                 Help Center
               </h1>
               <p className="text-xl mb-6" style={{ color: 'var(--text-secondary)' }}>
-                Find answers to your questions and get support for boing.finance
+                Search for answers, or ask the assistant
               </p>
-              <div className="rounded-lg p-4 mb-6 border" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
-                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                  <strong>Note:</strong> boing.finance is currently in early development phase. While our platform is fully functional, we are a solo-founder project seeking funding for expansion and feature development.
-                </p>
-              </div>
             </div>
 
             {/* Search Bar */}
-            <div className="rounded-lg p-6 mb-8 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+            <div className="rounded-lg p-6 mb-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
               <div className="relative max-w-2xl mx-auto">
                 <label htmlFor="help-center-search" className="sr-only">Search for help articles</label>
                 <input
@@ -245,40 +240,22 @@ const HelpCenter = () => {
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="flex flex-wrap justify-center items-center gap-4 mb-8">
               <button
+                type="button"
                 onClick={() => setAiChatOpen(true)}
-                className="p-4 rounded-lg transition-colors text-center border bg-cyan-600/20 hover:bg-cyan-600/30 border-cyan-500/50"
-                style={{ color: 'var(--text-primary)' }}
+                className="px-4 py-2 rounded-lg font-medium bg-cyan-600 hover:bg-cyan-500 text-white"
               >
-                <div className="text-2xl mb-2">🤖</div>
-                <div className="font-semibold">Ask AI Assistant</div>
-                <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Get help with swaps, liquidity, bridge</div>
+                Ask AI assistant
               </button>
-              <a
-                href="mailto:support@boing.finance"
-                className="hover:bg-gray-600 p-4 rounded-lg transition-colors text-center border" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
-              >
-                <div className="text-2xl mb-2">📧</div>
-                <div className="font-semibold">Email Support</div>
-                <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Primary support channel</div>
+              <a href="mailto:support@boing.finance" className="text-sm underline" style={{ color: 'var(--finance-primary)' }}>
+                Email support
               </a>
-              <a
-                href="/bug-report"
-                className="bg-red-600 hover:bg-red-700 p-4 rounded-lg transition-colors text-center" style={{ color: 'var(--text-primary)' }}
-              >
-                <div className="text-2xl mb-2">🐛</div>
-                <div className="font-semibold">Bug Report</div>
-                <div className="text-sm text-red-200">Report issues</div>
+              <a href="/bug-report" className="text-sm underline" style={{ color: 'var(--text-secondary)' }}>
+                Bug report
               </a>
-              <a
-                href="/contact-us"
-                className="bg-blue-600 hover:bg-blue-700 p-4 rounded-lg transition-colors text-center" style={{ color: 'var(--text-primary)' }}
-              >
-                <div className="text-2xl mb-2">💬</div>
-                <div className="font-semibold">Contact Us</div>
-                <div className="text-sm text-blue-200">General inquiries</div>
+              <a href="/contact-us" className="text-sm underline" style={{ color: 'var(--text-secondary)' }}>
+                Contact
               </a>
             </div>
 

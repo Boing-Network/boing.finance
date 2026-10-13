@@ -153,7 +153,7 @@ const BugReport = () => {
                 Bug Report
               </h1>
               <p className="text-xl text-theme-secondary mb-6">
-                Help us improve boing.finance by reporting bugs and issues
+                Tell us what went wrong — the form is the main step
               </p>
               <div className="rounded-lg p-4 mb-6 border" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                 <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>

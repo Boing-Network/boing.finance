@@ -434,7 +434,7 @@ export default function Portfolio() {
               Portfolio
             </h1>
             <p className="text-xl mb-8" style={{ color: 'var(--text-secondary)' }}>
-              Connect your wallet to view your portfolio on EVM and Solana.
+              Connect your wallet to see balances, pools, and NFTs.
             </p>
             <div
               className="rounded-2xl shadow-xl p-8 max-w-md mx-auto"
@@ -443,14 +443,13 @@ export default function Portfolio() {
                 border: '1px solid var(--border-color)',
               }}
             >
-              <p className="text-gray-400 mb-4">Connect your wallet to view balances, liquidity positions, and performance.</p>
+              <p className="text-gray-400 mb-4">One wallet connection unlocks your holdings on this network.</p>
               <button
                 onClick={() => connectWallet()}
                 className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-6 rounded-lg transition-colors w-full"
               >
-                Connect Wallet
+                Connect wallet
               </button>
-              <p className="text-gray-500 text-sm mt-4">Or use the Connect Wallet button in the navigation bar</p>
             </div>
           </div>
         </div>
@@ -461,8 +460,8 @@ export default function Portfolio() {
   return (
     <>
       <Helmet>
-        <title>Exposure Intelligence | boing.finance — Portfolio Research</title>
-        <meta name="description" content="Multi-chain portfolio research: allocation, movers, performance drift, and actionable exposure decisions from live onchain balances." />
+        <title>Portfolio | boing.finance</title>
+        <meta name="description" content="Balances, pools, and NFTs for your connected wallet on EVM, Solana, and Boing." />
         <meta name="keywords" content="DeFi portfolio, token balances, boing finance, EVM, Solana, portfolio tracking" />
         <meta property="og:title" content="Portfolio | boing.finance" />
         <meta property="og:description" content="Track balances and performance on EVM and Solana." />
@@ -480,13 +479,13 @@ export default function Portfolio() {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                    Exposure Intelligence
+                    Portfolio
                   </h1>
                   <p className="text-sm sm:text-base mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-                    Holdings, allocation & research-driven risk context
+                    Balances, pools, and NFTs for this wallet
                   </p>
                 </div>
-                <div className="flex-1 flex flex-wrap justify-center sm:justify-end gap-2">
+                <div className="flex-1 flex flex-wrap justify-center sm:justify-end gap-2 items-start">
                   <button
                     onClick={() => {
                       refetchPools();
@@ -504,10 +503,15 @@ export default function Portfolio() {
                     Refresh
                   </button>
                   {(tokenBalances?.balances?.length > 0 || filteredUserPools?.length > 0) && (
-                    <div className="flex flex-wrap gap-2">
+                    <details className="relative">
+                      <summary className="cursor-pointer list-none px-4 py-2 border border-gray-600 hover:bg-gray-700/60 text-gray-200 rounded-lg text-sm font-medium">
+                        Export & share
+                      </summary>
+                      <div className="absolute right-0 mt-2 z-20 flex flex-col gap-1 min-w-[10rem] rounded-lg border border-gray-600 p-2 shadow-xl" style={{ backgroundColor: 'var(--bg-card)' }}>
                       {tokenBalances?.balances?.length > 0 && (
                         <>
                       <button
+                        type="button"
                         onClick={() => {
                           const portfolioData = tokenBalances.balances.map(token => ({
                             name: token.name || '',
@@ -521,11 +525,12 @@ export default function Portfolio() {
                           exportPortfolio(portfolioData, 'csv');
                           toast.success('Portfolio exported as CSV!');
                         }}
-                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+                        className="px-3 py-2 text-left text-sm text-gray-200 hover:bg-gray-700/60 rounded"
                       >
-                        <span>📥</span> Export CSV
+                        Export CSV
                       </button>
                       <button
+                        type="button"
                         onClick={() => {
                           const portfolioData = tokenBalances.balances.map(token => ({
                             name: token.name || '',
@@ -539,13 +544,14 @@ export default function Portfolio() {
                           exportPortfolio(portfolioData, 'json');
                           toast.success('Portfolio exported as JSON!');
                         }}
-                        className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+                        className="px-3 py-2 text-left text-sm text-gray-200 hover:bg-gray-700/60 rounded"
                       >
-                        <span>📥</span> Export JSON
+                        Export JSON
                       </button>
                         </>
                       )}
                       <button
+                        type="button"
                         onClick={() => {
                           exportPortfolioPDF({
                             totalValue: portfolioSummary?.totalValue || '0',
@@ -555,20 +561,19 @@ export default function Portfolio() {
                           });
                           toast.success('Portfolio exported as PDF!');
                         }}
-                        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+                        className="px-3 py-2 text-left text-sm text-gray-200 hover:bg-gray-700/60 rounded"
                       >
-                        <span>📄</span> Export PDF
+                        Export PDF
                       </button>
                       <button
+                        type="button"
                         onClick={() => setShowShareModal(true)}
-                        className="px-4 py-2 bg-finance-purple hover:opacity-90 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+                        className="px-3 py-2 text-left text-sm text-gray-200 hover:bg-gray-700/60 rounded"
                       >
-                        <span>🔗</span> Share
+                        Share
                       </button>
-                    </div>
-                  )}
-                  {(!tokenBalances?.balances?.length && !filteredUserPools?.length) && (
-                    <span className="text-gray-500 text-sm self-center">Connect wallet & add assets to export</span>
+                      </div>
+                    </details>
                   )}
                 </div>
               </div>
@@ -580,10 +585,9 @@ export default function Portfolio() {
                 <div className="flex items-start space-x-3">
                   <span className="text-2xl">ℹ️</span>
                   <div className="flex-1">
-                    <p className="text-yellow-200 font-medium mb-1">API-Only Mode</p>
+                    <p className="text-yellow-200 font-medium mb-1">Pool data may be incomplete</p>
                     <p className="text-yellow-300/80 text-sm">
-                      DEX contracts not available on this network. Portfolio is showing data from APIs (Alchemy, The Graph, CoinGecko).
-                      For full DEX features, switch to Sepolia testnet.
+                      Some pool positions may be missing on this network. Switch to a supported testnet for fuller pool data.
                     </p>
                   </div>
                 </div>

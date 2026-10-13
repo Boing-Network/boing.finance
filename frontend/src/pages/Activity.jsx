@@ -134,7 +134,7 @@ export default function Activity() {
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="max-w-3xl mx-auto text-center py-16">
           <h1 className="text-3xl font-bold text-white mb-4">Activity</h1>
-          <p className="text-gray-400 mb-6">Connect your wallet to view swaps, liquidity, and bridge transactions with trading insights.</p>
+          <p className="text-gray-400 mb-6">Connect your wallet to see your swaps, liquidity, and bridge history.</p>
           <button
             onClick={() => connectWallet()}
             className="interactive-button bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg"
@@ -149,24 +149,17 @@ export default function Activity() {
   return (
     <>
       <Helmet>
-        <title>Wallet Flow Analysis | boing.finance — Onchain Activity Research</title>
-        <meta name="description" content="Wallet behavioral fingerprint, trading PnL, and onchain flow analysis across EVM chains — verifiable research output from live transaction data." />
+        <title>Activity | boing.finance</title>
+        <meta name="description" content="Your swaps, liquidity, and bridge history on boing.finance." />
       </Helmet>
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-white">Wallet Flow Analysis</h1>
-              <p className="text-gray-400 mt-1">Behavioral patterns, execution PnL & cross-chain activity</p>
+              <h1 className="text-3xl font-bold text-white">Activity</h1>
+              <p className="text-gray-400 mt-1">Your swaps, liquidity, and bridge history</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button
-                onClick={handleExport}
-                disabled={!filtered.length}
-                className="interactive-button px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 rounded-lg text-white text-sm"
-              >
-                Export CSV
-              </button>
               <button
                 onClick={() => { refetchApi(); toast.success('Refreshed'); }}
                 disabled={apiLoading}
@@ -176,6 +169,13 @@ export default function Activity() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
                 Refresh
+              </button>
+              <button
+                onClick={handleExport}
+                disabled={!filtered.length}
+                className="interactive-button px-4 py-2 border border-gray-600 hover:bg-gray-700/60 disabled:opacity-50 rounded-lg text-gray-200 text-sm"
+              >
+                Export CSV
               </button>
             </div>
           </div>
@@ -224,7 +224,7 @@ export default function Activity() {
                     {pnlInsights.topPair ? `${pnlInsights.topPair.pair} (${pnlInsights.topPair.count})` : '—'}
                   </p>
                   {pnlInsights.winRate != null && (
-                    <p className="text-xs text-gray-500 mt-1">{pnlInsights.winRate.toFixed(0)}% favorable exits</p>
+                    <p className="text-xs text-gray-500 mt-1">{pnlInsights.winRate.toFixed(0)}% swaps that look profitable</p>
                   )}
                 </div>
               </div>
@@ -236,7 +236,7 @@ export default function Activity() {
             {[
               { label: 'Total transactions', value: stats.total, color: 'text-cyan-400' },
               { label: 'Swaps', value: stats.byType.swap, color: 'text-blue-400' },
-              { label: 'Liquidity ops', value: stats.byType.liquidity, color: 'text-green-400' },
+              { label: 'Liquidity', value: stats.byType.liquidity, color: 'text-green-400' },
               { label: 'Bridges', value: stats.byType.bridge, color: 'text-purple-400' },
             ].map(({ label, value, color }) => (
               <div key={label} className="rounded-xl p-4 bg-gray-800 border border-gray-700">
@@ -347,7 +347,7 @@ export default function Activity() {
 
           <div className="flex flex-wrap gap-4 mt-6 text-sm">
             <Link to="/portfolio" className="text-cyan-400 hover:text-cyan-300">View portfolio →</Link>
-            <Link to="/analytics?section=intelligence" className="text-cyan-400 hover:text-cyan-300">Onchain intelligence →</Link>
+            <Link to="/analytics?section=intelligence" className="text-cyan-400 hover:text-cyan-300">Analytics →</Link>
             <Link to="/watchlist" className="text-cyan-400 hover:text-cyan-300">Watchlist →</Link>
           </div>
         </div>
