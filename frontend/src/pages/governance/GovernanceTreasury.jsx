@@ -63,8 +63,8 @@ export default function GovernanceTreasury() {
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         <PageHeader
-          title="DAO Treasury"
-          subtitle="Protocol treasury snapshot from the governance API when available."
+          title="Treasury"
+          subtitle="Treasury balances when the API has data — may be empty."
         />
 
         <div className="mb-6 rounded-lg border border-amber-500/30 bg-amber-900/20 px-4 py-3 text-sm text-amber-100">

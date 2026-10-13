@@ -11,7 +11,7 @@ export default function BoingActivities() {
         <meta name="description" content="Community activities, campaigns, and events. Get involved with boing.finance." />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <PageHeader title="Community Activities" subtitle="Campaigns and events for the Boing community — announced when live." />
+        <PageHeader title="Activities" subtitle="Campaigns and events — announced when live." />
 
         <div className="mb-6 rounded-lg border border-amber-500/30 bg-amber-900/20 px-4 py-3 text-sm text-amber-100">
           <strong>No live campaigns right now:</strong> Past sample Swapathon and workshop listings were removed so they are not mistaken for active reward programs.

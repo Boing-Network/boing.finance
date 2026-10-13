@@ -1303,17 +1303,17 @@ function CreatePool() {
         <TradeDeployShell width="medium">
           <TradeDeployHero
             eyebrow="Deploy"
-            title="Create Liquidity Pool"
-            subtitle="Connect your wallet to deploy trading pairs and earn fees."
+            title="Create a pool"
+            subtitle="Pick two tokens and add the first liquidity."
           />
           <PageCard>
             <EmptyState
               variant="pools"
               title="Connect your wallet"
-              description="Connect your wallet to create liquidity pools on EVM or Solana."
+              description="Connect to create a pool on this network."
               action={connectWallet}
-              actionLabel="Connect Wallet"
-              secondaryLabel="Pools"
+              actionLabel="Connect wallet"
+              secondaryLabel="Browse pools"
               secondaryHref="/pools"
             />
           </PageCard>
@@ -1336,8 +1336,8 @@ function CreatePool() {
             {chainId === BOING_NATIVE_L1_CHAIN_ID && (
             <header className="td-hero td-hero--center mb-8">
               <span className="td-hero__eyebrow">Deploy</span>
-              <h1 className="td-hero__title">Create Liquidity Pool</h1>
-              <p className="td-hero__subtitle">Deploy a native constant-product pool on Boing L1</p>
+              <h1 className="td-hero__title">Create a pool</h1>
+              <p className="td-hero__subtitle">Pick two tokens and add the first liquidity</p>
             </header>
             )}
             {chainId === BOING_NATIVE_L1_CHAIN_ID && <NativeBoingCreatePoolPanel />}
@@ -1352,16 +1352,15 @@ function CreatePool() {
             {chainId !== BOING_NATIVE_L1_CHAIN_ID && (
             <header className="td-hero td-hero--center mb-8">
               <span className="td-hero__eyebrow">Deploy</span>
-              <h1 className="td-hero__title">Create Liquidity Pool</h1>
-              <p className="td-hero__subtitle">Deploy new trading pairs and earn fees from every trade</p>
+              <h1 className="td-hero__title">Create a pool</h1>
+              <p className="td-hero__subtitle">Pick two tokens and add the first liquidity</p>
             </header>
             )}
 
             {chainId !== BOING_NATIVE_L1_CHAIN_ID && !evmCreateVenue && (
               <div className="td-status td-status--warn mb-6 text-sm">
                 <p className="mb-3">
-                  This network has no in-app AMM factory. Switch to a supported chain, or create the pair on that
-                  network&apos;s DEX.
+                  Pool creation isn&apos;t available on this network in-app. Switch networks, or create the pair on that chain&apos;s DEX.
                 </p>
                 {getExternalSwapUrl(chainId) && (
                   <a

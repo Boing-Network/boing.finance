@@ -21,7 +21,7 @@ import CompanionLinkGate from './CompanionLinkGate';
 import BuilderAttestationPanel from './BuilderAttestationPanel';
 
 /**
- * On-chain NFT ↔ token link UI: claim → register_link / unlink_at / query.
+ * On-chain NFT ↔ token link UI (claim ownership → link / unlink / list).
  */
 export default function LinkedNftTokenPanel({
   seedCollectionId = '',
@@ -34,7 +34,7 @@ export default function LinkedNftTokenPanel({
   hideStatus = false,
   /** When true, hide the intro blurb under the title (page hero already covers it). */
   hideIntro = false,
-  title = 'Companions',
+  title = 'Collection & token',
 }) {
   const { account, getWalletProvider, walletType, isConnected } = useWallet();
   const dexIntegration = useBoingNativeDexIntegration();
@@ -247,7 +247,8 @@ export default function LinkedNftTokenPanel({
           </h3>
           {!hideIntro ? (
             <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-              Link a collection and a token as companions, or unlink a pair. Starting fresh? Use Project pack.
+              Connect a collection to its project token (companions) so apps show them together. Starting fresh? Use
+              Project pack.
             </p>
           ) : null}
           {(collectionLabel || tokenLabel) && hideStatus ? (
@@ -273,8 +274,8 @@ export default function LinkedNftTokenPanel({
             {status.code === 'ready' ? 'Ready to link' : 'Not available yet'}
           </strong>
           {status.code === 'ready'
-            ? ' — claim each side if needed, then register companions.'
-            : ' — companion linking is not set up on this network yet.'}
+            ? ' — confirm ownership if needed, then link.'
+            : ' — linking is not set up on this network yet.'}
           {collectionLabel || tokenLabel ? (
             <span className="block mt-1">
               {collectionLabel ? `Collection: ${collectionLabel}. ` : ''}
@@ -333,23 +334,7 @@ export default function LinkedNftTokenPanel({
         </div>
       ) : null}
 
-      <div className="flex flex-wrap gap-2 mb-4">
-        <button
-          type="button"
-          onClick={onClaimCollection}
-          disabled={busy || !status.canWrite || !expressOk || !isLinkableAssetAddress(collectionId)}
-          className="td-btn td-btn--ghost text-sm disabled:opacity-50"
-        >
-          Claim collection
-        </button>
-        <button
-          type="button"
-          onClick={onClaimToken}
-          disabled={busy || !status.canWrite || !expressOk || !isLinkableAssetAddress(tokenId)}
-          className="td-btn td-btn--ghost text-sm disabled:opacity-50"
-        >
-          Claim token
-        </button>
+      <div className="flex flex-wrap gap-2 mb-2">
         <button
           type="button"
           onClick={onRegister}
@@ -363,22 +348,7 @@ export default function LinkedNftTokenPanel({
           }
           className="td-btn td-btn--green text-sm disabled:opacity-50"
         >
-          {busy ? 'Linking…' : 'Link companions'}
-        </button>
-        <button
-          type="button"
-          onClick={onUnlinkPair}
-          disabled={
-            busy ||
-            !status.canWrite ||
-            !expressOk ||
-            !isLinkableAssetAddress(collectionId) ||
-            !isLinkableAssetAddress(tokenId)
-          }
-          className="td-btn td-btn--ghost text-sm disabled:opacity-50"
-          style={{ color: 'var(--finance-red-light)' }}
-        >
-          Unlink
+          {busy ? 'Linking…' : 'Link'}
         </button>
         <button
           type="button"
@@ -387,13 +357,59 @@ export default function LinkedNftTokenPanel({
           className="td-btn td-btn--ghost text-sm disabled:opacity-50"
           style={{ color: 'var(--finance-primary)' }}
         >
-          Refresh
+          Refresh list
         </button>
       </div>
+      <details className="mb-4">
+        <summary
+          className="cursor-pointer text-xs font-medium"
+          style={{ color: 'var(--text-tertiary)' }}
+        >
+          Advanced: confirm ownership, unlink
+        </summary>
+        <p className="text-xs mt-2 mb-2" style={{ color: 'var(--text-tertiary)' }}>
+          Confirm ownership if the network asks before linking. Unlink only if you need to disconnect a pair.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={onClaimCollection}
+            disabled={busy || !status.canWrite || !expressOk || !isLinkableAssetAddress(collectionId)}
+            className="td-btn td-btn--ghost text-sm disabled:opacity-50"
+            title="Confirm you control this collection before linking"
+          >
+            Confirm collection ownership
+          </button>
+          <button
+            type="button"
+            onClick={onClaimToken}
+            disabled={busy || !status.canWrite || !expressOk || !isLinkableAssetAddress(tokenId)}
+            className="td-btn td-btn--ghost text-sm disabled:opacity-50"
+            title="Confirm you control this token before linking"
+          >
+            Confirm token ownership
+          </button>
+          <button
+            type="button"
+            onClick={onUnlinkPair}
+            disabled={
+              busy ||
+              !status.canWrite ||
+              !expressOk ||
+              !isLinkableAssetAddress(collectionId) ||
+              !isLinkableAssetAddress(tokenId)
+            }
+            className="td-btn td-btn--ghost text-sm disabled:opacity-50"
+            style={{ color: 'var(--finance-red-light)' }}
+          >
+            Unlink this pair
+          </button>
+        </div>
+      </details>
 
       {!expressOk ? (
         <p className="text-xs mb-3" style={{ color: 'var(--text-tertiary)' }}>
-          Connect Boing Express to link or unlink companions.
+          Connect Boing Express to link or unlink.
         </p>
       ) : null}
 
@@ -405,7 +421,7 @@ export default function LinkedNftTokenPanel({
 
       {listError ? (
         <p className="text-xs mb-3" style={{ color: 'var(--finance-gold)' }}>
-          Could not load companions right now. You can still link a pair below.
+          Could not load linked pairs right now. You can still link below.
         </p>
       ) : null}
 
@@ -418,12 +434,22 @@ export default function LinkedNftTokenPanel({
             unlockedHref={buildProjectPoolPath({ collectionId, tokenId })}
             compact
           />
-          <BuilderAttestationPanel
-            collectionId={collectionId}
-            tokenId={tokenId}
-            compact
-            requireCompanions
-          />
+          <details className="rounded-lg border" style={{ borderColor: 'var(--border-color)' }}>
+            <summary
+              className="cursor-pointer text-xs font-medium px-3 py-2"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              Optional: show you&apos;re the builder
+            </summary>
+            <div className="px-3 pb-3">
+              <BuilderAttestationPanel
+                collectionId={collectionId}
+                tokenId={tokenId}
+                compact
+                requireCompanions
+              />
+            </div>
+          </details>
         </div>
       ) : null}
 
@@ -471,7 +497,7 @@ export default function LinkedNftTokenPanel({
         </ul>
       ) : (
         <p className="text-xs mb-3" style={{ color: 'var(--text-tertiary)' }}>
-          No companions loaded yet. Refresh after you link a pair.
+          No linked pairs yet. Enter both ids and press Link, then refresh this list.
         </p>
       )}
 

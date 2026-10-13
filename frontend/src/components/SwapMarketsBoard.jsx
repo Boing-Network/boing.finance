@@ -78,11 +78,11 @@ export default function SwapMarketsBoard({
       <div className="flex-1 overflow-y-auto">
         {isLoading && !rows.length ? (
           <p className="px-3 py-6 text-xs text-center" style={{ color: 'var(--text-secondary)' }}>
-            Loading {networkName} markets…
+            Loading markets…
           </p>
         ) : !rows.length ? (
           <p className="px-3 py-6 text-xs text-center" style={{ color: 'var(--text-secondary)' }}>
-            No trending DEX pools for this chain yet. Switch network or try a listed token.
+            No markets listed yet. Pick a token above, or switch network.
           </p>
         ) : (
           <ul>

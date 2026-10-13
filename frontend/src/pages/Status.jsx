@@ -23,28 +23,28 @@ const Status = () => {
       status: 'operational',
       uptime: 'N/A',
       responseTime: 'N/A',
-      description: 'LI.FI aggregator for EVM routes (0.5% platform fee). Not a Boing-custody bridge; L1↔EVM is separate.'
+      description: 'EVM bridge routes with a small platform fee. Boing does not hold bridge funds.'
     },
     {
       name: 'Liquidity Pools',
       status: 'operational',
       uptime: '99.9%',
       responseTime: '140ms',
-      description: 'Automated market maker pools'
+      description: 'Pools for swapping and providing liquidity'
     },
     {
       name: 'Analytics Dashboard',
       status: 'operational',
       uptime: '99.7%',
       responseTime: '250ms',
-      description: 'Market data and portfolio analytics'
+      description: 'Market volume, trends, and portfolio views'
     },
     {
       name: 'Token Deployment',
       status: 'operational',
       uptime: '99.9%',
       responseTime: '200ms',
-      description: 'ERC20 token creation and deployment'
+      description: 'Create tokens and NFT collections'
     },
     {
       name: 'API Services',
@@ -187,28 +187,25 @@ const Status = () => {
                 System Status
               </h1>
               <p className="text-xl mb-6" style={{ color: 'var(--text-secondary)' }}>
-                Illustrative overview of boing.finance services and networks
+                Placeholder status page — not live uptime data
               </p>
-              <div className="bg-amber-900/20 border border-amber-500/30 rounded-lg p-4 mb-4">
+              <div className="bg-amber-900/20 border border-amber-500/30 rounded-lg p-4 mb-6">
                 <p className="text-amber-100 text-sm">
-                  <strong>Not live monitoring:</strong> Figures below are illustrative placeholders, not real-time uptime or incident telemetry. For live chain state, use your wallet RPC and explorers.
-                </p>
-              </div>
-              <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
-                <p className="text-blue-200 text-sm">
-                  <strong>Note:</strong> boing.finance is a solo-founder project. We are seeking funding for infrastructure scaling and team expansion.
+                  <strong>Not live monitoring:</strong> Numbers below are examples only. For live chain state, use your wallet RPC and explorers.
                 </p>
               </div>
             </div>
 
-            {/* Overall Status */}
+            {/* Overall Status — labeled as example */}
             <div className="rounded-lg p-6 border mb-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Overall System Status</h2>
+                <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                  Example overview <span className="text-sm font-normal text-amber-300">(not live)</span>
+                </h2>
                 <div className={`px-4 py-2 rounded-lg border ${getStatusColor(systemStatus.overall)}`}>
                   <span className="flex items-center space-x-2">
                     <span>{getStatusIcon(systemStatus.overall)}</span>
-                    <span className="capitalize font-semibold">{systemStatus.overall}</span>
+                    <span className="capitalize font-semibold">{systemStatus.overall} (example)</span>
                   </span>
                 </div>
               </div>
@@ -216,19 +213,19 @@ const Status = () => {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                   <div className="text-2xl font-bold text-green-400 mb-1">{systemStatus.uptime}</div>
-                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Uptime (30 days)</div>
+                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Uptime (example)</div>
                 </div>
                 <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                   <div className="text-2xl font-bold text-blue-400 mb-1">{systemStatus.responseTime}</div>
-                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Avg Response Time</div>
+                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Avg response (example)</div>
                 </div>
                 <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                   <div className="text-2xl font-bold text-purple-400 mb-1">{systemStatus.lastIncident}</div>
-                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Last Incident</div>
+                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Last incident (example)</div>
                 </div>
                 <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                   <div className="text-2xl font-bold text-green-400 mb-1">6/6</div>
-                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Services Operational</div>
+                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Services (example)</div>
                 </div>
               </div>
             </div>

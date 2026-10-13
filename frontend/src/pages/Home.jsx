@@ -155,53 +155,22 @@ function Home() {
                 <h1 className="hero-title text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-3 pb-2" style={{ fontFamily: 'var(--font-display)', background: 'linear-gradient(135deg, var(--finance-primary) 0%, var(--finance-green) 60%, #ffffff 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', filter: 'drop-shadow(0 0 20px var(--glow-cyan))' }}>
                   DeFi That Bounces Back
                 </h1>
-                <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--finance-primary)', letterSpacing: '0.12em' }}>
-                  Authentic. Decentralized. Optimal. Quality-Assured.
-                </p>
                 <p className="text-base md:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0 mb-8" style={{ color: 'var(--text-secondary)' }}>
-                  Swap, add liquidity, bridge assets, and deploy tokens on EVM and Solana—all in one place. No code required.
+                  Swap, bridge, and launch tokens in one place — no code required.
                 </p>
-                {/* Stats row */}
-                <div className="flex flex-wrap justify-center lg:justify-start gap-6 md:gap-8 mb-8" style={{ fontFamily: 'var(--font-display)' }}>
-                  <div>
-                    <div className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>$0 <span style={{ color: 'var(--finance-green)', fontSize: '0.6em' }}>fees</span></div>
-                    <div className="text-xs uppercase tracking-wider mt-0.5" style={{ color: 'var(--text-tertiary)' }}>Protocol Fee</div>
-                  </div>
-                  <div>
-                    <div className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>~2s</div>
-                    <div className="text-xs uppercase tracking-wider mt-0.5" style={{ color: 'var(--text-tertiary)' }}>Block Time</div>
-                  </div>
-                  <div>
-                    <div className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>2 <span style={{ color: 'var(--finance-green)', fontSize: '0.6em' }}>chains</span></div>
-                    <div className="text-xs uppercase tracking-wider mt-0.5" style={{ color: 'var(--text-tertiary)' }}>EVM + Solana</div>
-                  </div>
-                </div>
-                {/* CTAs */}
-                <div className="flex flex-wrap justify-center lg:justify-start gap-3">
+                {/* CTAs: one primary + one secondary */}
+                <div className="flex flex-wrap justify-center lg:justify-start items-center gap-4">
                   <a href="/swap" className="btn btn-green inline-flex items-center gap-2">
-                    <span>⚡</span> Start Trading
+                    Start trading
                   </a>
-                  <a href="/deploy-token" className="btn btn-primary inline-flex items-center gap-2">
-                    + Deploy Token
-                  </a>
-                  <a href="/docs" className="btn btn-outline inline-flex items-center gap-2">
-                    Get started →
+                  <a
+                    href="/deploy-token"
+                    className="text-sm font-medium underline underline-offset-4 hover:opacity-80"
+                    style={{ color: 'var(--finance-primary)' }}
+                  >
+                    Deploy a token
                   </a>
                 </div>
-                {/* Feature highlights strip */}
-                <div className="flex flex-wrap justify-center lg:justify-start gap-3 mt-10 fade-in delay-200">
-                  <Highlight icon={<SwapIcon />} text="Lightning-fast swaps" />
-                  <Highlight icon={<LiquidityIcon />} text="Earn with liquidity" />
-                  <Highlight icon={<AnalyticsIcon />} text="Real-time analytics" />
-                  <Highlight icon={<PortfolioIcon />} text="Unified portfolio" />
-                  <Highlight icon={<BridgeIcon />} text="Cross-chain bridge" />
-                  <Highlight icon={<TokensIcon />} text="All your tokens" />
-                  <Highlight icon={<DeployTokenIcon />} text="Deploy tokens" />
-                  <Highlight icon={<span className="text-xl">📜</span>} text="Governance" />
-                  <Highlight icon={<span className="text-xl">🎯</span>} text="BOING Ecosystem" />
-                  <Highlight icon={<span className="text-xl">🤖</span>} text="AI Assistant" />
-                </div>
-                <p className="text-lg text-center lg:text-left mt-6 max-w-xl mx-auto lg:mx-0" style={{ color: 'var(--text-secondary)' }}>Fast, secure DeFi. For everyone.</p>
               </div>
               {/* Right: Mascot only (transparent PNG from assets — no coral/hero composite) */}
               <div className="flex justify-center lg:justify-end order-1 lg:order-2">
@@ -236,6 +205,16 @@ function Home() {
             </div>
           </section>
 
+          <section className="mb-16 md:mb-20 fade-in delay-320">
+            <div className="flex flex-wrap justify-center gap-3">
+              <Highlight icon={<SwapIcon />} text="Swaps" />
+              <Highlight icon={<LiquidityIcon />} text="Liquidity" />
+              <Highlight icon={<BridgeIcon />} text="Bridge" />
+              <Highlight icon={<DeployTokenIcon />} text="Deploy" />
+              <Highlight icon={<TokensIcon />} text="Tokens" />
+            </div>
+          </section>
+
           {/* Proactive Tips (when connected) - right after onboarding */}
           <section className="mb-20 md:mb-24 max-w-2xl mx-auto fade-in delay-350">
             <ProactiveTipsBanner />
@@ -243,7 +222,12 @@ function Home() {
 
           {/* 3. Main product: Feature cards (Trade, Analytics, Deploy) */}
           <section className="space-y-10 mb-20 md:mb-24 fade-in delay-400">
-            <h2 className="text-2xl font-bold text-center" style={{ color: 'var(--text-primary)' }}>What you can do</h2>
+            <div className="text-center max-w-xl mx-auto">
+              <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>What you can do</h2>
+              <p className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>
+                Trade, bridge, or launch — start with Swap or Project pack.
+              </p>
+            </div>
             {/* First row - 6 cards in 3 columns - dynamically generated from navigation */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {[...memoizedNav.trading, ...memoizedNav.deployment].map((item) => {
@@ -317,16 +301,16 @@ function Home() {
               <h2 className="text-2xl font-bold text-center mb-6" style={{ color: 'var(--text-primary)' }}>Tools & Resources</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
                 <a href="/docs" className="block h-full">
-                  <FeatureCard title="Documentation" icon={<span className="text-xl">📖</span>} description="Guides for swapping, liquidity, bridging, and deployment" />
+                  <FeatureCard title="Documentation" description="Guides for swap, pools, bridge, and deploy" />
                 </a>
                 <a href="/developer-tools" className="block h-full">
-                  <FeatureCard title="Developer Tools" icon={<span className="text-xl">🔧</span>} description="Contract utilities and debugging tools" />
+                  <FeatureCard title="Developer Tools" description="Builder utilities — not required for Swap" />
                 </a>
                 <a href="/watchlist" className="block h-full">
-                  <FeatureCard title="Watchlist" icon={<span className="text-xl">⭐</span>} description="Track tokens and price alerts" />
+                  <FeatureCard title="Watchlist" description="Track tokens you care about" />
                 </a>
                 <a href="/help-center" className="block h-full">
-                  <FeatureCard title="Help Center" icon={<span className="text-xl">❓</span>} description="FAQs and support — use the AI button for help" />
+                  <FeatureCard title="Help Center" description="FAQs and Ask AI" />
                 </a>
               </div>
             </section>
@@ -334,24 +318,31 @@ function Home() {
 
           </div>
 
-          {/* 6. Token creation CTA banner */}
+          {/* 6. Creator CTA — single primary path */}
           <div className="mt-24 md:mt-32 mb-10 flex justify-center fade-in delay-800">
-            <div className="rounded-xl px-6 py-4 bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 max-w-2xl">
+            <div
+              className="rounded-xl px-6 py-5 border max-w-2xl w-full"
+              style={{
+                background: 'linear-gradient(135deg, rgba(0,229,255,0.08), rgba(0,255,136,0.06))',
+                borderColor: 'rgba(0,229,255,0.28)',
+              }}
+            >
               <div className="text-center">
-                <div className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>🚀 Create Your Own Tokens & Trading Pairs!</div>
-                <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-                  Unlike centralized exchanges, boing allows anyone to deploy tokens and create trading pairs instantly. 
-                  No permission required - just deploy, add liquidity, and start trading!
-                </p>
-                <div className="flex flex-wrap gap-2 justify-center">
-                  <a href="/tokens" className="text-sm underline transition-colors hover:opacity-80" style={{ color: 'var(--primary-color)' }}>Browse Tokens</a>
-                  <span style={{ color: 'var(--text-tertiary)' }}>•</span>
-                  <a href="/deploy-token" className="text-sm underline transition-colors hover:opacity-80" style={{ color: 'var(--primary-color)' }}>Deploy Token</a>
-                  <span style={{ color: 'var(--text-tertiary)' }}>•</span>
-                  <a href="/create-pool" className="text-sm underline transition-colors hover:opacity-80" style={{ color: 'var(--primary-color)' }}>Create Pairs</a>
-                  <span style={{ color: 'var(--text-tertiary)' }}>•</span>
-                  <a href="/swap" className="text-sm underline transition-colors hover:opacity-80" style={{ color: 'var(--primary-color)' }}>Start Trading</a>
+                <div className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+                  Launch a project
                 </div>
+                <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+                  Create an NFT collection and a token together, connect them, then add a pool when you&apos;re ready.
+                </p>
+                <a href="/project-pack" className="btn btn-primary inline-flex items-center gap-2">
+                  Open Project pack
+                </a>
+                <p className="text-xs mt-3" style={{ color: 'var(--text-tertiary)' }}>
+                  Or{' '}
+                  <a href="/deploy-token" className="underline" style={{ color: 'var(--finance-primary)' }}>
+                    deploy a token only
+                  </a>
+                </p>
               </div>
             </div>
           </div>
@@ -527,7 +518,9 @@ function FeatureCard({ title, icon, description, comingSoon }) {
     >
       <div className="relative z-10 text-center flex flex-col flex-1 min-h-0">
         <div className="flex items-center justify-center mb-4">
-          <span className="text-2xl mr-3 transition-colors duration-300" style={{ color: 'var(--accent-teal)' }}>{icon}</span>
+          {icon ? (
+            <span className="text-2xl mr-3 transition-colors duration-300" style={{ color: 'var(--accent-teal)' }}>{icon}</span>
+          ) : null}
           <h3 className="text-lg font-semibold transition-colors duration-300 flex items-center" style={{ color: 'var(--text-primary)' }}>
             {title}
             {comingSoon && (

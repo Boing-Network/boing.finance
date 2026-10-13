@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { findBestCpRoute } from 'boing-sdk';
 import { useWallet } from '../contexts/WalletContext';
@@ -323,25 +322,17 @@ export default function NativeAmmSwapPanel({
       }
     >
       <h2 className="text-lg font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
-        {embedded ? 'Pool swap' : 'Native constant-product pool (Boing VM)'}
+        {embedded ? 'Swap' : 'Swap on the main pool'}
       </h2>
       <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-        Trade against the public native constant-product pool for this deployment. Use <strong>whole-number</strong>{' '}
-        amounts only (≤ u64 for correct pool math). After you click swap, <strong>Boing Express</strong> will ask you to sign;
-        the node may request a <strong>second signature</strong> if it widens the access list. Pool bytecode is{' '}
-        <strong>immutable</strong> in this MVP. More flows:{' '}
-        <Link to="/boing/native-vm" className="text-blue-400 underline text-sm">
-          Native VM tools
-        </Link>
-        .
+        Swap on the network&apos;s main pool. Use whole-number amounts. Express will ask you to approve.
       </p>
       <p
         className="text-sm mb-3 rounded-lg border px-3 py-2.5"
         style={{ borderColor: 'rgba(59, 130, 246, 0.35)', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-secondary)' }}
       >
-        <strong style={{ color: 'var(--text-primary)' }}>New token or new factory pool?</strong> This Swap tab only targets the{' '}
-        <strong>default</strong> constant-product pool. Use the <strong>Pools</strong> tab (above) to see discovered factory pairs—including
-        ones you just created—then <strong>Smart route</strong> to swap any registered path with Boing Express (multihop when needed).
+        For other pairs, open <strong style={{ color: 'var(--text-primary)' }}>Pools</strong> or{' '}
+        <strong style={{ color: 'var(--text-primary)' }}>Smart route</strong>.
       </p>
 
       <div className="flex flex-wrap gap-2 mb-3 text-xs" style={{ color: 'var(--text-tertiary)' }}>

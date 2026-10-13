@@ -168,9 +168,9 @@ export function computeSmartFlowSignals(topPairs = [], trendingTokens = []) {
         volToLiq,
         isTrending,
         signal: isTrending && volToLiq > 0.3
-          ? 'Narrative + flow convergence'
+          ? 'Trending + high volume'
           : volToLiq > 0.5
-            ? 'High turnover vs liquidity (smart-flow proxy)'
+            ? 'High volume vs liquidity'
             : 'Trending pair activity',
       });
     }
@@ -195,11 +195,11 @@ export function generateActionableInsights({
   if (migration.signal) {
     insights.push({
       id: 'liq-migration',
-      category: 'Liquidity migration',
+      category: 'Volume by network',
       title: migration.signal.headline,
       signal: migration.signal.detail,
-      interpretation: 'Volume share shifts often precede bridge routing changes and native DEX depth rebalancing across ecosystems.',
-      action: 'Map top destination chains; watch bridge netflow and top pool reserve deltas on those networks.',
+      interpretation: 'When one network takes a larger share of volume, traders often move activity there next.',
+      action: 'Check pools and bridges on the networks gaining share.',
       confidence: migration.l2Share >= 45 ? 'high' : 'medium',
       source: 'GeckoTerminal / backend network stats',
     });
@@ -208,11 +208,11 @@ export function generateActionableInsights({
   if (flows[0]) {
     insights.push({
       id: 'smart-flow',
-      category: 'Smart money proxy',
-      title: `Elevated flow on ${flows[0].pair}`,
-      signal: `${flows[0].network} pair shows ${(flows[0].volToLiq * 100).toFixed(0)}% 24h vol/liquidity${flows[0].isTrending ? ' with narrative overlap' : ''}.`,
-      interpretation: 'High turnover relative to pool depth can indicate informed flow or short-term momentum positioning.',
-      action: 'Validate with wallet cohort behavior and follow-on liquidity adds before sizing exposure.',
+      category: 'Busy pairs',
+      title: `High activity on ${flows[0].pair}`,
+      signal: `${flows[0].network} pair shows ${(flows[0].volToLiq * 100).toFixed(0)}% 24h volume vs liquidity${flows[0].isTrending ? ' and is also trending' : ''}.`,
+      interpretation: 'High turnover vs pool size can mean strong short-term interest — or thin liquidity risk.',
+      action: 'Confirm depth and recent trades before sizing a position.',
       confidence: flows[0].isTrending ? 'high' : 'medium',
       source: 'DEX pair analytics',
     });
@@ -223,29 +223,32 @@ export function generateActionableInsights({
     const sym = trending.item?.symbol || trending.symbol;
     insights.push({
       id: 'narrative-early',
-      category: 'Narrative / early activity',
-      title: `${sym} leading social & market attention`,
-      signal: 'Token appears in global trending — early narrative formation phase.',
-      interpretation: 'Narrative-led regimes often see liquidity migrate into related pairs before broader market pricing.',
-      action: 'Add to watchlist; monitor swap cadence and LP depth on primary deployment chain.',
+      category: 'Trending',
+      title: `${sym} is getting attention`,
+      signal: 'This token appears in global trending lists right now.',
+      interpretation: 'Early attention can move prices before deeper liquidity forms.',
+      action: 'Add it to your watchlist and check pool depth on its main chain.',
       confidence: 'medium',
       source: 'CoinGecko trending',
     });
   }
 
   if (fearGreed?.value != null) {
-    const risk = fearGreed.value >= 60 ? 'risk-on' : fearGreed.value <= 40 ? 'risk-off' : 'balanced';
     insights.push({
       id: 'macro-sentiment',
-      category: 'Macro overlay',
-      title: `Sentiment at ${fearGreed.value} (${fearGreed.classification})`,
-      signal: `${risk} positioning environment for spot and perps books.`,
-      interpretation: 'Extreme readings historically correlate with mean-reversion in short-horizon flow intensity.',
+      category: 'Market mood',
+      title: `Fear & Greed at ${fearGreed.value} (${fearGreed.classification})`,
+      signal: fearGreed.value >= 60
+        ? 'Markets look more optimistic than usual.'
+        : fearGreed.value <= 40
+          ? 'Markets look more cautious than usual.'
+          : 'Sentiment is near the middle of the range.',
+      interpretation: 'Extreme readings often mean short-term moves can reverse.',
       action: fearGreed.value >= 75
-        ? 'Tighten risk; favor hedged or delta-neutral structures.'
+        ? 'Be careful with size; prefer clearer setups.'
         : fearGreed.value <= 25
-          ? 'Scan for contrarian accumulation in high-quality liquidity pools.'
-          : 'Maintain baseline sizing; focus on idiosyncratic narrative alpha.',
+          ? 'Look for solid pools if you are buying dips.'
+          : 'Keep normal position sizes; focus on tokens you already follow.',
       confidence: 'medium',
       source: 'Alternative.me Fear & Greed',
     });
@@ -255,13 +258,13 @@ export function generateActionableInsights({
   if (mcapChange != null) {
     insights.push({
       id: 'market-regime',
-      category: 'Market regime',
-      title: `Global mcap ${mcapChange >= 0 ? '+' : ''}${mcapChange.toFixed(2)}% (24h)`,
-      signal: mcapChange >= 0 ? 'Expansionary tape' : 'Risk-off tape',
-      interpretation: 'Regime context filters which narratives sustain follow-through vs. mean-revert.',
+      category: 'Market move',
+      title: `Global market cap ${mcapChange >= 0 ? '+' : ''}${mcapChange.toFixed(2)}% (24h)`,
+      signal: mcapChange >= 0 ? 'Overall crypto value is up today.' : 'Overall crypto value is down today.',
+      interpretation: 'Broad market direction affects which tokens keep momentum.',
       action: mcapChange >= 0
-        ? 'Prioritize momentum narratives with rising onchain turnover.'
-        : 'Prioritize liquidity quality and reduce chase exposure on low-depth pairs.',
+        ? 'Favor tokens with rising volume, not just price.'
+        : 'Prefer deeper pools and avoid chasing thin pairs.',
       confidence: 'high',
       source: 'CoinGecko global',
     });
@@ -291,37 +294,37 @@ export function computeBehavioralFingerprint(transactions, stats) {
   });
   const peakHour = hourBuckets.indexOf(Math.max(...hourBuckets));
 
-  let persona = 'Balanced operator';
-  if (swapRatio > 0.6) persona = 'Active trader';
-  else if (liqRatio > 0.4) persona = 'Liquidity provider';
-  else if (bridgeRatio > 0.3) persona = 'Cross-chain migrator';
+  let persona = 'Mixed activity';
+  if (swapRatio > 0.6) persona = 'Mostly swaps';
+  else if (liqRatio > 0.4) persona = 'Mostly liquidity';
+  else if (bridgeRatio > 0.3) persona = 'Often bridges';
 
   const patterns = [];
   if (chainConcentration >= 70) {
     patterns.push({
-      label: 'Chain concentration',
-      value: `${chainConcentration.toFixed(0)}% on primary chain`,
-      insight: 'Wallet behavior clusters on a single ecosystem — useful for cohort tagging.',
+      label: 'Main network',
+      value: `${chainConcentration.toFixed(0)}% on one chain`,
+      insight: 'Most of your activity is on a single network.',
     });
   }
   if (swapRatio > 0.5) {
     patterns.push({
-      label: 'Swap-dominant flow',
+      label: 'Swap-heavy',
       value: `${(swapRatio * 100).toFixed(0)}% swaps`,
-      insight: 'High swap cadence — monitor for momentum or arb-style execution patterns.',
+      insight: 'You swap more than you add liquidity or bridge.',
     });
   }
   if (bridgeRatio > 0.15) {
     patterns.push({
-      label: 'Liquidity migration signal',
+      label: 'Bridge activity',
       value: `${(bridgeRatio * 100).toFixed(0)}% bridge txs`,
-      insight: 'Cross-chain routing active — aligns with ecosystem rotation research.',
+      insight: 'You move assets between networks fairly often.',
     });
   }
   patterns.push({
-    label: 'Activity peak (UTC)',
+    label: 'Busiest hour (UTC)',
     value: `${peakHour}:00`,
-    insight: 'Temporal clustering helps align surveillance windows with likely execution times.',
+    insight: 'When most of your transactions tend to happen.',
   });
 
   return { persona, patterns, swapRatio, liqRatio, bridgeRatio, chainConcentration, primaryChain };
@@ -331,34 +334,34 @@ export function computePortfolioResearchInsights({ allocation = [], topMovers, e
   const insights = [];
   if (allocation[0]) {
     insights.push({
-      title: 'Exposure concentration',
+      title: 'Largest holding',
       signal: `${allocation[0].name} = ${allocation[0].percent.toFixed(1)}% of tracked value`,
       action: allocation[0].percent > 40
-        ? 'Consider hedging or diversifying if thesis is not high-conviction.'
-        : 'Balanced sleeve sizing — monitor correlation during risk-off regimes.',
+        ? 'Consider diversifying if you are not intentionally concentrated.'
+        : 'Sizing looks balanced — recheck if the market turns risk-off.',
     });
   }
   if (topMovers?.gainers?.[0]) {
     insights.push({
-      title: 'Narrative tailwind',
+      title: 'Top gainer today',
       signal: `${topMovers.gainers[0].symbol} +${topMovers.gainers[0].change24h.toFixed(2)}% (24h)`,
-      action: 'Validate onchain turnover supports price — avoid low-liquidity chase.',
+      action: 'Check volume and pool depth before adding more.',
     });
   }
   if (change7d != null) {
     insights.push({
-      title: '7d performance context',
-      signal: `${change7d >= 0 ? '+' : ''}${change7d.toFixed(2)}% portfolio drift`,
+      title: '7-day change',
+      signal: `${change7d >= 0 ? '+' : ''}${change7d.toFixed(2)}% portfolio change`,
       action: change7d > 5
-        ? 'Review whether gains are narrative-driven; trim into illiquid strength if needed.'
-        : 'Baseline risk budget — scan for early ecosystem entries.',
+        ? 'Review whether gains look sustainable, or take some profit on thin tokens.'
+        : 'Normal range — keep watching tokens you already follow.',
     });
   }
   if (enrichedSummary?.change24h != null) {
     insights.push({
-      title: 'Daily P&L overlay',
+      title: '24-hour change',
       signal: `${enrichedSummary.change24h >= 0 ? '+' : ''}${Number(enrichedSummary.change24h).toFixed(2)}% (24h)`,
-      action: 'Cross-reference with macro sentiment and primary chain flow before rebalancing.',
+      action: 'Compare with overall market mood before rebalancing.',
     });
   }
   return insights.slice(0, 4);
@@ -366,31 +369,31 @@ export function computePortfolioResearchInsights({ allocation = [], topMovers, e
 
 export const RESEARCH_PAGE_BRIEFS = {
   analytics: {
-    eyebrow: 'Onchain intelligence · Case study dashboard',
-    title: 'Multi-chain research workspace',
+    eyebrow: 'Analytics',
+    title: 'Research highlights',
     description:
-      'Live synthesis of liquidity migration, narrative momentum, smart-flow proxies, and macro sentiment — the same workflow used for trading research and operational crypto analysis.',
-    capabilities: ['Liquidity migration', 'Narrative radar', 'Smart-flow signals', 'Actionable briefs'],
+      'Short takeaways from volume, trending tokens, and market mood. Open Advanced for charts power users dig into.',
+    capabilities: ['Volume by network', 'Trending attention', 'Busy pairs', 'Highlights'],
   },
   portfolio: {
-    eyebrow: 'Holdings intelligence',
-    title: 'Exposure & behavioral context',
+    eyebrow: 'Portfolio',
+    title: 'Holdings snapshot',
     description:
-      'Portfolio-level view connecting allocation, movers, and performance drift to research actions — how onchain holdings translate into risk decisions.',
-    capabilities: ['Exposure map', 'Mover analysis', 'Performance overlay'],
+      'Balances and simple notes on concentration and movers — nothing to configure.',
+    capabilities: ['Allocation', 'Movers', 'Performance'],
   },
   activity: {
-    eyebrow: 'Wallet flow analysis',
-    title: 'Behavioral fingerprint & execution PnL',
+    eyebrow: 'Activity',
+    title: 'Your trading history',
     description:
-      'Wallet activity decomposed into chain clustering, flow type ratios, swap performance, and temporal patterns — verifiable output from real transaction data.',
-    capabilities: ['Behavior clustering', 'Flow ratios', 'Trading PnL', 'Cadence analysis'],
+      'Swaps, liquidity, and bridges for this wallet, with optional pattern summaries.',
+    capabilities: ['History', 'Swap mix', 'PnL estimates'],
   },
   watchlist: {
-    eyebrow: 'Narrative surveillance',
-    title: 'Early ecosystem & momentum watch',
+    eyebrow: 'Watchlist',
+    title: 'Tokens you follow',
     description:
-      'Curated token monitor for narrative tracking and price regime shifts — the front line for early activity detection before broader market pricing.',
-    capabilities: ['Narrative watch', '24h movers', 'Multi-chain tokens'],
+      'Track prices and 24h change for tokens you care about.',
+    capabilities: ['Price watch', '24h movers'],
   },
 };

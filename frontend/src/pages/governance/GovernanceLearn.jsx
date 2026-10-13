@@ -3,26 +3,29 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { PageHeader, PageCard } from '../../components/PageLayout';
 
-const SECTIONS = [
+const TODAY = [
   {
-    title: 'What is Governance?',
-    content: 'boing.finance uses a decentralized governance model where BOING token holders can propose and vote on protocol changes. This includes parameter updates, treasury allocations, and new feature proposals.',
+    title: 'What works today',
+    content:
+      'You can browse proposals and signal For/Against on the Proposals page. That updates an API registry — on-chain Governor voting is not live yet.',
   },
   {
-    title: 'How to Vote',
-    content: 'Connect your wallet with BOING tokens to the governance portal. Your voting power is proportional to your token balance. Browse active proposals, read the details, and cast your vote (For or Against) before the voting period ends.',
+    title: 'Create a proposal',
+    content:
+      'Use Create a proposal to submit a title and description to the same registry. No BOING balance threshold is enforced in the app today.',
+  },
+];
+
+const PLANNED = [
+  {
+    title: 'Planned: voting power',
+    content:
+      'When on-chain governance ships, voting power is expected to follow BOING balance, with a proposal threshold and quorum. Exact numbers will be published then.',
   },
   {
-    title: 'Creating a Proposal',
-    content: 'To create a proposal, you need a minimum of 10,000 BOING tokens. Draft your proposal with a clear title and description, then submit it for community review. Proposals go through a discussion period before voting begins.',
-  },
-  {
-    title: 'Voting Period & Quorum',
-    content: 'Each proposal has a 7-day voting period. A proposal passes when it receives more For votes than Against votes, and when the total votes meet the quorum threshold (currently 5% of circulating supply).',
-  },
-  {
-    title: 'Treasury & Execution',
-    content: 'The DAO treasury holds protocol fees and reserves. Successful proposals that involve treasury spending are executed by a multisig of elected signers after a timelock period for security.',
+    title: 'Planned: treasury execution',
+    content:
+      'Treasury spending from successful proposals is expected to use a timelock and elected signers. Until then, treasury figures are informational.',
   },
 ];
 
@@ -30,25 +33,63 @@ export default function GovernanceLearn() {
   return (
     <>
       <Helmet>
-        <title>How Governance Works | boing.finance — Voting & Proposals</title>
-        <meta name="description" content="Learn how boing.finance governance works: voting, proposals, quorum, and DAO structure." />
+        <title>How Governance Works | boing.finance</title>
+        <meta
+          name="description"
+          content="What governance works today on boing.finance (signaling) vs planned on-chain voting."
+        />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-3xl">
-        <PageHeader title="How Governance Works" subtitle="A guide to participating in boing.finance DAO governance." />
+        <PageHeader
+          title="How governance works"
+          subtitle="What you can do today — and what is still planned."
+        />
 
-        <div className="space-y-6 mb-8">
-          {SECTIONS.map((s) => (
+        <div className="space-y-6 mb-6">
+          {TODAY.map((s) => (
             <PageCard key={s.title}>
-              <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{s.title}</h3>
-              <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{s.content}</p>
+              <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+                {s.title}
+              </h3>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                {s.content}
+              </p>
             </PageCard>
           ))}
         </div>
 
-        <div className="flex flex-wrap gap-4">
-          <Link to="/governance/proposals" className="px-4 py-2 rounded-lg font-medium bg-cyan-500 hover:bg-cyan-600 text-white transition-colors">View Proposals</Link>
-          <Link to="/governance/vote" className="px-4 py-2 rounded-lg font-medium border hover:bg-gray-700/50 transition-colors" style={{ borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}>Create Proposal</Link>
-          <Link to="/governance/treasury" className="px-4 py-2 rounded-lg font-medium border hover:bg-gray-700/50 transition-colors" style={{ borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}>View Treasury</Link>
+        <details className="mb-8 rounded-xl border px-4 py-3" style={{ borderColor: 'var(--border-color)' }}>
+          <summary className="cursor-pointer text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+            Planned rules (not live yet)
+          </summary>
+          <div className="space-y-4 mt-4">
+            {PLANNED.map((s) => (
+              <div key={s.title}>
+                <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
+                  {s.title}
+                </h3>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                  {s.content}
+                </p>
+              </div>
+            ))}
+          </div>
+        </details>
+
+        <div className="flex flex-wrap gap-3 items-center">
+          <Link
+            to="/governance/proposals"
+            className="px-4 py-2 rounded-lg font-medium bg-cyan-500 hover:bg-cyan-600 text-white transition-colors"
+          >
+            View proposals
+          </Link>
+          <Link
+            to="/governance/vote"
+            className="text-sm underline"
+            style={{ color: 'var(--finance-primary)' }}
+          >
+            Create a proposal
+          </Link>
         </div>
       </div>
     </>

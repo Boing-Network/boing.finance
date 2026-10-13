@@ -15,7 +15,6 @@ import { downloadCSV } from '../utils/exportData';
 import toast from 'react-hot-toast';
 import LiveMarketPulse from '../components/LiveMarketPulse';
 import FearGreedPanel from '../components/FearGreedPanel';
-import ResearchBriefBanner from '../components/research/ResearchBriefBanner';
 import AnalyticsTopPairsView from '../components/AnalyticsTopPairsView';
 import { getFearGreedIndex } from '../services/fearGreedService';
 import {
@@ -115,7 +114,12 @@ export default function Analytics() {
     const stored = getStored(STORAGE_KEYS.timeRange, '24h');
     return isValidAnalyticsRange(stored) ? stored : '24h';
   });
-  const [activeSection, setActiveSection] = useState(() => getStored(STORAGE_KEYS.section, 'intelligence'));
+  const [activeSection, setActiveSection] = useState(() => {
+    const stored = getStored(STORAGE_KEYS.section, 'overview');
+    // Prefer Overview for average users; keep Research available as a tab.
+    if (stored === 'intelligence') return 'overview';
+    return ['overview', 'market', 'trending', 'intelligence'].includes(stored) ? stored : 'overview';
+  });
   const [selectedNetwork, setSelectedNetwork] = useState('all');
 
   const isIntelligence = activeSection === 'intelligence';
@@ -145,7 +149,6 @@ export default function Analytics() {
     data: analytics,
     isLoading,
     isError: analyticsError,
-    error: analyticsErrorObj,
     isFetching: analyticsFetching,
     dataUpdatedAt,
   } = useQuery({
@@ -349,7 +352,7 @@ export default function Analytics() {
     enabled: isIntelligence || isMarket,
   });
 
-  const sections = ['intelligence', 'overview', 'market', 'trending'];
+  const sections = ['overview', 'market', 'trending', 'intelligence'];
   const handleSectionKeyDown = (e) => {
     const i = sections.indexOf(activeSection);
     if (e.key === 'ArrowRight' && i < sections.length - 1) {
@@ -400,11 +403,11 @@ export default function Analytics() {
   return (
     <>
       <Helmet>
-        <title>Onchain Intelligence | boing.finance — Research & Trading Analytics</title>
-        <meta name="description" content="Live onchain intelligence dashboard: liquidity migration, narrative tracking, smart-flow signals, and actionable crypto research across Solana, Base, L2s, and EVM." />
-        <meta name="keywords" content="onchain intelligence, DeFi research, smart money, liquidity migration, crypto analytics, boing finance" />
-        <meta property="og:title" content="Onchain Intelligence | boing.finance" />
-        <meta property="og:description" content="Multi-chain research dashboard with actionable trading insights from live onchain data." />
+        <title>Analytics | boing.finance</title>
+        <meta name="description" content="Market volume, trending tokens, and network activity on boing.finance." />
+        <meta name="keywords" content="DeFi analytics, market volume, trending tokens, crypto analytics, boing finance" />
+        <meta property="og:title" content="Analytics | boing.finance" />
+        <meta property="og:description" content="Market volume, trending tokens, and network activity on EVM and Solana." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/analytics" />
         <meta name="twitter:card" content="summary_large_image" />
@@ -419,10 +422,10 @@ export default function Analytics() {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                    Onchain Intelligence
+                    Analytics
                   </h1>
                   <p className="text-sm sm:text-base mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-                    Research dashboard · liquidity, narratives, smart flow & actionable briefs
+                    Market volume, trending tokens, and network activity
                   </p>
                   {dataUpdatedAt > 0 && (
                     <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
@@ -470,9 +473,9 @@ export default function Analytics() {
                         exportAnalytics(analyticsData, 'json');
                         toast.success('Analytics data exported as JSON!');
                       }}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+                      className="px-4 py-2 border border-gray-600 hover:bg-gray-700/60 text-gray-200 rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
                     >
-                      <span>📥</span> Export JSON
+                      Export
                     </button>
                   )}
                 </div>
@@ -481,14 +484,14 @@ export default function Analytics() {
 
             {/* Unified Toolbar - Sections + Time Range */}
             <div
-              className="rounded-2xl shadow-xl p-4 sm:p-5 mb-6"
+              className="rounded-2xl shadow-xl p-3 sm:p-5 mb-6"
               style={{
                 backgroundColor: 'var(--bg-card)',
                 border: '1px solid var(--border-color)',
               }}
             >
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex flex-wrap gap-2" role="tablist" aria-label="Analytics sections" onKeyDown={handleSectionKeyDown}>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2" role="tablist" aria-label="Analytics sections" onKeyDown={handleSectionKeyDown}>
                   {sections.map((section) => (
                     <button
                       key={section}
@@ -499,22 +502,22 @@ export default function Analytics() {
                       id={`tab-${section}`}
                       tabIndex={activeSection === section ? 0 : -1}
                       onClick={() => setActiveSection(section)}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                         activeSection === section
                           ? 'bg-blue-500 text-white'
                           : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                       }`}
                     >
-                      {section === 'intelligence' ? 'Intelligence' : section.charAt(0).toUpperCase() + section.slice(1)}
+                      {section === 'intelligence' ? 'Research' : section.charAt(0).toUpperCase() + section.slice(1)}
                     </button>
                   ))}
                 </div>
-                <div className="flex flex-wrap gap-2 items-center">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center">
                   {timeRanges.map((range) => (
                     <button
                       key={range.id}
                       onClick={() => setTimeRange(range.id)}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                         timeRange === range.id
                           ? 'bg-blue-500 text-white'
                           : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -523,7 +526,7 @@ export default function Analytics() {
                       {range.shortLabel}
                     </button>
                   ))}
-                  <MetricTooltip content="Time range filters volume charts, network stats, trending pairs, platform activity, and research briefs. Market cap uses live CoinGecko data.">
+                  <MetricTooltip content="Time range filters volume charts, network stats, and trending pairs. Market cap uses live CoinGecko data.">
                     <span className="text-gray-500 cursor-help ml-1 text-sm">ⓘ</span>
                   </MetricTooltip>
                 </div>
@@ -532,25 +535,8 @@ export default function Analytics() {
 
             <LiveMarketPulse />
 
-            <ResearchBriefBanner page="analytics" />
-
-            {/* Analytics Content - section-level loading; no full-page block */}
-            {analyticsError ? (
-              <div className="text-center py-12 space-y-3">
-                <p className="text-red-400">Failed to load analytics. Please try again.</p>
-                {analyticsErrorObj?.message && (
-                  <p className="text-sm text-gray-500">{analyticsErrorObj.message}</p>
-                )}
-                <button
-                  type="button"
-                  onClick={() => queryClient.invalidateQueries({ queryKey: ['analytics'] })}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium"
-                >
-                  Retry
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-8">
+            {/* Analytics Content - section-level loading; Research still usable if volume API fails */}
+            <div className="space-y-8">
                 {activeSection === 'intelligence' && (
                   <Suspense fallback={<ChartSkeleton />}>
                     <OnchainIntelligenceDashboard
@@ -565,7 +551,20 @@ export default function Analytics() {
                 )}
 
                 {/* Overview Section */}
-                {activeSection === 'overview' && (
+                {activeSection === 'overview' && analyticsError && (
+                  <div className="text-center py-12 space-y-3">
+                    <p className="text-red-400">Couldn’t load volume data.</p>
+                    <p className="text-sm text-gray-500">Try again, or open Market for global stats.</p>
+                    <button
+                      type="button"
+                      onClick={() => queryClient.invalidateQueries({ queryKey: ['analytics'] })}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                )}
+                {activeSection === 'overview' && !analyticsError && (
                   <div id="analytics-panel-overview" role="tabpanel" aria-labelledby="tab-overview" className="space-y-6">
 
                 {/* Key Metrics - Compact */}
@@ -688,7 +687,7 @@ export default function Analytics() {
                 {!isLoading && activeSection === 'overview' && !marketData?.data && (!analytics || Object.keys(analytics).length === 0) && (
                   <div className="bg-gray-800/80 border border-gray-600 rounded-xl p-4 text-center">
                     <p className="text-gray-400 text-sm">
-                      Live metrics will appear when market data is available. Use <strong>Refresh</strong> or switch to <strong>Market</strong> for global stats.
+                      No volume yet. Use Retry/Refresh, or open Market.
                     </p>
                   </div>
                 )}
@@ -733,14 +732,11 @@ export default function Analytics() {
                   ) : (
                     <div className="text-center py-12">
                       <div className="bg-gray-700/50 rounded-lg p-6 max-w-md mx-auto">
-                        <p className="text-gray-300 mb-2">Trading Pairs Data Unavailable</p>
+                        <p className="text-gray-300 mb-2">No top pairs yet</p>
                         <p className="text-sm text-gray-400 mb-4">
-                          {analytics && Object.keys(analytics).length > 0 
-                            ? 'Top trading pairs are being fetched from the backend. If this persists, the backend may not have collected data yet or The Graph API may be rate-limited.'
-                            : 'Top trading pairs data requires backend API integration. The backend endpoint is available but may need time to collect initial data.'}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          Data source: GeckoTerminal, DefiLlama
+                          {analytics && Object.keys(analytics).length > 0
+                            ? 'Pairs are still loading. Try Refresh, or check back shortly.'
+                            : 'Pair volume will show here when market data is available. Try Refresh.'}
                         </p>
                       </div>
                     </div>
@@ -754,7 +750,7 @@ export default function Analytics() {
                     className="rounded-2xl shadow-xl p-6 mb-6"
                     style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
                   >
-                    <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">📰 Crypto & DeFi News</h2>
+                    <h2 className="text-xl font-bold text-white mb-4">Crypto & DeFi news</h2>
                     <div className="grid gap-3 sm:grid-cols-2">
                       {cryptoNews.articles.slice(0, 6).map((article, idx) => (
                         <a
@@ -773,7 +769,7 @@ export default function Analytics() {
                 )}
                 {dashboardStats && (
                   <div className="rounded-2xl shadow-xl p-6 mb-6" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                    <h2 className="text-xl font-bold text-white mb-4">Platform Activity</h2>
+                    <h2 className="text-xl font-bold text-white mb-4">Site activity</h2>
                     <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                       {[
                         { k: 'total_interactions', l: 'Interactions' },
@@ -790,18 +786,20 @@ export default function Analytics() {
                     </div>
                   </div>
                 )}
-                <div className="interactive-card bg-gradient-to-r from-purple-900/40 to-blue-900/40 rounded-2xl p-6 border border-purple-500/30 mb-6">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">✨ Pro Analytics <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-purple-500/30 text-purple-300">NFT Holders</span></h2>
-                      <p className="text-sm text-gray-300 mb-2">Unlock advanced analytics when you hold Boing NFTs.</p>
-                      <a href="/create-nft" className="inline-block px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium">Learn more →</a>
-                    </div>
-                  </div>
-                </div>
+                <details className="mb-6 rounded-xl border border-purple-500/25 px-4 py-3" style={{ backgroundColor: 'rgba(88,28,135,0.15)' }}>
+                  <summary className="cursor-pointer text-sm font-medium text-purple-200">
+                    Extra charts for Boing NFT holders
+                  </summary>
+                  <p className="text-sm text-gray-300 mt-2 mb-2">
+                    Some advanced charts unlock when you hold Boing NFTs.
+                  </p>
+                  <a href="/boing/staking" className="text-sm underline text-cyan-400 hover:text-cyan-300">
+                    NFT staking (coming soon)
+                  </a>
+                </details>
                 {priceInsights && priceInsights.length > 0 && (
                   <div className="rounded-2xl shadow-xl p-6" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                    <h2 className="text-2xl font-bold text-white mb-4">Price Insights (7-Day Forecast)</h2>
+                    <h2 className="text-2xl font-bold text-white mb-4">Price trends (estimate)</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {priceInsights.map((insight) => (
                         <div key={insight.symbol} className="bg-gray-700 rounded-xl p-4 border border-gray-600">
@@ -831,12 +829,9 @@ export default function Analytics() {
                     ) : marketData ? (
                       <>
                         <FearGreedPanel />
-                        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-6">
-                          <p className="text-sm text-blue-300">
-                            <span className="font-semibold">Note:</span> Market data shows current global cryptocurrency statistics. 
-                            Time range selection affects the Overview chart visualization but market statistics reflect real-time data from CoinGecko.
-                          </p>
-                        </div>
+                        <p className="text-sm text-gray-400 -mt-2">
+                          Live global stats. Time range mainly affects Overview charts.
+                        </p>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                           <div
                     className="rounded-2xl shadow-xl p-6"
@@ -913,10 +908,10 @@ export default function Analytics() {
                       border: '1px solid var(--border-color)',
                     }}
                   >
-                          <h2 className="text-2xl font-bold text-white mb-6">Market Statistics</h2>
+                          <h2 className="text-xl font-bold text-white mb-4">More stats</h2>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div>
-                              <p className="text-sm text-gray-400 mb-1">Active Cryptocurrencies</p>
+                              <p className="text-sm text-gray-400 mb-1">Active coins</p>
                               <p className="text-xl font-bold text-white">
                                 {marketData.data?.active_cryptocurrencies?.toLocaleString() || 'N/A'}
                               </p>
@@ -928,7 +923,7 @@ export default function Analytics() {
                               </p>
                             </div>
                             <div>
-                              <p className="text-sm text-gray-400 mb-1">Market Cap Change 24h</p>
+                              <p className="text-sm text-gray-400 mb-1">Market cap (24h)</p>
                               <p className={`text-xl font-bold ${marketData.data?.market_cap_change_percentage_24h_usd >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                                 {marketData.data?.market_cap_change_percentage_24h_usd 
                                   ? (marketData.data.market_cap_change_percentage_24h_usd >= 0 ? '+' : '') + marketData.data.market_cap_change_percentage_24h_usd.toFixed(2) + '%'
@@ -936,7 +931,7 @@ export default function Analytics() {
                               </p>
                             </div>
                             <div>
-                              <p className="text-sm text-gray-400 mb-1">Last Updated</p>
+                              <p className="text-sm text-gray-400 mb-1">Updated</p>
                               <p className="text-sm text-white">
                                 {marketData.data?.updated_at 
                                   ? (() => {
@@ -965,8 +960,9 @@ export default function Analytics() {
                         </div>
                       </>
                     ) : (
-                      <div className="text-center py-12">
-                        <p className="text-gray-300">Market data not available. Please check your connection and try again.</p>
+                      <div className="text-center py-12 space-y-3">
+                        <p className="text-gray-300">Market data isn’t available right now.</p>
+                        <p className="text-sm text-gray-500">Use Refresh above, or try again in a moment.</p>
                       </div>
                     )}
                   </div>
@@ -982,10 +978,16 @@ export default function Analytics() {
                         border: '1px solid var(--border-color)',
                       }}
                     >
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
-                        <h2 className="text-xl sm:text-2xl font-bold text-white shrink-0">Trending Tokens</h2>
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
+                        <div>
+                          <h2 className="text-xl sm:text-2xl font-bold text-white shrink-0">Trending tokens</h2>
+                          <p className="text-sm text-gray-400 mt-1">
+                            Tokens people are looking at right now
+                            {selectedNetwork !== 'all' ? ` · ${getNetworkName(selectedNetwork)}` : ''}.
+                          </p>
+                        </div>
                         <div className="flex flex-col filter:flex-row filter:items-center gap-2 sm:gap-3 w-full sm:w-auto min-w-0">
-                          <label htmlFor="network-selector" className="text-sm text-gray-300 shrink-0">Network:</label>
+                          <label htmlFor="network-selector" className="text-sm text-gray-300 shrink-0">Network</label>
                           <select
                             id="network-selector"
                             name="network-selector"
@@ -993,7 +995,7 @@ export default function Analytics() {
                             onChange={(e) => setSelectedNetwork(e.target.value)}
                             className="w-full sm:w-auto sm:min-w-[14rem] px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500 text-sm"
                           >
-                            <option value="all">All Networks (CoinGecko)</option>
+                            <option value="all">All networks</option>
                             <option value="1">Ethereum</option>
                             <option value="137">Polygon</option>
                             <option value="56">BSC</option>
@@ -1002,17 +1004,6 @@ export default function Analytics() {
                             <option value="8453">Base</option>
                           </select>
                         </div>
-                      </div>
-                      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mb-6">
-                        <p className="text-sm text-blue-300">
-                          <span className="font-semibold">Note:</span> Trending tokens show current popularity based on search volume and social activity. 
-                          {selectedNetwork === 'all' 
-                            ? ' Data from CoinGecko (all cryptocurrencies).' 
-                            : ` Data from backend API for ${getNetworkName(selectedNetwork)} network.`}
-                          {selectedNetwork === 'all'
-                            ? ' Time range does not affect CoinGecko trending (current market sentiment).'
-                            : ` Top pairs reflect the selected analytics range (${timeRange === 'all' ? 'all time' : timeRange}).`}
-                        </p>
                       </div>
                       {trendingLoading ? (
                         <div className="text-center py-12">
@@ -1088,24 +1079,22 @@ export default function Analytics() {
                           })}
                         </div>
                       ) : (
-                        <div className="text-center py-12">
-                          <p className="text-gray-300 mb-2">
-                            {selectedNetwork !== 'all' 
-                              ? `No trending tokens available for ${getNetworkName(selectedNetwork)} network.` 
-                              : 'No trending tokens available'}
+                        <div className="text-center py-12 space-y-3">
+                          <p className="text-gray-300">
+                            {selectedNetwork !== 'all'
+                              ? `No trending tokens for ${getNetworkName(selectedNetwork)} yet.`
+                              : 'No trending tokens right now.'}
                           </p>
-                          {selectedNetwork !== 'all' && (
-                            <>
-                              <p className="text-sm text-gray-400 mb-4">
-                                This may be due to API limitations or network-specific data unavailability.
-                              </p>
-                              <button
-                                onClick={() => setSelectedNetwork('all')}
-                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm"
-                              >
-                                Show All Networks (CoinGecko)
-                              </button>
-                            </>
+                          {selectedNetwork !== 'all' ? (
+                            <button
+                              type="button"
+                              onClick={() => setSelectedNetwork('all')}
+                              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm"
+                            >
+                              Show all networks
+                            </button>
+                          ) : (
+                            <p className="text-sm text-gray-500">Try Refresh, or check Overview for volume.</p>
                           )}
                         </div>
                       )}
@@ -1120,8 +1109,8 @@ export default function Analytics() {
                       border: '1px solid var(--border-color)',
                     }}
                   >
-                        <h2 className="text-2xl font-bold text-white mb-4">Trending NFT Collections</h2>
-                        <p className="text-sm text-gray-400 mb-6">Top collections by 24h volume. Source: CoinGecko.</p>
+                        <h2 className="text-xl font-bold text-white mb-1">Trending NFT collections</h2>
+                        <p className="text-sm text-gray-400 mb-6">Top collections by 24h volume</p>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                           {trendingNfts.map((nft, index) => (
                             <a
@@ -1146,7 +1135,6 @@ export default function Analytics() {
                   </div>
                 )}
               </div>
-            )}
           </div>
         </div>
       </div>

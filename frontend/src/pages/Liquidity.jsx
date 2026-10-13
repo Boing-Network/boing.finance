@@ -42,7 +42,10 @@ const Liquidity = () => {
         }
       } catch (error) {
         console.error('Failed to fetch pools:', error);
-        toast.error('Could not load liquidity pools from the API.');
+        // Avoid toast spam on the disconnected empty screen; connected users get a plain next step.
+        if (account) {
+          toast.error('Couldn’t load pools. Try Browse pools, or refresh.');
+        }
         setPairs([]);
       } finally {
         setLoading(false);
@@ -50,7 +53,7 @@ const Liquidity = () => {
     };
 
     fetchPools();
-  }, []);
+  }, [account]);
 
   // Fetch user's liquidity positions - React Query v5 API
   const { data: liquidityData, isLoading: liquidityLoading } = useQuery({
@@ -125,14 +128,14 @@ const Liquidity = () => {
           <meta name="twitter:description" content="Provide liquidity to earn rewards." />
         </Helmet>
         <div className="relative max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 overflow-x-hidden"><div className="relative z-10"><div className="text-center py-12">
-              <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">Connect Your Wallet</h1>
-              <p className="text-gray-300 mb-8">Connect your wallet to add liquidity and earn fees.</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">Your liquidity</h1>
+              <p className="text-gray-300 mb-8">Connect a wallet to add or remove liquidity.</p>
               <button
                 type="button"
                 onClick={connectWallet}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200"
               >
-                Connect Wallet
+                Connect wallet
               </button>
             </div>
           </div>
@@ -167,7 +170,7 @@ const Liquidity = () => {
                   className="cursor-pointer text-sm font-medium"
                   style={{ color: 'var(--text-secondary)' }}
                 >
-                  Advanced — LP vault (share token)
+                  Advanced — LP vault
                 </summary>
                 <div className="mt-3">
                   <NativeAmmLpVaultPanel compact />
@@ -180,30 +183,23 @@ const Liquidity = () => {
           {/* Header */}
           <div className="text-center mb-6 sm:mb-8">
             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 sm:mb-4">
-              Liquidity Provision
+              Your liquidity
             </h1>
-            <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
-              Provide liquidity to trading pairs and earn a share of trading fees. 
-              The more liquidity you provide, the more fees you earn!
+            <p className="text-base sm:text-lg text-gray-300 max-w-2xl mx-auto">
+              Add or remove tokens from a pool to earn a share of swap fees.
             </p>
-            <div className="flex flex-wrap justify-center gap-3 mt-4 sm:mt-6">
+            <div className="flex flex-wrap justify-center items-center gap-3 mt-4 sm:mt-6">
               <Link
                 to="/pools"
                 className="bg-cyan-600 hover:bg-cyan-500 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors border border-cyan-500/40 text-sm sm:text-base"
               >
-                View All Pools
+                Browse pools
               </Link>
               <Link
                 to="/swap"
-                className="bg-white/20 hover:bg-white/30 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors border border-white/30 text-sm sm:text-base"
+                className="text-sm underline text-cyan-300 hover:text-cyan-200"
               >
-                Start Trading
-              </Link>
-              <Link
-                to="/docs"
-                className="bg-white/20 hover:bg-white/30 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors border border-white/30 text-sm sm:text-base"
-              >
-                Learn More
+                Swap
               </Link>
             </div>
           </div>
@@ -304,66 +300,43 @@ const Liquidity = () => {
                 ) : (
                   <EmptyState
                     variant="pools"
-                    title="No pools returned"
-                    description="Pool directory may be empty for this API, or the liquidity endpoint is offline. Browse on-chain pools instead."
+                    title="No pools listed here"
+                    description="Browse pools to pick a pair, or create one if you are starting fresh."
                     actionHref="/pools"
-                    actionLabel="Open Pools"
+                    actionLabel="Browse pools"
                   />
                 )}
-
-                <div className="mt-4 sm:mt-6">
-                  <Link
-                    to="/pools"
-                    className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg text-center block text-sm sm:text-base transition-colors"
-                  >
-                    View All Pools
-                  </Link>
-                </div>
               </div>
             </div>
 
-            {/* Quick Actions */}
+            {/* Next steps */}
             <div className="space-y-4 sm:space-y-6">
               <div className="bg-gray-800 rounded-xl p-4 sm:p-6 border border-gray-700">
-                <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Quick Actions</h3>
-                <div className="space-y-2 sm:space-y-3">
-                  <Link
-                    to="/create-pool"
-                    className="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition duration-200 text-center block text-sm sm:text-base"
-                  >
-                    {Number(chainId) === BOING_NATIVE_L1_CHAIN_ID ? 'Create a new pool' : 'Create New Pair'}
-                  </Link>
-                  <Link
-                    to="/deploy-token"
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition duration-200 text-center block text-sm sm:text-base"
-                  >
-                    Create Token
-                  </Link>
-                  <Link
-                    to="/swap"
-                    className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition duration-200 text-center block text-sm sm:text-base"
-                  >
-                    Start Trading
-                  </Link>
-                </div>
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Need a new pair?</h3>
+                <Link
+                  to="/create-pool"
+                  className="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition duration-200 text-center block text-sm sm:text-base"
+                >
+                  Create pool
+                </Link>
+                <p className="text-xs text-gray-500 mt-3">
+                  Otherwise use the form above to add to an existing pool.
+                </p>
               </div>
 
-              {/* Liquidity Info */}
-              <div className="bg-gradient-to-br from-green-600/20 to-blue-600/20 rounded-xl p-4 sm:p-6 border border-green-500/30">
-                <div className="text-center">
-                  <div className="text-2xl sm:text-3xl mb-2 sm:mb-3">💧</div>
-                  <h4 className="text-base sm:text-lg font-semibold text-white mb-2">How Liquidity Works</h4>
-                  <p className="text-gray-300 text-xs sm:text-sm mb-3 sm:mb-4">
-                    Seed a new pair on Create Pool (one transaction). Add or remove on an
-                    existing pair with the form above. Trading fees stay in the pool until you remove LP.
-                  </p>
-                  <div className="text-xs text-gray-400 space-y-1">
-                    <p>• 0.3% fee is realized on remove</p>
-                    <p>• There is no separate Collect</p>
-                    <p>• Do not transfer tokens to a pair and mint later</p>
-                  </div>
+              <details className="bg-gradient-to-br from-green-600/20 to-blue-600/20 rounded-xl p-4 sm:p-6 border border-green-500/30">
+                <summary className="cursor-pointer text-base sm:text-lg font-semibold text-white">
+                  How liquidity works
+                </summary>
+                <p className="text-gray-300 text-xs sm:text-sm mt-3 mb-3">
+                  Create a pool to start a new pair, or add to an existing pool with the form above.
+                  Fees stay in the pool until you remove liquidity.
+                </p>
+                <div className="text-xs text-gray-400 space-y-1">
+                  <p>• Fees are realized when you remove liquidity</p>
+                  <p>• There is no separate “collect fees” step on this path</p>
                 </div>
-              </div>
+              </details>
             </div>
           </div>
 
@@ -371,10 +344,9 @@ const Liquidity = () => {
           {isConnected && liquidityData && (
             <div className="mt-6 sm:mt-8">
               <div className="bg-gray-800 rounded-xl p-4 sm:p-6 border border-gray-700">
-                <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">Indexed positions</h3>
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">Saved positions</h3>
                 <p className="text-sm text-gray-400 mb-4 sm:mb-6">
-                  These rows come from the API indexer, not your wallet. Use Manage an existing pair
-                  above to add or remove on-chain.
+                  Recent positions from this app. Use the form above to add or remove on-chain.
                 </p>
                 
                 {liquidityLoading ? (
@@ -433,8 +405,8 @@ const Liquidity = () => {
                               <p className="text-white">{new Date(position.addedAt).toLocaleDateString()}</p>
                             </div>
                             <div>
-                              <span className="text-gray-400">Last Claim:</span>
-                              <p className="text-white">{position.lastClaimed ? new Date(position.lastClaimed).toLocaleDateString() : 'Never'}</p>
+                              <span className="text-gray-400">Fees in pool:</span>
+                              <p className="text-white">{position.lastClaimed ? new Date(position.lastClaimed).toLocaleDateString() : 'In pool'}</p>
                             </div>
                           </div>
                         </div>
@@ -444,8 +416,8 @@ const Liquidity = () => {
                 ) : (
                   <EmptyState
                     variant="pools"
-                    title="No indexed positions"
-                    description="Create a pair or add liquidity on-chain. Indexed rows appear after the API sees the events."
+                    title="No saved positions yet"
+                    description="Create a pool or add liquidity. Positions show here after the app records them."
                     actionHref="/create-pool"
                     actionLabel="Create Pool"
                   />
