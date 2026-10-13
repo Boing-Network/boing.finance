@@ -15,7 +15,6 @@ import { downloadCSV } from '../utils/exportData';
 import toast from 'react-hot-toast';
 import LiveMarketPulse from '../components/LiveMarketPulse';
 import FearGreedPanel from '../components/FearGreedPanel';
-import ResearchBriefBanner from '../components/research/ResearchBriefBanner';
 import AnalyticsTopPairsView from '../components/AnalyticsTopPairsView';
 import { getFearGreedIndex } from '../services/fearGreedService';
 import {
@@ -537,25 +536,8 @@ export default function Analytics() {
 
             <LiveMarketPulse />
 
-            {activeSection === 'intelligence' && <ResearchBriefBanner page="analytics" />}
-
-            {/* Analytics Content - section-level loading; no full-page block */}
-            {analyticsError ? (
-              <div className="text-center py-12 space-y-3">
-                <p className="text-red-400">Failed to load analytics. Please try again.</p>
-                {analyticsErrorObj?.message && (
-                  <p className="text-sm text-gray-500">{analyticsErrorObj.message}</p>
-                )}
-                <button
-                  type="button"
-                  onClick={() => queryClient.invalidateQueries({ queryKey: ['analytics'] })}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium"
-                >
-                  Retry
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-8">
+            {/* Analytics Content - section-level loading; Research still usable if volume API fails */}
+            <div className="space-y-8">
                 {activeSection === 'intelligence' && (
                   <Suspense fallback={<ChartSkeleton />}>
                     <OnchainIntelligenceDashboard
@@ -570,7 +552,22 @@ export default function Analytics() {
                 )}
 
                 {/* Overview Section */}
-                {activeSection === 'overview' && (
+                {activeSection === 'overview' && analyticsError && (
+                  <div className="text-center py-12 space-y-3">
+                    <p className="text-red-400">Couldn’t load volume data. Try Refresh above.</p>
+                    {analyticsErrorObj?.message && (
+                      <p className="text-sm text-gray-500">{analyticsErrorObj.message}</p>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => queryClient.invalidateQueries({ queryKey: ['analytics'] })}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                )}
+                {activeSection === 'overview' && !analyticsError && (
                   <div id="analytics-panel-overview" role="tabpanel" aria-labelledby="tab-overview" className="space-y-6">
 
                 {/* Key Metrics - Compact */}
@@ -1149,7 +1146,6 @@ export default function Analytics() {
                   </div>
                 )}
               </div>
-            )}
           </div>
         </div>
       </div>
