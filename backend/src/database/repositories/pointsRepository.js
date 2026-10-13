@@ -20,6 +20,12 @@ export class PointsRepository {
     return row;
   }
 
+  async findActivityByTxHash(txHash) {
+    if (!txHash) return null;
+    const [row] = await this.db.select().from(pointsActivity).where(eq(pointsActivity.txHash, txHash)).limit(1);
+    return row ?? null;
+  }
+
   async addPoints(address, points, action, txHash = null, chainId = null, metadata = null) {
     await this.getOrCreatePoints(address);
     const [activity] = await this.db.insert(pointsActivity).values({

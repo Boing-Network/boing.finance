@@ -1,12 +1,17 @@
 import { accruePoints } from '../services/boingApi';
 
 /** Planned point rates (must match Boing Points UI). Fire-and-forget; never blocks UX. */
+/** Keep in sync with backend `POINTS_RATES` in boingRoutes.js */
 export const POINTS_RATES = {
   swap: 10,
   liquidity_add: 25,
+  liquidity_remove: 10,
   deploy: 50,
   bridge: 15,
   vote: 20,
+  stake: 25,
+  unstake: 10,
+  claim: 15,
 };
 
 /**
