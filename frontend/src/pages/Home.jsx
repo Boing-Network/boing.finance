@@ -225,7 +225,7 @@ function Home() {
             <div className="text-center max-w-xl mx-auto">
               <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>What you can do</h2>
               <p className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>
-                Trade first — or launch a collection and token together with Project pack.
+                Trade, bridge, or launch — start with Swap or Project pack.
               </p>
             </div>
             {/* First row - 6 cards in 3 columns - dynamically generated from navigation */}
@@ -301,16 +301,16 @@ function Home() {
               <h2 className="text-2xl font-bold text-center mb-6" style={{ color: 'var(--text-primary)' }}>Tools & Resources</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
                 <a href="/docs" className="block h-full">
-                  <FeatureCard title="Documentation" description="Guides for swapping, liquidity, bridging, and deployment" />
+                  <FeatureCard title="Documentation" description="Guides for swap, pools, bridge, and deploy" />
                 </a>
                 <a href="/developer-tools" className="block h-full">
-                  <FeatureCard title="Developer Tools" description="Contract utilities and debugging tools" />
+                  <FeatureCard title="Developer Tools" description="Builder utilities — not required for Swap" />
                 </a>
                 <a href="/watchlist" className="block h-full">
-                  <FeatureCard title="Watchlist" description="Track tokens and price alerts" />
+                  <FeatureCard title="Watchlist" description="Track tokens you care about" />
                 </a>
                 <a href="/help-center" className="block h-full">
-                  <FeatureCard title="Help Center" description="FAQs and support — use Ask AI when you need help" />
+                  <FeatureCard title="Help Center" description="FAQs and Ask AI" />
                 </a>
               </div>
             </section>

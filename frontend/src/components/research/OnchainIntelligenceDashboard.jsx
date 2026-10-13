@@ -73,18 +73,13 @@ export default function OnchainIntelligenceDashboard({
 
   return (
     <div id="analytics-panel-intelligence" role="tabpanel" aria-labelledby="tab-intelligence" className="space-y-6">
-      <div className="rounded-xl p-4 border" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-card)' }}>
-        <h3 className="text-sm font-semibold text-white mb-1">Highlights from current data</h3>
-        <p className="text-sm text-gray-400">
-          Short takeaways from volume, trending tokens, and market mood for{' '}
-          <span className="text-cyan-400">{timeRange === 'all' ? 'all time' : timeRange}</span>.
-          Use Overview or Market for charts and stats.
-        </p>
-      </div>
-
       <section>
         <h2 className="text-xl font-bold text-white mb-1">Market highlights</h2>
-        <p className="text-sm text-gray-400 mb-4">What stands out right now — and a simple next step</p>
+        <p className="text-sm text-gray-400 mb-4">
+          What stands out for{' '}
+          <span className="text-cyan-400">{timeRange === 'all' ? 'all time' : timeRange}</span>
+          {' '}— and a simple next step
+        </p>
         {insights.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {insights.map((insight) => (

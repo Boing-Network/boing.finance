@@ -33,53 +33,96 @@ export default function GovernanceVote() {
   return (
     <>
       <Helmet>
-        <title>Governance Vote | boing.finance — Proposals & DAO</title>
-        <meta name="description" content="Vote on proposals and create your own. Participate in boing.finance DAO governance." />
+        <title>Create a proposal | boing.finance</title>
+        <meta name="description" content="Submit a community proposal for signaling on boing.finance." />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <PageHeader title="Create a proposal" subtitle="Submit a proposal for community signaling. On-chain voting thresholds are not enforced yet." />
+        <PageHeader
+          title="Create a proposal"
+          subtitle="Share an idea for community signaling — not on-chain voting yet."
+        />
 
-        <div className="mb-6 rounded-lg border border-amber-500/30 bg-amber-900/20 px-4 py-3 text-sm text-amber-100">
-          <strong>Signaling only:</strong> Creating a proposal does not check a 10,000 BOING balance on-chain. Submissions go to the governance API for review.
-        </div>
-        <div className="flex gap-4 mb-8">
-          <Link to="/governance/proposals" className="text-cyan-400 hover:text-cyan-300 text-sm font-medium">← Back to Proposals</Link>
-          <Link to="/governance/learn" className="text-cyan-400 hover:text-cyan-300 text-sm font-medium">How it works</Link>
-        </div>
+        <p className="mb-4 text-sm" style={{ color: 'var(--text-secondary)' }}>
+          Submissions go to the governance API for review. No BOING balance check today.{' '}
+          <Link to="/governance/learn" className="text-cyan-400 hover:text-cyan-300">
+            How it works
+          </Link>
+          {' · '}
+          <Link to="/governance/proposals" className="text-cyan-400 hover:text-cyan-300">
+            Proposals
+          </Link>
+        </p>
 
         {account ? (
           <PageCard>
             {submitted ? (
               <div className="text-center py-8">
-                <div className="text-4xl mb-4">✅</div>
-                <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Proposal Submitted</h3>
-                <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>Your proposal has been submitted for review. It will appear in the proposals list after verification.</p>
-                <Link to="/governance/proposals" className="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-600 text-white font-medium">View Proposals</Link>
+                <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Proposal submitted</h3>
+                <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
+                  It will show in Proposals after review.
+                </p>
+                <Link to="/governance/proposals" className="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-600 text-white font-medium">
+                  View proposals
+                </Link>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label htmlFor="governance-proposal-title" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Proposal Title</label>
-                  <input id="governance-proposal-title" name="title" type="text" autoComplete="off" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Add support for new network" required className="w-full px-4 py-3 rounded-lg border bg-gray-800/50" style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} />
+                  <label htmlFor="governance-proposal-title" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                    Title
+                  </label>
+                  <input
+                    id="governance-proposal-title"
+                    name="title"
+                    type="text"
+                    autoComplete="off"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g. Add support for a new network"
+                    required
+                    className="w-full px-4 py-3 rounded-lg border bg-gray-800/50"
+                    style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                  />
                 </div>
                 <div>
-                  <label htmlFor="governance-proposal-description" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Description</label>
-                  <textarea id="governance-proposal-description" name="description" autoComplete="off" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe your proposal in detail..." required rows={6} className="w-full px-4 py-3 rounded-lg border bg-gray-800/50 resize-none" style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} />
+                  <label htmlFor="governance-proposal-description" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                    Description
+                  </label>
+                  <textarea
+                    id="governance-proposal-description"
+                    name="description"
+                    autoComplete="off"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="What should the community consider?"
+                    required
+                    rows={6}
+                    className="w-full px-4 py-3 rounded-lg border bg-gray-800/50 resize-none"
+                    style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                  />
                 </div>
                 {error && <p className="text-amber-400 text-sm">{error}</p>}
-                <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-                  Planned future requirement: hold BOING to create proposals (target threshold 10,000). Not enforced in this UI yet.
-                </div>
-                <button type="submit" disabled={loading} className="w-full py-3 rounded-lg font-medium bg-cyan-500 hover:bg-cyan-600 text-white transition-colors disabled:opacity-50">Submit Proposal</button>
+                <details className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                  <summary className="cursor-pointer">Planned rules</summary>
+                  <p className="mt-2">
+                    Future versions may require holding BOING to create proposals. Not enforced in this form yet.
+                  </p>
+                </details>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 rounded-lg font-medium bg-cyan-500 hover:bg-cyan-600 text-white transition-colors disabled:opacity-50"
+                >
+                  {loading ? 'Submitting…' : 'Submit proposal'}
+                </button>
               </form>
             )}
           </PageCard>
         ) : (
           <PageCard className="text-center py-12">
-            <div className="text-5xl mb-4">🔐</div>
             <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Connect wallet to submit</h3>
             <p className="text-sm mb-6 max-w-md mx-auto" style={{ color: 'var(--text-secondary)' }}>
-              Connect your wallet to submit a proposal for community signaling.
+              Connect your wallet, then write a short title and description.
             </p>
             <button
               type="button"

@@ -125,14 +125,14 @@ const Liquidity = () => {
           <meta name="twitter:description" content="Provide liquidity to earn rewards." />
         </Helmet>
         <div className="relative max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 overflow-x-hidden"><div className="relative z-10"><div className="text-center py-12">
-              <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">Connect Your Wallet</h1>
-              <p className="text-gray-300 mb-8">Connect your wallet to add liquidity and earn fees.</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">Your liquidity</h1>
+              <p className="text-gray-300 mb-8">Connect a wallet to add or remove liquidity.</p>
               <button
                 type="button"
                 onClick={connectWallet}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200"
               >
-                Connect Wallet
+                Connect wallet
               </button>
             </div>
           </div>
@@ -167,7 +167,7 @@ const Liquidity = () => {
                   className="cursor-pointer text-sm font-medium"
                   style={{ color: 'var(--text-secondary)' }}
                 >
-                  Advanced — LP vault (share token)
+                  Advanced — LP vault
                 </summary>
                 <div className="mt-3">
                   <NativeAmmLpVaultPanel compact />
@@ -182,7 +182,7 @@ const Liquidity = () => {
             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 sm:mb-4">
               Your liquidity
             </h1>
-            <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-300 max-w-2xl mx-auto">
               Add or remove tokens from a pool to earn a share of swap fees.
             </p>
             <div className="flex flex-wrap justify-center items-center gap-3 mt-4 sm:mt-6">
@@ -197,12 +197,6 @@ const Liquidity = () => {
                 className="text-sm underline text-cyan-300 hover:text-cyan-200"
               >
                 Swap
-              </Link>
-              <Link
-                to="/docs"
-                className="text-sm underline text-gray-400 hover:text-gray-300"
-              >
-                Docs
               </Link>
             </div>
           </div>
@@ -303,28 +297,19 @@ const Liquidity = () => {
                 ) : (
                   <EmptyState
                     variant="pools"
-                    title="No pools returned"
-                    description="Pool directory may be empty for this API, or the liquidity endpoint is offline. Browse on-chain pools instead."
+                    title="No pools listed here"
+                    description="Browse pools to pick a pair, or create one if you are starting fresh."
                     actionHref="/pools"
-                    actionLabel="Open Pools"
+                    actionLabel="Browse pools"
                   />
                 )}
-
-                <div className="mt-4 sm:mt-6">
-                  <Link
-                    to="/pools"
-                    className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg text-center block text-sm sm:text-base transition-colors"
-                  >
-                    View All Pools
-                  </Link>
-                </div>
               </div>
             </div>
 
             {/* Next steps */}
             <div className="space-y-4 sm:space-y-6">
               <div className="bg-gray-800 rounded-xl p-4 sm:p-6 border border-gray-700">
-                <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Next step</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Need a new pair?</h3>
                 <Link
                   to="/create-pool"
                   className="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition duration-200 text-center block text-sm sm:text-base"
@@ -332,7 +317,7 @@ const Liquidity = () => {
                   Create pool
                 </Link>
                 <p className="text-xs text-gray-500 mt-3">
-                  Or use the form above to add liquidity to an existing pool.
+                  Otherwise use the form above to add to an existing pool.
                 </p>
               </div>
 
@@ -358,7 +343,7 @@ const Liquidity = () => {
               <div className="bg-gray-800 rounded-xl p-4 sm:p-6 border border-gray-700">
                 <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">Saved positions</h3>
                 <p className="text-sm text-gray-400 mb-4 sm:mb-6">
-                  From the app&apos;s history API — use the manage form above to add or remove on-chain.
+                  Recent positions from this app. Use the form above to add or remove on-chain.
                 </p>
                 
                 {liquidityLoading ? (

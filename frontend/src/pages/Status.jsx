@@ -23,28 +23,28 @@ const Status = () => {
       status: 'operational',
       uptime: 'N/A',
       responseTime: 'N/A',
-      description: 'LI.FI aggregator for EVM routes (0.5% platform fee). Not a Boing-custody bridge; L1↔EVM is separate.'
+      description: 'EVM bridge routes with a small platform fee. Boing does not hold bridge funds.'
     },
     {
       name: 'Liquidity Pools',
       status: 'operational',
       uptime: '99.9%',
       responseTime: '140ms',
-      description: 'Automated market maker pools'
+      description: 'Pools for swapping and providing liquidity'
     },
     {
       name: 'Analytics Dashboard',
       status: 'operational',
       uptime: '99.7%',
       responseTime: '250ms',
-      description: 'Market data and portfolio analytics'
+      description: 'Market volume, trends, and portfolio views'
     },
     {
       name: 'Token Deployment',
       status: 'operational',
       uptime: '99.9%',
       responseTime: '200ms',
-      description: 'ERC20 token creation and deployment'
+      description: 'Create tokens and NFT collections'
     },
     {
       name: 'API Services',

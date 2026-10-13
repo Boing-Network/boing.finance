@@ -554,10 +554,8 @@ export default function Analytics() {
                 {/* Overview Section */}
                 {activeSection === 'overview' && analyticsError && (
                   <div className="text-center py-12 space-y-3">
-                    <p className="text-red-400">Couldn’t load volume data. Try Refresh above.</p>
-                    {analyticsErrorObj?.message && (
-                      <p className="text-sm text-gray-500">{analyticsErrorObj.message}</p>
-                    )}
+                    <p className="text-red-400">Couldn’t load volume data.</p>
+                    <p className="text-sm text-gray-500">Try again, or open Market for global stats.</p>
                     <button
                       type="button"
                       onClick={() => queryClient.invalidateQueries({ queryKey: ['analytics'] })}
@@ -690,7 +688,7 @@ export default function Analytics() {
                 {!isLoading && activeSection === 'overview' && !marketData?.data && (!analytics || Object.keys(analytics).length === 0) && (
                   <div className="bg-gray-800/80 border border-gray-600 rounded-xl p-4 text-center">
                     <p className="text-gray-400 text-sm">
-                      Live metrics will appear when market data is available. Use <strong>Refresh</strong> or switch to <strong>Market</strong> for global stats.
+                      No volume yet. Use Retry/Refresh, or open Market.
                     </p>
                   </div>
                 )}
