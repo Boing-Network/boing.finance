@@ -22,15 +22,12 @@ export default function SwapSpotTicker({ market, networkName, fallbackPair }) {
         ) : null}
         <div className="min-w-0">
           <div className="flex items-baseline gap-2">
-            <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#f0b90b' }}>
-              Spot
-            </span>
             <h2 className="text-lg sm:text-xl font-bold truncate" style={{ color: 'var(--text-primary)' }}>
               {pair}
             </h2>
           </div>
           <p className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
-            {networkName} · on-chain swap
+            {networkName}
           </p>
         </div>
       </div>

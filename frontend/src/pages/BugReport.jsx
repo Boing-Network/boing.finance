@@ -100,24 +100,20 @@ const BugReport = () => {
 
   const reportingGuidelines = [
     {
-      title: 'Be Specific',
-      description: 'Provide clear, detailed descriptions of the issue',
-      icon: '🎯'
+      title: 'Be specific',
+      description: 'Describe what went wrong in plain language',
     },
     {
-      title: 'Include Steps',
-      description: 'List the exact steps to reproduce the problem',
-      icon: '📝'
+      title: 'Include steps',
+      description: 'List the steps to reproduce the problem',
     },
     {
-      title: 'Add Screenshots',
-      description: 'Visual evidence helps us understand the issue better',
-      icon: '📸'
+      title: 'Add screenshots',
+      description: 'A screenshot helps us see what you saw',
     },
     {
-      title: 'Check Existing',
-      description: 'Search existing reports to avoid duplicates',
-      icon: '🔍'
+      title: 'Check existing reports',
+      description: 'Search first so we do not get duplicates',
     }
   ];
 
@@ -167,15 +163,12 @@ const BugReport = () => {
               <div className="lg:col-span-1 space-y-6">
                 {/* Reporting Guidelines */}
                 <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                  <h2 className="text-xl font-bold text-theme-primary mb-4">Reporting Guidelines</h2>
+                  <h2 className="text-xl font-bold text-theme-primary mb-4">Reporting tips</h2>
                   <div className="space-y-4">
                     {reportingGuidelines.map((guideline) => (
-                      <div key={guideline.title} className="flex items-start space-x-3">
-                        <span className="text-2xl">{guideline.icon}</span>
-                        <div>
-                          <h3 className="text-sm font-semibold text-theme-primary mb-1">{guideline.title}</h3>
-                          <p className="text-theme-secondary text-xs">{guideline.description}</p>
-                        </div>
+                      <div key={guideline.title}>
+                        <h3 className="text-sm font-semibold text-theme-primary mb-1">{guideline.title}</h3>
+                        <p className="text-theme-secondary text-xs">{guideline.description}</p>
                       </div>
                     ))}
                   </div>
@@ -183,7 +176,7 @@ const BugReport = () => {
 
                 {/* Security Guidelines */}
                 <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                  <h2 className="text-xl font-bold text-theme-primary mb-4">Security Guidelines</h2>
+                  <h2 className="text-xl font-bold text-theme-primary mb-4">Security</h2>
                   <div className="space-y-2">
                     {securityGuidelines.map((guideline, index) => (
                       <div key={index} className="flex items-start space-x-2">

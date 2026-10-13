@@ -139,7 +139,7 @@ export default function Bridge() {
         if (controller.signal.aborted) return;
         if (!next?.transactionRequest) {
           setQuote(null);
-          setQuoteError('No LI.FI route for this pair. Try USDC, native gas, or open the aggregator.');
+          setQuoteError('No route for this pair. Try USDC or the network’s gas token, or open the advanced bridge.');
           return;
         }
         setQuote(next);
@@ -203,7 +203,7 @@ export default function Bridge() {
       });
       const toUse = fresh?.transactionRequest ? fresh : quote;
       if (!toUse?.transactionRequest) {
-        toast.error('No live route. Opening LI.FI instead.');
+        toast.error('No route in-app. Opening the advanced bridge…');
         window.open(deepLink, '_blank', 'noopener,noreferrer');
         return;
       }
@@ -302,7 +302,7 @@ export default function Bridge() {
         <meta property="og:title" content="Bridge | boing.finance" />
         <meta
           property="og:description"
-          content="Aggregator-powered EVM bridge with a 0.5% platform service fee."
+          content="Move tokens between EVM networks. A small platform fee applies."
         />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/bridge" />
@@ -506,7 +506,7 @@ export default function Bridge() {
                   {quoting
                     ? 'Quoting…'
                     : quote?.venue
-                      ? `${quote.venue} via LI.FI`
+                      ? quote.venue
                       : `${getNetworkInfo(fromChain)?.name || fromChain} → ${getNetworkInfo(toChain)?.name || toChain}`}
                 </span>
               </div>
@@ -634,7 +634,7 @@ export default function Bridge() {
                   <EmptyState
                     variant="bridge"
                     title="No bridge transactions yet"
-                    description="Complete a transfer to see history here. Destination status is tracked by the aggregator, not a Boing relayer."
+                    description="Complete a transfer to see it here. Arrival on the destination network is handled by the route."
                     actionLabel="Bridge tokens"
                     actionHref="#bridge-form"
                   />
@@ -678,10 +678,10 @@ export default function Bridge() {
                       <span className="font-bold text-lg">1</span>
                     </div>
                     <h4 className="font-semibold mb-2 text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>
-                      Quote via LI.FI
+                      Get a quote
                     </h4>
                     <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      Routes use third-party bridges and DEXs. You receive whatever the quote shows after fees.
+                      We find a route across bridges and exchanges. You receive what the quote shows after fees.
                     </p>
                   </div>
                   <div className="text-center">
@@ -695,7 +695,7 @@ export default function Bridge() {
                       {PLATFORM_BRIDGE_FEE_LABEL} platform fee
                     </h4>
                     <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      Taken from the sending token by LI.FI's integrator fee. Plus network gas and any bridge/DEX fees.
+                      Taken from the amount you send. Network gas and any bridge fees may apply on top.
                     </p>
                   </div>
                   <div className="text-center">
@@ -709,8 +709,7 @@ export default function Bridge() {
                       Sign once
                     </h4>
                     <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      Your wallet sends the LI.FI transaction on the source chain. Destination arrival is handled by the
-                      route — Boing does not custody tokens.
+                      Confirm in your wallet on the sending network. Arrival is handled by the route — Boing does not hold your tokens.
                     </p>
                   </div>
                 </div>

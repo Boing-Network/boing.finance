@@ -772,7 +772,7 @@ export default function Analytics() {
                 )}
                 {dashboardStats && (
                   <div className="rounded-2xl shadow-xl p-6 mb-6" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                    <h2 className="text-xl font-bold text-white mb-4">Platform Activity</h2>
+                    <h2 className="text-xl font-bold text-white mb-4">Site activity</h2>
                     <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                       {[
                         { k: 'total_interactions', l: 'Interactions' },
@@ -832,11 +832,9 @@ export default function Analytics() {
                     ) : marketData ? (
                       <>
                         <FearGreedPanel />
-                        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-6">
-                          <p className="text-sm text-blue-300">
-                            Global market stats update live. The time range above mainly affects Overview charts.
-                          </p>
-                        </div>
+                        <p className="text-sm text-gray-400 -mt-2">
+                          Live global stats. Time range mainly affects Overview charts.
+                        </p>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                           <div
                     className="rounded-2xl shadow-xl p-6"
@@ -913,10 +911,10 @@ export default function Analytics() {
                       border: '1px solid var(--border-color)',
                     }}
                   >
-                          <h2 className="text-2xl font-bold text-white mb-6">Market Statistics</h2>
+                          <h2 className="text-xl font-bold text-white mb-4">More stats</h2>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div>
-                              <p className="text-sm text-gray-400 mb-1">Active Cryptocurrencies</p>
+                              <p className="text-sm text-gray-400 mb-1">Active coins</p>
                               <p className="text-xl font-bold text-white">
                                 {marketData.data?.active_cryptocurrencies?.toLocaleString() || 'N/A'}
                               </p>
@@ -928,7 +926,7 @@ export default function Analytics() {
                               </p>
                             </div>
                             <div>
-                              <p className="text-sm text-gray-400 mb-1">Market Cap Change 24h</p>
+                              <p className="text-sm text-gray-400 mb-1">Market cap (24h)</p>
                               <p className={`text-xl font-bold ${marketData.data?.market_cap_change_percentage_24h_usd >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                                 {marketData.data?.market_cap_change_percentage_24h_usd 
                                   ? (marketData.data.market_cap_change_percentage_24h_usd >= 0 ? '+' : '') + marketData.data.market_cap_change_percentage_24h_usd.toFixed(2) + '%'
@@ -936,7 +934,7 @@ export default function Analytics() {
                               </p>
                             </div>
                             <div>
-                              <p className="text-sm text-gray-400 mb-1">Last Updated</p>
+                              <p className="text-sm text-gray-400 mb-1">Updated</p>
                               <p className="text-sm text-white">
                                 {marketData.data?.updated_at 
                                   ? (() => {
@@ -965,8 +963,9 @@ export default function Analytics() {
                         </div>
                       </>
                     ) : (
-                      <div className="text-center py-12">
-                        <p className="text-gray-300">Market data not available. Please check your connection and try again.</p>
+                      <div className="text-center py-12 space-y-3">
+                        <p className="text-gray-300">Market data isn’t available right now.</p>
+                        <p className="text-sm text-gray-500">Use Refresh above, or try again in a moment.</p>
                       </div>
                     )}
                   </div>
@@ -982,10 +981,16 @@ export default function Analytics() {
                         border: '1px solid var(--border-color)',
                       }}
                     >
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
-                        <h2 className="text-xl sm:text-2xl font-bold text-white shrink-0">Trending Tokens</h2>
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
+                        <div>
+                          <h2 className="text-xl sm:text-2xl font-bold text-white shrink-0">Trending tokens</h2>
+                          <p className="text-sm text-gray-400 mt-1">
+                            Tokens people are looking at right now
+                            {selectedNetwork !== 'all' ? ` · ${getNetworkName(selectedNetwork)}` : ''}.
+                          </p>
+                        </div>
                         <div className="flex flex-col filter:flex-row filter:items-center gap-2 sm:gap-3 w-full sm:w-auto min-w-0">
-                          <label htmlFor="network-selector" className="text-sm text-gray-300 shrink-0">Network:</label>
+                          <label htmlFor="network-selector" className="text-sm text-gray-300 shrink-0">Network</label>
                           <select
                             id="network-selector"
                             name="network-selector"
@@ -993,7 +998,7 @@ export default function Analytics() {
                             onChange={(e) => setSelectedNetwork(e.target.value)}
                             className="w-full sm:w-auto sm:min-w-[14rem] px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500 text-sm"
                           >
-                            <option value="all">All Networks (CoinGecko)</option>
+                            <option value="all">All networks</option>
                             <option value="1">Ethereum</option>
                             <option value="137">Polygon</option>
                             <option value="56">BSC</option>
@@ -1002,17 +1007,6 @@ export default function Analytics() {
                             <option value="8453">Base</option>
                           </select>
                         </div>
-                      </div>
-                      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mb-6">
-                        <p className="text-sm text-blue-300">
-                          <span className="font-semibold">Note:</span> Trending tokens show current popularity based on search volume and social activity. 
-                          {selectedNetwork === 'all' 
-                            ? ' Data from CoinGecko (all cryptocurrencies).' 
-                            : ` Data from backend API for ${getNetworkName(selectedNetwork)} network.`}
-                          {selectedNetwork === 'all'
-                            ? ' Time range does not affect CoinGecko trending (current market sentiment).'
-                            : ` Top pairs reflect the selected analytics range (${timeRange === 'all' ? 'all time' : timeRange}).`}
-                        </p>
                       </div>
                       {trendingLoading ? (
                         <div className="text-center py-12">
@@ -1088,24 +1082,22 @@ export default function Analytics() {
                           })}
                         </div>
                       ) : (
-                        <div className="text-center py-12">
-                          <p className="text-gray-300 mb-2">
-                            {selectedNetwork !== 'all' 
-                              ? `No trending tokens available for ${getNetworkName(selectedNetwork)} network.` 
-                              : 'No trending tokens available'}
+                        <div className="text-center py-12 space-y-3">
+                          <p className="text-gray-300">
+                            {selectedNetwork !== 'all'
+                              ? `No trending tokens for ${getNetworkName(selectedNetwork)} yet.`
+                              : 'No trending tokens right now.'}
                           </p>
-                          {selectedNetwork !== 'all' && (
-                            <>
-                              <p className="text-sm text-gray-400 mb-4">
-                                This may be due to API limitations or network-specific data unavailability.
-                              </p>
-                              <button
-                                onClick={() => setSelectedNetwork('all')}
-                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm"
-                              >
-                                Show All Networks (CoinGecko)
-                              </button>
-                            </>
+                          {selectedNetwork !== 'all' ? (
+                            <button
+                              type="button"
+                              onClick={() => setSelectedNetwork('all')}
+                              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm"
+                            >
+                              Show all networks
+                            </button>
+                          ) : (
+                            <p className="text-sm text-gray-500">Try Refresh, or check Overview for volume.</p>
                           )}
                         </div>
                       )}
@@ -1120,8 +1112,8 @@ export default function Analytics() {
                       border: '1px solid var(--border-color)',
                     }}
                   >
-                        <h2 className="text-2xl font-bold text-white mb-4">Trending NFT Collections</h2>
-                        <p className="text-sm text-gray-400 mb-6">Top collections by 24h volume. Source: CoinGecko.</p>
+                        <h2 className="text-xl font-bold text-white mb-1">Trending NFT collections</h2>
+                        <p className="text-sm text-gray-400 mb-6">Top collections by 24h volume</p>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                           {trendingNfts.map((nft, index) => (
                             <a

@@ -1231,7 +1231,7 @@ export default function Portfolio() {
                                     }}
                                   />
                                 ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-gray-400 text-2xl">🖼️</div>
+                                  <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">NFT</div>
                                 )}
                               </div>
                               <div className="p-3">

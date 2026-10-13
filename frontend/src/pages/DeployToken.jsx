@@ -1966,34 +1966,32 @@ export default function DeployToken() {
               eyebrow="Launch"
               title="Deploy token"
               subtitle="Create a token on this network."
-              actions={
-                <TradeDeployButton as={Link} to="/project-pack" variant="ghost">
-                  Want NFT + token? Project pack
-                </TradeDeployButton>
-              }
-            />
-            <div className="flex flex-wrap gap-2 mb-6 justify-center">
-              <TradeDeployButton
-                type="button"
-                variant="ghost"
-                onClick={() => setShowPreview(!showPreview)}
-                style={{
-                  backgroundColor: showPreview ? 'var(--bg-secondary)' : undefined,
-                }}
-              >
-                {showPreview ? 'Hide preview' : 'Preview'}
-              </TradeDeployButton>
-              <TradeDeployButton
-                type="button"
-                variant="ghost"
-                onClick={() => setShowHistory(!showHistory)}
-                style={{
-                  backgroundColor: showHistory ? 'var(--bg-secondary)' : undefined,
-                }}
-              >
-                History
-              </TradeDeployButton>
-            </div>
+            >
+              <p className="mt-3 text-sm" style={{ color: 'var(--text-tertiary)' }}>
+                Need an NFT too?{' '}
+                <Link to="/project-pack" className="underline" style={{ color: 'var(--finance-primary)' }}>
+                  Project pack
+                </Link>
+                {' · '}
+                <button
+                  type="button"
+                  className="underline"
+                  style={{ color: 'var(--finance-primary)' }}
+                  onClick={() => setShowPreview(!showPreview)}
+                >
+                  {showPreview ? 'Hide preview' : 'Preview'}
+                </button>
+                {' · '}
+                <button
+                  type="button"
+                  className="underline"
+                  style={{ color: 'var(--finance-primary)' }}
+                  onClick={() => setShowHistory(!showHistory)}
+                >
+                  History
+                </button>
+              </p>
+            </TradeDeployHero>
 
             {/* Token Preview */}
             {showPreview && (

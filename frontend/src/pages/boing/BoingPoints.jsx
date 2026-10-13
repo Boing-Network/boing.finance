@@ -103,14 +103,15 @@ export default function BoingPoints() {
             </PageCard>
 
             <PageCard>
-              <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Redeem Points</h3>
-              <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>Point redemption for BOING tokens, NFT discounts, and exclusive perks will be available soon.</p>
-              <div className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-400/30">Coming Soon</div>
+              <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Redeem points</h3>
+              <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+                Redeem for BOING, NFT discounts, and perks when this feature goes live.
+              </p>
+              <div className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-400/30">Coming soon</div>
             </PageCard>
           </>
         ) : (
           <PageCard className="text-center py-12">
-            <div className="text-5xl mb-4">⭐</div>
             <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Connect wallet to view points</h3>
             <p className="text-sm mb-6 max-w-md mx-auto" style={{ color: 'var(--text-secondary)' }}>
               See your points balance and recent earning history.

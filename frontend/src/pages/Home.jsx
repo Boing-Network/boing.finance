@@ -301,16 +301,16 @@ function Home() {
               <h2 className="text-2xl font-bold text-center mb-6" style={{ color: 'var(--text-primary)' }}>Tools & Resources</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
                 <a href="/docs" className="block h-full">
-                  <FeatureCard title="Documentation" icon={<span className="text-xl">📖</span>} description="Guides for swapping, liquidity, bridging, and deployment" />
+                  <FeatureCard title="Documentation" description="Guides for swapping, liquidity, bridging, and deployment" />
                 </a>
                 <a href="/developer-tools" className="block h-full">
-                  <FeatureCard title="Developer Tools" icon={<span className="text-xl">🔧</span>} description="Contract utilities and debugging tools" />
+                  <FeatureCard title="Developer Tools" description="Contract utilities and debugging tools" />
                 </a>
                 <a href="/watchlist" className="block h-full">
-                  <FeatureCard title="Watchlist" icon={<span className="text-xl">⭐</span>} description="Track tokens and price alerts" />
+                  <FeatureCard title="Watchlist" description="Track tokens and price alerts" />
                 </a>
                 <a href="/help-center" className="block h-full">
-                  <FeatureCard title="Help Center" icon={<span className="text-xl">❓</span>} description="FAQs and support — use the AI button for help" />
+                  <FeatureCard title="Help Center" description="FAQs and support — use Ask AI when you need help" />
                 </a>
               </div>
             </section>
@@ -518,7 +518,9 @@ function FeatureCard({ title, icon, description, comingSoon }) {
     >
       <div className="relative z-10 text-center flex flex-col flex-1 min-h-0">
         <div className="flex items-center justify-center mb-4">
-          <span className="text-2xl mr-3 transition-colors duration-300" style={{ color: 'var(--accent-teal)' }}>{icon}</span>
+          {icon ? (
+            <span className="text-2xl mr-3 transition-colors duration-300" style={{ color: 'var(--accent-teal)' }}>{icon}</span>
+          ) : null}
           <h3 className="text-lg font-semibold transition-colors duration-300 flex items-center" style={{ color: 'var(--text-primary)' }}>
             {title}
             {comingSoon && (

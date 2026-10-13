@@ -826,8 +826,8 @@ export default function CreateNFT() {
     return (
       <>
         <Helmet>
-          <title>Create NFT | boing.finance — Mint on EVM & Solana</title>
-          <meta name="description" content="Create and mint NFTs on EVM or Solana. Upload images, add metadata, bulk mint. No code with boing.finance." />
+          <title>Create NFT | boing.finance</title>
+          <meta name="description" content="Name your collection, add art, then publish on boing.finance." />
         </Helmet>
         <TradeDeployShell width="medium">
           <TradeDeployHero
@@ -839,7 +839,7 @@ export default function CreateNFT() {
             <EmptyState
               variant="nfts"
               title="Connect your wallet"
-              description="Connect to create a collection. Want a token too? Use Project pack."
+              description="Connect to create a collection. Need a token too? Use Project pack."
               action={connectWallet}
               actionLabel="Connect wallet"
               secondaryLabel="Project pack"
@@ -854,8 +854,8 @@ export default function CreateNFT() {
   return (
     <>
       <Helmet>
-        <title>Create NFT | boing.finance — Mint on EVM & Solana</title>
-        <meta name="description" content="Mint NFTs on EVM or Solana. Upload images, add metadata, bulk mint. IPFS storage with boing.finance." />
+        <title>Create NFT | boing.finance</title>
+        <meta name="description" content="Name your collection, add art, then publish on boing.finance." />
       </Helmet>
       <TradeDeployShell width="medium">
           <TradeDeployHero
@@ -864,7 +864,7 @@ export default function CreateNFT() {
             subtitle="Name your collection, add art, then publish."
           >
             <p className="mt-3 text-sm" style={{ color: 'var(--text-tertiary)' }}>
-              Want collection + token together?{' '}
+              Need a token too?{' '}
               <Link to="/project-pack" className="underline" style={{ color: 'var(--finance-primary)' }}>
                 Project pack
               </Link>
@@ -880,8 +880,8 @@ export default function CreateNFT() {
                 setStep('collection');
               }}
               options={[
-                { value: 'standard', label: 'Standard mint' },
-                { value: 'dynamic', label: 'Dynamic (up to 10k)' },
+                { value: 'standard', label: 'Standard' },
+                { value: 'dynamic', label: 'Large set (up to 10k)' },
               ]}
             />
           </div>

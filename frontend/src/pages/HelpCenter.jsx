@@ -12,25 +12,25 @@ const HelpCenter = () => {
   const helpCategories = [
     {
       id: 'getting-started',
-      title: 'Getting Started',
-      icon: '🚀',
+      title: 'Getting started',
+      icon: null,
       articles: [
         {
           id: 'connect-wallet',
-          title: 'How to Connect Your Wallet',
-          content: 'Learn how to connect MetaMask, WalletConnect, or other supported wallets to boing.finance.',
+          title: 'Connect your wallet',
+          content: 'Connect MetaMask, WalletConnect, or another supported wallet to boing.finance.',
           tags: ['wallet', 'connection', 'metamask']
         },
         {
           id: 'first-swap',
-          title: 'Making Your First Swap',
-          content: 'Step-by-step guide to swapping tokens on boing.finance for the first time.',
+          title: 'Make your first swap',
+          content: 'Pick two tokens, enter an amount, and confirm in your wallet.',
           tags: ['swap', 'trading', 'first-time']
         },
         {
           id: 'network-switching',
-          title: 'Switching Between Networks',
-          content: 'How to switch between EVM chains and Solana.',
+          title: 'Switch networks',
+          content: 'Change networks from the header to move between EVM chains and Solana.',
           tags: ['network', 'switching', 'blockchain']
         }
       ]
@@ -38,49 +38,49 @@ const HelpCenter = () => {
     {
       id: 'trading',
       title: 'Trading',
-      icon: '🔄',
+      icon: null,
       articles: [
         {
           id: 'swap-tokens',
-          title: 'How to Swap Tokens',
-          content: 'Complete guide to swapping tokens, understanding slippage, and optimizing your trades.',
+          title: 'How to swap',
+          content: 'Swap tokens, set slippage, and confirm the trade.',
           tags: ['swap', 'tokens', 'slippage']
         },
         {
           id: 'liquidity-pools',
-          title: 'Adding and Removing Liquidity',
-          content: 'Learn how to provide liquidity to pools and earn trading fees.',
+          title: 'Add or remove liquidity',
+          content: 'Add tokens to a pool to earn a share of trading fees, or remove them later.',
           tags: ['liquidity', 'pools', 'fees']
         },
         {
           id: 'price-impact',
-          title: 'Understanding Price Impact',
-          content: 'What is price impact and how it affects your trades.',
+          title: 'Price impact',
+          content: 'Large swaps can move the price. Check impact before you confirm.',
           tags: ['price', 'impact', 'trading']
         }
       ]
     },
     {
       id: 'bridge',
-      title: 'Cross-Chain Bridge',
-      icon: '🌉',
+      title: 'Bridge',
+      icon: null,
       articles: [
         {
           id: 'bridge-tokens',
-          title: 'How to Bridge Tokens',
-          content: 'Step-by-step for the LI.FI-powered Bridge (0.5% platform fee, no Boing inventory).',
+          title: 'How to bridge',
+          content: 'Move tokens between EVM networks. A small platform fee applies.',
           tags: ['bridge', 'cross-chain', 'transfer']
         },
         {
           id: 'bridge-fees',
-          title: 'Bridge Fees and Timeframes',
-          content: '0.5% platform fee plus gas and aggregator route fees.',
+          title: 'Fees and timing',
+          content: 'Platform fee plus network gas and any bridge route fees. Arrival time depends on the route.',
           tags: ['fees', 'timeframes', 'gas']
         },
         {
           id: 'bridge-security',
-          title: 'Bridge Security',
-          content: 'You trust LI.FI and the selected route; Boing does not custody bridge funds.',
+          title: 'Bridge safety',
+          content: 'You send from your wallet through a third-party route. Boing does not hold bridge funds.',
           tags: ['security', 'safety', 'best-practices']
         }
       ]
@@ -88,40 +88,40 @@ const HelpCenter = () => {
     {
       id: 'launch',
       title: 'Launch',
-      icon: '🔗',
+      icon: null,
       articles: [
         {
           id: 'project-pack',
-          title: 'Launch a Project Pack',
+          title: 'Project pack',
           content:
-            'Guided flow: create an NFT collection and a token, then connect them so apps show them as one project. Start at /project-pack. Manage existing pairs at /linked-project.',
+            'Create an NFT collection and a token, then connect them as one project. Start at Project pack. Manage existing pairs under Manage links.',
           tags: ['nft', 'token', 'companions', 'project pack', 'linked', 'boing']
         },
         {
           id: 'linked-project',
-          title: 'Link an NFT Collection and Token',
+          title: 'Manage links',
           content:
-            'Connect or disconnect a collection and project token you already created. Prefer Project pack (/project-pack) to create both together. Manage links at /linked-project.',
+            'Connect or disconnect a collection and token you already created. Prefer Project pack to create both together.',
           tags: ['nft', 'token', 'linked', 'companions', 'claim', 'boing']
         },
         {
           id: 'builder-attestation',
           title: "Show you're the builder",
           content:
-            'Optional: after your collection and token are linked, mark yourself as the builder with Boing Express (Project pack success or Manage links).',
+            'Optional: after linking, mark yourself as the builder from Project pack success or Manage links.',
           tags: ['builder', 'attestation', 'companions', 'project', 'on-chain', 'boing']
         }
       ]
     },
     {
       id: 'keyboard-shortcuts',
-      title: 'Keyboard Shortcuts',
-      icon: '⌨️',
+      title: 'Keyboard shortcuts',
+      icon: null,
       articles: [
         {
           id: 'shortcuts',
-          title: 'Keyboard Shortcuts',
-          content: 'Press Escape (Esc) to close any open modal, dropdown, or menu. Use Tab to navigate between interactive elements.',
+          title: 'Keyboard shortcuts',
+          content: 'Press Escape to close modals and menus. Use Tab to move between controls.',
           tags: ['keyboard', 'shortcuts', 'accessibility']
         }
       ]
@@ -129,24 +129,24 @@ const HelpCenter = () => {
     {
       id: 'troubleshooting',
       title: 'Troubleshooting',
-      icon: '🔧',
+      icon: null,
       articles: [
         {
           id: 'failed-transactions',
-          title: 'Failed Transactions',
-          content: 'Common reasons for failed transactions and how to resolve them.',
+          title: 'Failed transactions',
+          content: 'Common reasons a transaction fails and what to try next.',
           tags: ['failed', 'transactions', 'errors']
         },
         {
           id: 'high-gas-fees',
-          title: 'High Gas Fees',
-          content: 'How to reduce gas fees and optimize your transactions.',
+          title: 'High gas fees',
+          content: 'Ways to lower gas costs when the network is busy.',
           tags: ['gas', 'fees', 'optimization']
         },
         {
           id: 'token-not-found',
-          title: 'Token Not Found',
-          content: 'What to do when a token is not showing up in the interface.',
+          title: 'Token not found',
+          content: 'What to do when a token does not show up in the app.',
           tags: ['token', 'not-found', 'import']
         }
       ]
@@ -154,24 +154,24 @@ const HelpCenter = () => {
     {
       id: 'security',
       title: 'Security',
-      icon: '🔒',
+      icon: null,
       articles: [
         {
           id: 'wallet-security',
-          title: 'Wallet Security Best Practices',
-          content: 'Essential security tips to protect your wallet and funds.',
+          title: 'Wallet safety tips',
+          content: 'Basic steps to keep your wallet and funds safer.',
           tags: ['security', 'wallet', 'protection']
         },
         {
           id: 'avoid-scams',
-          title: 'Avoiding Scams and Phishing',
-          content: 'How to identify and avoid common DeFi scams and phishing attempts.',
+          title: 'Avoid scams',
+          content: 'How to spot common phishing and fake support scams.',
           tags: ['scams', 'phishing', 'safety']
         },
         {
           id: 'private-keys',
-          title: 'Protecting Your Private Keys',
-          content: 'Best practices for keeping your private keys secure.',
+          title: 'Protect your keys',
+          content: 'Never share seed phrases or private keys. Store backups offline.',
           tags: ['private-keys', 'security', 'backup']
         }
       ]
@@ -336,7 +336,6 @@ const HelpCenter = () => {
                             }
                           }}
                         >
-                          <span className="text-lg">{category.icon}</span>
                           <span className="font-medium">{category.title}</span>
                         </button>
                       ))}
@@ -348,7 +347,6 @@ const HelpCenter = () => {
                 <div className="lg:col-span-3">
                   <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
                     <div className="flex items-center space-x-3 mb-6">
-                      <span className="text-2xl">{currentCategory.icon}</span>
                       <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{currentCategory.title}</h2>
                     </div>
                     
@@ -357,14 +355,7 @@ const HelpCenter = () => {
                         <Link key={article.id} to={`/help-center/article/${article.id}`} className="block">
                           <div className="border rounded-lg p-4 hover:border transition-colors cursor-pointer">
                             <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{article.title}</h3>
-                            <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>{article.content}</p>
-                            <div className="flex flex-wrap gap-1">
-                              {article.tags.map((tag) => (
-                                <span key={tag} className="text-xs px-2 py-1 rounded border" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}>
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
+                            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{article.content}</p>
                           </div>
                         </Link>
                       ))}
