@@ -1,433 +1,146 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
+/**
+ * Status page — honest “not wired” surface.
+ * Do not invent uptime %, response times, or incident history until a real monitor exists.
+ */
 const Status = () => {
-  // Mock status data - in a real app, this would come from an API
-  const systemStatus = {
-    overall: 'operational',
-    uptime: '99.9%',
-    lastIncident: 'No recent incidents',
-    responseTime: '150ms'
-  };
-
-  const services = [
+  const checks = [
     {
-      name: 'Trading Platform',
-      status: 'operational',
-      uptime: '99.9%',
-      responseTime: '120ms',
-      description: 'Core DEX functionality and token swaps'
+      name: 'Public testnet RPC',
+      detail: 'https://testnet-rpc.boing.network/ (Cloudflare Worker gateway → Fly nodes)',
+      href: 'https://testnet-rpc.boing.network/',
     },
     {
-      name: 'Cross-Chain Bridge',
-      status: 'operational',
-      uptime: 'N/A',
-      responseTime: 'N/A',
-      description: 'EVM bridge routes with a small platform fee. Boing does not hold bridge funds.'
+      name: 'boing.finance API Worker',
+      detail: 'Aggregator, analytics, and points routes on boing-api-prod',
+      href: 'https://boing-api-prod.nico-chikuji.workers.dev/api/aggregator/bridge-config',
     },
     {
-      name: 'Liquidity Pools',
-      status: 'operational',
-      uptime: '99.9%',
-      responseTime: '140ms',
-      description: 'Pools for swapping and providing liquidity'
+      name: 'Native DEX directory Worker',
+      detail: 'D1 directory merge for Pools (when Pages bake sets DIRECTORY_BASE_URL)',
+      href: 'https://boing-native-dex-indexer.nico-chikuji.workers.dev/v1/directory/pools',
     },
     {
-      name: 'Analytics Dashboard',
-      status: 'operational',
-      uptime: '99.7%',
-      responseTime: '250ms',
-      description: 'Market volume, trends, and portfolio views'
+      name: 'Explorer',
+      detail: 'boing.observer for blocks, accounts, and DEX discovery',
+      href: 'https://boing.observer',
     },
-    {
-      name: 'Token Deployment',
-      status: 'operational',
-      uptime: '99.9%',
-      responseTime: '200ms',
-      description: 'Create tokens and NFT collections'
-    },
-    {
-      name: 'API Services',
-      status: 'operational',
-      uptime: '99.8%',
-      responseTime: '150ms',
-      description: 'REST API and WebSocket connections'
-    }
   ];
-
-  const networks = [
-    {
-      name: 'Boing Network (L1)',
-      status: 'operational',
-      blockHeight: 'Via RPC',
-      gasPrice: 'Network',
-      lastBlock: 'Check explorer'
-    },
-    {
-      name: 'Ethereum Mainnet',
-      status: 'operational',
-      blockHeight: 'External',
-      gasPrice: 'Variable',
-      lastBlock: 'Via wallet/RPC'
-    },
-    {
-      name: 'Polygon',
-      status: 'operational',
-      blockHeight: 'External',
-      gasPrice: 'Variable',
-      lastBlock: 'Via wallet/RPC'
-    },
-    {
-      name: 'Arbitrum One',
-      status: 'operational',
-      blockHeight: 'External',
-      gasPrice: 'Variable',
-      lastBlock: 'Via wallet/RPC'
-    },
-    {
-      name: 'Optimism',
-      status: 'operational',
-      blockHeight: 'External',
-      gasPrice: 'Variable',
-      lastBlock: 'Via wallet/RPC'
-    },
-    {
-      name: 'Base',
-      status: 'operational',
-      blockHeight: 'External',
-      gasPrice: 'Variable',
-      lastBlock: 'Via wallet/RPC'
-    },
-    {
-      name: 'BNB Smart Chain',
-      status: 'operational',
-      blockHeight: 'External',
-      gasPrice: 'Variable',
-      lastBlock: 'Via wallet/RPC'
-    }
-  ];
-
-  const recentIncidents = [
-    {
-      id: 1,
-      date: 'No incidents',
-      time: 'N/A',
-      title: 'Platform Running Smoothly',
-      status: 'operational',
-      description: 'All systems are operational with no recent incidents reported.',
-      impact: 'none',
-      duration: 'N/A'
-    }
-  ];
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'operational':
-        return 'text-green-400 bg-green-900/20 border-green-500/30';
-      case 'degraded':
-        return 'text-yellow-400 bg-yellow-900/20 border-yellow-500/30';
-      case 'outage':
-        return 'text-red-400 bg-red-900/20 border-red-500/30';
-      case 'maintenance':
-        return 'text-blue-400 bg-blue-900/20 border-blue-500/30';
-      default:
-        return 'bg-gray-900/20 border-gray-500/30';
-    }
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'operational':
-        return '🟢';
-      case 'degraded':
-        return '🟡';
-      case 'outage':
-        return '🔴';
-      case 'maintenance':
-        return '🔵';
-      default:
-        return '⚪';
-    }
-  };
-
-  const getImpactColor = (impact) => {
-    switch (impact) {
-      case 'major':
-        return 'text-red-400';
-      case 'minor':
-        return 'text-yellow-400';
-      case 'none':
-        return 'text-green-400';
-      default:
-        return '';
-    }
-  };
 
   return (
     <>
       <Helmet>
-        <title>System Status | boing.finance — Uptime & Incidents</title>
-        <meta name="description" content="Illustrative overview of boing.finance services and supported networks. Not a live monitoring feed." />
-        <meta name="keywords" content="system status, uptime, incidents, monitoring, boing.finance, DEX" />
+        <title>System Status | boing.finance</title>
+        <meta
+          name="description"
+          content="boing.finance does not yet publish live uptime telemetry. Use RPC, Worker, and explorer links to check services."
+        />
         <meta property="og:title" content="System Status | boing.finance" />
-        <meta property="og:description" content="Illustrative service overview for boing.finance — not live uptime telemetry." />
+        <meta
+          property="og:description"
+          content="Status monitoring is not wired. No fake uptime metrics."
+        />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/status" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="System Status - boing.finance" />
-        <meta name="twitter:description" content="Illustrative service overview for boing.finance." />
       </Helmet>
-      
+
       <div className="relative w-full min-w-0" style={{ color: 'var(--text-primary)' }}>
         <div className="container mx-auto px-4 py-8">
-          <div className="max-w-6xl mx-auto">
-            {/* Header */}
-            <div className="text-center mb-12">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-10">
               <h1 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
                 System Status
               </h1>
-              <p className="text-xl mb-6" style={{ color: 'var(--text-secondary)' }}>
-                Placeholder status page — not live uptime data
+              <p className="text-lg mb-6" style={{ color: 'var(--text-secondary)' }}>
+                Live uptime monitoring is not wired yet.
               </p>
-              <div className="bg-amber-900/20 border border-amber-500/30 rounded-lg p-4 mb-6">
+              <div className="bg-amber-900/20 border border-amber-500/30 rounded-lg p-4 text-left">
                 <p className="text-amber-100 text-sm">
-                  <strong>Not live monitoring:</strong> Numbers below are examples only. For live chain state, use your wallet RPC and explorers.
+                  <strong>Not live:</strong> This page does not report real uptime, latency, or incidents.
+                  Placeholder percentages and “all systems operational” chips were removed so they are not
+                  mistaken for telemetry. When a monitor (Better Stack, Cloudflare Health Checks, or similar)
+                  is connected, this page will read from that API.
                 </p>
               </div>
             </div>
 
-            {/* Overall Status — labeled as example */}
-            <div className="rounded-lg p-6 border mb-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                  Example overview <span className="text-sm font-normal text-amber-300">(not live)</span>
-                </h2>
-                <div className={`px-4 py-2 rounded-lg border ${getStatusColor(systemStatus.overall)}`}>
-                  <span className="flex items-center space-x-2">
-                    <span>{getStatusIcon(systemStatus.overall)}</span>
-                    <span className="capitalize font-semibold">{systemStatus.overall} (example)</span>
-                  </span>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
-                  <div className="text-2xl font-bold text-green-400 mb-1">{systemStatus.uptime}</div>
-                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Uptime (example)</div>
-                </div>
-                <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
-                  <div className="text-2xl font-bold text-blue-400 mb-1">{systemStatus.responseTime}</div>
-                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Avg response (example)</div>
-                </div>
-                <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
-                  <div className="text-2xl font-bold text-purple-400 mb-1">{systemStatus.lastIncident}</div>
-                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Last incident (example)</div>
-                </div>
-                <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
-                  <div className="text-2xl font-bold text-green-400 mb-1">6/6</div>
-                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Services (example)</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="flex items-center justify-center my-8">
-              <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border-color)' }}></div>
-              <div className="px-4 py-2 rounded-full border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Service Status</span>
-              </div>
-              <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border-color)' }}></div>
-            </div>
-
-            {/* Services Status */}
-            <div className="rounded-lg p-6 border mb-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-              <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Service Status</h2>
-              <div className="space-y-4">
-                {services.map((service) => (
-                  <div key={service.name} className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
-                    <div className="flex items-center space-x-4">
-                      <span className="text-2xl">{getStatusIcon(service.status)}</span>
-                      <div>
-                        <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>{service.name}</h3>
-                        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{service.description}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(service.status)}`}>
-                        {service.status}
-                      </div>
-                      <div className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{service.uptime} uptime</div>
-                      <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{service.responseTime} avg</div>
-                    </div>
-                  </div>
+            <div
+              className="rounded-lg p-6 border mb-8"
+              style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
+            >
+              <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+                Check these endpoints manually
+              </h2>
+              <ul className="space-y-4">
+                {checks.map((item) => (
+                  <li key={item.name}>
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold hover:underline"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      {item.name}
+                    </a>
+                    <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
+                      {item.detail}
+                    </p>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
 
-            {/* Divider */}
-            <div className="flex items-center justify-center my-8">
-              <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border-color)' }}></div>
-              <div className="px-4 py-2 rounded-full border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Supported Networks</span>
-              </div>
-              <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border-color)' }}></div>
+            <div
+              className="rounded-lg p-6 border mb-8"
+              style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
+            >
+              <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
+                To wire real monitoring
+              </h2>
+              <ol className="list-decimal list-inside text-sm space-y-2" style={{ color: 'var(--text-secondary)' }}>
+                <li>Pick a monitor (Better Stack, Checkly, Cloudflare Health Checks, etc.).</li>
+                <li>Probe public RPC, Pages origin, and `boing-api-prod` on a fixed cadence.</li>
+                <li>Expose a JSON status API the frontend can fetch (no hard-coded “99.9%”).</li>
+                <li>Replace this page with that feed and keep an explicit degraded/outage path.</li>
+              </ol>
             </div>
 
-            {/* Network Status */}
-            <div className="rounded-lg p-6 border mb-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-              <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Supported Networks</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {networks.map((network) => (
-                  <div key={network.name} className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>{network.name}</h3>
-                      <div className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(network.status)}`}>
-                        {getStatusIcon(network.status)} {network.status}
-                      </div>
-                    </div>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span style={{ color: 'var(--text-secondary)' }}>Block Height:</span>
-                        <span style={{ color: 'var(--text-primary)' }}>{network.blockHeight}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span style={{ color: 'var(--text-secondary)' }}>Gas Price:</span>
-                        <span style={{ color: 'var(--text-primary)' }}>{network.gasPrice}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span style={{ color: 'var(--text-secondary)' }}>Last Block:</span>
-                        <span style={{ color: 'var(--text-primary)' }}>{network.lastBlock}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Recent Incidents */}
-            <div className="rounded-lg p-6 border mb-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-              <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Recent Incidents</h2>
-              <div className="space-y-4">
-                {recentIncidents.map((incident) => (
-                  <div key={incident.id} className="border rounded-lg p-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="text-lg font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>{incident.title}</h3>
-                        <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
-                          {incident.date} at {incident.time} • Duration: {incident.duration}
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(incident.status)}`}>
-                          {incident.status}
-                        </div>
-                        <div
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${getImpactColor(incident.impact)}`}
-                          style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}
-                        >
-                          {incident.impact} impact
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{incident.description}</p>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="mt-6 text-center">
-                <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
-                  Incident history will be maintained as the platform scales with funding.
-                </p>
-              </div>
-            </div>
-
-            {/* Performance Metrics */}
-            <div className="rounded-lg p-6 border mb-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-              <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Performance Metrics</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
-                  <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Response Times</h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span style={{ color: 'var(--text-secondary)' }}>Average:</span>
-                      <span style={{ color: 'var(--text-primary)' }}>150ms</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span style={{ color: 'var(--text-secondary)' }}>P95:</span>
-                      <span style={{ color: 'var(--text-primary)' }}>300ms</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span style={{ color: 'var(--text-secondary)' }}>P99:</span>
-                      <span style={{ color: 'var(--text-primary)' }}>500ms</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
-                  <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Error Rates</h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span style={{ color: 'var(--text-secondary)' }}>4xx Errors:</span>
-                      <span className="text-yellow-400">0.1%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span style={{ color: 'var(--text-secondary)' }}>5xx Errors:</span>
-                      <span className="text-red-400">0.01%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span style={{ color: 'var(--text-secondary)' }}>Success Rate:</span>
-                      <span className="text-green-400">99.9%</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
-                  <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Platform Status</h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span style={{ color: 'var(--text-secondary)' }}>Status:</span>
-                      <span className="text-green-400">Operational</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span style={{ color: 'var(--text-secondary)' }}>Networks:</span>
-                      <span style={{ color: 'var(--text-primary)' }}>6 Active</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span style={{ color: 'var(--text-secondary)' }}>Smart Contracts:</span>
-                      <span style={{ color: 'var(--text-primary)' }}>17+ Deployed</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Contact Information */}
-            <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-              <div className="text-center">
-                <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Contact Support</h2>
-                <p className="mb-6" style={{ color: 'var(--text-secondary)' }}>
-                  For status updates and technical support, contact our team directly
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <a
-                    href="mailto:support@boing.finance"
-                    className="hover:bg-gray-600 px-6 py-3 rounded-lg transition-colors border" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
-                  >
-                    Email Support
-                  </a>
-                  <a
-                    href="/contact-us"
-                    className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition-colors" style={{ color: 'var(--text-primary)' }}
-                  >
-                    Contact Form
-                  </a>
-                  <a
-                    href="/bug-report"
-                    className="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg transition-colors" style={{ color: 'var(--text-primary)' }}
-                  >
-                    Report Issues
-                  </a>
-                </div>
+            <div
+              className="rounded-lg p-6 border text-center"
+              style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
+            >
+              <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+                Report an issue
+              </h2>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <a
+                  href="mailto:support@boing.finance"
+                  className="hover:bg-gray-600 px-6 py-3 rounded-lg transition-colors border"
+                  style={{
+                    backgroundColor: 'var(--bg-secondary)',
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--text-primary)',
+                  }}
+                >
+                  Email Support
+                </a>
+                <a
+                  href="/contact-us"
+                  className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition-colors"
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  Contact Form
+                </a>
+                <a
+                  href="/bug-report"
+                  className="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg transition-colors"
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  Report Issues
+                </a>
               </div>
             </div>
           </div>
@@ -437,4 +150,4 @@ const Status = () => {
   );
 };
 
-export default Status; 
+export default Status;
