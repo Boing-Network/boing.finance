@@ -23,7 +23,7 @@
     "react-helmet-async": "^2.0.5",
     "react-hot-toast": "^2.4.1",
     "react-i18next": "^13.5.0",
-    "react-router-dom": "^6.28.0",
+    "react-router-dom": "^7.18.4",
     "recharts": "^2.15.0"
   },
   "scripts": {
