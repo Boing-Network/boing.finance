@@ -14,6 +14,7 @@ import { boingExpressContractCallSignSimulateSubmit } from '../services/boingExp
 import { getWindowBoingProvider } from '../utils/boingWalletDiscovery';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
 import { BOING_NETWORK_NATIVE_DEX_LEDGER_ROUTER_URL } from '../config/boingNetworkDocsUrls';
+import { boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
 
 function pickExpressProvider(getWalletProvider) {
   try {
@@ -107,7 +108,7 @@ export default function NativeDexLedgerForwardPanel() {
     async (txObject) => {
       const p = pickExpressProvider(getWalletProvider);
       if (!p) {
-        toast.error('Boing Express provider not found.');
+        toast.error(boingWalletMissingMessage());
         return;
       }
       setBusy(true);

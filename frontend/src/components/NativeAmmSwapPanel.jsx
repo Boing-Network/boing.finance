@@ -22,6 +22,7 @@ import {
   formatNativePoolReserveDisplay,
   resolveNativePoolLegDecimals,
 } from '../utils/nativePoolReserveFormat';
+import { boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
 
 function pickExpressProvider(getWalletProvider) {
   try {
@@ -204,7 +205,7 @@ export default function NativeAmmSwapPanel({
     }
     const p = pickExpressProvider(getWalletProvider);
     if (!p) {
-      toast.error('Boing Express provider not found.');
+      toast.error(boingWalletMissingMessage());
       return;
     }
 
@@ -244,7 +245,7 @@ export default function NativeAmmSwapPanel({
     }
     const p = pickExpressProvider(getWalletProvider);
     if (!p) {
-      toast.error('Boing Express provider not found.');
+      toast.error(boingWalletMissingMessage());
       return;
     }
 
@@ -284,7 +285,7 @@ export default function NativeAmmSwapPanel({
     }
     const p = pickExpressProvider(getWalletProvider);
     if (!p) {
-      toast.error('Boing Express provider not found.');
+      toast.error(boingWalletMissingMessage());
       return;
     }
     const calldata = encodeNativeAmmRemoveLiquidityCalldataHex(removeLpBn, 0n, 0n);
