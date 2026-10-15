@@ -3,10 +3,28 @@
  * Aligns with BOING-EXPRESS-WALLET.md (window.boing, EIP-6963, boing_* methods); ecosystem backlog: https://github.com/Boing-Network/boing.network/blob/main/docs/HANDOFF-DEPENDENT-PROJECTS.md
  */
 
+import { createBoingWebWalletProvider } from 'boing-sdk';
+
 const BOING_TESTNET_CHAIN_HEX = '0x1b01';
 
 /** Native 32-byte AccountId check — single source of truth in boing-sdk (`hex.ts`). */
 export { isBoingNativeAccountIdHex } from 'boing-sdk';
+
+let webWalletFallback = null;
+
+/**
+ * boing.express web wallet (popup signing at boing.express/connect) for browsers without the extension
+ * (mobile, Safari, Firefox). Only used when no injected provider exists; the extension stays primary.
+ * Every connect / signature is approved by the user on boing.express (docs/WEB-SIGNING-FLOW.md there).
+ * @returns {{ request: Function, isBoingWeb: true } | null}
+ */
+export function getBoingWebWalletFallbackProvider() {
+  if (typeof window === 'undefined') return null;
+  if (!webWalletFallback) {
+    webWalletFallback = createBoingWebWalletProvider({ chainId: BOING_TESTNET_CHAIN_HEX, mode: 'popup' });
+  }
+  return webWalletFallback;
+}
 
 /**
  * @param {{ request?: Function } | null | undefined} provider
@@ -144,7 +162,7 @@ export const BOING_EXPRESS_CHROME_STORE_URL =
 export function boingWalletMissingMessage(userAgent) {
   const ua = userAgent ?? (typeof navigator !== 'undefined' ? navigator.userAgent : '') ?? '';
   if (/Android|iPhone|iPad|iPod|Mobile/i.test(ua)) {
-    return 'Boing Express is a desktop Chrome extension and cannot connect on this mobile browser. Open boing.finance in Chrome on a computer, or use boing.express to view balances and send BOING.';
+    return 'The Boing Express extension is not available on this mobile browser. Connect with the boing.express web wallet instead (a boing.express window opens for each approval; allow popups for this site).';
   }
   const chromium = /Chrome\/|Chromium\/|Edg\//.test(ua) && !/Firefox\//.test(ua);
   if (!chromium) {

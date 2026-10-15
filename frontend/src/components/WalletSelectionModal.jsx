@@ -4,7 +4,7 @@ import { useWallet } from '../contexts/WalletContext';
 import { useChainType, useSolanaWallet, CHAIN_TYPE_SOLANA } from '../contexts/SolanaWalletContext';
 import { XMarkIcon, CheckIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-import { discoverBoingEip6963Providers } from '../utils/boingWalletDiscovery';
+import { discoverBoingEip6963Providers, getBoingWebWalletFallbackProvider } from '../utils/boingWalletDiscovery';
 
 const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
   const { detectWalletProviders, connectWalletWithProvider } = useWallet();
@@ -56,6 +56,18 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
         }
       } catch {
         /* ignore discovery errors */
+      }
+
+      // No extension (mobile, Safari, Firefox): offer the boing.express web wallet (popup approvals).
+      if (!wallets.some((w) => w.walletType === 'boingExpress')) {
+        add({
+          id: 'boing-express-web',
+          walletType: 'boingExpress',
+          name: 'Boing Express (web wallet)',
+          icon: '🌀',
+          provider: getBoingWebWalletFallbackProvider(),
+          available: true
+        });
       }
 
       if (providers.metamask) {
