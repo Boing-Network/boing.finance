@@ -1,5 +1,5 @@
+import { evmLite } from '../utils/evmLite';
 import React, { useState, useEffect } from 'react';
-import { ethers } from 'ethers';
 import externalSwapService from '../services/externalSwapService';
 
 const ExternalDEXQuotes = ({ 
@@ -32,7 +32,7 @@ const ExternalDEXQuotes = ({
 
     try {
       // Convert amount to wei
-      const amountInWei = ethers.parseUnits(amountIn, 18); // Assuming 18 decimals for now
+      const amountInWei = evmLite.parseUnits(amountIn, 18); // Assuming 18 decimals for now
       
       const externalQuotes = await externalSwapService.getSwapQuotes(
         tokenIn,

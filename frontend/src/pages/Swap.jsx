@@ -1,6 +1,6 @@
+import { evmLite, loadEthers } from '../utils/evmLite';
 import React, { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { ethers } from 'ethers';
 import { useWallet } from '../contexts/WalletContext';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useChainType } from '../contexts/SolanaWalletContext';
@@ -100,7 +100,7 @@ const Swap = () => {
     try {
       // ERC20 Transfer event signature
       const transferEventSignature = 'Transfer(address,address,uint256)';
-      const transferEventTopic = ethers.keccak256(ethers.toUtf8Bytes(transferEventSignature));
+      const transferEventTopic = evmLite.keccak256(evmLite.toUtf8Bytes(transferEventSignature));
       
       // Get current block
       const currentBlock = await provider.getBlockNumber();
@@ -117,7 +117,7 @@ const Swap = () => {
         topics: [
           transferEventTopic,
           null, // from address (any)
-          ethers.zeroPadValue(userAddress, 32) // to address (user)
+          evmLite.zeroPadValue(userAddress, 32) // to address (user)
         ]
       });
       
@@ -130,7 +130,7 @@ const Swap = () => {
             topics: [
               transferEventTopic,
               null, // from address (any)
-              ethers.zeroPadValue(userAddress, 32) // to address (user)
+              evmLite.zeroPadValue(userAddress, 32) // to address (user)
             ]
           });
           logs = [...earlyLogs, ...logs];
@@ -157,6 +157,7 @@ const Swap = () => {
 
   // Get token information
   const getTokenInfo = useCallback(async (address, provider) => {
+    const ethers = await loadEthers();
     devLog(`🔍 Getting token info for address: ${address}`);
     try {
       const tokenContract = new ethers.Contract(address, [
@@ -194,7 +195,7 @@ const Swap = () => {
   // Format token balance with appropriate decimal places
   const formatTokenBalance = (balance, decimals) => {
     try {
-      const balanceNum = parseFloat(ethers.formatUnits(balance, decimals));
+      const balanceNum = parseFloat(evmLite.formatUnits(balance, decimals));
       
       if (balanceNum === 0) return '0';
       
@@ -226,11 +227,11 @@ const Swap = () => {
         return;
       }
       const raw = (tokenAddress || '').trim();
-      if (!raw || !ethers.isAddress(raw)) {
+      if (!raw || !evmLite.isAddress(raw)) {
         toast.error('Enter a valid 0x token contract address');
         return;
       }
-      const checksummed = ethers.getAddress(raw);
+      const checksummed = evmLite.getAddress(raw);
       const tokenInfo = await getTokenInfo(checksummed, walletProvider);
       if (!tokenInfo) {
         toast.error('Invalid token address or token not found');
@@ -243,7 +244,7 @@ const Swap = () => {
         const newToken = {
           address: checksummed,
           ...tokenInfo,
-          formattedBalance: ethers.formatUnits(tokenInfo.balance, tokenInfo.decimals)
+          formattedBalance: evmLite.formatUnits(tokenInfo.balance, tokenInfo.decimals)
         };
         setUserTokens(prev => [...prev, newToken]);
         toast.success(`Added ${tokenInfo.symbol} to your tokens`);
@@ -425,7 +426,7 @@ const Swap = () => {
       const native = userTokens.find((t) => t.isNative || t.symbol === tokenIn);
       if (native?.balance) {
         try {
-          return parseFloat(ethers.formatUnits(native.balance, native.decimals || 18));
+          return parseFloat(evmLite.formatUnits(native.balance, native.decimals || 18));
         } catch {
           return null;
         }
@@ -437,7 +438,7 @@ const Swap = () => {
     
     // Use the raw balance instead of formatted balance
     try {
-      return parseFloat(ethers.formatUnits(token.balance, token.decimals));
+      return parseFloat(evmLite.formatUnits(token.balance, token.decimals));
     } catch (error) {
       console.error('Error parsing token balance:', error);
       return null;
@@ -454,7 +455,7 @@ const Swap = () => {
     
     // Use the raw balance instead of formatted balance
     try {
-      return parseFloat(ethers.formatUnits(token.balance, token.decimals));
+      return parseFloat(evmLite.formatUnits(token.balance, token.decimals));
     } catch (error) {
       console.error('Error parsing token balance:', error);
       return null;
@@ -550,6 +551,7 @@ const Swap = () => {
 
   // Handle swap transaction
   const handleSwap = async () => {
+    const ethers = await loadEthers();
     devLog('=== HANDLE SWAP START ===');
     devLog('Raw input values:', {
       amountIn: amountIn,
@@ -729,7 +731,7 @@ const Swap = () => {
       // Get the correct decimals for the input token
       let amountInWei;
       if (tokenIn === 'ETH') {
-        amountInWei = ethers.parseUnits(amountIn, 18); // ETH/WETH has 18 decimals
+        amountInWei = evmLite.parseUnits(amountIn, 18); // ETH/WETH has 18 decimals
         devLog('handleSwap: ETH amount calculation:', {
           amountIn,
           decimals: 18,
@@ -776,23 +778,23 @@ const Swap = () => {
           throw new Error(`Amount too large for ${tokenIn} with 18 decimals. Please enter a smaller amount (max 1000).`);
         }
         
-        amountInWei = ethers.parseUnits(amountIn, tokenInData.decimals);
+        amountInWei = evmLite.parseUnits(amountIn, tokenInData.decimals);
         devLog('handleSwap: Calculated amountInWei:', amountInWei.toString());
         
         // Check if amount exceeds token balance
         if (tokenInData.balance && amountInWei > tokenInData.balance) {
-          throw new Error(`Amount exceeds your ${tokenIn} balance. You have ${ethers.formatUnits(tokenInData.balance, tokenInData.decimals)} ${tokenIn}.`);
+          throw new Error(`Amount exceeds your ${tokenIn} balance. You have ${evmLite.formatUnits(tokenInData.balance, tokenInData.decimals)} ${tokenIn}.`);
         }
         
         // Check if amount is unreasonably large for this token's decimals
-        const maxReasonableForDecimals = ethers.parseUnits('1000000', tokenInData.decimals); // 1 million tokens
+        const maxReasonableForDecimals = evmLite.parseUnits('1000000', tokenInData.decimals); // 1 million tokens
         if (amountInWei > maxReasonableForDecimals) {
           throw new Error(`Amount too large for ${tokenIn}. Please enter a smaller amount.`);
         }
       }
       
       // Validate that the amount is reasonable (not too large)
-      const maxReasonableAmount = ethers.parseUnits('1000000', 18); // 1 million tokens max
+      const maxReasonableAmount = evmLite.parseUnits('1000000', 18); // 1 million tokens max
       devLog('handleSwap: Amount validation:', {
         amountInWei: amountInWei.toString(),
         maxReasonableAmount: maxReasonableAmount.toString(),
@@ -804,7 +806,7 @@ const Swap = () => {
       }
       
       // Additional validation: check if amount is unreasonably large (more than 1 billion wei)
-      const maxWeiAmount = ethers.parseUnits('1000000000', 18); // 1 billion wei
+      const maxWeiAmount = evmLite.parseUnits('1000000000', 18); // 1 billion wei
       if (amountInWei > maxWeiAmount) {
         throw new Error(`Amount unreasonably large: ${amountInWei.toString()} wei. This suggests an error in amount calculation.`);
       }
@@ -818,7 +820,7 @@ const Swap = () => {
       });
       
       // Final safety check - prevent any amount larger than 1 billion wei
-      const safetyLimit = ethers.parseUnits('1000000000', 18);
+      const safetyLimit = evmLite.parseUnits('1000000000', 18);
       if (amountInWei > safetyLimit) {
         throw new Error(`FINAL SAFETY CHECK FAILED - Amount too large: ${amountInWei.toString()} wei. This suggests a calculation error.`);
       }
@@ -930,7 +932,7 @@ const Swap = () => {
         gasLimit,
         ...(maxFeePerGas && maxPriorityFeePerGas
           ? { maxFeePerGas, maxPriorityFeePerGas }
-          : { gasPrice: gasPriceLegacy || ethers.parseUnits('20', 'gwei') })
+          : { gasPrice: gasPriceLegacy || evmLite.parseUnits('20', 'gwei') })
       };
 
       // Simulate transaction before sending (catch reverts early)
@@ -1051,6 +1053,7 @@ const Swap = () => {
 
   // Calculate expected output amount
   const calculateExpectedOutput = useCallback(async (inputAmount, inputToken, outputToken) => {
+    const ethers = await loadEthers();
     devLog('=== CALCULATE EXPECTED OUTPUT START ===');
     devLog('Function called with:', { inputAmount, inputToken, outputToken });
     
@@ -1261,7 +1264,7 @@ const Swap = () => {
       });
 
       // Try a small test amount first to check if the pair exists
-      const testAmount = ethers.parseUnits('0.001', 18); // 0.001 tokens
+      const testAmount = evmLite.parseUnits('0.001', 18); // 0.001 tokens
       devLog('calculateExpectedOutput: Testing with small amount:', testAmount.toString());
       devLog('calculateExpectedOutput: Testing path:', path);
       devLog('calculateExpectedOutput: Router address:', calcRouterAddress);
@@ -1367,7 +1370,7 @@ const Swap = () => {
       
       // Get the correct decimals for the input token
       if (inputToken === 'ETH') {
-        amountInWei = ethers.parseUnits(inputAmount, 18); // ETH/WETH has 18 decimals
+        amountInWei = evmLite.parseUnits(inputAmount, 18); // ETH/WETH has 18 decimals
         devLog('calculateExpectedOutput: ETH amount calculation:', {
           inputAmount,
           decimals: 18,
@@ -1409,7 +1412,7 @@ const Swap = () => {
           return;
         }
         
-        amountInWei = ethers.parseUnits(inputAmount, tokenInData.decimals);
+        amountInWei = evmLite.parseUnits(inputAmount, tokenInData.decimals);
         devLog('calculateExpectedOutput: Calculated amountInWei:', amountInWei.toString());
         
         // Check if amount exceeds token balance
@@ -1417,14 +1420,14 @@ const Swap = () => {
           devLog('calculateExpectedOutput: Amount exceeds token balance', {
             amountInWei: amountInWei.toString(),
             balance: tokenInData.balance.toString(),
-            formattedBalance: ethers.formatUnits(tokenInData.balance, tokenInData.decimals)
+            formattedBalance: evmLite.formatUnits(tokenInData.balance, tokenInData.decimals)
           });
           setAmountOut('');
           return;
         }
         
         // Check if amount is unreasonably large for this token's decimals
-        const maxReasonableForDecimals = ethers.parseUnits('1000000', tokenInData.decimals); // 1 million tokens
+        const maxReasonableForDecimals = evmLite.parseUnits('1000000', tokenInData.decimals); // 1 million tokens
         if (amountInWei > maxReasonableForDecimals) {
           devLog('calculateExpectedOutput: Amount too large for token decimals', {
             amountInWei: amountInWei.toString(),
@@ -1437,7 +1440,7 @@ const Swap = () => {
       }
       
       // Validate that the amount is reasonable (not too large)
-      const maxReasonableAmount = ethers.parseUnits('1000000', 18); // 1 million tokens max
+      const maxReasonableAmount = evmLite.parseUnits('1000000', 18); // 1 million tokens max
       devLog('calculateExpectedOutput: Amount validation:', {
         amountInWei: amountInWei.toString(),
         maxReasonableAmount: maxReasonableAmount.toString(),
@@ -1454,7 +1457,7 @@ const Swap = () => {
       }
       
       // Additional validation: check if amount is unreasonably large (more than 1 billion wei)
-      const maxWeiAmount = ethers.parseUnits('1000000000', 18); // 1 billion wei
+      const maxWeiAmount = evmLite.parseUnits('1000000000', 18); // 1 billion wei
       if (amountInWei > maxWeiAmount) {
         devLog('calculateExpectedOutput: Amount unreasonably large, preventing contract call', { 
           amountInWei: amountInWei.toString(),
@@ -1473,7 +1476,7 @@ const Swap = () => {
       });
       
       // Final safety check - prevent any amount larger than 1 billion wei
-      const safetyLimit = ethers.parseUnits('1000000000', 18);
+      const safetyLimit = evmLite.parseUnits('1000000000', 18);
       if (amountInWei > safetyLimit) {
         devLog('calculateExpectedOutput: FINAL SAFETY CHECK FAILED - Amount too large, preventing contract call', {
           amountInWei: amountInWei.toString(),
@@ -1515,7 +1518,7 @@ const Swap = () => {
       // Format the output amount using the correct decimals for the output token
       let expectedAmountOut;
       if (outputToken === 'ETH') {
-        expectedAmountOut = ethers.formatUnits(amountsOut[1], 18); // ETH/WETH has 18 decimals
+        expectedAmountOut = evmLite.formatUnits(amountsOut[1], 18); // ETH/WETH has 18 decimals
       } else {
         const tokenOutData = userTokens.find(t => t.symbol === outputToken);
         if (!tokenOutData || !tokenOutData.decimals) {
@@ -1523,7 +1526,7 @@ const Swap = () => {
           setAmountOut('');
           return;
         }
-        expectedAmountOut = ethers.formatUnits(amountsOut[1], tokenOutData.decimals);
+        expectedAmountOut = evmLite.formatUnits(amountsOut[1], tokenOutData.decimals);
       }
       
       devLog('calculateExpectedOutput: Expected output amount:', expectedAmountOut);
@@ -1612,7 +1615,7 @@ const Swap = () => {
               return {
                 address: tokenAddress,
                 ...tokenInfo,
-                formattedBalance: ethers.formatUnits(tokenInfo.balance, tokenInfo.decimals),
+                formattedBalance: evmLite.formatUnits(tokenInfo.balance, tokenInfo.decimals),
                 fromDexFactory: inFactory && !hasBal,
               };
             }
@@ -1641,17 +1644,17 @@ const Swap = () => {
         try {
           const wei = await walletProvider.getBalance(account);
           tokensWithBalance.unshift({
-            address: ethers.ZeroAddress,
+            address: evmLite.ZeroAddress,
             symbol: nativeSym,
             name: net?.nativeCurrency?.name || nativeSym,
             decimals: 18,
             balance: wei.toString(),
-            formattedBalance: ethers.formatEther(wei),
+            formattedBalance: evmLite.formatEther(wei),
             isNative: true,
           });
         } catch {
           tokensWithBalance.unshift({
-            address: ethers.ZeroAddress,
+            address: evmLite.ZeroAddress,
             symbol: nativeSym,
             name: nativeSym,
             decimals: 18,
@@ -1706,6 +1709,7 @@ const Swap = () => {
 
   // Check available trading pairs
   const checkAvailablePairs = useCallback(async () => {
+    const ethers = await loadEthers();
     if (!chainId) return [];
     
     const routerAddress = getAmmVenue(Number(chainId) || 0)?.router || null;
@@ -1724,7 +1728,7 @@ const Swap = () => {
       ];
       const routerContract = new ethers.Contract(routerAddress, routerABI, walletProvider);
 
-      const testAmount = ethers.parseUnits('0.001', 18);
+      const testAmount = evmLite.parseUnits('0.001', 18);
       const commonTokens = userTokens.slice(0, 5); // Test first 5 tokens
       const pairJobs = [];
       for (let i = 0; i < commonTokens.length; i++) {
@@ -1790,7 +1794,7 @@ const Swap = () => {
         if (cancelled) return;
         const network = getNetworkByChainId(chainId);
         const symbol = network?.nativeCurrency?.symbol || 'ETH';
-        setEstimatedGasCost(`${ethers.formatEther(costWei)} ${symbol}`);
+        setEstimatedGasCost(`${evmLite.formatEther(costWei)} ${symbol}`);
       } catch (e) {
         if (!cancelled) setEstimatedGasCost(null);
       } finally {
@@ -1923,7 +1927,7 @@ const Swap = () => {
         return;
       }
 
-      const amountInWei = ethers.parseUnits(amountIn, tokenInData.decimals);
+      const amountInWei = evmLite.parseUnits(amountIn, tokenInData.decimals);
       
       const quotes = await externalSwapService.getSwapQuotes(
         tokenInData.address,

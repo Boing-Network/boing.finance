@@ -1,3 +1,4 @@
+import { evmLite } from '../utils/evmLite';
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +9,6 @@ import { PoolsSolanaContent } from '../components/SolanaFeaturePlaceholder';
 import EmptyState from '../components/EmptyState';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { ethers } from 'ethers';
 import {
   getUserLiquidityPositions,
   getUserCreatedPools,
@@ -268,8 +268,8 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
 
   const calculateToken1Amount = (token0Input) => {
     if (!token0Input || !pool.token0?.reserve || !pool.token1?.reserve) return '';
-    const token0Reserve = parseFloat(ethers.formatUnits(pool.token0.reserve, pool.token0.decimals));
-    const token1Reserve = parseFloat(ethers.formatUnits(pool.token1.reserve, pool.token1.decimals));
+    const token0Reserve = parseFloat(evmLite.formatUnits(pool.token0.reserve, pool.token0.decimals));
+    const token1Reserve = parseFloat(evmLite.formatUnits(pool.token1.reserve, pool.token1.decimals));
     const ratio = token1Reserve / token0Reserve;
     return (parseFloat(token0Input) * ratio).toFixed(6);
   };
@@ -418,7 +418,7 @@ const PoolDetailsModal = ({ pool, isOpen, onClose, onAddLiquidity, onRemoveLiqui
                   <div>
                     <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>LP Tokens</p>
                     <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                      {pool.lpBalance ? parseFloat(ethers.formatUnits(pool.lpBalance, 18)).toFixed(4) : '0.0000'}
+                      {pool.lpBalance ? parseFloat(evmLite.formatUnits(pool.lpBalance, 18)).toFixed(4) : '0.0000'}
                     </p>
                   </div>
                 </div>

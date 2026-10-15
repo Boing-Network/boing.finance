@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { evmLite, loadEthers } from '../utils/evmLite';
 
 class SimplePoolDataService {
   constructor() {
@@ -9,6 +9,7 @@ class SimplePoolDataService {
    * Get realistic pool data with fallback values
    */
   async getPoolWithRealisticData(pool, provider) {
+    const ethers = await loadEthers();
     try {
       // Get current reserves
       const pairContract = new ethers.Contract(pool.address, this.getPairABI(), provider);
@@ -55,8 +56,8 @@ class SimplePoolDataService {
       const _reserve1Num = Number(reserve1);
       
       // Convert reserves to human-readable amounts for TVL calculation
-      const reserve0Human = parseFloat(ethers.formatUnits(reserve0, token0Info.decimals));
-      const reserve1Human = parseFloat(ethers.formatUnits(reserve1, token1Info.decimals));
+      const reserve0Human = parseFloat(evmLite.formatUnits(reserve0, token0Info.decimals));
+      const reserve1Human = parseFloat(evmLite.formatUnits(reserve1, token1Info.decimals));
       
       // For now, use a simplified TVL calculation (in a real implementation, you'd get token prices)
       // This is just the sum of the human-readable amounts, not actual USD value
@@ -154,6 +155,7 @@ class SimplePoolDataService {
    * Get token information
    */
   async getTokenInfo(tokenAddress, provider) {
+    const ethers = await loadEthers();
     try {
       const tokenABI = [
         'function name() external view returns (string)',
@@ -232,7 +234,7 @@ class SimplePoolDataService {
       const valueStr = value.toString();
       
       // Use ethers.formatUnits to convert from smallest unit to human readable
-      const formatted = ethers.formatUnits(valueStr, decimals);
+      const formatted = evmLite.formatUnits(valueStr, decimals);
       
       // Parse the formatted number to handle display
       const num = parseFloat(formatted);
@@ -276,7 +278,7 @@ class SimplePoolDataService {
       const valueStr = value.toString();
       
       // Use ethers.formatUnits to convert from smallest unit to human readable
-      const formatted = ethers.formatUnits(valueStr, decimals);
+      const formatted = evmLite.formatUnits(valueStr, decimals);
       
       // Parse the formatted number
       const num = parseFloat(formatted);
