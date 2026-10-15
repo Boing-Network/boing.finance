@@ -188,6 +188,18 @@ export default defineConfig(({ mode }) => {
     outDir: 'dist',
     sourcemap: true,
     chunkSizeWarningLimit: 1200,
+    rollupOptions: {
+      output: {
+        // Long-lived vendor chunks so app deploys don't re-download big libraries (EVM + motion).
+        // Solana and chart code are already split out via lazy routes / dynamic imports.
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined;
+          if (/node_modules[\\/](ethers|@adraffy[\\/]ens-normalize)[\\/]/.test(id)) return 'vendor-ethers';
+          if (/node_modules[\\/](framer-motion|motion-dom|motion-utils)[\\/]/.test(id)) return 'vendor-motion';
+          return undefined;
+        },
+      },
+    },
   },
   publicDir: 'public',
 };
