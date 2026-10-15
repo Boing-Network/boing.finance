@@ -3,19 +3,30 @@
  * Uses the existing REACT_APP_ALCHEMY_API_KEY (HTTP + WSS on *.g.alchemy.com).
  */
 
-import { ethers } from 'ethers';
 import { getContractAddresses, isZeroEvmAddress } from '../config/contracts';
 import alchemyService from './alchemyService';
 
-export const TOKEN_DEPLOYED_TOPIC = ethers.id(
-  'TokenDeployed(address,address,string,string,uint8,uint256,uint256,uint256)'
-);
-export const PAIR_CREATED_TOPIC = ethers.id('PairCreated(address,address,address,uint256)');
-
-const iface = new ethers.Interface([
-  'event TokenDeployed(address indexed tokenAddress, address indexed owner, string name, string symbol, uint8 plan, uint256 serviceFee, uint256 chainId, uint256 timestamp)',
-  'event PairCreated(address indexed token0, address indexed token1, address pair, uint256)',
-]);
+/**
+ * ethers is loaded on demand (only when an EVM chain with an Alchemy key subscribes), so the
+ * Boing L1 default path never downloads the EVM stack.
+ */
+let evmLib = null;
+async function loadEvmLib() {
+  if (evmLib) return evmLib;
+  const ethers = await import('ethers');
+  evmLib = {
+    ethers,
+    TOKEN_DEPLOYED_TOPIC: ethers.id(
+      'TokenDeployed(address,address,string,string,uint8,uint256,uint256,uint256)'
+    ),
+    PAIR_CREATED_TOPIC: ethers.id('PairCreated(address,address,address,uint256)'),
+    iface: new ethers.Interface([
+      'event TokenDeployed(address indexed tokenAddress, address indexed owner, string name, string symbol, uint8 plan, uint256 serviceFee, uint256 chainId, uint256 timestamp)',
+      'event PairCreated(address indexed token0, address indexed token1, address pair, uint256)',
+    ]),
+  };
+  return evmLib;
+}
 
 export function getAlchemyWsUrl(chainId) {
   const http = alchemyService.getRpcUrl(chainId);
@@ -23,7 +34,8 @@ export function getAlchemyWsUrl(chainId) {
   return http.replace(/^https:/, 'wss:');
 }
 
-function decodeLog(log, chainId) {
+function decodeLog(lib, log, chainId) {
+  const { ethers, TOKEN_DEPLOYED_TOPIC, PAIR_CREATED_TOPIC, iface } = lib;
   const topic0 = (log?.topics?.[0] || '').toLowerCase();
   const txHash = log?.transactionHash || log?.transaction_hash || '';
   const base = {
@@ -106,13 +118,16 @@ export function subscribeFactoryLogs(chainId, onEvent) {
   const attach = async () => {
     if (closed) return;
     try {
-      provider = new ethers.WebSocketProvider(wsUrl, Number(chainId));
+      const lib = await loadEvmLib();
+      if (closed) return;
+      const { TOKEN_DEPLOYED_TOPIC, PAIR_CREATED_TOPIC } = lib;
+      provider = new lib.ethers.WebSocketProvider(wsUrl, Number(chainId));
       const filter = {
         address: addresses,
         topics: [[TOKEN_DEPLOYED_TOPIC, PAIR_CREATED_TOPIC]],
       };
       provider.on(filter, (log) => {
-        const event = decodeLog(log, chainId);
+        const event = decodeLog(lib, log, chainId);
         if (event) onEvent(event);
       });
       delay = 1500;
@@ -159,8 +174,6 @@ const alchemyRealtimeService = {
   getAlchemyWsUrl,
   subscribeFactoryLogs,
   eventKey,
-  TOKEN_DEPLOYED_TOPIC,
-  PAIR_CREATED_TOPIC,
 };
 
 export default alchemyRealtimeService;

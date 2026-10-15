@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { ethers } from 'ethers';
 import { getNetworkByChainId, getWalletAddChainParams, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import {
   connectInjectedBoingWallet,
@@ -7,6 +6,7 @@ import {
   providerSupportsBoingNativeRpc,
 } from 'boing-sdk';
 import toast from 'react-hot-toast';
+import { formatUnitsLite } from '../utils/formatUnitsLite';
 import {
   getWindowBoingProvider,
   isBoingNamedProvider,
@@ -27,7 +27,9 @@ import { createBoingBrowserRpcClient, normalizeBoingFaucetAccountHex } from '../
  * @returns {{ browserProvider: import('ethers').BrowserProvider, signer: import('ethers').JsonRpcSigner | null, evmSignerUnavailableReason: 'boing_native_account' | null }}
  */
 async function createBrowserProviderAndSigner(eip1193Provider, accountAddress) {
-  const browserProvider = new ethers.BrowserProvider(eip1193Provider);
+  // ethers is fetched only when a wallet actually connects (keeps the default first load light).
+  const { BrowserProvider } = await import('ethers');
+  const browserProvider = new BrowserProvider(eip1193Provider);
 
   let signer = null;
   // Default getSigner() throws on 32-byte Boing AccountIds; skip to avoid noisy INVALID_ARGUMENT logs.
@@ -1344,7 +1346,7 @@ export const WalletProvider = ({ children }) => {
         const { balance } = await client.getBalance(normalized);
         const net = getNetworkByChainId(chainId);
         const decimals = net?.nativeCurrency?.decimals ?? 0;
-        return ethers.formatUnits(balance, decimals);
+        return formatUnitsLite(balance, decimals);
       } catch (error) {
         console.error('Error getting Boing native balance:', error);
         return null;
@@ -1367,7 +1369,7 @@ export const WalletProvider = ({ children }) => {
       const balance = await provider.getBalance(account);
       const net = chainId != null ? getNetworkByChainId(chainId) : null;
       const decimals = net?.nativeCurrency?.decimals ?? 18;
-      return ethers.formatUnits(balance, decimals);
+      return formatUnitsLite(balance, decimals);
     } catch (error) {
       console.error('Error getting balance:', error);
       // Don't show error toast for network change errors, just return null
@@ -1379,7 +1381,7 @@ export const WalletProvider = ({ children }) => {
           const balance = await provider.getBalance(account);
           const net = chainId != null ? getNetworkByChainId(chainId) : null;
           const decimals = net?.nativeCurrency?.decimals ?? 18;
-          return ethers.formatUnits(balance, decimals);
+          return formatUnitsLite(balance, decimals);
         } catch (retryError) {
           console.log('❌ Balance fetch retry failed:', retryError);
           return null;

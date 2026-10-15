@@ -190,11 +190,15 @@ export default defineConfig(({ mode }) => {
     chunkSizeWarningLimit: 1200,
     rollupOptions: {
       output: {
-        // Long-lived vendor chunks so app deploys don't re-download big libraries (EVM + motion).
+        // Long-lived vendor chunk for motion. ethers is NOT a manual chunk: Rollup would pull its shared
+        // deps (@noble/*) in with it and make the entry import it statically; ethers is dynamic-imported
+        // by WalletContext / alchemyRealtimeService / EVM pages, so it splits on its own.
         // Solana and chart code are already split out via lazy routes / dynamic imports.
         manualChunks(id) {
           if (!id.includes('node_modules')) return undefined;
-          if (/node_modules[\\/](ethers|@adraffy[\\/]ens-normalize)[\\/]/.test(id)) return 'vendor-ethers';
+          // React gets its own chunk; otherwise Rollup folds it into vendor-motion and the entry would
+          // statically import motion just to get React.
+          if (/node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) return 'vendor-react';
           if (/node_modules[\\/](framer-motion|motion-dom|motion-utils)[\\/]/.test(id)) return 'vendor-motion';
           return undefined;
         },
