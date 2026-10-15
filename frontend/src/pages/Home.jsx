@@ -20,7 +20,7 @@ function Home() {
   return (
     <>
       <Helmet>
-        <title>boing.finance | DeFi That Bounces Back — Swap, Deploy & Trade on EVM & Solana</title>
+        <title>boing.finance | DeFi on Boing L1 - Swap, Deploy & Trade (also EVM & Solana)</title>
         <meta name="description" content="The DeFi that always bounces back. Swap tokens, add liquidity, bridge assets, and deploy your own token on EVM and Solana. One interface, no code." />
         <meta name="keywords" content="boing finance, DeFi, DEX, swap tokens, liquidity pool, deploy token, cross-chain bridge, EVM, Solana, decentralized exchange, create token, ERC20, token launch" />
         <meta property="og:title" content="boing.finance | DeFi That Bounces Back — Swap, Deploy & Trade" />

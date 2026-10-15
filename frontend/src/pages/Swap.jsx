@@ -2041,7 +2041,7 @@ const Swap = () => {
   return (
     <>
       <Helmet>
-        <title>Swap Tokens | boing.finance — Trade on EVM & Solana</title>
+        <title>Swap Tokens | boing.finance - Trade on Boing L1, EVM & Solana</title>
         <meta name="description" content="Swap tokens instantly on EVM and Solana. Get the best rates with boing.finance—the DeFi that always bounces back." />
         <meta name="keywords" content="swap tokens, DEX, boing finance, EVM, Solana, token swap, decentralized exchange" />
         <meta property="og:title" content="Swap Tokens | boing.finance" />
