@@ -1297,7 +1297,7 @@ function CreatePool() {
     return (
       <>
         <Helmet>
-          <title>Create Pool | boing.finance — New Liquidity Pools on EVM & Solana</title>
+          <title>Create Pool | boing.finance — Liquidity Pools on Boing L1, EVM & Solana</title>
           <meta name="description" content="Create new liquidity pools on EVM and Solana. Deploy trading pairs and earn fees with boing.finance." />
         </Helmet>
         <TradeDeployShell width="medium">
@@ -1325,7 +1325,7 @@ function CreatePool() {
   return (
     <>
       <Helmet>
-        <title>Create Pool | boing.finance — New Liquidity Pools on EVM & Solana</title>
+        <title>Create Pool | boing.finance — Liquidity Pools on Boing L1, EVM & Solana</title>
         <meta name="description" content="Create new liquidity pools on EVM and Solana. Deploy pairs, earn fees. One interface with boing.finance." />
         <meta name="keywords" content="liquidity pools, create pool, DeFi, AMM, trading pairs" />
       </Helmet>

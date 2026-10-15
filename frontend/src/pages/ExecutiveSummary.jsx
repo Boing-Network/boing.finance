@@ -6,8 +6,8 @@ const ExecutiveSummary = () => {
     <>
       <Helmet>
         <title>Executive Summary | boing.finance — DeFi on EVM & Solana</title>
-        <meta name="description" content="boing.finance executive summary: cross-chain DeFi, token deployment, liquidity, and bridge on EVM and Solana. The DeFi that bounces back." />
-        <meta name="keywords" content="cross-chain DeFi, DEX, boing.finance, EVM, Solana, token deployment, liquidity" />
+        <meta name="description" content="boing.finance executive summary: DeFi on Boing L1 first (native AMM, token deploy, liquidity via Boing Express), plus EVM and Solana. The DeFi that bounces back." />
+        <meta name="keywords" content="Boing L1, Boing Network, cross-chain DeFi, DEX, boing.finance, EVM, Solana, token deployment, liquidity" />
         <meta property="og:title" content="Executive Summary | boing.finance" />
         <meta property="og:description" content="Next-generation cross-chain DeFi platform with live deployment across 6 networks" />
         <meta property="og:type" content="website" />
@@ -150,7 +150,7 @@ const ExecutiveSummary = () => {
                 boing.finance provides a comprehensive cross-chain DeFi platform featuring:
               </p>
               <ul className="space-y-2" style={{ color: 'var(--text-secondary)' }}>
-                <li>• <strong>Cross-Chain Trading</strong> - One interface for EVM and Solana</li>
+                <li>• <strong>Cross-Chain Trading</strong> - One interface for Boing L1, EVM and Solana</li>
                 <li>• <strong>Token Factory</strong> - One-click token deployment with enterprise security</li>
                 <li>• <strong>Liquidity Management</strong> - Advanced AMM pools with yield farming</li>
                 <li>• <strong>Cross-Chain Bridge</strong> - Secure, fast, and cost-effective transfers</li>
