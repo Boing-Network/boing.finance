@@ -11,7 +11,7 @@
     "@solana/spl-token": "^0.4.14",
     "@solana/web3.js": "^1.98.4",
     "@tanstack/react-query": "^5.90.11",
-    "axios": "^1.6.0",
+    "axios": "^1.20.0",
     "boing-sdk": "file:../boing.network/boing-sdk",
     "buffer": "^6.0.3",
     "canvas-confetti": "^1.9.4",
@@ -80,17 +80,17 @@
     "eslint": "^8.57.0",
     "eslint-config-react-app": "^7.0.1",
     "postcss": "^8.4.49",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.5",
     "tailwindcss": "^3.4.17",
-    "to-ico": "^1.1.5",
     "typescript": "~5.6.3",
-    "vite": "^5.4.11"
+    "vite": "^6.4.4"
   },
   "overrides": {
     "@solana/codecs": "2.3.0",
     "@solana/codecs-core": "2.3.0",
     "@solana/codecs-data-structures": "2.3.0",
     "@solana/codecs-numbers": "2.3.0",
-    "@solana/codecs-strings": "2.3.0"
+    "@solana/codecs-strings": "2.3.0",
+    "postcss-selector-parser": "^7.1.6"
   }
 }

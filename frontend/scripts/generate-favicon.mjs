@@ -1,6 +1,6 @@
 /**
  * Build public/favicon.ico from the canonical mark PNG (generated from boing-logo-mark.svg).
- * Renders multiple square PNG layers (default 16–128px) with sharp, then packs them with to-ico.
+ * Renders multiple square PNG layers (default 16–128px) with sharp, then packs them into a PNG-layer ICO (no extra dependency).
  *
  * Usage: npm run generate-favicon
  * Prerequisite: npm run generate-brand-assets (creates assets/boing-logo-mark.png)
@@ -10,11 +10,32 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { createRequire } from 'module';
 import sharp from 'sharp';
 
-const require = createRequire(import.meta.url);
-const toIco = require('to-ico');
+/** Pack PNG buffers into an ICO container (PNG-compressed entries, supported since Windows Vista). */
+function packIco(pngs) {
+  const header = Buffer.alloc(6);
+  header.writeUInt16LE(0, 0);
+  header.writeUInt16LE(1, 2);
+  header.writeUInt16LE(pngs.length, 4);
+  const dir = Buffer.alloc(16 * pngs.length);
+  let offset = 6 + dir.length;
+  pngs.forEach((png, i) => {
+    const w = png.readUInt32BE(16);
+    const h = png.readUInt32BE(20);
+    const o = i * 16;
+    dir.writeUInt8(w >= 256 ? 0 : w, o);
+    dir.writeUInt8(h >= 256 ? 0 : h, o + 1);
+    dir.writeUInt8(0, o + 2);
+    dir.writeUInt8(0, o + 3);
+    dir.writeUInt16LE(1, o + 4);
+    dir.writeUInt16LE(32, o + 6);
+    dir.writeUInt32LE(png.length, o + 8);
+    dir.writeUInt32LE(offset, o + 12);
+    offset += png.length;
+  });
+  return Buffer.concat([header, dir, ...pngs]);
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(__dirname, '..', 'public');
@@ -53,7 +74,7 @@ async function buildIco() {
     ICO_SIZES.map((size) => pngForSize(SOURCE, size)),
   );
 
-  const icoBuffer = await toIco(pngBuffers);
+  const icoBuffer = packIco(pngBuffers);
 
   fs.writeFileSync(OUT_ICO, icoBuffer);
   fs.writeFileSync(OUT_ICO_ALT, icoBuffer);
