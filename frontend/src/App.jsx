@@ -11,9 +11,8 @@ import { ChainRealtimeProvider } from './contexts/ChainRealtimeContext';
 import { SolanaWalletProvider } from './contexts/SolanaWalletContext';
 import ChainTypeSelector from './components/ChainTypeSelector';
 import { ThemeProvider } from './contexts/ThemeContext';
-import { AchievementProvider } from './contexts/AchievementContext';
+import { AchievementProvider, useAchievements } from './contexts/AchievementContext';
 import logger from './utils/logger';
-import AchievementOverlay from './components/AchievementOverlay';
 import BaseMiniAppWrapper from './components/BaseMiniAppWrapper';
 import BaseNetworkOptimizer from './components/BaseNetworkOptimizer';
 import WalletConnect from './components/WalletConnect';
@@ -84,6 +83,22 @@ const TransactionHistoryModal = lazy(() => import('./components/TransactionHisto
 const AIChatModal = lazy(() => import('./components/AIChatModal'));
 const DeFi101Modal = lazy(() => import('./components/DeFi101Modal'));
 const OnboardingTour = lazy(() => import('./components/OnboardingTour'));
+// framer-motion (~110 KB) is only needed once an achievement celebrates; load it then.
+const AchievementOverlay = lazy(() => import('./components/AchievementOverlay'));
+
+function AchievementOverlayGate() {
+  const { recentUnlock, lightCelebration } = useAchievements();
+  const [armed, setArmed] = useState(false);
+  useEffect(() => {
+    if (recentUnlock || lightCelebration) setArmed(true);
+  }, [recentUnlock, lightCelebration]);
+  if (!armed) return null;
+  return (
+    <Suspense fallback={null}>
+      <AchievementOverlay />
+    </Suspense>
+  );
+}
 
 // QueryClient singleton at module top to avoid "Cannot access before initialization"
 // (production bundle evaluation order can cause TDZ if this is declared after App)
@@ -887,7 +902,7 @@ function App() {
               <SolanaWalletProvider>
               <ChainRealtimeProvider>
               <AchievementProvider>
-                <AchievementOverlay />
+                <AchievementOverlayGate />
               <BaseMiniAppWrapper>
                 <Router>
                   <InitialAnimationGate>
