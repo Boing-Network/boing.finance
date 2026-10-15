@@ -6,6 +6,7 @@ import { encodeNativeDexRegisterPairCalldataHex } from './nativeDexFactoryCallda
 import { nativeAccountsAccessListJson } from './nativeAmmAccessList';
 import { normalizeNativeVmTokenId32 } from './nativeVmTokenRegistry';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
+import { boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
 
 const U64_MAX = (1n << 64n) - 1n;
 
@@ -92,7 +93,7 @@ export async function createBoingNativeConstantProductPool({
 
   const provider = pickExpressProviderForDeploy(getWalletProvider);
   if (!provider) {
-    return { ok: false, code: 'no_provider', message: 'Boing Express provider not found.' };
+    return { ok: false, code: 'no_provider', message: boingWalletMissingMessage() };
   }
 
   const deploy = await executeBoingLaunchWizardDeploy({

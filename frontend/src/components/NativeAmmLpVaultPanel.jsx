@@ -24,6 +24,7 @@ import {
   BOING_NETWORK_NATIVE_AMM_LP_VAULT_URL,
   BOING_NETWORK_NATIVE_LP_SHARE_TOKEN_URL,
 } from '../config/boingNetworkDocsUrls';
+import { boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
 
 function pickExpressProvider(getWalletProvider) {
   try {
@@ -133,7 +134,7 @@ export default function NativeAmmLpVaultPanel({ compact = false, embedded = fals
     async (txObject) => {
       const p = pickExpressProvider(getWalletProvider);
       if (!p) {
-        toast.error('Boing Express provider not found.');
+        toast.error(boingWalletMissingMessage());
         return;
       }
       setBusy(true);

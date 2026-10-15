@@ -131,3 +131,24 @@ export async function switchToBoingTestnetInWallet(provider) {
 }
 
 export { BOING_TESTNET_CHAIN_HEX };
+
+/** Chrome Web Store listing for the Boing Express extension. */
+export const BOING_EXPRESS_CHROME_STORE_URL =
+  'https://chromewebstore.google.com/detail/hhknjdhknnghccmfnfafbkapjljicbfh';
+
+/**
+ * User-facing message when no Boing Express provider is injected. Explains mobile / non-Chromium
+ * browsers (the extension cannot run there) vs desktop Chrome without the extension.
+ * @param {string} [userAgent]
+ */
+export function boingWalletMissingMessage(userAgent) {
+  const ua = userAgent ?? (typeof navigator !== 'undefined' ? navigator.userAgent : '') ?? '';
+  if (/Android|iPhone|iPad|iPod|Mobile/i.test(ua)) {
+    return 'Boing Express is a desktop Chrome extension and cannot connect on this mobile browser. Open boing.finance in Chrome on a computer, or use boing.express to view balances and send BOING.';
+  }
+  const chromium = /Chrome\/|Chromium\/|Edg\//.test(ua) && !/Firefox\//.test(ua);
+  if (!chromium) {
+    return 'Boing Express is a Chrome extension. Open boing.finance in Chrome, Edge, or Brave with the extension installed (or use boing.express).';
+  }
+  return `Boing Express isn't installed in this browser. Install it from the Chrome Web Store (${BOING_EXPRESS_CHROME_STORE_URL}), then reload.`;
+}

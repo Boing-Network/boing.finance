@@ -11,6 +11,7 @@ import { BOING_QA_PURPOSE_TOKEN, isValidBoingQaPurpose } from '../config/boingQa
 import { getWindowBoingProvider } from '../utils/boingWalletDiscovery';
 import { tryParseEvenLengthDeployBytecodeHex } from '../utils/boingDeployBytecodeHex';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
+import { boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
 
 export const LEGACY_FUNGIBLE_BYTECODE_ENV = 'REACT_APP_BOING_REFERENCE_TOKEN_BYTECODE';
 /** Optional extra env name for NFT collection template (SDK already checks REACT_APP_BOING_REFERENCE_NFT_COLLECTION_TEMPLATE_BYTECODE_HEX). */
@@ -277,7 +278,7 @@ export async function executeBoingLaunchWizardDeploy({ kind, getWalletProvider, 
 
   const p = pickExpressProviderForDeploy(getWalletProvider);
   if (!p) {
-    return { ok: false, code: 'no_provider', message: 'Boing Express provider not found.' };
+    return { ok: false, code: 'no_provider', message: boingWalletMissingMessage() };
   }
 
   const client = createBoingBrowserRpcClient();

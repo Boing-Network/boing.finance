@@ -18,6 +18,7 @@ import { boingExpressContractCallSignSimulateSubmit } from '../services/boingExp
 import { getWindowBoingProvider } from '../utils/boingWalletDiscovery';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
 import { normalizeNativeVmTokenId32 } from '../services/nativeVmTokenRegistry';
+import { boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
 
 function pickExpressProvider(getWalletProvider) {
   try {
@@ -104,7 +105,7 @@ export default function NativeBoingManagePoolPanel() {
     }
     if (!pool) throw new Error('Enter a 32-byte pool account id.');
     const p = pickExpressProvider(getWalletProvider);
-    if (!p) throw new Error('Boing Express provider not found.');
+    if (!p) throw new Error(boingWalletMissingMessage());
     const access = nativeAccountsAccessListJson([
       account,
       pool,

@@ -20,6 +20,7 @@ import { normalizeNativeVmTokenId32 } from '../services/nativeVmTokenRegistry';
 import { getWindowBoingProvider } from '../utils/boingWalletDiscovery';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
 import NativeVmTokenPickerField from './NativeVmTokenPickerField';
+import { boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
 
 function pickExpressProvider(getWalletProvider) {
   try {
@@ -255,7 +256,7 @@ export default function NativeDexDirectoryRoutePanel({
     }
     const p = pickExpressProvider(getWalletProvider);
     if (!p) {
-      toast.error('Boing Express provider not found.');
+      toast.error(boingWalletMissingMessage());
       return;
     }
     setPreviewBusy(true);
@@ -305,7 +306,7 @@ export default function NativeDexDirectoryRoutePanel({
 
     const p = pickExpressProvider(getWalletProvider);
     if (!p) {
-      toast.error('Boing Express provider not found.');
+      toast.error(boingWalletMissingMessage());
       return;
     }
 

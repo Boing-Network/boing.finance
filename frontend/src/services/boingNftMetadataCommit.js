@@ -4,6 +4,7 @@ import {
 } from 'boing-sdk';
 import { boingExpressContractCallSignSimulateSubmit } from './boingExpressNativeTx';
 import { pickExpressProviderForDeploy } from './boingNativeLaunchWizardDeploy';
+import { boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
 
 function bytesToHex(bytes) {
   let s = '0x';
@@ -37,7 +38,7 @@ export async function commitReferenceNftMetadataHash({
   }
   const p = pickExpressProviderForDeploy(getWalletProvider);
   if (!p) {
-    throw new Error('Boing Express provider not found.');
+    throw new Error(boingWalletMissingMessage());
   }
   const tokenIdHex32 = referenceNftTokenIdWordFromU64(tokenId);
   const calldata = encodeReferenceSetMetadataHashCalldataHex(tokenIdHex32, hash);
