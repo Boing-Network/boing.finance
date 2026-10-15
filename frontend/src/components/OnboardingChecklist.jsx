@@ -1,13 +1,17 @@
-// Onboarding Checklist - Connect wallet, View portfolio, Set price alert
+// Onboarding Checklist - Boing L1 first: install Boing Express, connect, get testnet BOING, swap, deploy, add liquidity
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
 import { getPriceAlerts } from '../utils/priceAlerts';
 import { getUnlockedAchievements } from '../utils/achievements';
+import { BOING_EXPRESS_CHROME_STORE_URL, getWindowBoingProvider } from '../utils/boingWalletDiscovery';
+
+const BOING_FAUCET_URL = 'https://boing.network/faucet';
 
 const STORAGE_KEYS = {
   visitedPortfolio: 'boing_visited_portfolio',
-  checklistDismissed: 'boing_checklist_dismissed'
+  checklistDismissed: 'boing_checklist_dismissed',
+  visitedFaucet: 'boing_visited_faucet'
 };
 
 const OnboardingChecklist = ({ compact = false }) => {
@@ -21,6 +25,8 @@ const OnboardingChecklist = ({ compact = false }) => {
   const [visitedPortfolio, setVisitedPortfolio] = useState(false);
   const [hasPriceAlert, setHasPriceAlert] = useState(false);
   const [unlocked, setUnlocked] = useState([]);
+  const [hasExpress, setHasExpress] = useState(false);
+  const [visitedFaucet, setVisitedFaucet] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -28,6 +34,8 @@ const OnboardingChecklist = ({ compact = false }) => {
     setVisitedPortfolio(localStorage.getItem(STORAGE_KEYS.visitedPortfolio) === 'true');
     setHasPriceAlert((getPriceAlerts() || []).length > 0);
     setUnlocked(getUnlockedAchievements(account) || []);
+    try { setHasExpress(!!getWindowBoingProvider()); } catch { setHasExpress(false); }
+    try { setVisitedFaucet(localStorage.getItem(STORAGE_KEYS.visitedFaucet) === 'true'); } catch { /* ignore */ }
   }, [location.pathname, account]);
 
   useEffect(() => {
@@ -47,7 +55,8 @@ const OnboardingChecklist = ({ compact = false }) => {
   const stepSwapDone = unlocked.includes('first_swap');
   const stepLiquidityDone = unlocked.includes('first_liquidity');
   const stepDeployDone = unlocked.includes('first_deploy');
-  const coreDone = step1Done && step2Done && step3Done;
+  void step2Done; void step3Done;
+  const coreDone = hasExpress && step1Done && visitedFaucet;
   const allDone = coreDone && stepSwapDone && stepLiquidityDone && stepDeployDone;
 
   const handleDismiss = () => {
@@ -58,11 +67,17 @@ const OnboardingChecklist = ({ compact = false }) => {
 
   if (dismissed && coreDone && !compact) return null;
 
+  const openFaucet = () => {
+    try { localStorage.setItem(STORAGE_KEYS.visitedFaucet, 'true'); } catch { /* ignore */ }
+    setVisitedFaucet(true);
+    window.open(BOING_FAUCET_URL, '_blank', 'noopener,noreferrer');
+  };
+
   const steps = [
-    { id: 1, label: 'Connect wallet', done: step1Done, action: () => connectWallet && connectWallet() },
-    { id: 2, label: 'Try a swap', done: stepSwapDone, action: () => navigate('/swap') },
-    { id: 3, label: 'Explore tokens', done: step3Done, action: () => navigate('/tokens') },
-    { id: 4, label: 'View portfolio', done: step2Done, action: () => navigate('/portfolio') },
+    { id: 1, label: 'Install Boing Express', done: hasExpress, action: () => window.open(BOING_EXPRESS_CHROME_STORE_URL, '_blank', 'noopener,noreferrer') },
+    { id: 2, label: 'Connect wallet (Boing Testnet)', done: step1Done, action: () => connectWallet && connectWallet() },
+    { id: 3, label: 'Get testnet BOING', done: visitedFaucet, action: openFaucet },
+    { id: 4, label: 'Try a swap', done: stepSwapDone, action: () => navigate('/swap') },
     { id: 5, label: 'Deploy a token', done: stepDeployDone, action: () => navigate('/deploy-token') },
     { id: 6, label: 'Add liquidity', done: stepLiquidityDone, action: () => navigate('/create-pool') }
   ];
