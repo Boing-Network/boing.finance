@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import { formatUnitsLite } from '../utils/formatUnitsLite';
 import {
   getWindowBoingProvider,
+  getBoingWebWalletFallbackProvider,
   isBoingNamedProvider,
   isBoingNativeAccountIdHex,
   getChainIdFromBoingCompatibleProvider,
@@ -622,7 +623,8 @@ export const WalletProvider = ({ children }) => {
     } else if (targetWalletType === 'coinbase') {
       return providers.coinbase;
     } else if (targetWalletType === 'boingExpress') {
-      return providers.boingExpress || getWindowBoingProvider();
+      // Extension first; boing.express web wallet (popup) only when no extension is injected.
+      return providers.boingExpress || getWindowBoingProvider() || getBoingWebWalletFallbackProvider();
     }
     
     // Fallback to current ethereum provider
