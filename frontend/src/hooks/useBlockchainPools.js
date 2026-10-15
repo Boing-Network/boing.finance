@@ -1,7 +1,7 @@
+import { loadEthers } from '../utils/evmLite';
 import { useState, useEffect, useCallback } from 'react';
 import { useWallet } from '../contexts/WalletContext';
 import blockchainPoolService from '../services/blockchainPoolService';
-import { ethers } from 'ethers';
 
 export const useBlockchainPools = () => {
   const { account, chainId } = useWallet();
@@ -12,6 +12,7 @@ export const useBlockchainPools = () => {
   // Initialize the blockchain service
   // Returns true if contracts are available, false if API-only mode
   const initializeService = useCallback(async () => {
+    const ethers = await loadEthers();
     if (!window.ethereum || !chainId) {
       // Don't set error - allow API-only mode
       setIsInitialized(false);

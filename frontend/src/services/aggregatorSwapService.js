@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { evmLite, loadEthers } from '../utils/evmLite';
 import { getNetworkByChainId } from '../config/networks';
 import { getApiUrl } from '../config';
 import {
@@ -30,7 +30,7 @@ function mapLifiBody(body, toDecimals) {
   const toAmount = estimate.toAmount || '0';
   let amountOutHuman = toAmount;
   try {
-    amountOutHuman = ethers.formatUnits(toAmount, toDecimals ?? 18);
+    amountOutHuman = evmLite.formatUnits(toAmount, toDecimals ?? 18);
   } catch {
     /* keep raw */
   }
@@ -102,7 +102,7 @@ export function resolveEvmSwapToken(symbol, chainId, userTokens) {
     return { address: LIFI_NATIVE, decimals: 18, isNative: true, symbol };
   }
   const token = (userTokens || []).find((t) => t.symbol === symbol);
-  if (!token?.address || token.address === ethers.ZeroAddress) return null;
+  if (!token?.address || token.address === evmLite.ZeroAddress) return null;
   return {
     address: token.address,
     decimals: token.decimals ?? 18,
@@ -141,7 +141,7 @@ export async function getEvmAggregatorQuote({
 
   let fromAmount;
   try {
-    fromAmount = ethers.parseUnits(String(amountHuman), from.decimals).toString();
+    fromAmount = evmLite.parseUnits(String(amountHuman), from.decimals).toString();
   } catch {
     return null;
   }
@@ -235,7 +235,7 @@ export async function getEvmBridgeQuote({
   }
   let fromAmount;
   try {
-    fromAmount = ethers.parseUnits(String(amountHuman), fromToken.decimals ?? 18).toString();
+    fromAmount = evmLite.parseUnits(String(amountHuman), fromToken.decimals ?? 18).toString();
   } catch {
     return null;
   }
@@ -353,13 +353,14 @@ const ERC20_ABI = [
 ];
 
 export async function ensureErc20Allowance(tokenAddress, spender, amount, signer) {
+    const ethers = await loadEthers();
   if (!tokenAddress || tokenAddress.toLowerCase() === LIFI_NATIVE.toLowerCase()) return;
-  if (!spender || spender === ethers.ZeroAddress) return;
+  if (!spender || spender === evmLite.ZeroAddress) return;
   const token = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
   const owner = await signer.getAddress();
   const current = await token.allowance(owner, spender);
   if (current >= BigInt(amount)) return;
-  const tx = await token.approve(spender, ethers.MaxUint256);
+  const tx = await token.approve(spender, evmLite.MaxUint256);
   await tx.wait();
 }
 

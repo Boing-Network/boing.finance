@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { evmLite } from '../utils/evmLite';
 import {
   preflightBoingIntegrationDeploy,
   resolveNativeConstantProductPoolBytecodeHex,
@@ -82,7 +82,7 @@ export async function enrichBoingTokenLaunchFields(fields) {
     const dec = fields.tokenDecimals;
     if (rawSupply != null && String(rawSupply).trim() !== '' && dec != null && Number(dec) >= 0) {
       try {
-        out.mintFirstTotalSupplyWei = ethers.parseUnits(String(rawSupply).trim() || '0', Number(dec));
+        out.mintFirstTotalSupplyWei = evmLite.parseUnits(String(rawSupply).trim() || '0', Number(dec));
       } catch {
         /* SDK may fall back to maxTxAmount for wallet cap */
       }

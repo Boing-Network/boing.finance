@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { evmLite, loadEthers } from '../utils/evmLite';
 
 // External DEX configurations for Sepolia
 const EXTERNAL_DEX_CONFIG = {
@@ -114,6 +114,7 @@ class ExternalSwapService {
 
   // Get quote from a specific DEX
   async getQuoteFromDEX(dexName, dexConfigItem, tokenIn, tokenOut, amountIn) {
+    const ethers = await loadEthers();
     try {
       // First check if the contracts are deployed
       const routerCode = await this.provider.getCode(dexConfigItem.router);
@@ -174,8 +175,8 @@ class ExternalSwapService {
         tokenOutContract.decimals()
       ]);
 
-      const amountOutFormatted = ethers.formatUnits(amountsOut[1], tokenOutDecimals);
-      const amountInFormatted = ethers.formatUnits(amountIn, tokenInDecimals);
+      const amountOutFormatted = evmLite.formatUnits(amountsOut[1], tokenOutDecimals);
+      const amountInFormatted = evmLite.formatUnits(amountIn, tokenInDecimals);
 
       const quote = {
         dex: dexName,
@@ -233,6 +234,7 @@ class ExternalSwapService {
 
   // Execute swap on external DEX
   async executeSwap(quote, signer, slippageTolerance = 0.5) {
+    const ethers = await loadEthers();
     if (!signer) {
       throw new Error('Signer required for swap execution');
     }
@@ -302,6 +304,7 @@ class ExternalSwapService {
 
   // Check if token approval is needed
   async checkApproval(tokenAddress, spenderAddress, amount, signer) {
+    const ethers = await loadEthers();
     try {
       const token = new ethers.Contract(tokenAddress, TOKEN_ABI, signer);
       const allowance = await token.allowance(await signer.getAddress(), spenderAddress);
@@ -314,9 +317,10 @@ class ExternalSwapService {
 
   // Approve token for external DEX
   async approveToken(tokenAddress, spenderAddress, signer) {
+    const ethers = await loadEthers();
     try {
       const token = new ethers.Contract(tokenAddress, TOKEN_ABI, signer);
-      const tx = await token.approve(spenderAddress, ethers.MaxUint256);
+      const tx = await token.approve(spenderAddress, evmLite.MaxUint256);
       return tx;
     } catch (error) {
       throw new Error(`Failed to approve token: ${error.message}`);

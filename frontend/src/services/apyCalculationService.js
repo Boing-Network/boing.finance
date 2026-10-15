@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { loadEthers } from '../utils/evmLite';
 
 // DEX Pair ABI for swap events
 const DEX_PAIR_ABI = [
@@ -31,6 +31,7 @@ class APYCalculationService {
    * @returns {Object} APY data
    */
   async calculatePoolAPY(pairAddress, provider, factoryAddress, timeRange = 24) {
+    const ethers = await loadEthers();
     const cacheKey = `${pairAddress}-${timeRange}`;
     const cached = this.cache.get(cacheKey);
     

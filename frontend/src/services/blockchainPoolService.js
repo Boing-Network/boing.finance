@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { evmLite, loadEthers } from '../utils/evmLite';
 import { getContractAddress } from '../config/contracts';
 import { isBoingNativeL1Chain } from '../config/networks';
 import apyCalculationService from './apyCalculationService';
@@ -128,7 +128,7 @@ class BlockchainPoolService {
       const valueStr = value.toString();
       
       // Use ethers.formatUnits to convert from smallest unit to human readable
-      const formatted = ethers.formatUnits(valueStr, decimals);
+      const formatted = evmLite.formatUnits(valueStr, decimals);
       
       // Parse the formatted number to handle display
       const num = parseFloat(formatted);
@@ -162,7 +162,7 @@ class BlockchainPoolService {
       const valueStr = value.toString();
       
       // Use ethers.formatUnits to convert from smallest unit to human readable
-      const formatted = ethers.formatUnits(valueStr, decimals);
+      const formatted = evmLite.formatUnits(valueStr, decimals);
       
       // Parse the formatted number
       const num = parseFloat(formatted);
@@ -196,6 +196,7 @@ class BlockchainPoolService {
   // Initialize the service with provider and chain ID
   // Returns true if initialized successfully, false if contracts not available (graceful degradation)
   async initialize(provider, chainId) {
+    const ethers = await loadEthers();
     this.provider = provider;
     this.chainId = chainId;
 
@@ -380,6 +381,7 @@ class BlockchainPoolService {
 
   // Get detailed pool information
   async getPoolInfo(pairAddress) {
+    const ethers = await loadEthers();
     if (!this.provider) {
       throw new Error('Service not initialized');
     }
@@ -446,8 +448,8 @@ class BlockchainPoolService {
       const totalSupplyNum = Number(totalSupply);
       
       // Convert reserves to human-readable amounts for TVL calculation
-      const reserve0Human = parseFloat(ethers.formatUnits(reserves[0], token0Info.decimals));
-      const reserve1Human = parseFloat(ethers.formatUnits(reserves[1], token1Info.decimals));
+      const reserve0Human = parseFloat(evmLite.formatUnits(reserves[0], token0Info.decimals));
+      const reserve1Human = parseFloat(evmLite.formatUnits(reserves[1], token1Info.decimals));
       
       // For now, use a simplified TVL calculation (in a real implementation, you'd get token prices)
       // This is just the sum of the human-readable amounts, not actual USD value
@@ -574,6 +576,7 @@ class BlockchainPoolService {
 
   // Get user's position in a specific pool (Enhanced)
   async getUserPositionInPool(userAddress, pairAddress) {
+    const ethers = await loadEthers();
     if (!this.provider || !userAddress || !pairAddress) {
       return null;
     }
@@ -678,8 +681,8 @@ class BlockchainPoolService {
       const userToken1Amount = (Number(reserves[1]) * Number(totalBalance)) / Number(totalSupply);
 
       // Calculate total pool TVL (sum of token amounts)
-      const reserve0Human = parseFloat(ethers.formatUnits(reserves[0], token0Info.decimals));
-      const reserve1Human = parseFloat(ethers.formatUnits(reserves[1], token1Info.decimals));
+      const reserve0Human = parseFloat(evmLite.formatUnits(reserves[0], token0Info.decimals));
+      const reserve1Human = parseFloat(evmLite.formatUnits(reserves[1], token1Info.decimals));
       const tvl = reserve0Human + reserve1Human;
 
       if (this.debug) {
@@ -812,6 +815,7 @@ class BlockchainPoolService {
 
   // Get pool analytics (volume, fees, etc.)
   async getPoolAnalytics(pairAddress, _timeRange = '24h') {
+    const ethers = await loadEthers();
     if (!this.provider || !pairAddress) {
       return null;
     }
@@ -856,6 +860,7 @@ class BlockchainPoolService {
 
   // Get token information
   async getTokenInfo(tokenAddress) {
+    const ethers = await loadEthers();
     if (!this.provider || !tokenAddress) {
       return null;
     }

@@ -1,5 +1,5 @@
+import { evmLite, loadEthers } from '../utils/evmLite';
 import axios from 'axios';
-import { ethers } from 'ethers';
 import { apiPath } from '../config';
 import { getContractAddress } from '../config/contracts';
 import blockchainPoolService from './blockchainPoolService';
@@ -7,6 +7,7 @@ import logger from '../utils/logger';
 
 // Get all pools (public)
 export const getAllPools = async (chainId = null, page = 1, limit = 20) => {
+    const ethers = await loadEthers();
   try {
     // First try to get data from API
     try {
@@ -51,6 +52,7 @@ export const getAllPools = async (chainId = null, page = 1, limit = 20) => {
 
 // Get user's liquidity positions
 export const getUserLiquidityPositions = async (account, chainId = null) => {
+    const ethers = await loadEthers();
   try {
     if (!account) return [];
     
@@ -93,6 +95,7 @@ export const getUserLiquidityPositions = async (account, chainId = null) => {
 
 // Get user's created pools
 export const getUserCreatedPools = async (account, chainId = null) => {
+    const ethers = await loadEthers();
   try {
     if (!account) return [];
     
@@ -146,6 +149,7 @@ export const getPoolDetails = async (poolAddress, chainId) => {
 
 // Get pool analytics
 export const getPoolAnalytics = async (poolAddress, chainId) => {
+    const ethers = await loadEthers();
   try {
     // First try to get data from API
     try {
@@ -181,6 +185,7 @@ export const getPoolAnalytics = async (poolAddress, chainId) => {
 
 // Fetch user pools from blockchain (fallback method)
 export const fetchUserPoolsFromBlockchain = async (account, chainId) => {
+    const ethers = await loadEthers();
   try {
     if (!window.ethereum || !account) return [];
     
@@ -271,7 +276,7 @@ export const fetchUserPoolsFromBlockchain = async (account, chainId) => {
               name: token0Info[1],
               decimals: token0Info[2],
               amount: userToken0Amount,
-              formattedAmount: ethers.formatUnits(userToken0Amount, token0Info[2])
+              formattedAmount: evmLite.formatUnits(userToken0Amount, token0Info[2])
             },
             token1: {
               address: token1,
@@ -279,7 +284,7 @@ export const fetchUserPoolsFromBlockchain = async (account, chainId) => {
               name: token1Info[1],
               decimals: token1Info[2],
               amount: userToken1Amount,
-              formattedAmount: ethers.formatUnits(userToken1Amount, token1Info[2])
+              formattedAmount: evmLite.formatUnits(userToken1Amount, token1Info[2])
             },
             lpBalance: userBalance.toString(),
             totalSupply: totalSupply.toString(),

@@ -1,4 +1,4 @@
-import { formatUnits } from 'ethers';
+import { formatUnits } from './evmLite';
 
 const MAX_DECIMALS = 48;
 

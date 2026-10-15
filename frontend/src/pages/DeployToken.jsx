@@ -1,11 +1,10 @@
+import { evmLite, loadEthers } from '../utils/evmLite';
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { ethers } from 'ethers';
 import { useWallet } from '../contexts/WalletContext';
 import { useAchievements } from '../contexts/AchievementContext';
 import { useChainType, useSolanaWallet } from '../contexts/SolanaWalletContext';
-import { createSPLToken } from '../services/solanaTokenService';
 import { SOLANA_NETWORKS } from '../config/solanaConfig';
 import toast from 'react-hot-toast';
 import AdvancedERC20Artifact from '../artifacts/AdvancedERC20.json';
@@ -262,6 +261,8 @@ function DeployTokenSolanaContent() {
     setMintAddress('');
     setSignature('');
     try {
+      // Solana token stack (web3.js, spl-token, metaplex) loads only for a Solana deploy.
+      const { createSPLToken } = await import('../services/solanaTokenService');
       const result = await createSPLToken(connection, address, signTransaction, {
         name: name.trim(),
         symbol: symbol.trim().toUpperCase(),
@@ -807,6 +808,7 @@ const DEPLOYMENT_TIPS = [
 
 // Utility: Manual deployment using Interface encoding (Hardhat-style)
 async function _manualDeployWithInterface({ signer, ERC20_ABI, ERC20_BYTECODE, constructorParams, serviceChargeWei }) {
+    const ethers = await loadEthers();
   const iface = new ethers.Interface(ERC20_ABI);
   // Find the constructor fragment
   const constructorFragment = iface.fragments.find(f => f.type === 'constructor');
@@ -1279,6 +1281,7 @@ export default function DeployToken() {
   ]);
 
   const handleDeploy = async (e) => {
+    const ethers = await loadEthers();
     e.preventDefault();
     if (deploying) {
       return;
@@ -1451,7 +1454,7 @@ export default function DeployToken() {
         return;
       }
       const nativeDecimals = network?.nativeCurrency?.decimals ?? 18;
-      const serviceChargeWei = ethers.parseUnits(serviceCharge.toString(), nativeDecimals);
+      const serviceChargeWei = evmLite.parseUnits(serviceCharge.toString(), nativeDecimals);
       // Check user balance
       const balance = await signer.provider.getBalance(await signer.getAddress());
       if (balance < serviceChargeWei) {
@@ -1459,20 +1462,20 @@ export default function DeployToken() {
         return;
       }
       // Convert initial supply to correct decimals
-      const supply = ethers.parseUnits(initialSupply.toString(), decimals);
+      const supply = evmLite.parseUnits(initialSupply.toString(), decimals);
       // Calculate max transaction amount (only if feature is allowed)
       let maxTx = 0n;
       if (isFeatureAllowed('maxTxAmount') && maxTxAmount) {
         const percentage = parseFloat(maxTxAmount);
         const basisPoints = Math.floor(percentage * 100);
-        maxTx = (supply * ethers.toBigInt(basisPoints)) / 10000n;
+        maxTx = (supply * evmLite.toBigInt(basisPoints)) / 10000n;
       }
       // Calculate max wallet amount (only if feature is allowed)
       let maxWallet = 0n;
       if (isFeatureAllowed('maxWallet') && maxWalletEnabled) {
         const percentage = parseFloat(maxWalletPercentage);
         const basisPoints = Math.floor(percentage * 100);
-        maxWallet = (supply * ethers.toBigInt(basisPoints)) / 10000n;
+        maxWallet = (supply * evmLite.toBigInt(basisPoints)) / 10000n;
       }
       // Platform wallet address
       const platformWallet = "0xb24c5a62f8da57967a08e11c88fe18904f49920e";
@@ -1500,12 +1503,12 @@ export default function DeployToken() {
         platformWallet,
         serviceChargeWei,
         isFeatureAllowed('antiBot') ? antiBotEnabled : false,
-        isFeatureAllowed('cooldown') ? ethers.toBigInt(cooldownPeriod || 0) : 0n,
+        isFeatureAllowed('cooldown') ? evmLite.toBigInt(cooldownPeriod || 0) : 0n,
         isFeatureAllowed('antiWhale') ? antiWhaleEnabled : false,
         maxWallet,
         isFeatureAllowed('pauseFunction') ? pauseFunctionEnabled : false,
         isFeatureAllowed('timelock') ? timelockEnabled : false,
-        isFeatureAllowed('timelock') ? ethers.toBigInt((timelockDelay || 0) * 3600) : 0n, // Convert hours to seconds
+        isFeatureAllowed('timelock') ? evmLite.toBigInt((timelockDelay || 0) * 3600) : 0n, // Convert hours to seconds
         network?.chainId || 1 // Add chainId parameter for network-aware service fee validation
       ];
       // Validate parameter count / types (plain errors for the UI)
@@ -1597,8 +1600,8 @@ export default function DeployToken() {
           enableTimelock: isFeatureAllowed('timelock') ? timelockEnabled : false,
           maxTxAmount: isFeatureAllowed('maxTxAmount') && maxTxAmount ? maxTx : 0n,
           maxWalletAmount: isFeatureAllowed('maxWallet') && maxWalletEnabled ? maxWallet : 0n,
-          cooldownPeriod: isFeatureAllowed('cooldown') && cooldownPeriod ? ethers.toBigInt(cooldownPeriod) : 0n,
-          timelockDelay: isFeatureAllowed('timelock') && timelockDelay ? ethers.toBigInt((timelockDelay || 0) * 3600) : 0n // Convert hours to seconds
+          cooldownPeriod: isFeatureAllowed('cooldown') && cooldownPeriod ? evmLite.toBigInt(cooldownPeriod) : 0n,
+          timelockDelay: isFeatureAllowed('timelock') && timelockDelay ? evmLite.toBigInt((timelockDelay || 0) * 3600) : 0n // Convert hours to seconds
         };
         
         console.log('Security Configuration:', {
@@ -2803,7 +2806,8 @@ export default function DeployToken() {
                   tokenAddress={tokenAddress}
                   txHash={txHash}
                   chainId={network?.chainId}
-                  onRenounce={() => {
+                  onRenounce={async () => {
+    const ethers = await loadEthers();
                   if (signer && tokenAddress) {
                     const contract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
                     setPendingRenounceContract(contract);

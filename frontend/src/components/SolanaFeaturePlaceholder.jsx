@@ -2,11 +2,12 @@
  * Solana Feature Placeholder
  * Shown when chain type is Solana and the feature uses external Solana protocols (Raydium, Jupiter, etc.)
  */
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSolanaWallet } from '../contexts/SolanaWalletContext';
 import { SOLANA_NETWORKS } from '../config/solanaConfig';
-import SolanaAggregatorSwap from './SolanaAggregatorSwap';
+// @solana/web3.js is only fetched when the Solana swap is actually shown.
+const SolanaAggregatorSwap = lazy(() => import('./SolanaAggregatorSwap'));
 
 const RAYDIUM_CREATE_POOL = 'https://raydium.io/liquidity/create/';
 const RAYDIUM_LIQUIDITY = 'https://raydium.io/liquidity/';
@@ -138,5 +139,9 @@ export function PoolsSolanaContent() {
 }
 
 export function SwapSolanaContent() {
-  return <SolanaAggregatorSwap />;
+  return (
+    <Suspense fallback={<div className="p-6 text-center text-sm opacity-70">Loading Solana swap…</div>}>
+      <SolanaAggregatorSwap />
+    </Suspense>
+  );
 }

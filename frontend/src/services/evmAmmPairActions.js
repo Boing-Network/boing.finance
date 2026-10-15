@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { evmLite, loadEthers } from '../utils/evmLite';
 import { getContractAddress } from '../config/contracts';
 import { getUniswapV2Compat } from '../config/uniswapV2Compat';
 
@@ -45,7 +45,7 @@ export function getAmountOut(amountIn, reserveIn, reserveOut) {
 export function getAmmVenue(chainId) {
   const factory = getContractAddress(chainId, 'dexFactory');
   const router = getContractAddress(chainId, 'dexRouter');
-  if (factory && factory !== ethers.ZeroAddress && router && router !== ethers.ZeroAddress) {
+  if (factory && factory !== evmLite.ZeroAddress && router && router !== evmLite.ZeroAddress) {
     return { factory, router, venue: 'Boing DEX', feePercent: '0.3' };
   }
   return getUniswapV2Compat(chainId);
@@ -77,6 +77,7 @@ export function quoteTokenBForTokenA(amountA, reserveA, reserveB) {
 }
 
 export async function ensureExactAllowance(tokenAddress, spender, amount, signer) {
+    const ethers = await loadEthers();
   const token = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
   const owner = await signer.getAddress();
   const current = await token.allowance(owner, spender);
@@ -86,14 +87,15 @@ export async function ensureExactAllowance(tokenAddress, spender, amount, signer
   return tx.hash;
 }
 
-export function getFactoryContract(chainId, runner) {
+export async function getFactoryContract(chainId, runner) {
+    const ethers = await loadEthers();
   return new ethers.Contract(getFactoryAddress(chainId), FACTORY_ABI, runner);
 }
 
 export async function getPairAddress(chainId, tokenA, tokenB, runner) {
-  const factory = getFactoryContract(chainId, runner);
+  const factory = await getFactoryContract(chainId, runner);
   const pairAddress = await factory.getPair(tokenA, tokenB);
-  if (!pairAddress || pairAddress === ethers.ZeroAddress) {
+  if (!pairAddress || pairAddress === evmLite.ZeroAddress) {
     throw new Error('No pool exists for this pair. Create the pool first.');
   }
   return pairAddress;
@@ -101,7 +103,7 @@ export async function getPairAddress(chainId, tokenA, tokenB, runner) {
 
 export async function getOrientedReserves(pair, tokenIn) {
   const [token0, reserves] = await Promise.all([pair.token0(), pair.getReserves()]);
-  const inIs0 = ethers.getAddress(tokenIn) === ethers.getAddress(token0);
+  const inIs0 = evmLite.getAddress(tokenIn) === evmLite.getAddress(token0);
   return inIs0
     ? { reserveIn: reserves[0], reserveOut: reserves[1] }
     : { reserveIn: reserves[1], reserveOut: reserves[0] };
@@ -109,6 +111,7 @@ export async function getOrientedReserves(pair, tokenIn) {
 
 /** Pair-oriented quote (does not trust the deployed router’s getAmountsOut). */
 export async function quoteExactIn(chainId, provider, tokenIn, tokenOut, amountIn) {
+    const ethers = await loadEthers();
   const pairAddress = await getPairAddress(chainId, tokenIn, tokenOut, provider);
   const pair = new ethers.Contract(pairAddress, PAIR_ABI, provider);
   const { reserveIn, reserveOut } = await getOrientedReserves(pair, tokenIn);
@@ -132,6 +135,7 @@ export async function swapExactTokensViaRouter({
   nativeOut = false,
   deadlineMinutes = 20,
 }) {
+    const ethers = await loadEthers();
   const to = recipient || (await signer.getAddress());
   const routerAddress = getRouterAddress(chainId);
   const router = new ethers.Contract(routerAddress, ROUTER_ABI, signer);
@@ -166,6 +170,7 @@ export async function addLiquidityViaRouter({
   recipient,
   deadlineMinutes = 20,
 }) {
+    const ethers = await loadEthers();
   const to = recipient || (await signer.getAddress());
   const routerAddress = getRouterAddress(chainId);
   await getPairAddress(chainId, tokenA, tokenB, signer);
@@ -197,6 +202,7 @@ export async function removeLiquidityViaRouter({
   recipient,
   deadlineMinutes = 20,
 }) {
+    const ethers = await loadEthers();
   const to = recipient || (await signer.getAddress());
   const routerAddress = getRouterAddress(chainId);
   const pairAddress = await getPairAddress(chainId, tokenA, tokenB, signer);
@@ -216,6 +222,7 @@ export async function removeLiquidityViaRouter({
 }
 
 export async function readUserLpPosition({ chainId, provider, account, tokenA, tokenB }) {
+    const ethers = await loadEthers();
   const pairAddress = await getPairAddress(chainId, tokenA, tokenB, provider);
   const pair = new ethers.Contract(pairAddress, PAIR_ABI, provider);
   const tokenAContract = new ethers.Contract(tokenA, ERC20_ABI, provider);
@@ -231,7 +238,7 @@ export async function readUserLpPosition({ chainId, provider, account, tokenA, t
     tokenBContract.decimals().catch(() => 18),
   ]);
   const share = supply > 0n ? (lp * 10000n) / supply : 0n;
-  const aIs0 = ethers.getAddress(tokenA) === ethers.getAddress(token0);
+  const aIs0 = evmLite.getAddress(tokenA) === evmLite.getAddress(token0);
   const reserveA = aIs0 ? reserves[0] : reserves[1];
   const reserveB = aIs0 ? reserves[1] : reserves[0];
   const amountA = supply > 0n ? (lp * reserveA) / supply : 0n;

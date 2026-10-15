@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { evmLite, loadEthers } from '../utils/evmLite';
 
 class ExternalPoolService {
   constructor() {
@@ -171,6 +171,7 @@ class ExternalPoolService {
    * Get pools from SushiSwap on Sepolia
    */
   async getSushiSwapPools(provider, limit = 500) {
+    const ethers = await loadEthers();
     try {
       // SushiSwap Factory on Sepolia (if available)
       const sushiswapFactory = '0xC35DADB65012eC5796536bD9864eD8773aBc74C4';
@@ -205,8 +206,8 @@ class ExternalPoolService {
 
                   if (token0Info && token1Info) {
           // Convert reserves to human-readable amounts for TVL calculation
-          const reserve0Human = parseFloat(ethers.formatUnits(reserves[0], token0Info.decimals));
-          const reserve1Human = parseFloat(ethers.formatUnits(reserves[1], token1Info.decimals));
+          const reserve0Human = parseFloat(evmLite.formatUnits(reserves[0], token0Info.decimals));
+          const reserve1Human = parseFloat(evmLite.formatUnits(reserves[1], token1Info.decimals));
           
           // For now, use a simplified TVL calculation (in a real implementation, you'd get token prices)
           const tvl = reserve0Human + reserve1Human;
@@ -277,6 +278,7 @@ class ExternalPoolService {
    * Get pools from a specific factory
    */
   async getPoolsFromFactory(provider, factoryAddress, sourceName, limit = 500) {
+    const ethers = await loadEthers();
     const factoryABI = [
       'function allPairsLength() external view returns (uint)',
       'function allPairs(uint) external view returns (address)'
@@ -322,6 +324,7 @@ class ExternalPoolService {
    * Get individual pool data
    */
   async getPoolData(provider, factory, index, pairABI, sourceName) {
+    const ethers = await loadEthers();
     try {
       const pairAddress = await factory.allPairs(index);
       const pair = new ethers.Contract(pairAddress, pairABI, provider);
@@ -341,8 +344,8 @@ class ExternalPoolService {
 
       if (token0Info && token1Info) {
         // Convert reserves to human-readable amounts for TVL calculation
-        const reserve0Human = parseFloat(ethers.formatUnits(reserves[0], token0Info.decimals));
-        const reserve1Human = parseFloat(ethers.formatUnits(reserves[1], token1Info.decimals));
+        const reserve0Human = parseFloat(evmLite.formatUnits(reserves[0], token0Info.decimals));
+        const reserve1Human = parseFloat(evmLite.formatUnits(reserves[1], token1Info.decimals));
         
         // For now, use a simplified TVL calculation (in a real implementation, you'd get token prices)
         const tvl = reserve0Human + reserve1Human;
@@ -418,6 +421,7 @@ class ExternalPoolService {
    * Get token information with caching
    */
   async getTokenInfo(tokenAddress, provider) {
+    const ethers = await loadEthers();
     // Check cache first
     const cacheKey = `token-${tokenAddress.toLowerCase()}`;
     const cached = this.tokenCache.get(cacheKey);
@@ -516,7 +520,7 @@ class ExternalPoolService {
       const valueStr = value.toString();
       
       // Use ethers.formatUnits to convert from smallest unit to human readable
-      const formatted = ethers.formatUnits(valueStr, decimals);
+      const formatted = evmLite.formatUnits(valueStr, decimals);
       
       // Parse the formatted number to handle display
       const num = parseFloat(formatted);
@@ -547,7 +551,7 @@ class ExternalPoolService {
       const valueStr = value.toString();
       
       // Use ethers.formatUnits to convert from smallest unit to human readable
-      const formatted = ethers.formatUnits(valueStr, decimals);
+      const formatted = evmLite.formatUnits(valueStr, decimals);
       
       // Parse the formatted number
       const num = parseFloat(formatted);
@@ -624,6 +628,7 @@ class ExternalPoolService {
    * Batch process pool requests to improve performance
    */
   async batchProcessPools(provider, factoryAddress, sourceName, limit = 500) {
+    const ethers = await loadEthers();
     if (this.debug) {
       console.log(`🔄 Starting batch processing for ${sourceName} with limit ${limit}`);
     }

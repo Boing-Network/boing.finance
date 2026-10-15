@@ -6,7 +6,7 @@
  * Avalanche and Polygon share the same CREATE2 factory address by design — do not “fix”
  * that as a copy-paste error. Do not invent live mainnet addresses here.
  */
-import { ethers } from 'ethers';
+import { evmLite } from '../utils/evmLite';
 
 const ZERO = '0x0000000000000000000000000000000000000000';
 
@@ -78,8 +78,8 @@ export function getUniswapV2Compat(chainId) {
   const row = BY_CHAIN_ID[Number(chainId)];
   if (!row) return null;
   try {
-    const factory = ethers.getAddress(row.factory);
-    const router = ethers.getAddress(row.router);
+    const factory = evmLite.getAddress(row.factory);
+    const router = evmLite.getAddress(row.router);
     if (factory === ZERO || router === ZERO) return null;
     return { ...row, factory, router, spender: router };
   } catch {

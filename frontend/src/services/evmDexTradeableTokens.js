@@ -1,8 +1,8 @@
-import { ethers } from 'ethers';
+import { evmLite } from '../utils/evmLite';
 import { getContractAddress } from '../config/contracts';
 
 /** Uniswap V2–style `PairCreated` on `DEXFactoryV2.sol`. */
-const PAIR_CREATED_TOPIC = ethers.id('PairCreated(address,address,address,uint256)');
+const PAIR_CREATED_TOPIC = evmLite.id('PairCreated(address,address,address,uint256)');
 
 const DEFAULT_MAX_BLOCK_SPAN = 250_000;
 const DEFAULT_CHUNK_SIZE = 8_000;
@@ -16,7 +16,7 @@ function topicIndexedAddress(topic) {
   const t = topic.toLowerCase();
   if (!/^0x[0-9a-f]{64}$/.test(t)) return null;
   try {
-    return ethers.getAddress(`0x${t.slice(-40)}`);
+    return evmLite.getAddress(`0x${t.slice(-40)}`);
   } catch {
     return null;
   }
@@ -33,7 +33,7 @@ function topicIndexedAddress(topic) {
  */
 export async function fetchTradeableEvmTokenAddressesFromDexFactory(provider, chainId, options = {}) {
   const factory = getContractAddress(chainId, 'dexFactory');
-  if (!factory || factory === ethers.ZeroAddress) return [];
+  if (!factory || factory === evmLite.ZeroAddress) return [];
 
   const maxSpan = options.maxBlockSpan ?? DEFAULT_MAX_BLOCK_SPAN;
   const chunk = options.chunkSize ?? DEFAULT_CHUNK_SIZE;
