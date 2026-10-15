@@ -39,6 +39,7 @@ import {
 } from './config/brandAssets';
 import { comingSoon, navigation } from './config/navigation';
 import NavIcon from './components/NavIcon';
+import BoingAppsLinks from './components/BoingAppsLinks';
 
 // Lazy load all page components for code splitting
 const Swap = lazy(() => import('./pages/Swap'));
@@ -702,6 +703,7 @@ function AppContent() {
                   <NetworkSelector />
                   <WalletConnect />
                 </div>
+                <BoingAppsLinks />
               </div>
             </div>
           </div>
@@ -947,6 +949,7 @@ function ToolsDropdown({ isOpen, onToggle, onClose, onOpenHistory, onOpenDefi101
         }}
       >
         <div className="py-2 px-2">
+          <BoingAppsLinks />
           <div className="flex items-center justify-between px-3 py-2 border-b mb-2" style={{ borderColor: 'var(--border-color)' }}>
             <span className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>Language</span>
             <LanguageSelector />
