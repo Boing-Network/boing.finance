@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import NativeAmmSwapPanel from './NativeAmmSwapPanel';
 import NativeCustodySwapPanel from './NativeCustodySwapPanel';
 import NativeAmmLpVaultPanel from './NativeAmmLpVaultPanel';
+import NativeLpVaultV2Panel from './NativeLpVaultV2Panel';
 import NativeLiquidityPositionsPanel from './NativeLiquidityPositionsPanel';
 import NativeDexDirectoryRoutePanel from './NativeDexDirectoryRoutePanel';
 import NativeDexIndexerSettingsStrip from './NativeDexIndexerSettingsStrip';
@@ -260,6 +261,7 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
         {tab === 'liquidity' && (
           <>
             <NativeLiquidityPositionsPanel />
+            <NativeLpVaultV2Panel slippagePercent={slippagePercent} />
             <NativeAmmLpVaultPanel embedded />
           </>
         )}
