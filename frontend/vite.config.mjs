@@ -178,6 +178,12 @@ export default defineConfig(({ mode }) => {
         secure: true,
         rewrite: () => '/',
       },
+      '/api/observer-interface': {
+        target: 'https://boing.observer',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (p) => p.replace(/^\/api\/observer-interface/, '/api/contract/interface'),
+      },
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true,

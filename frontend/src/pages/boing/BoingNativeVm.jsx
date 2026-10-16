@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { PageHeader, PageCard } from '../../components/PageLayout';
 import { useWallet } from '../../contexts/WalletContext';
@@ -462,6 +463,14 @@ export default function BoingNativeVm() {
           title="Boing developer tools"
           subtitle="Read chain state and submit Boing transactions. For builders — not required for Swap."
         />
+
+        <PageCard className="mb-6" data-testid="native-vm-publish-interface-link">
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            Deployed a contract?{' '}
+            <Link to="/boing/publish-interface" className="underline" style={{ color: 'var(--finance-primary)' }}>Publish its interface</Link>{' '}
+            so explorers show your function names with a &ldquo;Published by deployer&rdquo; badge.
+          </p>
+        </PageCard>
 
         <PageCard className="mb-6">
           <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
