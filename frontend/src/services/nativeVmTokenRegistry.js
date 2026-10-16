@@ -1,3 +1,4 @@
+import { CANONICAL_BOING_TESTNET_BOING_TOKEN_HEX, CANONICAL_BOING_TESTNET_USDC_TOKEN_HEX } from 'boing-sdk';
 import { SYNTHETIC_NATIVE_CP_TOKEN_A_HEX, SYNTHETIC_NATIVE_CP_TOKEN_B_HEX } from './boingNativePoolTokens';
 
 const RECENT_KEY = 'boing_native_vm_tokens_recent_v1';
@@ -52,6 +53,9 @@ function parseEnvTokenListJson() {
 export function getCuratedNativeVmTokens() {
   /** @type {NativeVmTokenEntry[]} */
   const base = [
+    // Public Boing testnet (chain 6913) defaults: reference token v2, whole units; USDC/BOING v9 pool is in the factory.
+    { id: CANONICAL_BOING_TESTNET_USDC_TOKEN_HEX.toLowerCase(), symbol: 'USDC', name: 'Testnet USD Coin' },
+    { id: CANONICAL_BOING_TESTNET_BOING_TOKEN_HEX.toLowerCase(), symbol: 'BOING', name: 'Boing Token' },
     {
       id: SYNTHETIC_NATIVE_CP_TOKEN_A_HEX,
       symbol: 'CP-A',
