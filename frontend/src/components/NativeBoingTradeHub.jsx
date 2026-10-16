@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import NativeAmmSwapPanel from './NativeAmmSwapPanel';
+import NativeCustodySwapPanel from './NativeCustodySwapPanel';
 import NativeAmmLpVaultPanel from './NativeAmmLpVaultPanel';
 import NativeLiquidityPositionsPanel from './NativeLiquidityPositionsPanel';
 import NativeDexDirectoryRoutePanel from './NativeDexDirectoryRoutePanel';
@@ -170,6 +171,7 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
       </div>
 
       <div className="p-4 sm:p-6" role="tabpanel">
+        {tab === 'swap' && <NativeCustodySwapPanel slippagePercent={slippagePercent} />}
         {tab === 'swap' &&
           (loading ? (
             <p className="text-sm py-6 text-center" style={{ color: 'var(--text-tertiary)' }}>
