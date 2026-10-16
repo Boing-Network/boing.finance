@@ -55,7 +55,8 @@ export function getCuratedNativeVmTokens() {
   const base = [
     // Public Boing testnet (chain 6913) defaults: reference token v2, whole units; USDC/BOING v9 pool is in the factory.
     { id: CANONICAL_BOING_TESTNET_USDC_TOKEN_HEX.toLowerCase(), symbol: 'USDC', name: 'Testnet USD Coin' },
-    { id: CANONICAL_BOING_TESTNET_BOING_TOKEN_HEX.toLowerCase(), symbol: 'BOING', name: 'Boing Token' },
+    // Reference contract token, not native BOING: never label it plain "BOING".
+    { id: CANONICAL_BOING_TESTNET_BOING_TOKEN_HEX.toLowerCase(), symbol: 'tBOING', name: 'Boing Token (test)' },
     {
       id: SYNTHETIC_NATIVE_CP_TOKEN_A_HEX,
       symbol: 'CP-A',
