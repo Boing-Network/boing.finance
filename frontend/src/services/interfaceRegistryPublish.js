@@ -7,9 +7,15 @@ import { boingExpressContractCallSignSimulateSubmit } from './boingExpressNative
 import { nodeBatchSupport } from './linkedNftTokenRegistry';
 import { flowTxsToBatchTx, isWalletBatchUnsupportedError } from '../utils/linkedNftLinkBatch';
 import { inspectContract, recordMatches, hex0x, INTERFACE_REGISTRY_ID } from '../utils/publishInterface';
-import { fetchInterfaceRecord } from 'boing-sdk';
+import { fetchInterfaceRecord, interfaceJsonHashHex, readInterfaceBlob, storageWordReaderFromRpc } from 'boing-sdk';
 
 export const rpc = (method, params) => boingJsonRpc(method, params);
+
+/** Read a boing://iface-blob/ URI back from chain and check BLAKE3 against the published hash. */
+export async function verifyBoingHosted(uri, interfaceHash) {
+  const bytes = await readInterfaceBlob(uri, storageWordReaderFromRpc(rpc));
+  return { ok: interfaceJsonHashHex(bytes).toLowerCase() === hex0x(interfaceHash).toLowerCase(), bytes: bytes.length };
+}
 
 export function inspectContractForWallet(wallet, contract) {
   return inspectContract(rpc, { wallet, contract });

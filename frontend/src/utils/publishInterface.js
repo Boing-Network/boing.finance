@@ -8,8 +8,12 @@
  */
 import { blake3 } from '@noble/hashes/blake3';
 import {
+  CANONICAL_BOING_TESTNET_INTERFACE_BLOB_STORE_HEX,
   CANONICAL_BOING_TESTNET_INTERFACE_REGISTRY_HEX,
   INTERFACE_REGISTRY_MAX_URI_BYTES,
+  buildHostInterfaceBlobFlow,
+  isInterfaceBlobUri,
+  parseInterfaceBlobUri,
   buildPublishInterfaceFlowTxs,
   fetchInterfaceRecord,
   interfaceJsonHashHex,
@@ -20,6 +24,7 @@ export const INTERFACE_SCHEMA = 'boing-interface/v1';
 export const PARAM_TYPES = ['account', 'u128', 'u64', 'bytes32', 'bool', 'u8'];
 export const MAX_NONCE_SCAN = 200_000;
 export const INTERFACE_REGISTRY_ID = CANONICAL_BOING_TESTNET_INTERFACE_REGISTRY_HEX;
+export const INTERFACE_BLOB_STORE_ID = CANONICAL_BOING_TESTNET_INTERFACE_BLOB_STORE_HEX;
 
 const h64 = (h) => String(h ?? '').trim().replace(/^0x/i, '').toLowerCase();
 export const hex0x = (h) => `0x${h64(h)}`;
@@ -231,7 +236,10 @@ export function draftFromObserver(contract, obs) {
 export function checkUri(uri) {
   const u = String(uri ?? '').trim();
   if (!u) return { ok: false, message: 'Enter the https URL where the JSON file will be served.' };
-  if (!/^https:\/\//i.test(u)) return { ok: false, message: 'The URI must start with https:// (the observer only fetches https).' };
+  if (isInterfaceBlobUri(u)) {
+    return parseInterfaceBlobUri(u) ? { ok: true, uri: u, onChain: true } : { ok: false, message: 'Malformed boing://iface-blob/ URI.' };
+  }
+  if (!/^https:\/\//i.test(u)) return { ok: false, message: 'The URI must start with https:// (the observer only fetches https), or use Host on Boing.' };
   const len = new TextEncoder().encode(u).length;
   if (len > INTERFACE_REGISTRY_MAX_URI_BYTES) return { ok: false, message: `The URI is ${len} bytes; the registry stores at most ${INTERFACE_REGISTRY_MAX_URI_BYTES}.` };
   return { ok: true, uri: u };
@@ -241,7 +249,7 @@ export function checkUri(uri) {
  * Steps to publish. Claim only when unclaimed; refuse when another account holds the claim or the wallet
  * is not the deployer (the observer would ignore the record).
  */
-export function planPublish({ wallet, contract, interfaceHash, uri, claimer, deployerOk, registry = INTERFACE_REGISTRY_ID }) {
+export function planPublish({ wallet, contract, interfaceHash, uri, claimer, deployerOk, registry = INTERFACE_REGISTRY_ID, hostTxs = [] }) {
   if (!deployerOk) return { ok: false, code: 'not_deployer', message: 'Only the contract deployer can publish an interface the observer will trust.' };
   if (claimer && h64(claimer) !== h64(wallet)) {
     return { ok: false, code: 'claimed_by_other', message: `The contract is already claimed in the registry by 0x${h64(claimer)}.` };
@@ -256,11 +264,38 @@ export function planPublish({ wallet, contract, interfaceHash, uri, claimer, dep
     registryHex32: hex0x(registry),
     alreadyClaimed: Boolean(claimer),
   });
+  const claim = txs.length === 2 ? [txs[0]] : [];
+  const all = [...claim, ...hostTxs, txs[txs.length - 1]];
+  if (all.length > MAX_BATCH_CALLS) {
+    return { ok: false, code: 'too_large', message: `This needs ${all.length} calls; one batch holds ${MAX_BATCH_CALLS}. Shorten the interface JSON.` };
+  }
   return {
     ok: true,
-    txs,
-    steps: txs.map((_, i) => (txs.length === 2 && i === 0 ? 'Claim the contract in the registry' : 'Record interface hash + URI')),
+    txs: all,
+    steps: [
+      ...(claim.length ? ['Claim the contract in the registry'] : []),
+      ...(hostTxs.length ? [`Store the JSON on Boing (${hostTxs.length} blob store write${hostTxs.length > 1 ? 's' : ''})`] : []),
+      'Record interface hash + URI',
+    ],
   };
+}
+
+/** Node batch limit (boing_primitives::MAX_BATCH_CALLS). */
+export const MAX_BATCH_CALLS = 16;
+
+/**
+ * Built-in hosting ("Host on Boing"): store the exact canonical JSON (deflate-raw when smaller) in the
+ * interface blob store under the wallet's namespace and use its boing://iface-blob/ URI.
+ */
+export async function planBoingHosting({ wallet, interfaceHash, text, store = INTERFACE_BLOB_STORE_ID }) {
+  const jsonBytes = new TextEncoder().encode(text);
+  const flow = await buildHostInterfaceBlobFlow({
+    senderHex32: hex0x(wallet),
+    interfaceHashHex32: hex0x(interfaceHash),
+    jsonBytes,
+    storeHex32: hex0x(store),
+  });
+  return { ...flow, jsonBytes: jsonBytes.length, gas: flow.words * 20_000 };
 }
 
 /** Has the registry caught up with what we published? */

@@ -75,6 +75,13 @@ test.describe('Publish interface page', () => {
     await page.getByTestId('publish-json').fill('{"functions":[{"selector":999,"name":""}]}');
     await expect(page.getByTestId('publish-json-errors')).toBeVisible();
     await page.getByTestId('publish-autofill').click();
+    // default is Host on Boing: the boing:// URI and blob writes are planned automatically
+    await expect(page.getByTestId('publish-boing-uri')).toHaveText(/^boing:\/\/iface-blob\/0x8079f305/);
+    await page.getByTestId('publish-review').click();
+    await expect(page.getByTestId('publish-review-panel')).toContainText(/Store the JSON on Boing/);
+    await expect(page.getByTestId('publish-review-panel')).toContainText(/ONE native batch/);
+    await page.getByRole('button', { name: 'Back' }).click();
+    await page.getByTestId('publish-host-url').click();
     await page.getByTestId('publish-uri').fill('https://example.com/pool.json');
     await page.getByTestId('publish-review').click();
     await expect(page.getByTestId('publish-review-panel')).toContainText(/ONE native batch/);
@@ -124,15 +131,23 @@ test.describe('Publish interface page', () => {
       await page.getByTestId('publish-download').click();
       await (await dl).saveAs(saveTo);
     }
-    await shot(page, 'after-18-1-contract-and-json.png');
-    await page.getByTestId('publish-uri').fill(process.env.BOING_E2E_LIVE_URI || `https://boing.network/interfaces/testnet/${LIVE_CONTRACT}.json`);
+    await shot(page, `${process.env.BOING_E2E_SHOT_PREFIX || 'after-18-'}1-contract-and-json.png`);
+    const hostOnBoing = process.env.BOING_E2E_LIVE_HOST === 'boing';
+    if (hostOnBoing) {
+      await expect(page.getByTestId('publish-boing-uri')).toHaveText(/^boing:\/\/iface-blob\//, { timeout: 30_000 });
+    } else {
+      await page.getByTestId('publish-host-url').click();
+      await page.getByTestId('publish-uri').fill(process.env.BOING_E2E_LIVE_URI || `https://boing.network/interfaces/testnet/${LIVE_CONTRACT}.json`);
+    }
+    const shotPrefix = process.env.BOING_E2E_SHOT_PREFIX || 'after-18-';
     await page.getByTestId('publish-review').click();
     await expect(page.getByTestId('publish-review-panel')).toBeVisible();
-    await shot(page, 'after-18-2-review.png');
+    await shot(page, `${shotPrefix}2-review.png`);
     await page.getByTestId('publish-submit').click();
     await expect(page.getByTestId('publish-result')).toBeVisible({ timeout: 180_000 });
     await expect(page.getByTestId('publish-observer-link')).toBeVisible();
-    await shot(page, 'after-18-3-published.png');
+    if (hostOnBoing) await expect(page.getByTestId('publish-hosted-status')).toContainText(/Stored on Boing/, { timeout: 60_000 });
+    await shot(page, `${shotPrefix}3-published.png`);
     await page.unrouteAll({ behavior: 'ignoreErrors' });
     writeFileSync(path.join(SHOTS || '.', 'live-result.txt'), `${signed.join(',')}\n${await page.getByTestId('publish-result').innerText()}\n`);
   });

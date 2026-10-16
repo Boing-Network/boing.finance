@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { predictCreate2ContractAddress, interfaceRegistryClaimerStorageKeyHex } from 'boing-sdk';
+import { predictCreate2ContractAddress, interfaceRegistryClaimerStorageKeyHex, readInterfaceBlob, interfaceBlobStorageKeyHex } from 'boing-sdk';
 import {
   nonceDerivedAddress, verifyDeployer, inspectContract, validateInterfaceDoc, canonicalInterfaceText,
   interfaceHashOfText, draftFromObserver, checkUri, planPublish, recordMatches, observerContractUrl, INTERFACE_REGISTRY_ID,
+  planBoingHosting, INTERFACE_BLOB_STORE_ID,
 } from '../src/utils/publishInterface.js';
 import { flowTxsToBatchTx } from '../src/utils/linkedNftLinkBatch.js';
 
@@ -139,4 +140,35 @@ test('recordMatches and observer link', () => {
   assert.equal(recordMatches(rec, { interfaceHash: HASH, uri: 'https://e/i.json', wallet: DEX }), true);
   assert.equal(recordMatches(rec, { interfaceHash: HASH, uri: 'https://e/j.json', wallet: DEX }), false);
   assert.equal(observerContractUrl('https://boing.observer/', POOL), `https://boing.observer/account/0x${POOL}?network=testnet`);
+});
+test('Host on Boing: boing:// URI accepted; claim + blob writes + set in ONE batch; reads back to the same hash', async () => {
+  const text = canonicalInterfaceText({ schema: 'boing-interface/v1', functions: Array.from({ length: 40 }, (_, i) => ({ selector: i, name: `fn_${i}`, kind: 'write', params: [{ name: 'amount', type: 'u128' }] })) });
+  const hash = interfaceHashOfText(text);
+  const host = await planBoingHosting({ wallet: `0x${DEX}`, interfaceHash: hash, text });
+  assert.match(host.uri, /^boing:\/\/iface-blob\/0x8079f305[0-9a-f]{56}\/[0-9a-f]{16}$/);
+  assert.equal(host.encoding, 1, 'deflated');
+  assert.ok(host.storedBytes < host.jsonBytes);
+  assert.equal(checkUri(host.uri).ok, true);
+  assert.equal(checkUri('boing://iface-blob/nope').ok, false);
+  const p = planPublish({ wallet: `0x${DEX}`, contract: `0x${POOL}`, interfaceHash: hash, uri: host.uri, deployerOk: true, claimer: null, hostTxs: host.txs });
+  assert.equal(p.ok, true);
+  assert.equal(p.txs.length, 2 + host.txs.length);
+  assert.equal(p.txs[0].calldata.slice(64, 66), 'd0');
+  assert.equal(p.txs[1].calldata.slice(64, 66), 'e0');
+  assert.equal(p.txs.at(-1).calldata.slice(64, 66), 'd1');
+  const batch = flowTxsToBatchTx(p.txs);
+  assert.ok(batch.access_list.write.includes(INTERFACE_BLOB_STORE_ID.toLowerCase()));
+  // simulate the contract writes and read back via the SDK reader
+  const storage = new Map();
+  for (const t of host.txs) {
+    const cd = t.calldata.slice(2);
+    const word = (o) => cd.slice(o * 2, o * 2 + 64);
+    const start = Number(BigInt(`0x${word(64)}`));
+    const count = Number(BigInt(`0x${word(96)}`));
+    for (let i = 0; i < count; i++) storage.set(interfaceBlobStorageKeyHex(`0x${DEX}`, host.id, start + i), word(128 + 32 * i));
+  }
+  const bytes = await readInterfaceBlob(host.uri, async (_s, k) => Uint8Array.from(Buffer.from(storage.get(k) ?? '0'.repeat(64), 'hex')));
+  assert.equal(new TextDecoder().decode(bytes), text);
+  const big = planPublish({ wallet: `0x${DEX}`, contract: `0x${POOL}`, interfaceHash: hash, uri: host.uri, deployerOk: true, claimer: null, hostTxs: Array(15).fill(host.txs[0]) });
+  assert.equal(big.code, 'too_large');
 });
