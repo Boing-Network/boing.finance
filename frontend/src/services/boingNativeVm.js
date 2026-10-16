@@ -117,7 +117,16 @@ export async function simulateBoingSignedTransaction(hexSignedTx, options = {}) 
  */
 export async function submitBoingSignedTransaction(hexSignedTx, options = {}) {
   const hex = normalizeBoingRpcHex(hexSignedTx);
-  return boingJsonRpc('boing_submitTransaction', [hex], options);
+  try {
+    return await boingJsonRpc('boing_submitTransaction', [hex], options);
+  } catch (e) {
+    // The public gateway fans submits out to every node; the validator can see the same signed bytes via
+    // gossip first and answer "Duplicate transaction" although the tx was accepted. Treat it as submitted.
+    if (/duplicate transaction|already_in_mempool/i.test(e?.message || '')) {
+      return { tx_hash: 'ok', already_pending: true };
+    }
+    throw e;
+  }
 }
 
 const BOING_SIMULATE_CONTRACT_CALL = 'boing_simulateContractCall';
