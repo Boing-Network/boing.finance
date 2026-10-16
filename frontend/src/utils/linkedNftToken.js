@@ -28,7 +28,6 @@ const sdkSoftGate =
 
 export const LINKED_NFT_TOKEN_SCHEMA =
   boingSdk.LINKED_NFT_TOKEN_SCHEMA ||
-  boingSdk.BOING_LINKED_NFT_TOKEN_SCHEMA ||
   'boing.linked_nft_token.v1';
 
 function str(v) {
