@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useSearchParams } from 'react-router-dom';
 import { PageHeader, PageCard } from '../../components/PageLayout';
@@ -14,6 +14,7 @@ import {
   interfaceHashOfText,
   isAccountHex,
   observerContractUrl,
+  planBoingHosting,
   planPublish,
   validateInterfaceDoc,
 } from '../../utils/publishInterface';
@@ -22,6 +23,7 @@ import {
   fetchObserverInterface,
   inspectContractForWallet,
   submitPublishPlan,
+  verifyBoingHosted,
   waitForRecord,
 } from '../../services/interfaceRegistryPublish';
 
@@ -57,6 +59,8 @@ export default function BoingPublishInterface() {
   const [draftNote, setDraftNote] = useState('');
   const [uri, setUri] = useState('');
   const [hostCheck, setHostCheck] = useState(null);
+  const [hostMode, setHostMode] = useState('boing');
+  const [boingHost, setBoingHost] = useState(null);
   const [reviewing, setReviewing] = useState(false);
   const [busy, setBusy] = useState('');
   const [result, setResult] = useState(null);
@@ -65,7 +69,19 @@ export default function BoingPublishInterface() {
   const validation = useMemo(() => (jsonText.trim() ? validateInterfaceDoc(jsonText) : null), [jsonText]);
   const canonical = validation?.ok ? canonicalInterfaceText(validation.doc) : null;
   const interfaceHash = canonical ? interfaceHashOfText(canonical) : null;
-  const uriCheck = checkUri(uri);
+  useEffect(() => {
+    let live = true;
+    setBoingHost(null);
+    if (hostMode !== 'boing' || !wallet || !canonical || !interfaceHash) return undefined;
+    planBoingHosting({ wallet, interfaceHash, text: canonical })
+      .then((h) => live && setBoingHost(h))
+      .catch((e) => live && setBoingHost({ error: e?.message || String(e) }));
+    return () => {
+      live = false;
+    };
+  }, [hostMode, wallet, canonical, interfaceHash]);
+  const effectiveUri = hostMode === 'boing' ? boingHost?.uri || '' : uri;
+  const uriCheck = checkUri(effectiveUri);
   const plan = useMemo(() => {
     if (!wallet || !inspect?.ok || !interfaceHash || !uriCheck.ok) return null;
     return planPublish({
@@ -75,8 +91,9 @@ export default function BoingPublishInterface() {
       uri: uriCheck.uri,
       claimer: inspect.claimer,
       deployerOk: inspect.deployer?.ok,
+      hostTxs: hostMode === 'boing' ? boingHost?.txs || [] : [],
     });
-  }, [wallet, inspect, interfaceHash, uriCheck.ok, uriCheck.uri, contract]);
+  }, [wallet, inspect, interfaceHash, uriCheck.ok, uriCheck.uri, contract, hostMode, boingHost]);
 
   const runInspect = async () => {
     setError('');
@@ -143,11 +160,16 @@ export default function BoingPublishInterface() {
       const provider = getWalletProvider?.();
       if (!provider?.request) throw new Error('Connect Boing Express.');
       const sent = await submitPublishPlan(provider, wallet, plan.txs, {
-        onStep: (s) => setBusy(s === 'batch' ? 'Signing one batch (claim + publish)…' : `Signing step ${s + 1} of ${plan.txs.length}…`),
+        onStep: (s) => setBusy(s === 'batch' ? `Signing one batch (${plan.steps.join(' + ').toLowerCase()})…` : `Signing step ${s + 1} of ${plan.txs.length}…`),
       });
       setBusy('Waiting for the registry to show the record…');
       const record = await waitForRecord(contract, { interfaceHash, uri: uriCheck.uri, wallet });
-      setResult({ ...sent, record });
+      let hosted = null;
+      if (uriCheck.onChain) {
+        setBusy('Reading the stored file back from chain…');
+        hosted = await verifyBoingHosted(uriCheck.uri, interfaceHash).catch((e) => ({ ok: false, error: e?.message || String(e) }));
+      }
+      setResult({ ...sent, record, hosted });
       setReviewing(false);
     } catch (e) {
       setError(formatBoingExpressRpcError ? formatBoingExpressRpcError(e) : e?.message || String(e));
@@ -257,6 +279,38 @@ export default function BoingPublishInterface() {
 
       <PageCard>
         <StepTitle n={3}>Host the file</StepTitle>
+        <div className="mb-3 flex flex-wrap gap-4 text-sm" role="radiogroup" aria-label="Where the interface file lives">
+          <label className="flex items-center gap-2">
+            <input type="radio" name="host-mode" checked={hostMode === 'boing'} onChange={() => setHostMode('boing')} data-testid="publish-host-boing" />
+            Host on Boing (stored on-chain, no website needed)
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="radio" name="host-mode" checked={hostMode === 'url'} onChange={() => setHostMode('url')} data-testid="publish-host-url" />
+            My own https URL
+          </label>
+        </div>
+        {hostMode === 'boing' ? (
+          <div className="space-y-1 text-sm" data-testid="publish-boing-hosting">
+            <p style={{ color: 'var(--text-secondary)' }}>
+              The exact file is written to the interface blob store under your account (compressed when smaller) in the same
+              batch as the publish step; boing.observer reads it from chain and checks the hash. Fee scales with size: one
+              storage write per 32 bytes.
+            </p>
+            {!wallet || !interfaceHash ? <p className="opacity-70">Connect the wallet and complete step 2.</p> : null}
+            {boingHost?.error ? <p className="text-amber-400">{boingHost.error}</p> : null}
+            {boingHost?.uri ? (
+              <>
+                <p>
+                  {boingHost.jsonBytes.toLocaleString()} bytes → {boingHost.storedBytes.toLocaleString()} stored
+                  {boingHost.encoding === 1 ? ' (deflate)' : ''} · {boingHost.words} words · {boingHost.txs.length} write call(s) · ≈
+                  {(boingHost.gas / 1e6).toFixed(2)}M gas
+                </p>
+                <p className="font-mono text-xs break-all opacity-80" data-testid="publish-boing-uri">{boingHost.uri}</p>
+              </>
+            ) : null}
+          </div>
+        ) : (
+        <>
         <p className="mb-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
           Upload the downloaded file unchanged to any https location you control: your project site, a GitHub repo
           (<span className="font-mono">raw.githubusercontent.com/…</span>), or a pinned IPFS file through an https gateway. Any change to
@@ -277,6 +331,8 @@ export default function BoingPublishInterface() {
             {hostCheck.state === 'unreachable' && <span className="text-amber-400">Could not read it from the browser ({hostCheck.message}); CORS may block this. You can still publish: the observer fetches it server-side.</span>}
           </p>
         ) : null}
+        </>
+        )}
       </PageCard>
 
       <PageCard>
@@ -301,7 +357,7 @@ export default function BoingPublishInterface() {
               <dt className="opacity-70">Registry</dt><dd className="font-mono break-all">{INTERFACE_REGISTRY_ID}</dd>
             </dl>
             <p className="opacity-80">
-              {plan.txs.length > 1 ? 'Both steps go out as ONE native batch transaction (one signature, all-or-nothing) when supported.' : 'One transaction.'}
+              {plan.txs.length > 1 ? `All ${plan.txs.length} calls go out as ONE native batch transaction (one signature, all-or-nothing) when supported.` : 'One transaction.'}
             </p>
             <div className="flex gap-2">
               <button type="button" className={btnCls} style={btnStyle} disabled={Boolean(busy)} onClick={publish} data-testid="publish-submit">
@@ -317,9 +373,14 @@ export default function BoingPublishInterface() {
               ✓ Published {result.batched ? 'in one batch transaction' : `in ${result.txHashes.length} transaction(s)`}.
               {result.record ? ' The registry shows the new record.' : ' The registry has not shown it yet; check again shortly.'}
             </p>
+            {result.hosted ? (
+              <p className={result.hosted.ok ? 'text-emerald-400' : 'text-amber-400'} data-testid="publish-hosted-status">
+                {result.hosted.ok ? `✓ Stored on Boing: read back ${result.hosted.bytes} bytes from chain; the hash matches.` : `Stored file could not be verified yet (${result.hosted.error || 'hash mismatch'}).`}
+              </p>
+            ) : null}
             {result.txHashes.map((h) => <p key={String(h)} className="font-mono text-xs break-all">tx {String(h)}</p>)}
             <a className="underline" href={observerUrl} target="_blank" rel="noopener noreferrer" data-testid="publish-observer-link">
-              View on boing.observer (shows “Published by deployer” once the file is reachable at the URI)
+              {result.hosted?.ok ? 'View on boing.observer (shows “Published by deployer · hosted on Boing”)' : 'View on boing.observer (shows “Published by deployer” once the file is reachable at the URI)'}
             </a>
           </div>
         ) : null}
