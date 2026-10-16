@@ -45,7 +45,8 @@ const createNavigation = () => {
     Object.freeze({ name: 'Points', href: '/boing/points', icon: 'points', description: 'Earn from activity', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Roadmap', href: '/boing/roadmap', icon: 'roadmap', description: 'Illustrative roadmap', isAvailable: true, comingSoon: false, testnetOnly: false }),
     Object.freeze({ name: 'Activities', href: '/boing/activities', icon: 'activities', description: 'Campaigns and events', isAvailable: true, comingSoon: false, testnetOnly: false }),
-    Object.freeze({ name: 'Developer tools', href: '/boing/native-vm', icon: 'native-vm', description: 'Builder tools', isAvailable: true, comingSoon: false, testnetOnly: false })
+    Object.freeze({ name: 'Developer tools', href: '/boing/native-vm', icon: 'native-vm', description: 'Builder tools', isAvailable: true, comingSoon: false, testnetOnly: false }),
+    Object.freeze({ name: 'Publish interface', href: '/boing/publish-interface', icon: 'native-vm', description: 'Name your contract functions', isAvailable: true, comingSoon: false, testnetOnly: false })
   ])
   });
 };

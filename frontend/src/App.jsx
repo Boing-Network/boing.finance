@@ -78,6 +78,7 @@ const BoingPoints = lazy(() => import('./pages/boing/BoingPoints'));
 const BoingRoadmap = lazy(() => import('./pages/boing/BoingRoadmap'));
 const BoingActivities = lazy(() => import('./pages/boing/BoingActivities'));
 const BoingNativeVm = lazy(() => import('./pages/boing/BoingNativeVm'));
+const BoingPublishInterface = lazy(() => import('./pages/boing/BoingPublishInterface'));
 const Home = lazy(() => import('./pages/Home'));
 const TransactionHistoryModal = lazy(() => import('./components/TransactionHistoryModal'));
 const AIChatModal = lazy(() => import('./components/AIChatModal'));
@@ -271,6 +272,7 @@ function PageTransitionRoutes() {
         <Route path="/boing/roadmap" element={<BoingRoadmap />} />
         <Route path="/boing/activities" element={<BoingActivities />} />
         <Route path="/boing/native-vm" element={<BoingNativeVm />} />
+        <Route path="/boing/publish-interface" element={<BoingPublishInterface />} />
       </Routes>
     </div>
   );
