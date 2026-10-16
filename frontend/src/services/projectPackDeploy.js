@@ -20,7 +20,9 @@ import {
   getLinkedNftTokenRegistryStatus,
   getLinkedNftTokenRegistrySdkApi,
   resolveLinkedNftTokenRegistryId,
+  nodeBatchSupport,
 } from './linkedNftTokenRegistry';
+import { flowTxsToBatchTx, isWalletBatchUnsupportedError, shouldUseLinkBatch } from '../utils/linkedNftLinkBatch';
 import { rememberAssetDeployer } from '../utils/linkedNftToken';
 
 const EXTRA_NFT_ENV = ['REACT_APP_BOING_REFERENCE_NFT_BYTECODE_HEX'];
@@ -317,6 +319,27 @@ export async function linkProjectPackCompanions({
       };
     }
     const sender = String(linker).toLowerCase();
+    const submitOpts = { senderHex: sender, refreshNonce: true, waitForInclusion: true, retryOnInvalidNonce: true };
+    // One wallet approval: claim×2 + register_link as a single native batch tx when node + wallet support it.
+    const support = await nodeBatchSupport();
+    if (shouldUseLinkBatch(flow.length, support) && flow.every((t) => (t?.type ?? t?.txType) === 'contract_call')) {
+      try {
+        const hash = await boingExpressContractCallSignSimulateSubmit(provider, flowTxsToBatchTx(flow), submitOpts);
+        txHashes.push(typeof hash === 'string' ? hash : String(hash?.txHash || hash));
+        return {
+          ok: true,
+          txHash: txHashes[0] || null,
+          txHashes,
+          batched: true,
+          registryId: status.registryId || null,
+          collectionId,
+          tokenId,
+          status,
+        };
+      } catch (e) {
+        if (!isWalletBatchUnsupportedError(e)) throw e;
+      }
+    }
     for (const tx of flow) {
       // Fresh app-RPC nonce + wait for inclusion between claim×2 and register_link so the
       // wallet never signs with a nonce from before the prior guided-flow deploy/link step.

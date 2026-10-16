@@ -18,6 +18,15 @@ import { getBoingNativeVmModuleId } from '../config/contracts';
 import { boingExpressContractCallSignSimulateSubmit } from './boingExpressNativeTx';
 import { tryBoingUnsignedContractSimulate } from './boingNativeVm';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
+import { boingJsonRpc } from './boingTestnetRpc';
+import {
+  LINK_BATCH_MAX_STEPS,
+  buildLinkBatchTx,
+  decodeClaimerReturnData,
+  isWalletBatchUnsupportedError,
+  planLinkSteps,
+  shouldUseLinkBatch,
+} from '../utils/linkedNftLinkBatch';
 
 const ZERO32 = `0x${'0'.repeat(64)}`;
 
@@ -273,6 +282,37 @@ async function submitCall(provider, tx) {
   return boingExpressContractCallSignSimulateSubmit(provider, tx);
 }
 
+/** Current registry claimer per asset (null = unclaimed, undefined = unknown because simulate is unavailable). */
+async function readAssetClaimers(status, assets) {
+  const out = {};
+  for (const a of assets) {
+    try {
+      const r = await simulateRegistryReturnData({ registryId: status.registryId, calldata: status.sdk.encodeGetClaimer(a) });
+      out[a] = r.ok ? decodeClaimerReturnData(r.returnData) : undefined;
+    } catch {
+      out[a] = undefined;
+    }
+  }
+  return out;
+}
+
+/** `boing_health.rpc_surface` batch capability (false on older nodes / errors). */
+export async function nodeBatchSupport() {
+  try {
+    const h = await boingJsonRpc('boing_health', []);
+    const nodeBatch =
+      typeof boingSdk.nodeSupportsNativeBatch === 'function'
+        ? boingSdk.nodeSupportsNativeBatch(h)
+        : h?.rpc_surface?.tx_payload_batch === true;
+    const maxSteps =
+      typeof boingSdk.nodeBatchMaxCalls === 'function'
+        ? boingSdk.nodeBatchMaxCalls(h)
+        : Number(h?.rpc_surface?.tx_batch_max_calls) || LINK_BATCH_MAX_STEPS;
+    return { nodeBatch, maxSteps };
+  } catch {
+    return { nodeBatch: false, maxSteps: LINK_BATCH_MAX_STEPS };
+  }
+}
 /**
  * Read-only registry call → return_data hex.
  * Prefers unsigned simulate; returns null when unavailable.
@@ -429,38 +469,54 @@ export async function registerLinkedNftTokenPairOnChain({
   }
 
   const txHashes = [];
+  let batched = false;
+  let steps = [];
   try {
-    if (!skipClaim && status.sdk.buildFlowTxs) {
-      const flow = status.sdk.buildFlowTxs({
-        senderHex32: linker,
-        registryHex32: status.registryId,
-        collectionHex32: collection,
-        tokenHex32: token,
-      });
-      for (const tx of flow) {
-        txHashes.push(await submitCall(provider, tx));
-      }
-    } else {
-      if (!skipClaim) {
-        for (const asset of [collection, token]) {
-          const calldata = status.sdk.encodeClaim(asset);
-          txHashes.push(
-            await submitCall(provider, buildTx(status.sdk, linker, status.registryId, calldata, [asset]))
-          );
-        }
-      }
-      const regData = status.sdk.encodeRegister(collection, token);
-      txHashes.push(
-        await submitCall(
-          provider,
-          buildTx(status.sdk, linker, status.registryId, regData, [collection, token])
-        )
-      );
+    // Skip claims the linker already holds (the old flow re-sent them every time), refuse early when
+    // another account holds a side, then send every remaining step as ONE native batch tx.
+    const claimers = skipClaim
+      ? { [collection]: linker, [token]: linker }
+      : await readAssetClaimers(status, [collection, token]);
+    const plan = planLinkSteps({
+      linker,
+      registryId: status.registryId,
+      collection,
+      token,
+      claimers,
+      encodeClaim: status.sdk.encodeClaim,
+      encodeRegister: status.sdk.encodeRegister,
+    });
+    if (!plan.ok) {
+      return { ok: false, code: plan.code, message: plan.message, txHashes, status };
     }
-    return {
+    steps = plan.steps;
+    const support = await nodeBatchSupport();
+    if (shouldUseLinkBatch(steps.length, support)) {
+      const batchTx = buildLinkBatchTx({
+        linker,
+        registryId: status.registryId,
+        steps,
+        assets: [collection, token],
+      });
+      try {
+        txHashes.push(await submitCall(provider, batchTx));
+        batched = true;
+      } catch (e) {
+        // Older Boing Express builds cannot sign `batch`: fall back to one tx per step.
+        if (!isWalletBatchUnsupportedError(e)) throw e;
+      }
+    }
+    if (!batched) {
+      for (const s of steps) {
+        const extra = s.label === 'Register link' ? [collection, token] : s.label === 'Claim collection' ? [collection] : [token];
+        txHashes.push(await submitCall(provider, buildTx(status.sdk, linker, status.registryId, s.calldata, extra)));
+      }
+    }    return {
       ok: true,
       txHash: txHashes[txHashes.length - 1] || null,
       txHashes,
+      batched,
+      steps: steps.map((s) => s.label),
       registryId: status.registryId,
       collectionId: collection,
       tokenId: token,
