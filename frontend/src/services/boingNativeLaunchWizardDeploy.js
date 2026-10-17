@@ -1,10 +1,10 @@
-import { evmLite } from '../utils/evmLite';
 import {
-  preflightBoingIntegrationDeploy,
+  buildBoingIntegrationDeployMetaTx,
+  preflightContractDeployMetaWithUi,
   resolveNativeConstantProductPoolBytecodeHex,
-  resolveReferenceFungibleTemplateBytecodeHex,
   resolveReferenceNftCollectionTemplateBytecodeHex,
 } from 'boing-sdk';
+import { boingTokenV2BytecodeHex, buildBoingTokenV2DeployMetaTx } from './boingTokenV2Launch';
 import { createBoingBrowserRpcClient } from './boingTestnetRpc';
 import { boingExpressSendTransaction } from './boingExpressNativeTx';
 import { BOING_QA_PURPOSE_TOKEN, isValidBoingQaPurpose } from '../config/boingQa';
@@ -27,12 +27,13 @@ export function pickExpressProviderForDeploy(getWalletProvider) {
   return getWindowBoingProvider();
 }
 
+/**
+ * Boing token deploys use the reference fungible template **v2** from boing-sdk (the token the v8 / v9 custody
+ * pools hold). Env template overrides are ignored on purpose so a stale v1 / secured hex can't slip in;
+ * Advanced → bytecode override still works for operators.
+ */
 export function getBundledNativeFungibleBytecodeHex() {
-  return (
-    resolveReferenceFungibleTemplateBytecodeHex({
-      extraEnvKeys: [LEGACY_FUNGIBLE_BYTECODE_ENV],
-    }) ?? ''
-  );
+  return boingTokenV2BytecodeHex();
 }
 
 export function getBundledNativeNftCollectionBytecodeHex() {
@@ -56,42 +57,6 @@ export function computeEffectiveNativeDeployBytecode(customBytecodeRaw, bundledB
 }
 
 /**
- * Fetches `boing_chainHeight` for timelock unlock height and derives `mintFirstTotalSupplyWei` when
- * max-wallet % needs supply (see `buildReferenceFungibleSecuredDeployMetaTx` in boing-sdk).
- *
- * @param {Record<string, unknown>} fields
- * @returns {Promise<Record<string, unknown>>}
- */
-export async function enrichBoingTokenLaunchFields(fields) {
-  const n = fields.nativeTokenSecurity;
-  const out = { ...fields };
-  if (!n || typeof n !== 'object') return out;
-
-  const client = createBoingBrowserRpcClient();
-  if (n.timelock) {
-    const h = await client.chainHeight();
-    out.chainContext = { chainHeight: BigInt(h) };
-  }
-
-  const wantPct =
-    (n.maxWallet || n.antiWhale) &&
-    typeof n.maxWalletPercentage === 'string' &&
-    n.maxWalletPercentage.trim() !== '';
-  if (wantPct) {
-    const rawSupply = fields.initialSupply;
-    const dec = fields.tokenDecimals;
-    if (rawSupply != null && String(rawSupply).trim() !== '' && dec != null && Number(dec) >= 0) {
-      try {
-        out.mintFirstTotalSupplyWei = evmLite.parseUnits(String(rawSupply).trim() || '0', Number(dec));
-      } catch {
-        /* SDK may fall back to maxTxAmount for wallet cap */
-      }
-    }
-  }
-  return out;
-}
-
-/**
  * @param {'token' | 'nft' | 'liquidity_pool'} kind
  * @param {Record<string, unknown>} fields
  */
@@ -102,7 +67,6 @@ export function buildBoingLaunchIntegrationInput(kind, fields) {
       const tokenSymbol = fields.tokenSymbol;
       const customBytecode = fields.customBytecode ?? '';
       const descriptionHash = fields.descriptionHash ?? '';
-      const nativeTokenSecurity = fields.nativeTokenSecurity;
       const purpose = fields.purpose ?? BOING_QA_PURPOSE_TOKEN;
       const name = typeof tokenName === 'string' ? tokenName.trim() : '';
       const sym = typeof tokenSymbol === 'string' ? tokenSymbol.trim().toUpperCase() : '';
@@ -115,9 +79,7 @@ export function buildBoingLaunchIntegrationInput(kind, fields) {
       const bundled = getBundledNativeFungibleBytecodeHex();
       const bc = computeEffectiveNativeDeployBytecode(customBytecode, bundled);
       if (!bc) {
-        throw new Error(
-          'No deploy bytecode — set REACT_APP_BOING_REFERENCE_FUNGIBLE_TEMPLATE_BYTECODE_HEX or paste hex under Advanced.',
-        );
+        throw new Error('Invalid bytecode override: use even-length hex (optional 0x prefix), or clear it.');
       }
       const custom = (customBytecode || '').trim();
       const bytecodeHexOverride = custom ? tryParseEvenLengthDeployBytecodeHex(customBytecode) || undefined : undefined;
@@ -126,16 +88,11 @@ export function buildBoingLaunchIntegrationInput(kind, fields) {
       }
       return {
         kind: 'token',
-        assetName: name,
-        assetSymbol: sym,
-        purposeCategory: purpose,
+        name,
+        symbol: sym,
+        purpose,
         descriptionHashHex: descriptionHash.trim() || undefined,
-        nativeTokenSecurity:
-          nativeTokenSecurity && typeof nativeTokenSecurity === 'object' ? nativeTokenSecurity : undefined,
-        chainContext: fields.chainContext,
-        mintFirstTotalSupplyWei: fields.mintFirstTotalSupplyWei,
         bytecodeHexOverride,
-        extraEnvKeys: [LEGACY_FUNGIBLE_BYTECODE_ENV],
       };
     }
     case 'nft': {
@@ -219,25 +176,41 @@ export function buildBoingLaunchIntegrationInput(kind, fields) {
 }
 
 /**
+ * Express `contract_deploy_meta` for a launch input: token → Boing token v2; NFT / pool → SDK integration builder.
+ * @param {ReturnType<typeof buildBoingLaunchIntegrationInput>} input
+ */
+export function buildBoingLaunchDeployTx(input) {
+  if (input.kind === 'token') return buildBoingTokenV2DeployMetaTx(input);
+  return buildBoingIntegrationDeployMetaTx(input);
+}
+
+/**
+ * Build the deploy tx and run `boing_qaCheck` on it.
+ * @param {ReturnType<typeof buildBoingLaunchIntegrationInput>} input
+ */
+export async function preflightBoingLaunchInput(input) {
+  const client = createBoingBrowserRpcClient();
+  const tx = buildBoingLaunchDeployTx(input);
+  const { qa, ui } = await preflightContractDeployMetaWithUi(client, tx);
+  return { tx, qa, ui };
+}
+
+/**
  * @param {'token' | 'nft' | 'liquidity_pool'} kind
  * @param {Record<string, unknown>} fields
  */
 export async function preflightBoingLaunchWizardByKind(kind, fields) {
-  const client = createBoingBrowserRpcClient();
-  let merged = fields;
-  if (kind === 'token') {
-    merged = await enrichBoingTokenLaunchFields(fields);
-  }
-  const input = buildBoingLaunchIntegrationInput(kind, merged);
-  return preflightBoingIntegrationDeploy(client, input);
+  return preflightBoingLaunchInput(buildBoingLaunchIntegrationInput(kind, fields));
 }
 
 /**
  * @param {import('boing-sdk').BoingClient} client
- * @param {import('boing-sdk').BoingIntegrationDeployInput} input
+ * @param {ReturnType<typeof buildBoingLaunchIntegrationInput>} input
  */
 export async function preflightBoingLaunchWizard(client, input) {
-  return preflightBoingIntegrationDeploy(client, input);
+  const tx = buildBoingLaunchDeployTx(input);
+  const { qa, ui } = await preflightContractDeployMetaWithUi(client, tx);
+  return { tx, qa, ui };
 }
 
 /**
@@ -252,22 +225,9 @@ export async function preflightBoingLaunchWizard(client, input) {
  * >}
  */
 export async function executeBoingLaunchWizardDeploy({ kind, getWalletProvider, qaPoolAcknowledged = false, ...fields }) {
-  let mergedFields = fields;
-  if (kind === 'token') {
-    try {
-      mergedFields = await enrichBoingTokenLaunchFields(fields);
-    } catch (e) {
-      return {
-        ok: false,
-        code: 'enrich_failed',
-        message: e?.message || 'Could not prepare deploy (chain height or supply).',
-      };
-    }
-  }
-
   let input;
   try {
-    input = buildBoingLaunchIntegrationInput(kind, mergedFields);
+    input = buildBoingLaunchIntegrationInput(kind, fields);
   } catch (e) {
     return {
       ok: false,
@@ -281,11 +241,10 @@ export async function executeBoingLaunchWizardDeploy({ kind, getWalletProvider, 
     return { ok: false, code: 'no_provider', message: boingWalletMissingMessage() };
   }
 
-  const client = createBoingBrowserRpcClient();
   let pre;
   let tx;
   try {
-    const r = await preflightBoingIntegrationDeploy(client, input);
+    const r = await preflightBoingLaunchInput(input);
     pre = r.qa;
     tx = r.tx;
   } catch (e) {

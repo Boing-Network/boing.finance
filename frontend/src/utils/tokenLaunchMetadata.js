@@ -51,7 +51,8 @@ export function buildTokenLaunchMetadataDocument({
     description: str(description),
     image: str(image),
     external_url: str(website),
-    decimals: Number(decimals) || 18,
+    // 0 is valid (Boing token v2 counts whole units).
+    decimals: decimals == null || decimals === '' || !Number.isFinite(Number(decimals)) ? 18 : Number(decimals),
     initialSupply: str(initialSupply),
     network: str(network),
     social: {

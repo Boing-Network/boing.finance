@@ -37,6 +37,12 @@ import { brandLogoPngAbsolute } from '../config/brandAssets';
 import { showDeployCelebration } from '../utils/deployCelebration';
 import { rememberAssetDeployer } from '../utils/linkedNftToken';
 import {
+  BOING_TOKEN_V2_DECIMALS,
+  BOING_TOKEN_V2_SECURITY,
+  BOING_TOKEN_V2_UNSUPPORTED_SECURITY,
+  parseBoingTokenV2Supply,
+} from '../services/boingTokenV2Launch';
+import {
   TradeDeployShell,
   TradeDeployHero,
   TradeDeployButton,
@@ -516,6 +522,23 @@ function DeployTokenSolanaContent() {
 }
 
 // Security Features Configuration
+/** Boing token v2: built-in guarantees, and the EVM/Solana options it does not have. */
+function BoingTokenV2SecurityNote() {
+  const unsupported = SECURITY_FEATURES.filter((f) => BOING_TOKEN_V2_UNSUPPORTED_SECURITY.includes(f.featureKey));
+  return (
+    <div data-testid="boing-token-v2-security" className="rounded-xl border p-4 text-sm space-y-3" style={{ borderColor: 'rgba(34, 197, 94, 0.35)', backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
+      <ul className="list-disc pl-5 space-y-1">
+        <li><strong style={{ color: 'var(--text-primary)' }}>Fixed supply.</strong> The whole supply is minted once, to you, right after the deploy. No one can mint more.</li>
+        <li><strong style={{ color: 'var(--text-primary)' }}>No owner controls.</strong> After that mint nobody can freeze, block, pause or change the token.</li>
+        <li><strong style={{ color: 'var(--text-primary)' }}>Works with Boing swap pools.</strong> Standard transfer, approve and transfer_from; whole units (no decimals).</li>
+      </ul>
+      <p data-testid="boing-token-v2-unsupported">
+        Not available on Boing: {unsupported.map((f) => f.name).join(', ')}. Switch to an EVM or Solana network if you need them.
+      </p>
+    </div>
+  );
+}
+
 const SECURITY_FEATURES = [
   {
     name: "Mint Authority Removal",
@@ -1231,10 +1254,10 @@ export default function DeployToken() {
       image,
       website,
       socialLinks,
-      decimals,
+      decimals: isBoingNativeDeployPath ? BOING_TOKEN_V2_DECIMALS : decimals,
       initialSupply,
       network: network?.name || (isBoingNativeDeployPath ? 'Boing Testnet' : ''),
-      security: nativeTokenSecurityForBoing,
+      security: isBoingNativeDeployPath ? BOING_TOKEN_V2_SECURITY : nativeTokenSecurityForBoing,
     });
     const fingerprint = JSON.stringify(doc);
     if (
@@ -1281,8 +1304,9 @@ export default function DeployToken() {
   ]);
 
   const handleDeploy = async (e) => {
-    const ethers = await loadEthers();
+    // Before any await: otherwise the browser submits the form natively and reloads the page mid-deploy.
     e.preventDefault();
+    const ethers = await loadEthers();
     if (deploying) {
       return;
     }
@@ -1294,6 +1318,12 @@ export default function DeployToken() {
     if (isBoingNativeDeployPath) {
       if (!name?.trim() || !symbol?.trim()) {
         toast.error('Please enter token name and symbol.');
+        return;
+      }
+      try {
+        parseBoingTokenV2Supply(initialSupply);
+      } catch (supplyErr) {
+        toast.error(supplyErr.message);
         return;
       }
       if (!nativeWizardGate.canSubmit) {
@@ -2274,6 +2304,21 @@ export default function DeployToken() {
                       <label htmlFor="deploy-evm-decimals" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
                         Decimals
                       </label>
+                      {isBoingNativeDeployPath ? (
+                        <>
+                          <input
+                            id="deploy-evm-decimals"
+                            name="decimals"
+                            type="text"
+                            readOnly
+                            value={`${BOING_TOKEN_V2_DECIMALS} (whole units)`}
+                            data-testid="deploy-boing-decimals"
+                            className="td-field__input"
+                            style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                          />
+                          <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>Boing token v2 counts whole tokens, like BOING itself.</p>
+                        </>
+                      ) : (
                       <select
                         id="deploy-evm-decimals"
                         name="decimals"
@@ -2286,6 +2331,7 @@ export default function DeployToken() {
                         <option value={6}>6 (USDC style)</option>
                         <option value={8}>8 (Bitcoin style)</option>
                       </select>
+                      )}
                     </div>
                     
                     <div>
@@ -2306,8 +2352,12 @@ export default function DeployToken() {
                         }}
                         placeholder="1000000"
                         min="1"
+                        step={isBoingNativeDeployPath ? '1' : undefined}
                         required
                       />
+                      {isBoingNativeDeployPath && (
+                        <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>Whole tokens, minted once to your account.</p>
+                      )}
                     </div>
                   </div>
 
@@ -2387,7 +2437,14 @@ export default function DeployToken() {
                 {/* Security Features */}
                 <div>
                   <h3 className="td-section-title">Security Features</h3>
-                  <p className="td-section-sub">Toggle protections for this token. Risk labels are plain guidance — not legal advice.</p>
+                  <p className="td-section-sub">
+                    {isBoingNativeDeployPath
+                      ? 'Boing token v2 has these protections built in. The other options need custom contract code and are not available on Boing.'
+                      : 'Toggle protections for this token. Risk labels are plain guidance — not legal advice.'}
+                  </p>
+                  {isBoingNativeDeployPath ? (
+                    <BoingTokenV2SecurityNote />
+                  ) : (
                   <div className="td-feature-matrix">
                     {SECURITY_FEATURES.map((feature, index) => {
                       const isAllowed = isFeatureAllowed(feature.featureKey);
@@ -2630,6 +2687,7 @@ export default function DeployToken() {
                       );
                     })}
                   </div>
+                  )}
                 </div>
 
                 {/* Social Links */}
@@ -2703,8 +2761,6 @@ export default function DeployToken() {
                       tokenName={name}
                       tokenSymbol={symbol}
                       initialSupply={initialSupply}
-                      tokenDecimals={decimals}
-                      nativeTokenSecurity={nativeTokenSecurityForBoing}
                       metadataUri={metadataUrl}
                       committedDescriptionHash={publishedDescriptionHash}
                       logoUri={publicAssetUri(logoUrl) || logoUrl}
@@ -2730,6 +2786,9 @@ export default function DeployToken() {
                         <div className="animate-spin rounded-full h-4 sm:h-5 w-4 sm:w-5 border-b-2 border-white mr-2"></div>
                         Deploying Token...
                       </div>
+                    ) : isBoingNativeDeployPath ? (
+                      // The Boing path charges no service fee (only the network fee for the two transactions).
+                      'Deploy Boing token'
                     ) : (
                       deployCtaLabel(selectedPlan, network)
                     )}

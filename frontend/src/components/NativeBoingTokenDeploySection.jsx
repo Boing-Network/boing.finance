@@ -1,6 +1,6 @@
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
-import { isBoingTestnetChainId, REFERENCE_FUNGIBLE_TEMPLATE_VERSION } from 'boing-sdk';
+import { isBoingTestnetChainId } from 'boing-sdk';
 import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import {
@@ -16,7 +16,7 @@ import {
   showBoingContractIncludedToast,
   showBoingLaunchDeploySuccessToast,
 } from '../utils/boingDeploySuccessToast';
-import { scheduleBoingDeployReceiptFollowup } from '../services/boingDeployReceiptFollowup';
+import { BOING_TOKEN_V2_DECIMALS } from '../services/boingTokenV2Launch';
 import { buildBoingExplorerAccountUrl, buildBoingExplorerTxUrl } from '../config/boingExplorerUrls';
 import { rememberAssetDeployer } from '../utils/linkedNftToken';
 import LinkedNftTokenPanel from './LinkedNftTokenPanel';
@@ -31,9 +31,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
     tokenName,
     tokenSymbol,
     embedInWizard = false,
-    nativeTokenSecurity,
     initialSupply = '',
-    tokenDecimals = 18,
     onDeployGateChange,
     metadataUri = '',
     committedDescriptionHash = '',
@@ -60,6 +58,8 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
   const [lastDeployedAccount, setLastDeployedAccount] = useState(null);
   const [qaPoolAcknowledged, setQaPoolAcknowledged] = useState(false);
   const [publishBusy, setPublishBusy] = useState(false);
+  const [stage, setStage] = useState(null);
+  const [mintNote, setMintNote] = useState(null);
 
   const effectiveBytecode = useMemo(
     () => computeEffectiveNativeDeployBytecode(customBytecode, bundledBytecode),
@@ -81,7 +81,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
     if (!effectiveBytecode) {
       return hasBundled
         ? 'Fix or clear the Advanced bytecode field (invalid hex).'
-        : 'Add bytecode: set REACT_APP_BOING_REFERENCE_FUNGIBLE_TEMPLATE_BYTECODE_HEX (or legacy REACT_APP_BOING_REFERENCE_TOKEN_BYTECODE), or paste template hex under Advanced.';
+        : 'Boing token v2 template missing from this build — update boing-sdk.';
     }
     if (qaResult?.result === 'unsure' && !qaPoolAcknowledged) {
       return 'Acknowledge the community QA pool checkbox below before deploying.';
@@ -91,7 +91,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
 
   useEffect(() => {
     setQaPoolAcknowledged(false);
-  }, [effectiveBytecode, effectiveDescriptionHash, nativeTokenSecurity]);
+  }, [effectiveBytecode, effectiveDescriptionHash]);
 
   useEffect(() => {
     onDeployGateChange?.({
@@ -100,8 +100,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
     });
   }, [gateEligible, deployBlocked, blockedReason, onDeployGateChange]);
 
-  const envHint =
-    'Set REACT_APP_BOING_REFERENCE_FUNGIBLE_TEMPLATE_BYTECODE_HEX (or legacy REACT_APP_BOING_REFERENCE_TOKEN_BYTECODE), or paste hex under Advanced.';
+  const envHint = 'Boing token v2 template missing from this build — update boing-sdk, or paste hex under Advanced.';
 
   const resolvePublished = useCallback(async () => {
     if (hasMetadataUri && effectiveDescriptionHash) {
@@ -156,9 +155,6 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
         tokenSymbol,
         customBytecode,
         descriptionHash: hash,
-        nativeTokenSecurity,
-        initialSupply,
-        tokenDecimals,
         purpose,
       });
       setQaResult(r);
@@ -181,17 +177,23 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
       return null;
     }
     const hashForDeploy = descriptionHash.trim() || published?.descriptionHash || '';
-    const result = await executeBoingNativeTokenDeploy({
-      getWalletProvider,
-      tokenName,
-      tokenSymbol,
-      customBytecode,
-      descriptionHash: hashForDeploy,
-      nativeTokenSecurity,
-      initialSupply,
-      tokenDecimals,
-      qaPoolAcknowledged,
-    });
+    setMintNote(null);
+    let result;
+    try {
+      result = await executeBoingNativeTokenDeploy({
+        getWalletProvider,
+        senderHex: account,
+        tokenName,
+        tokenSymbol,
+        initialSupply,
+        customBytecode,
+        descriptionHash: hashForDeploy,
+        qaPoolAcknowledged,
+        onStage: setStage,
+      });
+    } finally {
+      setStage(null);
+    }
     if (result.qaResult) setQaResult(result.qaResult);
     if (!result.ok) {
       toast.error(result.message);
@@ -199,32 +201,35 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
     }
     setLastTx(result.txHash);
     setLastBoingTxId(result.boingTxIdHex ?? null);
-    setLastDeployedAccount(null);
+    setLastDeployedAccount(result.tokenHex);
+    if (account) rememberAssetDeployer(result.tokenHex, account);
+    if (result.mintError) {
+      const note = `Token deployed, but minting the supply failed: ${result.mintError}`;
+      setMintNote(note);
+      toast.error(note);
+    } else if (!result.mintConfirmed) {
+      setMintNote('Mint submitted; still waiting for a block to include it. Check boing.observer in a moment.');
+    }
     showBoingLaunchDeploySuccessToast({
       txHash: result.txHash,
       boingTxIdHex: result.boingTxIdHex,
-      deployedAccountId: null,
+      deployedAccountId: result.tokenHex,
       explorerBaseUrl,
       celebration: {
-        deploymentKind: 'Native Boing token',
+        deploymentKind: 'Boing token (v2)',
         details: [
           { label: 'Name', value: String(tokenName || '').trim() || '—' },
           { label: 'Symbol', value: String(tokenSymbol || '').trim().toUpperCase() || '—' },
-          { label: 'Decimals', value: String(tokenDecimals ?? '—') },
-          ...(initialSupply !== '' && initialSupply != null
-            ? [{ label: 'Initial supply', value: String(initialSupply).trim() }]
-            : []),
+          { label: 'Decimals', value: `${BOING_TOKEN_V2_DECIMALS} (whole units)` },
+          { label: 'Supply', value: `${result.supply}${result.mintError ? ' (mint failed)' : ''}` },
+          { label: 'Token', value: result.tokenHex },
           ...(published?.logoUri ? [{ label: 'Logo', value: published.logoUri }] : []),
           ...(published?.metadataUri ? [{ label: 'Metadata', value: published.metadataUri }] : []),
         ],
       },
     });
-    scheduleBoingDeployReceiptFollowup(result.boingTxIdHex, (id) => {
-      setLastDeployedAccount(id);
-      showBoingContractIncludedToast(id, explorerBaseUrl);
-      if (account) rememberAssetDeployer(id, account);
-      onDeployed?.({ accountId: id, kind: 'token', name: tokenName, symbol: tokenSymbol });
-    });
+    if (result.mintConfirmed) showBoingContractIncludedToast(result.tokenHex, explorerBaseUrl);
+    onDeployed?.({ accountId: result.tokenHex, kind: 'token', name: tokenName, symbol: tokenSymbol });
     return result.txHash;
   }, [
     account,
@@ -235,10 +240,8 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
     initialSupply,
     logoUri,
     metadataUri,
-    nativeTokenSecurity,
     onDeployed,
     qaPoolAcknowledged,
-    tokenDecimals,
     tokenName,
     tokenSymbol,
     resolvePublished,
@@ -286,7 +289,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
 
       {embedInWizard && (
         <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-          Uses the same name and symbol as this wizard. Express will ask you to approve the deploy.
+          Uses the same name, symbol and supply as this wizard. Express will ask you to approve the deploy and the mint.
         </p>
       )}
 
@@ -336,11 +339,10 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
             color: 'var(--text-secondary)',
           }}
         >
-          <strong style={{ color: 'var(--text-primary)' }}>Standard fungible template loaded.</strong>{' '}
-          {embedInWizard
-            ? 'Use Deploy below; open Advanced only for overrides or QA.'
-            : 'Bytecode is not shown on this screen. Open Advanced only if you need to override hex, set description_hash, or run an explicit QA check.'}{' '}
-          SDK template line: <code className="text-[10px]">{REFERENCE_FUNGIBLE_TEMPLATE_VERSION}</code>.
+          <strong style={{ color: 'var(--text-primary)' }}>Boing token v2.</strong>{' '}
+          Same token as the Boing swap pools: transfer, approve and transfer_from, whole units (no decimals). Express
+          asks you to approve two transactions: the deploy, then a one-time mint of the whole supply to your account.
+          No one can mint more afterwards.
         </p>
       ) : (
         <p
@@ -351,6 +353,18 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
           }}
         >
           <strong style={{ color: 'var(--text-primary)' }}>No default template in this build.</strong> {envHint}
+        </p>
+      )}
+
+      {stage && (
+        <p role="status" data-testid="boing-token-deploy-stage" className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+          {{
+            qa: 'Running the QA check…',
+            sign_deploy: 'Approve the deploy in Boing Express (1 of 2)…',
+            sign_mint: 'Approve the mint in Boing Express (2 of 2)…',
+            submit: 'Submitting…',
+            confirm: 'Waiting for the mint to be included…',
+          }[stage] || 'Working…'}
         </p>
       )}
 
@@ -393,7 +407,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
         </summary>
         <div className="px-3 pb-3 pt-1 space-y-3">
           <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-            Leave bytecode empty to use the resolved template ({hasBundled ? 'from env / SDK' : 'configure env first'}). QA
+            Leave bytecode empty to deploy Boing token v2 from boing-sdk. A pasted template still gets the one-time mint call. QA
             purpose for this flow is <code className="text-[10px]">{purpose}</code>.
           </p>
           <div>
@@ -431,7 +445,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
               description_hash (optional, 32-byte hex)
             </label>
             <p className="text-[10px] mb-1" style={{ color: 'var(--text-tertiary)' }}>
-              Leave empty to commit uploaded token metadata (logo URL + security choices). Filling this field overrides that
+              Leave empty to commit the uploaded token metadata (logo, links, supply). Filling this field overrides that
               commitment.
             </p>
             <input
@@ -472,12 +486,10 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
       {lastTx && (
         <div className="text-xs mt-2 space-y-1" style={{ color: 'var(--text-secondary)' }}>
           <p className="font-mono break-all">Submit ack: {lastTx}</p>
-          {!embedInWizard ? (
-            <p>
-              Explorer token index lists the contract after a block includes this tx. The DEX token directory stays empty
-              until a canonical factory is published.
-            </p>
-          ) : null}
+          {lastDeployedAccount && (
+            <p className="font-mono break-all" data-testid="boing-token-deployed-id">Token: {lastDeployedAccount}</p>
+          )}
+          {mintNote && <p className="text-amber-400">{mintNote}</p>}
           {lastDeployedAccount && (
             <a
               href={buildBoingExplorerAccountUrl(explorerBaseUrl, lastDeployedAccount)}
