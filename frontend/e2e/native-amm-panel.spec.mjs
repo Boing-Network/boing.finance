@@ -43,7 +43,7 @@ test.describe('Native AMM panel (build with REACT_APP_BOING_NATIVE_AMM_POOL)', (
 
   test('swap page shows native CP pool section', async ({ page }) => {
     test.setTimeout(120_000);
-    await page.goto('/swap');
+    await page.goto('/swap?nativeTradeTab=advanced');
     await expect(page.getByTestId('native-amm-panel')).toBeVisible({ timeout: 90_000 });
     // Embedded panel title is "Swap" (non-embedded: "Swap on the main pool").
     await expect(
@@ -89,7 +89,7 @@ test.describe('Native AMM panel (build with REACT_APP_BOING_NATIVE_AMM_POOL)', (
       await route.continue();
     });
 
-    await page.goto('/swap');
+    await page.goto('/swap?nativeTradeTab=advanced');
     const panel = page.getByTestId('native-amm-panel');
     await expect(panel).toBeVisible({ timeout: 90_000 });
     await expect(panel).toContainText('1000', { timeout: 30_000 });
@@ -101,7 +101,7 @@ test.describe('Native AMM panel (build with REACT_APP_BOING_NATIVE_AMM_POOL)', (
 
   test('swap submit stays disabled without amount', async ({ page }) => {
     test.setTimeout(120_000);
-    await page.goto('/swap');
+    await page.goto('/swap?nativeTradeTab=advanced');
     await expect(page.getByTestId('native-amm-panel')).toBeVisible({ timeout: 90_000 });
     await expect(page.getByTestId('native-amm-swap-submit')).toBeDisabled();
   });

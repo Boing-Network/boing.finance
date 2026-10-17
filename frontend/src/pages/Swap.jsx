@@ -2075,6 +2075,8 @@ const Swap = () => {
                 Trade tokens on this network
               </p>
             </div>
+            {/* Boing L1: the swap card has its own slippage cog; gas settings are EVM-only. */}
+            {!onBoingNativeL1 && (
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
@@ -2087,6 +2089,7 @@ const Swap = () => {
                 Settings
               </button>
             </div>
+            )}
           </div>
 
           {onBoingNativeL1 && (
