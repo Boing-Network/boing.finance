@@ -394,7 +394,7 @@ function AppContent() {
     : `page-app deep-trade-bg page-variant-${pageVariant}`;
 
   return (
-    <div className={`relative flex flex-col min-h-screen min-w-0 overflow-x-hidden ${pageBackgroundClass}`}>
+    <div className={`relative flex flex-col min-h-screen min-w-0 overflow-x-clip ${pageBackgroundClass}`}>
       <AppShellVisualLayer reducedMotion={prefersReducedMotion} />
       <BaseNetworkOptimizer />
       
@@ -733,7 +733,7 @@ function AppContent() {
       <main className="flex-1 flex flex-col relative min-h-0">
         {/* Page Content with Error Boundary and Suspense — scroll container for long home content */}
         <ErrorBoundary>
-          <div className="relative z-10 flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden pb-6 sm:pb-8">
+          <div className="relative z-10 flex-1 flex flex-col min-h-0 overflow-x-clip pb-6 sm:pb-8">
             <Suspense fallback={<LoadingSpinner />}>
               <PageTransitionRoutes />
             </Suspense>

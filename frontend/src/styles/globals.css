@@ -198,8 +198,13 @@
   box-sizing: border-box;
 }
 
+/* Horizontal overflow is clipped, not hidden: `overflow-x: hidden` turns html/body/#root into scroll containers
+   (overflow-y computes to auto), which breaks `position: sticky` (site header, Docs table of contents) because sticky
+   elements then stick to a box that never scrolls. `clip` cuts overflow without creating a scroll container.
+   `hidden` stays first as the fallback for browsers without `clip`. */
 html {
   overflow-x: hidden;
+  overflow-x: clip;
   max-width: 100%;
 }
 
@@ -215,6 +220,7 @@ body {
   padding-left: env(safe-area-inset-left, 0px);
   padding-right: env(safe-area-inset-right, 0px);
   overflow-x: hidden;
+  overflow-x: clip;
   max-width: 100%;
   line-height: 1.6;
   transition: background-color var(--motion-transition), color var(--motion-transition);
@@ -222,6 +228,7 @@ body {
 
 #root {
   overflow-x: hidden;
+  overflow-x: clip;
   max-width: 100%;
   min-width: 0;
 }
