@@ -28,9 +28,6 @@ function useHeaderHeight() {
   return h;
 }
 
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-
 function TocList({ activeId, onPick, idPrefix }) {
   return (
     <ul className="space-y-0.5">
@@ -66,71 +63,63 @@ function TocList({ activeId, onPick, idPrefix }) {
 }
 
 const Docs = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const headerH = useHeaderHeight();
   const offset = headerH + GAP;
-  const [activeId, setActiveId] = useState(() => resolveSectionId(searchParams.get('section')) || DOC_SECTIONS[0].id);
+  const rawSection = searchParams.get('section');
+  // The URL is the source of truth, so ?section= deep links and browser back/forward pick the section.
+  const activeId = resolveSectionId(rawSection) || DOC_SECTIONS[0].id;
+  const activeIndex = DOC_SECTIONS.findIndex((s) => s.id === activeId);
+  const active = DOC_SECTIONS[activeIndex];
+  const prev = activeIndex > 0 ? DOC_SECTIONS[activeIndex - 1] : null;
+  const next = activeIndex < DOC_SECTIONS.length - 1 ? DOC_SECTIONS[activeIndex + 1] : null;
   const [mobileOpen, setMobileOpen] = useState(false);
   const tocScrollRef = useRef(null);
-  const lockUntil = useRef(0); // ignore scrollspy while a click-scroll is animating
+  const contentRef = useRef(null);
+  const firstRender = useRef(true);
 
-  const scrollToSection = useCallback(
-    (id, { smooth = true } = {}) => {
-      const el = document.getElementById(`doc-${id}`);
-      if (!el) return;
-      const top = el.getBoundingClientRect().top + window.scrollY - offset;
-      lockUntil.current = Date.now() + (smooth ? 900 : 0);
-      window.scrollTo({ top: Math.max(0, top), behavior: smooth && !prefersReducedMotion() ? 'smooth' : 'auto' });
-      setActiveId(id);
-      try {
-        const url = new URL(window.location.href);
-        url.searchParams.set('section', id);
-        window.history.replaceState(window.history.state, '', url);
-      } catch {
-        /* ignore */
+  // Old ids (e.g. ?section=trading) and unknown ids are rewritten in place, without a new history entry.
+  useEffect(() => {
+    if (rawSection && rawSection !== activeId) {
+      const n = new URLSearchParams(searchParams);
+      n.set('section', activeId);
+      setSearchParams(n, { replace: true });
+    }
+  }, [rawSection, activeId, searchParams, setSearchParams]);
+
+  // Put the top of the content just below the sticky header.
+  const scrollToContent = useCallback(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top: Math.max(0, top), behavior: 'auto' });
+  }, [offset]);
+
+  const selectSection = useCallback(
+    (id) => {
+      setMobileOpen(false);
+      if (id === activeId) {
+        scrollToContent();
+        return;
       }
+      const n = new URLSearchParams(searchParams);
+      n.set('section', id);
+      setSearchParams(n); // push: back/forward moves between sections
     },
-    [offset]
+    [activeId, searchParams, setSearchParams, scrollToContent]
   );
 
-  // Deep link (?section=…) on first load and when the query changes from a link elsewhere in the app.
-  const sectionParam = searchParams.get('section');
+  // Whenever the section changes (click, prev/next, back/forward), show the new section from its top.
+  // On first load, only scroll when the URL asked for a specific section.
   useEffect(() => {
-    const id = resolveSectionId(sectionParam);
-    if (!id) return undefined;
-    const t = setTimeout(() => scrollToSection(id, { smooth: false }), 50);
+    if (firstRender.current) {
+      firstRender.current = false;
+      if (!rawSection) return undefined;
+    }
+    const t = setTimeout(scrollToContent, 0);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sectionParam]);
-
-  // Scrollspy: the active section is the last one whose top has passed the header line.
-  useEffect(() => {
-    let raf = 0;
-    const compute = () => {
-      raf = 0;
-      if (Date.now() < lockUntil.current) return;
-      const line = offset + 24;
-      let current = DOC_SECTIONS[0].id;
-      for (const s of DOC_SECTIONS) {
-        const el = document.getElementById(`doc-${s.id}`);
-        if (el && el.getBoundingClientRect().top <= line) current = s.id;
-      }
-      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
-      if (atBottom) current = DOC_SECTIONS[DOC_SECTIONS.length - 1].id;
-      setActiveId((prev) => (prev === current ? prev : current));
-    };
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(compute);
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    compute();
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [offset]);
+  }, [activeId]);
 
   // Keep the active entry visible inside the TOC's own scroll area.
   useEffect(() => {
@@ -195,10 +184,7 @@ const Docs = () => {
                 <TocList
                   activeId={activeId}
                   idPrefix="docs-toc-mobile"
-                  onPick={(id) => {
-                    setMobileOpen(false);
-                    scrollToSection(id);
-                  }}
+                  onPick={selectSection}
                 />
               </div>
             )}
@@ -221,26 +207,73 @@ const Docs = () => {
                 Table of Contents
               </h3>
               <div ref={tocScrollRef} role="navigation" aria-label="Documentation sections" className="min-h-0 flex-1 overflow-y-auto pr-1">
-                <TocList activeId={activeId} idPrefix="docs-toc" onPick={(id) => scrollToSection(id)} />
+                <TocList activeId={activeId} idPrefix="docs-toc" onPick={selectSection} />
               </div>
             </aside>
 
-            <div className="min-w-0 rounded-xl border p-4 sm:p-6 lg:p-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-              {DOC_SECTIONS.map(({ id, title, Body }, i) => (
-                <section
-                  key={id}
-                  id={`doc-${id}`}
-                  data-testid={`docs-section-${id}`}
-                  aria-labelledby={`doc-${id}-title`}
-                  className={i > 0 ? 'mt-12 border-t pt-10' : ''}
-                  style={{ borderColor: 'var(--border-color)', scrollMarginTop: offset }}
-                >
-                  <h2 id={`doc-${id}-title`} className="mb-4 text-2xl sm:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                    {title}
-                  </h2>
-                  <Body />
-                </section>
-              ))}
+            <div
+              ref={contentRef}
+              className="min-w-0 rounded-xl border p-4 sm:p-6 lg:p-8"
+              style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', scrollMarginTop: offset }}
+            >
+              <section
+                key={active.id}
+                id={`doc-${active.id}`}
+                data-testid={`docs-section-${active.id}`}
+                aria-labelledby={`doc-${active.id}-title`}
+              >
+                <h2 id={`doc-${active.id}-title`} className="mb-4 text-2xl sm:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                  {active.title}
+                </h2>
+                <active.Body />
+              </section>
+              <div
+                className="mt-10 flex flex-col gap-3 border-t pt-6 sm:flex-row sm:justify-between"
+                style={{ borderColor: 'var(--border-color)' }}
+                role="navigation"
+                aria-label="Previous and next section"
+              >
+                {prev ? (
+                  <a
+                    href={`?section=${prev.id}`}
+                    data-testid="docs-prev"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      selectSection(prev.id);
+                    }}
+                    className="rounded-lg border px-4 py-3 text-left transition-colors hover:bg-white/5 sm:max-w-[48%]"
+                    style={{ borderColor: 'var(--border-color)' }}
+                  >
+                    <span className="block text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                      ← Previous
+                    </span>
+                    <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                      {prev.title}
+                    </span>
+                  </a>
+                ) : (
+                  <span />
+                )}
+                {next && (
+                  <a
+                    href={`?section=${next.id}`}
+                    data-testid="docs-next"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      selectSection(next.id);
+                    }}
+                    className="rounded-lg border px-4 py-3 text-right transition-colors hover:bg-white/5 sm:ml-auto sm:max-w-[48%]"
+                    style={{ borderColor: 'var(--border-color)' }}
+                  >
+                    <span className="block text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                      Next →
+                    </span>
+                    <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                      {next.title}
+                    </span>
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </div>
