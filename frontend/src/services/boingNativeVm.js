@@ -1,5 +1,6 @@
 import { boingJsonRpc, normalizeBoingFaucetAccountHex } from './boingTestnetRpc';
 import { getSharedBoingClient } from './boingNativeDexClient';
+import { ledgerDecimalsAt } from '../utils/boingNativeAmount';
 
 /**
  * Normalize arbitrary hex for Boing RPC (0x + lowercase, even length).
@@ -19,9 +20,24 @@ export function normalizeBoingRpcHex(input) {
 }
 
 /**
+ * Ledger decimals (0 = whole BOING, 18 = base units) for a tx included in the next block, from
+ * `boing_getNetworkInfo.native_currency`. Nodes before testnet-v0.1.17 omit it: whole BOING.
+ * @param {{ signal?: AbortSignal }} [options]
+ * @returns {Promise<number>}
+ */
+export async function fetchNextBlockNativeDecimals(options = {}) {
+  const info = await boingJsonRpc('boing_getNetworkInfo', [], options);
+  const nc = info?.native_currency;
+  if (!nc) return 0;
+  const head = Number(info?.head_height ?? 0);
+  return ledgerDecimalsAt(nc, head + 1);
+}
+
+/**
  * @param {string} account — wallet address / Boing account id
  * @param {{ signal?: AbortSignal }} [options]
- * @returns {Promise<{ balance: string; nonce: number; stake: string }>}
+ * @returns {Promise<{ balance: string; nonce: number; stake: string; decimals?: number; pending_unbond?: string }>}
+ *   Amounts are ledger units; `decimals` (testnet-v0.1.17+) is 18 for base units, 0 / absent for whole BOING.
  */
 export async function fetchBoingNativeAccount(account, options = {}) {
   const hex = normalizeBoingFaucetAccountHex(account);

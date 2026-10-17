@@ -8,6 +8,7 @@ import { BOING_NATIVE_L1_CHAIN_ID } from '../../config/networks';
 import { normalizeBoingFaucetAccountHex } from '../../services/boingTestnetRpc';
 import {
   fetchBoingNativeAccount,
+  fetchNextBlockNativeDecimals,
   qaCheckBoingDeploy,
   simulateBoingSignedTransaction,
   submitBoingSignedTransaction
@@ -23,6 +24,7 @@ import {
 } from '../../services/boingExpressNativeTx';
 import { getWindowBoingProvider } from '../../utils/boingWalletDiscovery';
 import { buildContractDeployMetaTx } from 'boing-sdk';
+import { parseBoingToLedger } from '../../utils/boingNativeAmount';
 import NativeAmmLpVaultPanel from '../../components/NativeAmmLpVaultPanel';
 import NativeDexLedgerForwardPanel from '../../components/NativeDexLedgerForwardPanel';
 import BoingL1DexReadinessPanel from '../../components/BoingL1DexReadinessPanel';
@@ -317,13 +319,26 @@ export default function BoingNativeVm() {
     }
   };
 
-  const buildExpressTxObject = () => {
+  /** BOING input → ledger units for the next block (whole BOING before the 18-decimals switch, base units after). */
+  const boingInputToLedger = (input, nativeDecimals, label) => {
+    const v = parseBoingToLedger(input, nativeDecimals);
+    if (v == null || v === '0') {
+      throw new Error(
+        nativeDecimals === 0
+          ? `${label}: enter a whole BOING amount (e.g. 100).`
+          : `${label}: enter a BOING amount with at most 18 decimals (e.g. 100 or 0.5).`
+      );
+    }
+    return v;
+  };
+
+  const buildExpressTxObject = (nativeDecimals = 0) => {
     switch (expressKind) {
       case 'transfer':
         return {
           type: 'transfer',
           to: exTransferTo.trim(),
-          amount: exTransferAmount.trim()
+          amount: boingInputToLedger(exTransferAmount, nativeDecimals, 'Amount')
         };
       case 'contract_deploy': {
         const bc = exDeployBytecode.trim();
@@ -368,9 +383,9 @@ export default function BoingNativeVm() {
           calldata: exCallCalldata.trim() || '0x'
         };
       case 'bond':
-        return { type: 'bond', amount: exStakeAmount.trim() };
+        return { type: 'bond', amount: boingInputToLedger(exStakeAmount, nativeDecimals, 'Bond amount') };
       case 'unbond':
-        return { type: 'unbond', amount: exStakeAmount.trim() };
+        return { type: 'unbond', amount: boingInputToLedger(exStakeAmount, nativeDecimals, 'Unbond amount') };
       default:
         throw new Error('Unknown transaction kind');
     }
@@ -393,7 +408,7 @@ export default function BoingNativeVm() {
         const ok = await runProtocolPreflightForDeploy(bc);
         if (!ok) return;
       }
-      const tx = buildExpressTxObject();
+      const tx = buildExpressTxObject(await fetchNextBlockNativeDecimals());
       const hex = await boingExpressSignTransaction(p, tx);
       setSignedTxHex(typeof hex === 'string' ? hex : String(hex));
       toast.success('Signed — you can simulate or submit below.');
@@ -423,7 +438,7 @@ export default function BoingNativeVm() {
         const ok = await runProtocolPreflightForDeploy(bc);
         if (!ok) return;
       }
-      const tx = buildExpressTxObject();
+      const tx = buildExpressTxObject(await fetchNextBlockNativeDecimals());
       const hash = await boingExpressSendTransaction(p, tx);
       const { displayHash, observerTxId } = normalizeBoingVmSubmitHash(hash);
       setSubmitHash(displayHash || observerTxId || null);
@@ -502,7 +517,7 @@ export default function BoingNativeVm() {
                 HANDOFF-DEPENDENT-PROJECTS.md
               </a>
               . Express can call <code className="text-xs">boing_signTransaction</code> /{' '}
-              <code className="text-xs">boing_sendTransaction</code>. Amounts are whole BOING units (not 10⁻¹⁸). Boing is
+              <code className="text-xs">boing_sendTransaction</code>. Native amounts are BOING with 18 decimals (1 BOING = 10¹⁸ base units on the ledger). Boing is
               not EVM: native VM + Ed25519, not MetaMask EIP-155.
             </p>
             <ul className="text-xs space-y-1 list-disc pl-5 mt-2">
@@ -595,7 +610,7 @@ export default function BoingNativeVm() {
               </div>
               <div>
                 <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
-                  Amount (u128 decimal)
+                  Amount (BOING)
                 </label>
                 <input
                   type="text"
@@ -759,7 +774,7 @@ export default function BoingNativeVm() {
           {(expressKind === 'bond' || expressKind === 'unbond') && (
             <div className="mb-3">
               <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
-                Amount (u128 decimal)
+                Amount (BOING)
               </label>
               <input
                 type="text"

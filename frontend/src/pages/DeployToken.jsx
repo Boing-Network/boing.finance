@@ -689,7 +689,7 @@ const SERVICE_CHARGES = {
       11155111: { amount: 0.001, currency: 'ETH' }, // Sepolia ~$2-3
       80001: { amount: 2, currency: 'MATIC' }, // Mumbai ~$1.60-2.40
       97: { amount: 0.005, currency: 'tBNB' }, // BSC Testnet ~$1.50-2.50
-      6913: { amount: 1, currency: 'BOING' }, // Boing L1 testnet (native BOING, 0 decimals in wallet)
+      6913: { amount: 1, currency: 'BOING' }, // Boing L1 testnet (whole BOING display amount; native BOING has 18 decimals)
     },
     features: [
       "Standard ERC-20 deployment",

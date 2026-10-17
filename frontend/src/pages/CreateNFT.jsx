@@ -57,7 +57,7 @@ const DYNAMIC_SIZES = [
   { value: 10000, label: '10,000 NFTs', feeEth: '0.05' }
 ];
 
-/** Whole BOING amounts for Boing L1 testnet (native currency uses 0 decimals in app config). */
+/** BOING display amounts for Boing L1 testnet (human BOING, not base units). */
 const NFT_DYNAMIC_FEES_BOING = {
   100: '1',
   500: '2',

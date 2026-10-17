@@ -10,14 +10,7 @@ import { BOING_NATIVE_L1_CHAIN_ID, getNetworkByChainId } from '../config/network
 import { fetchBoingNativeAccount } from '../services/boingNativeVm';
 import { getBoingObserverAccountUrl, BOING_OBSERVER_BASE_URL } from '../config/boingExplorerUrls';
 import { isBoingNativeAccountIdHex } from '../utils/boingWalletDiscovery';
-
-function formatBoingAmount(raw) {
-  if (raw == null) return '—';
-  const s = String(raw);
-  if (!/^\d+$/.test(s)) return s;
-  if (s === '0') return '0';
-  return s.replace(/^0+/, '') || '0';
-}
+import { formatNativeLedger } from '../utils/boingNativeAmount';
 
 function shortHex(hex) {
   if (!hex || typeof hex !== 'string') return '—';
@@ -49,6 +42,8 @@ export default function PortfolioBoingContent() {
         pendingUnbond: acc?.pending_unbond != null ? String(acc.pending_unbond) : null,
         unbondUnlockHeight:
           acc?.unbond_unlock_height != null ? Number(acc.unbond_unlock_height) : null,
+        // Ledger decimals of the amounts: 18 (base units) from the 18-decimals switch, 0 before / on old nodes.
+        decimals: typeof acc?.decimals === 'number' ? acc.decimals : 0,
       });
     } catch (err) {
       console.error('Boing portfolio fetch error:', err);
@@ -203,10 +198,10 @@ export default function PortfolioBoingContent() {
                   BOING balance
                 </h2>
                 <p className="text-2xl font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
-                  {formatBoingAmount(snapshot?.balance)} <span className="text-base font-medium">BOING</span>
+                  {formatNativeLedger(snapshot?.balance, snapshot?.decimals ?? 0)} <span className="text-base font-medium">BOING</span>
                 </p>
                 <p className="text-xs mt-2" style={{ color: 'var(--text-tertiary)' }}>
-                  Whole units (0 decimals on L1 wallet display).
+                  1 BOING = 10^18 base units (18 decimals).
                 </p>
               </div>
               <div className="rounded-xl border p-6" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
@@ -214,12 +209,12 @@ export default function PortfolioBoingContent() {
                   Staked
                 </h2>
                 <p className="text-2xl font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
-                  {formatBoingAmount(snapshot?.stake)} <span className="text-base font-medium">BOING</span>
+                  {formatNativeLedger(snapshot?.stake, snapshot?.decimals ?? 0)} <span className="text-base font-medium">BOING</span>
                 </p>
                 <p className="text-xs mt-2" style={{ color: 'var(--text-tertiary)' }}>
                   Nonce {snapshot?.nonce ?? '—'}
                   {snapshot?.pendingUnbond && Number(snapshot.pendingUnbond) > 0
-                    ? ` · pending unbond ${formatBoingAmount(snapshot.pendingUnbond)}`
+                    ? ` · pending unbond ${formatNativeLedger(snapshot.pendingUnbond, snapshot?.decimals ?? 0)}`
                     : ''}
                 </p>
               </div>
