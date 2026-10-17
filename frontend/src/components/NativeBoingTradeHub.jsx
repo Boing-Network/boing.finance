@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import NativeAmmSwapPanel from './NativeAmmSwapPanel';
-import NativeCustodySwapPanel from './NativeCustodySwapPanel';
+import BoingSwapCard from './BoingSwapCard';
 import NativeAmmLpVaultPanel from './NativeAmmLpVaultPanel';
 import NativeLpVaultV2Panel from './NativeLpVaultV2Panel';
 import NativeLiquidityPositionsPanel from './NativeLiquidityPositionsPanel';
@@ -13,18 +13,21 @@ import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 
-const VALID_TAB_IDS = new Set(['swap', 'pools', 'route', 'liquidity']);
+const VALID_TAB_IDS = new Set(['swap', 'pools', 'liquidity', 'advanced']);
 
+/** Old deep links (`nativeTradeTab=route`) land on Advanced, where Smart route now lives. */
 function parseTab(raw) {
   const t = (raw || '').trim().toLowerCase();
+  if (t === 'route') return 'advanced';
   return VALID_TAB_IDS.has(t) ? t : null;
 }
 
+/** Swap is the one simple card; readiness, legacy ledger pool, smart route and indexer settings sit in Advanced. */
 const TABS = [
   { id: 'swap', label: 'Swap' },
   { id: 'pools', label: 'Pools' },
-  { id: 'route', label: 'Smart route' },
   { id: 'liquidity', label: 'Your liquidity' },
+  { id: 'advanced', label: 'Advanced' },
 ];
 
 /**
@@ -60,13 +63,13 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
       tokenIn: (tin || '').trim(),
       tokenOut: (tout || '').trim(),
     });
-    setTab('route');
+    setTab('swap');
     setSearchParams(
       (prev) => {
         const n = new URLSearchParams(prev);
         n.delete('nativeTokenIn');
         n.delete('nativeTokenOut');
-        n.set('nativeTradeTab', 'route');
+        n.set('nativeTradeTab', 'swap');
         return n;
       },
       { replace: true }
@@ -112,7 +115,8 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
       tokenIn: (tokenAHex || '').trim(),
       tokenOut: (tokenBHex || '').trim(),
     });
-    setTabAndUrl('route');
+    // The swap card trades the pair when a custody pool exists; otherwise Advanced > Smart route has the prefill.
+    setTabAndUrl('swap');
   }, [setTabAndUrl]);
 
   const didScrollToTradeHash = useRef(false);
@@ -139,9 +143,6 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
         boxShadow: '0 4px 24px var(--shadow)',
       }}
     >
-      <div className="px-4 pt-4 sm:px-6 sm:pt-5">
-        <BoingL1DexReadinessPanel compact />
-      </div>
       <div
         className="flex flex-nowrap gap-1 p-2 border-b overflow-x-auto overscroll-x-contain"
         style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-secondary)' }}
@@ -172,91 +173,20 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
       </div>
 
       <div className="p-4 sm:p-6" role="tabpanel">
-        {tab === 'swap' && <NativeCustodySwapPanel slippagePercent={slippagePercent} />}
-        {tab === 'swap' &&
-          (loading ? (
-            <p className="text-sm py-6 text-center" style={{ color: 'var(--text-tertiary)' }}>
-              Loading pool…
+        {tab === 'swap' && (
+          <>
+            <BoingSwapCard slippagePercent={slippagePercent} prefill={routePrefill} />
+            <p className="mt-6 text-center text-xs" style={{ color: 'var(--text-tertiary)' }}>
+              Pair not listed?{' '}
+              <button type="button" className="underline" onClick={() => setTabAndUrl('pools')}>Browse pools</button>
+              {' '}or try{' '}
+              <button type="button" className="underline" onClick={() => setTabAndUrl('advanced')}>Advanced</button>
+              {' '}(smart route, legacy pool).
             </p>
-          ) : effectivePoolHex?.trim() ? (
-            <>
-              <NativeAmmSwapPanel slippagePercent={slippagePercent} embedded />
-              <div
-                className="mt-4 pt-4 border-t rounded-b-lg -mx-4 sm:-mx-6 px-4 sm:px-6"
-                style={{ borderColor: 'var(--border-color)' }}
-              >
-                <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-                  Looking for another pair? Open <strong style={{ color: 'var(--text-primary)' }}>Pools</strong>, then
-                  use Smart route when you need a multi-hop path.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setTabAndUrl('pools')}
-                    className="text-sm px-4 py-2.5 min-h-[44px] rounded-xl font-medium border transition hover:opacity-95"
-                    style={{
-                      borderColor: 'rgba(59, 130, 246, 0.45)',
-                      color: 'var(--text-primary)',
-                      backgroundColor: 'var(--bg-secondary)',
-                    }}
-                  >
-                    Browse pools
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setTabAndUrl('route')}
-                    className="text-sm px-4 py-2.5 min-h-[44px] rounded-xl font-medium border transition hover:opacity-95"
-                    style={{
-                      borderColor: 'rgba(59, 130, 246, 0.45)',
-                      color: 'var(--text-primary)',
-                      backgroundColor: 'var(--bg-secondary)',
-                    }}
-                  >
-                    Smart route
-                  </button>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div
-              className="text-sm py-6 rounded-lg border px-4 space-y-3"
-              style={{ borderColor: 'rgba(251, 191, 36, 0.45)', color: 'var(--text-secondary)', backgroundColor: 'rgba(251, 191, 36, 0.06)' }}
-              role="status"
-            >
-              <p>
-                <strong style={{ color: 'var(--text-primary)' }}>Default pool isn&apos;t published yet</strong> on this
-                network. Browse pools, create one, or use Smart route for other pairs.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => setTabAndUrl('pools')}
-                  className="text-sm px-4 py-2.5 min-h-[44px] rounded-xl font-medium border"
-                  style={{ borderColor: 'rgba(59, 130, 246, 0.45)', color: 'var(--text-primary)', backgroundColor: 'var(--bg-secondary)' }}
-                >
-                  Browse pools
-                </button>
-                <a
-                  href="/create-pool"
-                  className="text-sm px-4 py-2.5 min-h-[44px] rounded-xl font-medium border inline-flex items-center"
-                  style={{ borderColor: 'rgba(59, 130, 246, 0.45)', color: 'var(--text-primary)', backgroundColor: 'var(--bg-secondary)' }}
-                >
-                  Create a pool
-                </a>
-              </div>
-            </div>
-          ))}
+          </>
+        )}
         {tab === 'pools' && (
           <NativePoolsDirectoryPanel onTradeThisPair={onTradeThisPair} focusPoolHex={poolsFocusPoolHex} />
-        )}
-        {tab === 'route' && (
-          <NativeDexDirectoryRoutePanel
-            slippagePercent={slippagePercent}
-            embedded
-            prefillKey={routePrefill.key}
-            prefillTokenIn={routePrefill.tokenIn}
-            prefillTokenOut={routePrefill.tokenOut}
-          />
         )}
         {tab === 'liquidity' && (
           <>
@@ -265,7 +195,35 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
             <NativeAmmLpVaultPanel embedded />
           </>
         )}
-        <NativeDexIndexerSettingsStrip />
+        {tab === 'advanced' && (
+          <div className="space-y-6" data-testid="boing-trade-advanced">
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              Developer and power-user tools. Everyday swaps belong on the Swap tab.
+            </p>
+            <BoingL1DexReadinessPanel compact />
+            <section>
+              <h3 className="mb-2 font-semibold" style={{ color: 'var(--text-primary)' }}>Smart route (multi-hop)</h3>
+              <NativeDexDirectoryRoutePanel
+                slippagePercent={slippagePercent}
+                embedded
+                prefillKey={routePrefill.key}
+                prefillTokenIn={routePrefill.tokenIn}
+                prefillTokenOut={routePrefill.tokenOut}
+              />
+            </section>
+            <section>
+              <h3 className="mb-2 font-semibold" style={{ color: 'var(--text-primary)' }}>Legacy ledger pool (v1)</h3>
+              {loading ? (
+                <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>Loading pool…</p>
+              ) : effectivePoolHex?.trim() ? (
+                <NativeAmmSwapPanel slippagePercent={slippagePercent} embedded />
+              ) : (
+                <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>No legacy pool on this network.</p>
+              )}
+            </section>
+            <NativeDexIndexerSettingsStrip />
+          </div>
+        )}
       </div>
     </section>
   );

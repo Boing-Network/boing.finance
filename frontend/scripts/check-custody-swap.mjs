@@ -16,7 +16,7 @@ import {
   getBoingTokenBalance,
   hexToBytes,
   senderHexFromSecretKey,
-  signTransactionInput,
+  signTransactionInputForClient,
   submitSignedTransactionIdempotent,
   transactionIdFromSignedTransactionHex,
 } from 'boing-sdk';
@@ -59,7 +59,7 @@ async function signSimulateSubmit(expressTx, o = {}) {
     calldata: hexToBytes(expressTx.calldata),
     extraAccountsHex: expressTx.access_list.read,
   });
-  const signedHex = await signTransactionInput(tx, secret);
+  const signedHex = await signTransactionInputForClient(client, tx, secret);
   const boingTxIdHex = transactionIdFromSignedTransactionHex(signedHex);
   const sim = await client.simulateTransaction(signedHex);
   if (!sim.success) throw new Error(`simulation failed: ${sim.error}`);

@@ -38,7 +38,7 @@
     "build:staging": "cross-env CI=false REACT_APP_ENV=staging vite build",
     "preview": "vite preview",
     "check:custody-swap": "node scripts/check-custody-swap.mjs",
-    "test": "node scripts/check-evm-capability-wiring.mjs && node scripts/check-evm-lite.mjs && node --test scripts/publish-interface.test.mjs",
+    "test": "node scripts/check-evm-capability-wiring.mjs && node scripts/check-evm-lite.mjs && node --test scripts/publish-interface.test.mjs scripts/boing-swap-quote.test.mjs",
     "check:evm-wiring": "node scripts/check-evm-capability-wiring.mjs",
     "postinstall": "node scripts/postinstall-boing-sdk.mjs",
     "test:e2e": "playwright test",

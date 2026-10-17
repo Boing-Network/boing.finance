@@ -1,5 +1,8 @@
 import { defineConfig } from '@playwright/test';
 
+/** E2E_BASE_URL=https://boing.finance runs the suite against a deployed site (no local build/preview). */
+const remoteBase = process.env.E2E_BASE_URL?.trim();
+
 export default defineConfig({
   testDir: 'e2e',
   fullyParallel: true,
@@ -7,12 +10,14 @@ export default defineConfig({
   workers: 1,
   reporter: 'list',
   use: {
-    baseURL: 'http://127.0.0.1:4173',
+    baseURL: remoteBase || 'http://127.0.0.1:4173',
   },
-  webServer: {
-    command: 'node scripts/build-with-test-pool.mjs && npx vite preview --host 127.0.0.1 --port 4173',
-    url: 'http://127.0.0.1:4173',
-    reuseExistingServer: !process.env.CI,
-    timeout: 240_000,
-  },
+  webServer: remoteBase
+    ? undefined
+    : {
+        command: 'node scripts/build-with-test-pool.mjs && npx vite preview --host 127.0.0.1 --port 4173',
+        url: 'http://127.0.0.1:4173',
+        reuseExistingServer: !process.env.CI,
+        timeout: 240_000,
+      },
 });
