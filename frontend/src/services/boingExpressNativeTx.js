@@ -225,6 +225,17 @@ export async function boingExpressSignTransaction(provider, txObject) {
 }
 
 /**
+ * Sign (only) a `contract_deploy_meta` with the explicit QA-matching `description_hash` placeholder, so the bytes
+ * submitted later match what QA checked. Use when a deploy is chained with follow-up txs signed up front.
+ * @param {{ request: Function }} provider
+ * @param {Record<string, unknown>} txObject
+ * @returns {Promise<string>}
+ */
+export async function boingExpressSignDeployMeta(provider, txObject) {
+  return boingExpressSignTransaction(provider, normalizeContractDeployMetaForSign(txObject));
+}
+
+/**
  * Sign and broadcast. For **`contract_deploy_meta`** (token / NFT / pool wizards), uses **`boing_signTransaction`**
  * then **`boing_submitTransaction`** via the app’s Boing JSON-RPC proxy — avoids wallet **`boing_sendTransaction`**
  * bugs that surface as `Invalid transaction: io error: unexpected end of file` after approval.

@@ -333,7 +333,7 @@ function DeployToken() {
       <P>
         <To to="/deploy-token">Deploy token</To> walks you through four steps: <B>Token basics</B> (name, symbol, supply,
         logo), <B>Network &amp; plan</B>, <B>Security &amp; info</B> and <B>Review &amp; deploy</B>. The service fee for
-        the plan you choose is shown before you confirm.
+        the plan you choose is shown before you confirm; Boing deploys charge no service fee, only the network fee.
       </P>
       <UL>
         <li>
@@ -343,10 +343,13 @@ function DeployToken() {
           <B>Solana:</B> creates an SPL token with your Solana wallet.
         </li>
         <li>
-          <B>Boing:</B> deploys Boing&apos;s secured reference token with Boing Express (whole units). In the security step
-          you can turn on protections such as renouncing minting, freezing, a blacklist, max transaction or max wallet
-          size, anti-bot and anti-whale limits, a pause switch, a timelock or renouncing ownership. The network checks new
-          contracts before it accepts them.
+          <B>Boing:</B> deploys <B>Boing token v2</B> with Boing Express, the same kind of token the Boing swap pools
+          trade. Express asks you to approve two transactions: the deploy, then a one-time mint of the whole supply to
+          your account. Amounts are whole tokens (decimals are 0). After that mint no one can mint more, and there are no
+          owner controls such as freezing, a blacklist, transfer limits, anti-bot or a pause switch, so the security step
+          lists those as not available on Boing. The name and
+          symbol are stored with the deploy: boing.observer shows them right away, and the Boing swap token list and
+          Boing Express list the token once it has a pool. The network checks new contracts before it accepts them.
         </li>
       </UL>
       <P>

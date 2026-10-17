@@ -96,8 +96,8 @@ export function showBoingLaunchDeploySuccessToast(result) {
         </div>
         {celebration ? (
           <p className="text-xs opacity-90" style={{ color: 'var(--text-secondary)' }}>
-            Mempool accepted the tx. boing.observer lists it on the token index after a block includes it. The DEX token
-            directory stays empty until a canonical factory is published.
+            The network accepted the transaction. boing.observer lists it after a block includes it. A new token shows in
+            the swap token list once it has a pool.
           </p>
         ) : deployed ? (
           <a
