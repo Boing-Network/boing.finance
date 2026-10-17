@@ -942,23 +942,47 @@ function ToolsDropdown({ isOpen, onToggle, onClose, onOpenHistory, onOpenDefi101
   const buttonRef = useRef(null);
   const panelRef = useRef(null);
   const [position, setPosition] = useState({ top: 0, right: 0 });
+  // The header mounts two ToolsDropdowns (desktop rail + md tier) that share `isOpen`; the CSS-hidden one
+  // used to treat every click inside the visible panel as an outside click and close it before the click
+  // landed. Only the instance whose gear button is actually rendered is active.
+  const [buttonVisible, setButtonVisible] = useState(false);
+  const active = isOpen && buttonVisible;
 
   useEffect(() => {
-    if (!isOpen || !buttonRef.current) return;
+    if (!isOpen || !buttonRef.current) {
+      setButtonVisible(false);
+      return;
+    }
     const rect = buttonRef.current.getBoundingClientRect();
+    setButtonVisible(rect.width > 0 && rect.height > 0);
     setPosition({ top: rect.bottom + 8, right: Math.max(8, window.innerWidth - rect.right) });
   }, [isOpen]);
 
   useCloseOnPointerOutside(
-    isOpen,
+    active,
     (node) =>
       Boolean(buttonRef.current?.contains(node) || panelRef.current?.contains(node)),
     onClose
   );
 
-  const dropdownContent = isOpen && (
+  useEffect(() => {
+    if (!active) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+        buttonRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [active, onClose]);
+
+  const dropdownContent = active && (
       <div
         ref={panelRef}
+        data-testid="tools-dropdown-panel"
+        role="menu"
+        aria-label="Tools and preferences"
         className="dropdown-menu-glass-solid-nav fixed w-52 rounded-xl z-[120]"
         style={{
           top: position.top,
@@ -975,11 +999,11 @@ function ToolsDropdown({ isOpen, onToggle, onClose, onOpenHistory, onOpenDefi101
             <span className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>Theme</span>
             <ThemeToggle />
           </div>
-          <button onClick={onOpenHistory} className="w-full text-left px-3 py-2.5 text-sm flex items-center gap-3 rounded-lg transition-colors hover:bg-[var(--secondary-bg)]" style={{ color: 'var(--text-secondary)' }}>
+          <button type="button" data-testid="tools-history" onClick={onOpenHistory} className="w-full text-left px-3 py-2.5 text-sm flex items-center gap-3 rounded-lg transition-colors hover:bg-[var(--secondary-bg)]" style={{ color: 'var(--text-secondary)' }}>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             Transaction History
           </button>
-          <button onClick={onOpenDefi101} className="w-full text-left px-3 py-2.5 text-sm flex items-center gap-3 rounded-lg transition-colors hover:bg-[var(--secondary-bg)]" style={{ color: 'var(--text-secondary)' }}>
+          <button type="button" data-testid="tools-defi101" onClick={onOpenDefi101} className="w-full text-left px-3 py-2.5 text-sm flex items-center gap-3 rounded-lg transition-colors hover:bg-[var(--secondary-bg)]" style={{ color: 'var(--text-secondary)' }}>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
             DeFi 101
           </button>
@@ -998,7 +1022,8 @@ function ToolsDropdown({ isOpen, onToggle, onClose, onOpenHistory, onOpenDefi101
         onMouseEnter={(e) => { e.target.style.color = 'var(--text-primary)'; }}
         onMouseLeave={(e) => { e.target.style.color = 'var(--text-secondary)'; }}
         aria-label="Tools and preferences"
-        aria-expanded={isOpen}
+        data-testid="tools-dropdown-button"
+        aria-expanded={active}
         aria-haspopup="true"
         title="Tools"
       >
