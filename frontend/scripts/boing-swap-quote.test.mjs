@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   custodyTokenList,
+  custodyTokensNeedingMetadata,
   formatFee,
   formatRate,
   formatWhole,
@@ -77,4 +78,16 @@ test('spot rate and pro-rata fee display', () => {
   assert.equal(formatRate(1, r), '0.9911');
   assert.equal(formatFee(5n, 30), '0.015');
   assert.equal(formatFee(1000n, 30), '3');
+});
+
+test('tokens with only hex placeholder labels are looked up; real names then win', () => {
+  const NEW = '0x31357854f6371c8bafac0ff20296608d87db532bef06de8066d1fdd32c824b4e';
+  const pools2 = [pool, { ...pool, poolHex: '0x' + '3b'.repeat(32), tokenAHex: NEW, tokenBHex: USDC }];
+  const light = [{ id: NEW, symbol: '0x31357854…824b4e', name: 'Pool token 0x31357854f6' }];
+  assert.deepEqual(custodyTokensNeedingMetadata(pools2, light), [NEW]);
+  const full = [...light, { id: NEW, symbol: 'FV2C', name: 'FinV2Check' }];
+  assert.deepEqual(custodyTokensNeedingMetadata(pools2, full), []);
+  const t = custodyTokenList(pools2, full).find((x) => x.id === NEW);
+  assert.equal(t.symbol, 'FV2C');
+  assert.equal(t.name, 'FinV2Check');
 });

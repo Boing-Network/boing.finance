@@ -37,6 +37,27 @@ export async function loadCustodyPools(client) {
   return discoverBoingCustodyPools(client);
 }
 
+/**
+ * Deploy name / symbol for custody tokens via full `boing_getDexToken` (not light), best effort.
+ * @param {import('boing-sdk').BoingClient} client
+ * @param {string[]} ids
+ * @returns {Promise<Array<{ id: string, symbol: string, name: string }>>}
+ */
+export async function loadCustodyTokenMetadata(client, ids) {
+  const rows = await Promise.all(
+    (ids || []).slice(0, 25).map(async (id) => {
+      try {
+        const r = await client.getDexToken(id);
+        if (!r) return null;
+        return { id: String(r.id || id).toLowerCase(), symbol: String(r.symbol || ''), name: String(r.name || '') };
+      } catch {
+        return null;
+      }
+    }),
+  );
+  return rows.filter(Boolean);
+}
+
 /** Slippage percent (UI, e.g. 0.5) -> bps bigint, clamped to [0, 5000]. */
 export function slippagePercentToBps(pct) {
   const n = Number(pct);
