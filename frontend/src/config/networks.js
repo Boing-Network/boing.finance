@@ -170,7 +170,8 @@ export const NETWORKS = {
     ].filter(Boolean),
     explorer: 'https://boing.observer',
     chainId: 6913,
-    nativeCurrency: { name: 'Boing', symbol: 'BOING', decimals: 0 },
+    // 1 BOING = 10^18 base units (testnet 6913 switched at block 1050; boing.network NATIVE-DENOMINATION.md).
+    nativeCurrency: { name: 'Boing', symbol: 'BOING', decimals: 18 },
     blockTime: 2,
     gasLimit: 30000000,
     isTestnet: true,
