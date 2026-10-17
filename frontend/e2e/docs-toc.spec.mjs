@@ -1,138 +1,178 @@
 import { test, expect } from '@playwright/test';
 
-/** Docs page: sticky table of contents, scrollspy, click-to-scroll with the header offset, mobile layout. */
+/** Docs page: one section at a time, sticky table of contents, URL-driven selection, prev/next, mobile list. */
 
 const box = (loc) => loc.boundingBox();
 const headerBottom = (page) =>
   page.evaluate(() => Math.round(document.querySelector('header.site-header').getBoundingClientRect().bottom));
-const sectionTop = (page, id) =>
-  page.evaluate((i) => Math.round(document.getElementById(`doc-${i}`).getBoundingClientRect().top), id);
+const contentTop = (page) =>
+  page.evaluate(() => Math.round(document.querySelector('section[id^="doc-"]').parentElement.getBoundingClientRect().top));
+const sections = (page) => page.locator('section[id^="doc-"]');
+
+/** Exactly one section is rendered, it is `id`, and its TOC entry is the only highlighted one. */
+async function expectOnly(page, id, prefix = 'docs-toc') {
+  await expect(sections(page)).toHaveCount(1);
+  await expect(page.getByTestId(`docs-section-${id}`)).toBeVisible();
+  if (prefix === 'docs-toc') {
+    await expect(page.getByTestId(`docs-toc-${id}`)).toHaveAttribute('aria-current', 'location');
+    await expect(page.locator('[data-testid^="docs-toc-"][aria-current="location"]')).toHaveCount(1);
+  }
+}
+
+/** Top of the content card sits just below the sticky header. */
+async function expectContentAtTop(page) {
+  const hb = await headerBottom(page);
+  await expect
+    .poll(async () => {
+      const t = await contentTop(page);
+      return t >= hb && t <= hb + 40;
+    }, { timeout: 5_000 })
+    .toBe(true);
+}
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('boing_onboarding_completed', 'true'));
 });
 
-test.describe('Docs table of contents (desktop)', () => {
+test.describe('Docs (desktop)', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
-  test('stays in view at the left while scrolling to the bottom, and highlights the last section', async ({ page }) => {
-    await page.goto('/docs?noIntro=1');
-    const toc = page.getByTestId('docs-toc');
-    await expect(toc).toBeVisible({ timeout: 60_000 });
-    await expect(page.getByTestId('docs-section-faq')).toBeAttached();
-    expect(await toc.evaluate((el) => getComputedStyle(el).position)).toBe('sticky');
-
-    const start = await box(toc);
-    const hb = await headerBottom(page);
-
-    // End of the docs content (last section on screen): the whole list is stuck below the header.
-    await page.evaluate(() => {
-      const el = document.getElementById('doc-faq');
-      window.scrollTo(0, el.getBoundingClientRect().bottom + window.scrollY - window.innerHeight + 40);
-    });
-    await page.waitForTimeout(400);
-    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(2000);
-    const mid = await box(toc);
-    expect(await headerBottom(page)).toBe(hb); // sticky header still on screen
-    expect(mid.x).toBeLessThan(100);
-    expect(Math.abs(mid.x - start.x)).toBeLessThan(2);
-    expect(mid.y).toBeGreaterThanOrEqual(hb); // below the header, not hidden under it
-    expect(mid.y + mid.height).toBeLessThanOrEqual(900);
-
-    // Very bottom of the page (footer showing): still on screen at the left.
-    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-    await page.waitForTimeout(400);
-    await expect(toc).toBeInViewport({ ratio: 0.3 });
-    expect((await box(toc)).x).toBeLessThan(100);
-    await expect(page.getByTestId('docs-toc-faq')).toHaveAttribute('aria-current', 'location');
-  });
-
-  test('clicking an entry scrolls its section to just below the header and marks it active', async ({ page }) => {
+  test('shows only the selected section; clicking swaps it, updates the URL and scrolls to the content top', async ({ page }) => {
     await page.goto('/docs?noIntro=1');
     await expect(page.getByTestId('docs-toc')).toBeVisible({ timeout: 60_000 });
-    for (const id of ['liquidity', 'names', 'swap']) {
+    await expectOnly(page, 'overview');
+    expect(await page.evaluate(() => window.scrollY)).toBe(0); // no jump on a plain visit
+
+    for (const id of ['liquidity', 'names', 'faq', 'swap']) {
       await page.getByTestId(`docs-toc-${id}`).click();
-      await expect(page.getByTestId(`docs-toc-${id}`)).toHaveAttribute('aria-current', 'location');
-      const hb = await headerBottom(page);
-      await expect
-        .poll(async () => {
-          const top = await sectionTop(page, id);
-          return top >= hb && top <= hb + 40;
-        }, { timeout: 5_000 })
-        .toBe(true);
-      await expect(page).toHaveURL(new RegExp(`section=${id}`));
+      await expectOnly(page, id);
+      await expect(page).toHaveURL(new RegExp(`[?&]section=${id}(&|$)`));
+      await expectContentAtTop(page);
     }
   });
 
-  test('scrollspy follows manual scrolling', async ({ page }) => {
-    await page.goto('/docs?noIntro=1');
-    await expect(page.getByTestId('docs-toc')).toBeVisible({ timeout: 60_000 });
-    const hb = await headerBottom(page);
-    await page.evaluate(
-      ({ hb: h }) => {
-        const el = document.getElementById('doc-bridge');
-        window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - h - 30);
-      },
-      { hb }
-    );
-    await expect(page.getByTestId('docs-toc-bridge')).toHaveAttribute('aria-current', 'location');
-    await expect(page.locator('[data-testid^="docs-toc-"][aria-current="location"]')).toHaveCount(1);
-  });
-
-  test('a long list scrolls inside the table of contents on short windows', async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 560 });
-    await page.goto('/docs?noIntro=1');
+  test('the TOC stays in view and sticky while scrolling a long section', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 600 });
+    await page.goto('/docs?noIntro=1&section=swap');
     const toc = page.getByTestId('docs-toc');
     await expect(toc).toBeVisible({ timeout: 60_000 });
-    await page.evaluate(() => window.scrollTo(0, 1500));
+    await expectOnly(page, 'swap');
+    expect(await toc.evaluate((el) => getComputedStyle(el).position)).toBe('sticky');
+    const start = await box(toc);
+
+    // Scroll to the end of the section: bottom of the content card at the bottom of the window.
+    const contentHeight = await page.evaluate(() => document.querySelector('section[id^="doc-"]').parentElement.offsetHeight);
+    expect(contentHeight).toBeGreaterThan(900); // longer than 1.5 windows
+    await page.evaluate(() => {
+      const card = document.querySelector('section[id^="doc-"]').parentElement;
+      window.scrollTo(0, card.getBoundingClientRect().bottom + window.scrollY - window.innerHeight);
+    });
     await page.waitForTimeout(300);
-    const t = await box(toc);
+    await expect(page.getByTestId('docs-next')).toBeInViewport();
+    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(300);
     const hb = await headerBottom(page);
-    expect(t.y).toBeGreaterThanOrEqual(hb);
-    expect(t.y + t.height).toBeLessThanOrEqual(560);
+    expect(hb).toBeGreaterThan(0); // sticky header still on screen
+    const end = await box(toc);
+    expect(end.x).toBeLessThan(100);
+    expect(Math.abs(end.x - start.x)).toBeLessThan(2);
+    expect(end.y).toBeGreaterThanOrEqual(hb);
+    expect(end.y + end.height).toBeLessThanOrEqual(600);
+
+    // The list scrolls inside the TOC on a short window, and the active entry is kept visible.
     const list = toc.getByRole('navigation', { name: 'Documentation sections' });
     expect(await list.evaluate((el) => getComputedStyle(el).overflowY)).toBe('auto');
     expect(await list.evaluate((el) => el.scrollHeight > el.clientHeight)).toBe(true);
-    // Jumping to the last section keeps its entry visible inside the list.
     await page.getByTestId('docs-toc-faq').click();
+    await expectOnly(page, 'faq');
     await expect(page.getByTestId('docs-toc-faq')).toBeInViewport();
-    expect(hb).toBeGreaterThan(0);
   });
 
-  test('deep links (current and old section ids) open the right section', async ({ page }) => {
+  test('deep links and old section ids open the right section', async ({ page }) => {
     await page.goto('/docs?noIntro=1&section=bridge');
-    await expect(page.getByTestId('docs-toc-bridge')).toHaveAttribute('aria-current', 'location', { timeout: 60_000 });
-    const hb = await headerBottom(page);
-    await expect.poll(() => sectionTop(page, 'bridge')).toBeLessThanOrEqual(hb + 40);
-    await page.goto('/docs?noIntro=1&section=trading');
-    await expect(page.getByTestId('docs-toc-swap')).toHaveAttribute('aria-current', 'location', { timeout: 60_000 });
+    await expect(page.getByTestId('docs-toc')).toBeVisible({ timeout: 60_000 });
+    await expectOnly(page, 'bridge');
+    await expectContentAtTop(page);
+
+    for (const [legacy, id] of [['trading', 'swap'], ['contracts', 'deploy-token'], ['analytics', 'markets'], ['api', 'developers']]) {
+      await page.goto('about:blank');
+      await page.goto(`/docs?noIntro=1&section=${legacy}`);
+      await expectOnly(page, id);
+      await expect(page).toHaveURL(new RegExp(`[?&]section=${id}(&|$)`)); // alias rewritten in place
+    }
+    await page.goto('about:blank');
+    await page.goto('/docs?noIntro=1&section=does-not-exist');
+    await expectOnly(page, 'overview');
   });
 
-  test('every table-of-contents entry has a matching section', async ({ page }) => {
+  test('browser back and forward move between sections', async ({ page }) => {
     await page.goto('/docs?noIntro=1');
     await expect(page.getByTestId('docs-toc')).toBeVisible({ timeout: 60_000 });
-    const tocIds = await page.locator('[data-testid="docs-toc"] [data-toc-id]').evaluateAll((els) => els.map((e) => e.dataset.tocId));
-    const sectionIds = await page.locator('section[id^="doc-"]').evaluateAll((els) => els.map((e) => e.id.slice(4)));
-    expect(tocIds).toEqual(sectionIds);
-    expect(tocIds.length).toBeGreaterThan(10);
+    await page.getByTestId('docs-toc-bridge').click();
+    await expectOnly(page, 'bridge');
+    await page.getByTestId('docs-toc-names').click();
+    await expectOnly(page, 'names');
+
+    await page.goBack();
+    await expectOnly(page, 'bridge');
+    await expect(page).toHaveURL(/section=bridge/);
+    await page.goBack();
+    await expectOnly(page, 'overview');
+    await page.goForward();
+    await expectOnly(page, 'bridge');
+    await page.goForward();
+    await expectOnly(page, 'names');
+    await expectContentAtTop(page);
+  });
+
+  test('previous / next buttons walk the sections in TOC order', async ({ page }) => {
+    await page.goto('/docs?noIntro=1');
+    await expect(page.getByTestId('docs-toc')).toBeVisible({ timeout: 60_000 });
+    const order = await page.locator('[data-testid="docs-toc"] [data-toc-id]').evaluateAll((els) => els.map((e) => e.dataset.tocId));
+    expect(order.length).toBeGreaterThan(10);
+
+    await expect(page.getByTestId('docs-prev')).toHaveCount(0); // first section
+    await expect(page.getByTestId('docs-next')).toContainText(await page.getByTestId(`docs-toc-${order[1]}`).innerText());
+    await page.getByTestId('docs-next').click();
+    await expectOnly(page, order[1]);
+    await expectContentAtTop(page);
+    await page.getByTestId('docs-next').click();
+    await expectOnly(page, order[2]);
+    await page.getByTestId('docs-prev').click();
+    await expectOnly(page, order[1]);
+
+    await page.goto(`/docs?noIntro=1&section=${order[order.length - 1]}`);
+    await expectOnly(page, order[order.length - 1]);
+    await expect(page.getByTestId('docs-next')).toHaveCount(0); // last section
+    await page.getByTestId('docs-prev').click();
+    await expectOnly(page, order[order.length - 2]);
   });
 });
 
-test.describe('Docs table of contents (mobile)', () => {
+test.describe('Docs (mobile)', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
-  test('collapsible, non-sticky contents that jump to a section', async ({ page }) => {
+  test('collapsible contents that collapse after a pick and show only that section', async ({ page }) => {
     await page.goto('/docs?noIntro=1');
     const toggle = page.getByTestId('docs-toc-mobile-toggle');
     await expect(toggle).toBeVisible({ timeout: 60_000 });
     await expect(page.getByTestId('docs-toc')).toBeHidden();
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
     await toggle.click();
-    await page.getByTestId('docs-toc-mobile-faq').click();
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    await page.getByTestId('docs-toc-mobile-names').click();
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    const hb = await headerBottom(page);
-    await expect.poll(() => sectionTop(page, 'faq')).toBeLessThanOrEqual(hb + 40);
-    // The collapsed contents box scrolled away with the page (not sticky).
-    expect((await box(toggle)).y).toBeLessThan(0);
+    await expect(page.getByTestId('docs-toc-mobile-names')).toHaveCount(0);
+    await expectOnly(page, 'names', 'mobile');
+    await expect(page).toHaveURL(/section=names/);
+    await expect(toggle).toContainText('.boing names');
+    await expectContentAtTop(page);
+    // Not sticky: the collapsed contents box scrolled up under the header, above the content.
+    const tb = await box(toggle);
+    expect(tb.y + tb.height).toBeLessThanOrEqual((await headerBottom(page)) + 1);
+
+    await page.getByTestId('docs-next').click();
+    await expect(sections(page)).toHaveCount(1);
+    await expect(page).not.toHaveURL(/section=names/);
   });
 });
