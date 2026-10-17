@@ -11,10 +11,12 @@ import {
   CUSTODY_ROUTER_HEX,
   executeCustodySwap,
   loadCustodyPools,
+  loadCustodyTokenMetadata,
   planCustodySwap,
 } from '../services/nativeDexCustodySwap';
 import {
   custodyTokenList,
+  custodyTokensNeedingMetadata,
   formatFee,
   formatRate,
   formatWhole,
@@ -161,7 +163,27 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
     loadPools();
   }, [loadPools]);
 
-  const tokens = useMemo(() => custodyTokenList(pools || [], indexerPickerTokens), [pools, indexerPickerTokens]);
+  // Tokens without a label in the (light) directory, e.g. a freshly deployed token: fetch their deploy metadata.
+  const [extraTokenMeta, setExtraTokenMeta] = useState([]);
+  const missingMetaKey = useMemo(
+    () => custodyTokensNeedingMetadata(pools || [], indexerPickerTokens).sort().join(','),
+    [pools, indexerPickerTokens],
+  );
+  useEffect(() => {
+    if (!missingMetaKey) return undefined;
+    let cancelled = false;
+    loadCustodyTokenMetadata(client, missingMetaKey.split(',')).then((rows) => {
+      if (!cancelled && rows.length) setExtraTokenMeta(rows);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [client, missingMetaKey]);
+
+  const tokens = useMemo(
+    () => custodyTokenList(pools || [], [...(indexerPickerTokens || []), ...extraTokenMeta]),
+    [pools, indexerPickerTokens, extraTokenMeta],
+  );
 
   // Default pair: first pool's tokens (USDC -> tBOING on testnet); deep-link prefill wins when tradable.
   useEffect(() => {

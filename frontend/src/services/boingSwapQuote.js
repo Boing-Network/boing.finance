@@ -42,6 +42,28 @@ export function custodyTokenList(pools, directory = []) {
 }
 
 /**
+ * Pool tokens that would still be labelled "Token" / "Unlisted token" (no known label, no real directory name).
+ * The card looks these up with a full `boing_getDexToken` (the light directory only returns hex placeholders).
+ * @param {Array<{ tokenAHex: string, tokenBHex: string }>} pools
+ * @param {Array<{ id: string, symbol?: string, name?: string }>} directory
+ * @returns {string[]}
+ */
+export function custodyTokensNeedingMetadata(pools, directory = []) {
+  const byId = new Map();
+  for (const d of directory || []) if (d?.id) byId.set(norm(d.id), d);
+  const out = new Set();
+  for (const p of pools || []) {
+    for (const hex of [p.tokenAHex, p.tokenBHex]) {
+      const id = norm(hex);
+      if (!id || KNOWN_BOING_TOKENS[id]) continue;
+      const d = byId.get(id);
+      if (!cleanLabel(d?.symbol)) out.add(id);
+    }
+  }
+  return [...out];
+}
+
+/**
  * Constant-product quote matching the custody pools (v7+ fee-on-input, all floors, whole units):
  * inAfterFee = floor(in * (10000 - fee) / 10000); out = floor(rOut * inAfterFee / (rIn + inAfterFee)).
  * Price impact is measured against the fee-adjusted spot price, so whole-unit rounding loss on tiny trades shows up.
