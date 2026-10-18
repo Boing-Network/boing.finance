@@ -230,12 +230,14 @@ export function minReceived(amountOut, slippagePercent) {
  * Primary button: one of connect / enter_amount / no_route / insufficient / approve_swap / swap / busy.
  * @returns {{ kind: string, label: string, disabled: boolean }}
  */
-export function swapButtonState({ connected, wrongNetwork, amountIn, balance, hasRoute, needsApproval, busyLabel, symbolIn }) {
+export function swapButtonState({ connected, wrongNetwork, amountIn, balance, hasRoute, needsApproval, busyLabel, symbolIn, walletNeedsUpdate = false }) {
   if (busyLabel) return { kind: 'busy', label: busyLabel, disabled: true };
   if (!connected) return { kind: 'connect', label: 'Connect wallet', disabled: false };
   if (wrongNetwork) return { kind: 'wrong_network', label: 'Switch to Boing testnet', disabled: true };
   if (!amountIn) return { kind: 'enter_amount', label: 'Enter amount', disabled: true };
   if (!hasRoute) return { kind: 'no_route', label: 'No route for this pair', disabled: true };
+  // Paying with BOING sends it with the wrap call, which older Boing Express versions cannot sign.
+  if (walletNeedsUpdate) return { kind: 'update_wallet', label: `Update Boing Express to swap ${symbolIn || 'BOING'}`, disabled: true };
   if (balance != null && amountIn > balance) return { kind: 'insufficient', label: `Insufficient ${symbolIn} balance`, disabled: true };
   if (needsApproval) return { kind: 'approve_swap', label: `Approve ${symbolIn} & swap`, disabled: false };
   return { kind: 'swap', label: 'Swap', disabled: false };

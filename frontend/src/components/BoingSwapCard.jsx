@@ -38,6 +38,8 @@ import {
 } from '../services/boingSwapQuote';
 import { getWindowBoingProvider, boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
+import { useWalletNativeValue } from '../hooks/useWalletNativeValue';
+import { NATIVE_VALUE_MIN_EXPRESS_VERSION } from '../services/boingWalletNativeValue';
 
 const SLIPPAGE_KEY = 'boingSwapSlippagePercent';
 const SLIPPAGE_PRESETS = [0.1, 0.5, 1];
@@ -336,9 +338,18 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
   const balanceIn = tokenIn ? balances[tokenIn.id] : null;
   const balanceOut = tokenOut ? balances[tokenOut.id] : null;
 
+  // BOING in = BOING sent with the wBOING deposit: needs a wallet that signs call values (Express 0.1.19+).
+  const expressProvider = useMemo(
+    () => (connected && walletType === 'boingExpress' ? pickExpressProvider(getWalletProvider) : null),
+    [connected, walletType, getWalletProvider]
+  );
+  const nativeValue = useWalletNativeValue(expressProvider, Boolean(expressProvider));
+  const walletNeedsUpdate = Boolean(nativeRoute && tokenIn?.native && nativeValue && !nativeValue.supported);
+
   const button = swapButtonState({
     connected,
     wrongNetwork,
+    walletNeedsUpdate,
     amountIn,
     balance: balanceIn ?? null,
     hasRoute: Boolean(route?.pool),
@@ -646,6 +657,13 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
         <p className="mt-2 text-center text-xs" style={muted} data-testid="swap-native-note">
           One confirmation in Boing Express:{' '}
           {tokenIn?.native ? 'wraps your BOING, approves and swaps' : 'approves, swaps and unwraps to BOING'} in a single transaction.
+        </p>
+      )}
+      {button.kind === 'update_wallet' && (
+        <p className="mt-2 text-center text-xs" style={{ color: 'var(--text-secondary)' }} data-testid="swap-update-wallet">
+          Swapping BOING sends it with the wrap step, which needs Boing Express {NATIVE_VALUE_MIN_EXPRESS_VERSION} or newer
+          {nativeValue?.version ? ` (yours: ${nativeValue.version})` : ' (yours is older)'}. Update Boing Express, or reload the unpacked
+          extension, then refresh this page. Selling tokens for BOING works with your current version.
         </p>
       )}
       {button.kind === 'approve_swap' && (

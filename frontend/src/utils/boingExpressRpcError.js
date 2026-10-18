@@ -3,6 +3,7 @@
  * Delegates to `boing-sdk` `explainBoingRpcError` when a numeric RPC `code` is present; keeps a few wallet UX tweaks.
  */
 import { BoingRpcError, explainBoingRpcError, mapInjectedProviderErrorToUiMessage } from 'boing-sdk';
+import { NATIVE_VALUE_WALLET_ERROR_CODE, explainContractRevert } from '../services/boingWalletNativeValue.js';
 
 /**
  * @param {unknown} raw
@@ -31,6 +32,11 @@ export function formatBoingExpressRpcError(e) {
     if (code === 4001) {
       return 'Cancelled in your wallet.';
     }
+    if (code === NATIVE_VALUE_WALLET_ERROR_CODE) return msg;
+    if (typeof err.humanMessage === 'string' && err.humanMessage) return err.humanMessage;
+    // The VM's generic revert ("Invalid jump destination"): say what it means instead.
+    const revert = explainContractRevert(msg, err);
+    if (revert) return revert;
     if (code === -32016 || /rate limit/i.test(msg)) {
       return 'Rate limited — wait a minute and try again.';
     }

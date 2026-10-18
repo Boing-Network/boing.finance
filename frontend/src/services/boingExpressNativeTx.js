@@ -17,6 +17,13 @@ import {
   waitForBoingAccountNonceAtLeast,
   waitForBoingTxReceipt,
 } from './boingDeployReceiptFollowup';
+import {
+  explainContractRevert,
+  expressTxValueCalls,
+  nativeValueWalletError,
+  signedTxCarriesValues,
+  walletNativeValueSupport,
+} from './boingWalletNativeValue';
 
 /**
  * @param {string} addr
@@ -345,6 +352,7 @@ export async function boingExpressContractCallSignSimulateUntilOk(provider, txOb
   const initialWrite = Array.isArray(base.access_list?.write) ? [...base.access_list.write] : [];
   let read = initialRead;
   let write = initialWrite;
+  const valueCalls = expressTxValueCalls(base);
 
   let lastSim = null;
   for (let attempt = 0; attempt < max; attempt += 1) {
@@ -353,6 +361,10 @@ export async function boingExpressContractCallSignSimulateUntilOk(provider, txOb
       access_list: { read, write },
     };
     const signedHex = await boingExpressSignTransaction(provider, fullTx);
+    // Old wallets sign BOING-carrying calls without the value; never simulate / submit such a tx.
+    if (valueCalls.length && !signedTxCarriesValues(signedHex, valueCalls)) {
+      throw nativeValueWalletError('signed transaction is missing the BOING value');
+    }
     lastSim = await simulateBoingSignedTransaction(signedHex);
 
     if (lastSim?.success) {
@@ -370,6 +382,10 @@ export async function boingExpressContractCallSignSimulateUntilOk(provider, txOb
     const e = new Error(errMsg);
     e.simulation = lastSim;
     e.attempt = attempt;
+    e.valueStepIndexes = valueCalls.filter((c) => c.index != null).map((c) => c.index);
+    e.singleCallValue = valueCalls.some((c) => c.index == null);
+    const human = explainContractRevert(errMsg, e);
+    if (human) e.humanMessage = human;
     throw e;
   }
 
@@ -402,6 +418,13 @@ export async function boingExpressContractCallSignSimulateSubmit(provider, txObj
   const waitForInclusion = options.waitForInclusion === true;
   const retryOnInvalidNonce = options.retryOnInvalidNonce !== false;
   const maxAttempts = retryOnInvalidNonce ? 2 : 1;
+
+  // BOING sent with a contract call (wrap / native liquidity) needs Boing Express 0.1.19+: refuse up front
+  // instead of letting an older wallet sign the call without its value.
+  if (expressTxValueCalls(txObject).length) {
+    const support = await walletNativeValueSupport(provider);
+    if (!support.supported) throw nativeValueWalletError(`wallet ${support.version || support.source} lacks nativeValue`);
+  }
 
   let lastErr = null;
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
