@@ -9,6 +9,11 @@ import NativeDexDirectoryRoutePanel from './NativeDexDirectoryRoutePanel';
 import NativeDexIndexerSettingsStrip from './NativeDexIndexerSettingsStrip';
 import BoingL1DexReadinessPanel from './BoingL1DexReadinessPanel';
 import NativePoolsDirectoryPanel from './NativePoolsDirectoryPanel';
+import BoingPoolsTab from './BoingPoolsTab';
+import BoingYourLiquidityTab from './BoingYourLiquidityTab';
+import { useBoingPools } from '../hooks/useBoingPools';
+import { CUSTODY_ROUTER_HEX } from '../services/nativeDexCustodySwap';
+import toast from 'react-hot-toast';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
@@ -30,6 +35,49 @@ const TABS = [
   { id: 'advanced', label: 'Advanced' },
 ];
 
+function CopyChip({ label, value }) {
+  if (!value || !/^0x[0-9a-f]{64}$/i.test(String(value))) return null;
+  const v = String(value);
+  return (
+    <button
+      type="button"
+      className="inline-flex items-center gap-2 rounded-lg border px-2 py-1 text-xs"
+      style={{ borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}
+      title={v}
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(v);
+          toast.success(`${label} copied`);
+        } catch {
+          toast.error('Could not copy');
+        }
+      }}
+    >
+      <span>{label}</span>
+      <code className="font-mono">{`${v.slice(0, 8)}…${v.slice(-6)}`}</code>
+      <span aria-hidden>⧉</span>
+    </button>
+  );
+}
+
+/** One Advanced section: title, one-line description, optional copy chips, then the tool. */
+function AdvSection({ id, title, description, copies = [], children }) {
+  return (
+    <section className="rounded-2xl border p-4" style={{ borderColor: 'var(--border-color)' }} data-testid={`advanced-${id}`}>
+      <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>{title}</h3>
+      <p className="mt-1 text-sm" style={{ color: 'var(--text-tertiary)' }}>{description}</p>
+      {copies.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {copies.map(([l, v]) => (
+            <CopyChip key={l} label={l} value={v} />
+          ))}
+        </div>
+      )}
+      <div className="mt-3">{children}</div>
+    </section>
+  );
+}
+
 /**
  * Boing L1 trading surface: swap, pool directory, routing, and LP positions (Uniswap-style tabs).
  * Deep link: `/swap?nativeTradeTab=route&nativeTokenIn=0x…&nativeTokenOut=0x…#boing-native-trade`
@@ -38,8 +86,11 @@ const TABS = [
  * @param {{ slippagePercent?: number }} props
  */
 export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
-  const { chainId } = useWallet();
-  const { effectivePoolHex, loading } = useBoingNativeDexIntegration();
+  const { chainId, account, isConnected } = useWallet();
+  const { effectivePoolHex, effectiveFactoryHex, loading } = useBoingNativeDexIntegration();
+  const pools = useBoingPools(isConnected ? account : null);
+  const [addFor, setAddFor] = useState(/** @type {any} */ (null));
+  const clearAddFor = useCallback(() => setAddFor(null), []);
   const [searchParams, setSearchParams] = useSearchParams();
   const [tab, setTab] = useState(() => parseTab(searchParams.get('nativeTradeTab')) || 'swap');
   const routePrefillSeq = useRef(0);
@@ -186,23 +237,35 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
           </>
         )}
         {tab === 'pools' && (
-          <NativePoolsDirectoryPanel onTradeThisPair={onTradeThisPair} focusPoolHex={poolsFocusPoolHex} />
+          <BoingPoolsTab
+            key={poolsFocusPoolHex || 'pools'}
+            pools={pools}
+            initialQuery={poolsFocusPoolHex}
+            onSwap={(c) => onTradeThisPair(c.tokenA.id, c.tokenB.id)}
+            onAddLiquidity={(c) => {
+              setAddFor(c);
+              setTabAndUrl('liquidity');
+            }}
+          />
         )}
-        {tab === 'liquidity' && (
-          <>
-            <NativeLiquidityPositionsPanel />
-            <NativeLpVaultV2Panel slippagePercent={slippagePercent} />
-            <NativeAmmLpVaultPanel embedded />
-          </>
-        )}
+        {tab === 'liquidity' && <BoingYourLiquidityTab pools={pools} addFor={addFor} onAddForConsumed={clearAddFor} />}
         {tab === 'advanced' && (
-          <div className="space-y-6" data-testid="boing-trade-advanced">
+          <div className="space-y-4" data-testid="boing-trade-advanced">
             <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Developer and power-user tools. Everyday swaps belong on the Swap tab.
+              Developer and power-user tools. Everyday swaps and liquidity live on the other tabs.
             </p>
-            <BoingL1DexReadinessPanel compact />
-            <section>
-              <h3 className="mb-2 font-semibold" style={{ color: 'var(--text-primary)' }}>Smart route (multi-hop)</h3>
+            <AdvSection
+              id="contracts"
+              title="Pool contracts & factory"
+              description="Every pool registered with the factory, pair count, reserves chart and developer stats."
+              copies={[
+                ['Factory', effectiveFactoryHex],
+                ['Swap router', CUSTODY_ROUTER_HEX],
+              ]}
+            >
+              <NativePoolsDirectoryPanel onTradeThisPair={onTradeThisPair} focusPoolHex={poolsFocusPoolHex} />
+            </AdvSection>
+            <AdvSection id="routing" title="Smart routing" description="Multi-hop quotes across several pools when no direct pair exists.">
               <NativeDexDirectoryRoutePanel
                 slippagePercent={slippagePercent}
                 embedded
@@ -210,18 +273,32 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
                 prefillTokenIn={routePrefill.tokenIn}
                 prefillTokenOut={routePrefill.tokenOut}
               />
-            </section>
-            <section>
-              <h3 className="mb-2 font-semibold" style={{ color: 'var(--text-primary)' }}>Legacy ledger pool (v1)</h3>
+            </AdvSection>
+            <AdvSection
+              id="legacy"
+              title="Legacy pool"
+              description="The original ledger pool (v1) and its LP vaults. Kept for existing positions."
+              copies={[['Legacy pool', effectivePoolHex]]}
+            >
               {loading ? (
                 <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>Loading pool…</p>
               ) : effectivePoolHex?.trim() ? (
-                <NativeAmmSwapPanel slippagePercent={slippagePercent} embedded />
+                <div className="space-y-4">
+                  <NativeAmmSwapPanel slippagePercent={slippagePercent} embedded />
+                  <NativeLiquidityPositionsPanel />
+                  <NativeLpVaultV2Panel slippagePercent={slippagePercent} />
+                  <NativeAmmLpVaultPanel embedded />
+                </div>
               ) : (
                 <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>No legacy pool on this network.</p>
               )}
-            </section>
-            <NativeDexIndexerSettingsStrip />
+            </AdvSection>
+            <AdvSection id="readiness" title="Network readiness" description="Which DEX contracts the connected network advertises and whether they respond.">
+              <BoingL1DexReadinessPanel compact />
+            </AdvSection>
+            <AdvSection id="indexer" title="Indexer" description="Optional indexer URL used for pool and token lists, history and stats.">
+              <NativeDexIndexerSettingsStrip />
+            </AdvSection>
           </div>
         )}
       </div>
