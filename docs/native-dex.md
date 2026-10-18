@@ -150,6 +150,15 @@ Feature detection: `getFeatureSupport().nativeVmDex` in `frontend/src/config/fea
 
 Key modules: `BoingNativeDexIntegrationContext`, `nativeDexIndexerDirectoryMerge.js`, `boingNativeLpShareBalance.js`, `NativeLiquidityPositionsPanel.jsx`, `nativeVmTokenRegistry.js`, `NativeVmTokenPickerField.jsx`.
 
+### Native BOING (wBOING + v10 pools)
+
+From block 1150 (testnet-v0.1.18) contract calls can carry native BOING (`ContractCallWithValue`, see boing.network `docs/NATIVE-VALUE-AND-WBOING.md`). The simple swap card and Pools / Your liquidity show **BOING** (18 decimals) in place of wBOING (`REACT_APP_BOING_WBOING`, default `0x35555ffee114ba1698dcb6cd5f6d0ce56bf264dc6f386991c00cab22020d9c55`):
+
+- **Swap:** pairs with BOING route to the v10 pool and sign ONE batch: `deposit` (value) -> `approve(pool)` -> `swap`, or `approve(pool)` -> `swap` -> `withdraw_all` (`planNativeBoingSwap` / `planBoingNativeSwap`). Other pairs keep the custody router (v8 / v9) with its approve-then-swap flow.
+- **Add / remove liquidity** on a BOING pool: one batch (`deposit` (value) -> approve both -> `add_liquidity`; `remove_liquidity` -> `withdraw_all`).
+- Amounts are decimal-aware (`parseTokenAmount` / `formatTokenAmount`); rates are per whole token. Max on BOING keeps 1 BOING for fees.
+- Testnet v10 pools: BOING/USDC `0x23e9b02c3ee1600197e1a3d1c08feaa758b967f7ff1513f62991257a3b970069`, BOING/tBOING `0xf53a856083e615e20257707ede47acdd79b63a058733ba9694b2268e141f573a` (factory-registered).
+
 ### First-party indexer (operators)
 
 Same JSON shape as `REACT_APP_BOING_NATIVE_DEX_INDEXER_STATS_URL`:

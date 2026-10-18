@@ -5,7 +5,7 @@ import { getBoingTokenBalance } from 'boing-sdk';
 import { useWallet } from '../contexts/WalletContext';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { boingExpressContractCallSignSimulateSubmit } from '../services/boingExpressNativeTx';
-import { formatWhole, parseWholeAmount } from '../services/boingSwapQuote';
+import { formatTokenAmount, isNativeBoingId, NATIVE_FEE_RESERVE, parseTokenAmount, sanitizeAmountInput, toAmountInput } from '../services/boingSwapQuote';
 import { addLiquidityPreview, pairedAmount, removeLiquidityPreview, withSlippageFloor } from '../services/boingPoolsSimple';
 import { executeAddLiquidity, executeRemoveLiquidity } from '../services/boingLiquidityTx';
 import { getWindowBoingProvider, boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
@@ -39,24 +39,31 @@ function useSigner() {
   };
 }
 
-function AmountRow({ label, symbol, value, onChange, balance, testid, disabled }) {
+function AmountRow({ label, symbol, value, onChange, balance, testid, disabled, decimals = 0, native = false }) {
+  const max = balance == null ? null : native ? (balance > NATIVE_FEE_RESERVE ? balance - NATIVE_FEE_RESERVE : 0n) : balance;
   return (
     <div className="rounded-xl border p-3" style={panel}>
       <div className="mb-1 flex justify-between text-xs" style={muted}>
         <span>{label}</span>
         {balance != null && (
-          <button type="button" className="hover:underline" onClick={() => onChange(String(balance))} disabled={disabled}>
-            Balance: {formatWhole(balance)}
+          <button
+            type="button"
+            className="hover:underline"
+            onClick={() => onChange(max > 0n ? toAmountInput(max, decimals) : '')}
+            disabled={disabled}
+            title={native ? 'Keeps 1 BOING for network fees' : undefined}
+          >
+            Balance: {formatTokenAmount(balance, decimals, 4)}
           </button>
         )}
       </div>
       <div className="flex items-center gap-2">
         <input
-          inputMode="numeric"
+          inputMode={decimals ? 'decimal' : 'numeric'}
           autoComplete="off"
           placeholder="0"
           value={value}
-          onChange={(e) => onChange(e.target.value.replace(/[^\d]/g, ''))}
+          onChange={(e) => onChange(sanitizeAmountInput(e.target.value, decimals))}
           disabled={disabled}
           aria-label={`${symbol} amount`}
           data-testid={testid}
@@ -90,12 +97,19 @@ function AddLiquidityPanel({ pools, initialCard, onDone, onCancel }) {
     [cards, tokA, tokB]
   );
   const flipped = card && norm(card.tokenA.id) !== norm(tokA);
-  const symOf = (id) => tokens.find((t) => norm(t.id) === norm(id))?.symbol || 'Token';
+  const tokOf = (id) => tokens.find((t) => norm(t.id) === norm(id)) || null;
+  const symOf = (id) => tokOf(id)?.symbol || 'Token';
+  const decOf = (id) => tokOf(id)?.decimals ?? 0;
+  const [decA, decB] = [decOf(tokA), decOf(tokB)];
 
   useEffect(() => {
     if (!account) return;
     let off = false;
-    Promise.all([tokA, tokB].filter(Boolean).map(async (t) => [norm(t), await getBoingTokenBalance(client, t, account).catch(() => null)])).then(
+    const balanceOf = async (t) =>
+      isNativeBoingId(t)
+        ? BigInt((await client.getAccount(account))?.balance ?? 0) // native BOING: account balance (base units)
+        : getBoingTokenBalance(client, t, account);
+    Promise.all([tokA, tokB].filter(Boolean).map(async (t) => [norm(t), await balanceOf(t).catch(() => null)])).then(
       (rows) => !off && setBalances(Object.fromEntries(rows))
     );
     return () => {
@@ -107,16 +121,16 @@ function AddLiquidityPanel({ pools, initialCard, onDone, onCancel }) {
   const fill = (which, v) => {
     if (which === 'a') setAmtA(v);
     else setAmtB(v);
-    const n = parseWholeAmount(v);
+    const n = parseTokenAmount(v, which === 'a' ? decA : decB);
     if (!card || card.empty) return;
     const sideInPool = (which === 'a') !== Boolean(flipped) ? 'a' : 'b';
     const other = n ? pairedAmount(card, sideInPool, n) : null;
-    if (which === 'a') setAmtB(other != null ? String(other) : '');
-    else setAmtA(other != null ? String(other) : '');
+    if (which === 'a') setAmtB(other != null ? toAmountInput(other, decB) : '');
+    else setAmtA(other != null ? toAmountInput(other, decA) : '');
   };
 
-  const a = parseWholeAmount(amtA);
-  const b = parseWholeAmount(amtB);
+  const a = parseTokenAmount(amtA, decA);
+  const b = parseTokenAmount(amtB, decB);
   const [poolA, poolB] = flipped ? [b, a] : [a, b];
   const preview = card && poolA && poolB ? addLiquidityPreview(card, poolA, poolB, card.lpBalance) : null;
   const balA = balances[norm(tokA)];
@@ -147,14 +161,18 @@ function AddLiquidityPanel({ pools, initialCard, onDone, onCancel }) {
         signSimulateSubmit: sign,
         onState: (s) =>
           setBusy(
-            s === 'approve_a'
+            s === 'add_native'
+              ? `Confirm in Boing Express (wrap BOING → approve → add)…`
+              : s === 'approve_a'
               ? `Approve ${card.tokenA.symbol} in Boing Express…`
               : s === 'approve_b'
                 ? `Approve ${card.tokenB.symbol} in Boing Express…`
                 : 'Confirm adding liquidity in Boing Express…'
           ),
       });
-      toast.success(`Added ${formatWhole(poolA)} ${card.tokenA.symbol} + ${formatWhole(poolB)} ${card.tokenB.symbol}`);
+      toast.success(
+        `Added ${formatTokenAmount(poolA, card.decimalsA ?? 0)} ${card.tokenA.symbol} + ${formatTokenAmount(poolB, card.decimalsB ?? 0)} ${card.tokenB.symbol}`
+      );
       setAmtA('');
       setAmtB('');
       onDone();
@@ -202,8 +220,8 @@ function AddLiquidityPanel({ pools, initialCard, onDone, onCancel }) {
         </div>
       ) : (
         <>
-          <AmountRow label="You deposit" symbol={symOf(tokA)} value={amtA} onChange={(v) => fill('a', v)} balance={balA} testid="add-amount-a" disabled={Boolean(busy)} />
-          <AmountRow label="And" symbol={symOf(tokB)} value={amtB} onChange={(v) => fill('b', v)} balance={balB} testid="add-amount-b" disabled={Boolean(busy)} />
+          <AmountRow label="You deposit" symbol={symOf(tokA)} value={amtA} onChange={(v) => fill('a', v)} balance={balA} testid="add-amount-a" disabled={Boolean(busy)} decimals={decA} native={isNativeBoingId(tokA)} />
+          <AmountRow label="And" symbol={symOf(tokB)} value={amtB} onChange={(v) => fill('b', v)} balance={balB} testid="add-amount-b" disabled={Boolean(busy)} decimals={decB} native={isNativeBoingId(tokB)} />
           <div className="rounded-xl border p-3 text-sm" style={panel} data-testid="add-preview">
             <div className="flex justify-between"><span style={muted}>Pool price</span><span>{card.priceLine}</span></div>
             <div className="flex justify-between">
@@ -211,6 +229,11 @@ function AddLiquidityPanel({ pools, initialCard, onDone, onCancel }) {
               <span className="font-medium" data-testid="add-share">{preview?.sharePct ?? '—'}</span>
             </div>
             <p className="mt-1 text-xs" style={muted}>The other amount fills in at the pool&apos;s current ratio. You can withdraw any time.</p>
+            {card.native && (
+              <p className="mt-1 text-xs" style={muted} data-testid="add-native-note">
+                One confirmation: your BOING is wrapped, both tokens approved and the liquidity added in a single transaction.
+              </p>
+            )}
           </div>
         </>
       )}
@@ -248,7 +271,9 @@ function RemoveLiquidityPanel({ pools, card, onDone, onCancel }) {
         senderHex: account,
         signSimulateSubmit: sign,
       });
-      toast.success(`Withdrew ${formatWhole(p.outA)} ${card.tokenA.symbol} + ${formatWhole(p.outB)} ${card.tokenB.symbol}`);
+      toast.success(
+        `Withdrew ${formatTokenAmount(p.outA, card.decimalsA ?? 0)} ${card.tokenA.symbol} + ${formatTokenAmount(p.outB, card.decimalsB ?? 0)} ${card.tokenB.symbol}`
+      );
       onDone();
     } catch (e) {
       toast.error(formatBoingExpressRpcError(e));
@@ -281,8 +306,9 @@ function RemoveLiquidityPanel({ pools, card, onDone, onCancel }) {
       </div>
       <div className="rounded-xl border p-3 text-sm" style={panel} data-testid="remove-preview">
         <p style={muted}>You&apos;ll receive about</p>
-        <p className="tabular-nums" style={{ color: 'var(--text-primary)' }}>{formatWhole(p.outA)} {card.tokenA.symbol}</p>
-        <p className="tabular-nums" style={{ color: 'var(--text-primary)' }}>{formatWhole(p.outB)} {card.tokenB.symbol}</p>
+        <p className="tabular-nums" style={{ color: 'var(--text-primary)' }}>{formatTokenAmount(p.outA, card.decimalsA ?? 0)} {card.tokenA.symbol}</p>
+        <p className="tabular-nums" style={{ color: 'var(--text-primary)' }}>{formatTokenAmount(p.outB, card.decimalsB ?? 0)} {card.tokenB.symbol}</p>
+        {card.native && <p className="mt-1 text-xs" style={muted}>BOING comes back as native BOING (unwrapped in the same transaction).</p>}
       </div>
       <button
         type="button"
@@ -370,7 +396,7 @@ export default function BoingYourLiquidityTab({ pools, addFor, onAddForConsumed 
                   </div>
                   <p className="mt-3 text-xs" style={muted}>If you withdraw everything you get back</p>
                   <p className="tabular-nums text-sm" style={{ color: 'var(--text-primary)' }} data-testid="position-back">
-                    {formatWhole(c.youA)} {c.tokenA.symbol} + {formatWhole(c.youB)} {c.tokenB.symbol}
+                    {formatTokenAmount(c.youA, c.decimalsA ?? 0, 4)} {c.tokenA.symbol} + {formatTokenAmount(c.youB, c.decimalsB ?? 0, 4)} {c.tokenB.symbol}
                   </p>
                   <div className="mt-3 flex gap-2">
                     <button type="button" className="flex-1 rounded-xl px-3 py-2 text-sm font-semibold text-white" style={PRIMARY_BTN} onClick={() => setMode({ kind: 'add', card: c })} data-testid="position-add">Add</button>

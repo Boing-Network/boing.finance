@@ -1,5 +1,6 @@
 /**
- * Custody (v8/v9) pool swaps through the canonical custody router.
+ * Custody (v8/v9) pool swaps through the canonical custody router, and native BOING swaps against v10 pools
+ * (wrap / unwrap wBOING inside one signed batch).
  *
  * Flow: discover pools (`boing_listDexPools` + custody probe) -> live quote -> read allowance ->
  * approve the router for EXACTLY `amountIn` when needed (waits for inclusion) -> router swap with a
@@ -11,9 +12,13 @@ import {
   CANONICAL_BOING_TESTNET_CUSTODY_ROUTER_HEX,
   boingContractCallToExpressTx,
   discoverBoingCustodyPools,
+  getBoingPoolState,
   getBoingTokenAllowance,
+  boingTxToExpressRequest,
+  planBoingNativeSwap,
   quoteBoingCustodySwap,
 } from 'boing-sdk';
+import { WBOING_HEX, isNativeBoingId } from './boingSwapQuote.js';
 
 export const CUSTODY_ROUTER_HEX =
   (typeof process !== 'undefined' && process.env?.REACT_APP_BOING_CUSTODY_ROUTER?.trim()) ||
@@ -104,4 +109,44 @@ export async function executeCustodySwap(client, plan, o) {
   out.swap = await o.signSimulateSubmit(boingContractCallToExpressTx(plan.swapTx), { waitForInclusion: true });
   set(CUSTODY_APPROVAL.DONE);
   return out;
+}
+/**
+ * Native BOING swap plan against a v10 pool whose one side is wBOING (`tokenInHex` / `tokenOutHex` = wBOING
+ * means native BOING). One atomic batch, one signature:
+ *   BOING in:  wBOING.deposit (sends the BOING as call value) -> approve(pool) -> pool.swap
+ *   BOING out: approve(pool) -> pool.swap -> wBOING.withdraw_all (pays native BOING out)
+ * Fresh reserves and the next nonce are read here; the wallet refreshes the nonce again before signing.
+ *
+ * @param {import('boing-sdk').BoingClient} client
+ * @param {{ poolHex: string, tokenInHex: string, tokenOutHex: string, amountIn: bigint, slippagePercent: number,
+ *   senderHex: string, wboingHex?: string }} p
+ */
+export async function planNativeBoingSwap(client, p) {
+  const wboingHex = (p.wboingHex || WBOING_HEX).toLowerCase();
+  const [state, acct] = await Promise.all([getBoingPoolState(client, p.poolHex), client.getAccount(p.senderHex)]);
+  const plan = planBoingNativeSwap({
+    poolHex: p.poolHex,
+    wboingHex,
+    state,
+    assetIn: isNativeBoingId(p.tokenInHex) ? 'native' : p.tokenInHex,
+    assetOut: isNativeBoingId(p.tokenOutHex) ? 'native' : p.tokenOutHex,
+    amountIn: p.amountIn,
+    slippageBps: slippagePercentToBps(p.slippagePercent),
+    senderHex: p.senderHex,
+    nonce: BigInt(acct?.nonce ?? 0),
+    poolVersion: 10,
+  });
+  return { ...plan, native: true, approvalState: 'sufficient', approveTx: null };
+}
+
+/**
+ * Sign and submit a {@link planNativeBoingSwap} plan (one Boing Express approval showing the BOING value).
+ * @param {Awaited<ReturnType<typeof planNativeBoingSwap>>} plan
+ * @param {{ signSimulateSubmit: Function, onState?: (s: string) => void }} o
+ */
+export async function executeNativeBoingSwap(plan, o) {
+  o.onState?.(CUSTODY_APPROVAL.SWAPPING);
+  const swap = await o.signSimulateSubmit(boingTxToExpressRequest(plan.tx), { waitForInclusion: true });
+  o.onState?.(CUSTODY_APPROVAL.DONE);
+  return { approve: null, swap };
 }

@@ -3,8 +3,27 @@
  * No React, no RPC (Node-testable: `node --test scripts/boing-swap-quote.test.mjs`).
  */
 
+/**
+ * Canonical testnet wBOING (wrapped native BOING, 18 decimals). The UI never shows wBOING: it appears as native
+ * "BOING" and swaps / liquidity wrap and unwrap it automatically in the same signed batch.
+ */
+export const WBOING_HEX = (
+  (typeof process !== 'undefined' && process.env?.REACT_APP_BOING_WBOING?.trim()) ||
+  '0x35555ffee114ba1698dcb6cd5f6d0ce56bf264dc6f386991c00cab22020d9c55'
+).toLowerCase();
+
+/** Native BOING has 18 decimals. */
+export const BOING_DECIMALS = 18;
+
+/** Keep this much native BOING back on "Max" so the network fee (or the 1 BOING failed-tx fee) can still be paid. */
+export const NATIVE_FEE_RESERVE = 1000000000000000000n;
+
+/** True when `id` is the token the UI shows as native BOING (wBOING). */
+export const isNativeBoingId = (id) => typeof id === 'string' && id.trim().toLowerCase() === WBOING_HEX;
+
 /** Known canonical testnet tokens (fallback labels when the indexer / directory has no metadata). */
 export const KNOWN_BOING_TOKENS = Object.freeze({
+  [WBOING_HEX]: { symbol: 'BOING', name: 'Boing (native)', native: true, decimals: BOING_DECIMALS },
   '0x6676f971ade3982406efa3e2cdb0477923f8f2a15624c4b6ad3a432817a75e93': { symbol: 'USDC', name: 'USD Coin (test)' },
   '0x6fce9d3e3f13df9fc17e3fd947148a4e6ce6966538b7dd9bf2a891d3b9699c6b': { symbol: 'tBOING', name: 'Boing Token (test)' },
 });
@@ -35,7 +54,8 @@ export function custodyTokenList(pools, directory = []) {
       const d = byId.get(id);
       const symbol = known?.symbol || cleanLabel(d?.symbol) || 'Token';
       const name = cleanLabel(d?.name) || known?.name || 'Unlisted token';
-      out.set(id, { id, symbol, name, decimals: typeof dec === 'number' ? dec : 0 });
+      const decimals = known?.decimals ?? (typeof dec === 'number' ? dec : 0);
+      out.set(id, { id, symbol, name, decimals, native: Boolean(known?.native) });
     }
   }
   return [...out.values()];
@@ -84,22 +104,43 @@ export function quoteCustodyPoolLocal(pool, tokenInHex, amountIn) {
   return { amountOut, priceImpactBps, feeBps: Number(fee), feeAmount, rIn, rOut };
 }
 
-/** Marginal rate for 1 unit of `tokenInHex` after the pool fee (reserve ratio; number, display only). */
-export function spotRateAfterFee(pool, tokenInHex) {
+/**
+ * Marginal rate for 1 whole `tokenInHex` after the pool fee, in whole `tokenOut` (number, display only).
+ * Decimals default to the pool row's (`tokenADecimals` / `tokenBDecimals`); wBOING is 18, testnet tokens 0.
+ */
+export function spotRateAfterFee(pool, tokenInHex, decIn, decOut) {
   if (!pool) return null;
   const inIsA = norm(tokenInHex) === norm(pool.tokenAHex);
   const rIn = Number(inIsA ? pool.reserveA : pool.reserveB);
   const rOut = Number(inIsA ? pool.reserveB : pool.reserveA);
   if (!(rIn > 0) || !(rOut > 0)) return null;
-  return (rOut / rIn) * (1 - Number(pool.feeBps ?? 30) / 10000);
+  const dA = poolSideDecimals(pool, 'a');
+  const dB = poolSideDecimals(pool, 'b');
+  const di = decIn ?? (inIsA ? dA : dB);
+  const dout = decOut ?? (inIsA ? dB : dA);
+  return (rOut / rIn) * 10 ** (di - dout) * (1 - Number(pool.feeBps ?? 30) / 10000);
 }
 
-/** Exact LP fee on `amountIn` as a short decimal string ("0.015"); tokens are whole units, the fee is pro-rata. */
-export function formatFee(amountIn, feeBps) {
+/** Decimals of pool side `'a'` / `'b'` (known tokens win over the listing; default 0). */
+export function poolSideDecimals(pool, side) {
+  const hex = side === 'a' ? pool?.tokenAHex : pool?.tokenBHex;
+  const known = KNOWN_BOING_TOKENS[norm(hex)];
+  if (known?.decimals != null) return known.decimals;
+  const d = side === 'a' ? pool?.tokenADecimals : pool?.tokenBDecimals;
+  return typeof d === 'number' ? d : 0;
+}
+
+/** LP fee on `amountIn` (base units of a `decimals` token) as a short decimal string ("0.015"). */
+export function formatFee(amountIn, feeBps, decimals = 0) {
   if (!amountIn || feeBps == null) return null;
-  const v = (Number(amountIn) * Number(feeBps)) / 10000;
+  const v = (Number(amountIn) / 10 ** decimals) * (Number(feeBps) / 10000);
   if (!Number.isFinite(v)) return null;
   return v >= 1000 ? v.toLocaleString('en-US', { maximumFractionDigits: 0 }) : String(Number(v.toPrecision(4)));
+}
+
+/** True when the pool pairs native BOING (wBOING): those are v10 pools, swapped through an auto-wrap batch. */
+export function isNativeBoingPool(pool) {
+  return Boolean(pool) && (isNativeBoingId(pool.tokenAHex) || isNativeBoingId(pool.tokenBHex));
 }
 
 /** Best direct custody pool for the pair (highest output for `amountIn`, or deepest when no amount). */
@@ -129,6 +170,52 @@ export function parseWholeAmount(raw) {
   return n > 0n ? n : null;
 }
 
+/**
+ * Parse a user amount for a token with `decimals` (0 = whole units only) into base units; null for empty,
+ * invalid, zero, or more fraction digits than the token has.
+ */
+export function parseTokenAmount(raw, decimals = 0) {
+  const t = String(raw ?? '').trim().replace(/,/g, '');
+  if (!t || t === '.' || !/^\d*(\.\d*)?$/.test(t)) return null;
+  const [w, f = ''] = t.split('.');
+  if (f.length > decimals) return null;
+  const d = BigInt(decimals);
+  const n = BigInt(w || '0') * 10n ** d + BigInt((f + '0'.repeat(decimals)).slice(0, decimals) || '0');
+  return n > 0n ? n : null;
+}
+
+/** Keep only what an amount field for `decimals` may hold (digits, one dot, at most `decimals` fraction digits). */
+export function sanitizeAmountInput(raw, decimals = 0) {
+  const s = String(raw ?? '').replace(/,/g, '');
+  if (!decimals) return s.replace(/[^\d]/g, '');
+  const cleaned = s.replace(/[^\d.]/g, '');
+  const i = cleaned.indexOf('.');
+  if (i < 0) return cleaned;
+  return `${cleaned.slice(0, i)}.${cleaned.slice(i + 1).replace(/\./g, '').slice(0, decimals)}`;
+}
+
+/** Base units -> plain decimal string for an input field (no separators, full precision, no trailing zeros). */
+export function toAmountInput(n, decimals = 0) {
+  if (n == null) return '';
+  const v = BigInt(n);
+  if (!decimals) return v.toString();
+  const base = 10n ** BigInt(decimals);
+  const f = (v % base).toString().padStart(decimals, '0').replace(/0+$/, '');
+  return `${v / base}${f ? `.${f}` : ''}`;
+}
+
+/** Base units -> readable amount ("1,234.5678"); `maxFrac` fraction digits (truncated), "<0.000001" for dust. */
+export function formatTokenAmount(n, decimals = 0, maxFrac = 6) {
+  if (n == null) return '—';
+  const v = BigInt(n);
+  if (!decimals) return formatWhole(v);
+  const base = 10n ** BigInt(decimals);
+  const w = v / base;
+  const f = (v % base).toString().padStart(decimals, '0').slice(0, maxFrac).replace(/0+$/, '');
+  if (w === 0n && !f && v > 0n) return `<0.${'0'.repeat(Math.max(0, maxFrac - 1))}1`;
+  return `${formatWhole(w)}${f ? `.${f}` : ''}`;
+}
+
 /** min out = floor(out * (1 - slippage)). */
 export function minReceived(amountOut, slippagePercent) {
   const bps = BigInt(Math.max(0, Math.min(5000, Math.round(Number(slippagePercent) * 100))));
@@ -156,12 +243,17 @@ export function formatWhole(n) {
   return BigInt(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-/** Rate "x.xxx" (4 significant digits): pass (amountIn, amountOut), or (1, spotRateAfterFee(...)). */
-export function formatRate(amountIn, amountOut) {
+/**
+ * Rate "x.xxx" (4 significant digits): pass (amountIn, amountOut), or (1, spotRateAfterFee(...)).
+ * With base-unit amounts of tokens with decimals, pass `decIn` / `decOut` so the rate is per whole token.
+ */
+export function formatRate(amountIn, amountOut, decIn = 0, decOut = 0) {
   if (!amountIn || amountOut == null) return null;
-  const r = Number(amountOut) / Number(amountIn);
+  const r = (Number(amountOut) / Number(amountIn)) * 10 ** (decIn - decOut);
   if (!Number.isFinite(r) || r <= 0) return null;
-  return r >= 1000 ? r.toLocaleString('en-US', { maximumFractionDigits: 0 }) : r.toPrecision(4).replace(/\.?0+$/, '');
+  if (r >= 1000) return r.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  if (r < 0.0001) return r.toExponential(2);
+  return r.toPrecision(4).replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
 }
 
 /**
