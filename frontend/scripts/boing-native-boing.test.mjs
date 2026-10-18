@@ -64,6 +64,12 @@ test('BOING pairs route to the v10 pool and quote per whole token', () => {
   assert.equal(isNativeBoingPool(v9), false);
   // 1 BOING into 10 BOING / 1000 USDC: floor(1000 * 0.997 / 10.997) = 90 USDC.
   assert.equal(r.quote.amountOut, 90n);
+  // 1 BOING is ~9% of the pool: real price impact, but flooring 90.66 -> 90 USDC loses < 1% (no rounding hint).
+  assert.ok(r.quote.priceImpactBps > 800);
+  assert.ok(r.quote.roundingLossBps < 100);
+  // 2 USDC into a 100 / 99 whole-unit pool: flooring dominates.
+  const tiny = pickBestCustodyPool([{ ...v9, reserveA: 100n, reserveB: 99n }], USDC, TBOING, 2n);
+  assert.ok(tiny.quote.roundingLossBps >= 100);
   assert.equal(formatRate(1, spotRateAfterFee(v10, WBOING_HEX)), '99.7');
   assert.equal(formatRate(E18, 90n, 18, 0), '90');
   assert.equal(formatRate(1, spotRateAfterFee(v10, USDC)), '0.00997');
