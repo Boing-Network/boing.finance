@@ -163,3 +163,34 @@ export function formatRate(amountIn, amountOut) {
   if (!Number.isFinite(r) || r <= 0) return null;
   return r >= 1000 ? r.toLocaleString('en-US', { maximumFractionDigits: 0 }) : r.toPrecision(4).replace(/\.?0+$/, '');
 }
+
+/**
+ * Token picker search: match symbol / name (case-insensitive, prefix or substring) or a pasted 32-byte address.
+ * `unlistedAddress` is set when the query is an address that no pool trades yet (UI: "No pool yet — create one").
+ * @returns {{ matches: Array<{ id: string, symbol: string, name: string }>, unlistedAddress: string | null }}
+ */
+export function filterPickerTokens(tokens, query) {
+  const list = tokens || [];
+  const q = norm(query);
+  if (!q) return { matches: list, unlistedAddress: null };
+  if (/^0x[0-9a-f]{64}$/.test(q)) {
+    const hit = list.filter((t) => norm(t.id) === q);
+    return { matches: hit, unlistedAddress: hit.length ? null : q };
+  }
+  const score = (t) => {
+    const s = norm(t.symbol);
+    const n = norm(t.name);
+    if (s === q) return 0;
+    if (s.startsWith(q)) return 1;
+    if (s.includes(q)) return 2;
+    if (n.includes(q)) return 3;
+    if (q.length >= 6 && norm(t.id).includes(q.replace(/^0x/, ''))) return 4;
+    return -1;
+  };
+  const matches = list
+    .map((t) => [score(t), t])
+    .filter(([s]) => s >= 0)
+    .sort((a, b) => a[0] - b[0])
+    .map(([, t]) => t);
+  return { matches, unlistedAddress: null };
+}

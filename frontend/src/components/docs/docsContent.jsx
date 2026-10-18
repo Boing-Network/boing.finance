@@ -199,7 +199,8 @@ function Swap() {
       <OL>
         <li>
           <B>You pay:</B> pick a token (shown by symbol and name with your balance) and type a whole-number amount, or
-          press <B>Max</B>.
+          press <B>Max</B>. The token list has a search box: type a symbol or name, or paste a token address. A token
+          that has no pool yet shows <B>No pool yet — create one</B>, which opens Create pool with that token filled in.
         </li>
         <li>
           Use the <B>flip</B> button to swap the two sides.
@@ -219,10 +220,17 @@ function Swap() {
         </li>
       </OL>
       <P>
-        The card routes your trade through the best pool for the pair automatically. Open <B>Route details</B> at the
+        Every token that has a pool appears in the list automatically, including tokens you deployed yourself. If both
+        tokens are listed but no pool pairs them, the card says <B>No pool yet — create one</B>. The card routes your
+        trade through the best pool for the pair automatically. Open <B>Route details</B> at the
         bottom if you want to see the pool and token addresses. After a swap, a link opens the transaction on Boing
         Observer.
       </P>
+      <Note>
+        Native BOING (the coin you pay network fees with) can&apos;t be swapped yet. Boing contracts can&apos;t hold or
+        send the native coin today, so a wrapped BOING needs a network upgrade first; the test token <B>tBOING</B> is a
+        regular token and trades normally.
+      </Note>
       <Note>
         Because Boing testnet tokens are whole units, very small trades lose more to rounding. The card warns you when
         that happens; a larger amount gets closer to the quoted rate.
@@ -247,26 +255,35 @@ function BoingAdvanced() {
     <>
       <P>
         On Boing, the Swap page has four tabs: <B>Swap</B> (the card above), <B>Pools</B>, <B>Your liquidity</B> and{' '}
-        <B>Advanced</B>. Everyday trading only needs the Swap tab. Advanced holds the tools for power users and builders:
+        <B>Advanced</B>.
       </P>
+      <H3>Pools</H3>
+      <P>
+        One card per pool, for example <B>FV2C / USDC</B>: the total liquidity in plain numbers, the current price (tap it
+        to flip, e.g. &quot;1 USDC ≈ 0.99 tBOING&quot;), the swap fee, and your share if you have one. Each card has{' '}
+        <B>Add liquidity</B> and <B>Swap</B>. Search by token symbol or paste an address to filter, and use{' '}
+        <B>Create a pool</B> for a pair that doesn&apos;t exist yet. Addresses stay hidden under <B>Details</B>.
+      </P>
+      <H3>Advanced</H3>
+      <P>Tools for power users and builders, in sections:</P>
       <UL>
         <li>
-          <B>Readiness:</B> a checklist of which Boing DEX features are live on this network and which still need setup.
+          <B>Pool contracts &amp; factory:</B> every pool registered on the DEX factory, pair count, reserves chart and
+          developer stats, with copy buttons for the factory and swap router.
         </li>
         <li>
-          <B>Smart route (multi-hop):</B> searches pools registered on the DEX factory, including routes through more than
-          one pool, and swaps in one step.
+          <B>Smart routing:</B> multi-hop quotes through more than one pool, swapped in one step.
         </li>
         <li>
-          <B>Legacy ledger pool (v1):</B> the original testnet pool, kept for older balances.
+          <B>Legacy pool:</B> the original ledger pool (v1) and its LP vaults, kept for older positions.
         </li>
         <li>
-          <B>Discovery: custom indexer URL:</B> point the pool and token lists at your own indexer.
+          <B>Network readiness:</B> which Boing DEX contracts the network advertises and whether they respond.
+        </li>
+        <li>
+          <B>Indexer:</B> point the pool and token lists at your own indexer.
         </li>
       </UL>
-      <P>
-        The <B>Pools</B> tab lists the pools the app can see, with reserves and a button to trade that pair.
-      </P>
     </>
   );
 }
@@ -279,19 +296,28 @@ function Liquidity() {
         <B>impermanent loss</B> in DeFi 101 (settings menu) before you add liquidity.
       </P>
       <H3>On Boing</H3>
+      <P>Earn a share of swap fees by adding tokens to a pool. <B>Swap → Your liquidity</B>:</P>
       <UL>
         <li>
-          Boing&apos;s current pools are <B>custody pools (v8 and v9)</B>: the pool holds the tokens, and selling a token
-          first needs an approval, which the app asks for automatically. On testnet the main pool is USDC / tBOING.
+          <B>Your positions:</B> each pool you&apos;re in, your share of it, and what you&apos;d get back per token if you
+          withdrew everything. Connect Boing Express to see them.
         </li>
         <li>
-          <B>Swap → Your liquidity</B> shows your positions and the <B>LP vault</B>: deposit both tokens (whole units) to
-          receive vault shares, and withdraw shares later to get both tokens back. Each step is confirmed in Boing
-          Express.
+          <B>Add:</B> pick the two tokens and type one amount; the other fills in at the pool&apos;s current ratio, and the
+          preview shows the share you&apos;ll own. Boing Express asks you to approve each token (exactly that amount) and
+          then to confirm the deposit.
+        </li>
+        <li>
+          <B>Remove:</B> choose 25%, 50%, 75% or Max (or drag the slider); the preview shows the tokens you&apos;ll
+          receive. One confirmation in Boing Express.
+        </li>
+        <li>
+          Pools are <B>custody pools (v8 / v9)</B>: the pool holds the tokens; amounts are whole units.
         </li>
         <li>
           <To to="/create-pool">Create pool</To> starts a new pool: pick two tokens and make the first deposit, which sets
-          the starting price.
+          the starting price. The pool is registered on the DEX factory, so it shows on Pools and its tokens show in the
+          swap list right away.
         </li>
       </UL>
       <H3>On EVM chains</H3>
@@ -348,8 +374,14 @@ function DeployToken() {
           your account. Amounts are whole tokens (decimals are 0). After that mint no one can mint more, and there are no
           owner controls such as freezing, a blacklist, transfer limits, anti-bot or a pause switch, so the security step
           lists those as not available on Boing. The name and
-          symbol are stored with the deploy: boing.observer shows them right away, and the Boing swap token list and
-          Boing Express list the token once it has a pool. The network checks new contracts before it accepts them.
+          symbol are stored with the deploy: boing.observer shows them right away. The network checks new contracts
+          before it accepts them.
+        </li>
+        <li>
+          <B>Make it swappable:</B> after a Boing deploy, the success panel offers <B>Create a pool</B> and{' '}
+          <B>Add initial liquidity</B>. Both open Create pool with your token and USDC filled in; deposit both sides and
+          confirm in Boing Express. As soon as the pool exists, your token appears in the swap token list (search by
+          symbol or paste its address) and on the Pools tab.
         </li>
       </UL>
       <P>

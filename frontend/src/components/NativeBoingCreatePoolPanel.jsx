@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { isBoingTestnetChainId } from 'boing-sdk';
+import { Link } from 'react-router-dom';
+import { boingPoolBytecodeHex, isBoingTestnetChainId } from 'boing-sdk';
+import { KNOWN_BOING_TOKENS } from '../services/boingSwapQuote';
 import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import NativeVmTokenPickerField from './NativeVmTokenPickerField';
@@ -65,11 +67,28 @@ export default function NativeBoingCreatePoolPanel() {
     }
   }, [projectToken, tokenA]);
 
+  // `?pair=usdc` (default when a token is prefilled) / `?pair=0x…` prefills Token B.
+  const pairParam = String(searchParams.get('pair') || '').trim().toLowerCase();
+  useEffect(() => {
+    if (tokenB) return;
+    const want = isBoingNativeAccountIdHex(pairParam) ? pairParam : pairParam || (isBoingNativeAccountIdHex(projectToken) ? 'usdc' : '');
+    if (!want) return;
+    const hit = isBoingNativeAccountIdHex(want) ? want : Object.keys(KNOWN_BOING_TOKENS).find((id) => KNOWN_BOING_TOKENS[id].symbol.toLowerCase() === want);
+    if (hit && hit.toLowerCase() !== String(projectToken).toLowerCase()) setTokenB(hit);
+  }, [pairParam, projectToken, tokenB]);
+
   useEffect(() => {
     if (!projectGateActive) setCompanionsLinked(true);
   }, [projectGateActive]);
 
-  const bundledBytecode = useMemo(() => getBundledNativePoolBytecodeHex(), []);
+  // Custody pool v8 (token-v2 pairs, approvals, swaps through the swap card) unless an operator overrides it.
+  const bundledBytecode = useMemo(() => {
+    try {
+      return boingPoolBytecodeHex(8);
+    } catch {
+      return getBundledNativePoolBytecodeHex();
+    }
+  }, []);
   const effectiveBytecode = useMemo(
     () => computeEffectiveNativeDeployBytecode(customBytecode, bundledBytecode),
     [customBytecode, bundledBytecode]
@@ -118,7 +137,7 @@ export default function NativeBoingCreatePoolPanel() {
       const { qa } = await preflightBoingLaunchWizardByKind('liquidity_pool', {
         poolLabel: poolLabel.trim() || undefined,
         poolSymbol: poolSymbol.trim() || undefined,
-        customBytecode,
+        customBytecode: customBytecode.trim() || bundledBytecode,
         descriptionHash,
         purposeCategory,
       });
@@ -240,14 +259,15 @@ export default function NativeBoingCreatePoolPanel() {
         />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 mb-3">
+      <div className="grid gap-3 sm:grid-cols-2 mb-3" id="initial-liquidity">
         <label className="text-sm" style={{ color: 'var(--text-secondary)' }}>
           Amount of Token A
           <input
             type="text"
             inputMode="numeric"
             value={amountA}
-            onChange={(e) => setAmountA(e.target.value)}
+            data-testid="create-pool-amount-a"
+            onChange={(e) => setAmountA(e.target.value.replace(/[^\d]/g, ''))}
             className="mt-1 w-full rounded-lg border bg-transparent px-3 py-2 text-sm"
             style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
             placeholder="1000000"
@@ -262,7 +282,8 @@ export default function NativeBoingCreatePoolPanel() {
             type="text"
             inputMode="numeric"
             value={amountB}
-            onChange={(e) => setAmountB(e.target.value)}
+            data-testid="create-pool-amount-b"
+            onChange={(e) => setAmountB(e.target.value.replace(/[^\d]/g, ''))}
             className="mt-1 w-full rounded-lg border bg-transparent px-3 py-2 text-sm"
             style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
             placeholder="1000000"
@@ -306,6 +327,7 @@ export default function NativeBoingCreatePoolPanel() {
         <button
           type="button"
           onClick={onCreate}
+          data-testid="create-pool-submit"
           disabled={
             busy ||
             deployBlocked ||
@@ -395,6 +417,24 @@ export default function NativeBoingCreatePoolPanel() {
         </div>
       )}
 
+      {lastResult?.ok && lastResult.poolId && (
+        <div className="mb-3 rounded-lg border p-3 text-sm" style={{ borderColor: 'var(--border-color)' }} data-testid="create-pool-success">
+          <p style={{ color: 'var(--text-primary)' }}>Pool created. It now shows in the swap token list and on Pools.</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Link
+              className="rounded-lg px-3 py-1.5 font-semibold text-white"
+              style={{ background: 'linear-gradient(135deg, var(--finance-primary), #2563eb)', color: '#fff' }}
+              to={`/swap?nativeTokenIn=${tokenB}&nativeTokenOut=${tokenA}`}
+              data-testid="create-pool-swap-now"
+            >
+              Swap it now
+            </Link>
+            <Link className="rounded-lg border px-3 py-1.5" style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} to="/swap?nativeTradeTab=pools">
+              View in Pools
+            </Link>
+          </div>
+        </div>
+      )}
       {lastResult?.ok && lastResult.poolId && (
         <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
           Pool{' '}
