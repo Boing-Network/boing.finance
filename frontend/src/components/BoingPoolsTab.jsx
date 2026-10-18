@@ -7,6 +7,8 @@ import { formatWhole } from '../services/boingSwapQuote';
 
 const panel = { borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-secondary)' };
 const muted = { color: 'var(--text-tertiary)' };
+/** Gradient primary button; explicit white text with a shadow so the label stays readable over the light cyan end. */
+export const PRIMARY_BTN = { background: 'linear-gradient(135deg, var(--finance-primary), #2563eb)', color: '#ffffff', textShadow: '0 1px 2px rgba(0,0,0,0.55)' };
 
 async function copy(label, text) {
   try {
@@ -108,7 +110,7 @@ function PoolCard({ card, onAdd, onSwap }) {
         <button
           type="button"
           className="flex-1 rounded-xl px-3 py-2 text-sm font-semibold text-white"
-          style={{ background: 'linear-gradient(135deg, var(--finance-primary), #2563eb)' }}
+          style={PRIMARY_BTN}
           onClick={() => onAdd(card)}
           data-testid="pool-add"
         >
@@ -181,7 +183,7 @@ export default function BoingPoolsTab({ pools, onAddLiquidity, onSwap, initialQu
           <p className="mt-1 text-sm" style={muted}>
             {cards.length === 0 ? 'Be the first: pair two tokens and earn swap fees.' : 'No pool yet for that token — create one.'}
           </p>
-          <Link to="/create-pool" className="mt-4 inline-block rounded-xl px-4 py-2 text-sm font-semibold text-white" style={{ background: 'linear-gradient(135deg, var(--finance-primary), #2563eb)' }}>
+          <Link to="/create-pool" className="mt-4 inline-block rounded-xl px-4 py-2 text-sm font-semibold text-white" style={PRIMARY_BTN}>
             Create a pool
           </Link>
         </div>

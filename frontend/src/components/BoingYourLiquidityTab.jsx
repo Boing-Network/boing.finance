@@ -11,7 +11,7 @@ import { executeAddLiquidity, executeRemoveLiquidity } from '../services/boingLi
 import { getWindowBoingProvider, boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
 import BoingTokenPairIcons from './BoingTokenPairIcons';
-import { PoolDetails } from './BoingPoolsTab';
+import { PoolDetails, PRIMARY_BTN } from './BoingPoolsTab';
 
 const panel = { borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-secondary)' };
 const muted = { color: 'var(--text-tertiary)' };
@@ -217,7 +217,7 @@ function AddLiquidityPanel({ pools, initialCard, onDone, onCancel }) {
       <button
         type="button"
         className="w-full rounded-xl px-4 py-3 font-semibold text-white disabled:opacity-50"
-        style={{ background: 'linear-gradient(135deg, var(--finance-primary), #2563eb)' }}
+        style={PRIMARY_BTN}
         disabled={disabled}
         onClick={submit}
         data-testid="add-submit"
@@ -287,7 +287,7 @@ function RemoveLiquidityPanel({ pools, card, onDone, onCancel }) {
       <button
         type="button"
         className="w-full rounded-xl px-4 py-3 font-semibold text-white disabled:opacity-50"
-        style={{ background: 'linear-gradient(135deg, var(--finance-primary), #2563eb)' }}
+        style={PRIMARY_BTN}
         disabled={Boolean(busy) || p.burn <= 0n}
         onClick={submit}
         data-testid="remove-submit"
@@ -334,7 +334,7 @@ export default function BoingYourLiquidityTab({ pools, addFor, onAddForConsumed 
       {!connected ? (
         <div className="rounded-2xl border p-8 text-center" style={panel} data-testid="liquidity-connect">
           <p className="font-medium" style={{ color: 'var(--text-primary)' }}>Connect your wallet to see your liquidity</p>
-          <button type="button" onClick={connect} className="mt-4 rounded-xl px-4 py-2 font-semibold text-white" style={{ background: 'linear-gradient(135deg, var(--finance-primary), #2563eb)' }}>
+          <button type="button" onClick={connect} className="mt-4 rounded-xl px-4 py-2 font-semibold text-white" style={PRIMARY_BTN}>
             Connect wallet
           </button>
         </div>
@@ -347,7 +347,7 @@ export default function BoingYourLiquidityTab({ pools, addFor, onAddForConsumed 
           <div className="flex items-center justify-between">
             <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Your positions</h3>
             {mode?.kind !== 'add' && (
-              <button type="button" className="rounded-xl px-3 py-1.5 text-sm font-semibold text-white" style={{ background: 'linear-gradient(135deg, var(--finance-primary), #2563eb)' }} onClick={() => setMode({ kind: 'add' })} data-testid="liquidity-new">
+              <button type="button" className="rounded-xl px-3 py-1.5 text-sm font-semibold text-white" style={PRIMARY_BTN} onClick={() => setMode({ kind: 'add' })} data-testid="liquidity-new">
                 + Add liquidity
               </button>
             )}
@@ -373,7 +373,7 @@ export default function BoingYourLiquidityTab({ pools, addFor, onAddForConsumed 
                     {formatWhole(c.youA)} {c.tokenA.symbol} + {formatWhole(c.youB)} {c.tokenB.symbol}
                   </p>
                   <div className="mt-3 flex gap-2">
-                    <button type="button" className="flex-1 rounded-xl px-3 py-2 text-sm font-semibold text-white" style={{ background: 'linear-gradient(135deg, var(--finance-primary), #2563eb)' }} onClick={() => setMode({ kind: 'add', card: c })} data-testid="position-add">Add</button>
+                    <button type="button" className="flex-1 rounded-xl px-3 py-2 text-sm font-semibold text-white" style={PRIMARY_BTN} onClick={() => setMode({ kind: 'add', card: c })} data-testid="position-add">Add</button>
                     <button type="button" className="flex-1 rounded-xl border px-3 py-2 text-sm font-semibold" style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} onClick={() => setMode({ kind: 'remove', card: c })} data-testid="position-remove">Remove</button>
                   </div>
                   <PoolDetails card={c} />
