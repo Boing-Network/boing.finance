@@ -141,7 +141,7 @@ test.describe('Pools / Your liquidity — live testnet add + remove', () => {
     }, { account: sender });
 
     await page.setViewportSize({ width: 1280, height: 1000 });
-    await page.goto('/swap?noIntro=1&nativeTradeTab=pools');
+    await page.goto('/pools?noIntro=1');
     const card = page.locator('[data-testid="pool-card"][data-pair="FV2C / USDC"]');
     await expect(card).toBeVisible({ timeout: 120_000 });
     await shot('lp-live-pools');

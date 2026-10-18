@@ -1,7 +1,7 @@
 import { evmLite } from '../utils/evmLite';
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useWallet } from '../contexts/WalletContext';
 import { useChainType } from '../contexts/SolanaWalletContext';
@@ -16,7 +16,8 @@ import {
   getPoolAnalytics
 } from '../services/poolService';
 import { useBlockchainPools } from '../hooks/useBlockchainPools';
-import { getNetworkByChainId } from '../config/networks';
+import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
+import BoingPoolsSection from '../components/BoingPoolsSection';
 import getFeatureSupport from '../config/featureSupport';
 import { getNetworkBadgeBgClass } from '../utils/networkBadgeClasses';
 import useEscapeKey from '../hooks/useEscapeKey';
@@ -751,6 +752,11 @@ const Pools = () => {
   const { isConnected, account, connectWallet } = useWalletConnection();
   const { chainId } = useWallet();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // `?pool=0x…` (e.g. redirected from the old Swap → Pools tab link) pre-fills the Boing pools search.
+  const poolParamRaw = (searchParams.get('pool') || '').trim();
+  const boingPoolQuery = /^0x[0-9a-fA-F]{64}$/.test(poolParamRaw) ? poolParamRaw.toLowerCase() : '';
+  const onBoing = Number(chainId) === BOING_NATIVE_L1_CHAIN_ID;
   // Wallet state initialized
   const [activeTab, setActiveTab] = useState('all-pools');
   const [selectedPool, setSelectedPool] = useState(null);
@@ -1073,21 +1079,48 @@ const Pools = () => {
         </Helmet>
         <div className="relative w-full min-w-0">
           <div className="relative z-10 container mx-auto px-4 py-8">
+            <header className="td-hero td-hero--center mb-8">
+              <span className="td-hero__eyebrow">Trade</span>
+              <h1 className="td-hero__title">Pools</h1>
+              <p className="td-hero__subtitle">Browse Boing pools, or connect your wallet to see your liquidity.</p>
+            </header>
+            {/* Boing pools are public: browse, search and open a swap without a wallet. */}
+            <div className="max-w-5xl mx-auto mb-8">
+              <BoingPoolsSection account={null} initialQuery={boingPoolQuery} />
+            </div>
             <div className="max-w-2xl mx-auto text-center">
-              <header className="td-hero td-hero--center mb-8">
-                <span className="td-hero__eyebrow">Trade</span>
-                <h1 className="td-hero__title">Pools</h1>
-                <p className="td-hero__subtitle">Connect your wallet to see pools and your liquidity.</p>
-              </header>
               <div className="td-card p-8">
                 <EmptyState
                   variant="pools"
-                  title="Wallet Required"
-                  description="Connect your wallet to view your liquidity pools and earnings."
+                  title="Your liquidity"
+                  description="Connect your wallet to view your liquidity positions and earnings on any network."
                   actionLabel="Connect Wallet"
                   action={connectWallet}
                 />
               </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  if (onBoing) {
+    return (
+      <>
+        <Helmet>
+          <title>Pools - boing.finance</title>
+          <meta name="description" content="Boing pools: swap, add liquidity and earn a share of swap fees on boing.finance" />
+        </Helmet>
+        <div className="relative w-full min-w-0">
+          <div className="relative z-10 container mx-auto px-4 py-8">
+            <div className="max-w-5xl mx-auto">
+              <header className="td-hero td-hero--center mb-8">
+                <span className="td-hero__eyebrow">Trade</span>
+                <h1 className="td-hero__title">Pools</h1>
+                <p className="td-hero__subtitle">Swap in a pool, or add liquidity and earn a share of the fees.</p>
+              </header>
+              <BoingPoolsSection account={account} initialQuery={boingPoolQuery} />
             </div>
           </div>
         </div>
@@ -1110,13 +1143,6 @@ const Pools = () => {
               <h1 className="td-hero__title">Pools</h1>
               <p className="td-hero__subtitle">
                 See available pools and manage your liquidity
-              </p>
-              <p className="text-xs mt-2" style={{ color: 'var(--text-tertiary)' }}>
-                On Boing, factory pairs also appear under{' '}
-                <a href="/swap?tab=pools" className="underline" style={{ color: 'var(--finance-primary)' }}>
-                  Swap → Pools
-                </a>
-                .
               </p>
             </header>
 

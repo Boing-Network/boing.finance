@@ -238,7 +238,7 @@ test.describe('New Boing token becomes swappable — live testnet', () => {
     await shot('newtoken-swap-success');
 
     // 4. Listed on Pools.
-    await page.getByRole('tab', { name: 'Pools' }).click();
+    await page.goto('/pools?noIntro=1');
     await expect(page.locator(`[data-testid="pool-card"][data-pair="${SYMBOL} / USDC"], [data-testid="pool-card"][data-pair="USDC / ${SYMBOL}"]`)).toBeVisible({ timeout: 120_000 });
     await shot('newtoken-pools-listed');
     await page.context().unrouteAll({ behavior: 'ignoreErrors' });

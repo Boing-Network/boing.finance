@@ -259,15 +259,16 @@ function BoingAdvanced() {
   return (
     <>
       <P>
-        On Boing, the Swap page has four tabs: <B>Swap</B> (the card above), <B>Pools</B>, <B>Your liquidity</B> and{' '}
-        <B>Advanced</B>.
+        On Boing, the Swap page has three tabs: <B>Swap</B> (the card above), <B>Your liquidity</B> and <B>Advanced</B>.
+        Pool cards are on the <To to="/pools">Pools</To> page.
       </P>
-      <H3>Pools</H3>
+      <H3>Pools page</H3>
       <P>
         One card per pool, for example <B>FV2C / USDC</B>: the total liquidity in plain numbers, the current price (tap it
-        to flip, e.g. &quot;1 USDC ≈ 0.99 tBOING&quot;), the swap fee, and your share if you have one. Each card has{' '}
-        <B>Add liquidity</B> and <B>Swap</B>. Search by token symbol or paste an address to filter, and use{' '}
-        <B>Create a pool</B> for a pair that doesn&apos;t exist yet. Addresses stay hidden under <B>Details</B>.
+        to flip, e.g. &quot;1 USDC ≈ 0.99 tBOING&quot;), the swap fee, and your share if you have one. <B>Swap</B> opens the
+        Swap page with that pair selected; <B>Add liquidity</B> opens Swap → Your liquidity with the pool filled in. Search
+        by token symbol or paste an address to filter, and use <B>Create a pool</B> for a pair that doesn&apos;t exist yet.
+        Addresses stay hidden under <B>Details</B>. You can browse pools before connecting a wallet.
       </P>
       <H3>Advanced</H3>
       <P>Tools for power users and builders, in sections:</P>
@@ -389,7 +390,7 @@ function DeployToken() {
           <B>Make it swappable:</B> after a Boing deploy, the success panel offers <B>Create a pool</B> and{' '}
           <B>Add initial liquidity</B>. Both open Create pool with your token and USDC filled in; deposit both sides and
           confirm in Boing Express. As soon as the pool exists, your token appears in the swap token list (search by
-          symbol or paste its address) and on the Pools tab.
+          symbol or paste its address) and on the Pools page.
         </li>
       </UL>
       <P>
@@ -694,7 +695,7 @@ export const DOC_SECTIONS = Object.freeze([
   { id: 'settings', title: 'Settings menu & help', Body: SettingsMenu },
   { id: 'networks', title: 'Supported networks', Body: Networks },
   { id: 'swap', title: 'Swap', Body: Swap },
-  { id: 'boing-advanced', title: 'Boing swap: Pools & Advanced tabs', Body: BoingAdvanced },
+  { id: 'boing-advanced', title: 'Boing swap: Pools page & Advanced tab', Body: BoingAdvanced },
   { id: 'liquidity', title: 'Pools & liquidity', Body: Liquidity },
   { id: 'bridge', title: 'Bridge', Body: Bridge },
   { id: 'deploy-token', title: 'Deploy a token', Body: DeployToken },

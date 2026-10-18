@@ -140,13 +140,15 @@ Feature detection: `getFeatureSupport().nativeVmDex` in `frontend/src/config/fea
 | **Pool discovery** | Venues + factory pair count + search + pagination + `register_pair` log count (when from-block env is set). Optional D1 directory (`GET /v1/directory/pools`) merged by `poolHex` when `REACT_APP_BOING_NATIVE_DEX_DIRECTORY_BASE_URL` is set. **Next:** chain-native event index if product requires it. |
 | **Token picker** | Curated + directory + user-saved + recent + optional token-list JSON; indexer `tokenDirectory` merged via context. **Next:** richer on-chain metadata without indexer. |
 | **Charts / TVL / volume** | Reserve bars + localStorage time-series + optional indexer history; first-party indexer CLI / Pages function; optional CoinGecko oracle. **Still upstream at scale:** long-range USD TVL. |
-| **Multihop** | Smart route + Pools prefill + URL deep links (`nativeTradeTab`, `nativeTokenIn`/`Out`, `nativePool`). Unsigned simulate when `REACT_APP_BOING_RPC_UNSIGNED_SIMULATE_METHOD=boing_simulateContractCall`. |
+| **Multihop** | Smart route + Pools page → Swap prefill + URL deep links (`nativeTradeTab`, `nativeTokenIn`/`Out`, `addPool`). Unsigned simulate when `REACT_APP_BOING_RPC_UNSIGNED_SIMULATE_METHOD=boing_simulateContractCall`. |
 | **LP positions** | Per-pool total LP; share-token balances; vault↔pool map JSON. **Next:** LP NFT semantics. |
 | **Mobile polish** | Scrollable tabs, 44px targets. **Next:** wallet deep links. |
 
 ### Native trade hub
 
-`#boing-native-trade` on `/swap` — tabs **Swap | Pools | Smart route | Your liquidity** (`NativeBoingTradeHub`). Query params: `nativeTradeTab`, `nativeTokenIn` / `nativeTokenOut`, `nativePool`.
+`#boing-native-trade` on `/swap` — tabs **Swap | Your liquidity | Advanced** (`NativeBoingTradeHub`). Query params: `nativeTradeTab` (`swap`, `liquidity`, `advanced`), `nativeTokenIn` / `nativeTokenOut` (prefill the swap pair), `addPool` (opens Add liquidity for that pool).
+
+Pool cards (search, Add liquidity, Swap, Details, Create a pool) live on `/pools` (`BoingPoolsSection` → `BoingPoolsTab`); `/pools?pool=0x…` pre-filters them. Old links `/swap?nativeTradeTab=pools`, `/swap?tab=pools` and `/swap?nativePool=0x…` redirect to `/pools` (`swapPoolsRedirect.js`, `SwapRoute` in `App.jsx`).
 
 Key modules: `BoingNativeDexIntegrationContext`, `nativeDexIndexerDirectoryMerge.js`, `boingNativeLpShareBalance.js`, `NativeLiquidityPositionsPanel.jsx`, `nativeVmTokenRegistry.js`, `NativeVmTokenPickerField.jsx`.
 

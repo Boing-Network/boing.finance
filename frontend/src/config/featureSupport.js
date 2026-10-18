@@ -222,7 +222,7 @@ export function getBoingL1FullDexReadiness(chainId, options) {
       label: 'Pools explorer (factory list)',
       status: 'partial',
       detail:
-        'On Boing testnet, use Swap → Pools for a native pool table and factory pair count. The EVM Pools page lists Solidity-backed pools on other networks.',
+        'On Boing testnet, the Pools page lists the Boing pools (add liquidity, swap, details, create); Swap → Advanced has the factory table and pair count. On other networks the Pools page lists Solidity-backed pools.',
     },
     {
       id: 'portfolio',

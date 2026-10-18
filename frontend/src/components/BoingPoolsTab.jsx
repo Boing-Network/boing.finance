@@ -139,8 +139,8 @@ function PoolCard({ card, onAdd, onSwap }) {
 }
 
 /**
- * Pools tab: searchable pool cards (pair, liquidity, price, your share) with Add liquidity / Swap,
- * plus a "Create a pool" entry. Developer data lives on the Advanced tab.
+ * Searchable Boing pool cards (pair, liquidity, price, your share) with Add liquidity / Swap, plus a
+ * "Create a pool" entry. Shown on the Pools page (BoingPoolsSection); developer data lives on Swap > Advanced.
  */
 export default function BoingPoolsTab({ pools, onAddLiquidity, onSwap, initialQuery = '' }) {
   const { cards, loading, error, reload } = pools;

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import { createPortal } from 'react-dom';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -39,9 +39,17 @@ import {
 import { comingSoon, navigation } from './config/navigation';
 import NavIcon from './components/NavIcon';
 import BoingAppsLinks from './components/BoingAppsLinks';
+import { poolsRedirectFromSwapSearch } from './utils/swapPoolsRedirect';
 
 // Lazy load all page components for code splitting
 const Swap = lazy(() => import('./pages/Swap'));
+
+/** /swap, except old Pools-tab deep links (`?nativeTradeTab=pools`, `?tab=pools`, `?nativePool=`) go to /pools. */
+function SwapRoute() {
+  const location = useLocation();
+  const to = poolsRedirectFromSwapSearch(location.search);
+  return to ? <Navigate to={to} replace /> : <Swap />;
+}
 const Liquidity = lazy(() => import('./pages/Liquidity'));
 const Pools = lazy(() => import('./pages/Pools'));
 const Analytics = lazy(() => import('./pages/Analytics'));
@@ -233,7 +241,7 @@ function PageTransitionRoutes() {
     <div ref={transitionRef} className="page-transition-enter flex-1 flex flex-col min-h-0">
       <Routes location={location}>
         <Route path="/" element={<Home />} />
-        <Route path="/swap" element={<Swap />} />
+        <Route path="/swap" element={<SwapRoute />} />
         <Route path="/pools" element={<Pools />} />
         <Route path="/liquidity" element={<Liquidity />} />
         <Route path="/analytics" element={<Analytics />} />
