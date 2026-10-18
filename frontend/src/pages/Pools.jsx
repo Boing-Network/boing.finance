@@ -17,6 +17,7 @@ import {
 } from '../services/poolService';
 import { useBlockchainPools } from '../hooks/useBlockchainPools';
 import { getNetworkByChainId, BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
+import { parsePoolsTab } from '../utils/swapPoolsRedirect';
 import BoingPoolsSection from '../components/BoingPoolsSection';
 import getFeatureSupport from '../config/featureSupport';
 import { getNetworkBadgeBgClass } from '../utils/networkBadgeClasses';
@@ -757,8 +758,8 @@ const Pools = () => {
   const poolParamRaw = (searchParams.get('pool') || '').trim();
   const boingPoolQuery = /^0x[0-9a-fA-F]{64}$/.test(poolParamRaw) ? poolParamRaw.toLowerCase() : '';
   const onBoing = Number(chainId) === BOING_NATIVE_L1_CHAIN_ID;
-  // Wallet state initialized
-  const [activeTab, setActiveTab] = useState('all-pools');
+  // `?tab=liquidity` (Your liquidity) opens the "My" tab on EVM networks; on Boing, BoingPoolsSection reads it.
+  const [activeTab, setActiveTab] = useState(() => (parsePoolsTab(searchParams.get('tab')) === 'liquidity' ? 'user' : 'all-pools'));
   const [selectedPool, setSelectedPool] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [useBlockchainFallback, setUseBlockchainFallback] = useState(false);
@@ -1092,8 +1093,8 @@ const Pools = () => {
               <div className="td-card p-8">
                 <EmptyState
                   variant="pools"
-                  title="Your liquidity"
-                  description="Connect your wallet to view your liquidity positions and earnings on any network."
+                  title="Other networks"
+                  description="Connect a wallet to see your pools and liquidity positions on Ethereum, Base and other EVM networks."
                   actionLabel="Connect Wallet"
                   action={connectWallet}
                 />

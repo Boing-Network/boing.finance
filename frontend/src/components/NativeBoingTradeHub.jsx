@@ -9,15 +9,13 @@ import NativeDexDirectoryRoutePanel from './NativeDexDirectoryRoutePanel';
 import NativeDexIndexerSettingsStrip from './NativeDexIndexerSettingsStrip';
 import BoingL1DexReadinessPanel from './BoingL1DexReadinessPanel';
 import NativePoolsDirectoryPanel from './NativePoolsDirectoryPanel';
-import BoingYourLiquidityTab from './BoingYourLiquidityTab';
-import { useBoingPools } from '../hooks/useBoingPools';
 import { CUSTODY_ROUTER_HEX } from '../services/nativeDexCustodySwap';
 import toast from 'react-hot-toast';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 
-const VALID_TAB_IDS = new Set(['swap', 'liquidity', 'advanced']);
+const VALID_TAB_IDS = new Set(['swap', 'advanced']);
 
 /** Old deep links (`nativeTradeTab=route`) land on Advanced, where Smart route now lives. */
 function parseTab(raw) {
@@ -28,11 +26,11 @@ function parseTab(raw) {
 
 /**
  * Swap is the one simple card; readiness, legacy ledger pool, smart route and indexer settings sit in Advanced.
- * Pool cards live on the Pools page (/pools); old `nativeTradeTab=pools` / `nativePool=` links redirect there (App.jsx).
+ * Pool cards and Your liquidity live on the Pools page (/pools, /pools?tab=liquidity); old `nativeTradeTab=pools`,
+ * `nativeTradeTab=liquidity`, `addPool=` and `nativePool=` links redirect there (App.jsx).
  */
 const TABS = [
   { id: 'swap', label: 'Swap' },
-  { id: 'liquidity', label: 'Your liquidity' },
   { id: 'advanced', label: 'Advanced' },
 ];
 
@@ -80,25 +78,16 @@ function AdvSection({ id, title, description, copies = [], children }) {
 }
 
 /**
- * Boing L1 trading surface: swap, pool directory, routing, and LP positions (Uniswap-style tabs).
- * Deep link: `/swap?nativeTradeTab=route&nativeTokenIn=0x…&nativeTokenOut=0x…#boing-native-trade`
- * Add liquidity to a pool: `?nativeTradeTab=liquidity&addPool=0x…64hex…` (consumed once pools load; opens the add panel).
+ * Boing L1 trading surface: the swap card, plus Advanced (pool directory, routing, legacy pool, readiness, indexer).
+ * Deep link: `/swap?nativeTokenIn=0x…&nativeTokenOut=0x…#boing-native-trade` (prefills the swap card).
  *
  * @param {{ slippagePercent?: number }} props
  */
 export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
-  const { chainId, account, isConnected } = useWallet();
+  const { chainId } = useWallet();
   const { effectivePoolHex, effectiveFactoryHex, loading } = useBoingNativeDexIntegration();
-  const pools = useBoingPools(isConnected ? account : null);
-  const [addFor, setAddFor] = useState(/** @type {any} */ (null));
-  const clearAddFor = useCallback(() => setAddFor(null), []);
   const [searchParams, setSearchParams] = useSearchParams();
   const [tab, setTab] = useState(() => parseTab(searchParams.get('nativeTradeTab')) || 'swap');
-  // Fresh reserves / LP balances whenever Pools or Your liquidity opens (e.g. right after a swap).
-  const reloadPools = pools.reload;
-  useEffect(() => {
-    if (tab === 'liquidity') reloadPools();
-  }, [tab, reloadPools]);
   const routePrefillSeq = useRef(0);
   const [routePrefill, setRoutePrefill] = useState(
     /** @type {{ key: number, tokenIn: string, tokenOut: string }} */ ({ key: 0, tokenIn: '', tokenOut: '' })
@@ -131,27 +120,6 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
       { replace: true }
     );
   }, [searchParams, setSearchParams]);
-
-  // "Add liquidity" on a Pools page card: open Your liquidity with that pool's add panel once pools have loaded.
-  const addPoolParam = searchParams.get('addPool')?.trim().toLowerCase() || '';
-  const poolCards = pools.cards;
-  useEffect(() => {
-    if (!/^0x[0-9a-f]{64}$/.test(addPoolParam)) return;
-    if (pools.loading) return;
-    const card = (poolCards || []).find((c) => String(c.poolHex).toLowerCase() === addPoolParam);
-    if (card) setAddFor(card);
-    else toast.error('That pool was not found. Pick a pair below.');
-    setTab('liquidity');
-    setSearchParams(
-      (prev) => {
-        const n = new URLSearchParams(prev);
-        n.delete('addPool');
-        n.set('nativeTradeTab', 'liquidity');
-        return n;
-      },
-      { replace: true }
-    );
-  }, [addPoolParam, poolCards, pools.loading, setSearchParams]);
 
   const setTabAndUrl = useCallback(
     (next) => {
@@ -240,17 +208,17 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
             <p className="mt-6 text-center text-xs" style={{ color: 'var(--text-tertiary)' }}>
               Pair not listed?{' '}
               <Link className="underline" to="/pools" data-testid="swap-browse-pools">Browse pools</Link>
-              {' '}or try{' '}
+              {' '}(your liquidity is there too:{' '}
+              <Link className="underline" to="/pools?tab=liquidity" data-testid="swap-your-liquidity">Your liquidity</Link>) or try{' '}
               <button type="button" className="underline" onClick={() => setTabAndUrl('advanced')}>Advanced</button>
               {' '}(smart route, legacy pool).
             </p>
           </>
         )}
-        {tab === 'liquidity' && <BoingYourLiquidityTab pools={pools} addFor={addFor} onAddForConsumed={clearAddFor} />}
-        {tab === 'advanced' && (
+                {tab === 'advanced' && (
           <div className="space-y-4" data-testid="boing-trade-advanced">
             <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Developer and power-user tools. Everyday swaps and liquidity live on the other tabs; pool cards are on the{' '}
+              Developer and power-user tools. Everyday swaps are on the Swap tab; pool cards and your liquidity are on the{' '}
               <Link className="underline" to="/pools">Pools page</Link>.
             </p>
             <AdvSection

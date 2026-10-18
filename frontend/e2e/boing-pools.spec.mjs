@@ -131,7 +131,8 @@ test.describe('Simple Pools and Your liquidity', () => {
     await page.goto('/swap?noIntro=1&nativeTradeTab=pools');
     await expect(page).toHaveURL(/\/pools\?noIntro=1$/, { timeout: 60_000 });
     await expect(page.getByTestId('boing-pools-section')).toBeVisible({ timeout: 90_000 });
-    await expect(page.getByRole('tab', { name: 'Pools' })).toHaveCount(0);
+    await expect(page.getByTestId('pools-tab-all')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByTestId('pools-tab-liquidity')).toHaveText('Your liquidity');
     const tab = page.getByTestId('boing-pools-tab');
     await expect(tab).toBeVisible({ timeout: 90_000 });
     const cards = page.getByTestId('pool-card');
@@ -170,13 +171,17 @@ test.describe('Simple Pools and Your liquidity', () => {
     await expect(page.getByTestId('boing-swap-card')).toBeVisible({ timeout: 60_000 });
     await expect(page.getByTestId('swap-token-in')).toContainText('FV2C', { timeout: 60_000 });
     await expect(page.getByTestId('swap-token-out')).toContainText('USDC');
-    await expect(page.getByRole('tab', { name: 'Pools' })).toHaveCount(0);
+    // Swap keeps only Swap + Advanced.
+    expect(await page.locator('#boing-native-trade [role="tab"]').allInnerTexts()).toEqual(['Swap', 'Advanced']);
   });
 
   test('your liquidity: position, remove presets, add auto-fill and share', async ({ page }) => {
     test.setTimeout(180_000);
     await wallet(page);
+    // The old Swap → Your liquidity link redirects to the Pools page tab.
     await page.goto('/swap?noIntro=1&nativeTradeTab=liquidity');
+    await expect(page).toHaveURL(/\/pools\?tab=liquidity&noIntro=1$/, { timeout: 60_000 });
+    await expect(page.getByTestId('pools-tab-liquidity')).toHaveAttribute('aria-selected', 'true');
     const tab = page.getByTestId('boing-your-liquidity-tab');
     await expect(tab).toBeVisible({ timeout: 90_000 });
     await expect(page.getByTestId('liquidity-explainer')).toHaveText('Earn a share of swap fees by adding tokens to a pool.');
@@ -201,10 +206,14 @@ test.describe('Simple Pools and Your liquidity', () => {
     await expect(rm.getByTestId('remove-submit')).toBeEnabled();
     await shot(page, 'liquidity-remove-max');
 
-    // Add from a Pools page card -> Swap > Your liquidity with FV2C / USDC prefilled.
-    await page.goto('/pools?noIntro=1');
+    await rm.getByRole('button', { name: 'Close' }).click();
+
+    // Add from an All pools card -> Your liquidity tab with FV2C / USDC prefilled.
+    await page.getByTestId('pools-tab-all').click();
+    await expect(page).toHaveURL(/\/pools\?noIntro=1$/);
     await page.locator('[data-testid="pool-card"][data-pair="FV2C / USDC"]').getByTestId('pool-add').click({ timeout: 90_000 });
-    await expect(page).toHaveURL(/\/swap\?.*nativeTradeTab=liquidity/);
+    await expect(page).toHaveURL(/\/pools\?.*tab=liquidity/);
+    await expect(page.getByTestId('pools-tab-liquidity')).toHaveAttribute('aria-selected', 'true');
     const add = page.getByTestId('add-liquidity-panel');
     await expect(add).toBeVisible();
     await add.getByTestId('add-amount-a').fill('100');
@@ -227,12 +236,13 @@ test.describe('Simple Pools and Your liquidity', () => {
   test('disconnected: connect prompt; advanced sections', async ({ page }) => {
     test.setTimeout(180_000);
     await page.addInitScript(() => localStorage.setItem('boing_onboarding_completed', 'true'));
-    await page.goto('/swap?noIntro=1&nativeTradeTab=liquidity');
-    const connect = page.getByTestId('liquidity-connect');
-    if (await page.getByTestId('boing-your-liquidity-tab').isVisible({ timeout: 30_000 }).catch(() => false)) {
-      await expect(connect).toBeVisible();
-      await shot(page, 'liquidity-disconnected');
-    }
+    await page.goto('/pools?noIntro=1&tab=liquidity');
+    await expect(page.getByTestId('boing-your-liquidity-tab')).toBeVisible({ timeout: 90_000 });
+    await expect(page.getByTestId('liquidity-connect')).toBeVisible();
+    await shot(page, 'liquidity-disconnected');
+    // All pools is public: cards load without a wallet.
+    await page.getByTestId('pools-tab-all').click();
+    await expect(page.getByTestId('pool-card')).toHaveCount(2, { timeout: 60_000 });
   });
 
   test('advanced: named sections with descriptions', async ({ page }) => {
