@@ -259,14 +259,14 @@ function BoingAdvanced() {
   return (
     <>
       <P>
-        On Boing, the Swap page has three tabs: <B>Swap</B> (the card above), <B>Your liquidity</B> and <B>Advanced</B>.
-        Pool cards are on the <To to="/pools">Pools</To> page.
+        On Boing, the Swap page has two tabs: <B>Swap</B> (the card above) and <B>Advanced</B>. Pool cards and your
+        liquidity are on the <To to="/pools">Pools</To> page, in the <B>All pools</B> and <B>Your liquidity</B> tabs.
       </P>
-      <H3>Pools page</H3>
+      <H3>Pools page: All pools</H3>
       <P>
         One card per pool, for example <B>FV2C / USDC</B>: the total liquidity in plain numbers, the current price (tap it
         to flip, e.g. &quot;1 USDC ≈ 0.99 tBOING&quot;), the swap fee, and your share if you have one. <B>Swap</B> opens the
-        Swap page with that pair selected; <B>Add liquidity</B> opens Swap → Your liquidity with the pool filled in. Search
+        Swap page with that pair selected; <B>Add liquidity</B> opens the <B>Your liquidity</B> tab with the pool filled in. Search
         by token symbol or paste an address to filter, and use <B>Create a pool</B> for a pair that doesn&apos;t exist yet.
         Addresses stay hidden under <B>Details</B>. You can browse pools before connecting a wallet.
       </P>
@@ -302,7 +302,7 @@ function Liquidity() {
         <B>impermanent loss</B> in DeFi 101 (settings menu) before you add liquidity.
       </P>
       <H3>On Boing</H3>
-      <P>Earn a share of swap fees by adding tokens to a pool. <B>Swap → Your liquidity</B>:</P>
+      <P>Earn a share of swap fees by adding tokens to a pool. <B>Pools → Your liquidity</B> (<To to="/pools?tab=liquidity">open it</To>):</P>
       <UL>
         <li>
           <B>Your positions:</B> each pool you&apos;re in, your share of it, and what you&apos;d get back per token if you
@@ -558,7 +558,7 @@ function PortfolioActivity() {
         <li>
           <To to="/portfolio">Portfolio</To>: connect a wallet to see balances, pools and NFTs on the current network. On
           Boing it shows your BOING balance read from the chain, with a link to your account on Boing Observer; token and
-          LP positions are under Swap → Your liquidity.
+          LP positions are under Pools → Your liquidity.
         </li>
         <li>
           <To to="/activity">Activity</To>: your swaps, liquidity and bridge history, with Export CSV.
@@ -695,7 +695,7 @@ export const DOC_SECTIONS = Object.freeze([
   { id: 'settings', title: 'Settings menu & help', Body: SettingsMenu },
   { id: 'networks', title: 'Supported networks', Body: Networks },
   { id: 'swap', title: 'Swap', Body: Swap },
-  { id: 'boing-advanced', title: 'Boing swap: Pools page & Advanced tab', Body: BoingAdvanced },
+  { id: 'boing-advanced', title: 'Boing: Pools page & Swap → Advanced', Body: BoingAdvanced },
   { id: 'liquidity', title: 'Pools & liquidity', Body: Liquidity },
   { id: 'bridge', title: 'Bridge', Body: Bridge },
   { id: 'deploy-token', title: 'Deploy a token', Body: DeployToken },

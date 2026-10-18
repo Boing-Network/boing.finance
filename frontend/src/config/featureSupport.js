@@ -229,7 +229,7 @@ export function getBoingL1FullDexReadiness(chainId, options) {
       label: 'Portfolio (native balance + stake)',
       status: 'live',
       detail:
-        'Portfolio on chain 6913 uses boing_getAccount via Boing Express (not EVM indexers). LP / token positions: Swap → Your liquidity.',
+        'Portfolio on chain 6913 uses boing_getAccount via Boing Express (not EVM indexers). LP / token positions: Pools → Your liquidity.',
     },
     {
       id: 'bridge',

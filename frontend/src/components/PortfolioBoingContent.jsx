@@ -154,8 +154,8 @@ export default function PortfolioBoingContent() {
             <strong style={{ color: 'var(--text-primary)' }}>Boing-native:</strong> balances come from{' '}
             <code className="text-xs">boing_getAccount</code> over the Boing RPC — not Alchemy/The Graph/EVM
             indexers. Fungible token and LP share positions live under{' '}
-            <Link to="/swap?nativeTradeTab=liquidity" className="text-cyan-400 underline hover:text-cyan-300">
-              Swap → Your liquidity
+            <Link to="/pools?tab=liquidity" className="text-cyan-400 underline hover:text-cyan-300">
+              Pools → Your liquidity
             </Link>
             {' '}and the{' '}
             <a href={BOING_OBSERVER_BASE_URL} className="text-cyan-400 underline hover:text-cyan-300" target="_blank" rel="noopener noreferrer">
