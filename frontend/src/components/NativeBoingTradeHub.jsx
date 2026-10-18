@@ -91,6 +91,11 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
   const pools = useBoingPools(isConnected ? account : null);
   const [addFor, setAddFor] = useState(/** @type {any} */ (null));
   const clearAddFor = useCallback(() => setAddFor(null), []);
+  // Fresh reserves / LP balances whenever Pools or Your liquidity opens (e.g. right after a swap).
+  const reloadPools = pools.reload;
+  useEffect(() => {
+    if (tab === 'pools' || tab === 'liquidity') reloadPools();
+  }, [tab, reloadPools]);
   const [searchParams, setSearchParams] = useSearchParams();
   const [tab, setTab] = useState(() => parseTab(searchParams.get('nativeTradeTab')) || 'swap');
   const routePrefillSeq = useRef(0);

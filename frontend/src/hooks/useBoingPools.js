@@ -20,10 +20,12 @@ export function useBoingPools(account) {
   const [lpByPool, setLpByPool] = useState(/** @type {Record<string, { balance: bigint, totalLp: bigint }>} */ ({}));
   const [lpLoading, setLpLoading] = useState(false);
   const seq = useRef(0);
+  const [tick, setTick] = useState(0);
 
   const reload = useCallback(async () => {
     const my = ++seq.current;
     setError(null);
+    setTick((t) => t + 1);
     try {
       const p = await loadCustodyPools(client);
       if (my === seq.current) setPools(p);
@@ -89,7 +91,7 @@ export function useBoingPools(account) {
       off = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [client, account, poolKey]);
+  }, [client, account, poolKey, tick]);
 
   const cards = useMemo(
     () =>
