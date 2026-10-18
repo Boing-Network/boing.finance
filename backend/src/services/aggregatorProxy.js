@@ -95,6 +95,44 @@ export async function fetchLifiQuote({
   return body;
 }
 
+/**
+ * Pass-through LI.FI quote for the Bridge page: any LI.FI chain (EVM, Solana, Bitcoin, Sui, Tron…), optional
+ * `toAddress`. Adds the integrator, the platform fee (cross-chain only) and the API key server-side.
+ * Returns `{ ok, status, body }` with LI.FI's own body so the browser can explain errors.
+ */
+const LIFI_PARAM = /^[A-Za-z0-9:._-]{1,128}$/;
+export function buildLifiPassthroughParams(query, fee) {
+  const pick = (k) => (query[k] == null ? '' : String(query[k]).trim());
+  const out = new URLSearchParams();
+  for (const k of ['fromChain', 'toChain', 'fromToken', 'toToken', 'fromAddress']) {
+    const v = pick(k);
+    if (!LIFI_PARAM.test(v)) return { error: `${k} is missing or invalid` };
+    out.set(k, v);
+  }
+  const amount = pick('fromAmount');
+  if (!/^[0-9]{1,78}$/.test(amount) || /^0+$/.test(amount)) return { error: 'fromAmount must be a positive integer in base units' };
+  out.set('fromAmount', amount);
+  const toAddress = pick('toAddress');
+  if (toAddress) {
+    if (!LIFI_PARAM.test(toAddress)) return { error: 'toAddress is invalid' };
+    out.set('toAddress', toAddress);
+  }
+  const slippage = Number(pick('slippage') || '0.005');
+  if (!Number.isFinite(slippage) || slippage <= 0 || slippage > 0.5) return { error: 'slippage must be between 0 and 0.5' };
+  out.set('slippage', String(slippage));
+  const order = pick('order').toUpperCase();
+  out.set('order', order === 'FASTEST' ? 'FASTEST' : 'CHEAPEST');
+  out.set('integrator', INTEGRATOR);
+  if (out.get('fromChain') !== out.get('toChain') && fee != null && Number(fee) > 0) out.set('fee', String(fee));
+  return { params: out };
+}
+
+export async function fetchLifiQuotePassthrough(params, env) {
+  const res = await fetch(`${LIFI_QUOTE}?${params}`, { headers: lifiHeaders(env) });
+  const body = await res.json().catch(() => ({}));
+  return { ok: res.ok, status: res.status, body };
+}
+
 export async function fetchJupiterQuote({ inputMint, outputMint, amount, slippageBps, env }) {
   const params = new URLSearchParams({
     inputMint,

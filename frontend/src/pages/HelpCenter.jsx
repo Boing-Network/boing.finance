@@ -68,7 +68,7 @@ const HelpCenter = () => {
         {
           id: 'bridge-tokens',
           title: 'How to bridge',
-          content: 'Move tokens between EVM networks. A small platform fee applies.',
+          content: 'Move tokens between Ethereum, Base, Solana, Bitcoin and 60+ other LI.FI networks. A small platform fee applies.',
           tags: ['bridge', 'cross-chain', 'transfer']
         },
         {

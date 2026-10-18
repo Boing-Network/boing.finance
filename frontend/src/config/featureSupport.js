@@ -236,7 +236,7 @@ export function getBoingL1FullDexReadiness(chainId, options) {
       label: 'In-app cross-chain bridge',
       status: 'planned',
       detail:
-        'EVM /bridge is live LI.FI. Boing L1 has no VM bridge; native transfers use Boing Express.',
+        '/bridge is live LI.FI: every LI.FI chain (EVM, Solana, Bitcoin, Sui, Tron); send from EVM or Solana wallets. Boing L1 has no VM bridge; native transfers use Boing Express.',
     },
     {
       id: 'explorer_transparency',

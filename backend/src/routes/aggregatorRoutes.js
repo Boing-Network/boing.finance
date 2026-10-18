@@ -1,5 +1,7 @@
 import { Hono } from 'hono';
 import {
+  buildLifiPassthroughParams,
+  fetchLifiQuotePassthrough,
   fetchJupiterQuote,
   fetchJupiterSwapTx,
   fetchLifiQuote,
@@ -39,7 +41,7 @@ export function createAggregatorRoutes() {
         hasApiKey: Boolean(c.env?.LIFI_API_KEY),
         portalUrl: 'https://portal.li.fi/',
         inventoryRequired: false,
-        inAppRoutes: ['evm'],
+        inAppRoutes: ['evm', 'svm'],
       },
     });
   });
@@ -128,6 +130,21 @@ export function createAggregatorRoutes() {
       });
     } catch (error) {
       return c.json({ success: false, error: error.message || 'Quote failed' }, 502);
+    }
+  });
+
+  // Bridge page: LI.FI quote for any chain pair (EVM, Solana, Bitcoin, …), LI.FI body passed through.
+  router.get('/lifi/quote', async (c) => {
+    c.header('Cache-Control', 'no-store');
+    const { params, error } = buildLifiPassthroughParams(c.req.query(), resolveBridgeFee(c.env));
+    if (error) return c.json({ success: false, lifi: true, status: 400, error: { code: 1011, message: error } }, 400);
+    try {
+      const { ok, status, body } = await fetchLifiQuotePassthrough(params, c.env);
+      if (ok && body?.transactionRequest) return c.json({ success: true, data: body });
+      const code = status >= 400 && status < 600 ? status : 502;
+      return c.json({ success: false, lifi: true, status, error: body || {} }, code);
+    } catch (e) {
+      return c.json({ success: false, error: e.message || 'Quote failed' }, 502);
     }
   });
 
