@@ -10,6 +10,8 @@ import { addLiquidityPreview, pairedAmount, removeLiquidityPreview, withSlippage
 import { executeAddLiquidity, executeRemoveLiquidity } from '../services/boingLiquidityTx';
 import { getWindowBoingProvider, boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
+import { useWalletNativeValue } from '../hooks/useWalletNativeValue';
+import { NATIVE_VALUE_MIN_EXPRESS_VERSION } from '../services/boingWalletNativeValue';
 import BoingTokenPairIcons from './BoingTokenPairIcons';
 import { PoolDetails, PRIMARY_BTN } from './BoingPoolsTab';
 
@@ -26,6 +28,15 @@ function expressProvider(getWalletProvider) {
     /* ignore */
   }
   return getWindowBoingProvider();
+}
+
+function useNativeValueSupport() {
+  const { account, getWalletProvider, walletType } = useWallet();
+  const provider = useMemo(
+    () => (account && walletType === 'boingExpress' ? expressProvider(getWalletProvider) : null),
+    [account, walletType, getWalletProvider]
+  );
+  return useWalletNativeValue(provider, Boolean(provider));
 }
 
 function useSigner() {
@@ -79,6 +90,7 @@ function AmountRow({ label, symbol, value, onChange, balance, testid, disabled, 
 function AddLiquidityPanel({ pools, initialCard, onDone, onCancel }) {
   const { account } = useWallet();
   const getSigner = useSigner();
+  const nativeValue = useNativeValueSupport();
   const { client, cards, tokens } = pools;
   const [tokA, setTokA] = useState(initialCard?.tokenA.id || tokens[0]?.id || '');
   const [tokB, setTokB] = useState(initialCard?.tokenB.id || tokens[1]?.id || '');
@@ -144,6 +156,8 @@ function AddLiquidityPanel({ pools, initialCard, onDone, onCancel }) {
   else if (!a || !b) [label, disabled] = ['Enter amounts', true];
   else if (insufficient) [label, disabled] = ['Insufficient balance', true];
   else if (preview?.tooSmall) [label, disabled] = ['Amount too small for this pool', true];
+  // Adding to a BOING pool sends BOING with the wrap call: needs Boing Express 0.1.19+.
+  else if (card.native && nativeValue && !nativeValue.supported) [label, disabled] = ['Update Boing Express to add BOING liquidity', true];
 
   const submit = async () => {
     try {
@@ -229,6 +243,12 @@ function AddLiquidityPanel({ pools, initialCard, onDone, onCancel }) {
               <span className="font-medium" data-testid="add-share">{preview?.sharePct ?? '—'}</span>
             </div>
             <p className="mt-1 text-xs" style={muted}>The other amount fills in at the pool&apos;s current ratio. You can withdraw any time.</p>
+            {card.native && nativeValue && !nativeValue.supported && (
+              <p className="mt-1 text-xs" style={{ color: 'var(--text-secondary)' }} data-testid="add-update-wallet">
+                Adding BOING sends it with the wrap step, which needs Boing Express {NATIVE_VALUE_MIN_EXPRESS_VERSION} or newer
+                {nativeValue.version ? ` (yours: ${nativeValue.version})` : ' (yours is older)'}. Update or reload Boing Express, then refresh this page.
+              </p>
+            )}
             {card.native && (
               <p className="mt-1 text-xs" style={muted} data-testid="add-native-note">
                 One confirmation: your BOING is wrapped, both tokens approved and the liquidity added in a single transaction.
