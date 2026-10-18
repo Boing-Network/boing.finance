@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { getBoingTokenBalance } from 'boing-sdk';
+import { Link } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
@@ -17,6 +18,7 @@ import {
 import {
   custodyTokenList,
   custodyTokensNeedingMetadata,
+  filterPickerTokens,
   formatFee,
   formatRate,
   formatWhole,
@@ -42,9 +44,14 @@ function pickExpressProvider(getWalletProvider) {
   return getWindowBoingProvider();
 }
 
-function TokenSelect({ side, token, tokens, balances, onPick, disabled }) {
+function TokenSelect({ side, token, tokens, balances, onPick, disabled, otherToken }) {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
   const ref = useRef(null);
+  const { matches, unlistedAddress } = useMemo(() => filterPickerTokens(tokens, query), [tokens, query]);
+  useEffect(() => {
+    if (!open) setQuery('');
+  }, [open]);
   useEffect(() => {
     if (!open) return undefined;
     const close = (e) => {
@@ -84,36 +91,66 @@ function TokenSelect({ side, token, tokens, balances, onPick, disabled }) {
         </svg>
       </button>
       {open && (
-        <ul
-          role="listbox"
-          aria-label={side === 'in' ? 'Token you pay' : 'Token you receive'}
-          className="absolute right-0 z-30 mt-2 w-64 rounded-xl border p-1 shadow-xl"
+        <div
+          className="absolute right-0 z-30 mt-2 w-72 rounded-xl border p-1 shadow-xl"
           style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-card)' }}
         >
-          {tokens.map((t) => (
-            <li key={t.id}>
-              <button
-                type="button"
-                role="option"
-                aria-selected={t.id === token?.id}
-                data-testid={`swap-token-option-${t.symbol}`}
-                onClick={() => {
-                  onPick(t.id);
-                  setOpen(false);
-                }}
-                className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left hover:bg-[var(--secondary-bg)]"
-              >
-                <span>
-                  <span className="block font-semibold" style={{ color: 'var(--text-primary)' }}>{t.symbol}</span>
-                  <span className="block text-xs" style={{ color: 'var(--text-tertiary)' }}>{t.name}</span>
-                </span>
-                <span className="text-sm tabular-nums" style={{ color: 'var(--text-secondary)' }}>
-                  {balances[t.id] != null ? formatWhole(balances[t.id]) : ''}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
+          <input
+            autoFocus
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search name or paste address"
+            aria-label="Search tokens"
+            data-testid={`swap-token-search-${side}`}
+            className="mb-1 w-full rounded-lg border bg-transparent px-3 py-2 text-sm"
+            style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+          />
+          <ul
+            role="listbox"
+            aria-label={side === 'in' ? 'Token you pay' : 'Token you receive'}
+            className="max-h-72 overflow-y-auto"
+          >
+            {matches.map((t) => (
+              <li key={t.id}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={t.id === token?.id}
+                  data-testid={`swap-token-option-${t.symbol}`}
+                  onClick={() => {
+                    onPick(t.id);
+                    setOpen(false);
+                  }}
+                  className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left hover:bg-[var(--secondary-bg)]"
+                >
+                  <span>
+                    <span className="block font-semibold" style={{ color: 'var(--text-primary)' }}>{t.symbol}</span>
+                    <span className="block text-xs" style={{ color: 'var(--text-tertiary)' }}>{t.name}</span>
+                  </span>
+                  <span className="text-sm tabular-nums" style={{ color: 'var(--text-secondary)' }}>
+                    {balances[t.id] != null ? formatWhole(balances[t.id]) : ''}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          {matches.length === 0 && (
+            <div className="px-3 py-3 text-sm" style={{ color: 'var(--text-secondary)' }} data-testid="swap-token-no-pool">
+              {unlistedAddress ? (
+                <>
+                  No pool yet —{' '}
+                  <Link className="underline" to={`/create-pool?token=${unlistedAddress}${otherToken ? `&pair=${otherToken}` : ''}`}>
+                    create one
+                  </Link>
+                  .
+                </>
+              ) : (
+                'No token matches. Paste its address to check.'
+              )}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
@@ -463,7 +500,7 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
             className="min-w-0 flex-1 bg-transparent text-3xl font-semibold tabular-nums outline-none"
             style={{ color: 'var(--text-primary)' }}
           />
-          <TokenSelect side="in" token={tokenIn} tokens={tokens} balances={balances} onPick={(id) => pickToken('in', id)} disabled={busy} />
+          <TokenSelect side="in" token={tokenIn} tokens={tokens} balances={balances} onPick={(id) => pickToken('in', id)} disabled={busy} otherToken={tokenOut?.id} />
         </div>
         <p className="mt-1 text-xs" style={muted}>{tokenIn?.name || ' '} · whole units</p>
       </div>
@@ -498,7 +535,7 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
           >
             {amountOut != null ? formatWhole(amountOut) : '0'}
           </div>
-          <TokenSelect side="out" token={tokenOut} tokens={tokens} balances={balances} onPick={(id) => pickToken('out', id)} disabled={busy} />
+          <TokenSelect side="out" token={tokenOut} tokens={tokens} balances={balances} onPick={(id) => pickToken('out', id)} disabled={busy} otherToken={tokenIn?.id} />
         </div>
         <p className="mt-1 text-xs" style={muted}>{tokenOut?.name || ' '}</p>
       </div>
@@ -552,10 +589,18 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
         onClick={onPrimary}
         disabled={button.disabled}
         className="mt-4 w-full rounded-2xl py-4 text-lg font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-50"
-        style={{ background: 'linear-gradient(135deg, var(--finance-primary), #2563eb)' }}
+        style={{ background: 'linear-gradient(135deg, var(--finance-primary), #2563eb)', color: '#ffffff', textShadow: '0 1px 2px rgba(0,0,0,0.55)' }}
       >
         {button.label}
       </button>
+      {button.kind === 'no_route' && tokenIn && tokenOut && (
+        <p className="mt-2 text-center text-sm" style={{ color: 'var(--text-secondary)' }} data-testid="swap-no-pool">
+          No pool yet —{' '}
+          <Link className="underline" style={{ color: 'var(--finance-primary)' }} to={`/create-pool?token=${tokenOut.id}&pair=${tokenIn.id}`}>
+            create one
+          </Link>
+        </p>
+      )}
       {button.kind === 'approve_swap' && (
         <p className="mt-2 text-center text-xs" style={muted}>
           First time swapping {tokenIn?.symbol}: Boing Express asks you to approve exactly this amount, then to confirm the swap.

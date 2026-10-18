@@ -91,3 +91,22 @@ test('tokens with only hex placeholder labels are looked up; real names then win
   assert.equal(t.symbol, 'FV2C');
   assert.equal(t.name, 'FinV2Check');
 });
+
+test('picker search: symbol, name, pasted address, unlisted address', async () => {
+  const { filterPickerTokens } = await import('../src/services/boingSwapQuote.js');
+  const NEW = '0x' + 'cd'.repeat(32);
+  const toks = [
+    { id: USDC, symbol: 'USDC', name: 'USD Coin (test)' },
+    { id: TB, symbol: 'tBOING', name: 'Boing Token (test)' },
+    { id: '0x' + 'ef'.repeat(32), symbol: 'SWPC', name: 'Swap Check' },
+  ];
+  assert.deepEqual(filterPickerTokens(toks, '').matches.length, 3);
+  assert.deepEqual(filterPickerTokens(toks, 'sw').matches.map((t) => t.symbol), ['SWPC']);
+  assert.deepEqual(filterPickerTokens(toks, 'boing').matches.map((t) => t.symbol), ['tBOING']);
+  assert.deepEqual(filterPickerTokens(toks, 'coin').matches.map((t) => t.symbol), ['USDC']);
+  assert.deepEqual(filterPickerTokens(toks, USDC.toUpperCase().replace('0X', '0x')).matches.map((t) => t.symbol), ['USDC']);
+  const un = filterPickerTokens(toks, ` ${NEW} `);
+  assert.equal(un.matches.length, 0);
+  assert.equal(un.unlistedAddress, NEW);
+  assert.equal(filterPickerTokens(toks, 'doge').matches.length, 0);
+});

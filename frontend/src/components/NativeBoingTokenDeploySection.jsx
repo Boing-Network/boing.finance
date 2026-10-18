@@ -1,5 +1,6 @@
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
+import { Link } from 'react-router-dom';
 import { isBoingTestnetChainId } from 'boing-sdk';
 import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
@@ -512,6 +513,33 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
           )}
         </div>
       )}
+
+      {lastDeployedAccount ? (
+        <div className="mt-3 rounded-xl border p-4" style={{ borderColor: 'rgba(59, 130, 246, 0.45)' }} data-testid="boing-token-make-swappable">
+          <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>Make {tokenSymbol || 'your token'} swappable</p>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
+            Create a pool with USDC and add the first liquidity. As soon as the pool exists, {tokenSymbol || 'the token'} shows up in the swap token list and on Pools.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link
+              to={`/create-pool?token=${lastDeployedAccount}&pair=usdc`}
+              className="rounded-lg px-4 py-2 text-sm font-semibold"
+              style={{ background: 'linear-gradient(135deg, var(--finance-primary), #2563eb)', color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,0.55)' }}
+              data-testid="boing-token-create-pool"
+            >
+              Create a pool
+            </Link>
+            <Link
+              to={`/create-pool?token=${lastDeployedAccount}&pair=usdc#initial-liquidity`}
+              className="rounded-lg border px-4 py-2 text-sm font-semibold"
+              style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+              data-testid="boing-token-add-liquidity"
+            >
+              Add initial liquidity
+            </Link>
+          </div>
+        </div>
+      ) : null}
 
       {lastDeployedAccount ? (
         <LinkedNftTokenPanel

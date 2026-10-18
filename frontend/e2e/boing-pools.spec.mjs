@@ -232,4 +232,32 @@ test.describe('Simple Pools and Your liquidity', () => {
     await expect(page.getByTestId('advanced-contracts')).toContainText('Pool contracts & factory');
     await shot(page, 'advanced-sections');
   });
+
+  test('swap picker: search by symbol, paste address, "No pool yet — create one"', async ({ page }) => {
+    test.setTimeout(180_000);
+    await wallet(page);
+    await page.goto('/swap?noIntro=1');
+    await expect(page.getByTestId('boing-swap-card')).toBeVisible({ timeout: 90_000 });
+    await expect(page.getByTestId('swap-token-in')).not.toHaveText(/Select/, { timeout: 60_000 });
+    await page.getByTestId('swap-token-out').click();
+    await page.getByTestId('swap-token-search-out').fill('fv2');
+    await expect(page.getByTestId('swap-token-option-FV2C')).toBeVisible();
+    await expect(page.getByTestId('swap-token-option-USDC')).toHaveCount(0);
+    await shot(page, 'picker-search-symbol');
+    await page.getByTestId('swap-token-search-out').fill(FV);
+    await expect(page.getByTestId('swap-token-option-FV2C')).toBeVisible();
+    const NEW = `0x${'cd'.repeat(32)}`;
+    await page.getByTestId('swap-token-search-out').fill(NEW);
+    await expect(page.getByTestId('swap-token-no-pool')).toContainText('No pool yet — create one');
+    await expect(page.getByTestId('swap-token-no-pool').getByRole('link')).toHaveAttribute('href', new RegExp(`/create-pool\\?token=${NEW}`));
+    await shot(page, 'picker-paste-unlisted');
+    await page.getByTestId('swap-token-search-out').fill('tboing');
+    await page.getByTestId('swap-token-option-tBOING').click();
+    await page.getByTestId('swap-token-in').click();
+    await page.getByTestId('swap-token-search-in').fill('FV2C');
+    await page.getByTestId('swap-token-option-FV2C').click();
+    await page.getByTestId('swap-amount-in').fill('5');
+    await expect(page.getByTestId('swap-no-pool')).toContainText('No pool yet — create one');
+    await shot(page, 'swap-no-pool-pair');
+  });
 });

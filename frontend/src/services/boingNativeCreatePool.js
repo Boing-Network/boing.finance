@@ -1,11 +1,15 @@
 import { pickExpressProviderForDeploy, executeBoingLaunchWizardDeploy } from './boingNativeLaunchWizardDeploy';
-import { waitForBoingDeployReceiptAccount } from './boingDeployReceiptFollowup';
-import { boingExpressContractCallSignSimulateSubmit } from './boingExpressNativeTx';
+import { boingExpressContractCallSignSimulateSubmit, fetchBoingAccountNonceString } from './boingExpressNativeTx';
+import { fetchBoingTransactionReceipt } from './boingTestnetRpc';
+import { pickDeployedAccountIdFromBoingReceipt } from './boingDeployReceiptFollowup';
 import { encodeNativeAmmAddLiquidityCalldataHex, encodeNativeAmmSetTokensCalldataHex } from './nativeAmmCalldata';
 import { encodeNativeDexRegisterPairCalldataHex } from './nativeDexFactoryCalldata';
 import { nativeAccountsAccessListJson } from './nativeAmmAccessList';
 import { normalizeNativeVmTokenId32 } from './nativeVmTokenRegistry';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
+import { boingPoolBytecodeHex, predictNonceDerivedContractAddress } from 'boing-sdk';
+import { executeAddLiquidity } from './boingLiquidityTx';
+import { getSharedBoingClient } from './boingNativeDexClient';
 import { boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
 
 const U64_MAX = (1n << 64n) - 1n;
@@ -29,13 +33,45 @@ function accessListFor(accounts) {
   return list ? { access_list: list } : {};
 }
 
-async function contractCall(provider, contract, calldata, accounts) {
-  return boingExpressContractCallSignSimulateSubmit(provider, {
-    type: 'contract_call',
-    contract,
-    calldata,
-    ...accessListFor(accounts),
-  });
+async function contractCall(provider, contract, calldata, accounts, options) {
+  return boingExpressContractCallSignSimulateSubmit(
+    provider,
+    {
+      type: 'contract_call',
+      contract,
+      calldata,
+      ...accessListFor(accounts),
+    },
+    options
+  );
+}
+
+/**
+ * Wait for the deploy receipt; the pool id is the receipt's log address when present, else the predicted
+ * nonce-derived address once it holds code. Null if the deploy failed or never confirmed.
+ */
+export async function resolveDeployedPoolId(txIdHex, predictedPoolId, { maxAttempts = 40, delayMs = 1500 } = {}) {
+  for (let i = 0; i < maxAttempts; i += 1) {
+    if (i > 0) await new Promise((r) => setTimeout(r, delayMs));
+    let receipt = null;
+    try {
+      receipt = await fetchBoingTransactionReceipt(txIdHex);
+    } catch {
+      continue;
+    }
+    if (receipt == null) continue;
+    if (receipt.success === false) return null;
+    const fromReceipt = pickDeployedAccountIdFromBoingReceipt(receipt);
+    if (fromReceipt) return fromReceipt;
+    if (!predictedPoolId) return null;
+    try {
+      const code = await getSharedBoingClient().getContractCode(predictedPoolId);
+      if (code) return predictedPoolId;
+    } catch {
+      /* retry */
+    }
+  }
+  return null;
 }
 
 /**
@@ -96,12 +132,23 @@ export async function createBoingNativeConstantProductPool({
     return { ok: false, code: 'no_provider', message: boingWalletMissingMessage() };
   }
 
+  // Pool templates emit no deploy log, so the receipt alone does not name the new account: predict the
+  // nonce-derived address up front and confirm it has code once the deploy is included.
+  let predictedPoolId = null;
+  try {
+    predictedPoolId = predictNonceDerivedContractAddress(account, BigInt(await fetchBoingAccountNonceString(account))).toLowerCase();
+  } catch {
+    predictedPoolId = null;
+  }
+
+  // No override -> custody pool v8: token-v2 pairs pulled with approvals, quoted and swapped by the swap card.
+  const custody = !String(customBytecode || '').trim();
   const deploy = await executeBoingLaunchWizardDeploy({
     kind: 'liquidity_pool',
     getWalletProvider,
     poolLabel: (poolLabel || '').trim() || undefined,
     poolSymbol: (poolSymbol || '').trim() || undefined,
-    customBytecode,
+    customBytecode: custody ? boingPoolBytecodeHex(8) : customBytecode,
     descriptionHash,
     purposeCategory,
     qaPoolAcknowledged,
@@ -115,9 +162,7 @@ export async function createBoingNativeConstantProductPool({
     };
   }
 
-  const poolId = deploy.boingTxIdHex
-    ? await waitForBoingDeployReceiptAccount(deploy.boingTxIdHex, { maxAttempts: 32, delayMs: 1500 })
-    : null;
+  const poolId = deploy.boingTxIdHex ? await resolveDeployedPoolId(deploy.boingTxIdHex, predictedPoolId) : null;
   if (!poolId) {
     return {
       ok: false,
@@ -137,7 +182,8 @@ export async function createBoingNativeConstantProductPool({
       provider,
       poolId,
       encodeNativeAmmSetTokensCalldataHex(tokenA, tokenB),
-      [account, poolId, tokenA, tokenB]
+      [account, poolId, tokenA, tokenB],
+      custody ? { senderHex: account, waitForInclusion: true } : undefined
     );
   } catch (e) {
     setTokensSkipped = true;
@@ -148,12 +194,27 @@ export async function createBoingNativeConstantProductPool({
 
   let addLiquidityTxHash = null;
   try {
-    addLiquidityTxHash = await contractCall(
-      provider,
-      poolId,
-      encodeNativeAmmAddLiquidityCalldataHex(amountABn, amountBBn, 0n),
-      [account, poolId, tokenA, tokenB]
-    );
+    if (custody) {
+      const res = await executeAddLiquidity(getSharedBoingClient(), {
+        poolHex: poolId,
+        tokenAHex: tokenA,
+        tokenBHex: tokenB,
+        amountA: amountABn,
+        amountB: amountBBn,
+        minLp: 1n,
+        senderHex: account,
+        signSimulateSubmit: (tx, o) =>
+          boingExpressContractCallSignSimulateSubmit(provider, tx, { senderHex: account, waitForInclusion: o?.waitForInclusion }),
+      });
+      addLiquidityTxHash = res.add;
+    } else {
+      addLiquidityTxHash = await contractCall(
+        provider,
+        poolId,
+        encodeNativeAmmAddLiquidityCalldataHex(amountABn, amountBBn, 0n),
+        [account, poolId, tokenA, tokenB]
+      );
+    }
   } catch (e) {
     return {
       ok: false,
@@ -199,6 +260,7 @@ export async function createBoingNativeConstantProductPool({
     registerTxHash,
     setTokensSkipped,
     registerSkipped,
+    custody,
     warnings,
   };
 }
