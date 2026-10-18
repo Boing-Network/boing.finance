@@ -11,9 +11,11 @@ import {
   CUSTODY_APPROVAL,
   CUSTODY_ROUTER_HEX,
   executeCustodySwap,
+  executeNativeBoingSwap,
   loadCustodyPools,
   loadCustodyTokenMetadata,
   planCustodySwap,
+  planNativeBoingSwap,
 } from '../services/nativeDexCustodySwap';
 import {
   custodyTokenList,
@@ -21,12 +23,18 @@ import {
   filterPickerTokens,
   formatFee,
   formatRate,
-  formatWhole,
+  formatTokenAmount,
+  isNativeBoingPool,
   minReceived,
-  parseWholeAmount,
+  NATIVE_FEE_RESERVE,
+  parseTokenAmount,
   pickBestCustodyPool,
+  poolSideDecimals,
+  sanitizeAmountInput,
   spotRateAfterFee,
   swapButtonState,
+  toAmountInput,
+  WBOING_HEX,
 } from '../services/boingSwapQuote';
 import { getWindowBoingProvider, boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
@@ -129,7 +137,7 @@ function TokenSelect({ side, token, tokens, balances, onPick, disabled, otherTok
                     <span className="block text-xs" style={{ color: 'var(--text-tertiary)' }}>{t.name}</span>
                   </span>
                   <span className="text-sm tabular-nums" style={{ color: 'var(--text-secondary)' }}>
-                    {balances[t.id] != null ? formatWhole(balances[t.id]) : ''}
+                    {balances[t.id] != null ? formatTokenAmount(balances[t.id], t.decimals ?? 0, 4) : ''}
                   </span>
                 </button>
               </li>
@@ -157,8 +165,9 @@ function TokenSelect({ side, token, tokens, balances, onPick, disabled, otherTok
 }
 
 /**
- * One simple swap card for Boing L1: pick tokens, enter a whole amount, see the estimate and sign in Boing Express.
- * Routes through the best custody (v8/v9) pool for the pair; the raw pool / router details sit in "Route details".
+ * One simple swap card for Boing L1: pick tokens, enter an amount, see the estimate and sign in Boing Express.
+ * Routes through the best custody (v8/v9) pool for the pair. Native BOING (wBOING under the hood) routes to its
+ * v10 pools and wraps / unwraps inside one signed batch. Raw pool / router details sit in "Route details".
  *
  * @param {{ slippagePercent?: number, prefill?: { key: number, tokenIn: string, tokenOut: string } }} props
  */
@@ -238,7 +247,11 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
 
   const tokenIn = tokens.find((t) => t.id === tokenInId) || null;
   const tokenOut = tokens.find((t) => t.id === tokenOutId) || null;
-  const amountIn = parseWholeAmount(amountRaw);
+  const decIn = tokenIn?.decimals ?? 0;
+  const decOut = tokenOut?.decimals ?? 0;
+  const amountIn = parseTokenAmount(amountRaw, decIn);
+  const fmtIn = (n) => formatTokenAmount(n, decIn);
+  const fmtOut = (n) => formatTokenAmount(n, decOut);
   const route = useMemo(
     () => (tokenIn && tokenOut ? pickBestCustodyPool(pools || [], tokenIn.id, tokenOut.id, amountIn) : null),
     [pools, tokenIn, tokenOut, amountIn]
@@ -253,7 +266,13 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
     await Promise.all(
       tokens.map(async (t) => {
         try {
-          next[t.id] = await getBoingTokenBalance(client, t.id, account);
+          if (t.native) {
+            // Native BOING: the account balance (base units), not a wBOING token balance.
+            const acct = await client.getAccount(account);
+            next[t.id] = BigInt(acct?.balance ?? 0);
+          } else {
+            next[t.id] = await getBoingTokenBalance(client, t.id, account);
+          }
         } catch {
           next[t.id] = null;
         }
@@ -266,6 +285,26 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
     loadBalances();
   }, [loadBalances]);
 
+  const nativeRoute = isNativeBoingPool(route?.pool);
+  // BOING pairs: one batch through the v10 pool (wrap / unwrap included); others: custody router (+ approval).
+  const makePlan = () =>
+    nativeRoute
+      ? planNativeBoingSwap(client, {
+          poolHex: route.pool.poolHex,
+          tokenInHex: tokenIn.id,
+          tokenOutHex: tokenOut.id,
+          amountIn,
+          slippagePercent: slippage,
+          senderHex: account,
+        })
+      : planCustodySwap(client, {
+          poolHex: route.pool.poolHex,
+          tokenInHex: tokenIn.id,
+          amountIn,
+          slippagePercent: slippage,
+          senderHex: account,
+        });
+
   // Live plan (allowance, exact min out) once connected; local quote otherwise.
   useEffect(() => {
     setPlanError(null);
@@ -276,13 +315,7 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
     let cancelled = false;
     const t = setTimeout(async () => {
       try {
-        const p = await planCustodySwap(client, {
-          poolHex: route.pool.poolHex,
-          tokenInHex: tokenIn.id,
-          amountIn,
-          slippagePercent: slippage,
-          senderHex: account,
-        });
+        const p = await makePlan();
         if (!cancelled) setPlan(p);
       } catch (e) {
         if (!cancelled) {
@@ -295,7 +328,8 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
       cancelled = true;
       clearTimeout(t);
     };
-  }, [client, connected, wrongNetwork, route?.pool, tokenIn, amountIn, slippage, account, busyState]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [client, connected, wrongNetwork, route?.pool, tokenIn, tokenOut, amountIn, slippage, account, busyState]);
 
   const amountOut = plan ? plan.amountOut : route?.quote?.amountOut ?? null;
   const minOut = plan ? plan.minOut : amountOut != null ? minReceived(amountOut, slippage) : null;
@@ -326,7 +360,7 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
   const flip = () => {
     setTokenInId(tokenOutId);
     setTokenOutId(tokenInId);
-    if (amountOut != null && amountOut > 0n) setAmountRaw(String(amountOut));
+    if (amountOut != null && amountOut > 0n) setAmountRaw(toAmountInput(amountOut, decOut));
   };
 
   const saveSlippage = (v) => {
@@ -367,30 +401,32 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
     setBusyState('Preparing…');
     try {
       // Re-quote right before signing so min out reflects current reserves.
-      const fresh = await planCustodySwap(client, {
-        poolHex: route.pool.poolHex,
-        tokenInHex: tokenIn.id,
-        amountIn,
-        slippagePercent: slippage,
-        senderHex: account,
-      });
+      const fresh = await makePlan();
       setPlan(fresh);
-      const res = await executeCustodySwap(client, fresh, {
-        senderHex: account,
-        onState: (s) => {
-          if (s === CUSTODY_APPROVAL.APPROVING) setBusyState(`Approve ${tokenIn.symbol} in Boing Express (1/2)…`);
-          else if (s === CUSTODY_APPROVAL.SWAPPING)
-            setBusyState(fresh.approveTx ? 'Confirm the swap in Boing Express (2/2)…' : 'Confirm in Boing Express…');
-        },
-        signSimulateSubmit: (tx, o) =>
-          boingExpressContractCallSignSimulateSubmit(provider, tx, {
+      const signSimulateSubmit = (tx, o) =>
+        boingExpressContractCallSignSimulateSubmit(provider, tx, {
+          senderHex: account,
+          waitForInclusion: o?.waitForInclusion,
+          returnSubmitMeta: true,
+        });
+      const res = fresh.native
+        ? await executeNativeBoingSwap(fresh, {
+            signSimulateSubmit,
+            onState: (s) => {
+              if (s === CUSTODY_APPROVAL.SWAPPING) setBusyState(`Confirm in Boing Express (${fresh.steps.join(' → ')})…`);
+            },
+          })
+        : await executeCustodySwap(client, fresh, {
             senderHex: account,
-            waitForInclusion: o?.waitForInclusion,
-            returnSubmitMeta: true,
-          }),
-      });
-      setLastTx({ ...res, amountIn, symbolIn: tokenIn.symbol, amountOut: fresh.amountOut, symbolOut: tokenOut.symbol });
-      toast.success(`Swapped ${formatWhole(amountIn)} ${tokenIn.symbol} for ~${formatWhole(fresh.amountOut)} ${tokenOut.symbol}`);
+            onState: (s) => {
+              if (s === CUSTODY_APPROVAL.APPROVING) setBusyState(`Approve ${tokenIn.symbol} in Boing Express (1/2)…`);
+              else if (s === CUSTODY_APPROVAL.SWAPPING)
+                setBusyState(fresh.approveTx ? 'Confirm the swap in Boing Express (2/2)…' : 'Confirm in Boing Express…');
+            },
+            signSimulateSubmit,
+          });
+      setLastTx({ ...res, amountIn, symbolIn: tokenIn.symbol, decIn, amountOut: fresh.amountOut, symbolOut: tokenOut.symbol, decOut });
+      toast.success(`Swapped ${fmtIn(amountIn)} ${tokenIn.symbol} for ~${fmtOut(fresh.amountOut)} ${tokenOut.symbol}`);
       setAmountRaw('');
       setPlan(null);
       await Promise.all([loadPools(), loadBalances()]);
@@ -471,13 +507,17 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
           <span>You pay</span>
           {connected && tokenIn && (
             <span data-testid="swap-balance-in">
-              Balance: {balanceIn != null ? formatWhole(balanceIn) : '…'}
+              Balance: {balanceIn != null ? fmtIn(balanceIn) : '…'}
               {balanceIn != null && balanceIn > 0n && (
                 <button
                   type="button"
                   className="ml-2 rounded px-1.5 py-0.5 text-xs font-semibold"
                   style={{ color: 'var(--finance-primary)' }}
-                  onClick={() => setAmountRaw(String(balanceIn))}
+                  onClick={() => {
+                    // Native BOING also pays the network fee: keep a small reserve back.
+                    const max = tokenIn.native ? (balanceIn > NATIVE_FEE_RESERVE ? balanceIn - NATIVE_FEE_RESERVE : 0n) : balanceIn;
+                    setAmountRaw(max > 0n ? toAmountInput(max, decIn) : '');
+                  }}
                   disabled={busy}
                   data-testid="swap-max"
                 >
@@ -491,18 +531,18 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
           <input
             data-testid="swap-amount-in"
             aria-label="Amount you pay"
-            inputMode="numeric"
+            inputMode={decIn ? 'decimal' : 'numeric'}
             autoComplete="off"
             placeholder="0"
             value={amountRaw}
             disabled={busy}
-            onChange={(e) => setAmountRaw(e.target.value.replace(/[^\d]/g, ''))}
+            onChange={(e) => setAmountRaw(sanitizeAmountInput(e.target.value, decIn))}
             className="min-w-0 flex-1 bg-transparent text-3xl font-semibold tabular-nums outline-none"
             style={{ color: 'var(--text-primary)' }}
           />
           <TokenSelect side="in" token={tokenIn} tokens={tokens} balances={balances} onPick={(id) => pickToken('in', id)} disabled={busy} otherToken={tokenOut?.id} />
         </div>
-        <p className="mt-1 text-xs" style={muted}>{tokenIn?.name || ' '} · whole units</p>
+        <p className="mt-1 text-xs" style={muted}>{tokenIn?.name || ' '}{decIn ? '' : ' · whole units'}</p>
       </div>
 
       <div className="relative z-10 -my-3 flex justify-center">
@@ -525,7 +565,7 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
       <div className="rounded-2xl border p-4" style={panel}>
         <div className="mb-1 flex items-center justify-between text-sm" style={muted}>
           <span>You receive (estimated)</span>
-          {connected && tokenOut && <span>Balance: {balanceOut != null ? formatWhole(balanceOut) : '…'}</span>}
+          {connected && tokenOut && <span>Balance: {balanceOut != null ? fmtOut(balanceOut) : '…'}</span>}
         </div>
         <div className="flex items-center gap-3">
           <div
@@ -533,7 +573,7 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
             style={{ color: amountOut != null ? 'var(--text-primary)' : 'var(--text-tertiary)' }}
             data-testid="swap-amount-out"
           >
-            {amountOut != null ? formatWhole(amountOut) : '0'}
+            {amountOut != null ? fmtOut(amountOut) : '0'}
           </div>
           <TokenSelect side="out" token={tokenOut} tokens={tokens} balances={balances} onPick={(id) => pickToken('out', id)} disabled={busy} otherToken={tokenIn?.id} />
         </div>
@@ -558,18 +598,18 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
           <div className="flex justify-between">
             <dt style={muted}>Minimum received ({slippage}% slippage)</dt>
             <dd className="whitespace-nowrap pl-2 text-right" style={{ color: 'var(--text-primary)' }} data-testid="swap-min-out">
-              {minOut != null ? `${formatWhole(minOut)} ${tokenOut.symbol}` : '—'}
+              {minOut != null ? `${fmtOut(minOut)} ${tokenOut.symbol}` : '—'}
             </dd>
           </div>
           <div className="flex justify-between">
             <dt style={muted}>Fee ({(route.quote.feeBps / 100).toFixed(2)}%)</dt>
             <dd style={{ color: 'var(--text-primary)' }}>
-              {formatFee(amountIn, route.quote.feeBps) ?? '—'} {tokenIn.symbol}
+              {formatFee(amountIn, route.quote.feeBps, decIn) ?? '—'} {tokenIn.symbol}
             </dd>
           </div>
         </dl>
       )}
-      {amountIn && impact != null && impact >= 500 && amountIn < 1000n && (
+      {amountIn && impact != null && impact >= 500 && (decIn === 0 ? amountIn < 1000n : decOut === 0) && (
         <p className="mt-2 text-xs" style={muted} data-testid="swap-rounding-hint">
           Tokens here are whole units, so very small trades lose more to rounding. A larger amount gets closer to the
           quoted rate.
@@ -601,6 +641,12 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
           </Link>
         </p>
       )}
+      {nativeRoute && amountIn && button.kind === 'swap' && (
+        <p className="mt-2 text-center text-xs" style={muted} data-testid="swap-native-note">
+          One confirmation in Boing Express:{' '}
+          {tokenIn?.native ? 'wraps your BOING, approves and swaps' : 'approves, swaps and unwraps to BOING'} in a single transaction.
+        </p>
+      )}
       {button.kind === 'approve_swap' && (
         <p className="mt-2 text-center text-xs" style={muted}>
           First time swapping {tokenIn?.symbol}: Boing Express asks you to approve exactly this amount, then to confirm the swap.
@@ -609,7 +655,8 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
 
       {lastTx?.swap?.boingTxIdHex && (
         <p className="mt-3 text-center text-sm" style={{ color: 'var(--text-secondary)' }} data-testid="swap-success">
-          Swapped {formatWhole(lastTx.amountIn)} {lastTx.symbolIn} for ~{formatWhole(lastTx.amountOut)} {lastTx.symbolOut}.{' '}
+          Swapped {formatTokenAmount(lastTx.amountIn, lastTx.decIn ?? 0)} {lastTx.symbolIn} for ~
+          {formatTokenAmount(lastTx.amountOut, lastTx.decOut ?? 0)} {lastTx.symbolOut}.{' '}
           <a
             href={`https://boing.observer/tx/${lastTx.swap.boingTxIdHex}`}
             target="_blank"
@@ -630,12 +677,23 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
             <div><dt className="inline">Pool: </dt><dd className="inline font-mono">{route.pool.poolHex}</dd></div>
             <div><dt className="inline">{tokenIn?.symbol}: </dt><dd className="inline font-mono">{tokenIn?.id}</dd></div>
             <div><dt className="inline">{tokenOut?.symbol}: </dt><dd className="inline font-mono">{tokenOut?.id}</dd></div>
-            <div><dt className="inline">Router: </dt><dd className="inline font-mono">{CUSTODY_ROUTER_HEX}</dd></div>
+            {nativeRoute ? (
+              <div>
+                <dt className="inline">BOING: </dt>
+                <dd className="inline">
+                  wrapped / unwrapped automatically (wBOING <span className="font-mono">{WBOING_HEX}</span>), pool called directly
+                </dd>
+              </div>
+            ) : (
+              <div><dt className="inline">Router: </dt><dd className="inline font-mono">{CUSTODY_ROUTER_HEX}</dd></div>
+            )}
             <div>
               <dt className="inline">Pool reserves: </dt>
               <dd className="inline">
-                {formatWhole(route.pool.reserveA)} {tokens.find((t) => t.id === route.pool.tokenAHex?.toLowerCase())?.symbol} /{' '}
-                {formatWhole(route.pool.reserveB)} {tokens.find((t) => t.id === route.pool.tokenBHex?.toLowerCase())?.symbol}
+                {formatTokenAmount(route.pool.reserveA, poolSideDecimals(route.pool, 'a'))}{' '}
+                {tokens.find((t) => t.id === route.pool.tokenAHex?.toLowerCase())?.symbol} /{' '}
+                {formatTokenAmount(route.pool.reserveB, poolSideDecimals(route.pool, 'b'))}{' '}
+                {tokens.find((t) => t.id === route.pool.tokenBHex?.toLowerCase())?.symbol}
               </dd>
             </div>
           </dl>

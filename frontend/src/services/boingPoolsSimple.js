@@ -1,10 +1,11 @@
 /**
- * Pure helpers for the simple Pools / Your liquidity tabs (custody v8/v9 pools, whole-unit v2 tokens).
+ * Pure helpers for the simple Pools / Your liquidity tabs (custody v8/v9 pools with whole-unit v2 tokens, and
+ * v10 native BOING pools where wBOING is shown as BOING with 18 decimals). Amounts are base units.
  * No React, no RPC: Node-testable (`node --test scripts/boing-pools-simple.test.mjs`).
  * Math mirrors the pool bytecode: LP minted = min(a*T/ra, b*T/rb) (first deposit min(a, b));
  * remove pays floor(burn*ra/T), floor(burn*rb/T).
  */
-import { formatWhole } from './boingSwapQuote.js';
+import { formatTokenAmount, isNativeBoingPool, poolSideDecimals } from './boingSwapQuote.js';
 
 const norm = (h) => (typeof h === 'string' ? h.trim().toLowerCase() : '');
 const big = (v) => {
@@ -43,8 +44,11 @@ export function poolCard(pool, tokens, lp = null) {
   const b = byId.get(norm(pool.tokenBHex)) || { id: norm(pool.tokenBHex), symbol: 'Token', name: 'Unlisted token' };
   const ra = big(pool.reserveA);
   const rb = big(pool.reserveB);
-  const priceBperA = ra > 0n && rb > 0n ? Number(rb) / Number(ra) : null;
-  const priceAperB = ra > 0n && rb > 0n ? Number(ra) / Number(rb) : null;
+  const decA = a.decimals ?? poolSideDecimals(pool, 'a');
+  const decB = b.decimals ?? poolSideDecimals(pool, 'b');
+  // Prices per whole token (reserves are base units).
+  const priceBperA = ra > 0n && rb > 0n ? (Number(rb) / Number(ra)) * 10 ** (decA - decB) : null;
+  const priceAperB = ra > 0n && rb > 0n ? (Number(ra) / Number(rb)) * 10 ** (decB - decA) : null;
   const balance = lp ? big(lp.balance) : 0n;
   const totalLp = lp ? big(lp.totalLp) : 0n;
   const [youA, youB] = balance > 0n && totalLp > 0n ? [(balance * ra) / totalLp, (balance * rb) / totalLp] : [0n, 0n];
@@ -53,10 +57,14 @@ export function poolCard(pool, tokens, lp = null) {
     tokenA: a,
     tokenB: b,
     pairLabel: `${a.symbol} / ${b.symbol}`,
+    decimalsA: decA,
+    decimalsB: decB,
+    /** v10 pool pairing native BOING: deposits wrap and withdrawals unwrap automatically. */
+    native: isNativeBoingPool(pool),
     reserveA: ra,
     reserveB: rb,
     feeBps: pool.feeBps ?? 30,
-    liquidityLine: `${formatWhole(ra)} ${a.symbol} + ${formatWhole(rb)} ${b.symbol}`,
+    liquidityLine: `${formatTokenAmount(ra, decA, 4)} ${a.symbol} + ${formatTokenAmount(rb, decB, 4)} ${b.symbol}`,
     /** "1 USDC ≈ 0.9937 tBOING" (B per A) and the inverse. */
     priceLine: priceBperA != null ? `1 ${a.symbol} ≈ ${formatRatio(priceBperA)} ${b.symbol}` : 'No liquidity yet',
     priceLineInverse: priceAperB != null ? `1 ${b.symbol} ≈ ${formatRatio(priceAperB)} ${a.symbol}` : null,

@@ -185,8 +185,8 @@ function Networks() {
       <P>Solana mainnet and devnet, with a Solana wallet such as Phantom.</P>
       <H3>Boing L1 testnet</H3>
       <P>
-        Boing&apos;s own chain (testnet, chain id 6913). Tokens on Boing testnet use <B>whole units</B> (no decimals), and
-        you sign with Boing Express. Test tokens come from the faucet on <Ext href={NETWORK}>boing.network</Ext>.
+        Boing&apos;s own chain (testnet, chain id 6913). The native coin <B>BOING</B> has 18 decimals; the test tokens
+        (USDC, tBOING and most deployed tokens) use <B>whole units</B> (no decimals). You sign with Boing Express. Test tokens come from the faucet on <Ext href={NETWORK}>boing.network</Ext>.
       </P>
     </>
   );
@@ -198,8 +198,9 @@ function Swap() {
       <H3>On Boing: one swap card</H3>
       <OL>
         <li>
-          <B>You pay:</B> pick a token (shown by symbol and name with your balance) and type a whole-number amount, or
-          press <B>Max</B>. The token list has a search box: type a symbol or name, or paste a token address. A token
+          <B>You pay:</B> pick a token (shown by symbol and name with your balance) and type an amount (BOING takes
+          decimals such as 1.5; test tokens are whole numbers), or press <B>Max</B> (for BOING, Max keeps 1 BOING back
+          for fees). The token list has a search box: type a symbol or name, or paste a token address. A token
           that has no pool yet shows <B>No pool yet — create one</B>, which opens Create pool with that token filled in.
         </li>
         <li>
@@ -226,13 +227,17 @@ function Swap() {
         bottom if you want to see the pool and token addresses. After a swap, a link opens the transaction on Boing
         Observer.
       </P>
+      <H3>Swapping native BOING</H3>
+      <P>
+        <B>BOING</B> (the coin you pay network fees with) is in the token list like any other token. Behind the scenes
+        pools hold it as <B>wBOING</B> (wrapped BOING, always 1:1), but you never handle wBOING yourself: a BOING swap is
+        one transaction with one confirmation that wraps your BOING, approves the pool and swaps, or, when you receive
+        BOING, approves, swaps and unwraps it back to native BOING. Boing Express shows the BOING the transaction sends
+        before you approve. BOING pairs trade in the newer <B>v10</B> pools, which handle 18-decimal amounts; other pairs
+        keep using their v8 / v9 pools. The test token <B>tBOING</B> is a separate regular token.
+      </P>
       <Note>
-        Native BOING (the coin you pay network fees with) can&apos;t be swapped yet. Boing contracts can&apos;t hold or
-        send the native coin today, so a wrapped BOING needs a network upgrade first; the test token <B>tBOING</B> is a
-        regular token and trades normally.
-      </Note>
-      <Note>
-        Because Boing testnet tokens are whole units, very small trades lose more to rounding. The card warns you when
+        Because most Boing testnet tokens are whole units, very small trades lose more to rounding. The card warns you when
         that happens; a larger amount gets closer to the quoted rate.
       </Note>
       <H3>On EVM chains</H3>
@@ -305,14 +310,17 @@ function Liquidity() {
         <li>
           <B>Add:</B> pick the two tokens and type one amount; the other fills in at the pool&apos;s current ratio, and the
           preview shows the share you&apos;ll own. Boing Express asks you to approve each token (exactly that amount) and
-          then to confirm the deposit.
+          then to confirm the deposit. For a <B>BOING</B> pool it is one confirmation: your BOING is wrapped, both tokens
+          approved and the deposit made in a single transaction.
         </li>
         <li>
           <B>Remove:</B> choose 25%, 50%, 75% or Max (or drag the slider); the preview shows the tokens you&apos;ll
-          receive. One confirmation in Boing Express.
+          receive. One confirmation in Boing Express. From a BOING pool you get native BOING back (unwrapped in the same
+          transaction).
         </li>
         <li>
-          Pools are <B>custody pools (v8 / v9)</B>: the pool holds the tokens; amounts are whole units.
+          Pools are <B>custody pools</B>: the pool holds the tokens. Token pairs use v8 / v9 pools (whole units); BOING
+          pairs use v10 pools, which hold BOING as wBOING with 18 decimals.
         </li>
         <li>
           <To to="/create-pool">Create pool</To> starts a new pool: pick two tokens and make the first deposit, which sets
@@ -470,6 +478,11 @@ function BoingL1() {
         <li>
           <B>Signed for this network:</B> Boing signatures include the network&apos;s chain id, so a transaction signed for
           testnet can&apos;t be replayed on another Boing network. Use an up-to-date Boing Express.
+        </li>
+        <li>
+          <B>BOING sent to a contract:</B> since block 1150 a contract call can carry native BOING (for example a BOING
+          swap wraps it into wBOING). Boing Express shows <B>BOING sent to contract</B> with the amount in BOING on the
+          approval, and Boing Observer shows it on the transaction. The BOING is returned if the transaction fails.
         </li>
       </UL>
       <H3>Fees, including failed transactions</H3>
@@ -650,7 +663,8 @@ function Faq() {
   const qa = [
     ['Which wallet do I need?', 'MetaMask or another Ethereum wallet on EVM, Phantom or another Solana wallet on Solana, and Boing Express on Boing L1.'],
     ['Why do I approve twice on my first Boing swap?', 'The first time you sell a token, the pool needs permission to take it (approve), then the swap runs. Later swaps of that token need one confirmation.'],
-    ['Why did I get less than I expected on a tiny Boing trade?', 'Boing testnet tokens are whole units, so small trades lose more to rounding. Try a larger amount.'],
+    ['Why did I get less than I expected on a tiny Boing trade?', 'Most Boing testnet tokens are whole units, so small trades lose more to rounding. Try a larger amount.'],
+    ['Can I swap native BOING?', 'Yes. Pick BOING in the swap card. It is wrapped to wBOING and unwrapped back automatically inside one transaction, so you confirm once in Boing Express and only ever hold BOING.'],
     ['I am on a phone. Can I use Boing?', 'Yes. Without the extension, the app opens the boing.express web wallet for each approval. Allow pop-ups for boing.finance.'],
     ['Does a failed Boing transaction cost anything?', 'Yes, a small fee (1 BOING today). The app simulates transactions first to avoid failures.'],
     ['Where do I get .boing names?', 'In Boing Express. boing.finance shows addresses for now.'],

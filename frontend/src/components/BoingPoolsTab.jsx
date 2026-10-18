@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import BoingTokenPairIcons from './BoingTokenPairIcons';
 import { filterPoolCards } from '../services/boingPoolsSimple';
-import { formatWhole } from '../services/boingSwapQuote';
+import { formatTokenAmount } from '../services/boingSwapQuote';
 
 const panel = { borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-secondary)' };
 const muted = { color: 'var(--text-tertiary)' };
@@ -56,6 +56,11 @@ export function PoolDetails({ card }) {
           </div>
         ))}
         <div>Swap fee {(Number(card.feeBps) / 100).toFixed(2)}% · goes to liquidity providers</div>
+        {card.native && (
+          <div data-testid="pool-native-note">
+            BOING is held by the pool as wBOING (1:1). Adding wraps it and withdrawing unwraps it back to BOING automatically.
+          </div>
+        )}
       </div>
     </details>
   );
@@ -101,7 +106,8 @@ function PoolCard({ card, onAdd, onSwap }) {
           <div className="flex justify-between gap-3">
             <dt style={muted}>Your share</dt>
             <dd className="text-right tabular-nums font-medium" style={{ color: 'var(--finance-primary)' }} data-testid="pool-share">
-              {card.sharePct} · {formatWhole(card.youA)} {card.tokenA.symbol} + {formatWhole(card.youB)} {card.tokenB.symbol}
+              {card.sharePct} · {formatTokenAmount(card.youA, card.decimalsA ?? 0, 4)} {card.tokenA.symbol} +{' '}
+              {formatTokenAmount(card.youB, card.decimalsB ?? 0, 4)} {card.tokenB.symbol}
             </dd>
           </div>
         )}
