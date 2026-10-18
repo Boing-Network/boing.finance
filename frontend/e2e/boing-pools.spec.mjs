@@ -127,7 +127,11 @@ test.describe('Simple Pools and Your liquidity', () => {
   test('pool cards, search, details expander', async ({ page }) => {
     test.setTimeout(180_000);
     await wallet(page);
+    // The old Swap → Pools tab link redirects to the Pools page.
     await page.goto('/swap?noIntro=1&nativeTradeTab=pools');
+    await expect(page).toHaveURL(/\/pools\?noIntro=1$/, { timeout: 60_000 });
+    await expect(page.getByTestId('boing-pools-section')).toBeVisible({ timeout: 90_000 });
+    await expect(page.getByRole('tab', { name: 'Pools' })).toHaveCount(0);
     const tab = page.getByTestId('boing-pools-tab');
     await expect(tab).toBeVisible({ timeout: 90_000 });
     const cards = page.getByTestId('pool-card');
@@ -159,6 +163,14 @@ test.describe('Simple Pools and Your liquidity', () => {
     await fv.locator('summary', { hasText: 'Details' }).click();
     await expect(fv).toContainText(P2);
     await shot(page, 'pools-details-open');
+
+    // Swap from a card opens the Swap page with that pair selected.
+    await fv.getByTestId('pool-swap').click();
+    await expect(page).toHaveURL(/\/swap/);
+    await expect(page.getByTestId('boing-swap-card')).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByTestId('swap-token-in')).toContainText('FV2C', { timeout: 60_000 });
+    await expect(page.getByTestId('swap-token-out')).toContainText('USDC');
+    await expect(page.getByRole('tab', { name: 'Pools' })).toHaveCount(0);
   });
 
   test('your liquidity: position, remove presets, add auto-fill and share', async ({ page }) => {
@@ -189,9 +201,10 @@ test.describe('Simple Pools and Your liquidity', () => {
     await expect(rm.getByTestId('remove-submit')).toBeEnabled();
     await shot(page, 'liquidity-remove-max');
 
-    // Add from the Pools tab -> FV2C / USDC prefilled.
-    await page.getByRole('tab', { name: 'Pools' }).click();
-    await page.locator('[data-testid="pool-card"][data-pair="FV2C / USDC"]').getByTestId('pool-add').click();
+    // Add from a Pools page card -> Swap > Your liquidity with FV2C / USDC prefilled.
+    await page.goto('/pools?noIntro=1');
+    await page.locator('[data-testid="pool-card"][data-pair="FV2C / USDC"]').getByTestId('pool-add').click({ timeout: 90_000 });
+    await expect(page).toHaveURL(/\/swap\?.*nativeTradeTab=liquidity/);
     const add = page.getByTestId('add-liquidity-panel');
     await expect(add).toBeVisible();
     await add.getByTestId('add-amount-a').fill('100');

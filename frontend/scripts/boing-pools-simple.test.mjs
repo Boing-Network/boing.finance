@@ -73,3 +73,20 @@ test('remove preview: 25/50/75/Max', () => {
   assert.equal(withSlippageFloor(1003n, 0.5), 997n);
   assert.deepEqual(removeLiquidityPreview(poolCard(usdcTb, tokens), 50), { burn: 0n, outA: 0n, outB: 0n });
 });
+
+// Pools moved from the Swap page tab to /pools: old links redirect, cards link back to Swap.
+import { poolsRedirectFromSwapSearch, boingSwapPairHref, boingAddLiquidityHref } from '../src/utils/swapPoolsRedirect.js';
+
+test('old Swap → Pools links redirect to /pools; pool cards deep-link to Swap', () => {
+  const P = `0x${'Ab'.repeat(32)}`;
+  assert.equal(poolsRedirectFromSwapSearch('?nativeTradeTab=pools'), '/pools');
+  assert.equal(poolsRedirectFromSwapSearch('?tab=pools'), '/pools');
+  assert.equal(poolsRedirectFromSwapSearch('?noIntro=1&nativeTradeTab=Pools'), '/pools?noIntro=1');
+  assert.equal(poolsRedirectFromSwapSearch(`?nativePool=${P}`), `/pools?pool=0x${'ab'.repeat(32)}`);
+  assert.equal(poolsRedirectFromSwapSearch('?nativePool=0x12'), null);
+  assert.equal(poolsRedirectFromSwapSearch('?nativeTradeTab=liquidity'), null);
+  assert.equal(poolsRedirectFromSwapSearch('?nativeTradeTab=advanced'), null);
+  assert.equal(poolsRedirectFromSwapSearch(''), null);
+  assert.equal(boingSwapPairHref('0xaa', '0xbb'), '/swap?nativeTokenIn=0xaa&nativeTokenOut=0xbb');
+  assert.equal(boingAddLiquidityHref(P), `/swap?nativeTradeTab=liquidity&addPool=${P}`);
+});

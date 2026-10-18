@@ -429,7 +429,7 @@ export default function NativeBoingCreatePoolPanel() {
             >
               Swap it now
             </Link>
-            <Link className="rounded-lg border px-3 py-1.5" style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} to="/swap?nativeTradeTab=pools">
+            <Link className="rounded-lg border px-3 py-1.5" style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} to="/pools">
               View in Pools
             </Link>
           </div>
