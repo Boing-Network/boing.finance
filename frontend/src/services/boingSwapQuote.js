@@ -101,7 +101,11 @@ export function quoteCustodyPoolLocal(pool, tokenInHex, amountIn) {
   const idealNum = a * (10000n - fee) * rOut;
   const priceImpactBps = idealNum > 0n ? Number(((idealNum - amountOut * rIn * 10000n) * 10000n) / idealNum) : 0;
   const feeAmount = (a * fee + 9999n) / 10000n;
-  return { amountOut, priceImpactBps, feeBps: Number(fee), feeAmount, rIn, rOut };
+  // Share of the output lost to flooring to whole base units (vs the exact constant-product result).
+  const cpNum = rOut * aAfterFee;
+  const cpDen = rIn + aAfterFee;
+  const roundingLossBps = cpNum > 0n ? Number(((cpNum - amountOut * cpDen) * 10000n) / cpNum) : 0;
+  return { amountOut, priceImpactBps, roundingLossBps, feeBps: Number(fee), feeAmount, rIn, rOut };
 }
 
 /**

@@ -609,7 +609,8 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
           </div>
         </dl>
       )}
-      {amountIn && impact != null && impact >= 500 && (decIn === 0 ? amountIn < 1000n : decOut === 0) && (
+      {/* Only when flooring to whole units costs >= 1% (not for the real price impact of a large trade). */}
+      {amountIn && (route?.quote?.roundingLossBps ?? 0) >= 100 && (
         <p className="mt-2 text-xs" style={muted} data-testid="swap-rounding-hint">
           Tokens here are whole units, so very small trades lose more to rounding. A larger amount gets closer to the
           quoted rate.
