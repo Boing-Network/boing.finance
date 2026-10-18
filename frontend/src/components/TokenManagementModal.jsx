@@ -1,356 +1,392 @@
-import React, { useState, useEffect } from 'react';
-import { ethers } from 'ethers';
-import toast from 'react-hot-toast';
-import SecurityBadges from './SecurityBadges';
-import EmptyState from './EmptyState';
-import walletTokenService from '../services/walletTokenService';
+import React, { useEffect, useMemo, useState } from 'react';
 import useEscapeKey from '../hooks/useEscapeKey';
-import { getBridgeTokensForChain } from '../config/bridge';
+import TokenLogo from './bridge/TokenLogo';
+import VirtualList from './bridge/VirtualList';
+import { fetchLifiToken } from '../services/lifiApi';
+import {
+  chainTypeLabel,
+  explainLifiError,
+  formatUsd,
+  fromBaseUnits,
+  isNativeTokenAddress,
+  looksLikeTokenAddress,
+  sameAddress,
+  searchTokens,
+  sortTokensPopular,
+} from '../utils/lifiCore';
 
-const ERC20_META_ABI = [
-  'function name() view returns (string)',
-  'function symbol() view returns (string)',
-  'function decimals() view returns (uint8)',
+const CUSTOM_KEY = 'boing_bridge_custom_tokens_v1';
+
+function loadCustom(chainId) {
+  try {
+    const all = JSON.parse(localStorage.getItem(CUSTOM_KEY) || '{}');
+    return Array.isArray(all[chainId]) ? all[chainId] : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveCustom(chainId, list) {
+  try {
+    const all = JSON.parse(localStorage.getItem(CUSTOM_KEY) || '{}');
+    all[chainId] = list;
+    localStorage.setItem(CUSTOM_KEY, JSON.stringify(all));
+  } catch {
+    /* storage full or blocked: keep in memory only */
+  }
+}
+
+const TABS = [
+  { key: 'my-tokens', label: 'My Tokens' },
+  { key: 'popular', label: 'Popular' },
+  { key: 'custom', label: 'Custom' },
+  { key: 'import', label: 'Import' },
 ];
 
-export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, currentNetwork, account, provider, chainId }) {
+const muted = { color: 'var(--text-tertiary)' };
+
+function TokenRow({ token, balance, onSelect, onRemove, badge }) {
+  const human = balance != null && balance !== '0' ? fromBaseUnits(balance, token.decimals, 6) : '';
+  const usd = human && token.priceUSD ? formatUsd(Number(fromBaseUnits(balance, token.decimals, 8).replace(/,/g, '')) * Number(token.priceUSD)) : '';
+  return (
+    <div
+      role="option"
+      aria-selected="false"
+      tabIndex={0}
+      onClick={() => onSelect(token)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') onSelect(token);
+      }}
+      className="flex h-full cursor-pointer items-center gap-3 rounded-lg px-2 transition-colors hover:bg-[var(--bg-tertiary)]"
+      data-testid="bridge-token-option"
+      data-symbol={token.symbol}
+      data-address={token.address}
+    >
+      <TokenLogo src={token.logoURI} label={token.symbol} size={32} />
+      <div className="min-w-0 flex-1">
+        <p className="flex items-center gap-1.5 truncate font-medium" style={{ color: 'var(--text-primary)' }}>
+          <span className="truncate">{token.symbol}</span>
+          {badge && (
+            <span className="rounded px-1.5 py-0.5 text-[10px] font-semibold" style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
+              {badge}
+            </span>
+          )}
+        </p>
+        <p className="truncate text-xs" style={muted}>
+          {token.name}
+        </p>
+      </div>
+      {human && (
+        <div className="text-right">
+          <p className="text-sm tabular-nums" style={{ color: 'var(--text-primary)' }} data-testid="bridge-token-balance">
+            {human}
+          </p>
+          {usd && (
+            <p className="text-xs tabular-nums" style={muted}>
+              {usd}
+            </p>
+          )}
+        </div>
+      )}
+      {onRemove && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove(token);
+          }}
+          className="p-1 text-sm"
+          style={{ color: 'var(--finance-red)' }}
+          aria-label={`Remove ${token.symbol}`}
+        >
+          ×
+        </button>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Bridge "Select Token": every LI.FI token on the chosen network.
+ * - My Tokens: your balances (EVM via LI.FI, Solana via RPC).
+ * - Popular: the full LI.FI list, gas token and major coins first; search by symbol, name or address
+ *   (falls back to LI.FI GET /v1/token for tokens outside the default list, e.g. BONK).
+ * - Custom: tokens you imported. Import: paste an address, checked with LI.FI GET /v1/token.
+ */
+export default function TokenManagementModal({ isOpen, onClose, onTokenSelect, chain, tokens, tokensLoading, tokensError, onRetry, balances, walletHint }) {
   useEscapeKey(isOpen, onClose);
+  const chainId = chain?.id;
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('popular');
   const [customTokens, setCustomTokens] = useState([]);
+  const [remote, setRemote] = useState({ q: '', token: null, loading: false });
   const [importAddress, setImportAddress] = useState('');
-  const [importing, setImporting] = useState(false);
-  const [activeTab, setActiveTab] = useState('my-tokens'); // my-tokens, popular, custom, import
-  const [userTokens, setUserTokens] = useState([]);
-  const [loadingUserTokens, setLoadingUserTokens] = useState(false);
-
-  // Popular tokens by network
-  const popularTokens = {
-    1: [ // Ethereum
-      { symbol: 'ETH', name: 'Ethereum', address: '0x0000000000000000000000000000000000000000', decimals: 18, logo: '🔵' },
-      { symbol: 'USDC', name: 'USD Coin', address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', decimals: 6, logo: '🔵' },
-      { symbol: 'USDT', name: 'Tether USD', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6, logo: '🟡' },
-      { symbol: 'DAI', name: 'Dai Stablecoin', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18, logo: '🟡' },
-      { symbol: 'WETH', name: 'Wrapped Ether', address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', decimals: 18, logo: '🔵' },
-      { symbol: 'UNI', name: 'Uniswap', address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984', decimals: 18, logo: '🟣' },
-    ],
-    137: [ // Polygon
-      { symbol: 'MATIC', name: 'Polygon', address: '0x0000000000000000000000000000000000000000', decimals: 18, logo: '🟣' },
-      { symbol: 'USDC', name: 'USD Coin', address: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174', decimals: 6, logo: '🔵' },
-      { symbol: 'USDT', name: 'Tether USD', address: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', decimals: 6, logo: '🟡' },
-      { symbol: 'DAI', name: 'Dai Stablecoin', address: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063', decimals: 18, logo: '🟡' },
-      { symbol: 'WMATIC', name: 'Wrapped MATIC', address: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', decimals: 18, logo: '🟣' },
-    ],
-    56: [ // BSC
-      { symbol: 'BNB', name: 'BNB', address: '0x0000000000000000000000000000000000000000', decimals: 18, logo: '🟡' },
-      { symbol: 'USDC', name: 'USD Coin', address: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d', decimals: 18, logo: '🔵' },
-      { symbol: 'USDT', name: 'Tether USD', address: '0x55d398326f99059fF775485246999027B3197955', decimals: 18, logo: '🟡' },
-      { symbol: 'BUSD', name: 'Binance USD', address: '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56', decimals: 18, logo: '🟡' },
-      { symbol: 'WBNB', name: 'Wrapped BNB', address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', decimals: 18, logo: '🟡' },
-    ],
-    42161: [ // Arbitrum
-      { symbol: 'ETH', name: 'Ethereum', address: '0x0000000000000000000000000000000000000000', decimals: 18, logo: '🔵' },
-      { symbol: 'USDC', name: 'USD Coin', address: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8', decimals: 6, logo: '🔵' },
-      { symbol: 'USDT', name: 'Tether USD', address: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', decimals: 6, logo: '🟡' },
-      { symbol: 'WETH', name: 'Wrapped Ether', address: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', decimals: 18, logo: '🔵' },
-    ]
-  };
+  const [importState, setImportState] = useState({ loading: false, token: null, error: '' });
 
   useEffect(() => {
-    // Load custom tokens from localStorage
-    const saved = localStorage.getItem(`customTokens_${currentNetwork}`);
-    if (saved) {
-      setCustomTokens(JSON.parse(saved));
-    }
-  }, [currentNetwork]);
+    if (chainId != null) setCustomTokens(loadCustom(chainId));
+    setImportState({ loading: false, token: null, error: '' });
+    setImportAddress('');
+  }, [chainId]);
 
-  // Fetch user tokens when modal opens and user is connected
   useEffect(() => {
-    if (isOpen && account && provider && chainId) {
-      fetchUserTokens();
+    if (!isOpen) return;
+    setSearchTerm('');
+    setActiveTab(balances?.supported && balances.list.length ? 'my-tokens' : 'popular');
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- pick the starting tab when the modal opens
+  }, [isOpen, chainId]);
+
+  const popular = useMemo(() => sortTokensPopular(tokens || []), [tokens]);
+  const byAddress = useMemo(() => {
+    const m = new Map();
+    for (const t of tokens || []) m.set(t.address.toLowerCase(), t);
+    return m;
+  }, [tokens]);
+
+  const myTokens = useMemo(() => {
+    const list = (balances?.list || []).map((b) => {
+      const known = byAddress.get(String(b.address).toLowerCase()) || (isNativeTokenAddress(b.address) ? popular.find((t) => isNativeTokenAddress(t.address)) : null);
+      return known ? { ...known, amount: b.amount } : { chainId, address: b.address, symbol: b.symbol || 'Unknown', name: b.name || b.address, decimals: b.decimals, logoURI: b.logoURI || '', priceUSD: b.priceUSD || '', amount: b.amount, verified: false };
+    });
+    const usd = (t) => Number(fromBaseUnits(t.amount, t.decimals, 8).replace(/,/g, '')) * (Number(t.priceUSD) || 0);
+    return list.sort((a, b) => usd(b) - usd(a));
+  }, [balances?.list, byAddress, popular, chainId]);
+
+  const base = activeTab === 'my-tokens' ? myTokens : activeTab === 'custom' ? customTokens : popular;
+  const filtered = useMemo(() => searchTokens(base, searchTerm), [base, searchTerm]);
+
+  // Not in the cached list? Ask LI.FI for that exact address or symbol.
+  const q = searchTerm.trim();
+  const exactLocal = filtered.some((t) => sameAddress(t.address, q) || t.symbol.toLowerCase() === q.toLowerCase());
+  useEffect(() => {
+    if (!isOpen || activeTab !== 'popular' || chainId == null || q.length < 2 || exactLocal) {
+      setRemote({ q: '', token: null, loading: false });
+      return undefined;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUserTokens intentionally not in deps to avoid refetch loops
-  }, [isOpen, account, provider, chainId]);
+    const isAddr = looksLikeTokenAddress(q, chain?.chainType);
+    if (!isAddr && !/^[A-Za-z0-9.$+-]{2,15}$/.test(q)) return undefined;
+    const ctrl = new AbortController();
+    setRemote({ q, token: null, loading: true });
+    const timer = setTimeout(() => {
+      fetchLifiToken(chainId, q, { signal: ctrl.signal })
+        .then((token) => setRemote({ q, token, loading: false }))
+        .catch(() => {
+          if (!ctrl.signal.aborted) setRemote({ q, token: null, loading: false });
+        });
+    }, 450);
+    return () => {
+      ctrl.abort();
+      clearTimeout(timer);
+    };
+  }, [isOpen, activeTab, chainId, chain?.chainType, q, exactLocal]);
 
-  const fetchUserTokens = async () => {
-    if (!account || !provider || !chainId) return;
-    
-    setLoadingUserTokens(true);
-    try {
-      walletTokenService.initialize(provider, account, chainId, import.meta.env.DEV);      const tokens = await walletTokenService.getUserTokens();
-      if (import.meta.env.DEV) {
-        console.log('Fetched user tokens:', tokens);
-      }
-      setUserTokens(tokens);
-    } catch (error) {
-      console.error('Failed to fetch user tokens:', error);
-    } finally {
-      setLoadingUserTokens(false);
+  const shown = useMemo(() => {
+    if (activeTab === 'popular' && remote.token && remote.q === q && !filtered.some((t) => sameAddress(t.address, remote.token.address))) {
+      return [{ ...remote.token, _remote: true }, ...filtered];
     }
-  };
+    return filtered;
+  }, [activeTab, remote, q, filtered]);
 
-  const saveCustomTokens = (tokens) => {
-    setCustomTokens(tokens);
-    localStorage.setItem(`customTokens_${currentNetwork}`, JSON.stringify(tokens));
-  };
-
-  const addCustomToken = (token) => {
-    const exists = customTokens.some(t => t.address.toLowerCase() === token.address.toLowerCase());
-    if (!exists) {
-      const newTokens = [...customTokens, token];
-      saveCustomTokens(newTokens);
-    }
-  };
-
-  const removeCustomToken = (address) => {
-    const newTokens = customTokens.filter(t => t.address.toLowerCase() !== address.toLowerCase());
-    saveCustomTokens(newTokens);
-  };
-
-  const importToken = async () => {
-    if (!ethers.isAddress(importAddress)) {
-      toast.error('Invalid token address');
-      return;
-    }
-    if (!provider) {
-      toast.error('Connect a wallet so we can read token metadata on-chain');
-      return;
-    }
-
-    setImporting(true);
-    try {
-      const checksum = ethers.getAddress(importAddress);
-      const contract = new ethers.Contract(checksum, ERC20_META_ABI, provider);
-      const [name, symbol, decimalsRaw] = await Promise.all([
-        contract.name(),
-        contract.symbol(),
-        contract.decimals(),
-      ]);
-      const decimals = Number(decimalsRaw);
-      if (!symbol || !Number.isFinite(decimals)) {
-        throw new Error('Contract did not return valid ERC-20 metadata');
-      }
-
-      addCustomToken({
-        symbol: String(symbol),
-        name: String(name || symbol),
-        address: checksum,
-        decimals,
-        logo: '🪙',
-        isCustom: true,
-      });
-      setImportAddress('');
-      setActiveTab('custom');
-      toast.success(`Imported ${symbol}`);
-    } catch (error) {
-      toast.error(error?.message || 'Failed to import token from chain');
-    } finally {
-      setImporting(false);
-    }
-  };
-
-  const filterTokens = (tokens) => {
-    if (!searchTerm) return tokens;
-    return tokens.filter(token => 
-      token.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      token.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      token.address.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  };
-
-  const handleTokenSelect = (token) => {
-    onTokenSelect(token);
+  const select = (token) => {
+    const { _remote, amount, ...clean } = token;
+    onTokenSelect(clean);
     onClose();
   };
 
-  const getCurrentTokens = () => {
-    switch (activeTab) {
-      case 'my-tokens':
-        return userTokens;
-      case 'popular':
-        return popularTokens[currentNetwork] || getBridgeTokensForChain(currentNetwork);
-      case 'custom':
-        return customTokens;
-      case 'import':
-        return [];
-      default:
-        return [];
+  const addCustom = (token) => {
+    const next = [token, ...customTokens.filter((t) => !sameAddress(t.address, token.address))];
+    setCustomTokens(next);
+    saveCustom(chainId, next);
+  };
+
+  const removeCustom = (token) => {
+    const next = customTokens.filter((t) => !sameAddress(t.address, token.address));
+    setCustomTokens(next);
+    saveCustom(chainId, next);
+  };
+
+  const checkImport = async () => {
+    const addr = importAddress.trim();
+    if (!looksLikeTokenAddress(addr, chain?.chainType)) {
+      setImportState({ loading: false, token: null, error: `That doesn't look like a token address on ${chain?.name || 'this network'}.` });
+      return;
+    }
+    setImportState({ loading: true, token: null, error: '' });
+    try {
+      const token = await fetchLifiToken(chainId, addr);
+      if (!sameAddress(token.address, addr) && !isNativeTokenAddress(token.address)) throw new Error('LI.FI returned a different token');
+      setImportState({ loading: false, token, error: '' });
+    } catch (e) {
+      setImportState({ loading: false, token: null, error: explainLifiError({ ...(e?.body || {}), status: e?.status, message: e?.message || '' }) });
     }
   };
 
   if (!isOpen) return null;
 
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4 sm:p-6"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="token-mgmt-title"
-      onClick={onClose}
-    >
-      <div
-        className="bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md max-h-[85vh] relative overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          className="absolute top-4 right-4 text-gray-400 hover:text-white"
-          onClick={onClose}
-          aria-label="Close token management"
-        >
-          &times;
-        </button>
-        
-        <h2 id="token-mgmt-title" className="text-xl font-bold text-white mb-4">Select Token</h2>
-        
-        {/* Search */}
-        <div className="mb-4">
-          <label htmlFor="token-mgmt-search" className="sr-only">Search by name or paste address</label>
-          <input
-            id="token-mgmt-search"
-            name="searchTerm"
-            type="text"
-            autoComplete="off"
-            placeholder="Search by name or paste address"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+  const emptyText =
+    activeTab === 'my-tokens'
+      ? balances?.supported
+        ? balances.loading
+          ? 'Loading your balances…'
+          : balances.error || `No tokens with a balance on ${chain?.name}.`
+        : walletHint || `Connect a wallet for ${chain?.name || 'this network'} to see your tokens.`
+      : activeTab === 'custom'
+        ? 'Tokens you import appear here.'
+        : tokensLoading || remote.loading
+          ? 'Searching…'
+          : tokensError || 'No token matches. Paste the token address to look it up.';
 
-        {/* Tabs */}
-        <div className="flex space-x-1 mb-4 bg-gray-700 rounded-lg p-1" role="tablist" aria-label="Token lists">
-          {[
-            { key: 'my-tokens', label: 'My Tokens' },
-            { key: 'popular', label: 'Popular' },
-            { key: 'custom', label: 'Custom' },
-            { key: 'import', label: 'Import' }
-          ].map((tab) => (
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="token-mgmt-title" onClick={onClose}>
+      <div
+        className="relative w-full max-w-md rounded-2xl p-4 shadow-xl sm:p-6"
+        style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
+        onClick={(e) => e.stopPropagation()}
+        data-testid="bridge-token-modal"
+      >
+        <button className="td-icon-btn absolute right-4 top-4" onClick={onClose} aria-label="Close token selection" type="button">
+          ×
+        </button>
+        <h2 id="token-mgmt-title" className="mb-4 text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
+          Select Token
+        </h2>
+
+        {activeTab !== 'import' && (
+          <div className="mb-3">
+            <label htmlFor="token-mgmt-search" className="sr-only">
+              Search by name, symbol or address
+            </label>
+            <input
+              id="token-mgmt-search"
+              type="text"
+              autoComplete="off"
+              autoFocus
+              placeholder="Search name, symbol or paste address"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="td-field__input w-full text-sm"
+              style={{ backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+              data-testid="bridge-token-search"
+            />
+          </div>
+        )}
+
+        <div className="mb-3 flex gap-1 rounded-lg p-1" style={{ backgroundColor: 'var(--bg-primary)' }} role="tablist" aria-label="Token lists">
+          {TABS.map((tab) => (
             <button
               key={tab.key}
               type="button"
               role="tab"
               aria-selected={activeTab === tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                activeTab === tab.key
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-300 hover:text-white'
-              }`}
+              className={`flex-1 rounded-md px-2 py-2 text-xs font-medium transition-colors sm:text-sm ${activeTab === tab.key ? 'td-segmented__btn--active' : ''}`}
+              style={activeTab === tab.key ? undefined : { color: 'var(--text-secondary)' }}
+              data-testid={`bridge-token-tab-${tab.key}`}
             >
               {tab.label}
             </button>
           ))}
         </div>
 
-        {/* Content */}
-        <div className="overflow-y-auto max-h-96">
-          {activeTab === 'import' ? (
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="token-mgmt-import-address" className="block text-sm font-medium text-gray-300 mb-2">
-                  Token Contract Address
-                </label>
-                <input
-                  id="token-mgmt-import-address"
-                  name="importAddress"
-                  type="text"
-                  placeholder="0x..."
-                  value={importAddress}
-                  onChange={(e) => setImportAddress(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <button
-                onClick={importToken}
-                disabled={importing || !importAddress}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200 disabled:cursor-not-allowed"
-              >
-                {importing ? 'Importing...' : 'Import Token'}
-              </button>
-              <div className="text-xs text-gray-400">
-                <p>⚠️ Import at your own risk</p>
-                <p>• Verify the token contract address</p>
-                <p>• Check token information carefully</p>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {activeTab === 'my-tokens' && loadingUserTokens ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                  <p className="text-gray-400">Loading your tokens...</p>
-                </div>
-              ) : filterTokens(getCurrentTokens()).length > 0 ? (
-                filterTokens(getCurrentTokens()).map((token) => (
-                  <div
-                    key={token.address}
-                    className="flex items-center justify-between p-3 bg-gray-750 rounded-lg hover:bg-gray-700 transition-colors cursor-pointer"
-                    onClick={() => handleTokenSelect(token)}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="text-2xl">{token.logo}</div>
-                      <div>
-                        <p className="text-white font-medium">{token.symbol}</p>
-                        <p className="text-gray-400 text-sm">{token.name}</p>
-                        {activeTab === 'my-tokens' && token.balance && (
-                          <p className="text-blue-400 text-xs">Balance: {token.formattedBalance}</p>
-                        )}
-                      </div>
-                    </div>
-                    {activeTab === 'custom' && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeCustomToken(token.address);
-                        }}
-                        className="text-red-400 hover:text-red-300 p-1"
-                        aria-label="Remove token"
-                      >
-                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <EmptyState
-                  variant="tokens"
-                  icon="🔍"
-                  title="No tokens found"
-                  description={
-                    activeTab === 'my-tokens'
-                      ? 'No tokens found in your wallet on this network.'
-                      : activeTab === 'popular'
-                      ? 'No popular tokens match your search. Try a different search term.'
-                      : 'Add custom token addresses to track tokens not in our list.'
-                  }
-                />
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Security Badges for Selected Token */}
-        {activeTab === 'popular' && filterTokens(getCurrentTokens()).length > 0 && (
-          <div className="mt-4 pt-4 border-t border-gray-700">
-            <SecurityBadges
-              tokenAddress={filterTokens(getCurrentTokens())[0]?.address}
-              network={{ chainId: currentNetwork }}
-              showDetails={false}
+        {activeTab === 'import' ? (
+          <div className="space-y-3" data-testid="bridge-token-import">
+            <label htmlFor="token-mgmt-import-address" className="block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+              Token address on {chain?.name}
+            </label>
+            <input
+              id="token-mgmt-import-address"
+              type="text"
+              autoComplete="off"
+              placeholder={chain?.chainType === 'EVM' ? '0x…' : 'Token address'}
+              value={importAddress}
+              onChange={(e) => {
+                setImportAddress(e.target.value);
+                setImportState({ loading: false, token: null, error: '' });
+              }}
+              className="td-field__input w-full text-sm"
+              style={{ backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+              data-testid="bridge-token-import-input"
             />
+            <button type="button" onClick={checkImport} disabled={importState.loading || !importAddress.trim()} className="td-btn td-btn--primary w-full" data-testid="bridge-token-import-check">
+              {importState.loading ? 'Checking with LI.FI…' : 'Check token'}
+            </button>
+            {importState.error && (
+              <p className="text-sm" style={{ color: 'var(--finance-red)' }} role="alert" data-testid="bridge-token-import-error">
+                {importState.error}
+              </p>
+            )}
+            {importState.token && (
+              <div className="rounded-xl p-3" style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }} data-testid="bridge-token-import-preview">
+                <div className="flex items-center gap-3">
+                  <TokenLogo src={importState.token.logoURI} label={importState.token.symbol} size={36} />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                      {importState.token.symbol} <span className="text-sm font-normal" style={muted}>{importState.token.name}</span>
+                    </p>
+                    <p className="text-xs" style={muted}>
+                      {importState.token.decimals} decimals{importState.token.priceUSD ? ` · ${formatUsd(importState.token.priceUSD)}` : ''}
+                    </p>
+                  </div>
+                </div>
+                <p className="mt-2 text-xs" style={{ color: importState.token.verified ? 'var(--finance-green, #22c55e)' : 'var(--finance-amber, #e8b84a)' }}>
+                  {importState.token.verified
+                    ? 'LI.FI supports this token and marks it verified.'
+                    : 'LI.FI supports this token but has not verified it. Make sure it is the token you mean: anyone can create a token with any name.'}
+                </p>
+                <button
+                  type="button"
+                  className="td-btn td-btn--primary mt-3 w-full"
+                  onClick={() => {
+                    addCustom(importState.token);
+                    select(importState.token);
+                  }}
+                  data-testid="bridge-token-import-use"
+                >
+                  Import and use {importState.token.symbol}
+                </button>
+              </div>
+            )}
+            <p className="text-xs" style={muted}>
+              Only import tokens you trust. Copy the address from the project&apos;s official site or a block explorer.
+            </p>
+          </div>
+        ) : shown.length > 0 ? (
+          <VirtualList
+            items={shown}
+            rowHeight={60}
+            height={384}
+            getKey={(t) => `${t.address}-${t._remote ? 'r' : ''}`}
+            testId="bridge-token-list"
+            renderRow={(t) => (
+              <TokenRow
+                token={t}
+                balance={activeTab === 'my-tokens' ? t.amount : balances?.balanceOf?.(t)}
+                onSelect={select}
+                onRemove={activeTab === 'custom' ? removeCustom : null}
+                badge={t._remote ? 'LI.FI lookup' : !t.verified && activeTab !== 'my-tokens' ? 'Unverified' : ''}
+              />
+            )}
+          />
+        ) : (
+          <div className="py-10 text-center text-sm" style={muted} data-testid="bridge-token-empty">
+            <p>{emptyText}</p>
+            {activeTab === 'popular' && tokensError && onRetry && (
+              <button type="button" className="td-btn td-btn--ghost mt-3 text-sm" onClick={onRetry}>
+                Try again
+              </button>
+            )}
           </div>
         )}
 
-        {/* Network Info */}
-        <div className="mt-4 pt-4 border-t border-gray-700">
-          <p className="text-xs text-gray-400 text-center">
-            Network: {currentNetwork === 1 ? 'Ethereum' : 
-                      currentNetwork === 137 ? 'Polygon' :
-                      currentNetwork === 56 ? 'BSC' :
-                      currentNetwork === 42161 ? 'Arbitrum' : 'Unknown'}
-          </p>
+        <div className="mt-4 flex items-center justify-center gap-2 border-t pt-3 text-xs" style={{ borderColor: 'var(--border-color)', ...muted }} data-testid="bridge-token-network">
+          {chain?.logoURI && <TokenLogo src={chain.logoURI} label={chain.name} size={16} />}
+          <span>
+            Network: <span style={{ color: 'var(--text-primary)' }}>{chain?.name || 'Loading…'}</span>
+            {chain ? ` · ${chainTypeLabel(chain.chainType)}` : ''}
+            {tokens?.length ? ` · ${tokens.length.toLocaleString('en-US')} tokens` : ''}
+          </span>
         </div>
       </div>
     </div>
   );
-} 
+}

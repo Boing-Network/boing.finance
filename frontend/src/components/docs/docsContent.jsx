@@ -348,15 +348,29 @@ function Bridge() {
   return (
     <>
       <P>
-        <To to="/bridge">Bridge</To> moves tokens between EVM networks (for example Ethereum → Base) using routes from
-        LI.FI. Pick the source and destination networks, the token and the amount, review the route, then confirm in your
-        wallet.
+        <To to="/bridge">Bridge</To> moves tokens between every network LI.FI supports: Ethereum, Base, Arbitrum and the
+        other EVM chains, plus Solana, Bitcoin, Sui and Tron (about 70 in total). Pick the networks, search any LI.FI token
+        by name, symbol or address, enter the amount, review the route, then confirm in your wallet.
       </P>
       <UL>
+        <li>
+          You can send from EVM networks (MetaMask or another EVM wallet) and from Solana (Phantom, Solflare). Bitcoin, Sui
+          and Tron can be the receiving side: paste your address there.
+        </li>
+        <li>
+          The quote shows what you receive, the arrival time and the total cost. <B>Route details</B> lists every fee,
+          the steps, the slippage setting and the minimum you receive.
+        </li>
+        <li>
+          For tokens, your wallet first asks you to allow the exact amount, then to confirm the transfer. The page then
+          follows the transfer with LI.FI until it arrives.
+        </li>
         <li>A 0.5% platform fee applies, shown before you confirm.</li>
-        <li>Arrival on the destination network is handled by the bridge route and can take a few minutes.</li>
-        <li>Your recent bridges are listed on the page, and in Activity.</li>
-        <li>Bridging to or from Solana and Boing L1 isn&apos;t available in the app.</li>
+        <li>
+          <B>Select Token</B>: <B>My Tokens</B> shows your balances, <B>Popular</B> the full LI.FI list, and <B>Import</B>{' '}
+          checks a pasted address with LI.FI before adding it to <B>Custom</B>.
+        </li>
+        <li>Boing L1 isn&apos;t a LI.FI network; move BOING with Boing Express.</li>
       </UL>
     </>
   );

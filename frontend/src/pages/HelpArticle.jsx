@@ -288,22 +288,22 @@ const HelpArticle = () => {
       category: 'Cross-Chain Bridge',
       content: `
         <h2>Cross-Chain Token Bridging</h2>
-        <p>Learn how to transfer tokens between EVM networks using boing.finance's LI.FI-powered Bridge. This is not a proprietary Boing custody bridge.</p>
+        <p>Learn how to transfer tokens between networks using boing.finance's LI.FI-powered Bridge. This is not a proprietary Boing custody bridge.</p>
         
         <h3>What is Token Bridging?</h3>
         <p>Token bridging moves assets from one blockchain to another via third-party routes selected by LI.FI. Boing does not hold destination inventory.</p>
         
         <h3>Supported Networks</h3>
-        <p>Quotes work for EVM pairs LI.FI supports (for example Ethereum, Polygon, Arbitrum, Optimism, Base, BSC). Solana↔EVM and Boing L1 are not in this UI.</p>
+        <p>Every network LI.FI supports is listed (about 70): EVM chains such as Ethereum, Base, Arbitrum, Optimism, Polygon and BSC, plus Solana, Bitcoin, Sui and Tron. You can send from EVM networks and Solana; Bitcoin, Sui and Tron can receive. Boing L1 is not a LI.FI network.</p>
         
         <h3>How to Bridge Tokens</h3>
         <ol>
           <li>Open Bridge in the main navigation</li>
-          <li>Select source and destination EVM networks</li>
+          <li>Select the source and destination networks</li>
           <li>Choose tokens and enter an amount</li>
           <li>Review the LI.FI quote (includes a 0.5% platform fee plus gas/bridge fees)</li>
-          <li>Connect a wallet, switch to the source chain if asked, and sign</li>
-          <li>Wait for the aggregator's destination delivery</li>
+          <li>Connect a wallet (EVM or Solana), switch to the source chain if asked, approve the token if asked, and sign</li>
+          <li>Watch the status under Recent bridges until the tokens arrive</li>
         </ol>
         
         <h3>Fees and timeframes</h3>

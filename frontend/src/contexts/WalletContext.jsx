@@ -1411,6 +1411,8 @@ export const WalletProvider = ({ children }) => {
     detectWalletProviders,
     getWalletProvider,
     connectWalletWithProvider,
+    /** Raw EIP-1193 provider of the connected wallet (Bridge uses it for chains outside the app's network list). */
+    getActiveEip1193: getActiveRawEip1193,
   };
 
   return (
