@@ -1,9 +1,8 @@
 /**
  * Project pack: joint NFT collection + fungible token CREATE2 deploys, then companion link.
  *
- * Prefer boing-sdk `buildLinkedNftTokenProjectPack` (network PR #48 / main after merge).
- * Falls back to composing `buildLinkedNftTokenPairDeploys` + register flow when the helper
- * is not yet on the installed SDK.
+ * Planning lives in the pure `projectPackPlan.js` (token = Boing token v2 with the whole supply
+ * minted to the creator inside the deploy transaction); this module adds QA, wallet and registry I/O.
  */
 
 import * as boingSdk from 'boing-sdk';
@@ -16,17 +15,14 @@ import {
 import { pickExpressProviderForDeploy } from './boingNativeLaunchWizardDeploy';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
 import { isBoingNativeAccountIdHex } from '../utils/boingWalletDiscovery';
+import { planProjectPack } from './projectPackPlan';
 import {
   getLinkedNftTokenRegistryStatus,
-  getLinkedNftTokenRegistrySdkApi,
   resolveLinkedNftTokenRegistryId,
   nodeBatchSupport,
 } from './linkedNftTokenRegistry';
 import { flowTxsToBatchTx, isWalletBatchUnsupportedError, shouldUseLinkBatch } from '../utils/linkedNftLinkBatch';
 import { rememberAssetDeployer } from '../utils/linkedNftToken';
-
-const EXTRA_NFT_ENV = ['REACT_APP_BOING_REFERENCE_NFT_BYTECODE_HEX'];
-const EXTRA_TOKEN_ENV = ['REACT_APP_BOING_REFERENCE_TOKEN_BYTECODE'];
 
 function pickFn(...candidates) {
   for (const c of candidates) {
@@ -49,7 +45,8 @@ function resolvePackRegistryHex(opts = {}) {
 }
 
 /**
- * Plan a full project pack (deploys + claim×2 + register).
+ * Plan a full project pack (deploys + claim×2 + register) for the connected account.
+ * Thin wrapper over the pure {@link planProjectPack} that resolves the registry for this network.
  *
  * @param {object} input
  * @param {string} input.deployerHex
@@ -57,10 +54,10 @@ function resolvePackRegistryHex(opts = {}) {
  * @param {string} input.collectionSymbol
  * @param {string} input.tokenName
  * @param {string} input.tokenSymbol
+ * @param {string | bigint} [input.tokenSupply] — whole tokens; minted to the deployer inside the token deploy
  * @param {string} [input.collectionSaltHex]
  * @param {string} [input.note]
  * @param {string} [input.registryHex32]
- * @param {string} [input.senderHex32]
  * @param {{ endUser?: object, networkInfo?: object }} [input.registryOpts]
  */
 export function planProjectPackPair(input) {
@@ -68,98 +65,21 @@ export function planProjectPackPair(input) {
   if (!isBoingNativeAccountIdHex(deployer)) {
     throw new Error('Connect a Boing account to plan your project.');
   }
-  const collectionName = String(input.collectionName || '').trim();
-  const collectionSymbol = String(input.collectionSymbol || '').trim();
-  const tokenName = String(input.tokenName || '').trim();
-  const tokenSymbol = String(input.tokenSymbol || '').trim();
-  if (!collectionName || !collectionSymbol) {
-    throw new Error('Collection name and symbol are required.');
-  }
-  if (!tokenName || !tokenSymbol) {
-    throw new Error('Token name and symbol are required.');
-  }
-
-  const buildPack = pickFn(boingSdk.buildLinkedNftTokenProjectPack);
-  const buildPair = pickFn(boingSdk.buildLinkedNftTokenPairDeploys);
-  const randomSalt = pickFn(boingSdk.randomLinkedNftTokenCollectionSaltHex);
   const registryHex32 =
     (input.registryHex32 && String(input.registryHex32).trim()) ||
     resolvePackRegistryHex(input.registryOpts || {});
-  const senderHex32 =
-    (input.senderHex32 && String(input.senderHex32).trim().toLowerCase()) || deployer;
-
-  const salt =
-    (input.collectionSaltHex && String(input.collectionSaltHex).trim()) ||
-    (randomSalt ? randomSalt() : undefined);
-
-  const pairFields = {
+  return planProjectPack({
     deployerHex: deployer,
-    collectionName,
-    collectionSymbol,
-    tokenName,
-    tokenSymbol,
-    collectionSaltHex: salt,
+    collectionName: input.collectionName,
+    collectionSymbol: input.collectionSymbol,
+    tokenName: input.tokenName,
+    tokenSymbol: input.tokenSymbol,
+    tokenSupply: input.tokenSupply,
+    collectionSaltHex: input.collectionSaltHex,
     note: input.note,
-    collectionExtraEnvKeys: EXTRA_NFT_ENV,
-    tokenExtraEnvKeys: EXTRA_TOKEN_ENV,
-  };
-
-  if (buildPack) {
-    const pack = buildPack({
-      ...pairFields,
-      registryHex32,
-      senderHex32,
-    });
-    return {
-      source: 'sdk_project_pack',
-      collectionSaltHex: pack.collectionSaltHex,
-      tokenSaltHex: pack.tokenSaltHex,
-      predictedCollectionAddress: pack.predictedCollectionAddress,
-      predictedTokenAddress: pack.predictedTokenAddress,
-      collectionDeployTx: pack.collectionDeployTx,
-      tokenDeployTx: pack.tokenDeployTx,
-      collectionLink: pack.collectionLink,
-      tokenLink: pack.tokenLink,
-      registryHex32: pack.registryHex32,
-      senderHex32: pack.senderHex32,
-      registerFlowTxs: pack.registerFlowTxs,
-      submitOrder: pack.submitOrder,
-    };
-  }
-
-  if (!buildPair) {
-    throw new Error(
-      'This app build is missing project pack helpers. Update boing-sdk (network PR #48 / main).'
-    );
-  }
-
-  const pair = buildPair(pairFields);
-  const sdkApi = getLinkedNftTokenRegistrySdkApi();
-  let registerFlowTxs = null;
-  if (sdkApi.buildFlowTxs) {
-    registerFlowTxs = sdkApi.buildFlowTxs({
-      senderHex32,
-      registryHex32,
-      collectionHex32: pair.predictedCollectionAddress,
-      tokenHex32: pair.predictedTokenAddress,
-    });
-  }
-
-  return {
-    source: 'sdk_pair_compose',
-    collectionSaltHex: pair.collectionSaltHex,
-    tokenSaltHex: pair.tokenSaltHex,
-    predictedCollectionAddress: pair.predictedCollectionAddress,
-    predictedTokenAddress: pair.predictedTokenAddress,
-    collectionDeployTx: pair.collectionDeployTx,
-    tokenDeployTx: pair.tokenDeployTx,
-    collectionLink: pair.collectionLink,
-    tokenLink: pair.tokenLink,
     registryHex32,
-    senderHex32,
-    registerFlowTxs,
-    submitOrder: ['collectionDeploy', 'tokenDeploy', 'claimCollection', 'claimToken', 'registerLink'],
-  };
+    senderHex32: deployer,
+  });
 }
 
 /**

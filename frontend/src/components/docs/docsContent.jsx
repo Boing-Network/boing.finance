@@ -437,7 +437,9 @@ function CreateNft() {
       <H3>Project pack and Manage links</H3>
       <P>
         <To to="/project-pack">Project pack</To> creates an NFT collection and a project token in one flow, then links
-        them so wallets and explorers show them as one project. <To to="/linked-project">Manage links</To> connects an
+        them so wallets and explorers show them as one project. You pick the token supply (whole tokens, 1,000,000,000
+        by default); the whole supply is minted to your account in the same transaction that creates the token, and
+        no one can mint more later. <To to="/linked-project">Manage links</To> connects an
         existing collection to its token, or disconnects them, on networks where linking is set up.
       </P>
     </>

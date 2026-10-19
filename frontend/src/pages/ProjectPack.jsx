@@ -21,6 +21,8 @@ import { rememberAssetDeployer } from '../utils/linkedNftToken';
 import CompanionLinkGate from '../components/CompanionLinkGate';
 import BuilderAttestationPanel from '../components/BuilderAttestationPanel';
 import { buildProjectPoolPath } from '../services/linkedNftTokenRegistry';
+import { parseBoingTokenV2Supply } from '../services/boingTokenV2Launch';
+import { PROJECT_PACK_DEFAULT_TOKEN_SUPPLY, formatPackSupply } from '../config/projectPack';
 import {
   TradeDeployShell,
   TradeDeployHero,
@@ -37,7 +39,18 @@ const STEPS = [
   { id: 'done', label: 'Done' },
 ];
 
-const STORAGE_KEY = 'boing.finance.projectPack.v1';
+// v2: token = Boing token v2 minted to the creator at deploy; its address depends on the supply, so
+// drafts planned with the old v1 token are not resumed.
+const STORAGE_KEY = 'boing.finance.projectPack.v2';
+
+function supplyError(raw) {
+  try {
+    parseBoingTokenV2Supply(raw);
+    return null;
+  } catch (e) {
+    return e?.message || 'Enter a whole-number supply.';
+  }
+}
 
 function loadDraft() {
   try {
@@ -114,6 +127,7 @@ export default function ProjectPack() {
   const [collectionSymbol, setCollectionSymbol] = useState(draft?.collectionSymbol || '');
   const [tokenName, setTokenName] = useState(draft?.tokenName || '');
   const [tokenSymbol, setTokenSymbol] = useState(draft?.tokenSymbol || '');
+  const [tokenSupply, setTokenSupply] = useState(draft?.tokenSupply || PROJECT_PACK_DEFAULT_TOKEN_SUPPLY.toString());
   const [collectionSaltHex, setCollectionSaltHex] = useState(draft?.collectionSaltHex || '');
   const [predictedCollection, setPredictedCollection] = useState(draft?.predictedCollection || '');
   const [predictedToken, setPredictedToken] = useState(draft?.predictedToken || '');
@@ -151,6 +165,7 @@ export default function ProjectPack() {
       collectionSymbol,
       tokenName,
       tokenSymbol,
+      tokenSupply,
       collectionSaltHex,
       predictedCollection,
       predictedToken,
@@ -168,6 +183,7 @@ export default function ProjectPack() {
     collectionSymbol,
     tokenName,
     tokenSymbol,
+    tokenSupply,
     collectionSaltHex,
     predictedCollection,
     predictedToken,
@@ -179,6 +195,13 @@ export default function ProjectPack() {
     linked,
   ]);
 
+  const tokenSupplyError = supplyError(tokenSupply);
+  const supplyLabel = tokenSupplyError ? '' : formatPackSupply(parseBoingTokenV2Supply(tokenSupply));
+  const symbolLabel = tokenSymbol.trim().toUpperCase() || 'tokens';
+  // The token address depends on the supply (it is part of the deploy bytecode), and the collection's
+  // deploy already names that address: freeze the supply once the collection is on chain.
+  const supplyLocked = Boolean(collectionTx);
+
   const rebuildPlan = () => {
     if (!account || !isBoingNativeAccountIdHex(account)) return null;
     try {
@@ -188,6 +211,7 @@ export default function ProjectPack() {
         collectionSymbol,
         tokenName,
         tokenSymbol,
+        tokenSupply,
         collectionSaltHex: collectionSaltHex || undefined,
         note: projectName.trim() || undefined,
         registryOpts: { endUser, networkInfo },
@@ -277,7 +301,7 @@ export default function ProjectPack() {
           if (account) rememberAssetDeployer(id, account);
         });
       }
-      toast.success('Token ready');
+      toast.success(`Token ready: ${formatPackSupply(plan.tokenSupply)} ${tokenSymbol.toUpperCase()} are in your wallet`);
       setStep('link');
     } finally {
       setBusy(false);
@@ -332,7 +356,8 @@ export default function ProjectPack() {
     collectionName.trim() &&
     collectionSymbol.trim() &&
     tokenName.trim() &&
-    tokenSymbol.trim();
+    tokenSymbol.trim() &&
+    !tokenSupplyError;
 
   return (
     <>
@@ -475,6 +500,42 @@ export default function ProjectPack() {
                           />
                         </label>
                       </div>
+                      <label className="block">
+                        <span className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>
+                          Token supply
+                        </span>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={tokenSupply}
+                          onChange={(e) => setTokenSupply(e.target.value)}
+                          disabled={supplyLocked}
+                          placeholder={PROJECT_PACK_DEFAULT_TOKEN_SUPPLY.toString()}
+                          aria-invalid={Boolean(tokenSupplyError)}
+                          aria-describedby="project-pack-supply-help"
+                          data-testid="project-pack-supply"
+                          className="mt-1 w-full px-3 py-2.5 rounded-lg text-sm disabled:opacity-60"
+                          style={{
+                            backgroundColor: 'var(--bg-tertiary)',
+                            border: `1px solid ${tokenSupplyError ? 'rgba(239, 68, 68, 0.7)' : 'var(--border-color)'}`,
+                            color: 'var(--text-primary)',
+                          }}
+                        />
+                        <span id="project-pack-supply-help" className="mt-1 block text-xs" data-testid="project-pack-supply-help">
+                          {tokenSupplyError ? (
+                            <span style={{ color: 'rgb(248, 113, 113)' }}>{tokenSupplyError}</span>
+                          ) : (
+                            <span style={{ color: 'var(--text-secondary)' }}>
+                              You&apos;ll receive{' '}
+                              <strong style={{ color: 'var(--text-primary)' }}>
+                                {supplyLabel} {symbolLabel}
+                              </strong>
+                              . Whole tokens, no decimals; nobody can mint more later.
+                              {supplyLocked ? ' Locked because your collection is already created.' : ''}
+                            </span>
+                          )}
+                        </span>
+                      </label>
                     </div>
                     {!expressOk ? (
                       <p className="mt-4 text-sm" style={{ color: 'var(--text-secondary)' }}>
@@ -564,6 +625,19 @@ export default function ProjectPack() {
                       Collection is ready. Next, publish <strong style={{ color: 'var(--text-primary)' }}>{tokenName}</strong>{' '}
                       ({tokenSymbol.toUpperCase()}).
                     </p>
+                    <div
+                      className="rounded-xl border px-4 py-3 mb-4"
+                      style={{ borderColor: 'rgba(16, 185, 129, 0.45)', backgroundColor: 'rgba(16, 185, 129, 0.08)' }}
+                      data-testid="project-pack-supply-review"
+                    >
+                      <p className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
+                        You&apos;ll receive {supplyLabel} {symbolLabel}
+                      </p>
+                      <p className="mt-1 text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                        The full supply goes to your account ({shortId(account)}) in the same transaction that
+                        creates the token. No allocations, no fees in tokens, and no one can mint more.
+                      </p>
+                    </div>
                     <div className="space-y-3 mb-4">
                       <CopyField label="Collection id" value={collectionId || predictedCollection} />
                       <CopyField label="Token id (preview)" value={predictedToken} />
@@ -665,6 +739,11 @@ export default function ProjectPack() {
                       <div className="space-y-3 mb-6">
                         <CopyField label="Collection" value={collectionId || predictedCollection} />
                         <CopyField label="Token" value={tokenId || predictedToken} />
+                        {supplyLabel ? (
+                          <p className="text-sm" style={{ color: 'var(--text-secondary)' }} data-testid="project-pack-done-supply">
+                            Supply: <strong style={{ color: 'var(--text-primary)' }}>{supplyLabel} {symbolLabel}</strong>, all in your wallet.
+                          </p>
+                        ) : null}
                         <div
                           className="rounded-xl border px-3 py-2.5 text-sm"
                           style={{
@@ -704,6 +783,7 @@ export default function ProjectPack() {
                             setCollectionSymbol('');
                             setTokenName('');
                             setTokenSymbol('');
+                            setTokenSupply(PROJECT_PACK_DEFAULT_TOKEN_SUPPLY.toString());
                             setCollectionSaltHex('');
                             setPredictedCollection('');
                             setPredictedToken('');
