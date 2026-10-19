@@ -412,14 +412,7 @@ export default function Bridge() {
       </Helmet>
       <div className="relative w-full min-w-0">
         <div className="td-shell td-shell--narrow">
-          <header className="td-hero">
-            <span className="td-hero__eyebrow">Trade</span>
-            <h1 className="td-hero__title">Bridge</h1>
-            <p className="td-hero__subtitle">
-              Move tokens between {chains.length ? `${chains.length} networks` : 'networks'}: Ethereum, Base, Arbitrum, Solana, Bitcoin and more,
-              routed by LI.FI. A {PLATFORM_BRIDGE_FEE_LABEL} platform fee applies.
-            </p>
-          </header>
+          <h1 className="sr-only">Bridge tokens between {chains.length ? `${chains.length} networks` : 'networks'}</h1>
 
           {network && Number(network.chainId) === BOING_NATIVE_L1_CHAIN_ID && (
             <div className="mb-6 rounded-xl border px-4 py-3 text-sm" role="status" style={{ borderColor: 'rgba(45, 212, 191, 0.45)', backgroundColor: 'var(--bg-card)', color: 'var(--text-secondary)' }}>
@@ -681,6 +674,18 @@ export default function Bridge() {
             >
               {buttonLabel}
             </button>
+            <p
+              className="mt-3 text-center text-xs leading-relaxed"
+              style={{ color: 'var(--text-tertiary, var(--text-secondary))' }}
+              data-testid="bridge-fee-notice"
+            >
+              <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" className="mr-1 inline-block h-3.5 w-3.5 align-[-2px] opacity-70">
+                <path fillRule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clipRule="evenodd" />
+              </svg>
+              <span>
+                A {PLATFORM_BRIDGE_FEE_LABEL} platform fee is included in cross-chain quotes. Routes by LI.FI.
+              </span>
+            </p>
           </div>
 
           <div className="mb-6 overflow-hidden rounded-2xl shadow-lg" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
