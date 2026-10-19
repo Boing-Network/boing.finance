@@ -42,7 +42,16 @@ Optional later: `end_user.canonical_linked_nft_token_registry` on `boing_getNetw
 | 3 | **Unlink** when needed (`unlink_at`) | `0xE2` |
 | Query | List links (`links_count` / `get_link_at`) | `0xE3` / `0xE4` |
 
-Project pack prefers SDK `buildLinkedNftTokenProjectPack` ([boing.network #48](https://github.com/Boing-Network/boing.network/pull/48); branch `cursor/sdk-project-pack` until merge) — joint CREATE2 deploys + claim×2 + `register_link`. Falls back to composing `buildLinkedNftTokenPairDeploys` + register flow on older SDK installs.
+Project pack planning lives in `frontend/src/services/projectPackPlan.js` (pure, tested by `scripts/project-pack-plan.test.mjs`). It uses SDK `buildLinkedNftTokenProjectPack` — joint CREATE2 deploys + claim×2 + `register_link` — and falls back to composing `buildLinkedNftTokenPairDeploys` + register flow on older SDK installs.
+
+**Pack token = Boing token v2, minted to the creator at deploy.** The token deploy passes `tokenBytecodeHexOverride` = `buildBoingTokenV2MintAtDeployBytecodeHex({ supply })` (`services/boingTokenV2Launch.js`): `0xFD` init + the unchanged v2 runtime (`boingTokenBytecodeHex(2)`, the same code as Deploy token and the v8/v9 custody pools). The init runs inside the deploy transaction with `CALLER` = deployer and stores admin = deployer (`0x…f0`), `balance[deployer] = supply` and mint-once = 1 (`0x…f1`), then returns the v2 runtime. So:
+
+- the creator holds the whole supply as soon as the token exists, and `mint_first` is already spent (no one can mint more);
+- there is no transaction gap in which another account could call the empty token first and become its admin. A separate `mint_first` at nonce n+1 would leave that gap: the node packs blocks by (nonce, sender), so a third-party call with nonce n or n+1 can be ordered between the deploy and the mint.
+- Supply: the pack's supply field (default `PROJECT_PACK_DEFAULT_TOKEN_SUPPLY` = 1,000,000,000 in `config/projectPack.js`), whole units, 1 .. 2^128−1, validated by `parseBoingTokenV2Supply` like Deploy token. The supply is part of the token bytecode, so it changes the predicted token address; the page locks it once the collection (whose deploy names that address) is on chain.
+- The registry (`claim_asset` / `register_link`) only records AccountIds, so it is template-agnostic.
+
+Testnet check with the page's planner: `node scripts/check-project-pack-deploy.mjs --dry-run` / `--execute [--supply N]` (key from `BOING_SECRET_HEX`, never printed).
 
 Post-deploy panels on **Create NFT** and **Deploy Token** reuse `LinkedNftTokenPanel` → `linkedNftTokenRegistry`. Claim soon after deploy so a third party cannot front-run `claim_asset`.
 

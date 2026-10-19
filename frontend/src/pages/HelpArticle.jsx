@@ -731,11 +731,17 @@ const HelpArticle = () => {
 
         <h3>Steps</h3>
         <ol>
-          <li>Name your collection and token</li>
+          <li>Name your collection and token, and choose the token supply (whole tokens; 1,000,000,000 by default)</li>
           <li>Create the collection</li>
-          <li>Create the token</li>
+          <li>Create the token: the full supply is minted to your account in the same transaction that creates it</li>
           <li>Link companions</li>
         </ol>
+        <h3>Who gets the tokens?</h3>
+        <p>
+          You do: the whole supply lands in the wallet that creates the token, in that one transaction. There are no
+          other allocations, no fees taken in tokens, and nobody (you included) can mint more later. Boing tokens
+          have no decimals, so the supply is a whole number.
+        </p>
         <p>Open <a href="/project-pack">Project pack</a>. You can pause between wallet confirms and come back later in the same browser session.</p>
 
         <h3>Already have both?</h3>
