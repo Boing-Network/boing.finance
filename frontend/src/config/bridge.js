@@ -9,8 +9,9 @@ export const LIFI_INTEGRATOR = 'boing.finance';
 
 /** Platform service fee as a LI.FI `fee` decimal (0.005 = 0.5%). */
 export const PLATFORM_BRIDGE_FEE = 0.005;
-export const PLATFORM_BRIDGE_FEE_BPS = 50;
-export const PLATFORM_BRIDGE_FEE_LABEL = '0.5%';
+export const PLATFORM_BRIDGE_FEE_BPS = Math.round(PLATFORM_BRIDGE_FEE * 10000);
+/** Human label derived from the same fee the quotes use, e.g. "0.5%". */
+export const PLATFORM_BRIDGE_FEE_LABEL = `${Number((PLATFORM_BRIDGE_FEE * 100).toFixed(2))}%`;
 
 /**
  * Public fee-recipient address for display. LI.FI actually pays the wallet
