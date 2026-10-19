@@ -393,8 +393,8 @@ function DeployToken() {
         </li>
         <li>
           <B>Boing:</B> deploys <B>Boing token v2</B> with Boing Express, the same kind of token the Boing swap pools
-          trade. Express asks you to approve two transactions: the deploy, then a one-time mint of the whole supply to
-          your account. Amounts are whole tokens (decimals are 0). After that mint no one can mint more, and there are no
+          trade. Express asks you to approve one transaction: the deploy, which also makes you the token&apos;s admin and
+          puts the whole supply in your account. Amounts are whole tokens (decimals are 0). No one can mint more, and there are no
           owner controls such as freezing, a blacklist, transfer limits, anti-bot or a pause switch, so the security step
           lists those as not available on Boing. The name and
           symbol are stored with the deploy: boing.observer shows them right away. The network checks new contracts

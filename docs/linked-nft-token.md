@@ -10,7 +10,7 @@ Enforced many-to-many NFT ↔ fungible token links on boing.finance via the Boin
 |------|----------|
 | Cardinality | **Many-to-many** (no 1:1 cap) |
 | Mutability | **register_link** / **unlink_at** after create |
-| Auth | **Dual asset-claimer** — first `claim_asset` wins per AccountId; register/unlink require claimer of **both** sides |
+| Auth | **Dual asset-claimer**: register/unlink require the claimer of **both** sides. Registry v2: an asset's claimer is its **creator** (see below); nobody else can claim it |
 | Soft-gate | Same-deployer advisory only |
 | Metadata schema | `boing.linked_nft_token.v1` — **cache only** (not consensus) |
 
@@ -19,10 +19,25 @@ Enforced many-to-many NFT ↔ fungible token links on boing.finance via the Boin
 | Field | Value |
 |-------|--------|
 | Network | Boing public testnet (`https://testnet-rpc.boing.network/`) |
-| Registry AccountId | `0xebf9f0190f415852f90d0e60343126201248ab96273fdbf8acc5fe5fa03c3dd8` |
-| CREATE2 salt | `BOING_NFT_TOKEN_LINK_REG_V1` |
+| Registry AccountId | `0xf704485ad29f56bb6516ac822fcf9ca8fcb6c4266e22c9ed7f9c6908668655dd` |
+| CREATE2 salt | `BOING_NFT_TOKEN_LINK_REG_V2` (registry v2, block 1174) |
+| Previous (v1) | `0xebf9f0190f415852f90d0e60343126201248ab96273fdbf8acc5fe5fa03c3dd8`, first `claim_asset` caller won; its claims and links were copied into v2 |
 | Env (Pages CI) | `REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY` in `frontend/env/github-build.*.env` |
 | Mainnet | Not deployed (apps target testnet RPC today) |
+
+### Who can claim (registry v2)
+
+v1 let the **first caller** of `claim_asset(asset)` become the claimer, so anyone watching the mempool could claim
+a freshly deployed collection or token before its creator and block them from linking it. v2 closes that:
+
+- **New assets** are claimed **inside their own deploy transaction**. boing.finance deploys every token and NFT
+  collection with `0xFD` init code that, besides setting the creator as admin (and, for tokens, minting the supply),
+  calls `claim_self(creator)` (selector `0xE7`) on the registry. The registry takes the caller as the asset, so only
+  the asset itself can claim itself, and only once. Deploys: Deploy Token (one signature), Create NFT, Project pack.
+- **Assets that existed before v2** have a recorded deployer (the sender of their deploy tx, copied at v2 deploy).
+  `claim_asset(asset)` succeeds only when the sender is that deployer (`get_asset_deployer` = `0xE8`).
+- Anyone else's `claim_asset` fails. v1 claims and links were carried over unchanged (none were squatted).
+- Assets deployed after v2 by tools that do not add the claim to their init code cannot be claimed (and so not linked).
 
 Optional later: `end_user.canonical_linked_nft_token_registry` on `boing_getNetworkInfo` (finance already accepts that field when present).
 
@@ -37,23 +52,25 @@ Optional later: `end_user.canonical_linked_nft_token_registry` on `boing_getNetw
 **Builder attestation (optional, on-chain):** After companions are linked, Project pack success and Manage links offer **Attest as builder** / show **Builder attested** (revoke when you are the builder). Separate registry + claimer from companions — see [Builder attestation](#builder-attestation-on-chain) below. Soft wallet-proof helpers from [#23](https://github.com/Boing-Network/boing.finance/pull/23) may remain in-tree; the primary panel is on-chain.
 | Step | Action | Selector |
 |------|--------|----------|
-| 1 | **Claim** each asset AccountId (`claim_asset`) | `0xE0` |
+| 1 | **Claim** each asset: automatic in its deploy tx (`claim_self`, v2); pre-v2 assets: recorded deployer only (`claim_asset`) | `0xE7` / `0xE0` |
 | 2 | **Register** the NFT ↔ token pair (`register_link`) | `0xE1` |
 | 3 | **Unlink** when needed (`unlink_at`) | `0xE2` |
 | Query | List links (`links_count` / `get_link_at`) | `0xE3` / `0xE4` |
 
-Project pack planning lives in `frontend/src/services/projectPackPlan.js` (pure, tested by `scripts/project-pack-plan.test.mjs`). It uses SDK `buildLinkedNftTokenProjectPack` — joint CREATE2 deploys + claim×2 + `register_link` — and falls back to composing `buildLinkedNftTokenPairDeploys` + register flow on older SDK installs.
+Project pack planning lives in `frontend/src/services/projectPackPlan.js` (pure, tested by `scripts/project-pack-plan.test.mjs`). It uses SDK `buildLinkedNftTokenProjectPack` with `claimAtDeploy` — joint CREATE2 deploys (each claims itself) + `register_link`, three transactions — and falls back to composing `buildLinkedNftTokenPairDeploys` + register flow on older SDK installs.
 
 **Pack token = Boing token v2, minted to the creator at deploy.** The token deploy passes `tokenBytecodeHexOverride` = `buildBoingTokenV2MintAtDeployBytecodeHex({ supply })` (`services/boingTokenV2Launch.js`): `0xFD` init + the unchanged v2 runtime (`boingTokenBytecodeHex(2)`, the same code as Deploy token and the v8/v9 custody pools). The init runs inside the deploy transaction with `CALLER` = deployer and stores admin = deployer (`0x…f0`), `balance[deployer] = supply` and mint-once = 1 (`0x…f1`), then returns the v2 runtime. So:
 
 - the creator holds the whole supply as soon as the token exists, and `mint_first` is already spent (no one can mint more);
 - there is no transaction gap in which another account could call the empty token first and become its admin. A separate `mint_first` at nonce n+1 would leave that gap: the node packs blocks by (nonce, sender), so a third-party call with nonce n or n+1 can be ordered between the deploy and the mint.
 - Supply: the pack's supply field (default `PROJECT_PACK_DEFAULT_TOKEN_SUPPLY` = 1,000,000,000 in `config/projectPack.js`), whole units, 1 .. 2^128−1, validated by `parseBoingTokenV2Supply` like Deploy token. The supply is part of the token bytecode, so it changes the predicted token address; the page locks it once the collection (whose deploy names that address) is on chain.
-- The registry (`claim_asset` / `register_link`) only records AccountIds, so it is template-agnostic.
+- The token init also calls the registry's `claim_self(creator)`, and the collection deploy is wrapped the same way (`buildBoingNftCollectionAtDeployBytecodeHex` in `services/boingDeployInit.js`: admin slot `0x…e0` = creator + `claim_self`), so both sides are claimed by the creator in their deploy transactions and the pack is three transactions: collection, token, `register_link`.
+
+**Deploy Token (solo) uses the same init:** one transaction, one signature. The deploy stores admin = creator, the whole supply on the creator, mint-once = 1, and claims the token in the registry. Check: `node scripts/check-boing-token-deploy.mjs --dry-run` / `--execute [--supply N]`.
 
 Testnet check with the page's planner: `node scripts/check-project-pack-deploy.mjs --dry-run` / `--execute [--supply N]` (key from `BOING_SECRET_HEX`, never printed).
 
-Post-deploy panels on **Create NFT** and **Deploy Token** reuse `LinkedNftTokenPanel` → `linkedNftTokenRegistry`. Claim soon after deploy so a third party cannot front-run `claim_asset`.
+Post-deploy panels on **Create NFT** and **Deploy Token** reuse `LinkedNftTokenPanel` → `linkedNftTokenRegistry`. Assets deployed here are already claimed by their creator, so linking is a single `register_link`. An unclaimed asset can only be claimed by its recorded deployer; otherwise the panel explains why it cannot be linked.
 
 ## Selectors (SDK)
 
@@ -66,6 +83,8 @@ Post-deploy panels on **Create NFT** and **Deploy Token** reuse `LinkedNftTokenP
 | `get_link_at` | `0xE4` | 64 → 64 |
 | `get_asset_claimer` | `0xE5` | 64 |
 | `transfer_asset_claimer` | `0xE6` | 96 |
+| `claim_self` (v2, called by the asset itself) | `0xE7` | 64 |
+| `get_asset_deployer` (v2) | `0xE8` | 64 → 32 |
 
 ## Finance wiring
 
@@ -90,7 +109,7 @@ Post-deploy panels on **Create NFT** and **Deploy Token** reuse `LinkedNftTokenP
 
 ```bash
 # Public testnet (baked in github-build production/staging env)
-REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY=0xebf9f0190f415852f90d0e60343126201248ab96273fdbf8acc5fe5fa03c3dd8
+REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY=0xf704485ad29f56bb6516ac822fcf9ca8fcb6c4266e22c9ed7f9c6908668655dd
 
 # Required for Manage links / companion list reads (links_count / get_link_at) without Express signing.
 # Baked in github-build production/staging env — without it the UI shows "Ready to link" but
@@ -107,7 +126,7 @@ Canonical catalog: `frontend/.env.example`. Resolution order also accepts `REACT
 ```bash
 curl -fsS -A boing-sdk/json-rpc -X POST https://testnet-rpc.boing.network/ \
   -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":1,"method":"boing_simulateContractCall","params":["0xebf9f0190f415852f90d0e60343126201248ab96273fdbf8acc5fe5fa03c3dd8","0x00000000000000000000000000000000000000000000000000000000000000e3"]}'
+  -d '{"jsonrpc":"2.0","id":1,"method":"boing_simulateContractCall","params":["0xf704485ad29f56bb6516ac822fcf9ca8fcb6c4266e22c9ed7f9c6908668655dd","0x00000000000000000000000000000000000000000000000000000000000000e3"]}'
 ```
 
 Expect `success: true` and a zero word for empty `links_count`.

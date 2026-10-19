@@ -23,9 +23,23 @@ export function decodeClaimerReturnData(returnDataHex) {
 }
 
 /**
+ * `get_asset_deployer` (registry v2, 0xE8) return data → deployer hex; null when the registry has no deployer record
+ * (zero word); undefined when unknown (empty return data: a v1 registry has no such selector and STOPs).
+ */
+export function decodeDeployerReturnData(returnDataHex) {
+  const raw = String(returnDataHex || '').replace(/^0x/i, '').toLowerCase();
+  if (raw.length < 64) return undefined;
+  const w = `0x${raw.slice(-64)}`;
+  return w === ZERO32 ? null : w;
+}
+
+/**
+ * Registry v2: an unclaimed asset can only be claimed (`claim_asset`) by its recorded deployer. Assets created on
+ * boing.finance claim themselves in their deploy transaction, so they are never unclaimed.
  * @param {{
  *   linker: string, registryId: string, collection: string, token: string,
- *   claimers?: Record<string, string|null|undefined>, // undefined = unknown (claim anyway; claim is idempotent for the same claimer)
+ *   claimers?: Record<string, string|null|undefined>, // undefined = unknown (claim anyway; claim is a no-op for the current claimer)
+ *   deployers?: Record<string, string|null|undefined>, // v2 deployer records; undefined = unknown (v1 registry: claim anyway)
  *   encodeClaim: (asset: string) => string, encodeRegister: (collection: string, token: string) => string,
  * }} p
  * @returns {{ ok: true, steps: { contract: string, calldata: string, label: string }[] } | { ok: false, code: string, message: string }}
@@ -46,6 +60,16 @@ export function planLinkSteps(p) {
       };
     }
     if (c === undefined || c === null) {
+      const d = (p.deployers || {})[a];
+      if (c === null && d !== undefined && (d === null || norm(d) !== linker)) {
+        return {
+          ok: false,
+          code: 'not_claimable',
+          message: d
+            ? `The ${label} ${a.slice(0, 10)}… has no registry claimer yet, and only its creator ${norm(d).slice(0, 10)}… can claim it, not your connected account.`
+            : `The ${label} ${a.slice(0, 10)}… has no registry claimer and can't be claimed: only assets created on boing.finance (they register their creator when deployed) or created before the registry upgrade by your account can be linked.`,
+        };
+      }
       steps.push({ contract: registry, calldata: p.encodeClaim(a), label: `Claim ${label}` });
     }
   }

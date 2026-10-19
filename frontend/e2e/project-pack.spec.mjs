@@ -1,5 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { boingTokenBytecodeHex } from 'boing-sdk';
+import {
+  CANONICAL_BOING_TESTNET_LINKED_NFT_TOKEN_REGISTRY_HEX,
+  boingTokenBytecodeHex,
+  buildLinkedNftTokenClaimSelfInitSnippetHex,
+} from 'boing-sdk';
 
 /**
  * Project pack token = Boing token v2 minted to the creator at deploy: the supply field (default
@@ -17,7 +21,7 @@ async function setup(page, draft) {
     localStorage.setItem('walletType', 'boingExpress');
     localStorage.removeItem('userDisconnected');
     if (draftJson && !sessionStorage.getItem('e2e-draft-set')) {
-      sessionStorage.setItem('boing.finance.projectPack.v2', draftJson);
+      sessionStorage.setItem('boing.finance.projectPack.v3', draftJson);
       sessionStorage.setItem('e2e-draft-set', '1');
     }
     window.__signRequests = [];
@@ -117,6 +121,10 @@ test.describe('Project pack token supply (Boing token v2, minted at deploy)', ()
     const v2 = boingTokenBytecodeHex(2).slice(2);
     expect(deploy.bytecode).toContain(v2.slice(0, 64));
     expect(deploy.bytecode).toContain((4206900000).toString(16).padStart(64, '0'));
+    // ...and the token claims itself in the linked NFT↔token registry v2 inside the same deploy.
+    expect(deploy.bytecode.toLowerCase()).toContain(
+      buildLinkedNftTokenClaimSelfInitSnippetHex(CANONICAL_BOING_TESTNET_LINKED_NFT_TOKEN_REGISTRY_HEX).slice(2).toLowerCase()
+    );
   });
 
   test('supply is locked once the collection exists (it already names this token address)', async ({ page }) => {

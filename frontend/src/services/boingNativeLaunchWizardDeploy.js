@@ -5,6 +5,8 @@ import {
   resolveReferenceNftCollectionTemplateBytecodeHex,
 } from 'boing-sdk';
 import { boingTokenV2BytecodeHex, buildBoingTokenV2DeployMetaTx } from './boingTokenV2Launch';
+import { buildBoingNftCollectionAtDeployBytecodeHex } from './boingDeployInit.js';
+import { resolveLinkedNftTokenClaimRegistryHex } from './linkedNftTokenRegistry';
 import { createBoingBrowserRpcClient } from './boingTestnetRpc';
 import { boingExpressSendTransaction } from './boingExpressNativeTx';
 import { BOING_QA_PURPOSE_TOKEN, isValidBoingQaPurpose } from '../config/boingQa';
@@ -16,6 +18,11 @@ import { boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
 export const LEGACY_FUNGIBLE_BYTECODE_ENV = 'REACT_APP_BOING_REFERENCE_TOKEN_BYTECODE';
 /** Optional extra env name for NFT collection template (SDK already checks REACT_APP_BOING_REFERENCE_NFT_COLLECTION_TEMPLATE_BYTECODE_HEX). */
 export const LEGACY_NFT_BYTECODE_ENV = 'REACT_APP_BOING_REFERENCE_NFT_BYTECODE_HEX';
+
+/** Registry a new collection claims itself in (linked NFT↔token registry v2); null when none is configured. */
+function defaultClaimRegistryHex() {
+  return resolveLinkedNftTokenClaimRegistryHex();
+}
 
 export function pickExpressProviderForDeploy(getWalletProvider) {
   try {
@@ -117,10 +124,14 @@ export function buildBoingLaunchIntegrationInput(kind, fields) {
         );
       }
       const custom = (customBytecode || '').trim();
-      const bytecodeHexOverride = custom ? tryParseEvenLengthDeployBytecodeHex(customBytecode) || undefined : undefined;
-      if (custom && !bytecodeHexOverride) {
+      const runtimeHex = custom ? tryParseEvenLengthDeployBytecodeHex(customBytecode) || undefined : bc;
+      if (custom && !runtimeHex) {
         throw new Error('Invalid bytecode: use even-length hex (optional 0x prefix).');
       }
+      // Deploy with 0xFD init: admin = creator and (registry v2) claim_self(creator), inside the deploy tx.
+      const claimRegistryHex =
+        fields.claimRegistryHex !== undefined ? fields.claimRegistryHex : defaultClaimRegistryHex();
+      const bytecodeHexOverride = buildBoingNftCollectionAtDeployBytecodeHex({ runtimeHex, claimRegistryHex });
       return {
         kind: 'nft',
         collectionName: name,

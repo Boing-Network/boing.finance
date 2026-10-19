@@ -60,7 +60,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
   const [qaPoolAcknowledged, setQaPoolAcknowledged] = useState(false);
   const [publishBusy, setPublishBusy] = useState(false);
   const [stage, setStage] = useState(null);
-  const [mintNote, setMintNote] = useState(null);
+  const [deployNote, setDeployNote] = useState(null);
 
   const effectiveBytecode = useMemo(
     () => computeEffectiveNativeDeployBytecode(customBytecode, bundledBytecode),
@@ -178,7 +178,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
       return null;
     }
     const hashForDeploy = descriptionHash.trim() || published?.descriptionHash || '';
-    setMintNote(null);
+    setDeployNote(null);
     let result;
     try {
       result = await executeBoingNativeTokenDeploy({
@@ -197,6 +197,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
     }
     if (result.qaResult) setQaResult(result.qaResult);
     if (!result.ok) {
+      if (result.code === 'deploy_failed') setDeployNote(result.message);
       toast.error(result.message);
       return null;
     }
@@ -204,12 +205,8 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
     setLastBoingTxId(result.boingTxIdHex ?? null);
     setLastDeployedAccount(result.tokenHex);
     if (account) rememberAssetDeployer(result.tokenHex, account);
-    if (result.mintError) {
-      const note = `Token deployed, but minting the supply failed: ${result.mintError}`;
-      setMintNote(note);
-      toast.error(note);
-    } else if (!result.mintConfirmed) {
-      setMintNote('Mint submitted; still waiting for a block to include it. Check boing.observer in a moment.');
+    if (!result.confirmed) {
+      setDeployNote('Deploy submitted; still waiting for a block to include it. Check boing.observer in a moment.');
     }
     showBoingLaunchDeploySuccessToast({
       txHash: result.txHash,
@@ -222,14 +219,14 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
           { label: 'Name', value: String(tokenName || '').trim() || '—' },
           { label: 'Symbol', value: String(tokenSymbol || '').trim().toUpperCase() || '—' },
           { label: 'Decimals', value: `${BOING_TOKEN_V2_DECIMALS} (whole units)` },
-          { label: 'Supply', value: `${result.supply}${result.mintError ? ' (mint failed)' : ''}` },
+          { label: 'Supply', value: `${result.supply} (all in your account)` },
           { label: 'Token', value: result.tokenHex },
           ...(published?.logoUri ? [{ label: 'Logo', value: published.logoUri }] : []),
           ...(published?.metadataUri ? [{ label: 'Metadata', value: published.metadataUri }] : []),
         ],
       },
     });
-    if (result.mintConfirmed) showBoingContractIncludedToast(result.tokenHex, explorerBaseUrl);
+    if (result.confirmed) showBoingContractIncludedToast(result.tokenHex, explorerBaseUrl);
     onDeployed?.({ accountId: result.tokenHex, kind: 'token', name: tokenName, symbol: tokenSymbol });
     return result.txHash;
   }, [
@@ -290,7 +287,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
 
       {embedInWizard && (
         <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-          Uses the same name, symbol and supply as this wizard. Express will ask you to approve the deploy and the mint.
+          Uses the same name, symbol and supply as this wizard. Express asks for one signature: the deploy, which also puts the whole supply in your account.
         </p>
       )}
 
@@ -342,8 +339,8 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
         >
           <strong style={{ color: 'var(--text-primary)' }}>Boing token v2.</strong>{' '}
           Same token as the Boing swap pools: transfer, approve and transfer_from, whole units (no decimals). Express
-          asks you to approve two transactions: the deploy, then a one-time mint of the whole supply to your account.
-          No one can mint more afterwards.
+          asks you to approve one transaction: it creates the token with you as admin and the whole supply in your
+          account, and registers you as its creator for linking. No one can mint more afterwards.
         </p>
       ) : (
         <p
@@ -361,10 +358,9 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
         <p role="status" data-testid="boing-token-deploy-stage" className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
           {{
             qa: 'Running the QA check…',
-            sign_deploy: 'Approve the deploy in Boing Express (1 of 2)…',
-            sign_mint: 'Approve the mint in Boing Express (2 of 2)…',
+            sign: 'Approve the deploy in Boing Express (one signature)…',
             submit: 'Submitting…',
-            confirm: 'Waiting for the mint to be included…',
+            confirm: 'Waiting for the deploy to be included…',
           }[stage] || 'Working…'}
         </p>
       )}
@@ -408,7 +404,8 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
         </summary>
         <div className="px-3 pb-3 pt-1 space-y-3">
           <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-            Leave bytecode empty to deploy Boing token v2 from boing-sdk. A pasted template still gets the one-time mint call. QA
+            Leave bytecode empty to deploy Boing token v2 from boing-sdk. A pasted runtime is deployed the same way (admin, supply
+            and mint-once written at deploy), so it must use the v1/v2 reference token storage layout. QA
             purpose for this flow is <code className="text-[10px]">{purpose}</code>.
           </p>
           <div>
@@ -490,7 +487,7 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
           {lastDeployedAccount && (
             <p className="font-mono break-all" data-testid="boing-token-deployed-id">Token: {lastDeployedAccount}</p>
           )}
-          {mintNote && <p className="text-amber-400">{mintNote}</p>}
+          {deployNote && <p className="text-amber-400">{deployNote}</p>}
           {lastDeployedAccount && (
             <a
               href={buildBoingExplorerAccountUrl(explorerBaseUrl, lastDeployedAccount)}

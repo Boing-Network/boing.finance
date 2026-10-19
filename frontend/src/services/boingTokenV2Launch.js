@@ -8,11 +8,22 @@
  * (no decimals). Name and symbol go in the deploy transaction's asset metadata, which is what the
  * node's token discovery (`boing_listDexTokens` / `boing_getDexToken`), boing.observer and Boing Express read.
  *
- * The whole supply is minted once, to the deployer, by a `mint_first` signed with the next nonce.
- * Both transactions are signed before either is submitted, so a rejected second signature leaves
- * nothing on chain, and the mint lands right behind the deploy (the first `mint_first` caller becomes
- * the token admin, so it must be ours).
+ * The whole supply is minted to the deployer **inside the deploy transaction**: the v2 runtime is wrapped in
+ * `0xFD` init code (see {@link buildBoingTokenV2MintAtDeployBytecodeHex}) that sets admin = deployer,
+ * credits the supply and marks `mint_first` as used, then claims the token for the deployer in the linked
+ * NFT↔token registry v2. One transaction and one signature (Deploy token and the project pack alike), so
+ * there is no window between deploy and mint in which another account could call the token first.
  */
+import {
+  appendRegistryClaim,
+  BOING_DEPLOY_INIT_MARKER,
+  finishInitDeploy,
+  hexToU8,
+  initWriter,
+  OP,
+  runtimeBytesForInit,
+  word,
+} from './boingDeployInit.js';
 import {
   boingTokenBytecodeHex,
   buildContractDeployMetaTx,
@@ -112,30 +123,33 @@ export function buildBoingTokenV2MintTx({ senderHex, tokenHex, amount, toHex }) 
 }
 
 /**
- * Deploy (nonce n) + mint_first (nonce n+1) with the nonce-derived token address.
+ * The single launch transaction (Deploy token page): v2 runtime + mint-at-deploy init at `nonce`, with the
+ * nonce-derived token address. `runtimeHexOverride` (Advanced) replaces the v2 runtime; it must use the
+ * v1/v2 reference fungible storage layout, since the init writes admin / balance / mint-once slots.
  * @param {{ senderHex: string, nonce: bigint | number | string, name: string, symbol: string, supply: unknown,
- *   purpose?: string, descriptionHashHex?: string, bytecodeHexOverride?: string }} input
- * @returns {{ tokenHex: string, supply: bigint, deployTx: Record<string, unknown>, mintTx: Record<string, unknown> }}
+ *   purpose?: string, descriptionHashHex?: string, runtimeHexOverride?: string, claimRegistryHex?: string | null }} input
+ * @returns {{ tokenHex: string, supply: bigint, deployTx: Record<string, unknown> }}
  */
-export function buildBoingTokenV2LaunchTxs(input) {
+export function buildBoingTokenV2LaunchTx(input) {
   const senderHex = validateHex32(input.senderHex).toLowerCase();
   const nonce = BigInt(input.nonce);
   if (nonce < 0n) throw new Error('nonce must be >= 0');
   const supply = parseBoingTokenV2Supply(input.supply);
   const tokenHex = predictNonceDerivedContractAddress(senderHex, nonce).toLowerCase();
+  const bytecode = buildBoingTokenV2MintAtDeployBytecodeHex({
+    supply,
+    runtimeHex: String(input.runtimeHexOverride ?? '').trim() || undefined,
+    claimRegistryHex: input.claimRegistryHex || null,
+  });
   const deployTx = {
-    ...buildBoingTokenV2DeployMetaTx(input),
+    ...buildBoingTokenV2DeployMetaTx({ ...input, bytecodeHexOverride: bytecode }),
     nonce: nonce.toString(),
   };
-  const mintTx = {
-    ...buildBoingTokenV2MintTx({ senderHex, tokenHex, amount: supply }),
-    nonce: (nonce + 1n).toString(),
-  };
-  return { tokenHex, supply, deployTx, mintTx };
+  return { tokenHex, supply, deployTx };
 }
 
 /* ------------------------------------------------------------------------------------------------
- * Mint-at-deploy (project pack): the v2 runtime wrapped in a `0xFD` init that runs inside the deploy
+ * Mint-at-deploy (Deploy token + project pack): the v2 runtime wrapped in a `0xFD` init that runs inside the deploy
  * transaction itself. The init (CALLER = the deployer) stores, in the new token's storage:
  *   admin slot      = deployer          (same slot the v2 lazy-admin prologue checks)
  *   balance[deployer] = supply          (v1/v2 balance slot: holder ^ REF_FUNGIBLE_BALANCE_XOR)
@@ -147,76 +161,39 @@ export function buildBoingTokenV2LaunchTxs(input) {
  * (admin 0x..f0, mint-once 0x..f1, balance XOR mask).
  * ---------------------------------------------------------------------------------------------- */
 
-const OP = Object.freeze({ STOP: 0x00, XOR: 0x18, CALLER: 0x33, MSTORE: 0x52, SSTORE: 0x55, PUSH32: 0x7f, RETURN: 0xf3 });
-/** `CONTRACT_DEPLOY_INIT_CODE_MARKER` (boing-primitives). */
-export const BOING_DEPLOY_INIT_MARKER = 0xfd;
 /** v1/v2 reference fungible admin slot (`ref_fungible_admin_key`). */
 export const BOING_TOKEN_ADMIN_SLOT_HEX = `0x${'00'.repeat(31)}f0`;
 /** v1/v2 reference fungible mint-once slot (`ref_fungible_mint_once_key`). */
 export const BOING_TOKEN_MINT_ONCE_SLOT_HEX = `0x${'00'.repeat(31)}f1`;
-
-function hexToU8(hex) {
-  const h = String(hex).replace(/^0x/i, '');
-  if (h.length % 2) throw new Error('odd hex length');
-  const out = new Uint8Array(h.length / 2);
-  for (let i = 0; i < out.length; i++) out[i] = parseInt(h.slice(i * 2, i * 2 + 2), 16);
-  return out;
-}
-
-function u8ToHex(u8) {
-  let s = '0x';
-  for (const b of u8) s += b.toString(16).padStart(2, '0');
-  return s;
-}
-
-function word(bigintValue) {
-  const w = new Uint8Array(32);
-  let v = BigInt(bigintValue);
-  for (let i = 31; i >= 0 && v > 0n; i--) {
-    w[i] = Number(v & 0xffn);
-    v >>= 8n;
-  }
-  return w;
-}
+export { BOING_DEPLOY_INIT_MARKER };
 
 /**
  * `0xFD || init` deploy bytecode: v2 runtime with the whole `supply` minted to the deployer at deploy.
- * @param {{ supply: unknown, runtimeHex?: string, balanceXorMask?: Uint8Array }} input
+ * With `claimRegistryHex` the init also calls the linked NFT↔token registry v2 `claim_self(deployer)`
+ * (the registry faults, and so the whole deploy fails, if the token were somehow already claimed).
+ * @param {{ supply: unknown, runtimeHex?: string, balanceXorMask?: Uint8Array, claimRegistryHex?: string | null }} input
  * @returns {`0x${string}`}
  */
-export function buildBoingTokenV2MintAtDeployBytecodeHex({ supply, runtimeHex, balanceXorMask } = {}) {
+export function buildBoingTokenV2MintAtDeployBytecodeHex({ supply, runtimeHex, balanceXorMask, claimRegistryHex = null } = {}) {
   const amount = parseBoingTokenV2Supply(supply);
-  const runtime = hexToU8(runtimeHex || boingTokenV2BytecodeHex());
+  const runtime = runtimeBytesForInit(runtimeHex || boingTokenV2BytecodeHex());
   const mask = balanceXorMask || REFERENCE_FUNGIBLE_BALANCE_XOR;
   if (!(mask instanceof Uint8Array) || mask.length !== 32) throw new Error('balance XOR mask must be 32 bytes');
-  const bytes = [];
-  const push32 = (w) => {
-    bytes.push(OP.PUSH32);
-    for (const b of w) bytes.push(b);
-  };
+  const w = initWriter();
   // admin = CALLER
-  bytes.push(OP.CALLER);
-  push32(hexToU8(BOING_TOKEN_ADMIN_SLOT_HEX));
-  bytes.push(OP.SSTORE);
+  w.op(OP.CALLER);
+  w.push32(hexToU8(BOING_TOKEN_ADMIN_SLOT_HEX));
+  w.op(OP.SSTORE);
   // balance[CALLER ^ mask] = supply
-  push32(word(amount));
-  bytes.push(OP.CALLER);
-  push32(mask);
-  bytes.push(OP.XOR, OP.SSTORE);
+  w.push32(word(amount));
+  w.op(OP.CALLER);
+  w.push32(mask);
+  w.op(OP.XOR, OP.SSTORE);
   // mint-once = 1
-  push32(word(1n));
-  push32(hexToU8(BOING_TOKEN_MINT_ONCE_SLOT_HEX));
-  bytes.push(OP.SSTORE);
-  // copy runtime to memory in 32-byte words, then RETURN(0, len)
-  const padded = new Uint8Array(Math.ceil(runtime.length / 32) * 32);
-  padded.set(runtime);
-  for (let off = 0; off < padded.length; off += 32) {
-    push32(padded.subarray(off, off + 32));
-    push32(word(BigInt(off)));
-    bytes.push(OP.MSTORE);
-  }
-  push32(word(BigInt(runtime.length)));
-  push32(word(0n));
-  bytes.push(OP.RETURN, OP.STOP);
-  return u8ToHex(Uint8Array.from([BOING_DEPLOY_INIT_MARKER, ...bytes]));
+  w.push32(word(1n));
+  w.push32(hexToU8(BOING_TOKEN_MINT_ONCE_SLOT_HEX));
+  w.op(OP.SSTORE);
+  // linked NFT↔token registry v2: the creator is the token's claimer from this transaction on
+  appendRegistryClaim(w, claimRegistryHex);
+  return finishInitDeploy(w, runtime);
 }

@@ -414,6 +414,10 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
             {customBytecode.trim() && !tryParseEvenLengthDeployBytecodeHex(customBytecode) && (
               <p className="text-xs mt-1 text-amber-400">Enter even-length hex (optional 0x prefix).</p>
             )}
+            <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
+              Paste runtime bytecode with the reference collection storage layout: the deploy sets you as admin and
+              registers you as the creator for linking, in the same transaction.
+            </p>
           </div>
           <div>
             <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>

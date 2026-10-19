@@ -41,11 +41,11 @@ function resolvePackRegistryHex(opts = {}) {
   if (typeof canonical === 'string' && isBoingNativeAccountIdHex(canonical)) {
     return `0x${canonical.replace(/^0x/i, '').toLowerCase()}`;
   }
-  return '0xebf9f0190f415852f90d0e60343126201248ab96273fdbf8acc5fe5fa03c3dd8';
+  return '0xf704485ad29f56bb6516ac822fcf9ca8fcb6c4266e22c9ed7f9c6908668655dd';
 }
 
 /**
- * Plan a full project pack (deploys + claim×2 + register) for the connected account.
+ * Plan a full project pack (two self-claiming deploys + register_link) for the connected account.
  * Thin wrapper over the pure {@link planProjectPack} that resolves the registry for this network.
  *
  * @param {object} input
@@ -175,7 +175,8 @@ export async function executeProjectPackDeployTx({
 }
 
 /**
- * Submit claim×2 + register_link from a planned pack (or rebuild via register helpers).
+ * Submit register_link from a planned pack (or rebuild via register helpers). Both assets already claimed
+ * themselves for the creator in their deploy transactions (registry v2), so no claim transactions are sent.
  */
 export async function linkProjectPackCompanions({
   getWalletProvider,
@@ -228,6 +229,7 @@ export async function linkProjectPackCompanions({
         registryHex32: status.registryId,
         collectionHex32: collectionId,
         tokenHex32: tokenId,
+        includeClaims: false,
       });
     }
     if (!flow?.length) {
@@ -240,7 +242,7 @@ export async function linkProjectPackCompanions({
     }
     const sender = String(linker).toLowerCase();
     const submitOpts = { senderHex: sender, refreshNonce: true, waitForInclusion: true, retryOnInvalidNonce: true };
-    // One wallet approval: claim×2 + register_link as a single native batch tx when node + wallet support it.
+    // One wallet approval: the flow as a single native batch tx when it has several steps and node + wallet support it.
     const support = await nodeBatchSupport();
     if (shouldUseLinkBatch(flow.length, support) && flow.every((t) => (t?.type ?? t?.txType) === 'contract_call')) {
       try {
@@ -261,7 +263,7 @@ export async function linkProjectPackCompanions({
       }
     }
     for (const tx of flow) {
-      // Fresh app-RPC nonce + wait for inclusion between claim×2 and register_link so the
+      // Fresh app-RPC nonce + wait for inclusion between steps so the
       // wallet never signs with a nonce from before the prior guided-flow deploy/link step.
       const hash = await boingExpressContractCallSignSimulateSubmit(provider, tx, {
         senderHex: sender,

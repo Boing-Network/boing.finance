@@ -4,10 +4,12 @@
  * Prefer boing-sdk helpers (`linkedNftTokenRegistry.ts` from network PR #42). Local encode
  * fallbacks match selectors 0xE0–0xE6 until that SDK lands on main.
  *
- * Auth: claimer of both sides. Flow: claim_asset ×2 → register_link; unlink via unlink_at(index).
+ * Auth: claimer of both sides. Registry v2: assets deployed on boing.finance claim themselves for their creator
+ * in their deploy tx (claim_self 0xE7), so linking is a single register_link; an unclaimed pre-v2 asset can be
+ * claimed (claim_asset) only by its recorded deployer (get_asset_deployer 0xE8). Unlink via unlink_at(index).
  *
  * Registry AccountId: env `REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY`, contracts nativeVm,
- * or `end_user.canonical_linked_nft_token_registry`. CREATE2 salt `BOING_NFT_TOKEN_LINK_REG_V1`.
+ * or `end_user.canonical_linked_nft_token_registry`. CREATE2 salt `BOING_NFT_TOKEN_LINK_REG_V2` (v1: `_V1`).
  */
 
 import * as boingSdk from 'boing-sdk';
@@ -23,6 +25,7 @@ import {
   LINK_BATCH_MAX_STEPS,
   buildLinkBatchTx,
   decodeClaimerReturnData,
+  decodeDeployerReturnData,
   isWalletBatchUnsupportedError,
   planLinkSteps,
   shouldUseLinkBatch,
@@ -37,6 +40,7 @@ const SELECTOR_UNLINK_AT = 0xe2;
 const SELECTOR_LINKS_COUNT = 0xe3;
 const SELECTOR_GET_LINK_AT = 0xe4;
 const SELECTOR_GET_CLAIMER = 0xe5;
+const SELECTOR_GET_DEPLOYER = 0xe8;
 
 function selectorWord(selector) {
   const w = new Uint8Array(32);
@@ -100,6 +104,10 @@ function localEncodeGetClaimer(asset) {
   return bytesToHex(concatWords([selectorWord(SELECTOR_GET_CLAIMER), hex32ToBytes(asset)]));
 }
 
+function localEncodeGetDeployer(asset) {
+  return bytesToHex(concatWords([selectorWord(SELECTOR_GET_DEPLOYER), hex32ToBytes(asset)]));
+}
+
 function localDecodeCount(returnDataHex) {
   const raw = String(returnDataHex || '')
     .replace(/^0x/i, '')
@@ -160,6 +168,8 @@ export function getLinkedNftTokenRegistrySdkApi() {
     pickFn(boingSdk.encodeLinkedNftTokenGetLinkAtCalldataHex) || localEncodeGetLinkAt;
   const encodeGetClaimer =
     pickFn(boingSdk.encodeLinkedNftTokenGetAssetClaimerCalldataHex) || localEncodeGetClaimer;
+  const encodeGetDeployer =
+    pickFn(boingSdk.encodeLinkedNftTokenGetAssetDeployerCalldataHex) || localEncodeGetDeployer;
   const decodeCount =
     pickFn(boingSdk.decodeLinkedNftTokenLinksCountReturnData) || localDecodeCount;
   const decodeLinkAt =
@@ -167,10 +177,10 @@ export function getLinkedNftTokenRegistrySdkApi() {
   const buildFlowTxs = pickFn(boingSdk.buildLinkedNftTokenRegisterFlowTxs);
   const buildCallTx = pickFn(boingSdk.buildLinkedNftTokenRegistryContractCallTx);
   const create2SaltHex =
-    boingSdk.LINKED_NFT_TOKEN_REGISTRY_CREATE2_SALT_V1_HEX ||
+    boingSdk.LINKED_NFT_TOKEN_REGISTRY_CREATE2_SALT_V2_HEX ||
     (() => {
       const u8 = new Uint8Array(32);
-      u8.set(new TextEncoder().encode('BOING_NFT_TOKEN_LINK_REG_V1'));
+      u8.set(new TextEncoder().encode('BOING_NFT_TOKEN_LINK_REG_V2'));
       return bytesToHex(u8);
     })();
 
@@ -181,6 +191,7 @@ export function getLinkedNftTokenRegistrySdkApi() {
     encodeLinksCount,
     encodeGetLinkAt,
     encodeGetClaimer,
+    encodeGetDeployer,
     decodeCount,
     decodeLinkAt,
     buildFlowTxs,
@@ -226,6 +237,22 @@ export function resolveLinkedNftTokenRegistryId(opts = {}) {
 }
 
 /**
+ * Registry a NEW collection / token claims itself in from its deploy init code (registry v2 `claim_self`):
+ * the configured registry, else the SDK canonical testnet registry (Boing L1 testnet is the only Boing chain
+ * the app deploys to). Null only when neither resolves.
+ * @returns {string | null}
+ */
+export function resolveLinkedNftTokenClaimRegistryHex(opts = {}) {
+  try {
+    const { registryId } = resolveLinkedNftTokenRegistryId(opts);
+    if (registryId) return registryId;
+  } catch {
+    /* fall through */
+  }
+  return normalizeRegistryId(boingSdk.CANONICAL_BOING_TESTNET_LINKED_NFT_TOKEN_REGISTRY_HEX) || null;
+}
+
+/**
  * @returns {{
  *   canWrite: boolean,
  *   canRead: boolean,
@@ -247,7 +274,7 @@ export function getLinkedNftTokenRegistryStatus(opts = {}) {
       registrySource: null,
       code: 'registry_unpublished',
       message:
-        'Set REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY to the registry AccountId (CREATE2 salt BOING_NFT_TOKEN_LINK_REG_V1), or wait for end_user.canonical_linked_nft_token_registry. Claimer of both assets can register_link / unlink_at.',
+        'Set REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY to the registry AccountId (CREATE2 salt BOING_NFT_TOKEN_LINK_REG_V2), or wait for end_user.canonical_linked_nft_token_registry. Claimer of both assets can register_link / unlink_at.',
       sdk,
     };
   }
@@ -258,8 +285,8 @@ export function getLinkedNftTokenRegistryStatus(opts = {}) {
     registrySource: source,
     code: 'ready',
     message: sdk.fromSdk
-      ? 'Registry ready (boing-sdk encode helpers). Claim both assets, then register_link.'
-      : 'Registry ready (local 0xE0–0xE6 encode fallback until SDK merge). Claim both assets, then register_link.',
+      ? 'Registry ready (boing-sdk encode helpers). Assets created here are already claimed by their creator; register_link.'
+      : 'Registry ready (local encode fallback). Assets created here are already claimed by their creator; register_link.',
     sdk,
   };
 }
@@ -280,6 +307,20 @@ function buildTx(sdk, sender, registryId, calldata, extraAccounts = []) {
 
 async function submitCall(provider, tx) {
   return boingExpressContractCallSignSimulateSubmit(provider, tx);
+}
+
+/** Registry v2 deployer record per asset (null = none, undefined = unknown / v1 registry). */
+async function readAssetDeployers(status, assets) {
+  const out = {};
+  for (const a of assets) {
+    try {
+      const r = await simulateRegistryReturnData({ registryId: status.registryId, calldata: status.sdk.encodeGetDeployer(a) });
+      out[a] = r.ok ? decodeDeployerReturnData(r.returnData) : undefined;
+    } catch {
+      out[a] = undefined;
+    }
+  }
+  return out;
 }
 
 /** Current registry claimer per asset (null = unclaimed, undefined = unknown because simulate is unavailable). */
@@ -382,6 +423,33 @@ export async function claimLinkedNftTokenAsset({
       status,
     };
   }
+  // Registry v2: say why up front instead of letting a doomed claim fail on chain.
+  const me = String(linker).toLowerCase();
+  const claimer = (await readAssetClaimers(status, [asset]))[asset];
+  if (claimer && claimer.toLowerCase() === me) {
+    return { ok: true, txHash: null, alreadyClaimed: true, assetId: asset, registryId: status.registryId, status };
+  }
+  if (claimer) {
+    return {
+      ok: false,
+      code: 'claimed_by_other',
+      message: `This asset is already claimed in the registry by ${claimer.slice(0, 10)}…, not your connected account.`,
+      status,
+    };
+  }
+  if (claimer === null) {
+    const deployer = (await readAssetDeployers(status, [asset]))[asset];
+    if (deployer !== undefined && (deployer === null || deployer.toLowerCase() !== me)) {
+      return {
+        ok: false,
+        code: 'not_claimable',
+        message: deployer
+          ? `Only the account that created this asset (${deployer.slice(0, 10)}…) can claim it.`
+          : 'This asset has no recorded creator, so it cannot be claimed. Assets created on boing.finance are claimed automatically when deployed.',
+        status,
+      };
+    }
+  }
   try {
     const calldata = status.sdk.encodeClaim(asset);
     const tx = buildTx(status.sdk, linker, status.registryId, calldata, [asset]);
@@ -477,12 +545,15 @@ export async function registerLinkedNftTokenPairOnChain({
     const claimers = skipClaim
       ? { [collection]: linker, [token]: linker }
       : await readAssetClaimers(status, [collection, token]);
+    const unclaimed = [collection, token].filter((x) => claimers[x] === null);
+    const deployers = unclaimed.length ? await readAssetDeployers(status, unclaimed) : {};
     const plan = planLinkSteps({
       linker,
       registryId: status.registryId,
       collection,
       token,
       claimers,
+      deployers,
       encodeClaim: status.sdk.encodeClaim,
       encodeRegister: status.sdk.encodeRegister,
     });

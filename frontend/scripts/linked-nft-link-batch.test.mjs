@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  planLinkSteps, buildLinkBatchTx, decodeClaimerReturnData, isWalletBatchUnsupportedError, shouldUseLinkBatch, flowTxsToBatchTx,
+  planLinkSteps, buildLinkBatchTx, decodeClaimerReturnData, decodeDeployerReturnData, isWalletBatchUnsupportedError, shouldUseLinkBatch, flowTxsToBatchTx,
 } from '../src/utils/linkedNftLinkBatch.js';
 
 const ME = '0x' + 'd6'.repeat(32);
@@ -58,4 +58,31 @@ test('flowTxsToBatchTx merges SDK flow txs', () => {
   assert.deepEqual(b.calls.map((c) => c.calldata), ['0x01', '0x02', '0x03']);
   assert.deepEqual(new Set(b.access_list.write), new Set([ME, REG, COL, TOK]));
   assert.throws(() => flowTxsToBatchTx([{ type: 'transfer' }]), /only contract calls/);
+});
+test('registry v2: unclaimed asset whose recorded deployer is the linker → claim step', () => {
+  const r = planLinkSteps({ linker: ME, registryId: REG, collection: COL, token: TOK, claimers: { [COL]: ME, [TOK]: null }, deployers: { [TOK]: ME }, ...enc });
+  assert.deepEqual(r.steps.map((s) => s.label), ['Claim token', 'Register link']);
+});
+
+test('registry v2: unclaimed asset deployed by someone else, or with no deployer record → refused (not_claimable)', () => {
+  const other = '0x' + '11'.repeat(32);
+  const a = planLinkSteps({ linker: ME, registryId: REG, collection: COL, token: TOK, claimers: { [COL]: ME, [TOK]: null }, deployers: { [TOK]: other }, ...enc });
+  assert.equal(a.ok, false);
+  assert.equal(a.code, 'not_claimable');
+  assert.match(a.message, /only its creator/);
+  const b = planLinkSteps({ linker: ME, registryId: REG, collection: COL, token: TOK, claimers: { [COL]: null, [TOK]: ME }, deployers: { [COL]: null }, ...enc });
+  assert.equal(b.code, 'not_claimable');
+  assert.match(b.message, /created on boing.finance/);
+});
+
+test('registry v2: assets claimed at deploy → one register_link step', () => {
+  const r = planLinkSteps({ linker: ME, registryId: REG, collection: COL, token: TOK, claimers: { [COL]: ME, [TOK]: ME }, ...enc });
+  assert.deepEqual(r.steps.map((s) => s.label), ['Register link']);
+});
+
+test('decodeDeployerReturnData: empty = unknown (v1 registry), zero = no record, word = deployer', () => {
+  assert.equal(decodeDeployerReturnData('0x'), undefined);
+  assert.equal(decodeDeployerReturnData(null), undefined);
+  assert.equal(decodeDeployerReturnData('0x' + '00'.repeat(32)), null);
+  assert.equal(decodeDeployerReturnData('0x' + 'd6'.repeat(32)), ME);
 });

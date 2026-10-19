@@ -39,9 +39,9 @@ const STEPS = [
   { id: 'done', label: 'Done' },
 ];
 
-// v2: token = Boing token v2 minted to the creator at deploy; its address depends on the supply, so
-// drafts planned with the old v1 token are not resumed.
-const STORAGE_KEY = 'boing.finance.projectPack.v2';
+// v3: both deploys claim themselves in the linked NFT↔token registry v2 from their init code (and the
+// collection sets its admin), which changes both predicted addresses; v2 / v1 drafts are not resumed.
+const STORAGE_KEY = 'boing.finance.projectPack.v3';
 
 function supplyError(raw) {
   try {
