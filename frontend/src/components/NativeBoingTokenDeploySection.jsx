@@ -20,6 +20,9 @@ import {
 import { BOING_TOKEN_V2_DECIMALS } from '../services/boingTokenV2Launch';
 import { buildBoingExplorerAccountUrl, buildBoingExplorerTxUrl } from '../config/boingExplorerUrls';
 import { rememberAssetDeployer } from '../utils/linkedNftToken';
+import { rememberDeployedNativeVmToken } from '../services/nativeVmTokenRegistry';
+import deploymentHistoryUtil from '../utils/deploymentHistory';
+import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import LinkedNftTokenPanel from './LinkedNftTokenPanel';
 
 /**
@@ -205,6 +208,29 @@ const NativeBoingTokenDeploySection = forwardRef(function NativeBoingTokenDeploy
     setLastBoingTxId(result.boingTxIdHex ?? null);
     setLastDeployedAccount(result.tokenHex);
     if (account) rememberAssetDeployer(result.tokenHex, account);
+    // Immediately surface in Create Pool / Swap pickers (DEX directory often lags pool-backed lists).
+    rememberDeployedNativeVmToken({
+      id: result.tokenHex,
+      symbol: String(tokenSymbol || '').trim().toUpperCase() || 'TOKEN',
+      name: String(tokenName || '').trim() || 'My token',
+    });
+    try {
+      deploymentHistoryUtil.add({
+        name: String(tokenName || '').trim() || 'Token',
+        symbol: String(tokenSymbol || '').trim().toUpperCase() || 'TOKEN',
+        network: { name: 'Boing Testnet', chainId: BOING_NATIVE_L1_CHAIN_ID },
+        chainId: BOING_NATIVE_L1_CHAIN_ID,
+        status: result.confirmed ? 'completed' : 'submitted',
+        contractAddress: result.tokenHex,
+        tokenAddress: result.tokenHex,
+        deployerAddress: account || '',
+        txHash: result.txHash,
+        timestamp: Date.now(),
+        date: new Date().toISOString(),
+      });
+    } catch {
+      /* non-fatal */
+    }
     if (!result.confirmed) {
       setDeployNote('Deploy submitted; still waiting for a block to include it. Check boing.observer in a moment.');
     }

@@ -156,6 +156,63 @@ export function loadCustomNativeVmTokens() {
 }
 
 /**
+ * Tokens the user deployed from this browser (Deploy Token / history keys).
+ * Surfaced in pickers even before L1 DEX directory / indexer indexes them.
+ *
+ * @returns {NativeVmTokenEntry[]}
+ */
+export function loadLocalDeployNativeVmTokens() {
+  /** @type {Map<string, NativeVmTokenEntry>} */
+  const byId = new Map();
+  const ingest = (idRaw, symbolRaw, nameRaw) => {
+    const id = normalizeNativeVmTokenId32(idRaw);
+    if (!id) return;
+    const symbol = String(symbolRaw || 'TOKEN').trim().slice(0, 16) || `${id.slice(0, 8)}…${id.slice(-4)}`;
+    const name = String(nameRaw || symbol).trim().slice(0, 80) || symbol;
+    const prev = byId.get(id);
+    // Prefer richer labels if we already have a custom/saved row.
+    if (prev && prev.symbol && !prev.symbol.startsWith('0x') && symbol.startsWith('0x')) return;
+    byId.set(id, { id, symbol, name });
+  };
+
+  try {
+    const hist = JSON.parse(localStorage.getItem('boing_token_deployments') || '[]');
+    if (Array.isArray(hist)) {
+      for (const row of hist) {
+        if (!row || typeof row !== 'object') continue;
+        const chainOk =
+          row.chainId == null ||
+          Number(row.chainId) === 6913 ||
+          Number(row.network?.chainId) === 6913 ||
+          String(row.network?.name || '')
+            .toLowerCase()
+            .includes('boing');
+        if (!chainOk) continue;
+        ingest(row.contractAddress || row.tokenAddress || row.accountId || '', row.symbol, row.name);
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+
+  try {
+    const legacy = JSON.parse(localStorage.getItem('tokenDeployments') || '[]');
+    if (Array.isArray(legacy)) {
+      for (const row of legacy) {
+        if (!row || typeof row !== 'object') continue;
+        const chainOk = row.chainId == null || Number(row.chainId) === 6913;
+        if (!chainOk) continue;
+        ingest(row.tokenAddress || row.contractAddress || '', row.symbol, row.name);
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+
+  return [...byId.values()];
+}
+
+/**
  * @param {NativeVmTokenEntry} entry
  */
 export function saveCustomNativeVmToken(entry) {
@@ -174,4 +231,21 @@ export function saveCustomNativeVmToken(entry) {
   } catch {
     return false;
   }
+}
+
+/**
+ * Persist a freshly deployed L1 fungible into "my tokens" + recent list so Create Pool / Swap
+ * pickers show it immediately (DEX directory often lags or only lists pool-backed tokens).
+ *
+ * @param {{ id: string, symbol?: string, name?: string }} entry
+ * @returns {boolean}
+ */
+export function rememberDeployedNativeVmToken(entry) {
+  const id = normalizeNativeVmTokenId32(entry?.id);
+  if (!id) return false;
+  const symbol = String(entry?.symbol || 'TOKEN').trim().slice(0, 16) || 'TOKEN';
+  const name = String(entry?.name || symbol).trim().slice(0, 80) || symbol;
+  const ok = saveCustomNativeVmToken({ id, symbol, name });
+  pushRecentNativeVmToken(id);
+  return ok;
 }
