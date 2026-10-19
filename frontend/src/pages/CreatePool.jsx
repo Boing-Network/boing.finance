@@ -13,7 +13,6 @@ import { DexFeatureBanner } from '../components/NetworkSupportBanner';
 import { useAchievements } from '../contexts/AchievementContext';
 import ShareCardModal from '../components/ShareCardModal';
 import NativeBoingCreatePoolPanel from '../components/NativeBoingCreatePoolPanel';
-import NativeAmmSwapPanel from '../components/NativeAmmSwapPanel';
 import getFeatureSupport from '../config/featureSupport';
 import { getUniswapV2Compat } from '../config/uniswapV2Compat';
 import { createUniswapV2PoolWithLiquidity } from '../services/evmUniswapV2CreatePool';
@@ -1331,23 +1330,17 @@ function CreatePool() {
       </Helmet>
       <div className="relative w-full min-w-0">
         <div className="relative z-10 container mx-auto px-4 py-8">
-          <div className="max-w-6xl mx-auto td-mint-form">
+          <div className={`mx-auto td-mint-form ${chainId === BOING_NATIVE_L1_CHAIN_ID ? 'max-w-3xl' : 'max-w-6xl'}`}>
             <DexFeatureBanner featureLabel="Create Pool" currentChainId={chainId} onSwitchNetwork={switchNetwork} />
             {chainId === BOING_NATIVE_L1_CHAIN_ID && (
-            <header className="td-hero td-hero--center mb-8">
-              <span className="td-hero__eyebrow">Deploy</span>
-              <h1 className="td-hero__title">Create a pool</h1>
-              <p className="td-hero__subtitle">Pick two tokens and add the first liquidity</p>
-            </header>
-            )}
-            {chainId === BOING_NATIVE_L1_CHAIN_ID && <NativeBoingCreatePoolPanel />}
-            {chainId === BOING_NATIVE_L1_CHAIN_ID && featureSupport.hasNativeAmm && (
-              <div className="mb-6">
-                <p className="text-sm mb-2 ">
-                  Add more liquidity to the published canonical pool:
-                </p>
-                <NativeAmmSwapPanel defaultOpenAddLiquidity slippagePercent={0.5} />
-              </div>
+              <>
+                <header className="td-hero td-hero--center mb-6">
+                  <span className="td-hero__eyebrow">Deploy</span>
+                  <h1 className="td-hero__title">Create a pool</h1>
+                  <p className="td-hero__subtitle">Pick two tokens and add the first liquidity.</p>
+                </header>
+                <NativeBoingCreatePoolPanel />
+              </>
             )}
             {chainId !== BOING_NATIVE_L1_CHAIN_ID && (
             <header className="td-hero td-hero--center mb-8">
