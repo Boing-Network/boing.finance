@@ -6,15 +6,12 @@ import {
   preflightBoingLaunchInput,
   preflightBoingLaunchWizardByKind,
 } from './boingNativeLaunchWizardDeploy';
-import {
-  boingExpressSignDeployMeta,
-  boingExpressSignTransaction,
-  fetchBoingAccountNonceString,
-} from './boingExpressNativeTx';
+import { boingExpressSignDeployMeta, fetchBoingAccountNonceString } from './boingExpressNativeTx';
 import { submitBoingSignedTransaction } from './boingNativeVm';
 import { normalizeBoingFaucetAccountHex } from './boingTestnetRpc';
 import { waitForBoingTxReceipt } from './boingDeployReceiptFollowup';
-import { buildBoingTokenV2LaunchTxs, parseBoingTokenV2Supply } from './boingTokenV2Launch';
+import { buildBoingTokenV2LaunchTx, parseBoingTokenV2Supply } from './boingTokenV2Launch';
+import { resolveLinkedNftTokenClaimRegistryHex } from './linkedNftTokenRegistry';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
 import { boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
 
@@ -58,9 +55,17 @@ async function submitSigned(signedHex) {
   return sub && typeof sub === 'object' && sub.tx_hash != null ? String(sub.tx_hash) : String(sub);
 }
 
+/** Linked NFT↔token registry the new token claims itself in (null = none configured for this network). */
+function tokenClaimRegistryHex() {
+  return resolveLinkedNftTokenClaimRegistryHex();
+}
+
 /**
- * Launch a Boing token v2: QA, then Express signs the deploy (nonce n) and the one-time `mint_first`
- * of the whole supply to the deployer (nonce n+1); both are signed before either is submitted.
+ * Launch a Boing token v2 in ONE transaction (one Express signature): the v2 runtime wrapped in `0xFD`
+ * init code that, inside the deploy, sets admin = the deployer, credits the whole supply to the deployer,
+ * marks `mint_first` as used and claims the token for the deployer in the linked NFT↔token registry v2
+ * (`buildBoingTokenV2LaunchTx`). There is no separate mint transaction, so nobody can call the new token
+ * before its supply and admin are in place.
  *
  * @param {object} input
  * @param {() => import('ethers').Eip1193Provider | null} input.getWalletProvider
@@ -68,14 +73,14 @@ async function submitSigned(signedHex) {
  * @param {string} input.tokenName
  * @param {string} input.tokenSymbol
  * @param {string|number} input.initialSupply — whole tokens
- * @param {string} [input.customBytecode]
+ * @param {string} [input.customBytecode] — Advanced: runtime with the v1/v2 reference fungible storage layout
  * @param {string} [input.descriptionHash]
  * @param {boolean} [input.qaPoolAcknowledged]
- * @param {(stage: 'qa' | 'sign_deploy' | 'sign_mint' | 'submit' | 'confirm') => void} [input.onStage]
+ * @param {(stage: 'qa' | 'sign' | 'submit' | 'confirm') => void} [input.onStage]
  * @returns {Promise<
- *   | { ok: true, txHash: string, boingTxIdHex: string | null, mintTxIdHex: string | null, tokenHex: string,
- *       supply: string, mintConfirmed: boolean, mintError: string | null, qaResult: object }
- *   | { ok: false, code: string, message: string, qaResult?: object }
+ *   | { ok: true, txHash: string, boingTxIdHex: string | null, tokenHex: string, supply: string,
+ *       confirmed: boolean, claimRegistryHex: string | null, qaResult: object }
+ *   | { ok: false, code: string, message: string, qaResult?: object, txHash?: string, tokenHex?: string }
  * >}
  */
 export async function executeBoingNativeTokenDeploy({
@@ -111,9 +116,29 @@ export async function executeBoingNativeTokenDeploy({
   if (!p) return { ok: false, code: 'no_provider', message: boingWalletMissingMessage() };
 
   onStage?.('qa');
+  const claimRegistryHex = tokenClaimRegistryHex();
+  let launch;
+  try {
+    const nonce = await fetchBoingAccountNonceString(sender);
+    launch = buildBoingTokenV2LaunchTx({
+      senderHex: sender,
+      nonce,
+      name: input.name,
+      symbol: input.symbol,
+      supply,
+      purpose: input.purpose,
+      descriptionHashHex: input.descriptionHashHex,
+      runtimeHexOverride: input.bytecodeHexOverride,
+      claimRegistryHex,
+    });
+  } catch (e) {
+    return { ok: false, code: 'prepare_failed', message: e?.message || 'Could not prepare the deploy.' };
+  }
+
+  // QA the exact bytecode that will be signed (init + runtime).
   let pre;
   try {
-    pre = (await preflightBoingLaunchInput(input)).qa;
+    pre = (await preflightBoingLaunchInput({ ...input, bytecodeHexOverride: launch.deployTx.bytecode })).qa;
   } catch (e) {
     return { ok: false, code: 'qa_rpc_failed', message: e?.message || 'QA preflight (boing_qaCheck) failed.' };
   }
@@ -129,45 +154,17 @@ export async function executeBoingNativeTokenDeploy({
     };
   }
 
-  let launch;
-  try {
-    const nonce = await fetchBoingAccountNonceString(sender);
-    launch = buildBoingTokenV2LaunchTxs({
-      senderHex: sender,
-      nonce,
-      name: input.name,
-      symbol: input.symbol,
-      supply,
-      purpose: input.purpose,
-      descriptionHashHex: input.descriptionHashHex,
-      bytecodeHexOverride: input.bytecodeHexOverride,
-    });
-  } catch (e) {
-    return { ok: false, code: 'prepare_failed', message: e?.message || 'Could not prepare the deploy.', qaResult: pre };
-  }
-
   let signedDeploy;
-  let signedMint;
   try {
-    onStage?.('sign_deploy');
+    onStage?.('sign');
     signedDeploy = await boingExpressSignDeployMeta(p, launch.deployTx);
-    onStage?.('sign_mint');
-    signedMint = await boingExpressSignTransaction(p, launch.mintTx);
   } catch (e) {
     // Nothing was submitted.
     return { ok: false, code: 'sign_failed', message: formatBoingExpressRpcError(e), qaResult: pre };
   }
-
   const boingTxIdHex = (() => {
     try {
       return transactionIdFromSignedTransactionHex(signedDeploy);
-    } catch {
-      return null;
-    }
-  })();
-  const mintTxIdHex = (() => {
-    try {
-      return transactionIdFromSignedTransactionHex(signedMint);
     } catch {
       return null;
     }
@@ -181,38 +178,26 @@ export async function executeBoingNativeTokenDeploy({
     return { ok: false, code: 'send_failed', message: formatBoingExpressRpcError(e), qaResult: pre };
   }
 
-  const base = {
+  onStage?.('confirm');
+  const receipt = await waitForBoingTxReceipt(boingTxIdHex, { maxAttempts: 40, delayMs: 1200 });
+  if (receipt && receipt.success === false) {
+    return {
+      ok: false,
+      code: 'deploy_failed',
+      message: `The deploy transaction failed on chain${receipt.error ? `: ${receipt.error}` : '.'}`,
+      txHash,
+      tokenHex: launch.tokenHex,
+      qaResult: pre,
+    };
+  }
+  return {
     ok: true,
     txHash,
     boingTxIdHex,
-    mintTxIdHex,
     tokenHex: launch.tokenHex,
     supply: launch.supply.toString(),
+    confirmed: Boolean(receipt),
+    claimRegistryHex,
     qaResult: pre,
   };
-
-  let mintError = null;
-  try {
-    await submitSigned(signedMint);
-  } catch (e) {
-    // The node may refuse nonce n+1 until the deploy is in a block: wait for it, then resubmit once.
-    const deployReceipt = await waitForBoingTxReceipt(boingTxIdHex, { maxAttempts: 30, delayMs: 1200 });
-    if (deployReceipt && deployReceipt.success !== false) {
-      try {
-        await submitSigned(signedMint);
-      } catch (e2) {
-        mintError = formatBoingExpressRpcError(e2);
-      }
-    } else {
-      mintError = deployReceipt ? 'The deploy transaction failed on chain.' : formatBoingExpressRpcError(e);
-    }
-  }
-  if (mintError) return { ...base, mintConfirmed: false, mintError };
-
-  onStage?.('confirm');
-  const mintReceipt = await waitForBoingTxReceipt(mintTxIdHex, { maxAttempts: 40, delayMs: 1200 });
-  if (mintReceipt && mintReceipt.success === false) {
-    return { ...base, mintConfirmed: false, mintError: 'The mint transaction failed on chain.' };
-  }
-  return { ...base, mintConfirmed: Boolean(mintReceipt), mintError: null };
 }

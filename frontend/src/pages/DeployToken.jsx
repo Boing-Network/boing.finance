@@ -2787,7 +2787,7 @@ export default function DeployToken() {
                         Deploying Token...
                       </div>
                     ) : isBoingNativeDeployPath ? (
-                      // The Boing path charges no service fee (only the network fee for the two transactions).
+                      // The Boing path charges no service fee (only the network fee for the one deploy transaction).
                       'Deploy Boing token'
                     ) : (
                       deployCtaLabel(selectedPlan, network)

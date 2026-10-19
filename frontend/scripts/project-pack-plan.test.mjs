@@ -5,11 +5,13 @@ import {
   boingTokenBytecodeHex,
   bytesToHex,
   descriptionHashHexFromLinkedNftToken,
-  encodeLinkedNftTokenClaimAssetCalldataHex,
+  buildLinkedNftTokenClaimSelfInitSnippetHex,
   encodeLinkedNftTokenRegisterLinkCalldataHex,
   hexToBytes,
   predictCreate2ContractAddress,
+  resolveReferenceNftCollectionTemplateBytecodeHex,
 } from 'boing-sdk';
+import { BOING_NFT_COLLECTION_ADMIN_SLOT_HEX, buildBoingNftCollectionAtDeployBytecodeHex } from '../src/services/boingDeployInit.js';
 import {
   BOING_TOKEN_ADMIN_SLOT_HEX,
   BOING_TOKEN_MINT_ONCE_SLOT_HEX,
@@ -35,8 +37,8 @@ const base = {
 const word = (v) => hexToBytes(`0x${BigInt(v).toString(16).padStart(64, '0')}`);
 const eqBytes = (a, b) => bytesToHex(a) === bytesToHex(b);
 
-/** Decode the 0xFD init into its three SSTOREs and the RETURNed runtime. */
-function decodeInit(hex) {
+/** Decode the 0xFD init into its three SSTOREs, the optional registry claim and the RETURNed runtime. */
+function decodeInit(hex, { registry = null } = {}) {
   const b = hexToBytes(hex);
   let i = 0;
   const take = (n) => {
@@ -61,6 +63,8 @@ function decodeInit(hex) {
   const once = push32();
   const onceSlot = push32();
   op(0x55);
+  const claimed = expectClaim(b, i, registry);
+  i += claimed;
   const mem = [];
   while (b[i] === 0x7f && b[i + 33] === 0x7f && b[i + 66] === 0x52) {
     const chunk = push32();
@@ -75,7 +79,47 @@ function decodeInit(hex) {
   assert.equal(i, b.length, 'no trailing bytes');
   const memory = new Uint8Array(mem.length * 32);
   for (const [off, chunk] of mem) memory.set(chunk, off);
-  return { adminSlot, amount, mask, once, onceSlot, runtime: memory.subarray(retOff, retOff + len) };
+  return { adminSlot, amount, mask, once, onceSlot, claimed: claimed > 0, runtime: memory.subarray(retOff, retOff + len) };
+}
+
+/** Registry claim snippet at `i` (when `registry` is set): returns its length, asserting the exact bytes. */
+function expectClaim(b, i, registry) {
+  if (!registry) return 0;
+  const snip = hexToBytes(buildLinkedNftTokenClaimSelfInitSnippetHex(registry));
+  assert.equal(bytesToHex(b.subarray(i, i + snip.length)), bytesToHex(snip), 'claim_self snippet');
+  return snip.length;
+}
+
+/** Decode the collection init: admin SSTORE (CALLER → 0x..e0), registry claim, RETURNed runtime. */
+function decodeCollectionInit(hex, registry) {
+  const b = hexToBytes(hex);
+  let i = 0;
+  const op = (code) => assert.equal(b[i++], code, `opcode 0x${code.toString(16)} at ${i - 1}`);
+  const push32 = () => {
+    op(0x7f);
+    i += 32;
+    return b.subarray(i - 32, i);
+  };
+  op(0xfd);
+  op(0x33);
+  const adminSlot = push32();
+  op(0x55);
+  i += expectClaim(b, i, registry);
+  const memory = [];
+  while (b[i] === 0x7f && b[i + 33] === 0x7f && b[i + 66] === 0x52) {
+    const chunk = push32();
+    const off = Number(BigInt(bytesToHex(push32())));
+    op(0x52);
+    memory.push([off, chunk]);
+  }
+  const len = Number(BigInt(bytesToHex(push32())));
+  const retOff = Number(BigInt(bytesToHex(push32())));
+  op(0xf3);
+  op(0x00);
+  assert.equal(i, b.length, 'no trailing bytes');
+  const mem = new Uint8Array(memory.length * 32);
+  for (const [off, chunk] of memory) mem.set(chunk, off);
+  return { adminSlot, runtime: mem.subarray(retOff, retOff + len) };
 }
 
 test('mint-at-deploy bytecode: admin, balance and mint-once slots, then the exact v2 runtime', () => {
@@ -109,12 +153,18 @@ test('plan: default supply, v2 template, submit order and recipient', () => {
   assert.equal(plan.tokenTemplate, PROJECT_PACK_TOKEN_TEMPLATE);
   assert.equal(plan.tokenSupplyRecipient, DEPLOYER);
   assert.deepEqual([...plan.submitOrder], [...PROJECT_PACK_SUBMIT_ORDER]);
-  assert.deepEqual([...plan.submitOrder], ['collectionDeploy', 'tokenDeploy', 'claimCollection', 'claimToken', 'registerLink']);
+  assert.deepEqual([...plan.submitOrder], ['collectionDeploy', 'tokenDeploy', 'registerLink']);
   assert.equal(plan.tokenDeployTx.type, 'contract_deploy_meta');
   assert.equal(plan.tokenDeployTx.purpose_category, 'token');
   assert.equal(plan.tokenDeployTx.asset_symbol, 'NGT');
-  assert.equal(plan.tokenDeployTx.bytecode, buildBoingTokenV2MintAtDeployBytecodeHex({ supply: PROJECT_PACK_DEFAULT_TOKEN_SUPPLY }));
-  assert.ok(eqBytes(decodeInit(plan.tokenDeployTx.bytecode).amount, word(1_000_000_000n)));
+  assert.equal(
+    plan.tokenDeployTx.bytecode,
+    buildBoingTokenV2MintAtDeployBytecodeHex({ supply: PROJECT_PACK_DEFAULT_TOKEN_SUPPLY, claimRegistryHex: REGISTRY })
+  );
+  const d = decodeInit(plan.tokenDeployTx.bytecode, { registry: REGISTRY });
+  assert.ok(eqBytes(d.amount, word(1_000_000_000n)));
+  assert.ok(d.claimed, 'token claims itself in the registry at deploy');
+  assert.equal(bytesToHex(d.runtime), boingTokenBytecodeHex(2));
 });
 
 test('plan: CREATE2 addresses match the deploy bytecode and salts; links name each other', () => {
@@ -132,16 +182,30 @@ test('plan: CREATE2 addresses match the deploy bytecode and salts; links name ea
   assert.equal(plan.collectionDeployTx.description_hash, descriptionHashHexFromLinkedNftToken(plan.collectionLink));
 });
 
-test('plan: register flow claims both assets then links them, from the deployer, on the registry', () => {
+test('plan: collection deploy = reference collection runtime + init (admin = creator, claim_self)', () => {
   const plan = planProjectPack(base);
-  assert.equal(plan.registerFlowTxs.length, 3);
-  const [claimC, claimT, reg] = plan.registerFlowTxs;
-  for (const tx of plan.registerFlowTxs) {
-    assert.equal(tx.type, 'contract_call');
-    assert.equal(String(tx.contract).toLowerCase(), REGISTRY);
-  }
-  assert.equal(claimC.calldata, encodeLinkedNftTokenClaimAssetCalldataHex(plan.predictedCollectionAddress));
-  assert.equal(claimT.calldata, encodeLinkedNftTokenClaimAssetCalldataHex(plan.predictedTokenAddress));
+  const d = decodeCollectionInit(plan.collectionDeployTx.bytecode, REGISTRY);
+  assert.equal(bytesToHex(d.adminSlot), BOING_NFT_COLLECTION_ADMIN_SLOT_HEX);
+  assert.equal(
+    bytesToHex(d.runtime),
+    resolveReferenceNftCollectionTemplateBytecodeHex({ extraEnvKeys: ['REACT_APP_BOING_REFERENCE_NFT_BYTECODE_HEX'] }).toLowerCase(),
+    'runtime is the unchanged reference collection template'
+  );
+  assert.equal(
+    plan.collectionDeployTx.bytecode,
+    buildBoingNftCollectionAtDeployBytecodeHex({
+      runtimeHex: resolveReferenceNftCollectionTemplateBytecodeHex({}),
+      claimRegistryHex: REGISTRY,
+    })
+  );
+});
+
+test('plan: register flow is a single register_link (both deploys claimed themselves), from the deployer', () => {
+  const plan = planProjectPack(base);
+  assert.equal(plan.registerFlowTxs.length, 1);
+  const [reg] = plan.registerFlowTxs;
+  assert.equal(reg.type, 'contract_call');
+  assert.equal(String(reg.contract).toLowerCase(), REGISTRY);
   assert.equal(reg.calldata, encodeLinkedNftTokenRegisterLinkCalldataHex(plan.predictedCollectionAddress, plan.predictedTokenAddress));
   assert.equal(plan.senderHex32, DEPLOYER);
 });
@@ -150,7 +214,7 @@ test('plan: custom supply changes the token (address and minted amount) but not 
   const a = planProjectPack(base);
   const b = planProjectPack({ ...base, tokenSupply: '2,500,000' });
   assert.equal(b.tokenSupply, 2_500_000n);
-  assert.ok(eqBytes(decodeInit(b.tokenDeployTx.bytecode).amount, word(2_500_000n)));
+  assert.ok(eqBytes(decodeInit(b.tokenDeployTx.bytecode, { registry: REGISTRY }).amount, word(2_500_000n)));
   assert.notEqual(a.predictedTokenAddress, b.predictedTokenAddress);
   assert.equal(a.collectionSaltHex, b.collectionSaltHex);
   assert.equal(planProjectPack({ ...base, tokenSupply: '2500000' }).predictedTokenAddress, b.predictedTokenAddress, 'deterministic');
@@ -172,5 +236,18 @@ test('plan: works with the pair-compose fallback when the SDK pack helper is mis
   const b = planProjectPack({ ...base, sdk: { buildLinkedNftTokenProjectPack: undefined } });
   assert.equal(b.source, 'sdk_pair_compose');
   assert.equal(b.predictedTokenAddress, a.predictedTokenAddress);
+  assert.equal(b.predictedCollectionAddress, a.predictedCollectionAddress);
   assert.deepEqual(b.registerFlowTxs, a.registerFlowTxs);
+});
+
+test('init code: different registries give different deploys; no registry means no claim; init deploys are refused as runtime', () => {
+  const other = `0x${'c3'.repeat(32)}`;
+  const a = buildBoingTokenV2MintAtDeployBytecodeHex({ supply: 5n, claimRegistryHex: REGISTRY });
+  const b = buildBoingTokenV2MintAtDeployBytecodeHex({ supply: 5n, claimRegistryHex: other });
+  assert.notEqual(a, b);
+  assert.equal(decodeInit(buildBoingTokenV2MintAtDeployBytecodeHex({ supply: 5n })).claimed, false);
+  assert.throws(() => buildBoingTokenV2MintAtDeployBytecodeHex({ supply: 5n, runtimeHex: a }), /not deploy init code/);
+  assert.throws(() => buildBoingNftCollectionAtDeployBytecodeHex({ runtimeHex: '0xfd00' }), /not deploy init code/);
+  assert.throws(() => buildBoingNftCollectionAtDeployBytecodeHex({ runtimeHex: '0x' }), /empty/);
+  assert.throws(() => buildBoingTokenV2MintAtDeployBytecodeHex({ supply: 5n, claimRegistryHex: '0x1234' }));
 });

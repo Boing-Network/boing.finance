@@ -21,7 +21,7 @@ import CompanionLinkGate from './CompanionLinkGate';
 import BuilderAttestationPanel from './BuilderAttestationPanel';
 
 /**
- * On-chain NFT ↔ token link UI (claim ownership → link / unlink / list).
+ * On-chain NFT ↔ token link UI (link / unlink / list; claim only for pre-v2 assets by their recorded deployer).
  */
 export default function LinkedNftTokenPanel({
   seedCollectionId = '',
@@ -368,7 +368,9 @@ export default function LinkedNftTokenPanel({
           Advanced: confirm ownership, unlink
         </summary>
         <p className="text-xs mt-2 mb-2" style={{ color: 'var(--text-tertiary)' }}>
-          Confirm ownership if the network asks before linking. Unlink only if you need to disconnect a pair.
+          Collections and tokens created on boing.finance are registered to their creator when deployed, so you can link
+          them right away. Confirm ownership is only for assets created before the registry upgrade, by the account that
+          created them. Unlink only if you need to disconnect a pair.
         </p>
         <div className="flex flex-wrap gap-2">
           <button

@@ -1,9 +1,15 @@
 import { test, expect } from '@playwright/test';
-import { boingTokenBytecodeHex, predictNonceDerivedContractAddress } from 'boing-sdk';
+import {
+  CANONICAL_BOING_TESTNET_LINKED_NFT_TOKEN_REGISTRY_HEX,
+  boingTokenBytecodeHex,
+  buildLinkedNftTokenClaimSelfInitSnippetHex,
+  predictNonceDerivedContractAddress,
+} from 'boing-sdk';
 
 /**
  * Boing token deploy creates Boing token v2: the form shows whole units and the built-in protections,
- * Express is asked to sign the v2 deploy (nonce n) and then mint_first of the supply (nonce n+1).
+ * Express is asked to sign ONE transaction: the deploy (nonce n), whose 0xFD init sets the creator as admin,
+ * puts the whole supply on the creator, marks mint_first used and claims the token in the registry v2.
  * Wallet and RPC are mocked; nothing reaches the chain.
  */
 const ME = `0x${'11'.repeat(32)}`;
@@ -90,7 +96,7 @@ test.describe('Deploy token on Boing (token v2)', () => {
     await expect(page.getByText('Boing token v2.', { exact: false }).first()).toBeVisible();
   });
 
-  test('deploy asks Express to sign the v2 deploy, then mint_first of the supply at the next nonce', async ({ page }) => {
+  test('deploy asks Express for ONE signature: the v2 deploy with the supply minted to the creator at deploy', async ({ page }) => {
     test.setTimeout(150_000);
     const rpc = [];
     await setup(page, rpc);
@@ -98,36 +104,36 @@ test.describe('Deploy token on Boing (token v2)', () => {
     await page.getByRole('button', { name: /Next: Network & Plan/ }).click();
     await page.getByRole('button', { name: /Next: Security & Info/ }).click();
     await page.getByRole('button', { name: /Next: Review & Deploy/ }).click();
+    await expect(page.getByText(/approve one transaction/).first()).toBeVisible();
     const deployBtn = page.locator('button[type="submit"]').filter({ hasText: /Deploy/ }).first();
     await expect(deployBtn).toBeEnabled({ timeout: 30_000 });
     await deployBtn.click();
 
     const token = predictNonceDerivedContractAddress(ME, BigInt(NONCE)).toLowerCase();
-    await expect.poll(() => rpc.filter((m) => m === 'boing_submitTransaction').length, { timeout: 60_000 }).toBe(2);
+    await expect.poll(() => rpc.filter((m) => m === 'boing_submitTransaction').length, { timeout: 60_000 }).toBe(1);
     // The success summary names the v2 token, its whole-unit decimals, supply and address.
     const done = page.getByText(token).first();
     await expect(done).toBeVisible({ timeout: 30_000 });
 
     const signed = await page.evaluate(() => window.__signRequests);
-    expect(signed).toHaveLength(2);
-    const [deploy, mint] = signed;
+    expect(signed).toHaveLength(1);
+    const [deploy] = signed;
     expect(deploy.type).toBe('contract_deploy_meta');
-    expect(deploy.bytecode.toLowerCase()).toBe(boingTokenBytecodeHex(2));
+    const registry = CANONICAL_BOING_TESTNET_LINKED_NFT_TOKEN_REGISTRY_HEX;
+    // 0xFD init, first op CALLER (admin = creator); supply word; registry claim; then the v2 runtime chunks.
+    expect(deploy.bytecode.toLowerCase().startsWith('0xfd33')).toBe(true);
+    expect(deploy.bytecode.toLowerCase()).toContain((1_000_000).toString(16).padStart(64, '0'));
+    expect(deploy.bytecode.toLowerCase()).toContain(buildLinkedNftTokenClaimSelfInitSnippetHex(registry).slice(2).toLowerCase());
+    expect(deploy.bytecode.toLowerCase()).toContain(boingTokenBytecodeHex(2).slice(2, 66));
     expect(deploy.purpose_category).toBe('token');
     expect(deploy.asset_name).toBe('E2E Token');
     expect(deploy.asset_symbol).toBe('E2ET');
     expect(deploy.nonce).toBe(String(NONCE));
+    expect(deploy.create2_salt ?? null).toBeNull(); // nonce-derived address
     expect(deploy.description_hash).toMatch(/^0x[0-9a-f]{64}$/);
 
-    expect(mint.type).toBe('contract_call');
-    expect(mint.contract).toBe(token);
-    expect(mint.nonce).toBe(String(NONCE + 1));
-    const word = (n) => BigInt(n).toString(16).padStart(64, '0');
-    expect(mint.calldata).toBe(`0x${word(2)}${ME.slice(2)}${word(1_000_000)}`);
-    expect(mint.access_list).toEqual({ read: [ME, token], write: [ME, token] });
-
-    // Both were signed before anything was submitted; two submits, deploy first.
-    expect(rpc.filter((m) => m === 'boing_submitTransaction')).toHaveLength(2);
+    // QA ran on the exact init + runtime bytecode before the single submit.
+    expect(rpc.filter((m) => m === 'boing_submitTransaction')).toHaveLength(1);
     expect(rpc.indexOf('boing_qaCheck')).toBeLessThan(rpc.indexOf('boing_submitTransaction'));
   });
 });

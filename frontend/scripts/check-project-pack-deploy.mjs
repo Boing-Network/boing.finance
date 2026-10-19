@@ -6,8 +6,9 @@
  *   node scripts/check-project-pack-deploy.mjs --sender 0x...      # read-only: nonce, balance, planned addresses
  *   node scripts/check-project-pack-deploy.mjs --dry-run           # sign both deploys offline + simulate them (no submit)
  *   node scripts/check-project-pack-deploy.mjs --execute [--supply 4206900000] [--symbol PKT]
- *        # real run: collection deploy, token deploy (supply minted to the deployer at deploy),
- *        # claim x2 + register_link, then verify balance / admin / mint-once / claimers / link.
+ *        # real run: collection deploy, token deploy (supply minted to the deployer at deploy; both claim
+ *        # themselves in the registry v2 from their init code), register_link, then verify balance / admins /
+ *        # mint-once / claimers / link, and dry-run outsider claims as a throwaway account (funded with 1 testnet BOING; must be rejected).
  * Needs BOING_SECRET_HEX for --dry-run / --execute (never printed).
  */
 import {
@@ -28,6 +29,8 @@ import {
 } from 'boing-sdk';
 import { planProjectPack } from '../src/services/projectPackPlan.js';
 import { BOING_TOKEN_ADMIN_SLOT_HEX, BOING_TOKEN_MINT_ONCE_SLOT_HEX } from '../src/services/boingTokenV2Launch.js';
+import { BOING_NFT_COLLECTION_ADMIN_SLOT_HEX } from '../src/services/boingDeployInit.js';
+import { probeOutsiderClaims } from './lib/registry-v2-probe.mjs';
 
 const args = process.argv.slice(2);
 const flag = (n) => args.includes(n);
@@ -144,9 +147,7 @@ if (dryRun) {
 const out = {};
 out.collectionDeploy = await signSimSubmitDeploy(plan.collectionDeployTx, 'collection deploy', true);
 out.tokenDeploy = await signSimSubmitDeploy(plan.tokenDeployTx, 'token deploy (mints at deploy)', true);
-const [claimC, claimT, reg] = plan.registerFlowTxs;
-out.claimCollection = await registryCall(claimC, 'claim collection', true);
-out.claimToken = await registryCall(claimT, 'claim token', true);
+const [reg] = plan.registerFlowTxs; // both deploys already claimed themselves
 out.registerLink = await registryCall(reg, 'register_link', true);
 
 console.log('\n== verification ==');
@@ -158,6 +159,8 @@ const once = BigInt((await client.getContractStorage(token, BOING_TOKEN_MINT_ONC
 console.log(`deployer balance ${bal} / supply ${plan.tokenSupply}: ${bal === plan.tokenSupply ? 'OK' : 'MISMATCH'}`);
 console.log(`admin slot ${admin}: ${admin === senderHex ? 'OK (deployer)' : 'MISMATCH'}`);
 console.log(`mint-once flag ${once}: ${once === 1n ? 'OK (set)' : 'MISMATCH'}`);
+const colAdmin = (await client.getContractStorage(plan.predictedCollectionAddress, BOING_NFT_COLLECTION_ADMIN_SLOT_HEX)).value.toLowerCase();
+console.log(`collection admin slot ${colAdmin}: ${colAdmin === senderHex ? 'OK (deployer)' : 'MISMATCH'}`);
 if (code?.bytecode) {
   const same = code.bytecode.toLowerCase() === boingTokenBytecodeHex(2).toLowerCase();
   console.log(`stored runtime ${(code.bytecode.length - 2) / 2} bytes, identical to the v2 template: ${same ? 'OK' : 'MISMATCH'}`);
@@ -175,6 +178,16 @@ for (const [label, asset] of [['collection', plan.predictedCollectionAddress], [
   const s = await client.simulateTransaction(await signTransactionInputForClient(client, callInput(q, await nonceNow()), secret));
   const claimer = s.return_data ? `0x${s.return_data.replace(/^0x/, '').slice(-64)}` : '';
   console.log(`registry claimer of ${label}: ${claimer} ${claimer === senderHex ? 'OK' : 'MISMATCH'}`);
+}
+const probe = await probeOutsiderClaims(client, {
+  registry: plan.registryHex32,
+  collection: plan.predictedCollectionAddress,
+  token,
+  funder: { secret, hex: senderHex },
+});
+console.log(`throwaway account ${probe.outsider} (funded by tx ${probe.fundTx}; key in memory only)`);
+for (const r of probe.results) {
+  console.log(`throwaway ${probe.outsider.slice(0, 12)}… ${r.label} (dry-run): ${r.success ? 'ACCEPTED (MISMATCH)' : `rejected OK (${r.error || 'failed'})`}`);
 }
 try {
   const t = await client.getDexToken(token);
