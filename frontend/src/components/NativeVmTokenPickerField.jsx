@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import {
   getCuratedNativeVmTokens,
   loadCustomNativeVmTokens,
+  loadLocalDeployNativeVmTokens,
   loadRecentNativeVmTokens,
   normalizeNativeVmTokenId32,
   pushRecentNativeVmToken,
@@ -18,7 +19,7 @@ function shortHex(h) {
 }
 
 /**
- * Token account picker: curated + directory venues + user-added + recent; still accepts pasted 32-byte hex.
+ * Token account picker: curated + directory venues + user-added + recent deploys; still accepts pasted 32-byte hex.
  *
  * @param {{
  *   label: string,
@@ -28,6 +29,7 @@ function shortHex(h) {
  *   venueTokens?: import('boing-sdk').CpPoolVenue[],
  *   indexerTokens?: Array<{ id: string, symbol: string, name: string, decimals?: number }>,
  *   inputTestId?: string,
+ *   helpHint?: boolean,
  * }} props
  */
 export default function NativeVmTokenPickerField({
@@ -38,6 +40,7 @@ export default function NativeVmTokenPickerField({
   venueTokens = [],
   indexerTokens = [],
   inputTestId,
+  helpHint = true,
 }) {
   const [customVersion, setCustomVersion] = useState(0);
   const [recentVersion, setRecentVersion] = useState(0);
@@ -52,6 +55,7 @@ export default function NativeVmTokenPickerField({
   const allPickable = useMemo(() => {
     void listRefreshNonce;
     const custom = loadCustomNativeVmTokens();
+    const localDeploys = loadLocalDeployNativeVmTokens();
     const recent = loadRecentNativeVmTokens();
     const byId = new Map();
     // Baseline defaults + env list only; on-chain venues + indexer + user custom win on conflicts.
@@ -74,6 +78,10 @@ export default function NativeVmTokenPickerField({
       if (excludeNorm && e.id === excludeNorm) continue;
       byId.set(e.id, e);
     }
+    for (const e of localDeploys) {
+      if (excludeNorm && e.id === excludeNorm) continue;
+      if (!byId.has(e.id)) byId.set(e.id, { ...e, name: e.name || 'Your deploy' });
+    }
     for (const e of custom) {
       if (excludeNorm && e.id === excludeNorm) continue;
       byId.set(e.id, e);
@@ -86,6 +94,12 @@ export default function NativeVmTokenPickerField({
     }
     return [...byId.values()].sort((a, b) => a.symbol.localeCompare(b.symbol));
   }, [curated, fromVenues, fromIndexer, excludeNorm, listRefreshNonce]);
+
+  const normalizedValue = useMemo(() => normalizeNativeVmTokenId32(value), [value]);
+  const valueInList = useMemo(
+    () => (normalizedValue ? allPickable.some((t) => t.id === normalizedValue) : false),
+    [allPickable, normalizedValue]
+  );
 
   const onSelectPreset = useCallback(
     (e) => {
@@ -112,27 +126,28 @@ export default function NativeVmTokenPickerField({
   const onSaveCustom = useCallback(() => {
     const id = normalizeNativeVmTokenId32(value);
     if (!id) {
-      toast.error('Enter a valid 32-byte token id first.');
+      toast.error('Paste a valid 32-byte token id (0x + 64 hex) first.');
       return;
     }
+    const existing = allPickable.find((t) => t.id === id);
     const ok = saveCustomNativeVmToken({
       id,
-      symbol: shortHex(id),
-      name: 'Saved token',
+      symbol: existing?.symbol && !existing.symbol.startsWith('0x') ? existing.symbol : shortHex(id),
+      name: existing?.name || 'Saved token',
     });
     if (ok) {
-      toast.success('Saved to your token list');
+      toast.success('Saved to my tokens — it will stay in this list on this browser.');
       setCustomVersion((n) => n + 1);
       pushRecentNativeVmToken(id);
       setRecentVersion((n) => n + 1);
     } else {
       toast.error('Could not save (storage full or blocked).');
     }
-  }, [value]);
+  }, [value, allPickable]);
 
   return (
-    <div>
-      <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+    <div className="td-field">
+      <label className="td-field__label" htmlFor={inputTestId || undefined}>
         {label}
       </label>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
@@ -140,12 +155,7 @@ export default function NativeVmTokenPickerField({
           aria-label={`${label} — choose from list`}
           defaultValue=""
           onChange={onSelectPreset}
-          className="w-full sm:max-w-[200px] text-xs p-2 rounded-lg border shrink-0"
-          style={{
-            backgroundColor: 'var(--bg-secondary)',
-            borderColor: 'var(--border-color)',
-            color: 'var(--text-primary)',
-          }}
+          className="td-field__input w-full sm:max-w-[200px] text-xs shrink-0"
         >
           <option value="">Pick from list…</option>
           {allPickable.map((t) => (
@@ -157,31 +167,38 @@ export default function NativeVmTokenPickerField({
           ))}
         </select>
         <input
+          id={inputTestId || undefined}
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value.trim())}
           onBlur={onBlurRecordRecent}
-          placeholder="0x + 64 hex (or use list)"
+          placeholder="Paste token id (0x…)"
           data-testid={inputTestId}
-          className="w-full flex-1 text-xs p-2 rounded-lg border font-mono"
-          style={{
-            backgroundColor: 'var(--bg-secondary)',
-            borderColor: 'var(--border-color)',
-            color: 'var(--text-primary)',
-          }}
+          className="td-field__input w-full flex-1 text-xs font-mono"
           spellCheck={false}
         />
       </div>
-      <div className="flex flex-wrap gap-2 mt-1.5">
+      <div className="flex flex-wrap items-center gap-2 mt-1.5">
         <button
           type="button"
           onClick={onSaveCustom}
-          className="text-[10px] px-2 py-0.5 rounded border hover:opacity-90"
-          style={{ borderColor: 'var(--border-color)', color: 'var(--text-tertiary)' }}
+          className="td-btn td-btn--ghost text-[10px] px-2 py-0.5"
+          data-testid={inputTestId ? `${inputTestId}-save` : undefined}
         >
           Save current id to my tokens
         </button>
+        {normalizedValue && !valueInList ? (
+          <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
+            Not in the list yet — save it so it stays here.
+          </span>
+        ) : null}
       </div>
+      {helpHint ? (
+        <p className="text-[10px] mt-1 leading-snug" style={{ color: 'var(--text-tertiary)' }}>
+          New tokens appear after deploy (saved here), from recent deploys on this browser, or once they show up in the
+          network token directory. Paste the AccountId if the name is missing.
+        </p>
+      ) : null}
     </div>
   );
 }

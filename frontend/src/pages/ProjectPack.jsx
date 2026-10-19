@@ -18,6 +18,7 @@ import {
 } from '../config/boingExplorerUrls';
 import { isBoingNativeAccountIdHex } from '../utils/boingWalletDiscovery';
 import { rememberAssetDeployer } from '../utils/linkedNftToken';
+import { rememberDeployedNativeVmToken } from '../services/nativeVmTokenRegistry';
 import CompanionLinkGate from '../components/CompanionLinkGate';
 import BuilderAttestationPanel from '../components/BuilderAttestationPanel';
 import { buildProjectPoolPath } from '../services/linkedNftTokenRegistry';
@@ -295,10 +296,20 @@ export default function ProjectPack() {
       setTokenId(predicted);
       setPredictedToken(predicted);
       if (account) rememberAssetDeployer(predicted, account);
+      rememberDeployedNativeVmToken({
+        id: predicted,
+        symbol: String(tokenSymbol || '').trim().toUpperCase() || 'TOKEN',
+        name: String(tokenName || '').trim() || 'Project token',
+      });
       if (result.boingTxIdHex) {
         scheduleBoingDeployReceiptFollowup(result.boingTxIdHex, (id) => {
           setTokenId(id);
           if (account) rememberAssetDeployer(id, account);
+          rememberDeployedNativeVmToken({
+            id,
+            symbol: String(tokenSymbol || '').trim().toUpperCase() || 'TOKEN',
+            name: String(tokenName || '').trim() || 'Project token',
+          });
         });
       }
       toast.success(`Token ready: ${formatPackSupply(plan.tokenSupply)} ${tokenSymbol.toUpperCase()} are in your wallet`);

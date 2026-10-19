@@ -30,6 +30,7 @@ function shortHex(h) {
 
 /**
  * Deploy a new native constant-product pool, bind two token ids, and seed the first add_liquidity.
+ * Primary surface: pick two tokens + amounts + create. Advanced / other flows stay collapsed.
  */
 export default function NativeBoingCreatePoolPanel() {
   const { chainId, walletType, isConnected, getWalletProvider, account } = useWallet();
@@ -71,9 +72,13 @@ export default function NativeBoingCreatePoolPanel() {
   const pairParam = String(searchParams.get('pair') || '').trim().toLowerCase();
   useEffect(() => {
     if (tokenB) return;
-    const want = isBoingNativeAccountIdHex(pairParam) ? pairParam : pairParam || (isBoingNativeAccountIdHex(projectToken) ? 'usdc' : '');
+    const want = isBoingNativeAccountIdHex(pairParam)
+      ? pairParam
+      : pairParam || (isBoingNativeAccountIdHex(projectToken) ? 'usdc' : '');
     if (!want) return;
-    const hit = isBoingNativeAccountIdHex(want) ? want : Object.keys(KNOWN_BOING_TOKENS).find((id) => KNOWN_BOING_TOKENS[id].symbol.toLowerCase() === want);
+    const hit = isBoingNativeAccountIdHex(want)
+      ? want
+      : Object.keys(KNOWN_BOING_TOKENS).find((id) => KNOWN_BOING_TOKENS[id].symbol.toLowerCase() === want);
     if (hit && hit.toLowerCase() !== String(projectToken).toLowerCase()) setTokenB(hit);
   }, [pairParam, projectToken, tokenB]);
 
@@ -102,16 +107,10 @@ export default function NativeBoingCreatePoolPanel() {
 
   if (walletType !== 'boingExpress' || !isConnected) {
     return (
-      <section
-        className="mb-6 rounded-xl border p-5 text-left"
-        style={{ backgroundColor: 'var(--bg-card)', borderColor: 'rgba(59, 130, 246, 0.45)' }}
-      >
-        <h3 className="text-lg font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
-          Create a native pool
-        </h3>
-        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-          Connect <strong>Boing Express</strong> on Boing testnet (6913) to deploy a constant-product pool, bind two token
-          accounts, and seed the first liquidity. This is not the EVM factory form.
+      <section className="td-card text-left mb-6 p-5" data-testid="native-create-pool-connect">
+        <h3 className="td-section-title mb-1">Create a pool</h3>
+        <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+          Connect <strong>Boing Express</strong> on Boing testnet to pick two tokens and seed the first liquidity.
         </p>
       </section>
     );
@@ -154,7 +153,7 @@ export default function NativeBoingCreatePoolPanel() {
 
   const onCreate = async () => {
     if (projectGateActive && !companionsLinked) {
-      toast.error('Link companions for this project before creating the pool.');
+      toast.error('Link your collection and token before creating the pool.');
       return;
     }
     if (deployBlocked) {
@@ -162,7 +161,7 @@ export default function NativeBoingCreatePoolPanel() {
         !effectiveBytecode
           ? 'Pool bytecode is not available in this build. Operators: publish native AMM bytecode, or paste it under Advanced.'
           : projectGateActive && !companionsLinked
-            ? 'Link companions for this project before creating the pool.'
+            ? 'Link your collection and token before creating the pool.'
             : 'QA returned unsure — acknowledge the community pool checkbox first.'
       );
       return;
@@ -211,16 +210,11 @@ export default function NativeBoingCreatePoolPanel() {
   };
 
   return (
-    <section
-      className="mb-6 rounded-xl border p-5 text-left"
-      style={{ backgroundColor: 'var(--bg-card)', borderColor: 'rgba(59, 130, 246, 0.45)' }}
-    >
-      <h3 className="text-lg font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
-        Create a pool
-      </h3>
+    <section className="td-card text-left mb-6 p-5 sm:p-6" data-testid="native-create-pool-panel">
+      <h3 className="td-section-title mb-1">Create a pool</h3>
       <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-        Pick two tokens and deposit the first liquidity. That first deposit sets the starting price. Express will ask you
-        to approve each step.
+        Pick two tokens and deposit the first liquidity. That first deposit sets the starting price. Express will ask
+        you to approve each step.
       </p>
 
       {projectGateActive ? (
@@ -238,7 +232,16 @@ export default function NativeBoingCreatePoolPanel() {
         </div>
       ) : null}
 
-      <div className="grid gap-3 sm:grid-cols-2 mb-3">
+      <div className="td-status td-status--info text-xs mb-4">
+        <p className="mb-0">
+          Don&apos;t see your token? Paste its AccountId below, then{' '}
+          <strong style={{ color: 'var(--text-primary)' }}>Save current id to my tokens</strong>. Tokens you deploy on
+          this browser are saved automatically. Tokens that never joined a pool may not appear in the network directory
+          yet.
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 mb-4">
         <NativeVmTokenPickerField
           label="Token A"
           value={tokenA}
@@ -247,6 +250,7 @@ export default function NativeBoingCreatePoolPanel() {
           venueTokens={venues}
           indexerTokens={indexerPickerTokens}
           inputTestId="native-create-pool-token-a"
+          helpHint={false}
         />
         <NativeVmTokenPickerField
           label="Token B"
@@ -256,64 +260,40 @@ export default function NativeBoingCreatePoolPanel() {
           venueTokens={venues}
           indexerTokens={indexerPickerTokens}
           inputTestId="native-create-pool-token-b"
+          helpHint={false}
         />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 mb-3" id="initial-liquidity">
-        <label className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-          Amount of Token A
+      <div className="grid gap-4 sm:grid-cols-2 mb-4" id="initial-liquidity">
+        <label className="td-field">
+          <span className="td-field__label">Amount of Token A</span>
           <input
             type="text"
             inputMode="numeric"
             value={amountA}
             data-testid="create-pool-amount-a"
             onChange={(e) => setAmountA(e.target.value.replace(/[^\d]/g, ''))}
-            className="mt-1 w-full rounded-lg border bg-transparent px-3 py-2 text-sm"
-            style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+            className="td-field__input"
             placeholder="1000000"
           />
-          <span className="block text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
+          <span className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
             Whole numbers only (no decimals in this flow).
           </span>
         </label>
-        <label className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-          Amount of Token B
+        <label className="td-field">
+          <span className="td-field__label">Amount of Token B</span>
           <input
             type="text"
             inputMode="numeric"
             value={amountB}
             data-testid="create-pool-amount-b"
             onChange={(e) => setAmountB(e.target.value.replace(/[^\d]/g, ''))}
-            className="mt-1 w-full rounded-lg border bg-transparent px-3 py-2 text-sm"
-            style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+            className="td-field__input"
             placeholder="1000000"
           />
-          <span className="block text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
+          <span className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
             Whole numbers only (no decimals in this flow).
           </span>
-        </label>
-      </div>
-
-      <div className="grid gap-3 sm:grid-cols-2 mb-3">
-        <label className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-          Pool label (optional)
-          <input
-            type="text"
-            value={poolLabel}
-            onChange={(e) => setPoolLabel(e.target.value)}
-            className="mt-1 w-full rounded-lg border bg-transparent px-3 py-2 text-sm"
-            style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
-          />
-        </label>
-        <label className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-          Pool symbol (optional)
-          <input
-            type="text"
-            value={poolSymbol}
-            onChange={(e) => setPoolSymbol(e.target.value)}
-            className="mt-1 w-full rounded-lg border bg-transparent px-3 py-2 text-sm"
-            style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
-          />
         </label>
       </div>
 
@@ -337,8 +317,7 @@ export default function NativeBoingCreatePoolPanel() {
             !amountB ||
             (projectGateActive && !companionsLinked)
           }
-          className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
-          style={{ background: 'var(--accent-teal, #0891b2)' }}
+          className="td-btn td-btn--primary disabled:opacity-50"
         >
           {busy
             ? 'Creating pool…'
@@ -349,12 +328,27 @@ export default function NativeBoingCreatePoolPanel() {
         <button
           type="button"
           onClick={() => setShowAdvanced((v) => !v)}
-          className="px-4 py-2 rounded-lg text-sm border"
-          style={{ borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}
+          className="td-btn td-btn--ghost"
+          data-testid="create-pool-advanced-toggle"
         >
           {showAdvanced ? 'Hide advanced' : 'Advanced'}
         </button>
       </div>
+
+      <p className="text-xs mb-3" style={{ color: 'var(--text-tertiary)' }}>
+        Need to swap or add liquidity to an existing pool?{' '}
+        <Link className="td-btn td-btn--link text-xs" to="/swap">
+          Swap
+        </Link>
+        {' · '}
+        <Link className="td-btn td-btn--link text-xs" to="/liquidity">
+          Liquidity
+        </Link>
+        {' · '}
+        <Link className="td-btn td-btn--link text-xs" to="/pools">
+          Pools
+        </Link>
+      </p>
 
       {qaResult?.result === 'unsure' && (
         <label className="flex items-start gap-2 text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
@@ -368,23 +362,44 @@ export default function NativeBoingCreatePoolPanel() {
       )}
 
       {showAdvanced && (
-        <div className="space-y-3 mb-3">
+        <div className="space-y-3 mb-3 pt-3 border-t" style={{ borderColor: 'var(--border-color)' }}>
+          <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
+            Optional label, review check, and bytecode overrides for operators.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="td-field">
+              <span className="td-field__label">Pool label (optional)</span>
+              <input
+                type="text"
+                value={poolLabel}
+                onChange={(e) => setPoolLabel(e.target.value)}
+                className="td-field__input"
+              />
+            </label>
+            <label className="td-field">
+              <span className="td-field__label">Pool symbol (optional)</span>
+              <input
+                type="text"
+                value={poolSymbol}
+                onChange={(e) => setPoolSymbol(e.target.value)}
+                className="td-field__input"
+              />
+            </label>
+          </div>
           <button
             type="button"
             onClick={runQa}
             disabled={qaBusy || busy}
-            className="px-4 py-2 rounded-lg text-sm font-medium border"
-            style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+            className="td-btn td-btn--ghost text-sm"
           >
             {qaBusy ? 'Checking…' : 'Run review check'}
           </button>
-          <label className="block text-sm" style={{ color: 'var(--text-secondary)' }}>
-            Review purpose
+          <label className="td-field">
+            <span className="td-field__label">Review purpose</span>
             <select
               value={purposeCategory}
               onChange={(e) => setPurposeCategory(e.target.value)}
-              className="mt-1 w-full rounded-lg border bg-transparent px-3 py-2 text-sm"
-              style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+              className="td-field__input"
             >
               {BOING_QA_PURPOSE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -393,43 +408,44 @@ export default function NativeBoingCreatePoolPanel() {
               ))}
             </select>
           </label>
-          <label className="block text-sm" style={{ color: 'var(--text-secondary)' }}>
-            Bytecode override (hex)
+          <label className="td-field">
+            <span className="td-field__label">Bytecode override (hex)</span>
             <textarea
               value={customBytecode}
               onChange={(e) => setCustomBytecode(e.target.value)}
               rows={4}
-              className="mt-1 w-full rounded-lg border bg-transparent px-3 py-2 text-xs font-mono"
-              style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+              className="td-field__input text-xs font-mono"
               placeholder={bundledBytecode ? 'Leave empty to use bundled pool bytecode' : '0x…'}
             />
           </label>
-          <label className="block text-sm" style={{ color: 'var(--text-secondary)' }}>
-            Description hash (optional)
+          <label className="td-field">
+            <span className="td-field__label">Description hash (optional)</span>
             <input
               type="text"
               value={descriptionHash}
               onChange={(e) => setDescriptionHash(e.target.value)}
-              className="mt-1 w-full rounded-lg border bg-transparent px-3 py-2 text-xs font-mono"
-              style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+              className="td-field__input text-xs font-mono"
             />
           </label>
         </div>
       )}
 
       {lastResult?.ok && lastResult.poolId && (
-        <div className="mb-3 rounded-lg border p-3 text-sm" style={{ borderColor: 'var(--border-color)' }} data-testid="create-pool-success">
+        <div
+          className="mb-3 rounded-lg border p-3 text-sm"
+          style={{ borderColor: 'var(--border-color)' }}
+          data-testid="create-pool-success"
+        >
           <p style={{ color: 'var(--text-primary)' }}>Pool created. It now shows in the swap token list and on Pools.</p>
           <div className="mt-2 flex flex-wrap gap-2">
             <Link
-              className="rounded-lg px-3 py-1.5 font-semibold text-white"
-              style={{ background: 'linear-gradient(135deg, var(--finance-primary), #2563eb)', color: '#fff' }}
+              className="td-btn td-btn--primary"
               to={`/swap?nativeTokenIn=${tokenB}&nativeTokenOut=${tokenA}`}
               data-testid="create-pool-swap-now"
             >
               Swap it now
             </Link>
-            <Link className="rounded-lg border px-3 py-1.5" style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} to="/pools">
+            <Link className="td-btn td-btn--ghost" to="/pools">
               View in Pools
             </Link>
           </div>
