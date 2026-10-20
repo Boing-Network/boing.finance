@@ -8,10 +8,10 @@ const GB = 1024 * 1024 * 1024;
 function parseBudgetGb() {
   const raw = Number(process.env.REACT_APP_NFT_MEDIA_BUDGET_GB);
   if (Number.isFinite(raw) && raw > 0 && raw <= 50) return raw;
-  return 10;
+  return 50;
 }
 
-/** Product collection media budget (default 10 GiB; set REACT_APP_NFT_MEDIA_BUDGET_GB=50 to advertise 50). */
+/** Product collection media budget (default 50 GiB). Override with REACT_APP_NFT_MEDIA_BUDGET_GB (1–50). */
 export const NFT_MEDIA_BUDGET_GB = parseBudgetGb();
 export const NFT_MEDIA_BUDGET_BYTES = Math.floor(NFT_MEDIA_BUDGET_GB * GB);
 

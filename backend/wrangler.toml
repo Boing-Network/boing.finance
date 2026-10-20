@@ -17,8 +17,8 @@ account_id = "10374f367672f4d19db430601db0926b"
 [vars]
 NODE_ENV = "development"
 FRONTEND_URL = "http://localhost:3000"
-# Large-set NFT media collection budget (GiB). Product default 10; set 50 when ready to advertise.
-NFT_MEDIA_BUDGET_GB = "10"
+# Large-set NFT media collection budget (GiB). Product default 50.
+NFT_MEDIA_BUDGET_GB = "50"
 # LI.FI integrator fee (0.005 = 0.5%). Recipient is the wallet registered for integrator "boing.finance" on portal.li.fi.
 LIFI_INTEGRATOR_FEE = "0.005"
 # LIFI_FEE_RECIPIENT = "0x..."
@@ -35,7 +35,7 @@ binding = "AI"
 NODE_ENV = "production"
 FRONTEND_URL = "https://boing.finance"
 WORKER_URL = "https://boing-api-prod.nico-chikuji.workers.dev"
-NFT_MEDIA_BUDGET_GB = "10"
+NFT_MEDIA_BUDGET_GB = "50"
 LIFI_INTEGRATOR_FEE = "0.005"
 # Set via `wrangler secret put` (do not commit values): LIFI_API_KEY,
 # LIFI_FEE_RECIPIENT (EVM), LIFI_FEE_RECIPIENT_SOL, LIFI_FEE_RECIPIENT_BTC.
@@ -53,7 +53,7 @@ binding = "AI"
 NODE_ENV = "staging"
 FRONTEND_URL = "https://staging.boing.finance"
 WORKER_URL = "https://boing-api-staging.nico-chikuji.workers.dev"
-NFT_MEDIA_BUDGET_GB = "10"
+NFT_MEDIA_BUDGET_GB = "50"
 LIFI_INTEGRATOR_FEE = "0.005"
 
 # D1 Database

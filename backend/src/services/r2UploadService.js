@@ -8,7 +8,7 @@ export const R2_PART_MAX_BYTES = 16 * 1024 * 1024; // 16 MiB
 /** Per-object cap via multipart (product files stay well under this). */
 export const R2_MULTIPART_OBJECT_MAX_BYTES = 2 * 1024 * 1024 * 1024; // 2 GiB
 /** Collection media budget default (product UX); override with NFT_MEDIA_BUDGET_GB. */
-export const R2_COLLECTION_BUDGET_DEFAULT_GB = 10;
+export const R2_COLLECTION_BUDGET_DEFAULT_GB = 50;
 
 const IMAGE_AND_META_TYPES = [
   'image/jpeg',

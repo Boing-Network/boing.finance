@@ -420,8 +420,8 @@ function CreateNft() {
       <P>
         <To to="/create-nft">Create NFT</To> has two paths. <B>Standard</B> walks Collection → Images → Metadata → Review
         for small batches. <B>Large set (CSV)</B> is OpenSea-style: upload a CSV of names/traits, then bulk media whose
-        filenames match the spreadsheet, with chunked upload to network storage (product budget 10&nbsp;GB; operators can
-        raise the Worker/env cap toward 50&nbsp;GB). Download the CSV template from the wizard or{' '}
+        filenames match the spreadsheet, with chunked upload to network storage (product budget 50&nbsp;GB). Download the
+        CSV template from the wizard or{' '}
         <code>/templates/nft-collection-metadata.csv</code>.
       </P>
       <UL>
