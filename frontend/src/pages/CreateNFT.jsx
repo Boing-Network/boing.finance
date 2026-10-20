@@ -808,7 +808,7 @@ export default function CreateNFT() {
         setPublishedFingerprint('');
         setDynamicSize(Math.min(tokens.length, NFT_LARGE_SET_MAX_ROWS));
         toast.success(`Imported ${tokens.length} tokens from CSV`);
-        warnings?.forEach((w) => toast(w, { icon: 'ℹ️' }));
+        warnings?.forEach((w) => toast(w));
       } catch (err) {
         toast.error(err?.message || 'Failed to parse CSV');
       }
