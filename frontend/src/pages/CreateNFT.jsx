@@ -690,6 +690,7 @@ export default function CreateNFT() {
         descriptionHash: publishedDescriptionHash,
         coverImageUri: publishedCoverUri || cover,
         image: publishedCoverUri || cover,
+        tokens,
       };
     }
     setIsPublishingMetadata(true);
@@ -700,6 +701,7 @@ export default function CreateNFT() {
         description: collectionDescription,
         image: cover,
         tokens,
+        includeTokenMetadataHashes: true,
       });
       const published = await publishNftCollectionMetadata(doc);
       setPublishedMetadataUri(published.metadataUri);
@@ -712,6 +714,7 @@ export default function CreateNFT() {
         descriptionHash: published.descriptionHash,
         coverImageUri: cover,
         image: cover,
+        tokens,
       };
     } finally {
       setIsPublishingMetadata(false);
@@ -1352,6 +1355,7 @@ export default function CreateNFT() {
                               coverImageUri={publishedCoverUri || resolvedCoverUri(generatedDynamicMetadata.map((m) => m.image))}
                               onEnsureMetadataPublished={ensurePublishedMetadata}
                               linkTokenId={linkTokenFromQuery}
+                              mintTokens={generatedDynamicMetadata}
                             />
                             <details className="mt-2">
                               <summary className="cursor-pointer text-xs" style={{ color: 'var(--text-tertiary)' }}>
@@ -1394,7 +1398,7 @@ export default function CreateNFT() {
                         </div>
                         <p className="text-gray-400 text-sm">
                           {isBoingNativeNftWizard
-                            ? 'Deploy native collection publishes the contract only — it does not mint these tokens or upload art. Details: '
+                            ? 'Deploy & mint creates the collection on Boing L1, then mints every prepared token (chunked mint_batch) with owners and metadata hashes. Images stay on R2/HTTP. Details: '
                             : 'Export the JSON for an external minter. This page does not deploy an EVM collection or charge a fee.'}
                           {isBoingNativeNftWizard && (
                             <Link to="/docs?section=boing-l1" className="text-cyan-400 underline">
@@ -1720,6 +1724,7 @@ export default function CreateNFT() {
                     coverImageUri={publishedCoverUri || resolvedCoverUri()}
                     onEnsureMetadataPublished={ensurePublishedMetadata}
                     linkTokenId={linkTokenFromQuery}
+                    mintTokens={getFinalMetadataList()}
                   />
                 )}
                 {isBoingNativeNftWizard && (
@@ -1746,8 +1751,10 @@ export default function CreateNFT() {
                 <p className="text-gray-400 text-sm">
                   {isBoingNativeNftWizard ? (
                     <>
-                      Metadata is uploaded with a public image URL and committed as{' '}
-                      <code className="text-xs">description_hash</code> on native deploy.{' '}
+                      Collection metadata (with per-token <code className="text-xs">metadata_hash</code>) uploads to
+                      R2/HTTP and is committed as <code className="text-xs">description_hash</code> on deploy. After
+                      inclusion, the wizard runs chunked <code className="text-xs">mint_batch</code> so every token has
+                      an on-chain owner and metadata hash.{' '}
                       <Link to="/docs?section=boing-l1" className="text-cyan-400 underline">
                         Documentation → Boing L1 &amp; Express
                       </Link>
