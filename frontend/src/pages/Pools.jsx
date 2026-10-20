@@ -1080,11 +1080,6 @@ const Pools = () => {
         </Helmet>
         <div className="relative w-full min-w-0">
           <div className="relative z-10 container mx-auto px-4 py-8">
-            <header className="td-hero td-hero--center mb-8">
-              <span className="td-hero__eyebrow">Trade</span>
-              <h1 className="td-hero__title">Pools</h1>
-              <p className="td-hero__subtitle">Browse Boing pools, or connect your wallet to see your liquidity.</p>
-            </header>
             {/* Boing pools are public: browse, search and open a swap without a wallet. */}
             <div className="max-w-5xl mx-auto mb-8">
               <BoingPoolsSection account={null} initialQuery={boingPoolQuery} />
@@ -1116,11 +1111,6 @@ const Pools = () => {
         <div className="relative w-full min-w-0">
           <div className="relative z-10 container mx-auto px-4 py-8">
             <div className="max-w-5xl mx-auto">
-              <header className="td-hero td-hero--center mb-8">
-                <span className="td-hero__eyebrow">Trade</span>
-                <h1 className="td-hero__title">Pools</h1>
-                <p className="td-hero__subtitle">Swap in a pool, or add liquidity and earn a share of the fees.</p>
-              </header>
               <BoingPoolsSection account={account} initialQuery={boingPoolQuery} />
             </div>
           </div>
@@ -1139,14 +1129,6 @@ const Pools = () => {
       <div className="relative w-full min-w-0">
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-7xl mx-auto">
-            <header className="td-hero td-hero--center mb-8">
-              <span className="td-hero__eyebrow">Trade</span>
-              <h1 className="td-hero__title">Pools</h1>
-              <p className="td-hero__subtitle">
-                See available pools and manage your liquidity
-              </p>
-            </header>
-
             {/* Tabs */}
             <div className="td-panel-surface p-2 mb-8">
               <div

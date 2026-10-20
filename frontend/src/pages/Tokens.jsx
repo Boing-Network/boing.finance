@@ -387,18 +387,11 @@ const Tokens = () => {
       </Helmet>
       <div className="relative w-full min-w-0">
         <div className="td-mint-form relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <header className="td-hero mb-6 sm:mb-8">
-            <span className="td-hero__eyebrow">Trade</span>
-            <h1 className="td-hero__title">Tokens</h1>
-            <p className="td-hero__subtitle">
-              Browse tokens on the selected network
+          {selectedChain === BOING_NATIVE_L1_CHAIN_ID && (
+            <p className="td-status td-status--info mb-4 text-sm">
+              USD values use an approximate BOING price for estimates.
             </p>
-            {selectedChain === BOING_NATIVE_L1_CHAIN_ID && (
-              <p className="td-status td-status--info mt-3 text-sm">
-                USD values use an approximate BOING price for estimates.
-              </p>
-            )}
-          </header>
+          )}
 
           <LiveDeploymentsPanel />
 

@@ -22,7 +22,7 @@ import { showDeployCelebration } from '../utils/deployCelebration';
 import { fetchTradeableEvmTokenAddressesFromDexFactory } from '../services/evmDexTradeableTokens';
 import { tryAccruePoints } from '../utils/tryAccruePoints';
 import EmptyState from '../components/EmptyState';
-import { TradeDeployShell, TradeDeployHero, PageCard } from '../components/PageLayout';
+import { TradeDeployShell, PageCard } from '../components/PageLayout';
 
 const devLog = (...args) => {
   if (import.meta.env.DEV) console.log(...args);
@@ -1300,11 +1300,6 @@ function CreatePool() {
           <meta name="description" content="Create new liquidity pools on EVM and Solana. Deploy trading pairs and earn fees with boing.finance." />
         </Helmet>
         <TradeDeployShell width="medium">
-          <TradeDeployHero
-            eyebrow="Deploy"
-            title="Create a pool"
-            subtitle="Pick two tokens and add the first liquidity."
-          />
           <PageCard>
             <EmptyState
               variant="pools"
@@ -1333,21 +1328,7 @@ function CreatePool() {
           <div className={`mx-auto td-mint-form ${chainId === BOING_NATIVE_L1_CHAIN_ID ? 'max-w-3xl' : 'max-w-6xl'}`}>
             <DexFeatureBanner featureLabel="Create Pool" currentChainId={chainId} onSwitchNetwork={switchNetwork} />
             {chainId === BOING_NATIVE_L1_CHAIN_ID && (
-              <>
-                <header className="td-hero td-hero--center mb-6">
-                  <span className="td-hero__eyebrow">Deploy</span>
-                  <h1 className="td-hero__title">Create a pool</h1>
-                  <p className="td-hero__subtitle">Pick two tokens and add the first liquidity.</p>
-                </header>
-                <NativeBoingCreatePoolPanel />
-              </>
-            )}
-            {chainId !== BOING_NATIVE_L1_CHAIN_ID && (
-            <header className="td-hero td-hero--center mb-8">
-              <span className="td-hero__eyebrow">Deploy</span>
-              <h1 className="td-hero__title">Create a pool</h1>
-              <p className="td-hero__subtitle">Pick two tokens and add the first liquidity</p>
-            </header>
+              <NativeBoingCreatePoolPanel />
             )}
 
             {chainId !== BOING_NATIVE_L1_CHAIN_ID && !evmCreateVenue && (
