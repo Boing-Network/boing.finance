@@ -418,13 +418,16 @@ function CreateNft() {
   return (
     <>
       <P>
-        <To to="/create-nft">Create NFT</To> takes you through <B>Collection</B>, <B>Images</B>, <B>Metadata</B> and{' '}
-        <B>Review &amp; mint</B>. Choose <B>Standard</B> or <B>Large set (up to 10k)</B>. Images are uploaded to network
-        storage, and a public link is written into the collection metadata.
+        <To to="/create-nft">Create NFT</To> has two paths. <B>Standard</B> walks Collection → Images → Metadata → Review
+        for small batches. <B>Large set (CSV)</B> is OpenSea-style: upload a CSV of names/traits, then bulk media whose
+        filenames match the spreadsheet, with chunked upload to network storage (product budget 10&nbsp;GB; operators can
+        raise the Worker/env cap toward 50&nbsp;GB). Download the CSV template from the wizard or{' '}
+        <code>/templates/nft-collection-metadata.csv</code>.
       </P>
       <UL>
         <li>
-          <B>Boing:</B> deploys an NFT collection on Boing L1 with Boing Express.
+          <B>Boing:</B> deploys an NFT collection on Boing L1 with Boing Express (collection contract + metadata hash; does
+          not mint the full large set in this wizard).
         </li>
         <li>
           <B>Solana:</B> mints SPL NFTs.

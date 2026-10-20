@@ -2,7 +2,7 @@
 // Industry standards: ERC-721 metadata, local image upload, bulk minting, IPFS/R2 storage
 // Solana: SPL NFT (0 decimals, supply 1) with R2-hosted metadata
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
@@ -23,6 +23,20 @@ import {
   publicAssetUri,
   publishNftCollectionMetadata,
 } from '../utils/nftCollectionMetadata';
+import {
+  downloadNftCsvTemplate,
+  parseNftMetadataCsv,
+  indexMediaFilesByBasename,
+  applyMediaUrisToTokens,
+  mediaMatchReport,
+} from '../utils/nftCsv';
+import { uploadFilesToR2Chunked, formatBytes } from '../utils/r2ChunkedUpload';
+import {
+  NFT_MEDIA_BUDGET_BYTES,
+  NFT_MEDIA_BUDGET_GB,
+  NFT_LARGE_FILE_MAX_BYTES,
+  NFT_LARGE_SET_MAX_ROWS,
+} from '../config/nftUploadLimits';
 import { SOLANA_NETWORKS } from '../config/solanaConfig';
 import toast from 'react-hot-toast';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
@@ -81,7 +95,7 @@ function formatNftServiceFeeLine(chainId, collectionSize, nativeSymbol) {
 
 const DYNAMIC_STEPS = [
   { id: 'collection', label: 'Collection & size' },
-  { id: 'layers', label: 'Trait layers' },
+  { id: 'assets', label: 'CSV & media' },
   { id: 'review', label: 'Review & export' },
 ];
 
@@ -138,30 +152,18 @@ function CollectionCoverFields({
   );
 }
 
-// Parse CSV: header row, then data. Columns "name", "description" (or "Name", "Description") + any other = trait_type/value
-function parseMetadataCSV(text, maxRows = 10000) {
-  const lines = text.split(/\r?\n/).filter((line) => line.trim());
-  if (lines.length < 2) return [];
-  const headers = lines[0].split(',').map((h) => h.trim().replace(/^"|"$/g, ''));
-  const nameCol = headers.findIndex((h) => /^name$/i.test(h));
-  const descCol = headers.findIndex((h) => /^description$/i.test(h));
-  const imageCol = headers.findIndex((h) => /^image$/i.test(h));
-  const list = [];
-  for (let r = 1; r < lines.length && list.length < maxRows; r++) {
-    const row = lines[r];
-    const cells = row.match(/("([^"]|"")*"|[^,]*)/g)?.map((c) => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim()) || row.split(',').map((c) => c.trim());
-    const name = (nameCol >= 0 && cells[nameCol]) ? cells[nameCol] : `Token #${r}`;
-    const description = (descCol >= 0 && cells[descCol]) ? cells[descCol] : '';
-    const imageUri = (imageCol >= 0 && cells[imageCol]) ? publicAssetUri(cells[imageCol]) : '';
-    const attributes = [];
-    headers.forEach((h, i) => {
-      if (i === nameCol || i === descCol || i === imageCol) return;
-      const value = cells[i];
-      if (value != null && value !== '') attributes.push({ trait_type: h, value });
-    });
-    list.push(createNFTMetadata({ name, description, imageUri, attributes }));
-  }
-  return list;
+/** Normalize parsed CSV tokens into ERC-721 metadata objects (keeps `_filename` for media match). */
+function normalizeCsvTokens(parsedTokens) {
+  return (parsedTokens || []).map((t) => ({
+    ...createNFTMetadata({
+      name: t.name,
+      description: t.description,
+      imageUri: t.image || '',
+      attributes: t.attributes || [],
+    }),
+    external_url: t.external_url || '',
+    _filename: t._filename || '',
+  }));
 }
 
 // Solana SPL NFT wizard (shown when chain type is Solana)
@@ -427,8 +429,27 @@ export default function CreateNFT() {
   const [dynamicSize, setDynamicSize] = useState(1000);
   const [traitLayers, setTraitLayers] = useState([{ trait_type: '', values: [''] }]);
   const [generatedDynamicMetadata, setGeneratedDynamicMetadata] = useState([]);
+  const [csvFileName, setCsvFileName] = useState('');
+  const [csvWarnings, setCsvWarnings] = useState([]);
+  const [largeMediaFiles, setLargeMediaFiles] = useState([]);
+  const [largeMediaUriByFile, setLargeMediaUriByFile] = useState({});
+  const [largeUploadProgress, setLargeUploadProgress] = useState(null);
+  const [isLargeMediaUploading, setIsLargeMediaUploading] = useState(false);
   const [previewTokenIndex, setPreviewTokenIndex] = useState(null);
   useEscapeKey(previewTokenIndex != null, () => setPreviewTokenIndex(null));
+
+  const largeMediaFileMap = useMemo(
+    () => indexMediaFilesByBasename(largeMediaFiles),
+    [largeMediaFiles]
+  );
+  const largeMediaMatch = useMemo(
+    () => mediaMatchReport(generatedDynamicMetadata, largeMediaFileMap),
+    [generatedDynamicMetadata, largeMediaFileMap]
+  );
+  const largeMediaTotalBytes = useMemo(
+    () => largeMediaFiles.reduce((s, f) => s + (f.size || 0), 0),
+    [largeMediaFiles]
+  );
 
   const network = getCurrentNetwork?.();
   const nativeSymbol = network?.nativeCurrency?.symbol ?? 'ETH';
@@ -776,13 +797,18 @@ export default function CreateNFT() {
       try {
         const text = ev.target?.result;
         if (!text) return;
-        const list = parseMetadataCSV(text, 10000);
-        if (list.length === 0) {
+        const { tokens, warnings } = parseNftMetadataCsv(text, NFT_LARGE_SET_MAX_ROWS);
+        if (tokens.length === 0) {
           toast.error('CSV has no data rows or invalid format');
           return;
         }
-        setGeneratedDynamicMetadata(list);
-        toast.success(`Imported ${list.length} tokens from CSV`);
+        setGeneratedDynamicMetadata(normalizeCsvTokens(tokens));
+        setCsvFileName(file.name);
+        setCsvWarnings(warnings || []);
+        setPublishedFingerprint('');
+        setDynamicSize(Math.min(tokens.length, NFT_LARGE_SET_MAX_ROWS));
+        toast.success(`Imported ${tokens.length} tokens from CSV`);
+        warnings?.forEach((w) => toast(w, { icon: 'ℹ️' }));
       } catch (err) {
         toast.error(err?.message || 'Failed to parse CSV');
       }
@@ -790,6 +816,86 @@ export default function CreateNFT() {
     reader.readAsText(file);
     e.target.value = '';
   };
+
+  const addLargeMediaFiles = useCallback((incoming) => {
+    const list = Array.from(incoming || []);
+    if (list.length === 0) return;
+    const next = [...largeMediaFiles];
+    let added = 0;
+    let skipped = 0;
+    const existing = new Set(next.map((f) => f.name.toLowerCase()));
+    for (const file of list) {
+      if (!file.type?.startsWith('image/')) {
+        skipped += 1;
+        continue;
+      }
+      if (file.size > NFT_LARGE_FILE_MAX_BYTES) {
+        toast.error(`${file.name}: max ${formatBytes(NFT_LARGE_FILE_MAX_BYTES)}`);
+        skipped += 1;
+        continue;
+      }
+      const key = file.name.toLowerCase();
+      if (existing.has(key)) continue;
+      const projected = next.reduce((s, f) => s + f.size, 0) + file.size;
+      if (projected > NFT_MEDIA_BUDGET_BYTES) {
+        toast.error(`Media budget is ${NFT_MEDIA_BUDGET_GB} GB for this release`);
+        break;
+      }
+      if (next.length >= NFT_LARGE_SET_MAX_ROWS) {
+        toast.error(`Max ${NFT_LARGE_SET_MAX_ROWS.toLocaleString()} media files`);
+        break;
+      }
+      next.push(file);
+      existing.add(key);
+      added += 1;
+    }
+    setLargeMediaFiles(next);
+    if (added) toast.success(`Added ${added} media file(s)`);
+    else if (skipped) toast.error('No new image files added');
+  }, [largeMediaFiles]);
+
+  const clearLargeMedia = useCallback(() => {
+    setLargeMediaFiles([]);
+    setLargeMediaUriByFile({});
+    setLargeUploadProgress(null);
+  }, []);
+
+  const uploadLargeMedia = useCallback(async () => {
+    if (largeMediaFiles.length === 0) {
+      toast.error('Add media files that match CSV filenames');
+      return false;
+    }
+    if (largeMediaTotalBytes > NFT_MEDIA_BUDGET_BYTES) {
+      toast.error(`Total media exceeds ${NFT_MEDIA_BUDGET_GB} GB budget`);
+      return false;
+    }
+    setIsLargeMediaUploading(true);
+    setLargeUploadProgress({ loaded: 0, total: largeMediaTotalBytes, ratio: 0, completed: 0, failed: 0 });
+    try {
+      const { results, failures } = await uploadFilesToR2Chunked(largeMediaFiles, {
+        onTotalProgress: setLargeUploadProgress,
+      });
+      const uriMap = { ...largeMediaUriByFile };
+      for (const { file, uri } of results) {
+        uriMap[file.name.toLowerCase()] = uri;
+      }
+      setLargeMediaUriByFile(uriMap);
+      if (generatedDynamicMetadata.length > 0) {
+        setGeneratedDynamicMetadata((prev) => applyMediaUrisToTokens(prev, uriMap));
+        setPublishedFingerprint('');
+      }
+      if (results.length) toast.success(`Uploaded ${results.length} media file(s)`);
+      if (failures.length) {
+        toast.error(`${failures.length} upload(s) failed — retry or remove those files`);
+      }
+      return failures.length === 0 && results.length > 0;
+    } catch (err) {
+      toast.error(err?.message || 'Media upload failed');
+      return false;
+    } finally {
+      setIsLargeMediaUploading(false);
+    }
+  }, [largeMediaFiles, largeMediaTotalBytes, largeMediaUriByFile, generatedDynamicMetadata.length]);
 
   const generateDynamicMetadata = () => {
     const layers = traitLayers.filter((l) => (l.trait_type || '').trim() && (l.values || []).some((v) => String(v).trim()));
@@ -817,12 +923,20 @@ export default function CreateNFT() {
       );
     }
     setGeneratedDynamicMetadata(list);
+    setCsvFileName('');
+    setCsvWarnings([]);
     toast.success(`Generated ${list.length} metadata entries`);
   };
 
   if (isSolana) return <CreateNFTSolanaContent />;
 
-  if (!isConnected) {
+  // Dev-only: ?demo=1 skips the wallet gate for local UI review / screenshots.
+  const demoWizard =
+    typeof process !== 'undefined' &&
+    process.env.NODE_ENV === 'development' &&
+    searchParams.get('demo') === '1';
+
+  if (!isConnected && !demoWizard) {
     return (
       <>
         <Helmet>
@@ -881,7 +995,7 @@ export default function CreateNFT() {
               }}
               options={[
                 { value: 'standard', label: 'Standard' },
-                { value: 'dynamic', label: 'Large set (up to 10k)' },
+                { value: 'dynamic', label: 'Large set (CSV)' },
               ]}
             />
           </div>
@@ -973,69 +1087,223 @@ export default function CreateNFT() {
                     />
                   </div>
                 )}
-                {step === 'layers' && (
-                  <div className="space-y-6">
-                    <p className="text-gray-400 text-sm">Define trait layers. Each layer has a name (e.g. Background) and possible values. Metadata will be generated with random combinations.</p>
-                    {traitLayers.map((layer, li) => (
-                      <div key={li} className="p-4 rounded-lg bg-gray-700/50 border border-gray-600">
-                        <div className="flex items-center gap-2 mb-2">
+                {step === 'assets' && (
+                  <div className="space-y-8">
+                    <div className="space-y-3">
+                      <h3 className="text-white font-medium">1. Collection CSV</h3>
+                      <p className="text-gray-400 text-sm">
+                        OpenSea-style spreadsheet: <code className="bg-gray-700 px-1 rounded">filename</code>,{' '}
+                        <code className="bg-gray-700 px-1 rounded">name</code>,{' '}
+                        <code className="bg-gray-700 px-1 rounded">description</code>, optional{' '}
+                        <code className="bg-gray-700 px-1 rounded">external_url</code> /{' '}
+                        <code className="bg-gray-700 px-1 rounded">image</code>, plus trait columns. Max{' '}
+                        {NFT_LARGE_SET_MAX_ROWS.toLocaleString()} rows.
+                      </p>
+                      <div className="flex flex-wrap gap-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            downloadNftCsvTemplate();
+                            toast.success('CSV template downloaded');
+                          }}
+                          className="td-btn td-btn--ghost"
+                        >
+                          Download CSV template
+                        </button>
+                        <label className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-medium cursor-pointer">
+                          Upload CSV
+                          <input type="file" accept=".csv,text/csv" onChange={handleCSVUpload} className="hidden" />
+                        </label>
+                      </div>
+                      {csvFileName ? (
+                        <p className="text-sm text-green-400">
+                          Loaded {csvFileName}: {generatedDynamicMetadata.length.toLocaleString()} token(s)
+                        </p>
+                      ) : null}
+                      {csvWarnings.length > 0 ? (
+                        <ul className="text-xs text-amber-300/90 list-disc pl-5 space-y-1">
+                          {csvWarnings.map((w) => (
+                            <li key={w}>{w}</li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
+
+                    <div className="space-y-3">
+                      <h3 className="text-white font-medium">2. NFT media</h3>
+                      <p className="text-gray-400 text-sm">
+                        Upload a folder or many image files whose names match the CSV{' '}
+                        <code className="bg-gray-700 px-1 rounded">filename</code> column. Chunked upload to network
+                        storage (budget {NFT_MEDIA_BUDGET_GB} GB total; up to {formatBytes(NFT_LARGE_FILE_MAX_BYTES)} per
+                        file). Prefer a folder of files over a multi‑GB zip in the browser.
+                      </p>
+                      <div className="flex flex-wrap gap-3">
+                        <label className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium cursor-pointer">
+                          Choose folder
                           <input
-                            type="text"
-                            value={layer.trait_type || ''}
-                            onChange={(e) => updateTraitLayer(li, 'trait_type', e.target.value)}
-                            placeholder="Trait name (e.g. Background)"
-                            className="flex-1 px-3 py-2 rounded bg-gray-700 border border-gray-600 text-white"
+                            type="file"
+                            className="hidden"
+                            webkitdirectory=""
+                            directory=""
+                            multiple
+                            accept={ACCEPTED_IMAGE_TYPES}
+                            onChange={(e) => {
+                              addLargeMediaFiles(e.target.files);
+                              e.target.value = '';
+                            }}
                           />
-                          <button type="button" onClick={() => removeTraitLayer(li)} className="px-2 py-1.5 rounded bg-red-600/80 hover:bg-red-500 text-white text-sm">Remove layer</button>
+                        </label>
+                        <label className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium cursor-pointer">
+                          Choose files
+                          <input
+                            type="file"
+                            className="hidden"
+                            multiple
+                            accept={ACCEPTED_IMAGE_TYPES}
+                            onChange={(e) => {
+                              addLargeMediaFiles(e.target.files);
+                              e.target.value = '';
+                            }}
+                          />
+                        </label>
+                        {largeMediaFiles.length > 0 ? (
+                          <button type="button" onClick={clearLargeMedia} className="td-btn td-btn--ghost">
+                            Clear media
+                          </button>
+                        ) : null}
+                      </div>
+                      {largeMediaFiles.length > 0 ? (
+                        <div className="space-y-2 text-sm text-gray-300">
+                          <p>
+                            {largeMediaFiles.length.toLocaleString()} file(s) · {formatBytes(largeMediaTotalBytes)} /{' '}
+                            {NFT_MEDIA_BUDGET_GB} GB
+                          </p>
+                          {generatedDynamicMetadata.length > 0 ? (
+                            <p className="text-gray-400">
+                              CSV filenames needing art: {largeMediaMatch.needed.length}
+                              {largeMediaMatch.missing.length > 0
+                                ? ` · missing ${largeMediaMatch.missing.length} (${largeMediaMatch.missing.slice(0, 5).join(', ')}${largeMediaMatch.missing.length > 5 ? '…' : ''})`
+                                : ' · all matched or have image URLs'}
+                            </p>
+                          ) : null}
+                          <button
+                            type="button"
+                            onClick={() => uploadLargeMedia()}
+                            disabled={isLargeMediaUploading}
+                            className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-medium disabled:opacity-50"
+                          >
+                            {isLargeMediaUploading ? 'Uploading media…' : 'Upload media to network'}
+                          </button>
+                          {largeUploadProgress ? (
+                            <div className="space-y-1">
+                              <div className="h-2 rounded-full bg-gray-700 overflow-hidden">
+                                <div
+                                  className="h-full bg-cyan-500 transition-[width] duration-200"
+                                  style={{ width: `${Math.min(100, Math.round((largeUploadProgress.ratio || 0) * 100))}%` }}
+                                />
+                              </div>
+                              <p className="text-xs text-gray-400">
+                                {formatBytes(largeUploadProgress.loaded)} / {formatBytes(largeUploadProgress.total)}
+                                {largeUploadProgress.completed != null
+                                  ? ` · ${largeUploadProgress.completed} done`
+                                  : ''}
+                                {largeUploadProgress.failed
+                                  ? ` · ${largeUploadProgress.failed} failed`
+                                  : ''}
+                              </p>
+                            </div>
+                          ) : null}
+                          {Object.keys(largeMediaUriByFile).length > 0 ? (
+                            <p className="text-green-400 text-xs">
+                              {Object.keys(largeMediaUriByFile).length} file(s) have network URLs linked into metadata.
+                            </p>
+                          ) : null}
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                          {(layer.values || ['']).map((v, vi) => (
-                            <div key={vi} className="flex gap-1">
+                      ) : null}
+                    </div>
+
+                    <details className="rounded-lg border border-gray-600 bg-gray-700/30 p-4">
+                      <summary className="cursor-pointer text-sm text-gray-300 font-medium">
+                        Advanced: generate from trait layers (no per-token art)
+                      </summary>
+                      <div className="mt-4 space-y-4">
+                        <p className="text-gray-400 text-sm">
+                          Optional fallback if you do not have a CSV. Each layer has a name and values; metadata uses
+                          random combinations and the collection cover as the image.
+                        </p>
+                        {traitLayers.map((layer, li) => (
+                          <div key={li} className="p-4 rounded-lg bg-gray-700/50 border border-gray-600">
+                            <div className="flex items-center gap-2 mb-2">
                               <input
                                 type="text"
-                                value={v}
-                                onChange={(e) => {
-                                  const vals = [...(layer.values || [])];
-                                  vals[vi] = e.target.value;
-                                  setTraitLayerValues(li, vals);
-                                }}
-                                placeholder="Value"
-                                className="w-28 px-2 py-1.5 rounded bg-gray-700 border border-gray-600 text-white text-sm"
+                                value={layer.trait_type || ''}
+                                onChange={(e) => updateTraitLayer(li, 'trait_type', e.target.value)}
+                                placeholder="Trait name (e.g. Background)"
+                                className="flex-1 px-3 py-2 rounded bg-gray-700 border border-gray-600 text-white"
                               />
-                              <button type="button" onClick={() => removeTraitLayerValue(li, vi)} className="text-red-400 hover:text-red-300">×</button>
+                              <button type="button" onClick={() => removeTraitLayer(li)} className="px-2 py-1.5 rounded bg-red-600/80 hover:bg-red-500 text-white text-sm">Remove layer</button>
                             </div>
-                          ))}
-                          <button type="button" onClick={() => addTraitLayerValue(li)} className="text-cyan-400 hover:text-cyan-300 text-sm">+ Value</button>
+                            <div className="flex flex-wrap gap-2">
+                              {(layer.values || ['']).map((v, vi) => (
+                                <div key={vi} className="flex gap-1">
+                                  <input
+                                    type="text"
+                                    value={v}
+                                    onChange={(e) => {
+                                      const vals = [...(layer.values || [])];
+                                      vals[vi] = e.target.value;
+                                      setTraitLayerValues(li, vals);
+                                    }}
+                                    placeholder="Value"
+                                    className="w-28 px-2 py-1.5 rounded bg-gray-700 border border-gray-600 text-white text-sm"
+                                  />
+                                  <button type="button" onClick={() => removeTraitLayerValue(li, vi)} className="text-red-400 hover:text-red-300">×</button>
+                                </div>
+                              ))}
+                              <button type="button" onClick={() => addTraitLayerValue(li)} className="text-cyan-400 hover:text-cyan-300 text-sm">+ Value</button>
+                            </div>
+                          </div>
+                        ))}
+                        <div className="flex flex-wrap gap-3">
+                          <button type="button" onClick={addTraitLayer} className="td-btn td-btn--ghost">
+                            + Add trait layer
+                          </button>
+                          <button type="button" onClick={generateDynamicMetadata} className="px-4 py-2 rounded-lg bg-cyan-700 hover:bg-cyan-600 text-white font-medium">
+                            Generate from trait layers
+                          </button>
                         </div>
                       </div>
-                    ))}
-                    <button type="button" onClick={addTraitLayer} className="td-btn td-btn--ghost">
-                      + Add trait layer
-                    </button>
+                    </details>
                   </div>
                 )}
                 {step === 'review' && (
                   <div className="space-y-6">
                     <div className="p-4 rounded-lg bg-gray-700/50 border border-gray-600">
                       <p className="text-gray-300 font-medium">{collectionName || 'Collection'}</p>
-                      <p className="text-gray-500 text-sm">{collectionSymbol} · {dynamicSize} NFTs · Service fee: {dynamicFeeDisplayLine}</p>
+                      <p className="text-gray-500 text-sm">
+                        {collectionSymbol} · {generatedDynamicMetadata.length || dynamicSize} NFTs
+                        {csvFileName ? ` · ${csvFileName}` : ''}
+                        {' · '}reference fee: {dynamicFeeDisplayLine}
+                      </p>
                     </div>
                     {generatedDynamicMetadata.length === 0 ? (
                       <div className="space-y-4">
-                        <div className="flex flex-wrap gap-3">
-                          <button type="button" onClick={generateDynamicMetadata} className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-medium">
-                            Generate from trait layers
-                          </button>
-                          <label className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium cursor-pointer">
-                            Upload CSV
-                            <input type="file" accept=".csv" onChange={handleCSVUpload} className="hidden" />
-                          </label>
-                        </div>
-                        <p className="text-gray-400 text-sm">Generate from your trait layers above, or upload a CSV with columns: <code className="bg-gray-700 px-1 rounded">name</code>, <code className="bg-gray-700 px-1 rounded">description</code>, optional <code className="bg-gray-700 px-1 rounded">image</code> URL, and any trait columns (e.g. Background, Rarity). Max 10,000 rows.</p>
+                        <p className="text-amber-200/90 text-sm">
+                          No metadata yet. Go back to <strong>CSV &amp; media</strong> to upload a spreadsheet (or use trait layers).
+                        </p>
+                        <button type="button" onClick={() => setStep('assets')} className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-medium">
+                          Back to CSV &amp; media
+                        </button>
                       </div>
                     ) : (
                       <>
                         <p className="text-green-400">Ready: {generatedDynamicMetadata.length} metadata entries.</p>
+                        {largeMediaMatch.missing.length > 0 ? (
+                          <p className="text-amber-300 text-sm">
+                            {largeMediaMatch.missing.length} CSV filename(s) still lack media or image URLs. You can still
+                            export JSON or deploy the collection contract; art can be filled later.
+                          </p>
+                        ) : null}
                         <div className="flex flex-wrap gap-3">
                           <button
                             type="button"
@@ -1048,8 +1316,17 @@ export default function CreateNFT() {
                           <button type="button" onClick={exportMetadataJSON} className="td-btn td-btn--ghost">
                             Export metadata JSON
                           </button>
-                          <button type="button" onClick={() => setGeneratedDynamicMetadata([])} className="td-btn td-btn--ghost">
-                            Clear & re-import
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setGeneratedDynamicMetadata([]);
+                              setCsvFileName('');
+                              setCsvWarnings([]);
+                              setStep('assets');
+                            }}
+                            className="td-btn td-btn--ghost"
+                          >
+                            Clear &amp; re-import
                           </button>
                           <label className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium cursor-pointer">
                             Replace with CSV
@@ -1099,9 +1376,9 @@ export default function CreateNFT() {
                               onClick={() => setPreviewTokenIndex(mode === 'dynamic' ? `d-${i}` : i)}
                               className="rounded-lg border border-gray-600 overflow-hidden bg-gray-800 text-left hover:border-cyan-500/50 transition-colors"
                             >
-                              {collectionCoverPreview || isPublicAssetUri(meta.image) ? (
+                              {isPublicAssetUri(meta.image) || collectionCoverPreview ? (
                                 <img
-                                  src={collectionCoverPreview || meta.image}
+                                  src={isPublicAssetUri(meta.image) ? meta.image : collectionCoverPreview}
                                   alt={meta.name}
                                   className="w-full aspect-square object-cover"
                                 />
@@ -1133,7 +1410,7 @@ export default function CreateNFT() {
                 <div className="flex justify-between mt-8 pt-6 border-t border-gray-700">
                   <button
                     type="button"
-                    onClick={() => setStep(step === 'layers' ? 'collection' : 'layers')}
+                    onClick={() => setStep(step === 'assets' ? 'collection' : 'assets')}
                     disabled={step === 'collection'}
                     className="td-btn td-btn--ghost disabled:opacity-50"
                   >
@@ -1142,7 +1419,17 @@ export default function CreateNFT() {
                   {step !== 'review' && (
                     <button
                       type="button"
-                      onClick={() => setStep(step === 'collection' ? 'layers' : 'review')}
+                      onClick={() => {
+                        if (step === 'collection') {
+                          setStep('assets');
+                          return;
+                        }
+                        if (generatedDynamicMetadata.length === 0) {
+                          toast.error('Upload a CSV (or generate from trait layers) before review');
+                          return;
+                        }
+                        setStep('review');
+                      }}
                       disabled={step === 'collection' && (!collectionName.trim() || !collectionSymbol.trim())}
                       className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-medium disabled:opacity-50"
                     >

@@ -1,6 +1,25 @@
 // R2 Upload Service for Cloudflare R2 Object Storage
 // Handles file uploads, metadata storage, and IPFS-like functionality
 
+/** Default single-request upload cap (legacy /r2/upload). */
+export const R2_SIMPLE_MAX_BYTES = 32 * 1024 * 1024; // 32 MiB
+/** Max size of one multipart part body (must stay under Worker request limits). */
+export const R2_PART_MAX_BYTES = 16 * 1024 * 1024; // 16 MiB
+/** Per-object cap via multipart (product files stay well under this). */
+export const R2_MULTIPART_OBJECT_MAX_BYTES = 2 * 1024 * 1024 * 1024; // 2 GiB
+/** Collection media budget default (product UX); override with NFT_MEDIA_BUDGET_GB. */
+export const R2_COLLECTION_BUDGET_DEFAULT_GB = 10;
+
+const IMAGE_AND_META_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'image/svg+xml',
+  'application/json',
+];
+
 export class R2UploadService {
   constructor(r2Bucket, options = {}) {
     this.bucket = r2Bucket;
@@ -10,16 +29,35 @@ export class R2UploadService {
     this.workerUrl = options.workerUrl || null;
   }
 
+  buildUploadKey(originalName) {
+    const timestamp = Date.now();
+    const randomId = Math.random().toString(36).substring(2, 15);
+    const fileExtension = this.getFileExtension(originalName || '');
+    return `uploads/${timestamp}-${randomId}${fileExtension}`;
+  }
+
+  buildUploadResult(fileName, fileMetadata) {
+    const fileUrl = `${this.baseUrl}/${fileName}`;
+    const workerUrl = this.workerUrl
+      ? `${this.workerUrl}/api/r2/file/${fileName}`
+      : null;
+    const ipfsHash = this.generateIPFSHash(fileName);
+    const gatewayUrls = [fileUrl];
+    if (workerUrl) gatewayUrls.push(workerUrl);
+    return {
+      hash: ipfsHash,
+      url: fileUrl,
+      ipfsUrl: `ipfs://${ipfsHash}`,
+      gatewayUrls,
+      metadata: fileMetadata,
+      fileName,
+    };
+  }
+
   // Upload a file to R2 and return metadata
   async uploadFile(file, metadata = {}) {
     try {
-      // Generate a unique filename
-      const timestamp = Date.now();
-      const randomId = Math.random().toString(36).substring(2, 15);
-      const fileExtension = this.getFileExtension(file.name);
-      const fileName = `uploads/${timestamp}-${randomId}${fileExtension}`;
-      
-      // Prepare file metadata
+      const fileName = this.buildUploadKey(file.name);
       const fileMetadata = {
         originalName: file.name,
         contentType: file.type,
@@ -28,7 +66,6 @@ export class R2UploadService {
         ...metadata
       };
 
-      // Upload to R2
       await this.bucket.put(fileName, file, {
         httpMetadata: {
           contentType: file.type,
@@ -37,38 +74,91 @@ export class R2UploadService {
         customMetadata: fileMetadata
       });
 
-      // Return IPFS-like response with multiple URL options
-      const fileUrl = `${this.baseUrl}/${fileName}`;
-      const workerUrl = this.workerUrl 
-        ? `${this.workerUrl}/api/r2/file/${fileName}`
-        : null;
-      const ipfsHash = this.generateIPFSHash(fileName); // Generate a hash for compatibility
-
-      // Build gateway URLs array
-      const gatewayUrls = [fileUrl]; // Public R2 URL (primary)
-      if (workerUrl) {
-        gatewayUrls.push(workerUrl); // Worker URL (fallback)
-      }
-
+      const result = this.buildUploadResult(fileName, fileMetadata);
       console.log('R2 upload successful:', {
         fileName,
-        fileUrl,
-        workerUrl,
+        fileUrl: result.url,
+        workerUrl: result.gatewayUrls?.[1] || null,
         metadata: fileMetadata
       });
-
-      return {
-        hash: ipfsHash,
-        url: fileUrl, // Use public R2 URL as primary
-        ipfsUrl: `ipfs://${ipfsHash}`,
-        gatewayUrls,
-        metadata: fileMetadata,
-        fileName: fileName
-      };
+      return result;
     } catch (error) {
       console.error('R2 upload error:', error);
       throw new Error(`R2 upload failed: ${error.message}`);
     }
+  }
+
+  /**
+   * Start an R2 multipart upload (Worker-proxied parts — not S3 presigned URLs).
+   * Needed for objects larger than the simple PUT / Worker single-request comfort zone.
+   */
+  async createMultipartUpload(originalName, contentType = 'application/octet-stream', metadata = {}) {
+    const fileName = this.buildUploadKey(originalName);
+    const multipart = await this.bucket.createMultipartUpload(fileName, {
+      httpMetadata: {
+        contentType: contentType || 'application/octet-stream',
+        cacheControl: 'public, max-age=31536000',
+      },
+      customMetadata: {
+        originalName: String(originalName || 'upload').slice(0, 200),
+        uploadedAt: new Date().toISOString(),
+        ...Object.fromEntries(
+          Object.entries(metadata || {}).map(([k, v]) => [String(k).slice(0, 64), String(v).slice(0, 256)])
+        ),
+      },
+    });
+    return {
+      key: multipart.key,
+      uploadId: multipart.uploadId,
+      partMaxBytes: R2_PART_MAX_BYTES,
+      objectMaxBytes: R2_MULTIPART_OBJECT_MAX_BYTES,
+    };
+  }
+
+  async uploadMultipartPart(key, uploadId, partNumber, body) {
+    const part = Number(partNumber);
+    if (!Number.isInteger(part) || part < 1 || part > 10000) {
+      throw new Error('Invalid partNumber');
+    }
+    if (!key || !uploadId) {
+      throw new Error('key and uploadId are required');
+    }
+    const multipart = this.bucket.resumeMultipartUpload(key, uploadId);
+    const uploaded = await multipart.uploadPart(part, body);
+    return { partNumber: part, etag: uploaded.etag };
+  }
+
+  async completeMultipartUpload(key, uploadId, parts, fileMeta = {}) {
+    if (!Array.isArray(parts) || parts.length === 0) {
+      throw new Error('parts array is required');
+    }
+    const normalized = parts
+      .map((p) => ({
+        partNumber: Number(p.partNumber),
+        etag: String(p.etag || ''),
+      }))
+      .filter((p) => Number.isInteger(p.partNumber) && p.partNumber >= 1 && p.etag);
+    if (normalized.length === 0) {
+      throw new Error('No valid parts');
+    }
+    normalized.sort((a, b) => a.partNumber - b.partNumber);
+    const multipart = this.bucket.resumeMultipartUpload(key, uploadId);
+    await multipart.complete(normalized);
+    const size = Number(fileMeta.size) || 0;
+    const fileMetadata = {
+      originalName: fileMeta.originalName || key.split('/').pop(),
+      contentType: fileMeta.contentType || 'application/octet-stream',
+      size,
+      uploadedAt: new Date().toISOString(),
+      multipart: '1',
+    };
+    return this.buildUploadResult(key, fileMetadata);
+  }
+
+  async abortMultipartUpload(key, uploadId) {
+    const multipart = this.bucket.resumeMultipartUpload(key, uploadId);
+    await multipart.abort();
+    return { success: true };
   }
 
   // Upload metadata as JSON
@@ -200,16 +290,8 @@ export class R2UploadService {
   }
 
   // Validate file type and size
-  validateFile(file, maxSize = 10 * 1024 * 1024) { // 10MB default
-    const allowedTypes = [
-      'image/jpeg',
-      'image/jpg', 
-      'image/png',
-      'image/gif',
-      'image/webp',
-      'image/svg+xml',
-      'application/json' // Allow JSON for metadata
-    ];
+  validateFile(file, maxSize = R2_SIMPLE_MAX_BYTES) {
+    const allowedTypes = IMAGE_AND_META_TYPES;
 
     if (!allowedTypes.includes(file.type)) {
       throw new Error(`File type ${file.type} is not supported. Allowed types: ${allowedTypes.join(', ')}`);
@@ -220,6 +302,13 @@ export class R2UploadService {
     }
 
     return true;
+  }
+
+  validateContentType(contentType, { allowBinary = false } = {}) {
+    const type = String(contentType || '').toLowerCase();
+    if (IMAGE_AND_META_TYPES.includes(type)) return true;
+    if (allowBinary && (type.startsWith('image/') || type === 'application/octet-stream')) return true;
+    throw new Error(`Content type ${contentType || '(empty)'} is not supported for NFT media upload`);
   }
 
   // Get public URL for a file
