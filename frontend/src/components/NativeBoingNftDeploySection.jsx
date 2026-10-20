@@ -10,7 +10,11 @@ import {
   getBundledNativeNftCollectionBytecodeHex,
   preflightBoingLaunchWizardByKind,
 } from '../services/boingNativeLaunchWizardDeploy';
-import { commitReferenceNftMetadataHash } from '../services/boingNftMetadataCommit';
+import {
+  mintReferenceNftSetChunked,
+  resolveNftMintBatchChunkSize,
+  retryReferenceNftMintRemaining,
+} from '../services/boingNftMintBatch';
 import { BOING_QA_PURPOSE_OPTIONS, isValidBoingQaPurpose } from '../config/boingQa';
 import { tryParseEvenLengthDeployBytecodeHex } from '../utils/boingDeployBytecodeHex';
 import { isPublicAssetUri } from '../utils/nftCollectionMetadata';
@@ -28,6 +32,7 @@ const DEFAULT_NFT_PURPOSE = 'nft';
 
 /**
  * Native Boing NFT collection deploy for Create NFT review step (Boing Express + testnet).
+ * After deploy inclusion, mints the prepared set via chunked reference `mint_batch`.
  */
 const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySection(
   {
@@ -41,6 +46,8 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
     onEnsureMetadataPublished,
     onDeployed,
     linkTokenId = '',
+    /** Prepared token rows for on-chain mint (name, description, image, attributes). */
+    mintTokens = null,
   },
   ref
 ) {
@@ -60,6 +67,9 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
   const [lastDeployedAccount, setLastDeployedAccount] = useState(null);
   const [qaPoolAcknowledged, setQaPoolAcknowledged] = useState(false);
   const [publishBusy, setPublishBusy] = useState(false);
+  const [mintProgress, setMintProgress] = useState(null);
+  const [mintResult, setMintResult] = useState(null);
+  const [mintBusy, setMintBusy] = useState(false);
 
   const effectiveBytecode = useMemo(
     () => computeEffectiveNativeDeployBytecode(customBytecode, bundledBytecode),
@@ -69,6 +79,9 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
   const effectiveDescriptionHash = (descriptionHash.trim() || committedDescriptionHash || '').trim();
   const hasImage = isPublicAssetUri(coverImageUri);
   const hasMetadataUri = isPublicAssetUri(metadataUri);
+  const tokensForMint = Array.isArray(mintTokens) ? mintTokens : [];
+  const mintCount = tokensForMint.length;
+  const mintChunkSize = resolveNftMintBatchChunkSize();
 
   const deployBlocked =
     !effectiveBytecode || (qaResult?.result === 'unsure' && !qaPoolAcknowledged);
@@ -90,6 +103,7 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
         metadataUri,
         descriptionHash: effectiveDescriptionHash,
         coverImageUri,
+        tokens: tokensForMint,
       };
     }
     if (typeof onEnsureMetadataPublished !== 'function') {
@@ -112,6 +126,98 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
     hasMetadataUri,
     metadataUri,
     onEnsureMetadataPublished,
+    tokensForMint,
+  ]);
+
+  const runMintForCollection = useCallback(
+    async (collectionAccountId, tokens) => {
+      const list = Array.isArray(tokens) && tokens.length ? tokens : tokensForMint;
+      if (!collectionAccountId || !list.length) {
+        setMintProgress(null);
+        setMintResult({ ok: true, skipped: true, total: 0, minted: 0 });
+        return { ok: true, skipped: true };
+      }
+      if (!account || !/^0x[0-9a-fA-F]{64}$/.test(String(account).trim())) {
+        throw new Error('Connect Boing Express with a 32-byte AccountId to receive minted NFTs.');
+      }
+      setMintBusy(true);
+      setMintResult(null);
+      try {
+        const result = await mintReferenceNftSetChunked({
+          getWalletProvider,
+          collectionAccountId,
+          recipientHex: account,
+          tokens: list,
+          collectionName,
+          chunkSize: mintChunkSize,
+          onProgress: setMintProgress,
+        });
+        setMintResult(result);
+        if (result.ok) {
+          toast.success(`Minted ${result.minted} NFT(s) on-chain.`);
+        } else {
+          toast(
+            `Minted ${result.minted} of ${result.total}. Approve the failed batch to continue.`,
+            { icon: '⚠️' }
+          );
+        }
+        return result;
+      } catch (e) {
+        const msg = formatBoingExpressRpcError(e);
+        setMintProgress((prev) => ({
+          ...(prev || {}),
+          phase: 'error',
+          message: msg,
+          error: msg,
+        }));
+        toast.error(msg || 'On-chain mint failed');
+        throw e;
+      } finally {
+        setMintBusy(false);
+      }
+    },
+    [account, collectionName, getWalletProvider, mintChunkSize, tokensForMint]
+  );
+
+  const retryMint = useCallback(async () => {
+    if (!lastDeployedAccount || !mintResult?.remainingRows?.length) return;
+    setMintBusy(true);
+    try {
+      const result = await retryReferenceNftMintRemaining({
+        getWalletProvider,
+        collectionAccountId: lastDeployedAccount,
+        recipientHex: account,
+        remainingRows: mintResult.remainingRows,
+        collectionName,
+        chunkSize: mintChunkSize,
+        onProgress: setMintProgress,
+      });
+      const mergedMinted = (mintResult.minted || 0) + (result.minted || 0);
+      const merged = {
+        ...result,
+        total: mintResult.total,
+        minted: mergedMinted,
+        remainingRows: result.ok ? [] : result.remainingRows,
+        priorBatches: [...(mintResult.batches || []), ...(result.batches || [])],
+      };
+      setMintResult(merged);
+      if (merged.ok || mergedMinted >= mintResult.total) {
+        toast.success(`Minted ${mergedMinted} NFT(s) on-chain.`);
+      } else {
+        toast(`Minted ${mergedMinted} of ${mintResult.total}. Retry remaining batches.`, { icon: '⚠️' });
+      }
+    } catch (e) {
+      toast.error(formatBoingExpressRpcError(e) || 'Retry mint failed');
+    } finally {
+      setMintBusy(false);
+    }
+  }, [
+    account,
+    collectionName,
+    getWalletProvider,
+    lastDeployedAccount,
+    mintChunkSize,
+    mintResult,
   ]);
 
   const runQa = async () => {
@@ -160,6 +266,9 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
       return null;
     }
     const hashForDeploy = descriptionHash.trim() || published.descriptionHash;
+    const tokens =
+      (Array.isArray(published.tokens) && published.tokens.length ? published.tokens : null) ||
+      tokensForMint;
     const result = await executeBoingLaunchWizardDeploy({
       kind: 'nft',
       getWalletProvider,
@@ -178,6 +287,12 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
     setLastTx(result.txHash);
     setLastBoingTxId(result.boingTxIdHex ?? null);
     setLastDeployedAccount(null);
+    setMintProgress(null);
+    setMintResult(null);
+    const mintHint =
+      tokens.length > 0
+        ? `${tokens.length} token(s) will mint on-chain after the contract is included (chunks of ≤${mintChunkSize}).`
+        : 'No token rows to mint — collection contract only.';
     showBoingLaunchDeploySuccessToast({
       txHash: result.txHash,
       boingTxIdHex: result.boingTxIdHex,
@@ -191,6 +306,7 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
           { label: 'QA purpose', value: String(purpose || 'nft') },
           { label: 'Image', value: published.coverImageUri || published.image || '—' },
           { label: 'Metadata', value: published.metadataUri || '—' },
+          { label: 'On-chain mint', value: mintHint },
         ],
       },
     });
@@ -199,21 +315,19 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
       showBoingContractIncludedToast(id, explorerBaseUrl);
       if (account) rememberAssetDeployer(id, account);
       onDeployed?.({ accountId: id, kind: 'nft', name: collectionName, symbol: collectionSymbol });
-      void (async () => {
-        try {
-          await commitReferenceNftMetadataHash({
-            getWalletProvider,
-            collectionAccountId: id,
-            metadataHashHex32: hashForDeploy,
-          });
-          toast.success('Collection metadata hash bound on-chain (token 1).');
-        } catch (e) {
-          toast(
-            `Collection deployed. Token metadata slot was not updated yet: ${formatBoingExpressRpcError(e)}`,
-            { icon: '⚠️' }
-          );
-        }
-      })();
+      if (tokens.length > 0) {
+        setMintProgress({
+          phase: 'mint',
+          total: tokens.length,
+          minted: 0,
+          batchIndex: 0,
+          batchCount: Math.ceil(tokens.length / mintChunkSize),
+          message: 'Collection included — starting on-chain mint…',
+        });
+        void runMintForCollection(id, tokens).catch(() => {
+          /* toast already shown */
+        });
+      }
     });
     return result.txHash;
   }, [
@@ -223,11 +337,14 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
     customBytecode,
     descriptionHash,
     getWalletProvider,
+    mintChunkSize,
     onDeployed,
     purpose,
     qaPoolAcknowledged,
     explorerBaseUrl,
     resolvePublished,
+    runMintForCollection,
+    tokensForMint,
   ]);
 
   useImperativeHandle(
@@ -256,17 +373,49 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
         borderColor: 'rgba(34, 197, 94, 0.4)',
       };
 
+  const mintComplete = mintResult?.ok && mintResult.minted > 0;
+  const mintPartial = mintResult && !mintResult.ok && mintResult.minted > 0;
+  const mintFailedEarly = mintResult && !mintResult.ok && !(mintResult.minted > 0);
+
   return (
     <section className={shellClass} style={shellStyle}>
       <h3 className="text-base font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
         Publish collection on Boing
       </h3>
       <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-        Saves your art and creates the collection. Individual NFTs are minted later.{' '}
+        Deploys the collection contract, then mints the prepared set on-chain with chunked{' '}
+        <code className="text-[10px]">mint_batch</code> (owners + metadata hashes). Images stay on R2/HTTP; the chain
+        stores commitments marketplaces can resolve.{' '}
         <Link to="/docs?section=boing-l1" className="text-green-400 underline text-sm">
           Docs
         </Link>
       </p>
+
+      {mintCount > 0 ? (
+        <p
+          className="text-xs rounded-lg px-3 py-2 mb-3 border"
+          style={{
+            borderColor: 'rgba(34, 197, 94, 0.45)',
+            backgroundColor: 'rgba(34, 197, 94, 0.08)',
+            color: 'var(--text-secondary)',
+          }}
+        >
+          <strong style={{ color: 'var(--text-primary)' }}>On-chain mint ready:</strong> {mintCount} token
+          {mintCount === 1 ? '' : 's'} → wallet after deploy (batches of ≤{mintChunkSize}; template max{' '}
+          {REFERENCE_NFT_COLLECTION_TEMPLATE_VERSION === '3' ? '500' : '50'}).
+        </p>
+      ) : (
+        <p
+          className="text-xs rounded-lg px-3 py-2 mb-3 border"
+          style={{
+            borderColor: 'rgba(251, 191, 36, 0.45)',
+            color: 'var(--text-secondary)',
+          }}
+        >
+          No token rows in this publish — only the collection contract will deploy. Add Standard images or a Large-set
+          CSV first for marketplace-ready mints.
+        </p>
+      )}
 
       <div
         className="text-xs rounded-lg px-3 py-2 mb-3 border space-y-1"
@@ -349,13 +498,75 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
         <button
           type="button"
           onClick={runDeployInternal}
-          disabled={deployBlocked || publishBusy}
+          disabled={deployBlocked || publishBusy || mintBusy}
           className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
           style={{ backgroundColor: 'var(--finance-green-mid)' }}
         >
-          {publishBusy ? 'Publishing metadata…' : embedInWizard ? 'Deploy native collection' : 'Deploy collection'}
+          {publishBusy
+            ? 'Publishing metadata…'
+            : mintBusy
+              ? 'Minting on-chain…'
+              : embedInWizard
+                ? 'Deploy & mint on Boing'
+                : 'Deploy & mint collection'}
         </button>
       </div>
+
+      {(mintProgress || mintResult) && (
+        <div
+          className="text-xs rounded-lg px-3 py-2 mb-3 border space-y-2"
+          style={{
+            borderColor: mintComplete
+              ? 'rgba(34, 197, 94, 0.55)'
+              : mintPartial || mintFailedEarly
+                ? 'rgba(251, 191, 36, 0.55)'
+                : 'rgba(34, 197, 94, 0.35)',
+            backgroundColor: mintComplete ? 'rgba(34, 197, 94, 0.1)' : 'transparent',
+            color: 'var(--text-secondary)',
+          }}
+          data-testid="nft-mint-progress"
+        >
+          <p>
+            <strong style={{ color: 'var(--text-primary)' }}>On-chain mint:</strong>{' '}
+            {mintProgress?.message ||
+              (mintComplete
+                ? `Complete — ${mintResult.minted} / ${mintResult.total}`
+                : mintResult
+                  ? `${mintResult.minted} / ${mintResult.total}`
+                  : '…')}
+          </p>
+          {mintProgress?.batchCount > 0 ? (
+            <p>
+              Batch {mintProgress.batchIndex || 0} of {mintProgress.batchCount}
+              {typeof mintProgress.minted === 'number'
+                ? ` · ${mintProgress.minted} / ${mintProgress.total} tokens`
+                : ''}
+            </p>
+          ) : null}
+          {mintProgress?.phase === 'token_json' && mintProgress.tokenJson && !mintProgress.tokenJson.skipped ? (
+            <p>
+              Token JSON upload: {mintProgress.tokenJson.done}/{mintProgress.tokenJson.total}
+              {mintProgress.tokenJson.failures
+                ? ` (${mintProgress.tokenJson.failures} failed — catalog still valid)`
+                : ''}
+            </p>
+          ) : null}
+          {mintResult?.remainingRows?.length > 0 ? (
+            <button
+              type="button"
+              onClick={retryMint}
+              disabled={mintBusy}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium text-white disabled:opacity-50"
+              style={{ backgroundColor: 'var(--finance-primary)' }}
+            >
+              {mintBusy ? 'Retrying…' : `Retry remaining (${mintResult.remainingRows.length})`}
+            </button>
+          ) : null}
+          {mintProgress?.error ? (
+            <p className="text-amber-400 break-words">{mintProgress.error}</p>
+          ) : null}
+        </div>
+      )}
 
       {!hasBundled && !effectiveBytecode && (
         <p className="text-xs mb-3 rounded-lg px-3 py-2 border" style={{ borderColor: 'rgba(251, 191, 36, 0.35)', color: 'var(--text-secondary)' }}>
