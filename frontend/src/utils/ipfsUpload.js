@@ -535,8 +535,8 @@ export const createTokenMetadata = (tokenData) => {
 };
 
 // Validate file before upload
-export const validateFile = (file) => {
-  const maxSize = 10 * 1024 * 1024; // 10MB
+export const validateFile = (file, maxSizeBytes = 10 * 1024 * 1024) => {
+  const maxSize = maxSizeBytes;
   const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
   
   if (!file) {
@@ -544,7 +544,7 @@ export const validateFile = (file) => {
   }
   
   if (file.size > maxSize) {
-    throw new Error(`File size too large. Maximum size is ${maxSize / 1024 / 1024}MB`);
+    throw new Error(`File size too large. Maximum size is ${(maxSize / (1024 * 1024)).toFixed(0)}MB`);
   }
   
   if (!allowedTypes.includes(file.type)) {
