@@ -93,7 +93,7 @@ When integrating a network, aim for **full capability** within the app.
 | Capability | Contracts / Services | Security |
 |------------|----------------------|----------|
 | Deploy Token | TokenFactory, TokenImplementation | ERC-20, verified, input validation |
-| Create NFT | EVM: NFT factory or direct mint. **Boing L1:** reference NFT collection template v3 (`purpose nft`) + optional `mint_batch` (`0x06`, n≤500) | ERC-721 on EVM; Boing VM reference layout + Express `tx_id` |
+| Create NFT | EVM: NFT factory or direct mint. **Boing L1:** reference NFT collection template v3 (`purpose nft`) + wizard chunked `mint_batch` (`0x06`, n≤500 per tx) for the prepared set | ERC-721 on EVM; Boing VM reference layout + Express `tx_id` |
 | Swap | DEXRouter, DEXFactory, or aggregator | Slippage, deadline, balance checks |
 | Pools / Liquidity | DEXFactory, DEXRouter, LiquidityLocker | LP token handling |
 | Create Pool | DEXFactoryV2 | Pair creation, initial liquidity |
@@ -106,7 +106,7 @@ When integrating a network, aim for **full capability** within the app.
 - [ ] Config – `networks.js`, `contracts.js`, RPC, explorer, WETH
 - [ ] TokenFactory – Deployed, verified, SERVICE_CHARGES configured
 - [ ] DEX – DEXFactory, DEXRouter (or external swap/pool links)
-- [ ] NFT – Create NFT path (EVM and/or Boing L1 reference collection + `mint_batch` when nodes have 40M call gas)
+- [x] NFT – Create NFT path (Boing L1 reference collection + chunked `mint_batch` after deploy; EVM export-only)
 - [ ] Portfolio – Balances load correctly
 - [ ] Bridge – Cross-chain path (Boing or external)
 - [ ] Security – Input validation, tx simulation, no hardcoded keys
