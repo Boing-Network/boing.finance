@@ -16,6 +16,7 @@ import {
 } from '../services/nativeAmmCalldata';
 import { nativeAccountsAccessListJson } from '../services/nativeAmmAccessList';
 import { boingExpressContractCallSignSimulateSubmit } from '../services/boingExpressNativeTx';
+import { priorityTipFromGasSetting, withBoingPriorityTip } from '../services/boingPriorityTip';
 import { getWindowBoingProvider } from '../utils/boingWalletDiscovery';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
 import {
@@ -120,6 +121,8 @@ export default function NativeAmmSwapPanel({
   const [removeLp, setRemoveLp] = useState('');
   const [addLiquiditySectionOpen, setAddLiquiditySectionOpen] = useState(defaultOpenAddLiquidity);
   const [busy, setBusy] = useState(false);
+  /** Optional L1 tip: normal=0, faster≈1× micro transfer fee. */
+  const [tipPriority, setTipPriority] = useState('normal');
 
   const loadReserves = useCallback(async () => {
     if (!pool) return;
@@ -187,8 +190,10 @@ export default function NativeAmmSwapPanel({
       venueForPool?.tokenAHex,
       venueForPool?.tokenBHex,
     ]);
-    return accessList ? { access_list: accessList } : {};
-  }, [account, pool, venueForPool]);
+    const tip = priorityTipFromGasSetting(tipPriority);
+    const base = accessList ? { access_list: accessList } : {};
+    return withBoingPriorityTip(base, tip);
+  }, [account, pool, venueForPool, tipPriority]);
 
   const onSwap = async () => {
     if (chainId !== BOING_NATIVE_L1_CHAIN_ID || walletType !== 'boingExpress' || !isConnected) {
@@ -327,7 +332,23 @@ export default function NativeAmmSwapPanel({
       </h2>
       <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
         Swap on the network&apos;s main pool. Use whole-number amounts. Express will ask you to approve.
+        Network fee is a tiny micro base (~0.00021 BOING/transfer-scale); tip is optional.
       </p>
+      <div className="flex flex-wrap items-center gap-2 mb-3 text-xs" style={{ color: 'var(--text-tertiary)' }}>
+        <span>Priority tip</span>
+        <select
+          value={tipPriority}
+          onChange={(e) => setTipPriority(e.target.value)}
+          className="rounded border px-2 py-1 bg-transparent"
+          style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+          data-testid="native-amm-tip-priority"
+          title="Optional tip for faster inclusion under congestion"
+        >
+          <option value="normal">Normal (no tip)</option>
+          <option value="faster">Faster</option>
+          <option value="priority">Priority</option>
+        </select>
+      </div>
       <p
         className="text-sm mb-3 rounded-lg border px-3 py-2.5"
         style={{ borderColor: 'rgba(59, 130, 246, 0.35)', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-secondary)' }}

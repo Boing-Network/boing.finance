@@ -64,13 +64,13 @@ export function formatBoingExpressRpcError(e) {
     if (/duplicate transaction/i.test(msg)) {
       return (
         `${msg.trim()} ` +
-        'The same signed deploy is already in the mempool (identical nonce and metadata). Do not resubmit until a block includes it. Native token deploys charge a gas fee in BOING (about 0.2–0.4 BOING at 10^12 base units per gas). Request the faucet if needed, then retry with a fresh nonce.'
+        'The same signed deploy is already in the mempool (identical nonce and metadata). Do not resubmit until a block includes it. Native deploys charge a Solana-like micro fee (~0.0038 BOING at micro BPS for ~380k gas). Request the faucet if needed, then retry with a fresh nonce.'
       );
     }
     if (/insufficient balance for fee/i.test(msg)) {
       return (
         `${msg.trim()} ` +
-        'Native token deploys charge gas as a BOING fee. Request testnet BOING from the faucet and retry.'
+        'Need protocol fee (micro base by default, ~0.00021 BOING/transfer) plus any optional priority tip. Request testnet BOING from the faucet and retry.'
       );
     }
 
