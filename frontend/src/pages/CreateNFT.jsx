@@ -43,6 +43,12 @@ import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { apiPath } from '../config';
 import { showDeployCelebration } from '../utils/deployCelebration';
 import { getBoingNativeFeeUsd, formatUsdReferenceLabel, isBoingNativeFeeChain } from '../config/boingEconomics';
+import {
+  NFT_COLLECTION_SIZE_MIN,
+  NFT_COLLECTION_SIZE_MAX,
+  getNftDynamicFeeAmount,
+  parseCollectionSizeInput,
+} from '../utils/nftCollectionSizeFee';
 import NativeBoingNftDeploySection from '../components/NativeBoingNftDeploySection';
 import LinkedNftTokenPanel from '../components/LinkedNftTokenPanel';
 import useEscapeKey from '../hooks/useEscapeKey';
@@ -63,32 +69,8 @@ const ACCEPTED_IMAGE_TYPES = 'image/jpeg,image/png,image/gif,image/webp';
 const MAX_FILE_SIZE_MB = 10;
 const MAX_FILES_BULK = 50;
 
-const DYNAMIC_SIZES = [
-  { value: 100, label: '100 NFTs', feeEth: '0.001' },
-  { value: 500, label: '500 NFTs', feeEth: '0.003' },
-  { value: 1000, label: '1,000 NFTs', feeEth: '0.01' },
-  { value: 5000, label: '5,000 NFTs', feeEth: '0.03' },
-  { value: 10000, label: '10,000 NFTs', feeEth: '0.05' }
-];
-
-/** BOING display amounts for Boing L1 testnet (human BOING, not base units). */
-const NFT_DYNAMIC_FEES_BOING = {
-  100: '1',
-  500: '2',
-  1000: '5',
-  5000: '15',
-  10000: '50',
-};
-
-function getNftDynamicFeeAmount(chainId, collectionSize) {
-  if (chainId === BOING_NATIVE_L1_CHAIN_ID) {
-    return NFT_DYNAMIC_FEES_BOING[collectionSize] ?? '1';
-  }
-  return DYNAMIC_SIZES.find((s) => s.value === collectionSize)?.feeEth ?? '0.01';
-}
-
 function formatNftServiceFeeLine(chainId, collectionSize, nativeSymbol) {
-  const amt = getNftDynamicFeeAmount(chainId, collectionSize);
+  const amt = getNftDynamicFeeAmount(chainId, collectionSize, BOING_NATIVE_L1_CHAIN_ID);
   const usd = isBoingNativeFeeChain(chainId) ? getBoingNativeFeeUsd(amt) : null;
   return `${amt} ${nativeSymbol}${usd != null ? ` ${formatUsdReferenceLabel(usd)}` : ''}`;
 }
@@ -453,7 +435,12 @@ export default function CreateNFT() {
 
   const network = getCurrentNetwork?.();
   const nativeSymbol = network?.nativeCurrency?.symbol ?? 'ETH';
-  const dynamicFeeDisplayLine = formatNftServiceFeeLine(network?.chainId, dynamicSize, nativeSymbol);
+  const parsedDynamicSize = parseCollectionSizeInput(dynamicSize);
+  const resolvedDynamicSize = parsedDynamicSize.ok ? parsedDynamicSize.value : null;
+  const dynamicFeeDisplayLine =
+    resolvedDynamicSize != null
+      ? formatNftServiceFeeLine(network?.chainId, resolvedDynamicSize, nativeSymbol)
+      : null;
   const isBoingNativeNftWizard =
     isConnected && chainId === BOING_NATIVE_L1_CHAIN_ID && walletType === 'boingExpress';
 
@@ -906,9 +893,15 @@ export default function CreateNFT() {
       toast.error('Add at least one trait layer with type and values');
       return;
     }
+    const sizeParsed = parseCollectionSizeInput(dynamicSize);
+    if (!sizeParsed.ok) {
+      toast.error(sizeParsed.error || 'Set a valid collection size first');
+      return;
+    }
+    const size = sizeParsed.value;
     const baseName = collectionName.trim() || 'Collection';
     const list = [];
-    for (let i = 0; i < dynamicSize; i++) {
+    for (let i = 0; i < size; i++) {
       const attrs = [];
       for (const layer of layers) {
         const vals = (layer.values || []).map(String).filter(Boolean);
@@ -1047,26 +1040,72 @@ export default function CreateNFT() {
                       />
                     </div>
                     <div>
-                      <label htmlFor="nft-dynamic-size" className="block text-sm font-medium text-gray-300 mb-2">Collection size (up to 10,000)</label>
-                      <select
+                      <label htmlFor="nft-dynamic-size" className="block text-sm font-medium text-gray-300 mb-2">
+                        Collection size ({NFT_COLLECTION_SIZE_MIN.toLocaleString()}–{NFT_COLLECTION_SIZE_MAX.toLocaleString()})
+                      </label>
+                      <input
                         id="nft-dynamic-size"
                         name="dynamicSize"
+                        type="number"
+                        inputMode="numeric"
+                        min={NFT_COLLECTION_SIZE_MIN}
+                        max={NFT_COLLECTION_SIZE_MAX}
+                        step={1}
                         value={dynamicSize}
-                        onChange={(e) => setDynamicSize(Number(e.target.value))}
-                        className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-cyan-500"
-                      >
-                        {DYNAMIC_SIZES.map((s) => (
-                          <option key={s.value} value={s.value}>
-                            {s.label} — future mint reference: {formatNftServiceFeeLine(network?.chainId, s.value, nativeSymbol)}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(e) => {
+                          const parsed = parseCollectionSizeInput(e.target.value);
+                          if (parsed.ok) {
+                            setDynamicSize(parsed.value);
+                            return;
+                          }
+                          // Allow empty / mid-edit; clamp known out-of-range integers on blur via onBlur.
+                          const raw = e.target.value;
+                          if (raw === '') {
+                            setDynamicSize('');
+                            return;
+                          }
+                          const n = Number(raw);
+                          if (Number.isFinite(n) && Number.isInteger(n)) {
+                            setDynamicSize(n);
+                          }
+                        }}
+                        onBlur={() => {
+                          const parsed = parseCollectionSizeInput(dynamicSize);
+                          if (parsed.ok) {
+                            setDynamicSize(parsed.value);
+                            return;
+                          }
+                          if (typeof parsed.value === 'number' && Number.isFinite(parsed.value)) {
+                            setDynamicSize(
+                              Math.min(
+                                NFT_COLLECTION_SIZE_MAX,
+                                Math.max(NFT_COLLECTION_SIZE_MIN, Math.floor(parsed.value))
+                              )
+                            );
+                            return;
+                          }
+                          setDynamicSize(1000);
+                        }}
+                        className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500"
+                        placeholder="e.g. 2500"
+                      />
+                      <p className="mt-2 text-xs text-gray-500">
+                        Any whole number up to {NFT_COLLECTION_SIZE_MAX.toLocaleString()}. CSV and media uploads use the
+                        same cap. Trait-layer generate uses this size.
+                      </p>
                     </div>
                     <div className="p-4 rounded-lg bg-cyan-900/20 border border-cyan-500/30">
-                      <p className="text-cyan-200 font-medium">Reference size: {dynamicSize.toLocaleString()} tokens</p>
+                      <p className="text-cyan-200 font-medium">
+                        Reference size:{' '}
+                        {resolvedDynamicSize != null ? resolvedDynamicSize.toLocaleString() : '—'} tokens
+                      </p>
                       <p className="text-cyan-200/80 text-sm mt-1">
                         This wizard exports metadata only. No platform fee is charged here. A future mint contract may
-                        quote a fee separately (reference: {dynamicFeeDisplayLine}).
+                        quote a fee separately
+                        {dynamicFeeDisplayLine
+                          ? ` (reference for ${resolvedDynamicSize.toLocaleString()} NFTs: ${dynamicFeeDisplayLine}).`
+                          : '.'}{' '}
+                        Estimate scales with size from the former preset tiers.
                       </p>
                     </div>
                     <div>
@@ -1284,9 +1323,9 @@ export default function CreateNFT() {
                     <div className="p-4 rounded-lg bg-gray-700/50 border border-gray-600">
                       <p className="text-gray-300 font-medium">{collectionName || 'Collection'}</p>
                       <p className="text-gray-500 text-sm">
-                        {collectionSymbol} · {generatedDynamicMetadata.length || dynamicSize} NFTs
+                        {collectionSymbol} · {generatedDynamicMetadata.length || resolvedDynamicSize || '—'} NFTs
                         {csvFileName ? ` · ${csvFileName}` : ''}
-                        {' · '}reference fee: {dynamicFeeDisplayLine}
+                        {dynamicFeeDisplayLine ? ` · reference fee: ${dynamicFeeDisplayLine}` : ''}
                       </p>
                     </div>
                     {generatedDynamicMetadata.length === 0 ? (
@@ -1425,6 +1464,12 @@ export default function CreateNFT() {
                       type="button"
                       onClick={() => {
                         if (step === 'collection') {
+                          const sizeCheck = parseCollectionSizeInput(dynamicSize);
+                          if (!sizeCheck.ok) {
+                            toast.error(sizeCheck.error);
+                            return;
+                          }
+                          setDynamicSize(sizeCheck.value);
                           setStep('assets');
                           return;
                         }
@@ -1434,7 +1479,10 @@ export default function CreateNFT() {
                         }
                         setStep('review');
                       }}
-                      disabled={step === 'collection' && (!collectionName.trim() || !collectionSymbol.trim())}
+                      disabled={
+                        step === 'collection' &&
+                        (!collectionName.trim() || !collectionSymbol.trim() || !parsedDynamicSize.ok)
+                      }
                       className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-medium disabled:opacity-50"
                     >
                       Next
