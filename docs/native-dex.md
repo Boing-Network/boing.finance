@@ -158,7 +158,7 @@ From block 1150 (testnet-v0.1.18) contract calls can carry native BOING (`Contra
 
 - **Swap:** pairs with BOING route to the v10 pool and sign ONE batch: `deposit` (value) -> `approve(pool)` -> `swap`, or `approve(pool)` -> `swap` -> `withdraw_all` (`planNativeBoingSwap` / `planBoingNativeSwap`). Other pairs keep the custody router (v8 / v9) with its approve-then-swap flow.
 - **Add / remove liquidity** on a BOING pool: one batch (`deposit` (value) -> approve both -> `add_liquidity`; `remove_liquidity` -> `withdraw_all`).
-- Amounts are decimal-aware (`parseTokenAmount` / `formatTokenAmount`); rates are per whole token. Max on BOING keeps 1 BOING for fees.
+- Amounts are decimal-aware (`parseTokenAmount` / `formatTokenAmount`); rates are per whole token. Max on BOING keeps headroom for the **micro base fee** (~0.00021 BOING/transfer-scale) plus an optional **priority tip** (`boingPriorityTip.js` / Native AMM tip selector). Tips require a Boing Express build that accepts `priority_tip` on dApp JSON.
 - Testnet v10 pools: BOING/USDC `0x23e9b02c3ee1600197e1a3d1c08feaa758b967f7ff1513f62991257a3b970069`, BOING/tBOING `0xf53a856083e615e20257707ede47acdd79b63a058733ba9694b2268e141f573a` (factory-registered).
 
 ### First-party indexer (operators)
