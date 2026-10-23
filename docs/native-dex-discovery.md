@@ -154,7 +154,7 @@ L1 list RPCs are **wired** in this repo. Remaining gaps are **node coverage / ca
 
 `boing_listDexPools` rows stay as `l1DexPoolRows`; `attachDexPoolDecimalsToVenues` merges decimals onto `venues`.
 
-**SDK:** `boing-sdk` ≥ **0.3.0** (`listDexTokensPage`, `listDexPoolsPage`, `getDexToken`). This repo uses `file:../boing.network/boing-sdk`.
+**SDK:** **`@boing-network/boing-sdk` ≥ 0.5.24** (`listDexTokensPage`, `listDexPoolsPage`, `getDexToken`). This repo uses `file:../boing.network/boing-sdk` (package name `@boing-network/boing-sdk`).
 
 | Area | Status |
 |------|--------|
