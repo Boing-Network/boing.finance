@@ -1,4 +1,4 @@
-import { CANONICAL_BOING_TESTNET_BOING_TOKEN_HEX, CANONICAL_BOING_TESTNET_USDC_TOKEN_HEX } from 'boing-sdk';
+import { CANONICAL_BOING_TESTNET_BOING_TOKEN_HEX, CANONICAL_BOING_TESTNET_USDC_TOKEN_HEX } from '@boing-network/boing-sdk';
 import { SYNTHETIC_NATIVE_CP_TOKEN_A_HEX, SYNTHETIC_NATIVE_CP_TOKEN_B_HEX } from './boingNativePoolTokens';
 
 const RECENT_KEY = 'boing_native_vm_tokens_recent_v1';
@@ -77,14 +77,14 @@ export function getCuratedNativeVmTokens() {
 }
 
 /**
- * @param {import('boing-sdk').CpPoolVenue[]} venues
+ * @param {import('@boing-network/boing-sdk').CpPoolVenue[]} venues
  * @returns {NativeVmTokenEntry[]}
  */
 export function venueTokensToPickerEntries(venues) {
   if (!Array.isArray(venues)) return [];
   const byId = new Map();
   for (const v of venues) {
-    const row = /** @type {import('boing-sdk').CpPoolVenue & Record<string, unknown>} */ (v);
+    const row = /** @type {import('@boing-network/boing-sdk').CpPoolVenue & Record<string, unknown>} */ (v);
     const legs = [
       { hex: row.tokenAHex, sym: row.tokenASymbol, name: row.tokenAName },
       { hex: row.tokenBHex, sym: row.tokenBSymbol, name: row.tokenBName },

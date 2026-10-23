@@ -22,7 +22,7 @@ function shortPool(h) {
  * Reserve time series: localStorage samples (each refresh) plus optional remote indexer `history`.
  *
  * @param {{
- *   venues: import('boing-sdk').CpPoolVenue[],
+ *   venues: import('@boing-network/boing-sdk').CpPoolVenue[],
  *   remoteIndexerStats: unknown,
  *   focusPoolHex?: string,
  *   reserveSampleIntervalMs?: number,

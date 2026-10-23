@@ -26,7 +26,7 @@ function shortHex(h) {
  *   value: string,
  *   onChange: (next: string) => void,
  *   excludeHex?: string | null,
- *   venueTokens?: import('boing-sdk').CpPoolVenue[],
+ *   venueTokens?: import('@boing-network/boing-sdk').CpPoolVenue[],
  *   indexerTokens?: Array<{ id: string, symbol: string, name: string, decimals?: number }>,
  *   inputTestId?: string,
  *   helpHint?: boolean,

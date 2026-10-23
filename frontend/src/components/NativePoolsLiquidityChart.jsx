@@ -20,7 +20,7 @@ function shortPool(h) {
  * Uniswap-style liquidity snapshot from **current RPC reserves** (not USD TVL, not historical volume).
  * Replace with indexer-backed charts when subgraph-like data exists.
  *
- * @param {{ venues: import('boing-sdk').CpPoolVenue[] }} props
+ * @param {{ venues: import('@boing-network/boing-sdk').CpPoolVenue[] }} props
  */
 export default function NativePoolsLiquidityChart({ venues }) {
   const data = useMemo(() => {

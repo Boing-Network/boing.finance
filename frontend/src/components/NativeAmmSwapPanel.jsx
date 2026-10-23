@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
-import { findBestCpRoute } from 'boing-sdk';
+import { findBestCpRoute } from '@boing-network/boing-sdk';
 import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';

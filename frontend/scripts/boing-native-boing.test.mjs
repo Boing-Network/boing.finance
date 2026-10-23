@@ -105,7 +105,7 @@ test('native add / remove liquidity are single batches (wrap with value, unwrap 
 test('native swap plan: one batch, BOING value on the deposit step, unwrap on the way out', async () => {
   const state = { reserveA: 10n * E18, reserveB: 1000n, storedFeeBps: 30n, tokenAHex: WBOING_HEX, tokenBHex: USDC, totalLp: 1000n };
   // planNativeBoingSwap reads live state then calls this pure SDK planner with these inputs.
-  const sdk = await import('boing-sdk');
+  const sdk = await import('@boing-network/boing-sdk');
   const plan = sdk.planBoingNativeSwap({
     poolHex: POOL, wboingHex: WBOING_HEX, state, assetIn: 'native', assetOut: USDC, amountIn: E18, slippageBps: 50n, senderHex: ME, nonce: 7n, poolVersion: 10,
   });

@@ -1,11 +1,11 @@
-import { buildNativeDexIntegrationOverridesFromProcessEnv } from 'boing-sdk';
+import { buildNativeDexIntegrationOverridesFromProcessEnv } from '@boing-network/boing-sdk';
 import { createBoingBrowserRpcClient } from './boingTestnetRpc';
 
 let sharedClient = null;
 
 /**
  * Single BoingClient for browser JSON-RPC (same-origin proxy or direct testnet URL).
- * @returns {import('boing-sdk').BoingClient}
+ * @returns {import('@boing-network/boing-sdk').BoingClient}
  */
 export function getSharedBoingClient() {
   if (!sharedClient) {

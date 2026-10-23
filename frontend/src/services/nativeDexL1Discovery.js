@@ -3,7 +3,7 @@
  * degradation when `boing_rpcSupportedMethods` omits them or the node is older.
  */
 
-import { BoingRpcError } from 'boing-sdk';
+import { BoingRpcError } from '@boing-network/boing-sdk';
 import { normalizeNativeVmTokenId32 } from './nativeVmTokenRegistry';
 
 export const BOING_LIST_DEX_TOKENS = 'boing_listDexTokens';
@@ -11,7 +11,7 @@ export const BOING_LIST_DEX_POOLS = 'boing_listDexPools';
 export const BOING_GET_DEX_TOKEN = 'boing_getDexToken';
 
 /**
- * @param {import('boing-sdk').BoingClient} client
+ * @param {import('@boing-network/boing-sdk').BoingClient} client
  * @returns {Promise<string[]>}
  */
 async function safeRpcSupportedMethods(client) {
@@ -24,7 +24,7 @@ async function safeRpcSupportedMethods(client) {
 }
 
 /**
- * @param {import('boing-sdk').BoingClient} client
+ * @param {import('@boing-network/boing-sdk').BoingClient} client
  * @returns {Promise<string[]>}
  */
 async function safeGetRpcMethodCatalogNames(client) {
@@ -43,8 +43,8 @@ async function safeGetRpcMethodCatalogNames(client) {
 }
 
 /**
- * @param {import('boing-sdk').BoingClient} client
- * @returns {Promise<import('boing-sdk').BoingRpcPreflightResult | null>}
+ * @param {import('@boing-network/boing-sdk').BoingClient} client
+ * @returns {Promise<import('@boing-network/boing-sdk').BoingRpcPreflightResult | null>}
  */
 async function safePreflightRpc(client) {
   try {
@@ -58,7 +58,7 @@ async function safePreflightRpc(client) {
  * Reads **`boing_getNetworkInfo` → `developer.dex_discovery_methods`** (`NetworkDeveloperHints` in boing-sdk).
  * Operators publish the stable L1 triple here; merge into the capability union in **`resolveNativeDexL1DiscoveryCapabilities`**.
  *
- * @param {import('boing-sdk').BoingClient} client
+ * @param {import('@boing-network/boing-sdk').BoingClient} client
  * @returns {Promise<string[]>}
  */
 async function safeNetworkInfoDexDiscoveryMethods(client) {
@@ -74,7 +74,7 @@ async function safeNetworkInfoDexDiscoveryMethods(client) {
 /**
  * One-shot probe when the node does not advertise methods (empty list) or the list is unavailable.
  *
- * @param {import('boing-sdk').BoingClient} client
+ * @param {import('@boing-network/boing-sdk').BoingClient} client
  * @param {'tokens' | 'pools'} kind
  */
 async function probeDexDiscoveryMethod(client, kind) {
@@ -97,7 +97,7 @@ async function probeDexDiscoveryMethod(client, kind) {
  * Optional **`preflightRpc`** (env `REACT_APP_BOING_NATIVE_DEX_DISCOVERY_PREFLIGHT=1`) adds catalog
  * size / health metadata without changing the boolean flags.
  *
- * @param {import('boing-sdk').BoingClient} client
+ * @param {import('@boing-network/boing-sdk').BoingClient} client
  * @returns {Promise<{
  *   methods: string[],
  *   catalogMethodNames: string[],
@@ -105,7 +105,7 @@ async function probeDexDiscoveryMethod(client, kind) {
  *   listTokens: boolean,
  *   listPools: boolean,
  *   getDexToken: boolean,
- *   preflight: import('boing-sdk').BoingRpcPreflightResult | null,
+ *   preflight: import('@boing-network/boing-sdk').BoingRpcPreflightResult | null,
  * }>}
  */
 export async function resolveNativeDexL1DiscoveryCapabilities(client) {
@@ -166,20 +166,20 @@ function readMaxPages() {
 /**
  * Cursor is opaque — forward `nextCursor` verbatim between pages.
  *
- * @param {import('boing-sdk').BoingClient} client
+ * @param {import('@boing-network/boing-sdk').BoingClient} client
  * @param {{
  *   factory?: string,
  *   minLiquidityWei?: string,
  *   minReserveProduct?: string,
  *   maxPages?: number,
  * }} [opts]
- * @returns {Promise<import('boing-sdk').DexTokenListRow[]>}
+ * @returns {Promise<import('@boing-network/boing-sdk').DexTokenListRow[]>}
  */
 export async function collectAllDexTokensPagesL1(client, opts = {}) {
   const limit = 500;
   const maxPages = opts.maxPages ?? readMaxPages();
   const filters = readOptionalLiquidityFilter();
-  /** @type {import('boing-sdk').DexTokenListRow[]} */
+  /** @type {import('@boing-network/boing-sdk').DexTokenListRow[]} */
   const out = [];
   let cursor = null;
   for (let page = 0; page < maxPages; page += 1) {
@@ -202,14 +202,14 @@ export async function collectAllDexTokensPagesL1(client, opts = {}) {
 }
 
 /**
- * @param {import('boing-sdk').BoingClient} client
+ * @param {import('@boing-network/boing-sdk').BoingClient} client
  * @param {{ factory?: string, maxPages?: number }} [opts]
- * @returns {Promise<import('boing-sdk').DexPoolListRow[]>}
+ * @returns {Promise<import('@boing-network/boing-sdk').DexPoolListRow[]>}
  */
 export async function collectAllDexPoolsPagesL1(client, opts = {}) {
   const limit = 500;
   const maxPages = opts.maxPages ?? readMaxPages();
-  /** @type {import('boing-sdk').DexPoolListRow[]} */
+  /** @type {import('@boing-network/boing-sdk').DexPoolListRow[]} */
   const out = [];
   let cursor = null;
   for (let page = 0; page < maxPages; page += 1) {
@@ -230,7 +230,7 @@ export async function collectAllDexPoolsPagesL1(client, opts = {}) {
 }
 
 /**
- * @param {readonly import('boing-sdk').DexTokenListRow[]} rows
+ * @param {readonly import('@boing-network/boing-sdk').DexTokenListRow[]} rows
  * @returns {Array<{ id: string, symbol: string, name: string, decimals?: number }>}
  */
 export function dexTokenListRowsToPickerEntries(rows) {
@@ -252,7 +252,7 @@ export function dexTokenListRowsToPickerEntries(rows) {
 }
 
 /**
- * @param {readonly import('boing-sdk').DexPoolListRow[]} rows
+ * @param {readonly import('@boing-network/boing-sdk').DexPoolListRow[]} rows
  * @returns {Array<{ poolHex: string, tokenAHex: string, tokenBHex: string }>}
  */
 export function dexPoolListRowsToPoolTokenRows(rows) {
@@ -274,9 +274,9 @@ export function dexPoolListRowsToPoolTokenRows(rows) {
  * Merge **`tokenADecimals` / `tokenBDecimals`** from **`boing_listDexPools`** rows onto hydrated venues
  * (SDK **`CpPoolVenue`** allows extra fields at runtime).
  *
- * @param {readonly import('boing-sdk').CpPoolVenue[]} venues
- * @param {readonly import('boing-sdk').DexPoolListRow[]} dexPoolRows
- * @returns {import('boing-sdk').CpPoolVenue[]}
+ * @param {readonly import('@boing-network/boing-sdk').CpPoolVenue[]} venues
+ * @param {readonly import('@boing-network/boing-sdk').DexPoolListRow[]} dexPoolRows
+ * @returns {import('@boing-network/boing-sdk').CpPoolVenue[]}
  */
 export function attachDexPoolDecimalsToVenues(venues, dexPoolRows) {
   if (!Array.isArray(venues) || venues.length === 0) return [...venues];

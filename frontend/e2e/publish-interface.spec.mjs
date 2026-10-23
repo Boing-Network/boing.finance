@@ -92,7 +92,7 @@ test.describe('Publish interface page', () => {
   test('live testnet: publish through the page with an injected signer', async ({ page }) => {
     test.skip(!LIVE_ENV || !LIVE_CONTRACT, 'set BOING_E2E_LIVE_ENV_FILE and BOING_E2E_LIVE_CONTRACT');
     test.setTimeout(300_000);
-    const sdk = await import('boing-sdk');
+    const sdk = await import('@boing-network/boing-sdk');
     const line = readFileSync(LIVE_ENV, 'utf8').split(/\r?\n/).find((l) => /^\s*BOING_SECRET_HEX\s*=/.test(l)) || '';
     const secret = sdk.hexToBytes(line.split('=')[1].trim().replace(/^["']|["']$/g, ''));
     const RPC = process.env.BOING_E2E_RPC_URL || 'https://boing-testnet-1.fly.dev';

@@ -8,7 +8,7 @@ import {
   NATIVE_CONSTANT_PRODUCT_TOTAL_LP_KEY_HEX,
   boingTokenBalanceStorageKeyHex,
   nativeAmmLpBalanceStorageKeyHex,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 
 /**
  * Simple Pools / Your liquidity tabs against a mocked chain: two custody pools (FV2C/USDC, USDC/tBOING),

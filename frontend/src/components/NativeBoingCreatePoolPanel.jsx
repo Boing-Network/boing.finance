@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
-import { boingPoolBytecodeHex, isBoingTestnetChainId } from 'boing-sdk';
+import { boingPoolBytecodeHex, isBoingTestnetChainId } from '@boing-network/boing-sdk';
 import { KNOWN_BOING_TOKENS } from '../services/boingSwapQuote';
 import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';

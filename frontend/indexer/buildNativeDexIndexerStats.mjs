@@ -70,15 +70,15 @@ function envGet(key, envObj) {
  *   rpcBaseUrl?: string,
  *   registerFromBlock?: number | null,
  *   logScanBlocks?: number,
- *   historyStore?: import('boing-sdk').NativeDexIndexerHistoryStore | null,
- *   overrides?: import('boing-sdk').NativeDexIntegrationOverrides,
+ *   historyStore?: import('@boing-network/boing-sdk').NativeDexIndexerHistoryStore | null,
+ *   overrides?: import('@boing-network/boing-sdk').NativeDexIntegrationOverrides,
  *   env?: Record<string, string | undefined>,
  * }} BuildNativeDexIndexerStatsOptions
  */
 
 /**
  * @param {BuildNativeDexIndexerStatsOptions} [options]
- * @returns {Promise<import('boing-sdk').NativeDexIndexerStatsPayload>}
+ * @returns {Promise<import('@boing-network/boing-sdk').NativeDexIndexerStatsPayload>}
  */
 export async function buildNativeDexIndexerStats(options = {}) {
   const envObj = options.env;

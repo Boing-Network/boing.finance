@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { getBoingTokenBalance } from 'boing-sdk';
+import { getBoingTokenBalance } from '@boing-network/boing-sdk';
 import { useWallet } from '../contexts/WalletContext';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { boingExpressContractCallSignSimulateSubmit } from '../services/boingExpressNativeTx';

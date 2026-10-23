@@ -3,7 +3,7 @@ import {
   fetchNativeDexDirectorySnapshot,
   fetchNativeDexIntegrationDefaults,
   hydrateCpPoolVenuesFromRpc,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 import { useWallet } from './WalletContext';
 import { getContractAddress, getBoingNativeVmModuleId } from '../config/contracts';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
@@ -30,8 +30,8 @@ import { collectFungibleStyleDeployPickerEntries } from '../services/nativeFungi
 import { normalizeNativeVmTokenId32, venueTokensToPickerEntries } from '../services/nativeVmTokenRegistry';
 import { BOING_OBSERVER_BASE_URL } from '../config/boingExplorerUrls';
 
-/** @typedef {import('boing-sdk').NativeDexIntegrationDefaults} NativeDexIntegrationDefaults */
-/** @typedef {import('boing-sdk').CpPoolVenue} CpPoolVenue */
+/** @typedef {import('@boing-network/boing-sdk').NativeDexIntegrationDefaults} NativeDexIntegrationDefaults */
+/** @typedef {import('@boing-network/boing-sdk').CpPoolVenue} CpPoolVenue */
 
 const BoingNativeDexIntegrationContext = createContext(null);
 
@@ -51,7 +51,7 @@ export function BoingNativeDexIntegrationProvider({ children }) {
   /** Hydrated from RPC only; UI **`venues`** also merge L1 pool leg decimals. */
   const [venuesHydrated, setVenuesHydrated] = useState(/** @type {CpPoolVenue[]} */ ([]));
   /** Last **`boing_listDexPools`** page rows (light) for **`tokenADecimals` / `tokenBDecimals`** overlay. */
-  const [l1DexPoolRows, setL1DexPoolRows] = useState(/** @type {import('boing-sdk').DexPoolListRow[]} */ ([]));
+  const [l1DexPoolRows, setL1DexPoolRows] = useState(/** @type {import('@boing-network/boing-sdk').DexPoolListRow[]} */ ([]));
   /** RPC discovery metadata (supported methods, catalog, optional preflight). */
   const [dexDiscoveryRpcMeta, setDexDiscoveryRpcMeta] = useState(
     /** @type {{
@@ -83,7 +83,7 @@ export function BoingNativeDexIntegrationProvider({ children }) {
   });
   const [remoteIndexerStats, setRemoteIndexerStats] = useState(null);
   /** L1 `boing_listDexTokens` rows (light); merged into picker directory ahead of indexer labels. */
-  const [l1DexTokenRows, setL1DexTokenRows] = useState(/** @type {import('boing-sdk').DexTokenListRow[]} */ ([]));
+  const [l1DexTokenRows, setL1DexTokenRows] = useState(/** @type {import('@boing-network/boing-sdk').DexTokenListRow[]} */ ([]));
   /** Fungible-style VM deploys from recent blocks (`ContractDeployWithPurpose*`), merged after L1 list tokens. */
   const [fungibleDeployPickerTokens, setFungibleDeployPickerTokens] = useState(
     /** @type {Array<{ id: string, symbol: string, name: string }>} */ ([])
@@ -201,9 +201,9 @@ export function BoingNativeDexIntegrationProvider({ children }) {
         networkInfoDexDiscoveryMethodCount: 0,
         methods: /** @type {string[]} */ ([]),
         catalogMethodNames: /** @type {string[]} */ ([]),
-        preflight: /** @type {import('boing-sdk').BoingRpcPreflightResult | null} */ (null),
+        preflight: /** @type {import('@boing-network/boing-sdk').BoingRpcPreflightResult | null} */ (null),
       };
-      /** @type {import('boing-sdk').DexTokenListRow[]} */
+      /** @type {import('@boing-network/boing-sdk').DexTokenListRow[]} */
       let l1Tokens = [];
       try {
         l1Cap = await resolveNativeDexL1DiscoveryCapabilities(client);
@@ -328,7 +328,7 @@ export function BoingNativeDexIntegrationProvider({ children }) {
       const wantL1Pools = (process.env.REACT_APP_BOING_NATIVE_DEX_DISCOVERY_POOLS || '1').trim() !== '0';
       const facForPools = (d.nativeDexFactoryAccountHex || '').trim();
       const factoryOptPools = /^0x[0-9a-f]{64}$/i.test(facForPools) ? facForPools : undefined;
-      /** @type {import('boing-sdk').DexPoolListRow[]} */
+      /** @type {import('@boing-network/boing-sdk').DexPoolListRow[]} */
       let l1PoolsAll = [];
       if (wantL1Pools && l1Cap.listPools) {
         try {

@@ -12,7 +12,7 @@
  * or `end_user.canonical_linked_nft_token_registry`. CREATE2 salt `BOING_NFT_TOKEN_LINK_REG_V2` (v1: `_V1`).
  */
 
-import * as boingSdk from 'boing-sdk';
+import * as boingSdk from '@boing-network/boing-sdk';
 import { isBoingNativeAccountIdHex } from '../utils/boingWalletDiscovery';
 import { softGateSameDeployer, normalizeLinkableAssetAddress } from '../utils/linkedNftToken';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';

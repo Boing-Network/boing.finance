@@ -4,7 +4,7 @@ import {
   boingTokenBytecodeHex,
   buildLinkedNftTokenClaimSelfInitSnippetHex,
   predictNonceDerivedContractAddress,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 
 /**
  * Boing token deploy creates Boing token v2: the form shows whole units and the built-in protections,

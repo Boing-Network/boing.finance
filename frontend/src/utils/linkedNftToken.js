@@ -8,7 +8,7 @@
  */
 import { blake3 } from '@noble/hashes/blake3';
 import { bytesToHex } from '@noble/hashes/utils';
-import * as boingSdk from 'boing-sdk';
+import * as boingSdk from '@boing-network/boing-sdk';
 import { isBoingNativeAccountIdHex } from './boingWalletDiscovery';
 
 const DEPLOYER_HINTS_KEY = 'boing.finance.asset_deployer_hints.v1';

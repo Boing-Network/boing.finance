@@ -23,7 +23,7 @@ import {
   buildLinkedNftTokenRegisterFlowTxs,
   randomLinkedNftTokenCollectionSaltHex,
   validateHex32,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 import { PROJECT_PACK_DEFAULT_TOKEN_SUPPLY } from '../config/projectPack.js';
 import { buildBoingTokenV2MintAtDeployBytecodeHex, parseBoingTokenV2Supply } from './boingTokenV2Launch.js';
 import { buildBoingNftCollectionAtDeployBytecodeHex } from './boingDeployInit.js';

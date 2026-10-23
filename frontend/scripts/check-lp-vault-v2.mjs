@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /** Read-only check of the LP vault v2 UI service against the public testnet: state, deposit plan, withdraw plan. */
-import { BoingClient } from 'boing-sdk';
+import { BoingClient } from '@boing-network/boing-sdk';
 import { loadLpVaultV2, planLpVaultV2Deposit, planLpVaultV2Withdraw } from '../src/services/nativeLpVaultV2.js';
 
 const holder = process.argv[2] || '0x8079f30559c02c5fe087c9ad1bc3b751a29de35992f3f8431734243e825f696e';

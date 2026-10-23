@@ -13,7 +13,7 @@
  * Companion links are app policy only — not checked here.
  */
 
-import * as boingSdk from 'boing-sdk';
+import * as boingSdk from '@boing-network/boing-sdk';
 import { isBoingNativeAccountIdHex } from '../utils/boingWalletDiscovery';
 import { normalizeLinkableAssetAddress } from '../utils/linkedNftToken';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';

@@ -24,7 +24,7 @@ export async function onRequestGet({ env, request }) {
     });
   }
 
-  /** @type {import('boing-sdk').NativeDexIndexerHistoryStore | null} */
+  /** @type {import('@boing-network/boing-sdk').NativeDexIndexerHistoryStore | null} */
   let historyStore = null;
   if (env.NATIVE_DEX_INDEXER_KV && typeof env.NATIVE_DEX_INDEXER_KV.get === 'function') {
     const kv = env.NATIVE_DEX_INDEXER_KV;

@@ -7,7 +7,7 @@ import { encodeNativeDexRegisterPairCalldataHex } from './nativeDexFactoryCallda
 import { nativeAccountsAccessListJson } from './nativeAmmAccessList';
 import { normalizeNativeVmTokenId32 } from './nativeVmTokenRegistry';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
-import { boingPoolBytecodeHex, predictNonceDerivedContractAddress } from 'boing-sdk';
+import { boingPoolBytecodeHex, predictNonceDerivedContractAddress } from '@boing-network/boing-sdk';
 import { executeAddLiquidity } from './boingLiquidityTx';
 import { getSharedBoingClient } from './boingNativeDexClient';
 import { boingWalletMissingMessage } from '../utils/boingWalletDiscovery';

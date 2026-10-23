@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
-import { fetchCpRoutingFromDirectoryLogs } from 'boing-sdk';
+import { fetchCpRoutingFromDirectoryLogs } from '@boing-network/boing-sdk';
 import { useWallet } from '../contexts/WalletContext';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
@@ -74,7 +74,7 @@ export default function NativeDexDirectoryRoutePanel({
   const [tokenOut, setTokenOut] = useState('');
   const [amountInStr, setAmountInStr] = useState('');
   const [fromBlockStr, setFromBlockStr] = useState(defaultFromBlock);
-  const [routes, setRoutes] = useState(/** @type {import('boing-sdk').CpSwapRoute[]} */ ([]));
+  const [routes, setRoutes] = useState(/** @type {import('@boing-network/boing-sdk').CpSwapRoute[]} */ ([]));
   const [routeMeta, setRouteMeta] = useState(/** @type {{ venues: number } | null} */ (null));
   const [findError, setFindError] = useState(/** @type {string | null} */ (null));
   const [finding, setFinding] = useState(false);

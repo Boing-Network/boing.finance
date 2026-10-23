@@ -5,7 +5,7 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { encodeSignedTransaction, bytesToHex, boingTxToExpressRequest, planBoingNativeSwap } from 'boing-sdk';
+import { encodeSignedTransaction, bytesToHex, boingTxToExpressRequest, planBoingNativeSwap } from '@boing-network/boing-sdk';
 import {
   NATIVE_VALUE_WALLET_UPDATE_MESSAGE,
   explainContractRevert,

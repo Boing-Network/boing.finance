@@ -17,7 +17,7 @@ import {
   boingTxToExpressRequest,
   planBoingNativeSwap,
   quoteBoingCustodySwap,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 import { WBOING_HEX, isNativeBoingId } from './boingSwapQuote.js';
 
 export const CUSTODY_ROUTER_HEX =
@@ -37,14 +37,14 @@ export const CUSTODY_APPROVAL = Object.freeze({
   ERROR: 'error',
 });
 
-/** @param {import('boing-sdk').BoingClient} client */
+/** @param {import('@boing-network/boing-sdk').BoingClient} client */
 export async function loadCustodyPools(client) {
   return discoverBoingCustodyPools(client);
 }
 
 /**
  * Deploy name / symbol for custody tokens via full `boing_getDexToken` (not light), best effort.
- * @param {import('boing-sdk').BoingClient} client
+ * @param {import('@boing-network/boing-sdk').BoingClient} client
  * @param {string[]} ids
  * @returns {Promise<Array<{ id: string, symbol: string, name: string }>>}
  */
@@ -71,7 +71,7 @@ export function slippagePercentToBps(pct) {
 }
 
 /**
- * @param {import('boing-sdk').BoingClient} client
+ * @param {import('@boing-network/boing-sdk').BoingClient} client
  * @param {{ poolHex: string, tokenInHex: string, amountIn: bigint, slippagePercent: number, senderHex: string, routerHex?: string }} p
  */
 export async function planCustodySwap(client, p) {
@@ -90,8 +90,8 @@ export async function planCustodySwap(client, p) {
  * scripts), simulates, submits and returns `{ txHash, boingTxIdHex }`. Nonces are refreshed by the signer.
  * Re-reads the allowance after the approval so the swap never runs without one.
  *
- * @param {import('boing-sdk').BoingClient} client
- * @param {import('boing-sdk').BoingCustodySwapPlan} plan
+ * @param {import('@boing-network/boing-sdk').BoingClient} client
+ * @param {import('@boing-network/boing-sdk').BoingCustodySwapPlan} plan
  * @param {{ senderHex: string, routerHex?: string, signSimulateSubmit: Function, onState?: (s: string) => void }} o
  */
 export async function executeCustodySwap(client, plan, o) {
@@ -117,7 +117,7 @@ export async function executeCustodySwap(client, plan, o) {
  *   BOING out: approve(pool) -> pool.swap -> wBOING.withdraw_all (pays native BOING out)
  * Fresh reserves and the next nonce are read here; the wallet refreshes the nonce again before signing.
  *
- * @param {import('boing-sdk').BoingClient} client
+ * @param {import('@boing-network/boing-sdk').BoingClient} client
  * @param {{ poolHex: string, tokenInHex: string, tokenOutHex: string, amountIn: bigint, slippagePercent: number,
  *   senderHex: string, wboingHex?: string }} p
  */

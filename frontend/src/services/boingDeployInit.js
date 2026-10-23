@@ -10,7 +10,7 @@
  *   - linked NFT↔token registry v2: `claim_self(creator)` so the creator is the asset's claimer.
  * The stored runtime is the unchanged template, so template / decimals detection keeps working.
  */
-import { buildLinkedNftTokenClaimSelfInitSnippetHex, validateHex32 } from 'boing-sdk';
+import { buildLinkedNftTokenClaimSelfInitSnippetHex, validateHex32 } from '@boing-network/boing-sdk';
 
 export const OP = Object.freeze({
   STOP: 0x00,

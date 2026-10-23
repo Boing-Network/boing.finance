@@ -1,4 +1,4 @@
-import { transactionIdFromSignedTransactionHex } from 'boing-sdk';
+import { transactionIdFromSignedTransactionHex } from '@boing-network/boing-sdk';
 import { BOING_QA_PURPOSE_TOKEN } from '../config/boingQa';
 import {
   buildBoingLaunchIntegrationInput,

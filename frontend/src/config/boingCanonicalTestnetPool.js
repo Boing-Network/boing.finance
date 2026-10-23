@@ -11,7 +11,7 @@
  * `REACT_APP_BOING_NATIVE_AMM_POOL` in `.env` / Pages env **always wins** over this constant (CI, forks, staging).
  */
 
-import { CANONICAL_BOING_TESTNET_NATIVE_CP_POOL_HEX } from 'boing-sdk';
+import { CANONICAL_BOING_TESTNET_NATIVE_CP_POOL_HEX } from '@boing-network/boing-sdk';
 
 export { CANONICAL_BOING_TESTNET_NATIVE_CP_POOL_HEX };
 

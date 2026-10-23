@@ -9,7 +9,7 @@ import {
   encodeNativeAmmAddLiquidityCalldata,
   encodeNativeAmmLpVaultConfigureCalldataHex,
   encodeNativeAmmLpVaultDepositAddCalldataHex,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import { getContractAddress } from '../config/contracts';

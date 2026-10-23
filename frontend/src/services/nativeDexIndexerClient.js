@@ -102,7 +102,7 @@ export async function fetchRemoteDexIndexerStats() {
 }
 
 /**
- * @param {import('boing-sdk').CpPoolVenue[]} venues
+ * @param {import('@boing-network/boing-sdk').CpPoolVenue[]} venues
  * @returns {Record<string, { activityScore: string, hadPrior: boolean }>}
  */
 export function updateLocalReserveSnapshotsAndScore(venues) {

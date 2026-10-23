@@ -6,7 +6,7 @@
  * hex from `boingExpressSignTransaction` (user-approved Ed25519 signature in the extension).
  */
 
-import { BOING_QA_PLACEHOLDER_DESCRIPTION_HASH_HEX, bytesToHex, transactionIdFromSignedTransactionHex } from 'boing-sdk';
+import { BOING_QA_PLACEHOLDER_DESCRIPTION_HASH_HEX, bytesToHex, transactionIdFromSignedTransactionHex } from '@boing-network/boing-sdk';
 import {
   fetchBoingNativeAccount,
   simulateBoingSignedTransaction,

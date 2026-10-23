@@ -5,7 +5,7 @@
  * minted to the creator inside the deploy transaction); this module adds QA, wallet and registry I/O.
  */
 
-import * as boingSdk from 'boing-sdk';
+import * as boingSdk from '@boing-network/boing-sdk';
 import { createBoingBrowserRpcClient } from './boingTestnetRpc';
 import {
   boingExpressSendTransaction,
@@ -84,7 +84,7 @@ export function planProjectPackPair(input) {
 
 /**
  * QA-check a ready `contract_deploy_meta` tx from the pack planner.
- * @param {import('boing-sdk').ContractDeployMetaTxObject} tx
+ * @param {import('@boing-network/boing-sdk').ContractDeployMetaTxObject} tx
  */
 export async function preflightProjectPackDeployTx(tx) {
   const preflight = pickFn(boingSdk.preflightContractDeployMetaWithUi);
@@ -98,7 +98,7 @@ export async function preflightProjectPackDeployTx(tx) {
 /**
  * @param {object} opts
  * @param {() => unknown} opts.getWalletProvider
- * @param {import('boing-sdk').ContractDeployMetaTxObject} opts.tx
+ * @param {import('@boing-network/boing-sdk').ContractDeployMetaTxObject} opts.tx
  * @param {boolean} [opts.qaPoolAcknowledged]
  * @param {string} [opts.senderHex] — deployer account; used to refresh nonce + wait for inclusion
  */

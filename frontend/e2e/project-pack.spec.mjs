@@ -3,7 +3,7 @@ import {
   CANONICAL_BOING_TESTNET_LINKED_NFT_TOKEN_REGISTRY_HEX,
   boingTokenBytecodeHex,
   buildLinkedNftTokenClaimSelfInitSnippetHex,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 
 /**
  * Project pack token = Boing token v2 minted to the creator at deploy: the supply field (default

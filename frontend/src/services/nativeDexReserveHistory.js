@@ -17,7 +17,7 @@ export function getReserveSamplingIntervalMs() {
 }
 
 /**
- * @param {import('boing-sdk').CpPoolVenue[]} venues
+ * @param {import('@boing-network/boing-sdk').CpPoolVenue[]} venues
  */
 export function appendReserveHistorySamples(venues) {
   if (!Array.isArray(venues) || venues.length === 0) return;

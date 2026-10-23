@@ -1,7 +1,7 @@
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { isBoingTestnetChainId, REFERENCE_NFT_COLLECTION_TEMPLATE_VERSION } from 'boing-sdk';
+import { isBoingTestnetChainId, REFERENCE_NFT_COLLECTION_TEMPLATE_VERSION } from '@boing-network/boing-sdk';
 import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import {

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { getBoingPoolLpBalance, getBoingPoolState } from 'boing-sdk';
+import { getBoingPoolLpBalance, getBoingPoolState } from '@boing-network/boing-sdk';
 import { getSharedBoingClient } from '../services/boingNativeDexClient';
 import { loadCustodyPools, loadCustodyTokenMetadata } from '../services/nativeDexCustodySwap';
 import { custodyTokenList, custodyTokensNeedingMetadata } from '../services/boingSwapQuote';
