@@ -1,4 +1,4 @@
-import { filterMapNativeAmmRpcLogs, getLogsChunked } from 'boing-sdk';
+import { filterMapNativeAmmRpcLogs, getLogsChunked } from '@boing-network/boing-sdk';
 
 /**
  * @typedef {{
@@ -25,7 +25,7 @@ export function getConfiguredSwapLogScanBlocks() {
 /**
  * Fetch native AMM Log2 rows for pools in `[fromBlock, toBlock]` and aggregate swap volume + liquidity events.
  *
- * @param {import('boing-sdk').BoingClient} client
+ * @param {import('@boing-network/boing-sdk').BoingClient} client
  * @param {string[]} poolHexes32
  * @param {number} headHeight — chain tip (inclusive upper bound)
  * @param {number} [blockSpan]

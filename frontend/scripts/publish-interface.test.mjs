@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { predictCreate2ContractAddress, interfaceRegistryClaimerStorageKeyHex, readInterfaceBlob, interfaceBlobStorageKeyHex } from 'boing-sdk';
+import { predictCreate2ContractAddress, interfaceRegistryClaimerStorageKeyHex, readInterfaceBlob, interfaceBlobStorageKeyHex } from '@boing-network/boing-sdk';
 import {
   nonceDerivedAddress, verifyDeployer, inspectContract, validateInterfaceDoc, canonicalInterfaceText,
   interfaceHashOfText, draftFromObserver, checkUri, planPublish, recordMatches, observerContractUrl, INTERFACE_REGISTRY_ID,

@@ -7,7 +7,7 @@ import {
   bytesToHex,
   predictNonceDerivedContractAddress,
   resolveReferenceFungibleSecuredTemplateBytecodeHex,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 import {
   BOING_TOKEN_V2_DECIMALS,
   BOING_TOKEN_V2_SECURITY,

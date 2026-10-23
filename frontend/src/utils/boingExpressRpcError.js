@@ -2,7 +2,7 @@
  * Format Boing Express / JSON-RPC errors for toasts.
  * Delegates to `boing-sdk` `explainBoingRpcError` when a numeric RPC `code` is present; keeps a few wallet UX tweaks.
  */
-import { BoingRpcError, explainBoingRpcError, mapInjectedProviderErrorToUiMessage } from 'boing-sdk';
+import { BoingRpcError, explainBoingRpcError, mapInjectedProviderErrorToUiMessage } from '@boing-network/boing-sdk';
 import { NATIVE_VALUE_WALLET_ERROR_CODE, explainContractRevert } from '../services/boingWalletNativeValue.js';
 
 /**

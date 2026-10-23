@@ -19,7 +19,7 @@ import {
   signTransactionInputForClient,
   submitSignedTransactionIdempotent,
   transactionIdFromSignedTransactionHex,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 import { CUSTODY_APPROVAL, executeCustodySwap, loadCustodyPools, planCustodySwap } from '../src/services/nativeDexCustodySwap.js';
 
 const args = process.argv.slice(2);
@@ -85,8 +85,8 @@ async function signSimulateSubmit(expressTx, o = {}) {
 
 if (dryRun) {
   // Only the first tx can be simulated before the approve lands; sign it offline.
-  if (plan.approveTx) await signSimulateSubmit((await import('boing-sdk')).boingContractCallToExpressTx(plan.approveTx));
-  else await signSimulateSubmit((await import('boing-sdk')).boingContractCallToExpressTx(plan.swapTx));
+  if (plan.approveTx) await signSimulateSubmit((await import('@boing-network/boing-sdk')).boingContractCallToExpressTx(plan.approveTx));
+  else await signSimulateSubmit((await import('@boing-network/boing-sdk')).boingContractCallToExpressTx(plan.swapTx));
   console.log('dry run ok');
 } else if (execute) {
   const before = await bal();

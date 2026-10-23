@@ -3,7 +3,7 @@ import { formatUnits } from './evmLite';
 const MAX_DECIMALS = 48;
 
 /**
- * @param {import('boing-sdk').CpPoolVenue & { tokenADecimals?: number, tokenBDecimals?: number }} venue
+ * @param {import('@boing-network/boing-sdk').CpPoolVenue & { tokenADecimals?: number, tokenBDecimals?: number }} venue
  * @param {'a' | 'b'} leg
  * @param {readonly { id?: string, decimals?: number }[]} indexerTokens
  * @returns {number | null}

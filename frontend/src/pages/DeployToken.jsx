@@ -26,7 +26,7 @@ import FairLaunchChecklist from '../components/FairLaunchChecklist';
 import { deploymentHistory as deploymentHistoryUtil } from '../utils/deploymentHistory';
 import { notificationService } from '../utils/notifications';
 import ShareCardModal from '../components/ShareCardModal';
-import { isBoingTestnetChainId } from 'boing-sdk';
+import { isBoingTestnetChainId } from '@boing-network/boing-sdk';
 import NativeBoingTokenDeploySection from '../components/NativeBoingTokenDeploySection';
 import LinkedNftTokenPanel from '../components/LinkedNftTokenPanel';
 import { BOING_NATIVE_L1_CHAIN_ID, getNetworkByChainId } from '../config/networks';

@@ -2,7 +2,7 @@ import {
   encodeNativeDexSwap2RouterCalldata128Hex,
   encodeNativeDexSwap3RouterCalldata128Hex,
   encodeNativeDexSwap4RouterCalldata128Hex,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 import { encodeNativeAmmSwapCalldataHex } from './nativeAmmCalldata';
 
 /**
@@ -23,7 +23,7 @@ export function swapCalldataHexToUint8Array128(hex) {
 
 /**
  * Multihop swap router calldata (2–4 pools). Pair with `contract_call` to the configured swap router module.
- * @param {import('boing-sdk').CpSwapRoute} route
+ * @param {import('@boing-network/boing-sdk').CpSwapRoute} route
  * @param {number} slippageBps
  * @returns {string}
  */

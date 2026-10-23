@@ -7,7 +7,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 
 /**
  * @param {string} path
- * @returns {import('boing-sdk').NativeDexIndexerHistoryStore}
+ * @returns {import('@boing-network/boing-sdk').NativeDexIndexerHistoryStore}
  */
 export function createFsHistoryStore(path) {
   return {

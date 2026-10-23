@@ -14,7 +14,7 @@ function shortHex(h) {
  * On-chain AMM log scan (swap counts, liquidity events) for the configured block span — complements remote indexer URLs.
  *
  * @param {{
- *   venues: import('boing-sdk').CpPoolVenue[],
+ *   venues: import('@boing-network/boing-sdk').CpPoolVenue[],
  *   directoryMeta: { headHeight: number | null },
  *   remoteIndexerStats: unknown,
  * }} props

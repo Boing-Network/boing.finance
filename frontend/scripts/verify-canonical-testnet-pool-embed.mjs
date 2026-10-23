@@ -4,7 +4,7 @@
  * Hosted Fly testnet currently leaves `end_user.canonical_native_cp_pool` unset — when
  * REACT_APP_BOING_NATIVE_AMM_POOL is empty, skip (do not bake a dead pool id).
  */
-import { CANONICAL_BOING_TESTNET_NATIVE_CP_POOL_HEX } from 'boing-sdk';
+import { CANONICAL_BOING_TESTNET_NATIVE_CP_POOL_HEX } from '@boing-network/boing-sdk';
 
 const envPool = process.env.REACT_APP_BOING_NATIVE_AMM_POOL?.trim().toLowerCase() || '';
 const embedded = String(CANONICAL_BOING_TESTNET_NATIVE_CP_POOL_HEX || '').trim().toLowerCase();

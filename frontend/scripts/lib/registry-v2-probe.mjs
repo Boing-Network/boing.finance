@@ -21,7 +21,7 @@ import {
   encodeLinkedNftTokenGetAssetDeployerCalldataHex,
   encodeLinkedNftTokenRegisterLinkCalldataHex,
   senderHexFromSecretKey,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 
 export async function throwawayAccount() {
   const secret = new Uint8Array(randomBytes(32));
@@ -66,7 +66,7 @@ export async function fundAccount(client, { funderSecret, funderHex, toHex, amou
 }
 
 /**
- * @param {import('boing-sdk').BoingClient} client
+ * @param {import('@boing-network/boing-sdk').BoingClient} client
  * @param {{ registry: string, collection?: string|null, token?: string|null, funder?: { secret: Uint8Array, hex: string },
  *   fundAmount?: bigint, submit?: boolean }} opts
  * @returns {Promise<{ outsider: string, fundTx: string|null, results: { label: string, success: boolean, error: string | null }[],

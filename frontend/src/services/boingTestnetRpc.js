@@ -1,4 +1,4 @@
-import { createClient } from 'boing-sdk';
+import { createClient } from '@boing-network/boing-sdk';
 import { BOING_TESTNET_CHAIN_DECIMAL } from '../config/boingChainIds';
 import { getNetworkByChainId } from '../config/networks';
 
@@ -38,7 +38,7 @@ export function getBoingRpcClientBaseUrl() {
 /**
  * Browser-safe Boing JSON-RPC client. `BoingClient` assigns `globalThis.fetch` to a field and calls it
  * unbound, which throws "Illegal invocation" in Chromium; this passes a wrapper that preserves binding.
- * @returns {import('boing-sdk').BoingClient}
+ * @returns {import('@boing-network/boing-sdk').BoingClient}
  */
 export function createBoingBrowserRpcClient() {
   return createClient({

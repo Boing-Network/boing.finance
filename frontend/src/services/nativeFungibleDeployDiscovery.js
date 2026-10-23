@@ -6,7 +6,7 @@
 import {
   extractUniversalContractDeploymentsFromBlock,
   fetchBlocksWithReceiptsForHeightRange,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 import { normalizeNativeVmTokenId32 } from './nativeVmTokenRegistry';
 
 /**
@@ -55,7 +55,7 @@ export function isFungibleStyleDeployRow(row) {
 }
 
 /**
- * @param {import('boing-sdk').BoingClient} client
+ * @param {import('@boing-network/boing-sdk').BoingClient} client
  * @param {number} headHeight — inclusive chain tip height
  * @param {{ signal?: AbortSignal }} [options]
  * @returns {Promise<{

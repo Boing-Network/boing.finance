@@ -32,7 +32,7 @@ import {
   senderHexFromSecretKey,
   signTransactionInputForClient,
   transactionIdFromSignedTransactionHex,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 
 const LIVE = process.env.BOING_E2E_SWAP_LIVE === '1' && Boolean(process.env.BOING_SECRET_HEX?.trim());
 const DRY = process.env.BOING_E2E_SWAP_DRY_RUN === '1';

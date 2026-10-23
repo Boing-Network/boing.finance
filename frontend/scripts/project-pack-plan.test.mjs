@@ -10,7 +10,7 @@ import {
   hexToBytes,
   predictCreate2ContractAddress,
   resolveReferenceNftCollectionTemplateBytecodeHex,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 import { BOING_NFT_COLLECTION_ADMIN_SLOT_HEX, buildBoingNftCollectionAtDeployBytecodeHex } from '../src/services/boingDeployInit.js';
 import {
   BOING_TOKEN_ADMIN_SLOT_HEX,

@@ -2,7 +2,7 @@ import {
   NATIVE_CONSTANT_PRODUCT_TOKEN_A_KEY_HEX,
   NATIVE_CONSTANT_PRODUCT_TOKEN_B_KEY_HEX,
   validateHex32,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 
 /** Synthetic 32-byte ids when the on-chain pool has no `set_tokens` reference accounts (v1 ledger-only reserves). */
 export const SYNTHETIC_NATIVE_CP_TOKEN_A_HEX =
@@ -29,7 +29,7 @@ function storageWordToAccountHex(valueHex) {
  * Read token A/B account ids from native CP pool storage for {@link hydrateCpPoolVenuesFromRpc}.
  * Falls back to synthetic ids when both are unset (matches SDK routing math for A/B legs).
  *
- * @param {import('boing-sdk').BoingClient} client
+ * @param {import('@boing-network/boing-sdk').BoingClient} client
  * @param {string} poolHex32
  * @returns {Promise<{ poolHex: string, tokenAHex: string, tokenBHex: string }>}
  */

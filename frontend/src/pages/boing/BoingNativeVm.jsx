@@ -23,7 +23,7 @@ import {
   boingExpressSendTransaction
 } from '../../services/boingExpressNativeTx';
 import { getWindowBoingProvider } from '../../utils/boingWalletDiscovery';
-import { buildContractDeployMetaTx } from 'boing-sdk';
+import { buildContractDeployMetaTx } from '@boing-network/boing-sdk';
 import { parseBoingToLedger } from '../../utils/boingNativeAmount';
 import NativeAmmLpVaultPanel from '../../components/NativeAmmLpVaultPanel';
 import NativeDexLedgerForwardPanel from '../../components/NativeDexLedgerForwardPanel';

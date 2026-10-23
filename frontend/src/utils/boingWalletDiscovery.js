@@ -3,12 +3,12 @@
  * Aligns with BOING-EXPRESS-WALLET.md (window.boing, EIP-6963, boing_* methods); ecosystem backlog: https://github.com/Boing-Network/boing.network/blob/main/docs/HANDOFF-DEPENDENT-PROJECTS.md
  */
 
-import { createBoingWebWalletProvider } from 'boing-sdk';
+import { createBoingWebWalletProvider } from '@boing-network/boing-sdk';
 
 const BOING_TESTNET_CHAIN_HEX = '0x1b01';
 
 /** Native 32-byte AccountId check — single source of truth in boing-sdk (`hex.ts`). */
-export { isBoingNativeAccountIdHex } from 'boing-sdk';
+export { isBoingNativeAccountIdHex } from '@boing-network/boing-sdk';
 
 let webWalletFallback = null;
 

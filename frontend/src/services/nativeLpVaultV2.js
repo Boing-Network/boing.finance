@@ -14,7 +14,7 @@ import {
   getBoingTokenBalance,
   quoteBoingLpVaultV2Deposit,
   quoteBoingLpVaultV2Withdraw,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 
 export const LP_VAULT_V2_HEX =
   (typeof process !== 'undefined' && process.env?.REACT_APP_BOING_LP_VAULT_V2?.trim()) || CANONICAL_BOING_TESTNET_LP_VAULT_V2_HEX;

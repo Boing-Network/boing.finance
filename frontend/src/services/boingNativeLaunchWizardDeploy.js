@@ -3,7 +3,7 @@ import {
   preflightContractDeployMetaWithUi,
   resolveNativeConstantProductPoolBytecodeHex,
   resolveReferenceNftCollectionTemplateBytecodeHex,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 import { boingTokenV2BytecodeHex, buildBoingTokenV2DeployMetaTx } from './boingTokenV2Launch';
 import { buildBoingNftCollectionAtDeployBytecodeHex } from './boingDeployInit.js';
 import { resolveLinkedNftTokenClaimRegistryHex } from './linkedNftTokenRegistry';
@@ -215,7 +215,7 @@ export async function preflightBoingLaunchWizardByKind(kind, fields) {
 }
 
 /**
- * @param {import('boing-sdk').BoingClient} client
+ * @param {import('@boing-network/boing-sdk').BoingClient} client
  * @param {ReturnType<typeof buildBoingLaunchIntegrationInput>} input
  */
 export async function preflightBoingLaunchWizard(client, input) {

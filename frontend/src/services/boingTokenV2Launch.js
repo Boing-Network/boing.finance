@@ -33,7 +33,7 @@ import {
   REFERENCE_FUNGIBLE_BALANCE_XOR,
   validateBoingTokenMetadata,
   validateHex32,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 
 export const BOING_TOKEN_V2_VERSION = 2;
 /** v2 balances are whole units. */

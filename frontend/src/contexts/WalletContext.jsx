@@ -4,7 +4,7 @@ import {
   connectInjectedBoingWallet,
   mapInjectedProviderErrorToUiMessage,
   providerSupportsBoingNativeRpc,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 import toast from 'react-hot-toast';
 import { formatUnitsLite } from '../utils/formatUnitsLite';
 import {

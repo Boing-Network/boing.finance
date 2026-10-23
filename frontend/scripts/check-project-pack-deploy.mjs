@@ -26,7 +26,7 @@ import {
   signTransactionInputForClient,
   submitSignedTransactionIdempotent,
   transactionIdFromSignedTransactionHex,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 import { planProjectPack } from '../src/services/projectPackPlan.js';
 import { BOING_TOKEN_ADMIN_SLOT_HEX, BOING_TOKEN_MINT_ONCE_SLOT_HEX } from '../src/services/boingTokenV2Launch.js';
 import { BOING_NFT_COLLECTION_ADMIN_SLOT_HEX } from '../src/services/boingDeployInit.js';

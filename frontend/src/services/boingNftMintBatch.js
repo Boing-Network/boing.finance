@@ -2,7 +2,7 @@ import {
   encodeReferenceMintBatchCalldata,
   MAX_REFERENCE_NFT_MINT_BATCH,
   referenceNftTokenIdWordFromU64,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 import { boingExpressContractCallSignSimulateSubmit } from './boingExpressNativeTx';
 import { pickExpressProviderForDeploy } from './boingNativeLaunchWizardDeploy';
 import { prepareOnChainNftMintRows, publishNftTokenMetadataDocuments } from '../utils/nftCollectionMetadata';

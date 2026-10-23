@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { getBoingTokenBalance } from 'boing-sdk';
+import { getBoingTokenBalance } from '@boing-network/boing-sdk';
 import { Link } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';

@@ -1,7 +1,7 @@
 import {
   encodeReferenceSetMetadataHashCalldata,
   referenceNftTokenIdWordFromU64,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 import { boingExpressContractCallSignSimulateSubmit } from './boingExpressNativeTx';
 import { pickExpressProviderForDeploy } from './boingNativeLaunchWizardDeploy';
 import { boingWalletMissingMessage } from '../utils/boingWalletDiscovery';

@@ -61,11 +61,11 @@ import {
   encodeWboingDepositCalldata,
   encodeWboingWithdrawAllCalldata,
   getBoingTokenAllowance,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 import { WBOING_HEX, isNativeBoingId } from './boingSwapQuote.js';
 
 /**
- * @param {import('boing-sdk').BoingClient} client
+ * @param {import('@boing-network/boing-sdk').BoingClient} client
  * @param {{ poolHex: string, tokenAHex: string, tokenBHex: string, amountA: bigint, amountB: bigint, minLp?: bigint,
  *   senderHex: string, signSimulateSubmit: Function, onState?: (s: string) => void }} p
  */
@@ -100,7 +100,7 @@ export async function executeAddLiquidity(client, p) {
 }
 
 /**
- * @param {import('boing-sdk').BoingClient} _client
+ * @param {import('@boing-network/boing-sdk').BoingClient} _client
  * @param {{ poolHex: string, tokenAHex: string, tokenBHex: string, burn: bigint, minA: bigint, minB: bigint,
  *   senderHex: string, signSimulateSubmit: Function }} p
  */

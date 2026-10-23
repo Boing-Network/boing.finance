@@ -7,7 +7,7 @@ import { boingExpressContractCallSignSimulateSubmit } from './boingExpressNative
 import { nodeBatchSupport } from './linkedNftTokenRegistry';
 import { flowTxsToBatchTx, isWalletBatchUnsupportedError } from '../utils/linkedNftLinkBatch';
 import { inspectContract, recordMatches, hex0x, INTERFACE_REGISTRY_ID } from '../utils/publishInterface';
-import { fetchInterfaceRecord, interfaceJsonHashHex, readInterfaceBlob, storageWordReaderFromRpc } from 'boing-sdk';
+import { fetchInterfaceRecord, interfaceJsonHashHex, readInterfaceBlob, storageWordReaderFromRpc } from '@boing-network/boing-sdk';
 
 export const rpc = (method, params) => boingJsonRpc(method, params);
 

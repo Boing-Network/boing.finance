@@ -18,7 +18,7 @@ import {
   fetchInterfaceRecord,
   interfaceJsonHashHex,
   predictCreate2ContractAddress,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 
 export const INTERFACE_SCHEMA = 'boing-interface/v1';
 export const PARAM_TYPES = ['account', 'u128', 'u64', 'bytes32', 'bool', 'u8'];

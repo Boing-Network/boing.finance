@@ -5,7 +5,7 @@ import {
   buildNativeDexLedgerRouterV3ContractCallTx,
   encodeNativeAmmRemoveLiquidityToCalldata,
   encodeNativeAmmSwapToCalldata,
-} from 'boing-sdk';
+} from '@boing-network/boing-sdk';
 import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
