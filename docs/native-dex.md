@@ -1,7 +1,7 @@
 # Native DEX on Boing L1
 
 > 👋 **Everyday users:** on Boing L1, swap with [Boing Express](https://boing.express). The Swap tab uses the network default constant-product pool when the RPC publishes one.  
-> 🛠️ **Developers:** Solidity in `contracts/` is **EVM only**. Boing L1 uses Boing VM bytecode + `boing-sdk`.  
+> 🛠️ **Developers:** Solidity in `contracts/` is **EVM only**. Boing L1 uses Boing VM bytecode + `@boing-network/boing-sdk`.  
 > 🛰️ **Operators:** publish `end_user.canonical_native_*` on the node. Do not bake historical SDK hexes as live.
 
 How **boing.finance** treats **Boing Network L1** (chain id **6913**, Boing VM) versus **EVM** chains, what is shipped, and what still belongs to the network team.
@@ -18,7 +18,7 @@ flowchart LR
     Sol[contracts/ Solidity] --> Eth[ethers + MetaMask]
   end
   subgraph boing [Boing L1]
-    VM[Boing VM programs] --> SDK[boing-sdk]
+    VM[Boing VM programs] --> SDK["@boing-network/boing-sdk"]
     SDK --> Express[Boing Express]
   end
   App[boing.finance] --> evm
@@ -43,7 +43,7 @@ There is **no compiler switch** that turns the Solidity tree in `contracts/` int
 - **Boing L1 (6913):** Boing RPC + Boing Express signing. `contracts.js` defines:
   - `nativeConstantProductPool` — 32-byte pool `AccountId` from `REACT_APP_BOING_NATIVE_AMM_POOL` when set; otherwise `0x00…00` until the hosted chain publishes `end_user.canonical_native_cp_pool`.
   - `nativeVm.dexFactory`, `swapRouter`, `ledgerRouterV2` / `V3`, `liquidityLocker`, plus LP vault / share token ids (env or live RPC; zeros when unpublished).
-  - Runtime defaults come from **`fetchNativeDexIntegrationDefaults`** (`boing-sdk`): live `boing_getNetworkInfo.end_user` plus env overrides. Historical SDK-embedded 6913 hexes are **not** treated as live.
+  - Runtime defaults come from **`fetchNativeDexIntegrationDefaults`** (`@boing-network/boing-sdk`): live `boing_getNetworkInfo.end_user` plus env overrides. Historical SDK-embedded 6913 hexes are **not** treated as live.
 
 The **Swap** tab on 6913 targets the **network default** constant-product pool. **Create Pool** on 6913 deploys a new CP pool, binds token ids, and seeds `add_liquidity`; `register_pair` runs when a factory id is published. **Liquidity** add/remove works on the canonical pool, a directory venue, or a pasted pool AccountId. Additional factory pairs (including multihop) are surfaced under **Pools** and **Smart route**.
 
@@ -52,7 +52,7 @@ The **Swap** tab on 6913 targets the **network default** constant-product pool. 
 1. **On-chain programs** written for the Boing VM (instruction set, storage, logs, gas).
 2. **QA / deploy policy** — bytecode passes `boing_qaCheck`, then **ContractDeploy** (optional Create2).
 3. **Published ids** — 32-byte `AccountId` hex for factory, router, locker (and per-pair accounts if the design mirrors Uniswap pairs).
-4. **App wiring** — `boing_simulateTransaction` / `boing_submitTransaction` with Boing calldata (`boing-sdk`), not `eth_call` / MetaMask for those flows.
+4. **App wiring** — `boing_simulateTransaction` / `boing_submitTransaction` with Boing calldata (`@boing-network/boing-sdk`), not `eth_call` / MetaMask for those flows.
 
 Solidity in this repo remains a **reference design** and **EVM deployment source**.
 
@@ -73,7 +73,7 @@ Account URLs: `https://boing.observer/account/{accountHex}` via `frontend/src/co
 
 | Concept | EVM (e.g. Sepolia) | Boing L1 (6913) |
 |--------|---------------------|------------------|
-| Deploy unit | `solc` bytecode | **Boing VM bytecode** (templates in **boing-sdk** / env overrides) |
+| Deploy unit | `solc` bytecode | **Boing VM bytecode** (templates in **@boing-network/boing-sdk** / env overrides) |
 | Address | 20-byte `0x…` | **32-byte `AccountId`** (`0x` + 64 hex) |
 | How dApps deploy | `ethers.ContractFactory` / MetaMask | **Boing Express** + `contract_deploy_meta` (+ QA) |
 | Solidity in `contracts/` | Deployed here | **Reference / EVM only** |
@@ -224,4 +224,4 @@ Discovery-specific flags: [native-dex-discovery.md](./native-dex-discovery.md).
 - **RPC URLs / chain IDs:** [THREE-CODEBASE-ALIGNMENT.md](https://github.com/Boing-Network/boing.network/blob/main/docs/THREE-CODEBASE-ALIGNMENT.md)
 - **Canonical testnet pool:** [OPS-CANONICAL-TESTNET-NATIVE-AMM-POOL.md](https://github.com/Boing-Network/boing.network/blob/main/docs/OPS-CANONICAL-TESTNET-NATIVE-AMM-POOL.md)
 
-This repo consumes `boing-sdk` via `file:../boing.network/boing-sdk` (keep that checkout ≥ 0.3.0 for list-RPC helpers).
+This repo consumes **`@boing-network/boing-sdk`** via `file:../boing.network/boing-sdk` (keep that checkout ≥ **0.5.24** for current list-RPC helpers). External apps should `npm i @boing-network/boing-sdk` — not unscoped `boing-sdk`.
