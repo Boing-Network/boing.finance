@@ -3,7 +3,7 @@
 Cross-chain DeFi: **EVM** (TokenFactory, Sepolia DEX, LI.FI swap **and** Bridge), **Solana** (SPL deploy, Jupiter), and **Boing Network L1** (native VM AMM via Boing Express).
 
 > 👋 **Everyday users:** open [boing.finance](https://boing.finance), connect a wallet, swap or deploy. On Boing L1 you need [Boing Express](https://boing.express) — MetaMask cannot sign 32-byte Boing accounts.  
-> 🛠️ **Developers:** Vite + React frontend, Cloudflare Workers + D1 backend. Boing path is `boing-sdk` + Express, **not** the Solidity tree.  
+> 🛠️ **Developers:** Vite + React frontend, Cloudflare Workers + D1 backend. Boing path is `@boing-network/boing-sdk` + Express, **not** the Solidity tree.  
 > 🛰️ **Operators:** canonical env is `frontend/.env.example`. Live EVM addresses: `frontend/src/config/contracts.js`. Smoke: `cd frontend && npm run smoke:boing-rpc`.
 
 ```mermaid
@@ -39,7 +39,7 @@ Hosted Fly testnet currently may have **`end_user.canonical_native_*` = null** �
 
 ## Tech stack
 
-- **Frontend:** React 18, Vite, Tailwind CSS, Framer Motion, React Query, ethers.js, `@solana/web3.js`, `boing-sdk`
+- **Frontend:** React 18, Vite, Tailwind CSS, Framer Motion, React Query, ethers.js, `@solana/web3.js`, `@boing-network/boing-sdk`
 - **Backend:** Cloudflare Workers, Hono, D1, Drizzle ORM
 - **Contracts:** Solidity, Hardhat, OpenZeppelin (EVM only)
 

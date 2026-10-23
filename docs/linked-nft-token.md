@@ -119,7 +119,7 @@ REACT_APP_BOING_RPC_UNSIGNED_SIMULATE_METHOD=boing_simulateContractCall
 
 Canonical catalog: `frontend/.env.example`. Resolution order also accepts `REACT_APP_BOING_NATIVE_VM_LINKED_NFT_TOKEN_REGISTRY`, contracts `nativeVm.linkedNftTokenRegistry`, and network `end_user.canonical_linked_nft_token_registry`.
 
-`boing-sdk` registry helpers are on **boing.network main** (merged [PR #42](https://github.com/Boing-Network/boing.network/pull/42)).
+`@boing-network/boing-sdk` registry helpers are on **boing.network main** (merged [PR #42](https://github.com/Boing-Network/boing.network/pull/42)).
 
 ### Verify registry (public)
 
