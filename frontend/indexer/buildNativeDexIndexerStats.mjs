@@ -1,21 +1,21 @@
 /**
- * Env-aware wrapper around {@link buildNativeDexIndexerStatsForClient} (boing-sdk).
+ * Env-aware wrapper around {@link buildNativeDexIndexerStatsForClient} (@boing-network/boing-sdk).
  * CLI, Cloudflare Pages, and optional KV-backed Workers use this module.
  *
- * Imports use `../node_modules/boing-sdk/dist/*.js` (not the package barrel) so Wrangler’s
- * esbuild bundles the indexer implementation even when upstream `dist/index.js` is stale
- * or omits re-exports on Boing-Network/boing.network main.
+ * Imports use scoped package deep paths under `node_modules/@boing-network/boing-sdk/dist`
+ * (not the package barrel) so Wrangler’s esbuild bundles the indexer implementation even when
+ * upstream `dist/index.js` is stale or omits re-exports on Boing-Network/boing.network main.
  *
  * Disk persistence: pass `historyStore` from `historyStoreFs.mjs` (CLI only). Do not use
  * `node:fs` here so Wrangler can bundle this file for Pages Functions without nodejs_compat.
  */
 
-import { BoingClient } from '../node_modules/boing-sdk/dist/client.js';
-import { buildNativeDexIntegrationOverridesFromProcessEnv } from '../node_modules/boing-sdk/dist/dexIntegration.js';
+import { BoingClient } from '../node_modules/@boing-network/boing-sdk/dist/client.js';
+import { buildNativeDexIntegrationOverridesFromProcessEnv } from '../node_modules/@boing-network/boing-sdk/dist/dexIntegration.js';
 import {
   buildDexOverridesFromPlainEnv,
   buildNativeDexIndexerStatsForClient,
-} from '../node_modules/boing-sdk/dist/nativeDexIndexerStats.js';
+} from '../node_modules/@boing-network/boing-sdk/dist/nativeDexIndexerStats.js';
 
 export { buildDexOverridesFromPlainEnv };
 

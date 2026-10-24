@@ -15,7 +15,7 @@ if (!existsSync(sdkRoot)) {
   process.exit(0);
 }
 
-/** Wrangler bundles `@boing-network/boing-sdk/dist/*.js` and resolves `@noble/*` from `boing-sdk/node_modules`. */
+/** Wrangler bundles `@boing-network/boing-sdk/dist/*.js` and resolves `@noble/*` from that package’s `node_modules`. */
 const nobleHashes = join(sdkRoot, 'node_modules', '@noble', 'hashes', 'package.json');
 if (!existsSync(nobleHashes)) {
   // Prefer lockfile-aligned `npm ci` when present; plain `npm install` has hit arborist
