@@ -2,10 +2,17 @@
  * Resolve `boing://blob/0x…` to a browser-displayable object URL via `boing_getBlob`.
  */
 
-import { blobIdHexFromBoingUri, hexToBytes } from '@boing-network/boing-sdk';
+import { bytesToHex, hexToBytes, parseMediaBlobId } from '@boing-network/boing-sdk';
 import { getSharedBoingClient } from '../services/boingNativeDexClient';
 
 const cache = new Map();
+
+/** @param {string} uri @returns {string | null} 0x-prefixed 32-byte id */
+function blobIdHexFromUri(uri) {
+  const id = parseMediaBlobId(String(uri || '').trim());
+  if (!id) return null;
+  return bytesToHex(id);
+}
 
 function dataHexToBytes(dataHex) {
   if (dataHex instanceof Uint8Array) return dataHex;
@@ -23,7 +30,7 @@ function dataHexToBytes(dataHex) {
  * @returns {Promise<string | null>} blob: URL or null
  */
 export async function resolveBoingBlobDisplayUrl(uri, opts = {}) {
-  const idHex = blobIdHexFromBoingUri(String(uri || '').trim());
+  const idHex = blobIdHexFromUri(uri);
   if (!idHex) return null;
   const cached = cache.get(idHex);
   if (cached) return cached;
@@ -48,7 +55,7 @@ export async function resolveBoingBlobDisplayUrl(uri, opts = {}) {
 
 /** Drop a cached object URL (revoke). */
 export function forgetBoingBlobDisplayUrl(uri) {
-  const idHex = blobIdHexFromBoingUri(String(uri || '').trim());
+  const idHex = blobIdHexFromUri(uri);
   if (!idHex) return;
   const url = cache.get(idHex);
   if (url) {

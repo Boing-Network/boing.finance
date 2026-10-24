@@ -49,7 +49,7 @@ test('deploy section copy mentions L1 blobs', () => {
 
 test('blob display resolver uses getBlob', () => {
   assert.match(blobUrlSrc, /getBlob/);
-  assert.match(blobUrlSrc, /blobIdHexFromBoingUri/);
+  assert.match(blobUrlSrc, /parseMediaBlobId/);
   assert.match(blobUrlSrc, /createObjectURL/);
 });
 
