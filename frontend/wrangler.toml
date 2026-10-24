@@ -25,14 +25,16 @@ preview_id = "f6c686292e544a868a3bbfa8c37cede6"
 [vars]
 REACT_APP_ENV = "development"
 REACT_APP_BACKEND_URL = "https://boing-api-staging.nico-chikuji.workers.dev"
-BOING_TESTNET_RPC_URL = "https://testnet-rpc.boing.network"
+# Pin Pages Function proxy to testnet-1 (empty registries on t2; Option B).
+BOING_TESTNET_RPC_URL = "https://boing-testnet-1.fly.dev"
 # Optional tuning for GET /api/native-dex-indexer-stats (see indexer/buildNativeDexIndexerStats.mjs)
 NATIVE_DEX_INDEXER_LOG_SCAN_BLOCKS = "8000"
 
 [env.production.vars]
 REACT_APP_ENV = "production"
 REACT_APP_BACKEND_URL = "https://boing-api-prod.nico-chikuji.workers.dev"
-BOING_TESTNET_RPC_URL = "https://testnet-rpc.boing.network"
+# Pin Pages Function proxy to testnet-1 (empty registries on t2; Option B).
+BOING_TESTNET_RPC_URL = "https://boing-testnet-1.fly.dev"
 NATIVE_DEX_INDEXER_LOG_SCAN_BLOCKS = "8000"
 
 # Preview / non-production Pages deployments (e.g. staging project + preview branches).
@@ -45,5 +47,6 @@ preview_id = "f6c686292e544a868a3bbfa8c37cede6"
 [env.preview.vars]
 REACT_APP_ENV = "staging"
 REACT_APP_BACKEND_URL = "https://boing-api-staging.nico-chikuji.workers.dev"
-BOING_TESTNET_RPC_URL = "https://testnet-rpc.boing.network"
+# Pin Pages Function proxy to testnet-1 (empty registries on t2; Option B).
+BOING_TESTNET_RPC_URL = "https://boing-testnet-1.fly.dev"
 NATIVE_DEX_INDEXER_LOG_SCAN_BLOCKS = "8000"
