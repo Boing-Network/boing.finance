@@ -6,24 +6,30 @@ export const NFT_COLLECTION_METADATA_SCHEMA = 'boing.nft_collection_metadata.v1'
 /** Per-token ERC-721-style JSON committed on-chain via reference NFT `metadata_hash`. */
 export const NFT_TOKEN_METADATA_SCHEMA = 'boing.nft_token_metadata.v1';
 
-/** Public URI from R2 / IPFS upload results. Keep https URLs; only raw CIDs become ipfs://. */
+/** Public URI from R2 / IPFS / L1 blob upload results. Keep https, ipfs, and boing://blob URIs. */
 export function publicAssetUri(result) {
   if (!result) return '';
   if (typeof result === 'string') {
     const t = result.trim();
     if (!t) return '';
-    if (/^(https?:\/\/|ipfs:\/\/)/i.test(t)) return t;
+    if (/^(https?:\/\/|ipfs:\/\/|boing:\/\/blob\/)/i.test(t)) return t;
     return `ipfs://${t}`;
   }
-  const raw = String(result.url || result.gatewayUrls?.[0] || '').trim();
-  if (/^(https?:\/\/|ipfs:\/\/)/i.test(raw)) return raw;
+  const raw = String(result.url || result.gatewayUrls?.[0] || result.uri || '').trim();
+  if (/^(https?:\/\/|ipfs:\/\/|boing:\/\/blob\/)/i.test(raw)) return raw;
   const hash = String(result.hash || raw || '').trim();
   if (!hash) return '';
+  if (/^boing:\/\/blob\//i.test(hash)) return hash;
   return hash.startsWith('ipfs://') ? hash : `ipfs://${hash}`;
 }
 
 export function isPublicAssetUri(value) {
-  return /^(https?:\/\/|ipfs:\/\/)/i.test(String(value || '').trim());
+  return /^(https?:\/\/|ipfs:\/\/|boing:\/\/blob\/)/i.test(String(value || '').trim());
+}
+
+/** True when the URI is an L1 media blob reference. */
+export function isBoingL1BlobUri(value) {
+  return /^boing:\/\/blob\/0x[0-9a-fA-F]{64}$/i.test(String(value || '').trim());
 }
 
 function normalizeAttributes(attributes) {

@@ -384,7 +384,8 @@ const NativeBoingNftDeploySection = forwardRef(function NativeBoingNftDeploySect
       </h3>
       <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
         Deploys the collection contract, then mints the prepared set on-chain with chunked{' '}
-        <code className="text-[10px]">mint_batch</code> (owners + metadata hashes). Images stay on R2/HTTP; the chain
+        <code className="text-[10px]">mint_batch</code> (owners + metadata hashes). Images prefer L1 media blobs (
+        <code className="text-[10px]">boing://blob/…</code>) when PutBlob succeeds, with R2/HTTP fallback; the chain
         stores commitments marketplaces can resolve.{' '}
         <Link to="/docs?section=boing-l1" className="text-green-400 underline text-sm">
           Docs
