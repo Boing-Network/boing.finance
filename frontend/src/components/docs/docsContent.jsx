@@ -427,8 +427,9 @@ function CreateNft() {
       <UL>
         <li>
           <B>Boing:</B> deploys an NFT collection on Boing L1 with Boing Express, then mints the prepared set on-chain via
-          chunked <code>mint_batch</code> (owners + per-token metadata hashes). Images and JSON stay on R2/HTTP; the
-          chain stores commitments marketplaces can resolve.
+          chunked <code>mint_batch</code> (owners + per-token metadata hashes). Images prefer L1 media blobs (
+          <code>boing://blob/…</code>) via PutBlob when under the live size cap, with R2/HTTP fallback; collection JSON
+          stays on R2/HTTP. The chain stores commitments marketplaces can resolve.
         </li>
         <li>
           <B>Solana:</B> mints SPL NFTs.
