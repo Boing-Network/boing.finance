@@ -15,7 +15,7 @@ import {
   SegmentedControl,
   PageCard,
 } from '../components/PageLayout';
-import { uploadToIPFS, validateFile } from '../utils/ipfsUpload';
+import { validateFile } from '../utils/ipfsUpload';
 import {
   applyCoverImageToTokens,
   buildNftCollectionMetadataDocument,
@@ -30,7 +30,7 @@ import {
   applyMediaUrisToTokens,
   mediaMatchReport,
 } from '../utils/nftCsv';
-import { uploadFilesToR2Chunked, formatBytes } from '../utils/r2ChunkedUpload';
+import { formatBytes } from '../utils/r2ChunkedUpload';
 import {
   NFT_MEDIA_BUDGET_BYTES,
   NFT_MEDIA_BUDGET_GB,
@@ -51,6 +51,11 @@ import {
 } from '../utils/nftCollectionSizeFee';
 import NativeBoingNftDeploySection from '../components/NativeBoingNftDeploySection';
 import LinkedNftTokenPanel from '../components/LinkedNftTokenPanel';
+import BoingBlobImage from '../components/BoingBlobImage';
+import {
+  uploadNftMediaFilesPreferL1,
+  uploadNftMediaPreferL1,
+} from '../services/boingL1MediaBlobUpload';
 import useEscapeKey from '../hooks/useEscapeKey';
 
 const SOLANA_NFT_STEPS = [
@@ -378,7 +383,15 @@ function CreateNFTSolanaContent() {
 
 export default function CreateNFT() {
   const { isSolana } = useChainType();
-  const { account: _account, isConnected, getCurrentNetwork, connectWallet, chainId, walletType } = useWallet();
+  const {
+    account: walletAccount,
+    isConnected,
+    getCurrentNetwork,
+    connectWallet,
+    chainId,
+    walletType,
+    getWalletProvider,
+  } = useWallet();
   const [searchParams] = useSearchParams();
   const linkTokenFromQuery = searchParams.get('linkToken') || searchParams.get('token') || '';
   const [step, setStep] = useState('collection');
@@ -417,6 +430,8 @@ export default function CreateNFT() {
   const [largeMediaUriByFile, setLargeMediaUriByFile] = useState({});
   const [largeUploadProgress, setLargeUploadProgress] = useState(null);
   const [isLargeMediaUploading, setIsLargeMediaUploading] = useState(false);
+  /** Default on for Boing Express: PutBlob when under live cap; R2/IPFS fallback otherwise. */
+  const [preferL1MediaBlobs, setPreferL1MediaBlobs] = useState(true);
   const [previewTokenIndex, setPreviewTokenIndex] = useState(null);
   useEscapeKey(previewTokenIndex != null, () => setPreviewTokenIndex(null));
 
@@ -560,7 +575,11 @@ export default function CreateNFT() {
     }
     setIsUploading(true);
     const uris = [];
+    let l1Count = 0;
     try {
+      const provider =
+        isBoingNativeNftWizard && preferL1MediaBlobs ? getWalletProvider?.() : null;
+      const senderHex = isBoingNativeNftWizard && preferL1MediaBlobs ? walletAccount : null;
       for (let i = 0; i < files.length; i++) {
         try {
           validateFile(files[i]);
@@ -568,13 +587,26 @@ export default function CreateNFT() {
           toast.error(`Image ${i + 1}: ${e.message}`);
           continue;
         }
-        const result = await uploadToIPFS(files[i]);
-        const uri = publicAssetUri(result);
-        if (uri) uris.push(uri);
+        const out = await uploadNftMediaPreferL1(files[i], {
+          preferL1: preferL1MediaBlobs && isBoingNativeNftWizard,
+          provider,
+          senderHex,
+          useChunkedR2: false,
+        });
+        if (out?.uri) {
+          uris.push(out.uri);
+          if (out.storage === 'l1') l1Count += 1;
+        }
       }
       setUploadedUris(uris);
       setPublishedFingerprint('');
-      if (uris.length > 0) toast.success(`${uris.length} image(s) uploaded`);
+      if (uris.length > 0) {
+        toast.success(
+          l1Count > 0
+            ? `${uris.length} image(s) uploaded (${l1Count} on Boing L1)`
+            : `${uris.length} image(s) uploaded`,
+        );
+      }
       if (uris.length < files.length) toast.error('Some uploads failed');
       return uris;
     } catch (err) {
@@ -583,7 +615,13 @@ export default function CreateNFT() {
     } finally {
       setIsUploading(false);
     }
-  }, [files]);
+  }, [
+    files,
+    getWalletProvider,
+    isBoingNativeNftWizard,
+    preferL1MediaBlobs,
+    walletAccount,
+  ]);
 
   const canProceed = () => {
     if (step === 'collection') return collectionName.trim() && collectionSymbol.trim();
@@ -649,8 +687,15 @@ export default function CreateNFT() {
     if (!cover && collectionCoverFile) {
       try {
         validateFile(collectionCoverFile);
-        const uploaded = await uploadToIPFS(collectionCoverFile);
-        cover = publicAssetUri(uploaded);
+        const provider =
+          isBoingNativeNftWizard && preferL1MediaBlobs ? getWalletProvider?.() : null;
+        const out = await uploadNftMediaPreferL1(collectionCoverFile, {
+          preferL1: preferL1MediaBlobs && isBoingNativeNftWizard,
+          provider,
+          senderHex: walletAccount,
+          useChunkedR2: false,
+        });
+        cover = out?.uri || '';
         if (cover) setUploadedCoverUri(cover);
       } catch (e) {
         throw new Error(e?.message || 'Collection image upload failed');
@@ -711,12 +756,16 @@ export default function CreateNFT() {
     collectionDescription,
     collectionName,
     collectionSymbol,
+    getWalletProvider,
+    isBoingNativeNftWizard,
+    preferL1MediaBlobs,
     publishedCoverUri,
     publishedDescriptionHash,
     publishedFingerprint,
     publishedMetadataUri,
     resolvedCoverUri,
     tokenListForPublish,
+    walletAccount,
   ]);
 
   const exportMetadataJSON = () => {
@@ -862,19 +911,33 @@ export default function CreateNFT() {
     setIsLargeMediaUploading(true);
     setLargeUploadProgress({ loaded: 0, total: largeMediaTotalBytes, ratio: 0, completed: 0, failed: 0 });
     try {
-      const { results, failures } = await uploadFilesToR2Chunked(largeMediaFiles, {
-        onTotalProgress: setLargeUploadProgress,
+      const provider =
+        isBoingNativeNftWizard && preferL1MediaBlobs ? getWalletProvider?.() : null;
+      const senderHex = isBoingNativeNftWizard && preferL1MediaBlobs ? walletAccount : null;
+      const { results, failures } = await uploadNftMediaFilesPreferL1(largeMediaFiles, {
+        preferL1: preferL1MediaBlobs && isBoingNativeNftWizard,
+        provider,
+        senderHex,
+        onProgress: setLargeUploadProgress,
       });
       const uriMap = { ...largeMediaUriByFile };
-      for (const { file, uri } of results) {
+      let l1Count = 0;
+      for (const { file, uri, storage } of results) {
         uriMap[file.name.toLowerCase()] = uri;
+        if (storage === 'l1') l1Count += 1;
       }
       setLargeMediaUriByFile(uriMap);
       if (generatedDynamicMetadata.length > 0) {
         setGeneratedDynamicMetadata((prev) => applyMediaUrisToTokens(prev, uriMap));
         setPublishedFingerprint('');
       }
-      if (results.length) toast.success(`Uploaded ${results.length} media file(s)`);
+      if (results.length) {
+        toast.success(
+          l1Count > 0
+            ? `Uploaded ${results.length} media file(s) (${l1Count} on Boing L1)`
+            : `Uploaded ${results.length} media file(s)`,
+        );
+      }
       if (failures.length) {
         toast.error(`${failures.length} upload(s) failed — retry or remove those files`);
       }
@@ -885,7 +948,16 @@ export default function CreateNFT() {
     } finally {
       setIsLargeMediaUploading(false);
     }
-  }, [largeMediaFiles, largeMediaTotalBytes, largeMediaUriByFile, generatedDynamicMetadata.length]);
+  }, [
+    largeMediaFiles,
+    largeMediaTotalBytes,
+    largeMediaUriByFile,
+    generatedDynamicMetadata.length,
+    getWalletProvider,
+    isBoingNativeNftWizard,
+    preferL1MediaBlobs,
+    walletAccount,
+  ]);
 
   const generateDynamicMetadata = () => {
     const layers = traitLayers.filter((l) => (l.trait_type || '').trim() && (l.values || []).some((v) => String(v).trim()));
@@ -1228,6 +1300,19 @@ export default function CreateNFT() {
                                 : ' · all matched or have image URLs'}
                             </p>
                           ) : null}
+                          {isBoingNativeNftWizard ? (
+                            <label className="flex items-start gap-2 text-sm text-gray-300 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                className="mt-1 rounded"
+                                checked={preferL1MediaBlobs}
+                                onChange={(e) => setPreferL1MediaBlobs(e.target.checked)}
+                              />
+                              <span>
+                                Prefer L1 media blobs (wallet approval per file under cap; otherwise R2).
+                              </span>
+                            </label>
+                          ) : null}
                           <button
                             type="button"
                             onClick={() => uploadLargeMedia()}
@@ -1420,7 +1505,7 @@ export default function CreateNFT() {
                               className="rounded-lg border border-gray-600 overflow-hidden bg-gray-800 text-left hover:border-cyan-500/50 transition-colors"
                             >
                               {isPublicAssetUri(meta.image) || collectionCoverPreview ? (
-                                <img
+                                <BoingBlobImage
                                   src={isPublicAssetUri(meta.image) ? meta.image : collectionCoverPreview}
                                   alt={meta.name}
                                   className="w-full aspect-square object-cover"
@@ -1437,7 +1522,7 @@ export default function CreateNFT() {
                         </div>
                         <p className="text-gray-400 text-sm">
                           {isBoingNativeNftWizard
-                            ? 'Deploy & mint creates the collection on Boing L1, then mints every prepared token (chunked mint_batch) with owners and metadata hashes. Images stay on R2/HTTP. Details: '
+                            ? 'Deploy & mint creates the collection on Boing L1, then mints every prepared token (chunked mint_batch) with owners and metadata hashes. Images prefer L1 media blobs (boing://blob/…) when under the live cap, with R2/HTTP fallback. Details: '
                             : 'Export the JSON for an external minter. This page does not deploy an EVM collection or charge a fee.'}
                           {isBoingNativeNftWizard && (
                             <Link to="/docs?section=boing-l1" className="text-cyan-400 underline">
@@ -1591,6 +1676,20 @@ export default function CreateNFT() {
                         </div>
                       ))}
                     </div>
+                    {isBoingNativeNftWizard ? (
+                      <label className="flex items-start gap-2 text-sm text-gray-300 cursor-pointer max-w-xl">
+                        <input
+                          type="checkbox"
+                          className="mt-1 rounded"
+                          checked={preferL1MediaBlobs}
+                          onChange={(e) => setPreferL1MediaBlobs(e.target.checked)}
+                        />
+                        <span>
+                          Store images as Boing L1 media blobs when under the live size cap (falls back to R2/HTTP).
+                          Each L1 upload needs a wallet approval.
+                        </span>
+                      </label>
+                    ) : null}
                     {uploadedUris.length < files.length && (
                       <button
                         type="button"
@@ -1800,9 +1899,10 @@ export default function CreateNFT() {
                   {isBoingNativeNftWizard ? (
                     <>
                       Collection metadata (with per-token <code className="text-xs">metadata_hash</code>) uploads to
-                      R2/HTTP and is committed as <code className="text-xs">description_hash</code> on deploy. After
-                      inclusion, the wizard runs chunked <code className="text-xs">mint_batch</code> so every token has
-                      an on-chain owner and metadata hash.{' '}
+                      R2/HTTP and is committed as <code className="text-xs">description_hash</code> on deploy. Token{' '}
+                      <code className="text-xs">image</code> fields prefer L1 <code className="text-xs">boing://blob/</code>{' '}
+                      URIs when PutBlob succeeds. After inclusion, chunked <code className="text-xs">mint_batch</code>{' '}
+                      sets owners + metadata hashes.{' '}
                       <Link to="/docs?section=boing-l1" className="text-cyan-400 underline">
                         Documentation → Boing L1 &amp; Express
                       </Link>
@@ -1882,7 +1982,11 @@ export default function CreateNFT() {
                     className="aspect-square rounded-lg overflow-hidden"
                     style={{ backgroundColor: 'var(--bg-tertiary)' }}
                   >
-                    {imageUrl ? <img src={imageUrl} alt={meta.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-4xl" style={{ color: 'var(--text-tertiary)' }}>#{idx + 1}</div>}
+                    {imageUrl ? (
+                      <BoingBlobImage src={imageUrl} alt={meta.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-4xl" style={{ color: 'var(--text-tertiary)' }}>#{idx + 1}</div>
+                    )}
                   </div>
                   <div>
                     <p className="text-xs mb-1" style={{ color: 'var(--text-tertiary)' }}>Name</p>
