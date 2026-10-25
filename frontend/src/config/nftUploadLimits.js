@@ -27,8 +27,23 @@ export const NFT_LARGE_FILE_MAX_BYTES = 512 * 1024 * 1024;
 /** Max CSV / media rows for large set. */
 export const NFT_LARGE_SET_MAX_ROWS = 10000;
 
-/** Parallel file uploads in the browser. */
-export const NFT_UPLOAD_CONCURRENCY = 3;
+/**
+ * Parallel file uploads in the browser (Worker → R2).
+ * HTTP/2 to Cloudflare allows more than classic per-host connection limits.
+ * Override with REACT_APP_NFT_UPLOAD_CONCURRENCY (1–16).
+ */
+function parseUploadConcurrency() {
+  const raw = Number(process.env.REACT_APP_NFT_UPLOAD_CONCURRENCY);
+  if (Number.isFinite(raw) && raw >= 1 && raw <= 16) return Math.trunc(raw);
+  return 8;
+}
+export const NFT_UPLOAD_CONCURRENCY = parseUploadConcurrency();
+
+/**
+ * Without a PutBlob publish session (Express 0.1.22+), warn that each file needs
+ * a wallet approval. Sessions remove the per-file popup; this is not a hard cap.
+ */
+export const NFT_L1_PER_FILE_APPROVAL_WARN_AT = 24;
 
 export function formatBytes(n) {
   const bytes = Number(n) || 0;
