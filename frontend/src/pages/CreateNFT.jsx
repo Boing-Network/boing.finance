@@ -36,6 +36,8 @@ import {
   NFT_MEDIA_BUDGET_GB,
   NFT_LARGE_FILE_MAX_BYTES,
   NFT_LARGE_SET_MAX_ROWS,
+  NFT_L1_PER_FILE_APPROVAL_WARN_AT,
+  NFT_UPLOAD_CONCURRENCY,
 } from '../config/nftUploadLimits';
 import { SOLANA_NETWORKS } from '../config/solanaConfig';
 import toast from 'react-hot-toast';
@@ -575,27 +577,42 @@ export default function CreateNFT() {
     }
     setIsUploading(true);
     const uris = [];
-    let l1Count = 0;
     try {
-      const provider =
-        isBoingNativeNftWizard && preferL1MediaBlobs ? getWalletProvider?.() : null;
-      const senderHex = isBoingNativeNftWizard && preferL1MediaBlobs ? walletAccount : null;
+      const validFiles = [];
       for (let i = 0; i < files.length; i++) {
         try {
           validateFile(files[i]);
+          validFiles.push(files[i]);
         } catch (e) {
           toast.error(`Image ${i + 1}: ${e.message}`);
-          continue;
         }
-        const out = await uploadNftMediaPreferL1(files[i], {
-          preferL1: preferL1MediaBlobs && isBoingNativeNftWizard,
-          provider,
-          senderHex,
-          useChunkedR2: false,
-        });
-        if (out?.uri) {
-          uris.push(out.uri);
-          if (out.storage === 'l1') l1Count += 1;
+      }
+      if (validFiles.length === 0) return [];
+
+      const preferL1 = preferL1MediaBlobs && isBoingNativeNftWizard;
+      const provider = preferL1 ? getWalletProvider?.() : null;
+      const senderHex = preferL1 ? walletAccount : null;
+
+      const { results, failures } = await uploadNftMediaFilesPreferL1(validFiles, {
+        preferL1,
+        provider,
+        senderHex,
+        concurrency: NFT_UPLOAD_CONCURRENCY,
+        onL1ForcedOff: (reason) => toast(reason, { icon: '⚡' }),
+        onPutBlobSession: (info) => {
+          if (info?.ok) toast.success(info.reason || 'L1 media session approved');
+          else if (info?.reason && validFiles.length >= NFT_L1_PER_FILE_APPROVAL_WARN_AT) {
+            toast(info.reason, { icon: 'ℹ️' });
+          }
+        },
+      });
+      const byFile = new Map(results.map((r) => [r.file, r]));
+      let l1Count = 0;
+      for (const file of validFiles) {
+        const row = byFile.get(file);
+        if (row?.uri) {
+          uris.push(row.uri);
+          if (row.storage === 'l1') l1Count += 1;
         }
       }
       setUploadedUris(uris);
@@ -607,7 +624,9 @@ export default function CreateNFT() {
             : `${uris.length} image(s) uploaded`,
         );
       }
-      if (uris.length < files.length) toast.error('Some uploads failed');
+      if (failures.length || uris.length < validFiles.length) {
+        toast.error('Some uploads failed');
+      }
       return uris;
     } catch (err) {
       toast.error(err?.message || 'Upload failed');
@@ -908,40 +927,65 @@ export default function CreateNFT() {
       toast.error(`Total media exceeds ${NFT_MEDIA_BUDGET_GB} GB budget`);
       return false;
     }
+    const pending = largeMediaFiles.filter(
+      (f) => !largeMediaUriByFile[String(f.name || '').toLowerCase()],
+    );
+    if (pending.length === 0) {
+      toast.success('All selected media already uploaded');
+      return true;
+    }
     setIsLargeMediaUploading(true);
-    setLargeUploadProgress({ loaded: 0, total: largeMediaTotalBytes, ratio: 0, completed: 0, failed: 0 });
+    setLargeUploadProgress({
+      loaded: 0,
+      total: largeMediaTotalBytes,
+      ratio: 0,
+      completed: largeMediaFiles.length - pending.length,
+      failed: 0,
+    });
     try {
-      const provider =
-        isBoingNativeNftWizard && preferL1MediaBlobs ? getWalletProvider?.() : null;
-      const senderHex = isBoingNativeNftWizard && preferL1MediaBlobs ? walletAccount : null;
-      const { results, failures } = await uploadNftMediaFilesPreferL1(largeMediaFiles, {
-        preferL1: preferL1MediaBlobs && isBoingNativeNftWizard,
+      const preferL1 = preferL1MediaBlobs && isBoingNativeNftWizard;
+      const provider = preferL1 ? getWalletProvider?.() : null;
+      const senderHex = preferL1 ? walletAccount : null;
+      const { results, failures } = await uploadNftMediaFilesPreferL1(pending, {
+        preferL1,
         provider,
         senderHex,
+        existingUriByName: largeMediaUriByFile,
+        concurrency: NFT_UPLOAD_CONCURRENCY,
         onProgress: setLargeUploadProgress,
+        onL1ForcedOff: (reason) => toast(reason, { icon: '⚡' }),
+        onPutBlobSession: (info) => {
+          if (info?.ok) toast.success(info.reason || 'L1 media session approved');
+          else if (info?.reason && pending.length >= NFT_L1_PER_FILE_APPROVAL_WARN_AT) {
+            toast(info.reason, { icon: 'ℹ️' });
+          }
+        },
       });
       const uriMap = { ...largeMediaUriByFile };
       let l1Count = 0;
-      for (const { file, uri, storage } of results) {
+      let skipped = 0;
+      for (const { file, uri, storage, skipped: wasSkipped } of results) {
         uriMap[file.name.toLowerCase()] = uri;
-        if (storage === 'l1') l1Count += 1;
+        if (wasSkipped) skipped += 1;
+        else if (storage === 'l1') l1Count += 1;
       }
       setLargeMediaUriByFile(uriMap);
       if (generatedDynamicMetadata.length > 0) {
         setGeneratedDynamicMetadata((prev) => applyMediaUrisToTokens(prev, uriMap));
         setPublishedFingerprint('');
       }
-      if (results.length) {
+      const fresh = results.length - skipped;
+      if (fresh > 0 || skipped > 0) {
         toast.success(
           l1Count > 0
-            ? `Uploaded ${results.length} media file(s) (${l1Count} on Boing L1)`
-            : `Uploaded ${results.length} media file(s)`,
+            ? `Uploaded ${fresh} media file(s) (${l1Count} on Boing L1)${skipped ? ` · ${skipped} skipped` : ''}`
+            : `Uploaded ${fresh} media file(s)${skipped ? ` · ${skipped} already done` : ''}`,
         );
       }
       if (failures.length) {
         toast.error(`${failures.length} upload(s) failed — retry or remove those files`);
       }
-      return failures.length === 0 && results.length > 0;
+      return failures.length === 0 && (fresh > 0 || skipped > 0);
     } catch (err) {
       toast.error(err?.message || 'Media upload failed');
       return false;
@@ -1309,10 +1353,16 @@ export default function CreateNFT() {
                                 onChange={(e) => setPreferL1MediaBlobs(e.target.checked)}
                               />
                               <span className="min-w-0 flex-1 leading-snug">
-                                Prefer L1 media blobs (wallet approval per file under cap; otherwise R2).
+                                Prefer L1 media blobs (default). Boing Express 0.1.22+ asks once for a
+                                PutBlob publish session, then uploads the whole set without per-file
+                                approvals. Uncheck for faster parallel R2 ×{NFT_UPLOAD_CONCURRENCY}.
                               </span>
                             </label>
-                          ) : null}
+                          ) : (
+                            <p className="text-xs text-gray-500">
+                              Uploads run in parallel (×{NFT_UPLOAD_CONCURRENCY}) to R2 for large collections.
+                            </p>
+                          )}
                           <button
                             type="button"
                             onClick={() => uploadLargeMedia()}
@@ -1333,6 +1383,9 @@ export default function CreateNFT() {
                                 {formatBytes(largeUploadProgress.loaded)} / {formatBytes(largeUploadProgress.total)}
                                 {largeUploadProgress.completed != null
                                   ? ` · ${largeUploadProgress.completed} done`
+                                  : ''}
+                                {largeUploadProgress.concurrency
+                                  ? ` · ×${largeUploadProgress.concurrency}`
                                   : ''}
                                 {largeUploadProgress.failed
                                   ? ` · ${largeUploadProgress.failed} failed`
@@ -1685,8 +1738,8 @@ export default function CreateNFT() {
                           onChange={(e) => setPreferL1MediaBlobs(e.target.checked)}
                         />
                         <span className="min-w-0 flex-1 leading-snug">
-                          Store images as Boing L1 media blobs when under the live size cap (falls back to R2/HTTP).
-                          Each L1 upload needs a wallet approval.
+                          Store as Boing L1 media blobs (default). Express 0.1.22+ uses one PutBlob
+                          session approval for the set. Uncheck for parallel R2 ×{NFT_UPLOAD_CONCURRENCY}.
                         </span>
                       </label>
                     ) : null}
