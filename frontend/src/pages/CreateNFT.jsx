@@ -1301,14 +1301,14 @@ export default function CreateNFT() {
                             </p>
                           ) : null}
                           {isBoingNativeNftWizard ? (
-                            <label className="flex items-start gap-2 text-sm text-gray-300 cursor-pointer">
+                            <label className="flex items-start gap-2 text-sm text-gray-300 cursor-pointer max-w-xl">
                               <input
                                 type="checkbox"
-                                className="mt-1 rounded"
+                                className="mt-1 h-4 w-4 shrink-0 rounded border-gray-500"
                                 checked={preferL1MediaBlobs}
                                 onChange={(e) => setPreferL1MediaBlobs(e.target.checked)}
                               />
-                              <span>
+                              <span className="min-w-0 flex-1 leading-snug">
                                 Prefer L1 media blobs (wallet approval per file under cap; otherwise R2).
                               </span>
                             </label>
@@ -1317,7 +1317,7 @@ export default function CreateNFT() {
                             type="button"
                             onClick={() => uploadLargeMedia()}
                             disabled={isLargeMediaUploading}
-                            className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-medium disabled:opacity-50"
+                            className="inline-flex items-center px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {isLargeMediaUploading ? 'Uploading media…' : 'Upload media to network'}
                           </button>
@@ -1680,11 +1680,11 @@ export default function CreateNFT() {
                       <label className="flex items-start gap-2 text-sm text-gray-300 cursor-pointer max-w-xl">
                         <input
                           type="checkbox"
-                          className="mt-1 rounded"
+                          className="mt-1 h-4 w-4 shrink-0 rounded border-gray-500"
                           checked={preferL1MediaBlobs}
                           onChange={(e) => setPreferL1MediaBlobs(e.target.checked)}
                         />
-                        <span>
+                        <span className="min-w-0 flex-1 leading-snug">
                           Store images as Boing L1 media blobs when under the live size cap (falls back to R2/HTTP).
                           Each L1 upload needs a wallet approval.
                         </span>
@@ -1709,8 +1709,13 @@ export default function CreateNFT() {
             {step === 'metadata' && (
               <div className="space-y-6">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={useSameMetadata} onChange={(e) => setUseSameMetadata(e.target.checked)} className="rounded" />
-                  <span className="text-gray-300">Use same name/description for all (with #1, #2, …)</span>
+                  <input
+                    type="checkbox"
+                    checked={useSameMetadata}
+                    onChange={(e) => setUseSameMetadata(e.target.checked)}
+                    className="h-4 w-4 shrink-0 rounded border-gray-500"
+                  />
+                  <span className="text-gray-300 min-w-0">Use same name/description for all (with #1, #2, …)</span>
                 </label>
                 {useSameMetadata ? (
                   <div className="space-y-4">
