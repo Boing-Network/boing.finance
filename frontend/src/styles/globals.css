@@ -1045,7 +1045,10 @@ nav a.active, .navbar a.active {
 }
 
 /* === INPUT FIELDS & FORM ELEMENTS (Step 5.4) === */
-input, textarea, select {
+/* Text-like controls only — checkboxes/radios/file/range must not inherit width:100% + padding. */
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]),
+textarea,
+select {
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
   border-radius: 8px;
@@ -1055,13 +1058,26 @@ input, textarea, select {
   width: 100%;
   transition: border-color var(--motion-transition), box-shadow var(--motion-transition);
 }
-input:focus, textarea:focus, select:focus {
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]):focus,
+textarea:focus,
+select:focus {
   outline: none;
   border-color: var(--accent-teal);
   box-shadow: 0 0 8px var(--glow-cyan);
 }
-input::placeholder, textarea::placeholder {
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="hidden"])::placeholder,
+textarea::placeholder {
   color: var(--text-tertiary);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: 1rem;
+  height: 1rem;
+  min-width: 1rem;
+  padding: 0;
+  flex-shrink: 0;
+  accent-color: var(--accent-teal);
 }
 
 .input-field {
