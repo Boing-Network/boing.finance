@@ -82,6 +82,10 @@ npm run check:dex
 
 Cloudflare Pages (manual): root `frontend`, build `npm install && npm run build:prod`, output **`dist`**.
 
+## Community
+
+Join the [Boing Network Discord](https://discord.gg/K3w9nbUw4N) (Boing Finance also has its own [Discord](https://discord.gg/7RDtQtQvBW)).
+
 ## Documentation
 
 See **[docs/README.md](./docs/README.md)** for the full index.

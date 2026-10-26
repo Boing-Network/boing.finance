@@ -72,7 +72,8 @@ function Home() {
           },
           "description": "The DeFi that always bounces back. Deploy tokens, create pools, and trade on EVM and Solana with boing.finance.",
           "sameAs": [
-            "https://twitter.com/boingfinance"
+            "https://twitter.com/boingfinance",
+            "https://discord.gg/K3w9nbUw4N"
           ],
           "contactPoint": {
             "@type": "ContactPoint",
