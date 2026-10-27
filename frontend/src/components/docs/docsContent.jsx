@@ -482,7 +482,7 @@ function BoingL1() {
       <P>
         Boing L1 is Boing&apos;s own blockchain, currently a public testnet (chain id 6913). boing.finance uses it for the
         Boing swap card, custody pools, the LP vault, token and NFT deploys, Publish interface and the Boing developer
-        tools. Your Boing account is a 64-character address and you sign with Boing Express, not MetaMask.
+        tools. Your Boing account is a 64-character address and you sign with Boing Express.
       </P>
       <H3>How signing works</H3>
       <UL>

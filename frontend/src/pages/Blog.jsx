@@ -69,9 +69,9 @@ const Blog = () => {
     <div className="relative w-full min-w-0">
       <Helmet>
         <title>Blog & News | boing.finance — Updates & Announcements</title>
-        <meta name="description" content="Latest news, updates, and announcements from boing.finance. The DeFi that always bounces back." />
+        <meta name="description" content="Latest news, updates, and announcements from boing.finance. Cross-chain DeFi with transparent routing and native Boing liquidity." />
         <meta property="og:image" content={brandShareImageAbsolute()} />
-        <meta property="og:image:alt" content="Boing Finance — DeFi That Bounces Back brand banner" />
+        <meta property="og:image:alt" content="Boing Finance — Move liquidity across chains brand banner" />
         <meta name="twitter:image" content={brandShareImageAbsolute()} />
       </Helmet>
 

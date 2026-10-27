@@ -15,9 +15,9 @@ export const minikitConfig = {
     iconUrl: "https://boing.finance/assets/boing-logo-mark.png",
     homeUrl: "https://boing.finance",
     splashImageUrl: "https://boing.finance/splash.png",
-    splashBackgroundColor: "#06080c",
+    splashBackgroundColor: "#050A1A",
     heroImageUrl: "https://boing.finance/preview-image.png",
-    tagline: "DeFi That Bounces Back",
+    tagline: "Move liquidity across chains",
     primaryCategory: "finance",
     tags: [
       "defi",

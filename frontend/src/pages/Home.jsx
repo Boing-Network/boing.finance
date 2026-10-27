@@ -20,23 +20,23 @@ function Home() {
   return (
     <>
       <Helmet>
-        <title>boing.finance | DeFi on Boing L1 - Swap, Deploy & Trade (also EVM & Solana)</title>
-        <meta name="description" content="The DeFi that always bounces back. Swap tokens, add liquidity, bridge assets, and deploy your own token on EVM and Solana. One interface, no code." />
-        <meta name="keywords" content="boing finance, DeFi, DEX, swap tokens, liquidity pool, deploy token, cross-chain bridge, EVM, Solana, decentralized exchange, create token, ERC20, token launch" />
-        <meta property="og:title" content="boing.finance | DeFi That Bounces Back — Swap, Deploy & Trade" />
-        <meta property="og:description" content="The DeFi that always bounces back. Swap, add liquidity, bridge, and deploy tokens on EVM and Solana. One interface." />
+        <title>Boing Finance — Move liquidity across chains | Swap, bridge & deploy</title>
+        <meta name="description" content="Cross-chain DeFi with transparent routing and native Boing liquidity. Swap, add liquidity, bridge and deploy tokens across Boing, EVM networks and Solana. Boing features run on public testnet; Boing mainnet is not live." />
+        <meta name="keywords" content="Boing Finance, cross-chain DeFi, liquidity, swap, bridge, deploy token, Boing, EVM, Solana, transparent routing" />
+        <meta property="og:title" content="Boing Finance — Move liquidity across chains" />
+        <meta property="og:description" content="Cross-chain DeFi with transparent routing and native Boing liquidity. A cross-chain liquidity interface spanning Boing and external networks." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance" />
         <meta property="og:site_name" content="boing.finance" />
         <meta property="og:locale" content="en_US" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="boing.finance | DeFi That Bounces Back" />
-        <meta name="twitter:description" content="Swap, add liquidity, bridge, and deploy tokens on EVM and Solana. The DeFi that always bounces back." />
+        <meta name="twitter:title" content="Boing Finance — Move liquidity across chains" />
+        <meta name="twitter:description" content="Cross-chain DeFi with transparent routing and native Boing liquidity." />
         <meta name="twitter:site" content="@boingfinance" />
         <meta property="og:image" content={brandShareImageAbsolute()} />
-        <meta property="og:image:alt" content="Boing Finance — DeFi That Bounces Back; brand mark on stone-dark background" />
+        <meta property="og:image:alt" content="Boing Finance — Move liquidity across chains; brand mark on a dark navy background" />
         <meta name="twitter:image" content={brandShareImageAbsolute()} />
-        <meta name="twitter:image:alt" content="Boing Finance — DeFi That Bounces Back; brand preview with medallion mark" />
+        <meta name="twitter:image:alt" content="Boing Finance — Move liquidity across chains; brand preview with the Boing Finance mark on dark navy" />
         <link rel="canonical" href="https://boing.finance" />
         <link rel="icon" type="image/png" href={`/favicon-32x32.png${getBrandAssetVersionSuffix()}`} sizes="32x32" />
         <link rel="icon" type="image/png" href={`/favicon-16x16.png${getBrandAssetVersionSuffix()}`} sizes="16x16" />
@@ -50,7 +50,7 @@ function Home() {
           "@type": "WebSite",
           "name": "Boing Finance",
           "url": "https://boing.finance",
-          "description": "The DeFi that always bounces back. Deploy tokens, create pools, and trade on EVM and Solana with boing.finance.",
+          "description": "Cross-chain DeFi with transparent routing and native Boing liquidity. A cross-chain liquidity interface spanning Boing and external networks.",
           "potentialAction": {
             "@type": "SearchAction",
             "target": "https://boing.finance/tokens?q={search_term_string}",
@@ -70,7 +70,7 @@ function Home() {
             "@type": "ImageObject",
             "url": brandLogoPngAbsolute()
           },
-          "description": "The DeFi that always bounces back. Deploy tokens, create pools, and trade on EVM and Solana with boing.finance.",
+          "description": "Cross-chain DeFi with transparent routing and native Boing liquidity. A cross-chain liquidity interface spanning Boing and external networks.",
           "sameAs": [
             "https://twitter.com/boingfinance",
             "https://discord.gg/K3w9nbUw4N"
@@ -89,7 +89,7 @@ function Home() {
           "@context": "https://schema.org",
           "@type": "FinancialProduct",
           "name": "boing.finance DeFi Platform",
-          "description": "The DeFi that always bounces back. Swap, add liquidity, bridge, and deploy tokens on EVM and Solana.",
+          "description": "Cross-chain DeFi with transparent routing and native Boing liquidity. Swap, add liquidity, bridge and deploy tokens across Boing, EVM networks and Solana.",
           "provider": {
             "@type": "Organization",
             "name": "boing.finance",
@@ -119,7 +119,7 @@ function Home() {
               "name": "What blockchains does Boing Finance support?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Boing Finance supports EVM chains and Solana for cross-chain token deployment and trading."
+                "text": "Boing Finance is a cross-chain liquidity interface spanning Boing and external networks: Boing (public testnet, signed with Boing Express), EVM chains and Solana."
               }
             },
             {
@@ -127,7 +127,7 @@ function Home() {
               "name": "Is Boing Finance safe to use?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Yes, Boing Finance implements advanced security features including mint authority removal, anti-bot protection, and comprehensive smart contract audits to ensure safe token deployment and trading."
+                "text": "No DeFi product is risk-free. Boing Finance shows quote details before you confirm and offers token-deploy options such as mint authority removal and anti-bot protection, but DeFi carries smart-contract, market and bridge risk. The Boing Finance contracts have not had a professional third-party audit, Boing features run on testnet, and nothing on the site is financial advice or a guarantee of safety or returns."
               }
             },
             {
@@ -144,20 +144,23 @@ function Home() {
       </Helmet>
       <div className="relative z-10 container mx-auto px-4 pt-[6rem] pb-10 md:pt-[7rem] md:pb-14">
         <div className="max-w-7xl mx-auto">
-          {/* 1. Hero: Two-column layout — copy left, robot mascot right (Deep Trade + design system) */}
+          {/* 1. Hero: positioning copy left, factual network panel right. The mascot is kept for onboarding and empty states, not the hero. */}
           <section className="relative z-10 mb-20 md:mb-24">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-0">
               {/* Left: copy and CTAs */}
-              <div className="text-center lg:text-left order-2 lg:order-1">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)', color: 'var(--finance-green)' }}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-finance-green animate-pulse" style={{ background: 'var(--finance-green)', boxShadow: '0 0 0 0 rgba(0,255,136,0.4)' }} />
-                  Live on EVM & Solana
+              <div className="text-center lg:text-left order-1">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4" style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.3)', color: '#FBBF24' }}>
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#FBBF24' }} />
+                  Boing: public testnet · mainnet not live
                 </div>
-                <h1 className="hero-title text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-3 pb-2" style={{ fontFamily: 'var(--font-display)', background: 'linear-gradient(135deg, var(--finance-primary) 0%, var(--finance-green) 60%, #ffffff 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', filter: 'drop-shadow(0 0 20px var(--glow-cyan))' }}>
-                  DeFi That Bounces Back
+                <h1 className="hero-title text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-3 pb-2" style={{ fontFamily: 'var(--font-display)', background: 'linear-gradient(135deg, #8DB8FF 0%, #3B8CFF 55%, #F0F4F8 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                  Move liquidity across chains
                 </h1>
-                <p className="text-base md:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0 mb-8" style={{ color: 'var(--text-secondary)' }}>
-                  Swap, bridge, and launch tokens in one place — no code required.
+                <p className="text-base md:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0 mb-4" style={{ color: 'var(--text-secondary)' }}>
+                  Cross-chain DeFi with transparent routing and native Boing liquidity.
+                </p>
+                <p className="text-sm leading-relaxed max-w-xl mx-auto lg:mx-0 mb-8" style={{ color: 'var(--text-tertiary)' }}>
+                  Swap, bridge and deploy tokens across Boing, EVM networks and Solana. Quote details such as minimum received are shown before you confirm. DeFi carries risk, including smart-contract risk, and the Boing Finance contracts have not had a professional third-party audit.
                 </p>
                 {/* CTAs: one primary + one secondary */}
                 <div className="flex flex-wrap justify-center lg:justify-start items-center gap-4">
@@ -173,28 +176,31 @@ function Home() {
                   </a>
                 </div>
               </div>
-              {/* Right: Mascot only (transparent PNG from assets — no coral/hero composite) */}
-              <div className="flex justify-center lg:justify-end order-1 lg:order-2">
-                <div className="relative flex items-center justify-center w-full max-w-sm lg:max-w-md">
-                  <img
-                    src={`${process.env.PUBLIC_URL || ''}/assets/mascot-default.png`}
-                    alt=""
-                    width={220}
-                    height={220}
-                    className="block w-full h-auto max-h-[220px] object-contain boing-hero-float"
-                    style={{
-                      minHeight: 220,
-                      objectFit: 'contain',
-                      filter: 'drop-shadow(0 0 12px var(--glow-cyan-soft))',
-                    }}
-                    onError={(e) => {
-                      e.target.src = `${process.env.PUBLIC_URL || ''}/assets/mascot-winking.png`;
-                    }}
-                  />
+              {/* Right: where Boing Finance works today */}
+              <div className="flex justify-center lg:justify-end order-2">
+                <div className="w-full max-w-md rounded-2xl p-5 text-left" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                  <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: 'var(--text-tertiary)' }}>
+                    A cross-chain liquidity interface spanning Boing and external networks
+                  </p>
+                  <ul className="space-y-4">
+                    <li>
+                      <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Boing · native liquidity</p>
+                      <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Native-VM pools and swaps on the Boing public testnet, signed with Boing Express.</p>
+                    </li>
+                    <li>
+                      <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>EVM networks · swap and bridge</p>
+                      <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Cross-chain swaps and bridging via LI.FI, plus token deployment on supported networks.</p>
+                    </li>
+                    <li>
+                      <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Solana · swap and deploy</p>
+                      <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Jupiter swaps and SPL token deployment.</p>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
           </section>
+
 
           {/* 2. Getting started: Onboarding + For You (positioned before feature grid so new users see next steps first) */}
           <section className="flex flex-col lg:flex-row gap-8 mb-20 md:mb-24 fade-in delay-300">
@@ -324,8 +330,8 @@ function Home() {
             <div
               className="rounded-xl px-6 py-5 border max-w-2xl w-full"
               style={{
-                background: 'linear-gradient(135deg, rgba(0,229,255,0.08), rgba(0,255,136,0.06))',
-                borderColor: 'rgba(0,229,255,0.28)',
+                background: 'linear-gradient(135deg, rgba(59, 140, 255,0.08), rgba(52, 211, 153,0.06))',
+                borderColor: 'rgba(59, 140, 255,0.28)',
               }}
             >
               <div className="text-center">
