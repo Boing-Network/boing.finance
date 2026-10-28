@@ -746,7 +746,9 @@ function AppContent() {
         <ErrorBoundary>
           <div className="relative z-10 flex-1 flex flex-col min-h-0 overflow-x-clip pb-6 sm:pb-8">
             <ChainStaleBanner />
-            <Suspense fallback={<LoadingSpinner />}>
+            {/* Reserve a full screen while a lazy route loads so the footer does not start in view and
+                get pushed out when the page arrives (was the main layout shift on /). */}
+            <Suspense fallback={<div className="flex flex-1 flex-col min-h-screen"><LoadingSpinner /></div>}>
               <PageTransitionRoutes />
             </Suspense>
           </div>
