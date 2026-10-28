@@ -92,6 +92,9 @@
     "@solana/codecs-data-structures": "2.3.0",
     "@solana/codecs-numbers": "2.3.0",
     "@solana/codecs-strings": "2.3.0",
-    "postcss-selector-parser": "^7.1.6"
+    "postcss-selector-parser": "^7.1.6",
+    "jayson": {
+      "uuid": "^11.1.1"
+    }
   }
 }
