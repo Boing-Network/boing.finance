@@ -13,6 +13,7 @@ import { CUSTODY_ROUTER_HEX } from '../services/nativeDexCustodySwap';
 import toast from 'react-hot-toast';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { useWallet } from '../contexts/WalletContext';
+import { useChainType } from '../contexts/SolanaWalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 
 const VALID_TAB_IDS = new Set(['swap', 'advanced']);
@@ -84,7 +85,10 @@ function AdvSection({ id, title, description, copies = [], children }) {
  * @param {{ slippagePercent?: number }} props
  */
 export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
-  const { chainId } = useWallet();
+  const { chainId: walletChainId } = useWallet();
+  const { isBoing } = useChainType();
+  // Without a wallet, follow the header's chain family (Boing testnet by default).
+  const chainId = walletChainId ?? (isBoing ? BOING_NATIVE_L1_CHAIN_ID : walletChainId);
   const { effectivePoolHex, effectiveFactoryHex, loading } = useBoingNativeDexIntegration();
   const [searchParams, setSearchParams] = useSearchParams();
   const [tab, setTab] = useState(() => parseTab(searchParams.get('nativeTradeTab')) || 'swap');

@@ -60,9 +60,10 @@ export const SolanaWalletProvider = ({ children }) => {
       if (stored === CHAIN_TYPE_SOLANA || stored === CHAIN_TYPE_BOING || stored === CHAIN_TYPE_EVM) {
         return stored;
       }
-      return CHAIN_TYPE_EVM;
+      // First visit: start on the Boing testnet. Visitors can switch to EVM or Solana from the header.
+      return CHAIN_TYPE_BOING;
     } catch {
-      return CHAIN_TYPE_EVM;
+      return CHAIN_TYPE_BOING;
     }
   });
 

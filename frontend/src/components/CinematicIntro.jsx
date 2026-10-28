@@ -10,6 +10,7 @@
 
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
+import { PLATFORM_BRIDGE_FEE_LABEL } from '../config/bridge';
 
 const CYAN = { r: 0, g: 229, b: 255 };
 const GREEN = { r: 0, g: 255, b: 136 };
@@ -495,7 +496,7 @@ function CinematicIntro({ onComplete }) {
       >
         <div className="cinematic-intro__scene-label">Move liquidity across chains</div>
         <div className="cinematic-intro__scene-title">boing.finance</div>
-        <div className="cinematic-intro__scene-sub">Swap. Bridge. Deploy. Zero fees.</div>
+        <div className="cinematic-intro__scene-sub">Swap. Bridge. Deploy. {PLATFORM_BRIDGE_FEE_LABEL} bridge fee.</div>
       </div>
       <div
         className="cinematic-intro__progress"
