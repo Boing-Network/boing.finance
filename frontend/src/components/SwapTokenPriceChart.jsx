@@ -165,7 +165,7 @@ export default function SwapTokenPriceChart({
           style={{ backgroundColor: 'var(--bg-tertiary, rgba(255,255,255,0.04))' }}
         />
       ) : chartData.length >= 2 ? (
-        <div className="flex-1 min-h-[220px]" aria-label={`${active?.symbol} price chart`}>
+        <div className="flex-1 min-h-[220px]" role="img" aria-label={`${active?.symbol} price chart`}>
           <ResponsiveContainer width="100%" height={240}>
             <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <defs>

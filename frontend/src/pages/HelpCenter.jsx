@@ -398,7 +398,7 @@ const HelpCenter = () => {
                   <div className="space-y-2">
                     <a
                       href="/bug-report"
-                      className="block bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors" style={{ color: 'var(--text-primary)' }}
+                      className="block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
                     >
                       Report a Bug
                     </a>
