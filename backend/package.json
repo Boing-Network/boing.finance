@@ -1,7 +1,7 @@
 {
   "name": "dex-backend",
   "version": "1.0.0",
-  "description": "Backend API for DEX with Drizzle ORM and D1 database",
+  "description": "Boing Finance backend API (Cloudflare Workers, Hono, D1, Drizzle ORM)",
   "main": "src/worker.js",
   "type": "module",
   "scripts": {
@@ -28,7 +28,7 @@
     "wrangler": "^4.154.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20"
   },
   "keywords": [
     "dex",
@@ -43,6 +43,6 @@
     "d1",
     "hono"
   ],
-  "author": "Your Name",
+  "author": "Boing Network",
   "license": "MIT"
 }
