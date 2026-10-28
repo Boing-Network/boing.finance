@@ -207,24 +207,25 @@ export default function NativeDexLedgerForwardPanel() {
         <button
           type="button"
           onClick={() => setMode('swap_to')}
-          className={`px-3 py-1.5 rounded-lg text-sm ${mode === 'swap_to' ? 'bg-emerald-600 text-white' : 'border border-emerald-500/40 text-emerald-200'}`}
+          className={`px-3 py-1.5 rounded-lg text-sm ${mode === 'swap_to' ? 'bg-emerald-700 text-white' : 'border border-emerald-500/40 text-emerald-200'}`}
         >
           swap_to (v2)
         </button>
         <button
           type="button"
           onClick={() => setMode('remove_liquidity_to')}
-          className={`px-3 py-1.5 rounded-lg text-sm ${mode === 'remove_liquidity_to' ? 'bg-emerald-600 text-white' : 'border border-emerald-500/40 text-emerald-200'}`}
+          className={`px-3 py-1.5 rounded-lg text-sm ${mode === 'remove_liquidity_to' ? 'bg-emerald-700 text-white' : 'border border-emerald-500/40 text-emerald-200'}`}
         >
           remove_liquidity_to (v3)
         </button>
       </div>
 
       <div className="grid gap-2 mb-4">
-        <label className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>
+        <label htmlFor="ndlf-pool" className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>
           Pool (CP AMM)
         </label>
         <input
+          id="ndlf-pool"
           type="text"
           value={poolHex}
           onChange={(e) => setPoolHex(e.target.value)}
@@ -244,10 +245,11 @@ export default function NativeDexLedgerForwardPanel() {
       {mode === 'swap_to' ? (
         <div className="space-y-3 border-t border-border pt-4">
           <div>
-            <label className="text-xs font-medium block mb-1" style={{ color: 'var(--text-tertiary)' }}>
+            <label htmlFor="ndlf-direction" className="text-xs font-medium block mb-1" style={{ color: 'var(--text-tertiary)' }}>
               Direction
             </label>
             <select
+              id="ndlf-direction"
               value={direction}
               onChange={(e) => setDirection(e.target.value)}
               className="text-sm p-2 rounded-lg border w-full sm:w-auto"
@@ -303,7 +305,7 @@ export default function NativeDexLedgerForwardPanel() {
             type="button"
             disabled={busy || !canV2}
             onClick={onSubmitV2}
-            className="px-4 py-2 rounded-lg text-sm font-medium bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white"
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-emerald-700 hover:bg-emerald-600 disabled:opacity-50 text-white"
           >
             Sign &amp; submit forwarder v2
           </button>
@@ -376,7 +378,7 @@ export default function NativeDexLedgerForwardPanel() {
             type="button"
             disabled={busy || !canV3}
             onClick={onSubmitV3}
-            className="px-4 py-2 rounded-lg text-sm font-medium bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white"
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-emerald-700 hover:bg-emerald-600 disabled:opacity-50 text-white"
           >
             Sign &amp; submit forwarder v3
           </button>

@@ -568,10 +568,10 @@ export default function BoingNativeVm() {
               : 'Connect with Boing Express and switch to Boing testnet to enable in-browser signing.'}
           </p>
           <div className="mb-3">
-            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+            <label htmlFor="nvm-field-1" className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
               Transaction type
             </label>
-            <select
+            <select id="nvm-field-1"
               value={expressKind}
               onChange={(e) => setExpressKind(e.target.value)}
               className="w-full sm:w-auto text-sm p-2 rounded-lg border"
@@ -592,10 +592,10 @@ export default function BoingNativeVm() {
           {expressKind === 'transfer' && (
             <div className="grid gap-3 sm:grid-cols-2 mb-3">
               <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+                <label htmlFor="nvm-field-2" className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
                   To (0x + 64 hex)
                 </label>
-                <input
+                <input id="nvm-field-2"
                   type="text"
                   value={exTransferTo}
                   onChange={(e) => setExTransferTo(e.target.value)}
@@ -609,10 +609,10 @@ export default function BoingNativeVm() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+                <label htmlFor="nvm-field-3" className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
                   Amount (BOING)
                 </label>
-                <input
+                <input id="nvm-field-3"
                   type="text"
                   value={exTransferAmount}
                   onChange={(e) => setExTransferAmount(e.target.value)}
@@ -649,7 +649,7 @@ export default function BoingNativeVm() {
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+                  <label htmlFor="nvm-deploy-purpose" className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
                     Purpose category (protocol QA)
                   </label>
                   {deployHasAssetMeta && (
@@ -658,6 +658,7 @@ export default function BoingNativeVm() {
                     </p>
                   )}
                   <select
+                    id="nvm-deploy-purpose"
                     value={exDeployPurpose}
                     onChange={(e) => setExDeployPurpose(e.target.value)}
                     disabled={deployHasAssetMeta}
@@ -676,10 +677,10 @@ export default function BoingNativeVm() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+                  <label htmlFor="nvm-field-4" className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
                     Description hash (optional, 32-byte hex)
                   </label>
-                  <input
+                  <input id="nvm-field-4"
                     type="text"
                     value={exDeployDescHash}
                     onChange={(e) => setExDeployDescHash(e.target.value)}
@@ -695,10 +696,10 @@ export default function BoingNativeVm() {
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+                  <label htmlFor="nvm-field-5" className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
                     Asset name (optional — content policy; uses contract_deploy_meta)
                   </label>
-                  <input
+                  <input id="nvm-field-5"
                     type="text"
                     value={exAssetName}
                     onChange={(e) => setExAssetName(e.target.value)}
@@ -712,10 +713,10 @@ export default function BoingNativeVm() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+                  <label htmlFor="nvm-field-6" className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
                     Asset symbol (optional)
                   </label>
-                  <input
+                  <input id="nvm-field-6"
                     type="text"
                     value={exAssetSymbol}
                     onChange={(e) => setExAssetSymbol(e.target.value)}
@@ -735,10 +736,10 @@ export default function BoingNativeVm() {
           {expressKind === 'contract_call' && (
             <div className="grid gap-3 mb-3">
               <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+                <label htmlFor="nvm-field-7" className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
                   Contract (0x + 64 hex)
                 </label>
-                <input
+                <input id="nvm-field-7"
                   type="text"
                   value={exCallContract}
                   onChange={(e) => setExCallContract(e.target.value)}
@@ -752,10 +753,10 @@ export default function BoingNativeVm() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+                <label htmlFor="nvm-field-8" className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
                   Calldata (hex)
                 </label>
-                <input
+                <input id="nvm-field-8"
                   type="text"
                   value={exCallCalldata}
                   onChange={(e) => setExCallCalldata(e.target.value)}
@@ -773,10 +774,10 @@ export default function BoingNativeVm() {
 
           {(expressKind === 'bond' || expressKind === 'unbond') && (
             <div className="mb-3">
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+              <label htmlFor="nvm-field-9" className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
                 Amount (BOING)
               </label>
-              <input
+              <input id="nvm-field-9"
                 type="text"
                 value={exStakeAmount}
                 onChange={(e) => setExStakeAmount(e.target.value)}
@@ -873,10 +874,10 @@ export default function BoingNativeVm() {
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
             <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+              <label htmlFor="nvm-field-10" className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
                 Purpose category (optional)
               </label>
-              <select
+              <select id="nvm-field-10"
                 value={qaPurpose}
                 onChange={(e) => setQaPurpose(e.target.value)}
                 className="w-full text-sm p-2 rounded-lg border"
@@ -895,10 +896,10 @@ export default function BoingNativeVm() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+              <label htmlFor="nvm-field-11" className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
                 Description hash (optional hex)
               </label>
-              <input
+              <input id="nvm-field-11"
                 type="text"
                 value={qaDescHash}
                 onChange={(e) => setQaDescHash(e.target.value)}
@@ -914,10 +915,10 @@ export default function BoingNativeVm() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
             <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+              <label htmlFor="nvm-field-12" className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
                 Asset name (optional)
               </label>
-              <input
+              <input id="nvm-field-12"
                 type="text"
                 value={qaAssetName}
                 onChange={(e) => setQaAssetName(e.target.value)}
@@ -930,10 +931,10 @@ export default function BoingNativeVm() {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+              <label htmlFor="nvm-field-13" className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
                 Asset symbol (optional)
               </label>
-              <input
+              <input id="nvm-field-13"
                 type="text"
                 value={qaAssetSymbol}
                 onChange={(e) => setQaAssetSymbol(e.target.value)}
