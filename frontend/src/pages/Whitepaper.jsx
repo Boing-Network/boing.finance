@@ -5,16 +5,16 @@ const Whitepaper = () => {
   return (
     <>
       <Helmet>
-        <title>Whitepaper | boing.finance — Architecture, Tokenomics & Roadmap</title>
-        <meta name="description" content="boing.finance whitepaper: cross-chain DEX architecture, tokenomics, bridge protocol, and roadmap for EVM and Solana." />
-        <meta name="keywords" content="whitepaper, tokenomics, roadmap, cross-chain DEX, boing.finance, EVM, Solana" />
-        <meta property="og:title" content="Whitepaper | boing.finance" />
-        <meta property="og:description" content="Technical whitepaper for boing.finance - Cross-chain decentralized exchange architecture, tokenomics, and roadmap." />
+        <title>Whitepaper | Boing Finance — Architecture, Tokenomics & Status</title>
+        <meta name="description" content="Boing Finance overview: cross-chain DEX architecture, bridge path, tokenomics pointers, and current status." />
+        <meta name="keywords" content="whitepaper, tokenomics, cross-chain DEX, Boing Finance, Boing Network, EVM, Solana" />
+        <meta property="og:title" content="Whitepaper | Boing Finance" />
+        <meta property="og:description" content="Overview of Boing Finance: cross-chain DEX architecture, bridge path, and current status." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/whitepaper" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Whitepaper - boing.finance" />
-        <meta name="twitter:description" content="Technical whitepaper for boing.finance - Cross-chain DEX architecture and tokenomics." />
+        <meta name="twitter:title" content="Whitepaper - Boing Finance" />
+        <meta name="twitter:description" content="Overview of Boing Finance - cross-chain DEX architecture and status." />
       </Helmet>
       
       <div className="relative w-full min-w-0" style={{ color: 'var(--text-primary)' }}>
@@ -23,15 +23,15 @@ const Whitepaper = () => {
             {/* Header */}
             <div className="text-center mb-12">
               <h1 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
-                boing.finance Whitepaper
+                Boing Finance Whitepaper
               </h1>
               <p className="text-xl mb-6" style={{ color: 'var(--text-secondary)' }}>
-                Cross-Chain Decentralized Exchange Protocol
+                Cross-chain DeFi interface
               </p>
               <div className="flex justify-center space-x-4 text-sm" style={{ color: 'var(--text-tertiary)' }}>
-                <span>Version 1.0</span>
+                <span>Version 1.1</span>
                 <span>•</span>
-                <span>Last Updated: January 2025</span>
+                <span>Last Updated: October 2026</span>
               </div>
             </div>
 
@@ -46,7 +46,7 @@ const Whitepaper = () => {
                 <li><a href="#tokenomics" className="hover:text-blue-400 transition-colors">5. Tokenomics</a></li>
                 <li><a href="#governance" className="hover:text-blue-400 transition-colors">6. Governance</a></li>
                 <li><a href="#security" className="hover:text-blue-400 transition-colors">7. Security Considerations</a></li>
-                <li><a href="#roadmap" className="hover:text-blue-400 transition-colors">8. Development Roadmap</a></li>
+                <li><a href="#roadmap" className="hover:text-blue-400 transition-colors">8. Status & Direction</a></li>
                 <li><a href="#conclusion" className="hover:text-blue-400 transition-colors">9. Conclusion</a></li>
               </ul>
             </div>
@@ -56,10 +56,10 @@ const Whitepaper = () => {
               <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>1. Executive Summary</h2>
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
                 <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
-                  boing.finance is a DEX for cross-chain trading and liquidity on EVM and Solana. One interface for swaps, bridge, and token deployment—no centralized intermediaries.
+                  Boing Finance is a cross-chain DeFi interface for trading and liquidity on EVM networks and Solana, with native support for Boing Network L1. One interface for swaps, bridge routes, and token deployment.
                 </p>
                 <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
-                  AMM-based swaps, cross-chain bridge, and token deployment on EVM and Solana.
+                  AMM-based swaps, aggregator-powered bridge routes, and token deployment. Boing Network is on a public testnet; mainnet is not live and independent audits are not complete.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                   <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
@@ -84,18 +84,18 @@ const Whitepaper = () => {
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
                 <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Problem Statement</h3>
                 <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
-                  DeFi is fragmented across chains: different wallets, bridges, and UIs. boing.finance unifies access on EVM and Solana.
+                  DeFi is fragmented across chains: different wallets, bridges, and UIs. Boing Finance unifies access on EVM and Solana.
                 </p>
                 <h3 className="text-xl font-semibold mb-4 mt-6" style={{ color: 'var(--text-primary)' }}>Solution Overview</h3>
                 <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
-                  boing.finance provides a comprehensive solution through:
+                  Boing Finance works toward this through:
                 </p>
                 <ul className="list-disc list-inside space-y-2 mb-4" style={{ color: 'var(--text-secondary)' }}>
                   <li>Unified trading on EVM and Solana</li>
-                  <li>Automated market maker pools with cross-chain liquidity</li>
-                  <li>Secure bridge protocol for asset transfers</li>
-                  <li>Advanced analytics and portfolio management tools</li>
-                  <li>Token deployment and management capabilities</li>
+                  <li>Automated market maker pools</li>
+                  <li>Bridge routes through an external aggregator (LI.FI)</li>
+                  <li>Analytics and portfolio tools</li>
+                  <li>Token deployment and management</li>
                 </ul>
               </div>
             </section>
@@ -110,7 +110,7 @@ const Whitepaper = () => {
                   <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                     <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>DEX Factory</h4>
                     <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      The factory contract responsible for creating and managing trading pairs across different networks. Each network has its own factory instance that maintains the registry of all trading pairs.
+                      The factory contract responsible for creating and managing trading pairs. Each network where it is deployed has its own factory instance and pair registry. See the contract docs for which networks are enabled.
                     </p>
                   </div>
                   
@@ -144,7 +144,7 @@ const Whitepaper = () => {
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
                 <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Bridge Architecture</h3>
                 <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
-                  The live Bridge page on boing.finance is aggregator-powered (LI.FI). Users sign a source-chain transaction; destination liquidity belongs to those third-party routes. Boing does not hold bridge inventory. A 0.5% integrator fee is included in the quote.
+                  The live Bridge page on Boing Finance is aggregator-powered (LI.FI). Users sign a source-chain transaction; destination liquidity belongs to those third-party routes. Boing does not hold bridge inventory. A 0.5% integrator fee is included in the quote.
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
@@ -176,43 +176,24 @@ const Whitepaper = () => {
             <section id="tokenomics" className="mb-12">
               <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>5. Tokenomics</h2>
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>BOING Token</h3>
+                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>BOING is the Boing Network L1 token</h3>
                 <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
-                  The BOING token serves as the governance and utility token for the boing.finance ecosystem.
+                  BOING is the native token of Boing Network, the Layer 1. Its supply, emission and fee economics are defined by the protocol, not by Boing Finance. This app uses BOING on Boing L1; it does not issue it, sell it, or govern it.
                 </p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
-                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Token Details</h4>
-                    <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
-                      <li>• Name: BOING</li>
-                      <li>• Symbol: BOING</li>
-                      <li>• Total Supply: 100,000,000</li>
-                      <li>• Decimals: 18</li>
-                      <li>• Network: Multi-chain</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
-                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Distribution</h4>
-                    <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
-                      <li>• Community Rewards: 40%</li>
-                      <li>• Development Fund: 25%</li>
-                      <li>• Team & Advisors: 15%</li>
-                      <li>• Marketing: 10%</li>
-                      <li>• Reserve: 10%</li>
-                    </ul>
-                  </div>
-                </div>
-                
-                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Utility</h3>
-                <ul className="list-disc list-inside space-y-2" style={{ color: 'var(--text-secondary)' }}>
-                  <li>Governance voting on protocol upgrades</li>
-                  <li>Staking rewards for liquidity providers</li>
-                  <li>Fee discounts on trading and bridging</li>
-                  <li>Access to premium features and analytics</li>
-                  <li>Participation in ecosystem governance</li>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
+                  This page does not publish a supply, allocation table, or sale terms. Read the protocol sources instead:
+                </p>
+                <ul className="list-disc list-inside space-y-2 mb-4" style={{ color: 'var(--text-secondary)' }}>
+                  <li><a href="https://github.com/Boing-Network/boing.network/blob/main/docs/BOING-BLOCKCHAIN-DESIGN-PLAN.md#boing-tokenomics--sustainable-value-design" className="text-blue-400 hover:text-blue-300 transition-colors" target="_blank" rel="noopener noreferrer">BOING Tokenomics: Sustainable Value Design</a> (design narrative in the boing.network repo)</li>
+                  <li><a href="https://github.com/Boing-Network/boing.network/tree/main/crates/boing-tokenomics" className="text-blue-400 hover:text-blue-300 transition-colors" target="_blank" rel="noopener noreferrer">crates/boing-tokenomics</a> (protocol constants)</li>
+                  <li><a href="https://github.com/Boing-Network/boing.network/blob/main/docs/NATIVE-DENOMINATION.md" className="text-blue-400 hover:text-blue-300 transition-colors" target="_blank" rel="noopener noreferrer">Native denomination</a> (18-decimal base units, fees, emission)</li>
+                  <li><a href="https://github.com/Boing-Network/boing.finance/blob/main/docs/boing-tokenomics.md" className="text-blue-400 hover:text-blue-300 transition-colors" target="_blank" rel="noopener noreferrer">Boing Finance tokenomics note</a></li>
                 </ul>
+                <div className="p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                  <p className="text-blue-200 text-sm">
+                    <strong>Not the same token:</strong> an ERC-20 named "BOING" on an EVM chain may have been deployed through this app's token factory. Anyone can deploy a token with any name, so that is not the Boing Network L1 token.
+                  </p>
+                </div>
               </div>
             </section>
 
@@ -220,33 +201,13 @@ const Whitepaper = () => {
             <section id="governance" className="mb-12">
               <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>6. Governance</h2>
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>DAO Structure</h3>
+                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Status</h3>
                 <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
-                  boing.finance operates as a decentralized autonomous organization (DAO) where token holders participate in governance decisions.
+                  Boing Finance has no deployed on-chain governance. The repository contains governance and staking contract sources (see <code>contracts/GOVERNANCE_CONTRACTS.md</code>), but they are not deployed and no voting or staking is live in the app.
                 </p>
-                
-                <div className="space-y-4">
-                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
-                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Proposal Types</h4>
-                    <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
-                      <li>• Protocol parameter changes</li>
-                      <li>• New network integrations</li>
-                      <li>• Treasury fund allocation</li>
-                      <li>• Security upgrades</li>
-                      <li>• Community initiatives</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
-                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Voting Mechanism</h4>
-                    <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
-                      <li>• One token, one vote</li>
-                      <li>• Minimum quorum requirements</li>
-                      <li>• Time-locked execution</li>
-                      <li>• Emergency governance procedures</li>
-                    </ul>
-                  </div>
-                </div>
+                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
+                  Protocol-level decisions for Boing Network L1 belong to the network and are documented in the boing.network repository.
+                </p>
               </div>
             </section>
 
@@ -254,101 +215,63 @@ const Whitepaper = () => {
             <section id="security" className="mb-12">
               <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>7. Security Considerations</h2>
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Smart Contract Security</h3>
-                <ul className="list-disc list-inside space-y-2 mb-6" style={{ color: 'var(--text-secondary)' }}>
-                  <li>Reentrancy protection on all external calls</li>
-                  <li>Integer overflow/underflow protection</li>
-                  <li>Access control mechanisms</li>
-                  <li>Emergency pause functionality</li>
-                  <li>Comprehensive test coverage</li>
+                <div className="mb-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                  <p className="text-blue-200 text-sm">
+                    <strong>Audit status:</strong> the contracts have been reviewed internally only. Independent audits are not complete. Treat everything here as experimental and do not use funds you cannot afford to lose.
+                  </p>
+                </div>
+                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Smart contracts</h3>
+                <ul className="list-disc list-inside space-y-2 mb-4" style={{ color: 'var(--text-secondary)' }}>
+                  <li>Reentrancy guards and access control on the contract sources in this repository</li>
+                  <li>Internal review notes in <code>contracts/CONTRACTS_AUDIT.md</code>; not a third-party audit</li>
                 </ul>
-                
-                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Cross-Chain Security</h3>
-                <ul className="list-disc list-inside space-y-2 mb-6" style={{ color: 'var(--text-secondary)' }}>
-                  <li>Multi-signature validator consensus</li>
-                  <li>Time-locked bridge operations</li>
-                  <li>Cross-chain transaction verification</li>
-                  <li>Bridge state monitoring</li>
-                  <li>Emergency bridge pause capability</li>
+                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Bridge</h3>
+                <ul className="list-disc list-inside space-y-2 mb-4" style={{ color: 'var(--text-secondary)' }}>
+                  <li>The live path is the LI.FI aggregator, so you also rely on LI.FI routing and the bridge or DEX each quote selects</li>
+                  <li>Boing does not run validators or hold bridge inventory</li>
+                  <li>Always check the route, amounts and fees in your wallet before signing</li>
                 </ul>
-                
-                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Risk Mitigation</h3>
-                <ul className="list-disc list-inside space-y-2" style={{ color: 'var(--text-secondary)' }}>
-                  <li>Gradual rollout of new features</li>
-                  <li>Bug bounty programs</li>
-                  <li>Ongoing security reviews (no professional third-party audit has been completed yet)</li>
-                  <li>Insurance fund for user protection</li>
-                  <li>Community-driven security monitoring</li>
-                </ul>
+                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Responsible disclosure</h3>
+                <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                  Found a vulnerability? Please report it privately through the <a href="/bug-report" className="text-blue-400 hover:text-blue-300 transition-colors">bug report page</a> or by email to support@boing.finance instead of posting it publicly.
+                </p>
               </div>
             </section>
 
             {/* Roadmap */}
             <section id="roadmap" className="mb-12">
-              <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>8. Development Roadmap</h2>
+              <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>8. Status & Direction</h2>
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
                 <div className="mb-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
                   <p className="text-blue-200 text-sm">
-                    <strong>Current Status:</strong> boing.finance is currently in early development phase with core infrastructure deployed. Many features are developed locally but not yet available in production due to funding constraints. The roadmap below reflects realistic milestones based on current capabilities and funding needs.
+                    <strong>Current status:</strong> Boing Network is on a public testnet (chain ID 6913). Mainnet is not live. Independent audits are not complete. Boing Finance is under active development and this page gives no dates.
                   </p>
                 </div>
-                
                 <div className="space-y-6">
-                  <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
-                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>✅ Phase 1: Foundation (Completed - Q4 2024)</h4>
-                    <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
-                      <li>• Core smart contract deployment across 6 networks</li>
-                      <li>• Token deployment functionality (ERC-20 factory)</li>
-                      <li>• Basic platform infrastructure and UI</li>
-                      <li>• Cross-chain contract architecture</li>
-                      <li>• 17+ smart contracts deployed and verified</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4">
-                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>🚧 Phase 2: Core Features (In Development - Q1 2025)</h4>
-                    <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
-                      <li>• <strong>Swap functionality</strong> - Token trading interface (locally developed, needs funding for production)</li>
-                      <li>• <strong>Liquidity pools</strong> - AMM pool creation and management (locally developed, needs funding for production)</li>
-                      <li>• <strong>Cross-chain bridge</strong> - Asset transfer between networks (locally developed, needs funding for production)</li>
-                      <li>• <strong>Basic analytics</strong> - Trading data and pool statistics (locally developed, needs funding for production)</li>
-                    </ul>
-                    <p className="text-yellow-200 text-xs mt-2">
-                      <em>Note: These features are developed locally but require funding for production deployment, testing, and security audits.</em>
-                    </p>
-                  </div>
-                  
                   <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
-                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>📋 Phase 3: Advanced Features (Post-Funding - Q2-Q3 2025)</h4>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>What the app does today</h4>
                     <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
-                      <li>• <strong>Professional security audits</strong> - Third-party smart contract audits</li>
-                      <li>• <strong>Advanced analytics dashboard</strong> - Comprehensive market data and portfolio tracking</li>
-                      <li>• <strong>Token management interface</strong> - Token discovery and portfolio management</li>
-                      <li>• <strong>Mobile application</strong> - iOS and Android apps</li>
-                      <li>• <strong>Team expansion</strong> - Hiring specialized developers and security experts</li>
+                      <li>• Swap, pools and token deployment on supported EVM networks (see the contract docs for which networks are enabled)</li>
+                      <li>• Cross-chain routes through the LI.FI aggregator</li>
+                      <li>• Native swap and liquidity on Boing L1 testnet through Boing Express</li>
                     </ul>
                   </div>
-                  
                   <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
-                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>🎯 Phase 4: Ecosystem & Governance (Future - Q4 2025+)</h4>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Direction</h4>
                     <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
-                      <li>• <strong>DAO governance implementation</strong> - Community-driven protocol decisions</li>
-                      <li>• <strong>Token staking and rewards</strong> - BOING token utility and staking mechanisms</li>
-                      <li>• <strong>Additional network integrations</strong> - Support for more blockchain networks</li>
-                      <li>• <strong>DeFi protocol integrations</strong> - Partnerships with other DeFi protocols</li>
-                      <li>• <strong>Institutional features</strong> - Advanced trading tools and compliance features</li>
+                      <li>• Follow the Boing L1 testnet and its DEX and discovery RPCs</li>
+                      <li>• Independent security audits before any mainnet use</li>
+                      <li>• Further analytics and portfolio tooling</li>
                     </ul>
                   </div>
-                </div>
-                
-                <div className="mt-6 p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
-                  <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>⚠️ Current Limitations</h4>
-                  <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
-                    <li>• <strong>Funding constraints</strong> - Many features are developed but not deployed due to lack of resources</li>
-                    <li>• <strong>Solo development</strong> - All development done by single founder, limiting feature velocity</li>
-                    <li>• <strong>No professional audits</strong> - Smart contracts need third-party security audits</li>
-                    <li>• <strong>Limited user base</strong> - Platform lacks marketing budget for user acquisition</li>
-                  </ul>
+                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                    <h4 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Limitations</h4>
+                    <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
+                      <li>• Small team, so feature velocity is limited</li>
+                      <li>• No independent audit yet</li>
+                      <li>• Some features are enabled only on testnets</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </section>
@@ -358,16 +281,10 @@ const Whitepaper = () => {
               <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>9. Conclusion</h2>
               <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
                 <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
-                  boing.finance delivers cross-chain DeFi on EVM and Solana with a modular, secure architecture.
-                </p>
-                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
-                  Currently in early development phase, boing.finance has successfully deployed 17+ smart contracts across 6 networks and provides functional token deployment capabilities. Many advanced features are developed locally but await funding for production deployment, professional audits, and team expansion.
-                </p>
-                <p className="leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
-                  As a solo-founder project seeking investment, we are committed to transparency about our current capabilities and limitations. With proper funding, we aim to complete feature deployment, conduct professional security audits, and build a robust team to serve both retail and institutional DeFi users.
+                  Boing Finance aims to make cross-chain DeFi simpler: one interface for swaps, liquidity, bridging through an aggregator, and token deployment on EVM networks and Boing L1.
                 </p>
                 <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                  We invite the DeFi community and potential investors to join us in building a more interconnected and accessible financial future through responsible development and community-driven governance.
+                  We would rather be clear about what works today than overpromise. For the current state of contracts and networks, see the repository docs.
                 </p>
               </div>
             </section>
@@ -376,11 +293,11 @@ const Whitepaper = () => {
             <div className="rounded-lg p-6 border text-center" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
               <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Get Involved</h3>
               <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>
-                Join the boing.finance community and help shape the future of cross-chain DeFi.
+                Questions, feedback or bug reports are welcome.
               </p>
               <div className="mb-4 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
                 <p className="text-blue-200 text-sm">
-                  <strong>Note:</strong> As a solo-founder project seeking funding, we currently provide direct email support. Social media channels and community platforms will be established post-funding.
+                  <strong>Note:</strong> Support is by email and the contact form.
                 </p>
               </div>
               <div className="flex justify-center space-x-4">
