@@ -197,6 +197,13 @@ export default defineConfig(({ mode }) => {
     sourcemap: true,
     chunkSizeWarningLimit: 1200,
     rollupOptions: {
+      // boing-sdk's dist files are plain constants/functions with no import-time side effects, but the
+      // package does not declare `sideEffects: false`, so Rollup kept every module the barrel re-exports
+      // (e.g. ~260 KB of pool bytecode hex and the media-blob helpers) in the entry chunk. Telling Rollup
+      // they are side-effect free lets it drop whatever the entry does not actually use.
+      treeshake: {
+        moduleSideEffects: (id) => !/boing-sdk[\\/]dist[\\/]/.test(id),
+      },
       output: {
         // Long-lived vendor chunk for motion. ethers is NOT a manual chunk: Rollup would pull its shared
         // deps (@noble/*) in with it and make the entry import it statically; ethers is dynamic-imported

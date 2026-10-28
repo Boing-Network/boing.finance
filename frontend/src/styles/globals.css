@@ -354,7 +354,12 @@ code, pre, .monospace {
 
 .bf-neon-layer {
   position: absolute;
-  inset: 0;
+  /* Sized to the first screen rather than the whole page. The percentage offsets of the orbs used
+     to be relative to the page height, so they jumped when lazy route content changed the height
+     (CLS ~0.7 on the landing page). */
+  inset: 0 0 auto 0;
+  height: 100vh;
+  height: 100svh;
   z-index: 1;
   pointer-events: none;
   overflow: hidden;
