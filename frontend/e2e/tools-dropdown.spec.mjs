@@ -8,7 +8,7 @@ const APPS = [
   ['Boing Network', 'boing.network'],
   ['Boing Express', 'boing.express'],
   ['Boing Observer', 'boing.observer'],
-  ['boing.finance', 'boing.finance'],
+  ['Boing Finance', 'boing.finance'],
 ];
 
 for (const [label, width] of [['desktop', 1440], ['md tier', 900]]) {
