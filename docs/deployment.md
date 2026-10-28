@@ -1,7 +1,7 @@
 # Deployment & Production Configuration
 
 > 👋 **Everyday users:** production is [boing.finance](https://boing.finance). You do not deploy it.  
-> 🛠️ **Developers:** push `main` → production, `staging` → staging. Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.  
+> 🛠️ **Developers:** push `main` → production (backend + frontend). `staging` only deploys the frontend preview. Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.  
 > 🛰️ **Operators:** frontend output directory is **`dist`**, not `build`.
 
 Complete guide for deploying boing.finance to Cloudflare Workers and Pages, and production checklist.
@@ -19,14 +19,14 @@ flowchart LR
 ### Automated Deployment (Recommended)
 
 - **Push to `main`** → Deploys to **production**
-- **Push to `staging`** → Deploys to **staging**
+- **Push to `staging`** → Deploys the **staging frontend** only (backend has no staging Worker)
 
 **Requirements:** GitHub Secrets configured (see Setup). Projects auto-created on first deployment.
 
 ### Manual Deployment
 
 ```bash
-./deploy-backend.sh staging   # or production
+./deploy-backend.sh production
 ./deploy-frontend.sh staging  # or production
 ```
 
@@ -44,7 +44,7 @@ GitHub → Settings → Secrets and variables → Actions:
 ### 2. Cloudflare Resources
 
 **Pages (auto-created):** `boing-finance-prod`, `boing-finance` (staging)  
-**Workers:** `boing-api-prod`, `boing-api-staging`  
+**Workers:** `boing-api-prod` (the only deployed backend; the former `boing-api` and `boing-api-staging` Workers were deleted)  
 **R2:** `boing-storage`, `boing-storage-preview`
 
 ### 3. URLs
@@ -52,7 +52,7 @@ GitHub → Settings → Secrets and variables → Actions:
 | Environment | Frontend | Backend |
 |-------------|----------|---------|
 | Production | https://boing.finance | https://boing-api-prod.nico-chikuji.workers.dev |
-| Staging | https://boing-finance.pages.dev | https://boing-api-staging.nico-chikuji.workers.dev |
+| Staging (frontend only) | https://boing-finance.pages.dev | https://boing-api-prod.nico-chikuji.workers.dev (shared; there is no staging API Worker) |
 
 ---
 

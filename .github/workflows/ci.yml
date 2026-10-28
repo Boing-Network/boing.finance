@@ -29,6 +29,10 @@ jobs:
         working-directory: backend
         run: npm ci
 
+      - name: Run backend tests (db middleware wiring, error logging)
+        working-directory: backend
+        run: npm test
+
       - name: Check for linting issues
         working-directory: backend
         run: |

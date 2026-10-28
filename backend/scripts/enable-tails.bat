@@ -25,36 +25,14 @@ if not exist "wrangler.toml" (
     exit /b 1
 )
 
-REM Ask which environment to tail
-echo Select environment to tail:
-echo 1) Production (boing-api-prod)
-echo 2) Staging (boing-api-staging)
-echo 3) Development (boing-api)
-set /p env_choice="Enter choice [1-3]: "
-
-if "%env_choice%"=="1" (
-    set ENV=production
-    set WORKER_NAME=boing-api-prod
-) else if "%env_choice%"=="2" (
-    set ENV=staging
-    set WORKER_NAME=boing-api-staging
-) else if "%env_choice%"=="3" (
-    set ENV=
-    set WORKER_NAME=boing-api
-) else (
-    echo Invalid choice. Defaulting to staging.
-    set ENV=staging
-    set WORKER_NAME=boing-api-staging
-)
+REM boing-api-prod is the only deployed Worker (boing-api / boing-api-staging were deleted)
+set ENV=production
+set WORKER_NAME=boing-api-prod
 
 echo.
 echo 📡 Starting tail for: %WORKER_NAME%
 echo.
 
 REM Start tailing
-if "%ENV%"=="" (
-    wrangler tail --format pretty
-) else (
-    wrangler tail --env %ENV% --format pretty
-)
+wrangler tail --env %ENV% --format pretty
 

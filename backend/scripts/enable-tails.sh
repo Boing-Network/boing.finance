@@ -25,41 +25,14 @@ if [ ! -f "wrangler.toml" ]; then
     exit 1
 fi
 
-# Ask which environment to tail
-echo "Select environment to tail:"
-echo "1) Production (boing-api-prod)"
-echo "2) Staging (boing-api-staging)"
-echo "3) Development (boing-api)"
-read -p "Enter choice [1-3]: " env_choice
-
-case $env_choice in
-    1)
-        ENV="production"
-        WORKER_NAME="boing-api-prod"
-        ;;
-    2)
-        ENV="staging"
-        WORKER_NAME="boing-api-staging"
-        ;;
-    3)
-        ENV=""
-        WORKER_NAME="boing-api"
-        ;;
-    *)
-        echo "Invalid choice. Defaulting to staging."
-        ENV="staging"
-        WORKER_NAME="boing-api-staging"
-        ;;
-esac
+# boing-api-prod is the only deployed Worker (boing-api / boing-api-staging were deleted)
+ENV="production"
+WORKER_NAME="boing-api-prod"
 
 echo ""
 echo "📡 Starting tail for: $WORKER_NAME"
 echo ""
 
 # Start tailing
-if [ -z "$ENV" ]; then
-    wrangler tail --format pretty
-else
-    wrangler tail --env "$ENV" --format pretty
-fi
+wrangler tail --env "$ENV" --format pretty
 
