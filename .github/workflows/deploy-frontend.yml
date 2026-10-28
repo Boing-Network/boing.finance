@@ -113,7 +113,7 @@ jobs:
         run: node scripts/run-with-env-file.mjs env/github-build.staging.env -- npm run build:staging
         env:
           REACT_APP_ENV: staging
-          REACT_APP_BACKEND_URL: https://boing-api-staging.nico-chikuji.workers.dev
+          REACT_APP_BACKEND_URL: https://boing-api-prod.nico-chikuji.workers.dev
           CI: false
 
       - name: Deploy to Cloudflare Pages (Production)

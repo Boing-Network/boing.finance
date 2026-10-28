@@ -1,14 +1,14 @@
 // Environment configuration
 const config = {
   development: {
-    // Use staging API for development to avoid using the unused boing-api worker
-    apiUrl: 'https://boing-api-staging.nico-chikuji.workers.dev/api',
-    workerUrl: 'https://boing-api-staging.nico-chikuji.workers.dev/api',
+    // boing-api and boing-api-staging were deleted; boing-api-prod is the only deployed API Worker.
+    apiUrl: 'https://boing-api-prod.nico-chikuji.workers.dev/api',
+    workerUrl: 'https://boing-api-prod.nico-chikuji.workers.dev/api',
     environment: 'development'
   },
   staging: {
-    apiUrl: 'https://boing-api-staging.nico-chikuji.workers.dev/api',
-    workerUrl: 'https://boing-api-staging.nico-chikuji.workers.dev/api',
+    apiUrl: 'https://boing-api-prod.nico-chikuji.workers.dev/api',
+    workerUrl: 'https://boing-api-prod.nico-chikuji.workers.dev/api',
     environment: 'staging'
   },
   production: {

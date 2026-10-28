@@ -83,10 +83,10 @@ npm run check:dex
 
 ## Deployment
 
-**GitHub Actions:** push to `main` → production; `staging` → staging. Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`. Details: [docs/deployment.md](./docs/deployment.md).
+**GitHub Actions:** push to `main` → production; `staging` deploys the frontend preview only (the backend has a single production Worker, `boing-api-prod`). Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`. Details: [docs/deployment.md](./docs/deployment.md).
 
 ```bash
-./deploy-backend.sh staging    # or production
+./deploy-backend.sh production   # only environment (no staging API Worker)
 ./deploy-frontend.sh staging
 ```
 

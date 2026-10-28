@@ -134,18 +134,34 @@ app.get('/api/test', async (c) => {
   }
 });
 
-// Middleware to inject DB into context
-const dbMiddleware = async (c, next) => {
-  const d1 = c.env.DB;
-  if (!d1) {
-    return c.json({ success: false, error: 'Database not configured' }, 500);
+// Inject the Drizzle DB handle into the request context for every route.
+//
+// IMPORTANT (Hono ordering): middleware only wraps handlers that are registered AFTER
+// it. Registering `routes.use('*', dbMiddleware)` on a sub-app *after* its handlers were
+// defined (as this file used to do) means the middleware never runs before the handlers,
+// so `c.get('db')` was undefined and every DB route returned 500. Always register
+// `app.use(...)` BEFORE the `app.route(...)` call for the routes it should protect.
+export const injectDb = async (c, next) => {
+  if (c.env && c.env.DB) {
+    c.set('db', drizzle(c.env.DB, { schema }));
   }
-  c.set('db', drizzle(d1, { schema }));
+  await next();
+};
+
+// Strict variant for DB-only route groups: fail fast with a clear message.
+export const dbMiddleware = async (c, next) => {
+  if (!c.get('db')) {
+    const d1 = c.env && c.env.DB;
+    if (!d1) {
+      return c.json({ success: false, error: 'Database not configured' }, 500);
+    }
+    c.set('db', drizzle(d1, { schema }));
+  }
   await next();
 };
 
 // Caching middleware for GET requests
-const cacheMiddleware = async (c, next) => {
+export const cacheMiddleware = async (c, next) => {
   await next();
   
   // Only cache successful GET requests
@@ -172,61 +188,62 @@ const cacheMiddleware = async (c, next) => {
   }
 };
 
+// Every route below can read `c.get('db')`: the injector runs before any route is mounted.
+app.use('*', injectDb);
+
+// Middleware is registered with app.use() BEFORE the matching app.route() so it really
+// wraps the handlers. Prefixes are scoped to DB-backed groups; routes that share the
+// /api prefix but need no DB (AI, aggregator, webhooks, R2, Solana RPC proxy) are untouched.
+// /api/tokens* and /api/liquidity* are the cacheable DEX/API groups mounted at /api.
+app.use('/api/tokens', cacheMiddleware);
+app.use('/api/tokens/*', cacheMiddleware);
+app.use('/api/liquidity/*', cacheMiddleware);
+app.use('/api/analytics', dbMiddleware, cacheMiddleware);
+app.use('/api/analytics/*', dbMiddleware, cacheMiddleware);
+app.use('/analytics', dbMiddleware, cacheMiddleware);
+app.use('/analytics/*', dbMiddleware, cacheMiddleware);
+app.use('/api/portfolio', dbMiddleware);
+app.use('/api/portfolio/*', dbMiddleware);
+app.use('/api/governance', dbMiddleware, cacheMiddleware);
+app.use('/api/governance/*', dbMiddleware, cacheMiddleware);
+app.use('/api/boing', dbMiddleware, cacheMiddleware);
+app.use('/api/boing/*', dbMiddleware, cacheMiddleware);
+app.use('/api/solana/deployments', dbMiddleware);
+app.use('/api/solana/deployments/*', dbMiddleware);
+
+// Mount Portfolio routes (D1 snapshots for PnL) BEFORE the DEX routes: the DEX group
+// declares GET /portfolio/:address, which would otherwise shadow GET /api/portfolio/snapshots
+// (Hono runs the first matching handler in registration order).
+app.route('/api/portfolio', createPortfolioRoutes());
+
 // Mount DEX routes at /api
-const dexRoutes = createDEXRoutes();
-dexRoutes.use('*', dbMiddleware);
-dexRoutes.use('*', cacheMiddleware);
-app.route('/api', dexRoutes);
+app.route('/api', createDEXRoutes());
 
 // Mount Analytics routes at /analytics
-const analyticsRoutes = createAnalyticsRoutes();
-analyticsRoutes.use('*', dbMiddleware);
-analyticsRoutes.use('*', cacheMiddleware);
-app.route('/analytics', analyticsRoutes);
+app.route('/analytics', createAnalyticsRoutes());
 
 // Mount IPFS routes (including R2 upload) at /api
-const ipfsRoutes = createIPFSRoutes();
-app.route('/api', ipfsRoutes);
+app.route('/api', createIPFSRoutes());
 
 // Mount Public API routes at /api
-const apiRoutes = createAPIRoutes();
-apiRoutes.use('*', dbMiddleware);
-apiRoutes.use('*', cacheMiddleware);
-app.route('/api', apiRoutes);
+app.route('/api', createAPIRoutes());
 
 // Mount Wallet Activity routes at /api/analytics
-const walletActivityRoutes = createWalletActivityRoutes();
-walletActivityRoutes.use('*', dbMiddleware);
-walletActivityRoutes.use('*', cacheMiddleware);
-app.route('/api/analytics', walletActivityRoutes);
-
-// Mount Portfolio routes (D1 snapshots for PnL)
-const portfolioRoutes = createPortfolioRoutes();
-portfolioRoutes.use('*', dbMiddleware);
-app.route('/api/portfolio', portfolioRoutes);
+app.route('/api/analytics', createWalletActivityRoutes());
 
 // Mount AI Assistant routes at /api/ai (no DB required)
-const aiRoutes = createAIRoutes();
-app.route('/api/ai', aiRoutes);
+app.route('/api/ai', createAIRoutes());
 
 // Mount Governance routes at /api/governance
-const governanceRoutes = createGovernanceRoutes();
-governanceRoutes.use('*', dbMiddleware);
-governanceRoutes.use('*', cacheMiddleware);
-app.route('/api/governance', governanceRoutes);
+app.route('/api/governance', createGovernanceRoutes());
 
 // Mount BOING routes (points, activity) at /api/boing
-const boingRoutes = createBoingRoutes();
-boingRoutes.use('*', dbMiddleware);
-boingRoutes.use('*', cacheMiddleware);
-app.route('/api/boing', boingRoutes);
+app.route('/api/boing', createBoingRoutes());
 
 app.post('/api/solana/rpc', handleSolanaRpcPost);
 
 // Mount Solana routes (deployments) at /api/solana
-const solanaRoutes = createSolanaRoutes();
-solanaRoutes.use('*', dbMiddleware);
-app.route('/api/solana', solanaRoutes);
+app.route('/api/solana', createSolanaRoutes());
 
 // Aggregator quotes (LI.FI / Jupiter) — no DB; do not cache
 const aggregatorRoutes = createAggregatorRoutes();
@@ -284,31 +301,40 @@ app.get('/api/webhook/health', (c) => {
   });
 });
 
-// Error handling with better logging
+// Error handling with better logging.
+// The real error is always logged server-side (visible in Workers Logs / `wrangler tail`);
+// the response body stays generic in production so internals never leak to clients.
 app.onError((err, c) => {
   const env = c.env.NODE_ENV || 'production';
   const errorId = Math.random().toString(36).substring(2, 15);
-  
-  console.error('Worker Error:', {
-    errorId,
-    message: err.message,
-    stack: env !== 'production' ? err.stack : undefined,
-    url: c.req.url,
-    method: c.req.method,
-    environment: env,
-    timestamp: new Date().toISOString()
-  });
-  
+  const message = err && err.message ? String(err.message) : String(err);
+  const url = new URL(c.req.url);
+
+  console.error(
+    `[worker-error] ${c.req.method} ${url.pathname} id=${errorId} ${err && err.name ? err.name : 'Error'}: ${message}`,
+    {
+      errorId,
+      route: url.pathname,
+      method: c.req.method,
+      name: err && err.name,
+      message,
+      cause: err && err.cause && err.cause.message ? String(err.cause.message) : undefined,
+      stack: err && err.stack ? String(err.stack).split('\n').slice(0, 8).join('\n') : undefined,
+      environment: env,
+      timestamp: new Date().toISOString()
+    }
+  );
+
   // Don't expose internal errors in production
-  const errorMessage = env === 'production' 
+  const errorMessage = env === 'production'
     ? 'Internal server error'
-    : err.message;
-  
-  return c.json({ 
-    success: false, 
+    : message;
+
+  return c.json({
+    success: false,
     error: 'Internal server error',
     message: errorMessage,
-    errorId: env !== 'production' ? errorId : undefined
+    errorId
   }, 500);
 });
 

@@ -7,13 +7,13 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "deploy:staging": "wrangler deploy --env staging",
     "deploy:prod": "wrangler deploy --env production",
     "db:generate": "drizzle-kit generate:sqlite",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "db:push": "drizzle-kit push:sqlite --driver=better-sqlite --schema=./src/database/schema.js --url=./data/dex.db",
     "d1:generate": "node apply-d1-migration.js",
+    "test": "node --test test/worker.test.mjs",
     "test:db": "node check-db.js"
   },
   "dependencies": {

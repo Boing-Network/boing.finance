@@ -1,11 +1,10 @@
 # Cloudflare Workers Configuration for boing.finance API
 # 
-# IMPORTANT: The base worker name "boing-api" is kept for local development only.
-# Production deployments use environment-specific workers:
-# - Production: boing-api-prod (via --env production)
-# - Staging: boing-api-staging (via --env staging)
-#
-# The unused "boing-api" worker in Cloudflare dashboard can be safely deleted.
+# IMPORTANT: The base worker name "boing-api" is used for local development only
+# (`wrangler dev`); never deploy it.
+# Production is the only deployed environment: boing-api-prod (via --env production).
+# The former "boing-api" and "boing-api-staging" Workers were deleted from Cloudflare
+# (Workers Free plan allows only 5 cron triggers per account).
 
 name = "boing-api"
 main = "src/worker.js"
@@ -23,10 +22,23 @@ NFT_MEDIA_BUDGET_GB = "50"
 LIFI_INTEGRATOR_FEE = "0.005"
 # LIFI_FEE_RECIPIENT = "0x..."
 # Worker URL for generating file URLs (auto-detected from request if not set)
-# WORKER_URL = "https://boing-api-staging.nico-chikuji.workers.dev"
+# WORKER_URL = "https://boing-api-prod.nico-chikuji.workers.dev"
 
 [env.production]
 name = "boing-api-prod"
+
+# Workers Logs: persists invocation logs and console output so production errors
+# (see the global app.onError handler in src/worker.js) can be inspected in the dashboard
+# or via the Workers Observability telemetry API. Free plan has a daily event cap, so the
+# head sampling rate stays at 1 (all requests) only because traffic is small; lower it
+# (e.g. 0.25) if the cap is hit.
+[env.production.observability]
+enabled = true
+head_sampling_rate = 1
+
+[env.production.observability.logs]
+enabled = true
+invocation_logs = true
 
 [env.production.ai]
 binding = "AI"
@@ -43,22 +55,8 @@ LIFI_INTEGRATOR_FEE = "0.005"
 # HELIUS_API_KEY (or SOLANA_MAINNET_RPC / SOLANA_DEVNET_RPC) for the /api/solana/rpc proxy
 # Webhook URLs: /api/webhooks/alchemy and /api/webhooks/helius
 
-[env.staging]
-name = "boing-api-staging"
-
-[env.staging.ai]
-binding = "AI"
-
-[env.staging.vars]
-NODE_ENV = "staging"
-FRONTEND_URL = "https://staging.boing.finance"
-WORKER_URL = "https://boing-api-staging.nico-chikuji.workers.dev"
-NFT_MEDIA_BUDGET_GB = "50"
-LIFI_INTEGRATOR_FEE = "0.005"
-
 # D1 Database
-# Staging and production currently share this database_id. Create separate
-# Cloudflare D1 databases before treating environments as isolated.
+# Production uses this database_id (the only deployed environment).
 [[d1_databases]]
 binding = "DB"
 database_name = "boing-database"
@@ -76,19 +74,10 @@ binding = "DB"
 database_name = "boing-database-prod"
 database_id = "fad0eff6-b010-4310-af96-0b68fc5ebab5"
 
-[[env.staging.d1_databases]]
-binding = "DB"
-database_name = "boing-database-staging"
-database_id = "fad0eff6-b010-4310-af96-0b68fc5ebab5"
-
 # Environment-specific R2 buckets
 [[env.production.r2_buckets]]
 binding = "BOING_STORAGE"
 bucket_name = "boing-storage"
-
-[[env.staging.r2_buckets]]
-binding = "BOING_STORAGE"
-bucket_name = "boing-storage-preview"
 
 # KV Namespace for caching (CoinGecko, The Graph, etc.)
 [[kv_namespaces]]
@@ -110,13 +99,9 @@ binding = "AI"
 
 # Cron triggers for background jobs. Wrangler inherits a top-level [triggers] into
 # every environment, so the hourly analytics cron is declared ONLY under the
-# production env. Staging and the local-dev base worker get none (the Workers
-# Free plan allows 5 cron triggers per account).
+# production env (the Workers Free plan allows 5 cron triggers per account).
 [env.production.triggers]
 crons = ["0 * * * *"] # Run every hour to collect analytics data
-
-[env.staging.triggers]
-crons = []
 
 # Limits - Removed CPU limits for Free plan compatibility
 # [limits]

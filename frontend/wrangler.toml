@@ -24,7 +24,8 @@ preview_id = "f6c686292e544a868a3bbfa8c37cede6"
 # Client `REACT_APP_*` for the SPA are baked at `vite build` from `env/github-build.*.env` in CI (see deploy workflow).
 [vars]
 REACT_APP_ENV = "development"
-REACT_APP_BACKEND_URL = "https://boing-api-staging.nico-chikuji.workers.dev"
+# Local backend (`wrangler dev` in backend/); the deployed API is boing-api-prod only.
+REACT_APP_BACKEND_URL = "http://localhost:8787"
 # Pin Pages Function proxy to testnet-1 (empty registries on t2; Option B).
 BOING_TESTNET_RPC_URL = "https://boing-testnet-1.fly.dev"
 # Optional tuning for GET /api/native-dex-indexer-stats (see indexer/buildNativeDexIndexerStats.mjs)
@@ -46,7 +47,8 @@ preview_id = "f6c686292e544a868a3bbfa8c37cede6"
 
 [env.preview.vars]
 REACT_APP_ENV = "staging"
-REACT_APP_BACKEND_URL = "https://boing-api-staging.nico-chikuji.workers.dev"
+# The boing-api-staging Worker was deleted; staging/preview builds use the production API.
+REACT_APP_BACKEND_URL = "https://boing-api-prod.nico-chikuji.workers.dev"
 # Pin Pages Function proxy to testnet-1 (empty registries on t2; Option B).
 BOING_TESTNET_RPC_URL = "https://boing-testnet-1.fly.dev"
 NATIVE_DEX_INDEXER_LOG_SCAN_BLOCKS = "8000"
