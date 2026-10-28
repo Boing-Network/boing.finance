@@ -25,7 +25,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
 import TickerBar from './components/TickerBar';
 import CollaborationBanner from './components/CollaborationBanner';
-import ChainStaleBanner from './components/ChainStaleBanner';
+import ChainIdleNotice from './components/ChainIdleNotice';
 import AppShellVisualLayer from './components/AppShellVisualLayer';
 import CinematicIntro, { shouldShowCinematicIntro } from './components/CinematicIntro';
 import { getPageVariant } from './utils/pageVariant';
@@ -745,7 +745,7 @@ function AppContent() {
         {/* Page Content with Error Boundary and Suspense — scroll container for long home content */}
         <ErrorBoundary>
           <div className="relative z-10 flex-1 flex flex-col min-h-0 overflow-x-clip pb-6 sm:pb-8">
-            <ChainStaleBanner />
+            <ChainIdleNotice />
             {/* Reserve a full screen while a lazy route loads so the footer does not start in view and
                 get pushed out when the page arrives (was the main layout shift on /). */}
             <Suspense fallback={<div className="flex flex-1 flex-col min-h-screen"><LoadingSpinner /></div>}>

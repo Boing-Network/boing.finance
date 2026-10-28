@@ -1,12 +1,15 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useChainType } from '../contexts/SolanaWalletContext';
 import { useWallet } from '../contexts/WalletContext';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { boingJsonRpc } from '../services/boingTestnetRpc';
 
-/** A block older than this means the testnet has stopped producing blocks. */
-export const STALE_AFTER_MS = 10 * 60 * 1000;
+/**
+ * A tip older than this is only worth a neutral note. The Boing node produces a block only when there are
+ * transactions to include, so an old tip is normal on a quiet testnet and is not a fault.
+ */
+export const IDLE_AFTER_MS = 10 * 60 * 1000;
 const POLL_MS = 60 * 1000;
 const RPC_TIMEOUT_MS = 8000;
 
@@ -21,7 +24,11 @@ export function formatAge(ms) {
   return `${Math.floor(hours / 24)} days`;
 }
 
-/** Reads the testnet tip through the same JSON-RPC client the rest of the app uses. */
+/**
+ * Reads the testnet tip through the same JSON-RPC client the rest of the app uses.
+ * Returns `{ height, ageMs }`, `{ error: true }` when the RPC could not be reached or errored, or null when the
+ * reply had no usable block timestamp.
+ */
 export async function fetchTipAge() {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), RPC_TIMEOUT_MS);
@@ -33,27 +40,30 @@ export async function fetchTipAge() {
     if (!Number.isFinite(ts) || ts <= 0) return null;
     return { height, ageMs: Date.now() - ts * 1000 };
   } catch {
-    // RPC unreachable: say nothing rather than guess.
-    return null;
+    return { error: true };
   } finally {
     clearTimeout(timer);
   }
 }
 
 /**
- * Dismissible notice shown when the Boing testnet tip is more than 10 minutes old.
- * Silent when the RPC cannot be reached. Testnet only; makes no claim about mainnet.
+ * Info line for the Boing testnet on pages that use it.
+ * - Tip older than 10 min: a neutral, dismissible "No transactions recently" note (not a warning).
+ * - RPC unreachable or erroring on two checks in a row: a warning, because that is a real problem.
+ * Testnet only; makes no claim about mainnet.
  */
-export default function ChainStaleBanner({ force = false }) {
+export default function ChainIdleNotice({ force = false }) {
   const { pathname } = useLocation();
   const { isBoing } = useChainType();
   const { chainId } = useWallet();
   const onBoing = isBoing || Number(chainId) === BOING_NATIVE_L1_CHAIN_ID;
   const relevant = force || (onBoing && BOING_PAGES.some((p) => pathname === p || pathname.startsWith(`${p}/`)));
   const [tip, setTip] = useState(null);
+  const [rpcDown, setRpcDown] = useState(false);
+  const failures = useRef(0);
   const [dismissedAt, setDismissedAt] = useState(() => {
     try {
-      return Number(sessionStorage.getItem('boing_stale_banner_dismissed')) || 0;
+      return Number(sessionStorage.getItem('boing_idle_notice_dismissed')) || 0;
     } catch {
       return 0;
     }
@@ -61,6 +71,13 @@ export default function ChainStaleBanner({ force = false }) {
 
   const check = useCallback(async () => {
     const t = await fetchTipAge();
+    if (t && t.error) {
+      failures.current += 1;
+      if (failures.current >= 2) setRpcDown(true);
+      return;
+    }
+    failures.current = 0;
+    setRpcDown(false);
     setTip(t);
   }, []);
 
@@ -71,15 +88,15 @@ export default function ChainStaleBanner({ force = false }) {
     return () => clearInterval(id);
   }, [relevant, check]);
 
-  const stale = tip && tip.ageMs > STALE_AFTER_MS;
-  // Dismissal is remembered per stalled height, so a new stall shows the banner again.
-  const dismissed = stale && dismissedAt === tip.height;
+  const idle = !rpcDown && tip && tip.ageMs > IDLE_AFTER_MS;
+  // Dismissal is remembered per tip height, so a newer idle stretch shows the note again.
+  const dismissed = idle && dismissedAt === tip.height;
 
   const dismiss = () => {
     if (!tip) return;
     setDismissedAt(tip.height);
     try {
-      sessionStorage.setItem('boing_stale_banner_dismissed', String(tip.height));
+      sessionStorage.setItem('boing_idle_notice_dismissed', String(tip.height));
     } catch {
       /* ignore */
     }
@@ -87,21 +104,33 @@ export default function ChainStaleBanner({ force = false }) {
 
   return (
     <div role="status" aria-live="polite">
-      {relevant && stale && !dismissed && (
+      {relevant && rpcDown && (
         <div
-          data-testid="chain-stale-banner"
+          data-testid="chain-rpc-warning"
           className="mx-auto mt-3 flex w-[min(100%-2rem,72rem)] items-start gap-3 rounded-xl border px-4 py-3 text-sm"
           style={{ borderColor: 'rgba(245, 158, 11, 0.55)', background: 'rgba(245, 158, 11, 0.12)', color: 'var(--text-primary)' }}
         >
           <p className="flex-1">
-            <strong>Testnet block production looks stalled — last block {formatAge(tip.ageMs)} ago</strong> (height {tip.height}).
-            Swaps, pool changes and faucet requests on Boing testnet may not confirm until blocks resume.{' '}
-            <Link to="/status" className="underline">See status</Link>
+            <strong>Boing testnet RPC is not responding.</strong> Balances, swaps and faucet requests may fail until it is
+            back. <Link to="/status" className="underline">See status</Link>
+          </p>
+        </div>
+      )}
+      {relevant && idle && !dismissed && (
+        <div
+          data-testid="chain-idle-notice"
+          className="mx-auto mt-3 flex w-[min(100%-2rem,72rem)] items-start gap-3 rounded-xl border px-4 py-3 text-sm"
+          style={{ borderColor: 'var(--border-color, rgba(255,255,255,0.14))', background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)' }}
+        >
+          <p className="flex-1">
+            <strong style={{ color: 'var(--text-primary)' }}>No transactions recently.</strong> The Boing testnet only
+            produces a block when there are transactions to include. Last block {formatAge(tip.ageMs)} ago (height{' '}
+            {tip.height}). Submitting a transaction produces the next block.
           </p>
           <button
             type="button"
             onClick={dismiss}
-            aria-label="Dismiss stalled testnet notice"
+            aria-label="Dismiss idle-chain notice"
             className="-m-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-lg"
             style={{ color: 'var(--text-secondary)' }}
           >
