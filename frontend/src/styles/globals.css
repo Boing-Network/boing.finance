@@ -105,41 +105,41 @@
    ============================================================ */
 :root {
   /* === BACKGROUNDS (Colosseum-style stone base + legacy aliases) === */
-  --bg-primary: #06080c;
-  --bg-secondary: #0c1018;
-  --bg-tertiary: #0f1419;
-  --bg-card: rgba(15, 20, 25, 0.82);
+  --bg-primary: #050A1A;
+  --bg-secondary: #0A1128;
+  --bg-tertiary: #101A38;
+  --bg-card: rgba(16, 26, 56, 0.82);
   /* Slab / engraving refresh (surfaces read as carved glass on stone) */
   --surface-etched-rim: rgba(255, 255, 255, 0.055);
   --surface-neon-ambient: color-mix(in srgb, var(--accent-teal) 12%, transparent);
   /* Colosseum-style stone ramp (https://colloseum-hackathon.vercel.app/) */
-  --bf-stone-deep: #06080c;
-  --bf-stone-mid: #0c1018;
-  --bf-stone-vein: #121a24;
+  --bf-stone-deep: #050A1A;
+  --bf-stone-mid: #0A1128;
+  --bf-stone-vein: #18244A;
   /* === TEXT === */
-  --text-primary: #f0f7ff;
+  --text-primary: #F0F4F8;
   --text-secondary: #b8d4f0;
   --text-tertiary: #7a9bc8;
   /* === ACCENTS (cyan + indigo/violet from logo) === */
-  --accent-teal: #00e5ff;
-  --accent-cyan: #38bdf8;
+  --accent-teal: #3B8CFF;
+  --accent-cyan: #8DB8FF;
   --accent-gold: #facc15;
   --accent-gold-dim: #eab308;
   --accent-purple: #5b21b6;
   --mascot-yellow: #ffe000;
   /* === BORDERS === */
-  --border-color: rgba(0, 229, 255, 0.18);
-  --border-hover: rgba(0, 229, 255, 0.45);
+  --border-color: rgba(59, 140, 255, 0.18);
+  --border-hover: rgba(59, 140, 255, 0.45);
   /* === GLOWS (for box-shadow / text-shadow) === */
-  --glow-cyan: rgba(0, 229, 255, 0.38);
-  --glow-cyan-soft: rgba(0, 229, 255, 0.14);
-  --glow-blue: rgba(56, 189, 248, 0.32);
+  --glow-cyan: rgba(59, 140, 255, 0.38);
+  --glow-cyan-soft: rgba(59, 140, 255, 0.14);
+  --glow-blue: rgba(141, 184, 255, 0.32);
   --glow-gold: rgba(250, 204, 21, 0.35);
   --glow-purple: rgba(91, 33, 182, 0.38);
-  --bg-nav: rgba(2, 11, 38, 0.88);
-  --accent-cyan-bg: rgba(0, 229, 255, 0.1);
-  --overlay-gradient-start: rgba(2, 11, 38, 0.35);
-  --overlay-gradient-end: rgba(2, 11, 38, 0.62);
+  --bg-nav: rgba(5, 10, 26, 0.88);
+  --accent-cyan-bg: rgba(59, 140, 255, 0.1);
+  --overlay-gradient-start: rgba(5, 10, 26, 0.35);
+  --overlay-gradient-end: rgba(5, 10, 26, 0.62);
   /* === SHADOWS === */
   --shadow: rgba(0, 0, 0, 0.35);
   --shadow-hover: rgba(0, 0, 0, 0.45);
@@ -173,22 +173,22 @@
   --error-bg: rgba(239, 68, 68, 0.2);
   --error-text: #fca5a5;
   --error-hover: #f87171;
-  --secondary-bg: rgba(0, 229, 255, 0.12);
+  --secondary-bg: rgba(59, 140, 255, 0.12);
   --secondary-text: var(--accent-teal);
   --secondary-hover: var(--accent-cyan);
 }
 
 /* Dark class: same as :root (single-theme design) */
 .dark {
-  --bg-primary: #06080c;
-  --bg-secondary: #0c1018;
-  --bg-tertiary: #0f1419;
-  --bg-card: rgba(15, 20, 25, 0.82);
-  --text-primary: #f0f7ff;
+  --bg-primary: #050A1A;
+  --bg-secondary: #0A1128;
+  --bg-tertiary: #101A38;
+  --bg-card: rgba(16, 26, 56, 0.82);
+  --text-primary: #F0F4F8;
   --text-secondary: #b8d4f0;
   --text-tertiary: #7a9bc8;
-  --border-color: rgba(0, 229, 255, 0.18);
-  --border-hover: rgba(0, 229, 255, 0.45);
+  --border-color: rgba(59, 140, 255, 0.18);
+  --border-hover: rgba(59, 140, 255, 0.45);
   --shadow: rgba(0, 0, 0, 0.35);
   --shadow-hover: rgba(0, 0, 0, 0.45);
 }
@@ -242,8 +242,8 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   color: var(--text-primary);
 }
-h1 { text-shadow: 0 0 20px var(--glow-cyan); }
-h2 { text-shadow: 0 0 12px var(--glow-cyan); }
+h1 { text-shadow: none; }
+h2 { text-shadow: none; }
 
 p {
   color: var(--text-secondary);
@@ -310,7 +310,7 @@ code, pre, .monospace {
     radial-gradient(ellipse 80% 50% at 92% 12%, rgba(40, 48, 62, 0.18), transparent 48%),
     radial-gradient(ellipse 70% 45% at 8% 88%, rgba(35, 42, 54, 0.2), transparent 50%),
     radial-gradient(ellipse 90% 60% at 78% 96%, rgba(48, 58, 72, 0.15), transparent 55%),
-    linear-gradient(168deg, var(--bf-stone-deep, #06080c) 0%, var(--bf-stone-mid, #0c1018) 42%, var(--bf-stone-vein, #121a24) 100%);
+    linear-gradient(168deg, var(--bf-stone-deep, #050A1A) 0%, var(--bf-stone-mid, #0A1128) 42%, var(--bf-stone-vein, #18244A) 100%);
 }
 
 .bf-engrave-stone::after {
@@ -504,7 +504,7 @@ code, pre, .monospace {
 }
 
 .bf-neon--h {
-  --neon-c: #7eb8ff;
+  --neon-c: #8DB8FF;
   left: 72%;
   top: 14%;
   --neon-dur: 4s;
@@ -796,8 +796,8 @@ body.nav-scroll-lock {
 .logo-wordmark {
   background: linear-gradient(
     115deg,
-    #e9eef5 0%,
-    color-mix(in srgb, var(--primary-color) 88%, #e9eef5) 38%,
+    #F0F4F8 0%,
+    color-mix(in srgb, var(--primary-color) 88%, #F0F4F8) 38%,
     var(--primary-color) 62%,
     color-mix(in srgb, var(--primary-color) 55%, #9aa8bc) 100%
   );
@@ -842,11 +842,11 @@ body.nav-scroll-lock {
   padding: 12px 28px;
   cursor: pointer;
   transition: all var(--motion-transition);
-  box-shadow: 0 0 20px var(--finance-green-glow, rgba(0, 255, 136, 0.2));
+  box-shadow: 0 0 20px var(--glow-cyan);
 }
 .btn-green:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0 28px var(--finance-green-glow, rgba(0, 255, 136, 0.35));
+  box-shadow: 0 0 28px var(--finance-green-glow, rgba(52, 211, 153, 0.35));
 }
 
 .btn-secondary, button[data-variant="secondary"] {

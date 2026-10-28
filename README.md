@@ -1,8 +1,12 @@
-# 💱 boing.finance
+# boing.finance
+
+**Boing Finance — Move liquidity across chains** Cross-chain DeFi with transparent routing and native Boing liquidity. A cross-chain liquidity interface spanning Boing and external networks.
+
+> **Status:** Boing features run on the public testnet; Boing mainnet is not live. The Boing Finance contracts have not had a professional third-party audit. Nothing here is financial advice or a guarantee of safety or returns.
 
 Cross-chain DeFi: **EVM** (TokenFactory, Sepolia DEX, LI.FI swap **and** Bridge), **Solana** (SPL deploy, Jupiter), and **Boing Network L1** (native VM AMM via Boing Express).
 
-> 👋 **Everyday users:** open [boing.finance](https://boing.finance), connect a wallet, swap or deploy. On Boing L1 you need [Boing Express](https://boing.express) — MetaMask cannot sign 32-byte Boing accounts.  
+> 👋 **Everyday users:** open [boing.finance](https://boing.finance), connect a wallet, swap or deploy. On Boing L1, transactions are signed with [Boing Express](https://boing.express) (Boing accounts are 32 bytes).  
 > 🛠️ **Developers:** Vite + React frontend, Cloudflare Workers + D1 backend. Boing path is `@boing-network/boing-sdk` + Express, **not** the Solidity tree.  
 > 🛰️ **Operators:** canonical env is `frontend/.env.example`. Live EVM addresses: `frontend/src/config/contracts.js`. Smoke: `cd frontend && npm run smoke:boing-rpc`.
 

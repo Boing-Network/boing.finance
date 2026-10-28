@@ -173,22 +173,22 @@ function DefaultSeoTags() {
       })} />
 
       {/* Open Graph Meta Tags for better sharing */}
-      <meta property="og:title" content="Boing Finance — DeFi That Bounces Back" />
-      <meta property="og:description" content="Deploy tokens, create pools, and trade on EVM and Solana. Swap, bridge, and launch with Boing Finance." />
+      <meta property="og:title" content="Boing Finance — Move liquidity across chains" />
+      <meta property="og:description" content="Cross-chain DeFi with transparent routing and native Boing liquidity. Swap, bridge and deploy across Boing, EVM networks and Solana." />
       <meta property="og:image" content={brandShareImageAbsolute()} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
-      <meta property="og:image:alt" content="Boing Finance — DeFi That Bounces Back; brand mark on stone-dark background" />
+      <meta property="og:image:alt" content="Boing Finance — Move liquidity across chains; brand mark on a dark navy background" />
       <meta property="og:url" content={canonical} />
       <meta property="og:type" content="website" />
       <meta property="og:site_name" content="Boing Finance" />
 
       {/* Twitter Card Meta Tags */}
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content="Boing Finance — DeFi That Bounces Back" />
-      <meta name="twitter:description" content="Deploy tokens, create pools, and trade on EVM and Solana with ease." />
+      <meta name="twitter:title" content="Boing Finance — Move liquidity across chains" />
+      <meta name="twitter:description" content="Cross-chain DeFi with transparent routing and native Boing liquidity." />
       <meta name="twitter:image" content={brandShareImageAbsolute()} />
-      <meta name="twitter:image:alt" content="Boing Finance — DeFi That Bounces Back; brand preview with medallion mark" />
+      <meta name="twitter:image:alt" content="Boing Finance — Move liquidity across chains; brand preview with the Boing Finance mark on dark navy" />
     </Helmet>
   );
 }
@@ -791,19 +791,11 @@ function AppContent() {
               <div className="flex items-center mb-4 sm:mb-6">
                 <Logo size={48} className="mr-3 sm:mr-4" showText={true} showComic={false} />
               </div>
-              {/* Official Boing Bot mascot - design system asset */}
-              <img
-                src={`${process.env.PUBLIC_URL || ''}/assets/mascot-default.png`}
-                alt=""
-                className="boing-hero-float absolute -right-2 bottom-0 w-24 h-auto opacity-30 pointer-events-none hidden sm:block"
-                style={{ maxHeight: '100px', objectFit: 'contain' }}
-                onError={(e) => { e.target.style.display = 'none'; }}
-              />
               <p className="text-sm sm:text-base font-medium mb-1 bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(to right, var(--accent-teal), var(--accent-cyan))', WebkitBackgroundClip: 'text' }}>
-                Authentic. Decentralized. Optimal. Quality-Assured.
+                Boing Finance — Move liquidity across chains
               </p>
               <p className="text-xs sm:text-sm mb-4 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                Swap, bridge, and deploy on EVM and Solana—one interface.
+                A cross-chain liquidity interface spanning Boing and external networks.
               </p>
               <div className="flex space-x-3 sm:space-x-4">
                 <a href="https://twitter.com/boing_finance" target="_blank" rel="noopener noreferrer" className="transition-colors p-1 sm:p-2" style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>

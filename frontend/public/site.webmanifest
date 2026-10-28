@@ -1,14 +1,14 @@
 {
-  "name": "Boing Finance — DeFi That Bounces Back",
+  "name": "Boing Finance — Move liquidity across chains",
   "short_name": "boing.finance",
-  "description": "Swap, deploy tokens, pools, and bridge on EVM and Solana",
+  "description": "Cross-chain DeFi with transparent routing and native Boing liquidity.",
   "icons": [
     { "src": "/assets/boing-logo-mark.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
     { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
     { "src": "/favicon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
   ],
-  "theme_color": "#06080c",
-  "background_color": "#06080c",
+  "theme_color": "#050A1A",
+  "background_color": "#050A1A",
   "display": "standalone",
   "start_url": "/",
   "scope": "/"
