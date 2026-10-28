@@ -108,9 +108,15 @@ binding = "AI"
 # ETHERSCAN_API_KEY
 # JWT_SECRET
 
-# Cron triggers for background jobs
-[triggers]
+# Cron triggers for background jobs. Wrangler inherits a top-level [triggers] into
+# every environment, so the hourly analytics cron is declared ONLY under the
+# production env. Staging and the local-dev base worker get none (the Workers
+# Free plan allows 5 cron triggers per account).
+[env.production.triggers]
 crons = ["0 * * * *"] # Run every hour to collect analytics data
+
+[env.staging.triggers]
+crons = []
 
 # Limits - Removed CPU limits for Free plan compatibility
 # [limits]
