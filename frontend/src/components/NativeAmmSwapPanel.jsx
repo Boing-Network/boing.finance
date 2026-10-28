@@ -417,10 +417,11 @@ export default function NativeAmmSwapPanel({
 
       <div className="grid gap-3 sm:grid-cols-2 mb-3">
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
+          <label htmlFor="nasp-direction" className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
             Direction
           </label>
           <select
+            id="nasp-direction"
             value={direction}
             onChange={(e) => setDirection(e.target.value)}
             className="w-full text-sm p-2 rounded-lg border"

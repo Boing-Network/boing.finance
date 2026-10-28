@@ -494,7 +494,7 @@ export default function NativeDexDirectoryRoutePanel({
           type="button"
           onClick={() => void onFindRoutes()}
           disabled={finding}
-          className="px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-medium bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white"
+          className="px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-medium bg-emerald-700 hover:bg-emerald-600 disabled:opacity-50 text-white"
         >
           {finding ? 'Finding best route…' : 'Find best route'}
         </button>

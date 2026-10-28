@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useWallet } from '../contexts/WalletContext';
 import { useChainType, useSolanaWallet, CHAIN_TYPE_SOLANA } from '../contexts/SolanaWalletContext';
@@ -14,6 +14,8 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
   const [availableWallets, setAvailableWallets] = useState([]);
   const [selectedWallet, setSelectedWallet] = useState(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  const dialogRef = useRef(null);
+  const closeBtnRef = useRef(null);
 
   useEffect(() => {
     if (!isOpen || isSolana) return undefined;
@@ -214,6 +216,39 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
     };
   }, [isOpen, onClose]);
 
+  // Focus management: move focus into the dialog on open, keep Tab inside it, and give focus back
+  // to whatever opened it when it closes.
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const opener = document.activeElement;
+    const raf = requestAnimationFrame(() => closeBtnRef.current?.focus());
+    const onKeyDown = (e) => {
+      if (e.key !== 'Tab' || !dialogRef.current) return;
+      const focusable = dialogRef.current.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      } else if (!dialogRef.current.contains(document.activeElement)) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      cancelAnimationFrame(raf);
+      document.removeEventListener('keydown', onKeyDown);
+      if (opener && typeof opener.focus === 'function' && document.contains(opener)) opener.focus();
+    };
+  }, [isOpen]);
+
   // Use portal to render modal at document body level
   // This ensures it's above all other content and not affected by parent z-index
   if (!isOpen) return null;
@@ -236,6 +271,7 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
       }}
     >
       <div 
+        ref={dialogRef}
         className="bg-theme-card rounded-lg shadow-xl max-w-md w-full border border-theme flex flex-col max-h-[90vh]"
         onClick={(e) => {
           e.stopPropagation();
@@ -250,8 +286,10 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
         <div className="flex items-center justify-between p-6 border-b border-theme flex-shrink-0 bg-theme-card rounded-t-lg">
           <h2 id="wallet-selection-title" className="text-xl font-bold text-theme-primary">{isSolana ? 'Connect Solana' : 'Select Wallet'}</h2>
           <button
+            ref={closeBtnRef}
+            type="button"
             onClick={onClose}
-            className="text-theme-tertiary hover:text-theme-primary transition-colors"
+            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-theme-tertiary hover:text-theme-primary transition-colors"
             aria-label="Close modal"
           >
             <XMarkIcon className="w-6 h-6" />
@@ -270,8 +308,10 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
                     {['devnet', 'mainnet'].map((net) => (
                       <button
                         key={net}
+                        type="button"
+                        aria-pressed={solanaWallet?.network === net}
                         onClick={() => solanaWallet?.setSolanaNetwork?.(net)}
-                        className={`px-3 py-2 rounded text-sm font-medium transition-colors ${
+                        className={`min-h-[44px] px-3 py-2 rounded text-sm font-medium transition-colors ${
                           solanaWallet?.network === net ? 'bg-[var(--secondary-bg)] text-primary' : 'hover:bg-white/5 text-theme-secondary'
                         }`}
                         style={{ color: solanaWallet?.network === net ? 'var(--primary-color)' : undefined }}
@@ -291,6 +331,8 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
                   {availableWallets.map((wallet) => (
                     <button
                       key={wallet.id}
+                      type="button"
+                      aria-pressed={selectedWallet?.id === wallet.id}
                       onClick={() => handleWalletSelect(wallet)}
                       disabled={!wallet.available}
                       className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
@@ -320,6 +362,13 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
                     </button>
                   ))}
                 </div>
+                <p className="text-xs text-theme-tertiary mt-3" data-testid="wallet-install-help">
+                  New to wallets? Install{' '}
+                  <a href="https://boing.express" target="_blank" rel="noopener noreferrer" className="underline">Boing Express</a>,{' '}
+                  <a href="https://metamask.io/download/" target="_blank" rel="noopener noreferrer" className="underline">MetaMask</a> or{' '}
+                  <a href="https://www.coinbase.com/wallet/downloads" target="_blank" rel="noopener noreferrer" className="underline">Coinbase Wallet</a>
+                  , then reopen this dialog.
+                </p>
               </div>
             )}
           </div>

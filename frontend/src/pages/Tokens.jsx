@@ -401,6 +401,7 @@ const Tokens = () => {
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 min-w-0 w-full md:flex-1 md:max-w-xl">
                 <span className="text-sm sm:text-base shrink-0" style={{ color: 'var(--text-secondary)' }}>Network:</span>
                 <select
+                  aria-label="Network"
                   value={selectedChain}
                   onChange={(e) => handleNetworkChange(parseInt(e.target.value))}
                   className="td-field__input w-full sm:min-w-[12rem] sm:max-w-md text-sm sm:text-base"

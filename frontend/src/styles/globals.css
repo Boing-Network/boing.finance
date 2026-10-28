@@ -744,9 +744,10 @@ body.nav-scroll-lock {
 .btn-wallet-connect {
   background: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--accent-teal) 52%, var(--bg-primary)),
-    color-mix(in srgb, var(--accent-cyan) 45%, var(--bg-primary))
+    var(--accent-teal),
+    var(--accent-cyan)
   );
+  /* Dark text needs a bright fill: the old 45-52% mix with the navy page colour gave ~2.3:1 */
   color: var(--boing-black, var(--text-primary));
   border: 1px solid color-mix(in srgb, var(--border-color) 35%, transparent);
   box-shadow: 0 2px 10px color-mix(in srgb, var(--glow-cyan) 18%, transparent);
@@ -1290,7 +1291,10 @@ a, .link {
   text-shadow: 0 0 12px var(--glow-blue);
 }
 
-button, .btn {
+/* Default button look. Wrapped in :where() so these defaults have zero specificity: utility classes
+   (`text-white`, `bg-blue-600`, `.td-btn--primary`, ...) and component styles now win, instead of being
+   overridden by `.dark button` (0,1,1) which left blue text on blue buttons and cleared backgrounds on hover. */
+:where(button, .btn) {
   background: transparent;
   color: var(--primary-color);
   border: none;
@@ -1299,22 +1303,11 @@ button, .btn {
   transition: color 0.2s, background 0.2s;
 }
 
-/* Light mode - subtle effects */
-:root button, :root .btn {
-  color: var(--primary-color);
-}
-
-.dark button, .dark .btn {
+:where(.dark) :where(button, .btn) {
   color: var(--accent-teal);
 }
 
-:root button:hover, :root .btn:hover {
-  color: var(--accent-cyan);
-  background: transparent;
-  box-shadow: none;
-}
-
-.dark button:hover, .dark .btn:hover {
+:where(button:hover, .btn:hover) {
   color: var(--accent-cyan);
   background: transparent;
   box-shadow: none;

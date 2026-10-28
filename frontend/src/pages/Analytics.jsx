@@ -498,13 +498,12 @@ export default function Analytics() {
                       type="button"
                       role="tab"
                       aria-selected={activeSection === section}
-                      aria-controls={`analytics-panel-${section}`}
                       id={`tab-${section}`}
                       tabIndex={activeSection === section ? 0 : -1}
                       onClick={() => setActiveSection(section)}
                       className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                         activeSection === section
-                          ? 'bg-blue-500 text-white'
+                          ? 'bg-blue-600 text-white'
                           : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                       }`}
                     >
@@ -519,7 +518,7 @@ export default function Analytics() {
                       onClick={() => setTimeRange(range.id)}
                       className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                         timeRange === range.id
-                          ? 'bg-blue-500 text-white'
+                          ? 'bg-blue-600 text-white'
                           : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                       }`}
                     >

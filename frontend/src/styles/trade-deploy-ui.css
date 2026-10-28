@@ -307,7 +307,7 @@
 
 .td-btn--green {
   background-color: var(--finance-green-mid);
-  color: #fff;
+  color: #04140d; /* dark text: white on #10b981 is only ~2.5:1 */
 }
 
 .td-btn--green:hover:not(:disabled) {
