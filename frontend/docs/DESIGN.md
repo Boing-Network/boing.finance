@@ -1,4 +1,4 @@
-# Visual system (boing.finance)
+# Visual system (Boing Finance)
 
 > 👋 **Everyday users:** the app uses a stone + engraved-vein + soft neon shell.  
 > 🛠️ **Developers:** apply this system consistently — not only on isolated pages.  
@@ -6,7 +6,7 @@
 
 Current app chrome is a **stone + engraved-vein + soft neon** shell, not the older aquatic-space `.webp` / canvas engine.
 
-*Last reviewed: August 2026.*
+*Last reviewed: October 2026. Brand naming, tagline and shared palette come from [BRAND.md](https://github.com/Boing-Network/boing.network/blob/main/BRAND.md); this page covers how the app applies them.*
 
 ## Shell
 
@@ -22,7 +22,7 @@ Current app chrome is a **stone + engraved-vein + soft neon** shell, not the old
 
 ## Tokens (canonical in `:root`)
 
-Defined in `globals.css` (dark-first). Current primaries include `--bg-primary: #050A1A`, `--accent-teal: #3B8CFF`, `--accent-cyan`, `--accent-gold`, `--text-primary`. Prefer these variables over hardcoded hex in components. Recharts should use the same tokens.
+Defined in `globals.css` (dark-first). Current primaries include `--bg-primary: #050A1A`, `--accent-teal: #3B8CFF` (the token name is historical; the value is the Boing electric blue), `--accent-cyan`, `--accent-gold`, `--text-primary`. Prefer these variables over hardcoded hex in components. Recharts should use the same tokens.
 
 ## Typography
 

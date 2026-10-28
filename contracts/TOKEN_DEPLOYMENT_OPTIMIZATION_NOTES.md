@@ -32,7 +32,7 @@ Replace string-based `require` statements with custom errors for smaller bytecod
 
 ### 2. SafeERC20 for Transfers
 
-All external token transfers (including `emergencyRecover`) should use `SafeERC20.safeTransfer` and `safeTransferFrom`. The current codebase has been audited for this; ensure any new transfer paths follow the same pattern.
+All external token transfers (including `emergencyRecover`) should use `SafeERC20.safeTransfer` and `safeTransferFrom`. The current codebase was reviewed internally for this (not a third-party audit); ensure any new transfer paths follow the same pattern.
 
 ### 3. ETH Forwarding
 
@@ -109,6 +109,6 @@ For any **new** chain deployment, the optimizations above can be applied before 
 ## Summary
 
 - **Custom errors:** Major gas and size improvement; apply in future deployments.
-- **SafeERC20:** Already addressed in audit; maintain for any new code paths.
+- **SafeERC20:** Addressed in the internal review (see `CONTRACTS_AUDIT.md`); maintain for any new code paths.
 - **Storage layout:** Do not change for TokenFactory, TokenImplementation, or TokenStructs in existing deployments.
 - **Logic refactors:** Plan upgrades for new deployments only; document changes clearly.

@@ -124,6 +124,8 @@ constructor(
 
 ### Ethereum Mainnet Tokens
 
+> **Read this first:** the entries in this section are ERC-20 tokens created through the app's `TokenFactory`. The Ethereum address below had contract code and a total supply of 1,000,000,000 (18 decimals) on 2026-10-27 (checked via `eth_getCode` / `totalSupply`). Anyone can deploy a token with any name or symbol, so this record does **not** make it the native BOING token of Boing Network L1 and is not an endorsement or an offer. See [boing-tokenomics.md](./boing-tokenomics.md).
+
 **Token Address:** `0xa2cdB9Ee051bb0b622B4f23BA0B7a819b68b7c83`
 
 - **Name:** boing.finance

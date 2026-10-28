@@ -1,8 +1,8 @@
-# boing.finance
+# Boing Finance
 
-**Boing Finance — Move liquidity across chains** Cross-chain DeFi with transparent routing and native Boing liquidity. A cross-chain liquidity interface spanning Boing and external networks.
+**Boing Finance — Move liquidity across chains.** Cross-chain DeFi with transparent routing and native Boing liquidity. A cross-chain liquidity interface spanning Boing and external networks.
 
-> **Status:** Boing features run on the public testnet; Boing mainnet is not live. The Boing Finance contracts have not had a professional third-party audit. Nothing here is financial advice or a guarantee of safety or returns.
+> **Status:** Boing features run on the public testnet; Boing mainnet is not live. The Boing Finance contracts have been reviewed internally only and have not had an independent third-party audit. Nothing here is financial advice or a guarantee of safety or returns.
 
 Cross-chain DeFi: **EVM** (TokenFactory, Sepolia DEX, LI.FI swap **and** Bridge), **Solana** (SPL deploy, Jupiter), and **Boing Network L1** (native VM AMM via Boing Express).
 
@@ -49,11 +49,15 @@ Hosted Fly testnet currently may have **`end_user.canonical_native_*` = null** �
 
 ## Quick start
 
-Prerequisites: Node.js 18+, npm, Git.
+Prerequisites: Node.js 20+ (22 recommended; CI uses 22), npm, Git, and a clone of [Boing-Network/boing.network](https://github.com/Boing-Network/boing.network) (the frontend links its `boing-sdk` package from it).
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Boing-Network/boing.finance.git
 cd boing.finance
+
+# The frontend depends on file:../boing.network/boing-sdk (relative to frontend/),
+# so the SDK repo must be at ./boing.network inside this repo (it is gitignored; CI does the same).
+git clone https://github.com/Boing-Network/boing.network.git boing.network
 
 # Backend
 cd backend && npm install && npm run dev
@@ -64,6 +68,8 @@ cd frontend && npm install && npm start
 ```
 
 From the repo root: `npm run dev` runs backend and frontend together.
+
+**No `boing.network` clone?** `@boing-network/boing-sdk` is also published on npm (0.5.38 at the time of writing). In `frontend/package.json`, change `"@boing-network/boing-sdk": "file:../boing.network/boing-sdk"` to `"^0.5.38"` and run `npm install`. Don't commit that change (or the lockfile it rewrites) unless you mean to move the project off the linked checkout.
 
 ### Smart contracts (optional, EVM)
 
@@ -104,6 +110,7 @@ See **[docs/README.md](./docs/README.md)** for the full index.
 | [docs/bridge.md](./docs/bridge.md) | LI.FI Bridge MVP + 0.5% fee |
 | [docs/contracts.md](./docs/contracts.md) | EVM TokenFactory / DEX |
 | [docs/integration.md](./docs/integration.md) | Networks, Solana, swap market data |
+| [docs/boing-tokenomics.md](./docs/boing-tokenomics.md) | Where BOING (the Boing Network L1 token) economics are documented |
 | [frontend/docs/DESIGN.md](./frontend/docs/DESIGN.md) | Visual system |
 
 ## Configuration

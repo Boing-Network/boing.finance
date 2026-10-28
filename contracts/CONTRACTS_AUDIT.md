@@ -1,6 +1,8 @@
-# Smart Contracts Audit & Improvements
+# Smart Contracts Review & Improvements
 
-This document summarizes the contract audit performed and improvements made to align with industry standards, security best practices, and feature completeness.
+> **Not a third-party audit.** This is an internal review by the project team. These contracts have not had an independent professional security audit. Do not rely on this document as evidence of safety.
+
+This document summarizes the internal contract review performed and improvements made to align with industry standards, security best practices, and feature completeness.
 
 ## Contract-to-Page Mapping
 
@@ -89,7 +91,7 @@ This document summarizes the contract audit performed and improvements made to a
 2. **WETH** – Custom WETH with rate limits and blacklists; ensure frontend/router expectations match canonical WETH if needed.
 3. **CrossChainBridge** – EIP-712 usage for validator signatures should be double-checked against the intended struct and hashing scheme.
 4. **DEXFactoryV2 stub functions** – `setEmergencyStop`, `pause`, `unpause`, etc. currently revert with `NOT_IMPLEMENTED`; implement or remove if unused.
-5. **External audit** – For mainnet, engage a third-party security audit.
+5. **Independent audit** – Not done. Engage a third-party security audit before any mainnet use.
 
 ---
 
