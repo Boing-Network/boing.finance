@@ -44,6 +44,7 @@ import { poolsRedirectFromSwapSearch } from './utils/swapPoolsRedirect';
 
 // Lazy load all page components for code splitting
 const Swap = lazy(() => import('./pages/Swap'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 /** /swap, except old Pools-tab deep links (`?nativeTradeTab=pools`, `?tab=pools`, `?nativePool=`) go to /pools. */
 function SwapRoute() {
@@ -282,6 +283,7 @@ function PageTransitionRoutes() {
         <Route path="/boing/activities" element={<BoingActivities />} />
         <Route path="/boing/native-vm" element={<BoingNativeVm />} />
         <Route path="/boing/publish-interface" element={<BoingPublishInterface />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   );

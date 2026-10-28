@@ -1300,6 +1300,7 @@ function CreatePool() {
           <meta name="description" content="Create new liquidity pools on EVM and Solana. Deploy trading pairs and earn fees with boing.finance." />
         </Helmet>
         <TradeDeployShell width="medium">
+          <h1 className="sr-only">Create a liquidity pool</h1>
           <PageCard>
             <EmptyState
               variant="pools"
@@ -1324,6 +1325,7 @@ function CreatePool() {
         <meta name="keywords" content="liquidity pools, create pool, DeFi, AMM, trading pairs" />
       </Helmet>
       <div className="relative w-full min-w-0">
+        <h1 className="sr-only">Create a liquidity pool</h1>
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className={`mx-auto td-mint-form ${chainId === BOING_NATIVE_L1_CHAIN_ID ? 'max-w-3xl' : 'max-w-6xl'}`}>
             <DexFeatureBanner featureLabel="Create Pool" currentChainId={chainId} onSwitchNetwork={switchNetwork} />
