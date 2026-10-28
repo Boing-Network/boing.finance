@@ -1,7 +1,12 @@
 {
   "name": "boing",
   "version": "1.0.0",
-  "description": "Cross-chain decentralized exchange",
+  "description": "Boing Finance: cross-chain DeFi interface (EVM, Solana, Boing Network L1)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Boing-Network/boing.finance.git"
+  },
+  "homepage": "https://boing.finance",
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm install && npm run dev",
@@ -43,8 +48,11 @@
     "bridge",
     "boing"
   ],
-  "author": "Your Name",
+  "author": "Boing Network",
   "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
   "devDependencies": {
     "concurrently": "^8.2.2"
   },

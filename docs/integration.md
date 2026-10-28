@@ -6,7 +6,7 @@
 
 How we onboard chains: **prioritize by user activity**, aim for full in-app capability, degrade to aggregators/external links when native contracts are not live. Add a chain: [adding-a-network.md](./adding-a-network.md). Boing L1: [native-dex.md](./native-dex.md). EVM DEX: [contracts.md](./contracts.md).
 
-*Last reviewed: August 2026. TVL / address-count figures below are indicative snapshots, not live dashboards.*
+*Last reviewed: October 2026. The earlier TVL figures were undated and unsourced, so they were removed. Check [DefiLlama](https://defillama.com/chains) for current numbers.*
 
 ```mermaid
 flowchart LR
@@ -22,32 +22,34 @@ Networks are integrated **in order of user activity**. We use industry metrics t
 
 | Metric | Source | Use |
 |--------|--------|-----|
-| **TVL** | [DefiLlama](https://defillama.com/chains) | DeFi engagement, liquidity depth |
+| **TVL** | [DefiLlama](https://defillama.com/chains) (check live) | DeFi engagement, liquidity depth |
 | **7-day Active Addresses** | DefiLlama, Dune, chain explorers | Real user activity |
 | **Transaction Volume** | Block explorers | Usage intensity |
 | **Ecosystem Maturity** | Protocol count, audit coverage | Reliability, tooling |
 
-### EVM prioritization order (2025)
+### EVM prioritization order
 
-| Rank | Network | Chain ID | TVL (approx) | Rationale |
-|------|---------|----------|--------------|------------|
-| 1 | Ethereum | 1 | ~$55B | Highest TVL, industry standard |
-| 2 | BNB Smart Chain | 56 | ~$5.5B | Highest EVM active addresses |
-| 3 | Base | 8453 | ~$4B | Coinbase ecosystem |
-| 4 | Arbitrum One | 42161 | ~$2.3B | Strong L2 DeFi |
-| 5 | Polygon | 137 | ~$1B | Mature, low fees |
-| 6 | Optimism | 10 | ~$1B | OP Stack |
-| 7 | Avalanche C-Chain | 43114 | ~$900M | Subnets, fast finality |
-| 8 | zkSync Era | 324 | ~$500M | zkEVM |
-| 9 | Mantle | 5000 | ~$278M | Low fees |
-| 10 | Scroll | 534352 | ~$205M | zkEVM |
-| 11 | Linea | 59144 | ~$125M | ConsenSys |
-| 12 | Blast | 81457 | — | L2 |
-| 13 | Fantom | 250 | ~$100M | Very low fees |
-| 14 | opBNB | 204 | — | BNB L2 |
-| 15 | Mode | 34443 | — | Cost-focused |
+This is a product judgment, not a measured ranking.
 
-**Note:** Solana (non-EVM) is integrated separately; see [solana.md](solana.md). It ranks #2 by TVL (~$6.4B).
+| Rank | Network | Chain ID | Rationale |
+|------|---------|----------|-----------|
+| 1 | Ethereum | 1 | Largest EVM DeFi ecosystem, industry standard |
+| 2 | BNB Smart Chain | 56 | Large retail user base |
+| 3 | Base | 8453 | Coinbase ecosystem |
+| 4 | Arbitrum One | 42161 | Strong L2 DeFi |
+| 5 | Polygon | 137 | Mature, low fees |
+| 6 | Optimism | 10 | OP Stack |
+| 7 | Avalanche C-Chain | 43114 | Subnets, fast finality |
+| 8 | zkSync Era | 324 | zkEVM |
+| 9 | Mantle | 5000 | Low fees |
+| 10 | Scroll | 534352 | zkEVM |
+| 11 | Linea | 59144 | ConsenSys |
+| 12 | Blast | 81457 | L2 |
+| 13 | Fantom | 250 | Very low fees |
+| 14 | opBNB | 204 | BNB L2 |
+| 15 | Mode | 34443 | Cost-focused |
+
+**Note:** Solana (non-EVM) is integrated separately; see [solana.md](solana.md). Its priority comes from user activity and ecosystem reach; see DefiLlama for current TVL.
 
 ---
 

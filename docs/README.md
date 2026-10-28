@@ -30,10 +30,10 @@ Canonical **env vars:** `frontend/.env.example`. Canonical **EVM addresses:** `f
 | [integration.md](./integration.md) | Network prioritization, capability matrix, swap market data |
 | [solana.md](./solana.md) | Solana wallet, SPL deploy, Jupiter |
 | [product-roadmap.md](./product-roadmap.md) | Product ideas backlog (not an engineering spec) |
-| [boing-tokenomics.md](./boing-tokenomics.md) | BOING token economics (mostly planned) |
+| [boing-tokenomics.md](./boing-tokenomics.md) | Pointer to where BOING (Boing Network L1 token) economics are documented |
 | [../frontend/docs/DESIGN.md](../frontend/docs/DESIGN.md) | App visual system |
 | [../contracts/GOVERNANCE_CONTRACTS.md](../contracts/GOVERNANCE_CONTRACTS.md) | Governance deploy (undeployed) |
-| [../contracts/CONTRACTS_AUDIT.md](../contracts/CONTRACTS_AUDIT.md) | Historical audit notes |
+| [../contracts/CONTRACTS_AUDIT.md](../contracts/CONTRACTS_AUDIT.md) | Internal contract review notes (not a third-party audit) |
 | [../scripts/README.md](../scripts/README.md) | Optional Python asset scripts |
 
 **Upstream (Boing Network):** [HANDOFF-DEPENDENT-PROJECTS.md](https://github.com/Boing-Network/boing.network/blob/main/docs/HANDOFF-DEPENDENT-PROJECTS.md) — Express, Observer, partner dApp backlog.

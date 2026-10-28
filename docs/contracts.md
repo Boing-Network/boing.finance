@@ -94,5 +94,5 @@ Rough gas (indicative): Ethereum high four figures USD; L2s tens of USD; Polygon
 
 ## Related
 
-- `contracts/CONTRACTS_AUDIT.md` — historical audit notes
+- `contracts/CONTRACTS_AUDIT.md` — internal review notes (not a third-party audit)
 - `contracts/TOKEN_DEPLOYMENT_OPTIMIZATION_NOTES.md` — TokenFactory follow-ups (do not change already-deployed factories lightly)

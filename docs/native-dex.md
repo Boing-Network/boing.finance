@@ -224,4 +224,4 @@ Discovery-specific flags: [native-dex-discovery.md](./native-dex-discovery.md).
 - **RPC URLs / chain IDs:** [THREE-CODEBASE-ALIGNMENT.md](https://github.com/Boing-Network/boing.network/blob/main/docs/THREE-CODEBASE-ALIGNMENT.md)
 - **Canonical testnet pool:** [OPS-CANONICAL-TESTNET-NATIVE-AMM-POOL.md](https://github.com/Boing-Network/boing.network/blob/main/docs/OPS-CANONICAL-TESTNET-NATIVE-AMM-POOL.md)
 
-This repo consumes **`@boing-network/boing-sdk`** via `file:../boing.network/boing-sdk` (keep that checkout ≥ **0.5.24** for current list-RPC helpers). External apps should `npm i @boing-network/boing-sdk` — not unscoped `boing-sdk`.
+This repo consumes **`@boing-network/boing-sdk`** via `file:../boing.network/boing-sdk` (keep that checkout at **0.5.24 or newer** for the list-RPC helpers; the current published version is **0.5.38**). External apps should `npm i @boing-network/boing-sdk` — not unscoped `boing-sdk`.
