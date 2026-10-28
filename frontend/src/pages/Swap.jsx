@@ -37,9 +37,12 @@ const devLog = (...args) => {
 };
 
 const Swap = () => {
-  const { isSolana } = useChainType();
-  const { isConnected, account } = useWalletConnection();
-  const { chainId, provider: walletProvider, signer: walletSigner } = useWallet();
+  const { isSolana, isBoing } = useChainType();
+  const { isConnected, account, connectWithRetry } = useWalletConnection();
+  const { chainId: walletChainId, provider: walletProvider, signer: walletSigner } = useWallet();
+  // No wallet yet: follow the header's chain family. Boing testnet is the default family, so a
+  // first-time visitor sees the Boing swap card instead of an Ethereum USDC/ETH desk.
+  const chainId = walletChainId ?? (isBoing ? BOING_NATIVE_L1_CHAIN_ID : walletChainId);
   const { effectivePoolHex } = useBoingNativeDexIntegration();
   const featureSupport = useMemo(
     () =>
@@ -2040,6 +2043,25 @@ const Swap = () => {
     }
   };
 
+  // State-driven CTA (same idea as Bridge.jsx): the label always says what the button will do next.
+  const swapAmountValid = Boolean(amountIn) && Number.isFinite(parseFloat(amountIn)) && parseFloat(amountIn) > 0;
+  const swapBalance = getTokenInBalance();
+  const swapInsufficient = swapAmountValid && swapBalance !== null && parseFloat(amountIn) > swapBalance;
+  const swapNeedsWallet = !isConnected || !account;
+  const swapButtonLabel = (() => {
+    if (isSwapping) return 'Swapping…';
+    if (swapNeedsWallet) return 'Connect wallet';
+    if (!tokenIn || !tokenOut) return 'Select both tokens';
+    if (tokenIn === tokenOut) return 'Choose two different tokens';
+    if (!swapAmountValid) return 'Enter an amount';
+    if (swapInsufficient) return `Not enough ${tokenIn}`;
+    return `Swap ${tokenIn} for ${tokenOut}`;
+  })();
+  const swapButtonDisabled =
+    isSwapping || (!swapNeedsWallet && (!swapAmountValid || !tokenIn || !tokenOut || tokenIn === tokenOut || swapInsufficient));
+  const swapTxHash = (swapSuccess.match(/0x[0-9a-fA-F]{64}/) || [])[0] || '';
+  const swapExplorerBase = getNetworkByChainId(Number(chainId))?.explorer || '';
+
   if (isSolana) return <SwapSolanaContent />;
 
   return (
@@ -2118,14 +2140,6 @@ const Swap = () => {
             />
           </div>
           <div className="xl:col-span-9 order-1 xl:order-2 flex flex-col gap-4 min-w-0">
-            <Suspense fallback={<ChartSkeleton height="280px" />}>
-              <SwapTokenPriceChart
-                chain="evm"
-                chainId={Number(chainId)}
-                tokenIn={chartTokenIn}
-                tokenOut={chartTokenOut}
-              />
-            </Suspense>
           <div
             className="rounded-2xl p-4 sm:p-5 shadow-xl mb-4 sm:mb-6"
             style={{
@@ -2374,34 +2388,49 @@ const Swap = () => {
             {/* Swap Button */}
             <div className="mt-6 sm:mt-8">
               <button
-                onClick={handleSwap}
-                disabled={isSwapping || !isConnected || !account || !amountIn || parseFloat(amountIn) <= 0 || !tokenIn || !tokenOut || tokenIn === tokenOut}
+                type="button"
+                onClick={() => (swapNeedsWallet ? connectWithRetry() : handleSwap())}
+                disabled={swapButtonDisabled}
+                aria-busy={isSwapping || undefined}
                 className="td-btn td-btn--primary w-full py-4 text-base sm:text-lg"
+                data-testid="evm-swap-cta"
               >
                 {isSwapping ? (
                   <div className="flex items-center justify-center space-x-2">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    <span>Swapping...</span>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" aria-hidden="true"></div>
+                    <span>{swapButtonLabel}</span>
                   </div>
                 ) : (
                   <div className="flex items-center justify-center space-x-2">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                     </svg>
-                    <span>Swap Now</span>
+                    <span>{swapButtonLabel}</span>
                   </div>
                 )}
               </button>
               
               {swapError && (
-                <div className="mt-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg text-red-400 text-sm text-center">
+                <div role="alert" className="mt-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg text-red-400 text-sm text-center">
                   {swapError}
                 </div>
               )}
               
+              <div role="status" aria-live="polite" aria-atomic="true">
               {swapSuccess && (
                 <div className="mt-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg text-green-400 text-sm text-center">
-                  {swapSuccess}
+                  <p className="break-words">{swapTxHash ? swapSuccess.replace(swapTxHash, `${swapTxHash.slice(0, 10)}…${swapTxHash.slice(-8)}`) : swapSuccess}</p>
+                  {swapTxHash && swapExplorerBase && (
+                    <a
+                      href={`${swapExplorerBase}/tx/${swapTxHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block mt-2 underline font-medium"
+                      data-testid="swap-explorer-link"
+                    >
+                      View transaction on explorer<span className="sr-only"> (opens in a new tab)</span>
+                    </a>
+                  )}
                   <button
                     type="button"
                     onClick={() => shareData && setShareModalOpen(true)}
@@ -2412,8 +2441,18 @@ const Swap = () => {
                   </button>
                 </div>
               )}
+              </div>
             </div>
           </div>
+            {/* Chart sits below the swap card so the form is the first thing on every screen size. */}
+            <Suspense fallback={<ChartSkeleton height="280px" />}>
+              <SwapTokenPriceChart
+                chain="evm"
+                chainId={Number(chainId)}
+                tokenIn={chartTokenIn}
+                tokenOut={chartTokenOut}
+              />
+            </Suspense>
           </div>
           </div>
           </>

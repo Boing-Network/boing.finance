@@ -301,6 +301,19 @@
   color: #041018;
 }
 
+/* The global `button` / `.dark button` rules (globals.css) tint every button's text with the accent
+   colour and clear its background on hover. On the primary gradient that left blue text on a blue
+   button (contrast about 1:1) and dropped the fill on hover, so the primary CTA is pinned here. */
+button.td-btn--primary,
+:root button.td-btn--primary,
+.dark button.td-btn--primary,
+button.td-btn--primary:hover:not(:disabled),
+:root button.td-btn--primary:hover:not(:disabled),
+.dark button.td-btn--primary:hover:not(:disabled) {
+  background: var(--btn-primary-gradient, linear-gradient(135deg, var(--finance-primary), var(--finance-green-mid)));
+  color: #041018;
+}
+
 .td-btn--primary:hover:not(:disabled) {
   filter: brightness(1.08);
 }
