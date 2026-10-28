@@ -190,6 +190,8 @@ export default defineConfig(({ mode }) => {
       },
     },
   },
+  // Strip noisy console.log/console.debug calls from production bundles. warn/error are kept.
+  esbuild: mode === 'production' ? { pure: ['console.log', 'console.debug'] } : {},
   build: {
     outDir: 'dist',
     sourcemap: true,

@@ -1079,6 +1079,7 @@ const Pools = () => {
           <meta name="description" content="View and manage your liquidity pools on EVM and Solana. Track positions and earn fees with boing.finance." />
         </Helmet>
         <div className="relative w-full min-w-0">
+          <h1 className="sr-only">Liquidity pools</h1>
           <div className="relative z-10 container mx-auto px-4 py-8">
             {/* Boing pools are public: browse, search and open a swap without a wallet. */}
             <div className="max-w-5xl mx-auto mb-8">
@@ -1109,6 +1110,7 @@ const Pools = () => {
           <meta name="description" content="Boing pools: swap, add liquidity and earn a share of swap fees on boing.finance" />
         </Helmet>
         <div className="relative w-full min-w-0">
+          <h1 className="sr-only">Liquidity pools</h1>
           <div className="relative z-10 container mx-auto px-4 py-8">
             <div className="max-w-5xl mx-auto">
               <BoingPoolsSection account={account} initialQuery={boingPoolQuery} />
@@ -1127,6 +1129,7 @@ const Pools = () => {
       </Helmet>
 
       <div className="relative w-full min-w-0">
+        <h1 className="sr-only">Liquidity pools</h1>
         <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="max-w-7xl mx-auto">
             {/* Tabs */}

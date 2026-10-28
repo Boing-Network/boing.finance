@@ -386,6 +386,7 @@ const Tokens = () => {
         <meta name="twitter:description" content="Explore and manage tokens." />
       </Helmet>
       <div className="relative w-full min-w-0">
+        <h1 className="sr-only">Token directory</h1>
         <div className="td-mint-form relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           {selectedChain === BOING_NATIVE_L1_CHAIN_ID && (
             <p className="td-status td-status--info mb-4 text-sm">
