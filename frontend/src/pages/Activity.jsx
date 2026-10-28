@@ -130,6 +130,11 @@ export default function Activity() {
 
   if (!account) {
     return (
+      <>
+      <Helmet>
+        <title>Activity | boing.finance</title>
+        <meta name="description" content="Your swaps, liquidity, and bridge history on boing.finance." />
+      </Helmet>
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="max-w-3xl mx-auto text-center py-16">
           <h1 className="text-3xl font-bold text-white mb-4">Activity</h1>
@@ -142,6 +147,7 @@ export default function Activity() {
           </button>
         </div>
       </div>
+      </>
     );
   }
 

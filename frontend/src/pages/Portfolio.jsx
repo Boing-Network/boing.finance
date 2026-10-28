@@ -426,6 +426,11 @@ export default function Portfolio() {
 
   if (!account) {
     return (
+      <>
+      <Helmet>
+        <title>Portfolio | boing.finance</title>
+        <meta name="description" content="Balances, pools, and NFTs for your connected wallet on EVM, Solana, and Boing." />
+      </Helmet>
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center py-12">
@@ -453,6 +458,7 @@ export default function Portfolio() {
           </div>
         </div>
       </div>
+      </>
     );
   }
 
