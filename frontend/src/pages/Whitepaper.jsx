@@ -276,7 +276,7 @@ const Whitepaper = () => {
                 <ul className="list-disc list-inside space-y-2" style={{ color: 'var(--text-secondary)' }}>
                   <li>Gradual rollout of new features</li>
                   <li>Bug bounty programs</li>
-                  <li>Regular security audits</li>
+                  <li>Ongoing security reviews (no professional third-party audit has been completed yet)</li>
                   <li>Insurance fund for user protection</li>
                   <li>Community-driven security monitoring</li>
                 </ul>

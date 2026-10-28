@@ -153,7 +153,7 @@ const Privacy = () => {
                 </p>
                 <ul className="list-disc list-inside space-y-2 mb-4" style={{ color: 'var(--text-secondary)' }}>
                   <li>Encryption of data in transit and at rest</li>
-                  <li>Regular security audits and vulnerability assessments</li>
+                  <li>Ongoing security reviews and vulnerability assessments (no professional third-party audit has been completed yet)</li>
                   <li>Access controls and authentication mechanisms</li>
                   <li>Secure development practices and code reviews</li>
                   <li>Employee training on data protection</li>

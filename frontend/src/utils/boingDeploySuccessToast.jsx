@@ -30,7 +30,7 @@ export function showBoingContractIncludedToast(deployedAccountId, explorerBaseUr
         <a
           href={buildBoingExplorerAccountUrl(base, deployedAccountId)}
           className="underline block"
-          style={{ color: 'var(--accent-cyan, #38bdf8)' }}
+          style={{ color: 'var(--accent-cyan, #8DB8FF)' }}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -103,7 +103,7 @@ export function showBoingLaunchDeploySuccessToast(result) {
           <a
             href={buildBoingExplorerAccountUrl(base, deployed)}
             className="underline block"
-            style={{ color: 'var(--accent-cyan, #38bdf8)' }}
+            style={{ color: 'var(--accent-cyan, #8DB8FF)' }}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -114,7 +114,7 @@ export function showBoingLaunchDeploySuccessToast(result) {
             <a
               href={buildBoingExplorerTxUrl(base, txId)}
               className="underline block"
-              style={{ color: 'var(--accent-cyan, #38bdf8)' }}
+              style={{ color: 'var(--accent-cyan, #8DB8FF)' }}
               target="_blank"
               rel="noopener noreferrer"
             >

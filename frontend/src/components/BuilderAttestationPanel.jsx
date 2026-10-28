@@ -87,7 +87,7 @@ export default function BuilderAttestationPanel({
         ? 'var(--border-color)'
         : state === 'unavailable' || !status.canWrite
           ? 'rgba(245, 158, 11, 0.5)'
-          : 'rgba(0, 229, 255, 0.28)';
+          : 'rgba(59, 140, 255, 0.28)';
   const bg =
     attested || ownAttestation
       ? 'rgba(16, 185, 129, 0.08)'

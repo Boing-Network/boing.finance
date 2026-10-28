@@ -3,8 +3,7 @@ import React, { useId } from 'react';
 const base = process.env.PUBLIC_URL || '';
 
 /**
- * Boing family mark: rounded-square shell + recovery arc + orb.
- * Same bounce language as boing.network; square (not hex) so finance reads as its own site.
+ * Boing Finance mark (interim): rounded-square shell + route arc + destination node, in the shared Boing navy/blue tokens.
  * Keep path geometry in sync with public/assets/boing-logo-mark.svg (rasters / favicons).
  */
 function BoingLogoMark({ size, title }) {
@@ -23,18 +22,18 @@ function BoingLogoMark({ size, title }) {
     >
       <defs>
         <linearGradient id={`${g}-frame`} x1="8" y1="10" x2="56" y2="54" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#7c3aed" />
-          <stop offset="0.5" stopColor="#06b6d4" />
-          <stop offset="1" stopColor="#22d3ee" />
+          <stop stopColor="#2563EB" />
+          <stop offset="0.5" stopColor="#3B8CFF" />
+          <stop offset="1" stopColor="#8DB8FF" />
         </linearGradient>
         <linearGradient id={`${g}-orb`} x1="36" y1="14" x2="52" y2="30" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#c4b5fd" />
-          <stop offset="0.55" stopColor="#22d3ee" />
-          <stop offset="1" stopColor="#67e8f9" />
+          <stop stopColor="#CFE0FF" />
+          <stop offset="0.55" stopColor="#8DB8FF" />
+          <stop offset="1" stopColor="#3B8CFF" />
         </linearGradient>
         <radialGradient id={`${g}-slab`} cx="34%" cy="28%" r="78%">
-          <stop offset="0%" stopColor="#1a2434" />
-          <stop offset="100%" stopColor="#0c1018" />
+          <stop offset="0%" stopColor="#18244A" />
+          <stop offset="100%" stopColor="#0A1128" />
         </radialGradient>
       </defs>
       <rect

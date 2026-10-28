@@ -518,7 +518,7 @@ export default function BoingNativeVm() {
               </a>
               . Express can call <code className="text-xs">boing_signTransaction</code> /{' '}
               <code className="text-xs">boing_sendTransaction</code>. Native amounts are BOING with 18 decimals (1 BOING = 10¹⁸ base units on the ledger). Boing is
-              not EVM: native VM + Ed25519, not MetaMask EIP-155.
+              native VM accounts (Ed25519), signed with Boing Express.
             </p>
             <ul className="text-xs space-y-1 list-disc pl-5 mt-2">
               <li>Use chain {BOING_NATIVE_L1_CHAIN_ID} (0x1b01) for native balance and mempool behavior.</li>

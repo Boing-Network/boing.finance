@@ -3,8 +3,8 @@
  * Requires: sharp (devDependency). Run from frontend/: `npm run generate-brand-assets`
  * Then: `npm run generate-favicon` (uses boing-logo-mark.png as ICO source).
  *
- * The mark is the Boing family rounded square (outlined paths only, no <text>) so Sharp/librsvg
- * matches in-app Logo.jsx. Same bounce arc + orb as network; square shell instead of hex.
+ * The mark is a rounded square (outlined paths only, no <text>) so Sharp/librsvg
+ * matches in-app Logo.jsx: shell + route arc + destination node.
  */
 
 import fs from 'fs';
@@ -18,7 +18,7 @@ const assetsDir = path.join(publicDir, 'assets');
 const svgPath = path.join(assetsDir, 'boing-logo-mark.svg');
 
 /** Solid tile behind small favicons — transparent + ICO quantization often reads as broken / “green” in tabs. */
-const FAVICON_TILE_BG = { r: 6, g: 8, b: 12, alpha: 1 };
+const FAVICON_TILE_BG = { r: 5, g: 10, b: 26, alpha: 1 };
 
 /**
  * @param {number} size
@@ -54,13 +54,13 @@ async function buildSplash() {
       width: 512,
       height: 512,
       channels: 4,
-      background: { r: 6, g: 8, b: 12, alpha: 1 },
+      background: { r: 5, g: 10, b: 26, alpha: 1 },
     },
   })
     .composite([{ input: logo, gravity: 'center' }])
     .png({ compressionLevel: 9 })
     .toFile(out);
-  console.log('[brand-assets] splash.png (512×512, boing-logo-mark on #06080c)');
+  console.log('[brand-assets] splash.png (512×512, boing-logo-mark on #050A1A)');
 }
 
 async function buildOgImage() {
@@ -73,21 +73,21 @@ async function buildOgImage() {
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#121a24"/>
-      <stop offset="55%" stop-color="#0c1018"/>
-      <stop offset="100%" stop-color="#06080c"/>
+      <stop offset="0%" stop-color="#18244A"/>
+      <stop offset="55%" stop-color="#0A1128"/>
+      <stop offset="100%" stop-color="#050A1A"/>
     </linearGradient>
     <radialGradient id="glow" cx="50%" cy="32%" r="70%">
-      <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.12"/>
-      <stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#3B8CFF" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#3B8CFF" stop-opacity="0"/>
     </radialGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
   <rect width="1200" height="630" fill="url(#glow)"/>
   <image href="data:image/png;base64,${b64}" width="280" height="280" x="460" y="88"/>
-  <text x="600" y="440" text-anchor="middle" fill="#e9eef5" font-size="48" font-family="Segoe UI, system-ui, sans-serif" font-weight="700">boing.finance</text>
-  <text x="600" y="495" text-anchor="middle" fill="#7eb8ff" font-size="26" font-family="Segoe UI, system-ui, sans-serif">DeFi That Bounces Back</text>
-  <text x="600" y="535" text-anchor="middle" fill="#8b9cb0" font-size="18" font-family="Segoe UI, system-ui, sans-serif">Swap · Deploy · Bridge on EVM &amp; Solana</text>
+  <text x="600" y="440" text-anchor="middle" fill="#F0F4F8" font-size="48" font-family="Segoe UI, system-ui, sans-serif" font-weight="700">boing.finance</text>
+  <text x="600" y="495" text-anchor="middle" fill="#8DB8FF" font-size="26" font-family="Segoe UI, system-ui, sans-serif">Move liquidity across chains</text>
+  <text x="600" y="535" text-anchor="middle" fill="#8b9cb0" font-size="18" font-family="Segoe UI, system-ui, sans-serif">Transparent routing · Native Boing liquidity</text>
 </svg>`;
   const out = path.join(publicDir, 'preview-image.png');
   await sharp(Buffer.from(ogSvg)).png().toFile(out);
@@ -104,21 +104,21 @@ async function buildHeroImage() {
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="682" viewBox="0 0 1024 682">
   <defs>
     <linearGradient id="hbg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#121a24"/>
-      <stop offset="55%" stop-color="#0c1018"/>
-      <stop offset="100%" stop-color="#06080c"/>
+      <stop offset="0%" stop-color="#18244A"/>
+      <stop offset="55%" stop-color="#0A1128"/>
+      <stop offset="100%" stop-color="#050A1A"/>
     </linearGradient>
     <radialGradient id="hglow" cx="38%" cy="42%" r="65%">
-      <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.14"/>
-      <stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#3B8CFF" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#3B8CFF" stop-opacity="0"/>
     </radialGradient>
   </defs>
   <rect width="1024" height="682" fill="url(#hbg)"/>
   <rect width="1024" height="682" fill="url(#hglow)"/>
   <image href="data:image/png;base64,${b64}" width="240" height="240" x="120" y="221"/>
-  <text x="400" y="320" fill="#e9eef5" font-size="52" font-family="Segoe UI, system-ui, sans-serif" font-weight="700">boing.finance</text>
-  <text x="400" y="372" fill="#7eb8ff" font-size="28" font-family="Segoe UI, system-ui, sans-serif">DeFi That Bounces Back</text>
-  <text x="400" y="416" fill="#8b9cb0" font-size="18" font-family="Segoe UI, system-ui, sans-serif">Swap · Deploy · Bridge on EVM &amp; Solana</text>
+  <text x="400" y="320" fill="#F0F4F8" font-size="52" font-family="Segoe UI, system-ui, sans-serif" font-weight="700">boing.finance</text>
+  <text x="400" y="372" fill="#8DB8FF" font-size="28" font-family="Segoe UI, system-ui, sans-serif">Move liquidity across chains</text>
+  <text x="400" y="416" fill="#8b9cb0" font-size="18" font-family="Segoe UI, system-ui, sans-serif">Transparent routing · Native Boing liquidity</text>
 </svg>`;
   const out = path.join(publicDir, 'hero-image.png');
   await sharp(Buffer.from(heroSvg)).png().toFile(out);
@@ -137,15 +137,15 @@ async function buildFacebookBanner() {
 <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
   <defs>
     <linearGradient id="bbg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#121a24"/>
-      <stop offset="100%" stop-color="#06080c"/>
+      <stop offset="0%" stop-color="#18244A"/>
+      <stop offset="100%" stop-color="#050A1A"/>
     </linearGradient>
   </defs>
   <rect width="${w}" height="${h}" fill="url(#bbg)"/>
   <image href="data:image/png;base64,${b64}" width="200" height="200" x="48" y="56"/>
-  <text x="280" y="130" fill="#e9eef5" font-size="36" font-family="Segoe UI, system-ui, sans-serif" font-weight="700">boing.finance</text>
-  <text x="280" y="175" fill="#8b9cb0" font-size="18" font-family="Segoe UI, system-ui, sans-serif">DeFi That Bounces Back</text>
-  <text x="280" y="210" fill="#00e5ff" font-size="15" font-family="Segoe UI, system-ui, sans-serif" opacity="0.9">Swap · Deploy · Bridge</text>
+  <text x="280" y="130" fill="#F0F4F8" font-size="36" font-family="Segoe UI, system-ui, sans-serif" font-weight="700">boing.finance</text>
+  <text x="280" y="175" fill="#8b9cb0" font-size="18" font-family="Segoe UI, system-ui, sans-serif">Move liquidity across chains</text>
+  <text x="280" y="210" fill="#3B8CFF" font-size="15" font-family="Segoe UI, system-ui, sans-serif" opacity="0.9">Transparent routing · Native Boing liquidity</text>
 </svg>`;
   const out = path.join(assetsDir, 'boing-banner-facebook.png');
   await sharp(Buffer.from(svg)).png().toFile(out);

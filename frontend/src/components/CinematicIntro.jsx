@@ -13,7 +13,7 @@ import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 
 const CYAN = { r: 0, g: 229, b: 255 };
 const GREEN = { r: 0, g: 255, b: 136 };
-const DEEP_BG = '#06080c';
+const DEEP_BG = '#050A1A';
 
 const TOTAL_MS = 4500;
 const TOTAL_REDUCED_MS = 1800;
@@ -161,7 +161,7 @@ function drawSwapUI(ctx, W, H, opacity, scale) {
   const by = -bh / 2;
   const r = 16;
 
-  ctx.fillStyle = 'rgba(2,11,38,0.88)';
+  ctx.fillStyle = 'rgba(5, 10, 26,0.88)';
   ctx.shadowBlur = 40;
   ctx.shadowColor = `rgba(${CYAN.r},${CYAN.g},${CYAN.b},0.25)`;
   roundRect(ctx, bx, by, bw, bh, r);
@@ -199,7 +199,7 @@ function drawSwapUI(ctx, W, H, opacity, scale) {
   ctx.fillStyle = `rgba(${GREEN.r},${GREEN.g},${GREEN.b},0.8)`;
   ctx.font = '600 13px "JetBrains Mono", ui-monospace, monospace';
   ctx.fillText('◈ BOING', rowX + 12, by + 142);
-  ctx.fillStyle = '#f0f7ff';
+  ctx.fillStyle = '#F0F4F8';
   ctx.textAlign = 'right';
   ctx.fillText('67,567,567', rowX + rowW - 12, by + 142);
   ctx.textAlign = 'left';
@@ -212,7 +212,7 @@ function drawSwapUI(ctx, W, H, opacity, scale) {
   ctx.shadowColor = `rgba(${CYAN.r},${CYAN.g},${CYAN.b},0.4)`;
   roundRect(ctx, rowX, by + 170, rowW, 36, 8);
   ctx.fill();
-  ctx.fillStyle = '#020B26';
+  ctx.fillStyle = '#050A1A';
   ctx.font = '700 13px Orbitron, ui-sans-serif, sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText('Swap →', 0, by + 194);
@@ -385,7 +385,7 @@ function CinematicIntro({ onComplete }) {
           position: fixed;
           inset: 0;
           z-index: 99999;
-          background: #020B26;
+          background: #050A1A;
           overflow: hidden;
           transition: opacity 1s ease, visibility 1.1s ease;
         }
@@ -399,9 +399,9 @@ function CinematicIntro({ onComplete }) {
           top: 22px;
           right: 24px;
           z-index: 10;
-          background: rgba(0,229,255,0.07);
-          border: 1px solid rgba(0,229,255,0.2);
-          color: rgba(0,229,255,0.6);
+          background: rgba(59, 140, 255,0.07);
+          border: 1px solid rgba(59, 140, 255,0.2);
+          color: rgba(59, 140, 255,0.6);
           font-family: var(--font-sans, 'Comfortaa', system-ui, sans-serif);
           font-size: 0.72rem;
           font-weight: 600;
@@ -414,8 +414,8 @@ function CinematicIntro({ onComplete }) {
           animation: cinematic-intro-fade-in 0.5s ease 0.3s both;
         }
         .cinematic-intro__skip:hover {
-          background: rgba(0,229,255,0.14);
-          color: #00e5ff;
+          background: rgba(59, 140, 255,0.14);
+          color: #3B8CFF;
         }
         @keyframes cinematic-intro-fade-in {
           from { opacity: 0; }
@@ -450,15 +450,15 @@ function CinematicIntro({ onComplete }) {
           font-weight: 700;
           letter-spacing: 0.2em;
           text-transform: uppercase;
-          color: rgba(0,229,255,0.5);
+          color: rgba(59, 140, 255,0.5);
           margin-bottom: 6px;
         }
         .cinematic-intro__scene-title {
           font-family: Orbitron, ui-sans-serif, sans-serif;
           font-size: clamp(1.4rem, 3.5vw, 2.8rem);
           font-weight: 900;
-          color: #f0f7ff;
-          text-shadow: 0 0 30px rgba(0,229,255,0.6);
+          color: #F0F4F8;
+          text-shadow: 0 0 30px rgba(59, 140, 255,0.6);
         }
         .cinematic-intro__scene-sub {
           font-size: 0.88rem;
@@ -470,8 +470,8 @@ function CinematicIntro({ onComplete }) {
           bottom: 0;
           left: 0;
           height: 2px;
-          background: linear-gradient(90deg, #00e5ff, rgba(0,229,255,0.3));
-          box-shadow: 0 0 8px rgba(0,229,255,0.6);
+          background: linear-gradient(90deg, #3B8CFF, rgba(59, 140, 255,0.3));
+          box-shadow: 0 0 8px rgba(59, 140, 255,0.6);
           transition: width 50ms linear;
         }
       `}</style>
@@ -493,7 +493,7 @@ function CinematicIntro({ onComplete }) {
         className={`cinematic-intro__scene-text${showSceneText ? ' show' : ''}`}
         aria-hidden
       >
-        <div className="cinematic-intro__scene-label">DeFi That Bounces Back</div>
+        <div className="cinematic-intro__scene-label">Move liquidity across chains</div>
         <div className="cinematic-intro__scene-title">boing.finance</div>
         <div className="cinematic-intro__scene-sub">Swap. Bridge. Deploy. Zero fees.</div>
       </div>

@@ -105,7 +105,7 @@ export default function SwapTokenPriceChart({
           </p>
           <p className="text-xs mt-1 flex items-center gap-2" style={{ color: 'var(--text-tertiary)' }}>
             {live && (
-              <span className="inline-flex items-center gap-1.5" style={{ color: 'var(--finance-green, #00ff88)' }}>
+              <span className="inline-flex items-center gap-1.5" style={{ color: 'var(--finance-green, #34D399)' }}>
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-60 animate-ping" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-green-400" />
@@ -128,8 +128,8 @@ export default function SwapTokenPriceChart({
                   onClick={() => setFocus(side)}
                   className="px-2.5 py-1 text-xs font-medium"
                   style={{
-                    backgroundColor: selected ? 'rgba(0, 229, 255, 0.12)' : 'transparent',
-                    color: selected ? 'var(--finance-primary, #00e5ff)' : 'var(--text-secondary)',
+                    backgroundColor: selected ? 'rgba(59, 140, 255, 0.12)' : 'transparent',
+                    color: selected ? 'var(--finance-primary, #3B8CFF)' : 'var(--text-secondary)',
                   }}
                 >
                   {tok?.symbol || (side === 'in' ? 'Pay' : 'Receive')}
@@ -147,8 +147,8 @@ export default function SwapTokenPriceChart({
                   onClick={() => setDays(r.id)}
                   className="px-2.5 py-1 text-xs font-medium"
                   style={{
-                    backgroundColor: selected ? 'rgba(0, 229, 255, 0.12)' : 'transparent',
-                    color: selected ? 'var(--finance-primary, #00e5ff)' : 'var(--text-secondary)',
+                    backgroundColor: selected ? 'rgba(59, 140, 255, 0.12)' : 'transparent',
+                    color: selected ? 'var(--finance-primary, #3B8CFF)' : 'var(--text-secondary)',
                   }}
                 >
                   {r.label}

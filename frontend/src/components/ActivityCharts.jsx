@@ -21,7 +21,7 @@ export default function ActivityCharts({ dailyChart, typeBreakdown, mostActiveCh
                 contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
                 labelStyle={{ color: '#F9FAFB' }}
               />
-              <Bar dataKey="count" fill="#06B6D4" name="Transactions" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="count" fill="#3B8CFF" name="Transactions" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

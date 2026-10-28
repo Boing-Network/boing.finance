@@ -49,8 +49,8 @@ function TocList({ activeId, onPick, idPrefix }) {
               }`}
               style={{
                 color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
-                background: active ? 'linear-gradient(135deg, rgba(0,229,255,0.18), rgba(37,99,235,0.28))' : undefined,
-                boxShadow: active ? 'inset 3px 0 0 var(--finance-primary, #00e5ff)' : undefined,
+                background: active ? 'linear-gradient(135deg, rgba(59, 140, 255,0.18), rgba(37,99,235,0.28))' : undefined,
+                boxShadow: active ? 'inset 3px 0 0 var(--finance-primary, #3B8CFF)' : undefined,
               }}
             >
               {s.title}

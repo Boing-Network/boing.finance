@@ -22,7 +22,7 @@ Current app chrome is a **stone + engraved-vein + soft neon** shell, not the old
 
 ## Tokens (canonical in `:root`)
 
-Defined in `globals.css` (dark-first). Current primaries include `--bg-primary: #06080c`, `--accent-teal: #00e5ff`, `--accent-cyan`, `--accent-gold`, `--text-primary`. Prefer these variables over hardcoded hex in components. Recharts should use the same tokens.
+Defined in `globals.css` (dark-first). Current primaries include `--bg-primary: #050A1A`, `--accent-teal: #3B8CFF`, `--accent-cyan`, `--accent-gold`, `--text-primary`. Prefer these variables over hardcoded hex in components. Recharts should use the same tokens.
 
 ## Typography
 

@@ -7,12 +7,12 @@
   "miniapp": {
     "version": "1",
     "name": "boing.finance",
-    "iconUrl": "https://boing.finance/assets/boing-logo-mark.png?v=v1787153927041-0uwqtk0",
+    "iconUrl": "https://boing.finance/assets/boing-logo-mark.png?v=v1793143521831-aser9sj",
     "homeUrl": "https://boing.finance",
     "splashImageUrl": "https://boing.finance/splash.png",
-    "splashBackgroundColor": "#06080c",
-    "heroImageUrl": "https://boing.finance/preview-image.png?v=v1787153927041-0uwqtk0",
-    "tagline": "DeFi That Bounces Back",
+    "splashBackgroundColor": "#050A1A",
+    "heroImageUrl": "https://boing.finance/preview-image.png?v=v1793143521831-aser9sj",
+    "tagline": "Move liquidity across chains",
     "primaryCategory": "finance",
     "tags": [
       "defi",

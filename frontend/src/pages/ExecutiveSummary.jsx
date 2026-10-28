@@ -6,7 +6,7 @@ const ExecutiveSummary = () => {
     <>
       <Helmet>
         <title>Executive Summary | boing.finance — DeFi on EVM & Solana</title>
-        <meta name="description" content="boing.finance executive summary: DeFi on Boing L1 first (native AMM, token deploy, liquidity via Boing Express), plus EVM and Solana. The DeFi that bounces back." />
+        <meta name="description" content="boing.finance executive summary: DeFi on Boing L1 first (native AMM, token deploy, liquidity via Boing Express), plus EVM and Solana. Cross-chain DeFi with transparent routing and native Boing liquidity." />
         <meta name="keywords" content="Boing L1, Boing Network, cross-chain DeFi, DEX, boing.finance, EVM, Solana, token deployment, liquidity" />
         <meta property="og:title" content="Executive Summary | boing.finance" />
         <meta property="og:description" content="Next-generation cross-chain DeFi platform with live deployment across 6 networks" />

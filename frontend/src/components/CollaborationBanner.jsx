@@ -10,8 +10,8 @@ export default function CollaborationBanner() {
       role="note"
       aria-label="Collaboration"
       style={{
-        backgroundColor: 'color-mix(in srgb, var(--finance-primary, #00e5ff) 10%, transparent)',
-        borderBottom: '1px solid color-mix(in srgb, var(--finance-primary, #00e5ff) 24%, var(--border-color))',
+        backgroundColor: 'color-mix(in srgb, var(--finance-primary, #3B8CFF) 10%, transparent)',
+        borderBottom: '1px solid color-mix(in srgb, var(--finance-primary, #3B8CFF) 24%, var(--border-color))',
         color: 'var(--text-secondary)',
         fontFamily: 'var(--font-sans, Comfortaa, system-ui, sans-serif)',
       }}
@@ -21,7 +21,7 @@ export default function CollaborationBanner() {
         <a
           href={`mailto:${EMAIL}`}
           className="font-semibold underline underline-offset-2"
-          style={{ color: 'var(--finance-primary, #00e5ff)' }}
+          style={{ color: 'var(--finance-primary, #3B8CFF)' }}
         >
           {EMAIL}
         </a>
