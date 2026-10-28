@@ -4,6 +4,7 @@ import { PageHeader, PageCard } from '../../components/PageLayout';
 
 const SOCIAL_LINKS = [
   { name: 'Discord', icon: '💬', url: 'https://discord.gg/7RDtQtQvBW', description: 'Join our community chat, get support, and discuss governance.' },
+  { name: 'Boing Network Discord', icon: '💬', url: 'https://discord.gg/K3w9nbUw4N', description: 'Join the official Boing Network community chat for protocol, wallet, and ecosystem discussion.' },
   { name: 'Twitter', icon: '🐦', url: 'https://twitter.com/boing_finance', description: 'Follow for updates, announcements, and governance discussions.' },
   { name: 'Telegram', icon: '✈️', url: 'https://t.me/boing_finance', description: 'Real-time chat and community coordination.' },
   { name: 'Contact', icon: '📧', url: '/contact-us', description: 'Email the team with governance ideas and proposal drafts.' },

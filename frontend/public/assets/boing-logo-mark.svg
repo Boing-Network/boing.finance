@@ -2,21 +2,21 @@
   <title>Boing Finance</title>
   <defs>
     <linearGradient id="boing-mark-frame" x1="8" y1="10" x2="56" y2="54" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#7c3aed"/>
-      <stop offset="0.5" stop-color="#06b6d4"/>
-      <stop offset="1" stop-color="#22d3ee"/>
+      <stop stop-color="#2563EB"/>
+      <stop offset="0.5" stop-color="#3B8CFF"/>
+      <stop offset="1" stop-color="#8DB8FF"/>
     </linearGradient>
     <linearGradient id="boing-mark-orb" x1="36" y1="14" x2="52" y2="30" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#c4b5fd"/>
-      <stop offset="0.55" stop-color="#22d3ee"/>
-      <stop offset="1" stop-color="#67e8f9"/>
+      <stop stop-color="#CFE0FF"/>
+      <stop offset="0.55" stop-color="#8DB8FF"/>
+      <stop offset="1" stop-color="#3B8CFF"/>
     </linearGradient>
     <radialGradient id="boing-mark-slab" cx="34%" cy="28%" r="78%">
-      <stop offset="0%" stop-color="#1a2434"/>
-      <stop offset="100%" stop-color="#0c1018"/>
+      <stop offset="0%" stop-color="#18244A"/>
+      <stop offset="100%" stop-color="#0A1128"/>
     </radialGradient>
   </defs>
-  <!-- Finance shell: rounded square (network uses a hex) -->
+  <!-- Rounded-square shell -->
   <rect
     x="6"
     y="6"
@@ -27,7 +27,7 @@
     stroke="url(#boing-mark-frame)"
     stroke-width="2.25"
   />
-  <!-- Recovery arc: dip then spring upward (“always bounces back”) -->
+  <!-- Route arc: a path from one side to a destination node -->
   <path
     d="M13 45 C 19 45 21 40 25 33 C 29 26 33 21 38 19 C 43 17 47 20 49 24"
     fill="none"

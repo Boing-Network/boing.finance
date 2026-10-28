@@ -23,6 +23,9 @@ test('L1 media upload service exports PutBlob + prefer-L1 helpers', () => {
   assert.match(uploadSrc, /L1_PUT_BLOB_WALLET_SAFE_MAX_BYTES/);
   assert.match(uploadSrc, /mediaBlobUri/);
   assert.match(uploadSrc, /getMediaBlobParams/);
+  assert.match(uploadSrc, /requestNftPutBlobSession/);
+  assert.match(uploadSrc, /boing_requestPutBlobSession/);
+  assert.match(uploadSrc, /putBlobSession/);
 });
 
 test('publicAssetUri accepts boing://blob references', () => {

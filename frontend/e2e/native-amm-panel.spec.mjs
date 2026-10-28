@@ -15,6 +15,56 @@ function reserveWordHex(n) {
   return `0x${'0'.repeat(32)}${lo}`;
 }
 
+async function mockBoingRpcReserves(page, { reserveA = 1000, reserveB = 2000 } = {}) {
+  // vite preview has no Pages Function / Vite proxy — without this, panel hydration waits on dead `/api/boing-rpc`.
+  await page.route('**/api/boing-rpc', async (route) => {
+    let body;
+    try {
+      body = route.request().postDataJSON();
+    } catch {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, result: null }),
+      });
+      return;
+    }
+    const method = body?.method;
+    if (method === 'boing_getContractStorage') {
+      const key = body.params?.[1];
+      const reserveAKey = `0x${'0'.repeat(62)}01`;
+      const reserveBKey = `0x${'0'.repeat(62)}02`;
+      let value;
+      if (key?.toLowerCase() === reserveAKey.toLowerCase()) {
+        value = reserveWordHex(reserveA);
+      } else if (key?.toLowerCase() === reserveBKey.toLowerCase()) {
+        value = reserveWordHex(reserveB);
+      } else {
+        value = `0x${'0'.repeat(64)}`;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: body.id ?? 1,
+          result: { value },
+        }),
+      });
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: body?.id ?? 1,
+        result: null,
+      }),
+    });
+  });
+}
+
 test.describe('Native AMM panel (build with REACT_APP_BOING_NATIVE_AMM_POOL)', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(
@@ -39,12 +89,12 @@ test.describe('Native AMM panel (build with REACT_APP_BOING_NATIVE_AMM_POOL)', (
       },
       { account: MOCK_ACCOUNT, sig: SIG128 }
     );
+    await mockBoingRpcReserves(page);
   });
 
   test('swap page shows native CP pool section', async ({ page }) => {
-    test.setTimeout(120_000);
     await page.goto('/swap?nativeTradeTab=advanced');
-    await expect(page.getByTestId('native-amm-panel')).toBeVisible({ timeout: 90_000 });
+    await expect(page.getByTestId('native-amm-panel')).toBeVisible({ timeout: 60_000 });
     // Embedded panel title is "Swap" (non-embedded: "Swap on the main pool").
     await expect(
       page.getByTestId('native-amm-panel').getByRole('heading', { name: /Swap/i })
@@ -52,46 +102,9 @@ test.describe('Native AMM panel (build with REACT_APP_BOING_NATIVE_AMM_POOL)', (
   });
 
   test('native panel loads mocked reserves via boing-rpc proxy', async ({ page }) => {
-    test.setTimeout(120_000);
-
-    await page.route('**/api/boing-rpc', async (route) => {
-      let body;
-      try {
-        body = route.request().postDataJSON();
-      } catch {
-        await route.continue();
-        return;
-      }
-      const method = body?.method;
-      if (method === 'boing_getContractStorage') {
-        const key = body.params?.[1];
-        const reserveAKey = `0x${'0'.repeat(62)}01`;
-        const reserveBKey = `0x${'0'.repeat(62)}02`;
-        let value;
-        if (key?.toLowerCase() === reserveAKey.toLowerCase()) {
-          value = reserveWordHex(1000);
-        } else if (key?.toLowerCase() === reserveBKey.toLowerCase()) {
-          value = reserveWordHex(2000);
-        } else {
-          value = `0x${'0'.repeat(64)}`;
-        }
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            jsonrpc: '2.0',
-            id: body.id ?? 1,
-            result: { value },
-          }),
-        });
-        return;
-      }
-      await route.continue();
-    });
-
     await page.goto('/swap?nativeTradeTab=advanced');
     const panel = page.getByTestId('native-amm-panel');
-    await expect(panel).toBeVisible({ timeout: 90_000 });
+    await expect(panel).toBeVisible({ timeout: 60_000 });
     await expect(panel).toContainText('1000', { timeout: 30_000 });
     await expect(panel).toContainText('2000');
 
@@ -100,9 +113,8 @@ test.describe('Native AMM panel (build with REACT_APP_BOING_NATIVE_AMM_POOL)', (
   });
 
   test('swap submit stays disabled without amount', async ({ page }) => {
-    test.setTimeout(120_000);
     await page.goto('/swap?nativeTradeTab=advanced');
-    await expect(page.getByTestId('native-amm-panel')).toBeVisible({ timeout: 90_000 });
+    await expect(page.getByTestId('native-amm-panel')).toBeVisible({ timeout: 60_000 });
     await expect(page.getByTestId('native-amm-swap-submit')).toBeDisabled();
   });
 });

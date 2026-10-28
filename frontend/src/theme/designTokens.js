@@ -5,8 +5,8 @@
  */
 
 export const CHART_COLORS = [
-  '#00e5ff', // finance-primary / chart-1
-  '#00ff88', // finance-green / chart-2
+  '#3B8CFF', // finance-primary / chart-1
+  '#34D399', // finance-green / chart-2
   '#f59e0b', // finance-gold / chart-3
   '#8b5cf6', // finance-purple / chart-4
   '#ec4899', // chart-5 (pink)
@@ -14,12 +14,12 @@ export const CHART_COLORS = [
 ];
 
 export const TREASURY_ALLOCATION_COLORS = {
-  Liquidity: '#00e5ff',
+  Liquidity: '#3B8CFF',
   Grants: '#8b5cf6',
-  Development: '#00ff88',
+  Development: '#34D399',
   Marketing: '#f59e0b',
   Reserve: '#10b981',
-  Other: '#00e5ff',
+  Other: '#3B8CFF',
 };
 
 /** Default allocation list for treasury charts; color key matches TREASURY_ALLOCATION_COLORS */
@@ -33,12 +33,12 @@ export const TREASURY_DEFAULT_ALLOCATIONS = [
 
 /** Confetti / canvas-friendly palette (Deep Trade) */
 export const CONFETTI_COLORS = [
-  '#00e5ff',
-  '#00ff88',
+  '#3B8CFF',
+  '#34D399',
   '#94a3b8',
   '#475569',
-  'rgba(0, 229, 255, 0.4)',
-  'rgba(0, 255, 136, 0.35)',
+  'rgba(59, 140, 255, 0.4)',
+  'rgba(52, 211, 153, 0.35)',
 ];
 
 const designTokens = {

@@ -2046,15 +2046,15 @@ const Swap = () => {
     <>
       <Helmet>
         <title>Swap Tokens | boing.finance - Trade on Boing L1, EVM & Solana</title>
-        <meta name="description" content="Swap tokens instantly on EVM and Solana. Get the best rates with boing.finance—the DeFi that always bounces back." />
+        <meta name="description" content="Swap tokens across Boing, EVM networks and Solana. Cross-chain DeFi with transparent routing and native Boing liquidity." />
         <meta name="keywords" content="swap tokens, DEX, boing finance, EVM, Solana, token swap, decentralized exchange" />
         <meta property="og:title" content="Swap Tokens | boing.finance" />
-        <meta property="og:description" content="Swap tokens on EVM and Solana. Best rates, one interface." />
+        <meta property="og:description" content="Swap tokens across Boing, EVM networks and Solana. Quote details are shown before you confirm." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance/swap" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Swap Tokens | boing.finance" />
-        <meta name="twitter:description" content="Swap tokens on EVM and Solana. Best rates." />
+        <meta name="twitter:description" content="Swap tokens across Boing, EVM networks and Solana. Cross-chain DeFi with transparent routing and native Boing liquidity." />
       </Helmet>
       <div className="relative w-full min-w-0">
         <SettingsModal
