@@ -44,7 +44,9 @@ Merged from Improvement Plan, UX & NFT Brainstorm, and Boing NFT Roadmap.
 
 ### Boing NFT Collection (Phased)
 
-- **Phase 1:** ERC-721/721A contract per chain, minting (gas only), metadata on R2
+> Backlog ideas below. **Shipped on Boing L1 Create NFT:** reference collection + Prefer L1 PutBlob (default) + R2 catalog/fallback + chunked `mint_batch` — see [nft-onchain-vs-offchain.md](./nft-onchain-vs-offchain.md).
+
+- **Phase 1:** ERC-721/721A contract per chain, minting (gas only), metadata on R2 *(EVM-oriented; L1 uses VM template + hashes)*
 - **Phase 2:** Claim page, eligibility (e.g. first swap/liquidity), R2 metadata/images
 - **Phase 3:** Holder verification (`balanceOf`), benefits: swap fee discount, Pro analytics, badge, AI features
 - **Phase 4 (optional):** Early access, referral bonus for holders

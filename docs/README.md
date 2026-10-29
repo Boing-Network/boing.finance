@@ -20,6 +20,7 @@ Canonical **env vars:** `frontend/.env.example`. Canonical **EVM addresses:** `f
 |-----|-------------|
 | [native-dex.md](./native-dex.md) | Boing L1 vs EVM, VM deploy/Observer, roadmap, Uniswap-parity matrix, indexer |
 | [linked-nft-token.md](./linked-nft-token.md) | On-chain companions registry; Project pack (`/project-pack`) + Manage links (`/linked-project`); on-chain builder attestation (`REACT_APP_BOING_BUILDER_ATTESTATION_REGISTRY`) |
+| [nft-onchain-vs-offchain.md](./nft-onchain-vs-offchain.md) | Create NFT Deploy & mint: on-chain hashes vs off-chain catalog; Prefer L1 PutBlob default; Express 0.1.22+ session; R2 fallback |
 | [native-dex-discovery.md](./native-dex-discovery.md) | `boing_listDexTokens` / `boing_listDexPools` spec, client wiring, operator definition of done |
 | [contracts.md](./contracts.md) | TokenFactory / DEXFactory status and EVM DEX operator runbook |
 | [contract-registry.md](./contract-registry.md) | Historical addresses and verification links (mirror of `contracts.js`) |
