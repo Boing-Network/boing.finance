@@ -63,6 +63,7 @@ import {
   getBoingTokenAllowance,
 } from '@boing-network/boing-sdk';
 import { WBOING_HEX, isNativeBoingId } from './boingSwapQuote.js';
+import { withBoingExpressDisplay } from './boingExpressTxDisplay.js';
 
 /**
  * @param {import('@boing-network/boing-sdk').BoingClient} client
@@ -73,7 +74,13 @@ export async function executeAddLiquidity(client, p) {
   const out = { approvals: [], add: null };
   if (isNativePair(p)) {
     p.onState?.('add_native');
-    out.add = await p.signSimulateSubmit(buildNativeAddLiquidityRequest(p), { waitForInclusion: true });
+    out.add = await p.signSimulateSubmit(
+      withBoingExpressDisplay(
+        buildNativeAddLiquidityRequest(p),
+        p.addDisplay || 'Wrap BOING, approve tokens, and add liquidity',
+      ),
+      { waitForInclusion: true },
+    );
     return out;
   }
   const legs = [
@@ -85,7 +92,13 @@ export async function executeAddLiquidity(client, p) {
     if (have >= amount) continue;
     p.onState?.(`approve_${side}`);
     const tx = buildBoingTokenApproveTransaction({ nonce: 0n, senderHex: p.senderHex, tokenHex: token, toHex: p.poolHex, amount });
-    out.approvals.push(await p.signSimulateSubmit(boingContractCallToExpressTx(tx), { waitForInclusion: true }));
+    const approveDisplay =
+      typeof p.approveDisplayFor === 'function' ? p.approveDisplayFor(side, token, amount) : `Approve ${amount.toString()} tokens for liquidity`;
+    out.approvals.push(
+      await p.signSimulateSubmit(withBoingExpressDisplay(boingContractCallToExpressTx(tx), approveDisplay), {
+        waitForInclusion: true,
+      }),
+    );
   }
   p.onState?.('add');
   const tx = buildBoingPoolCallTransaction({
@@ -95,7 +108,10 @@ export async function executeAddLiquidity(client, p) {
     calldata: encodeBoingPoolV8AddLiquidityCalldata(p.amountA, p.amountB, p.minLp ?? 1n, 0n),
     extraAccountsHex: [p.tokenAHex, p.tokenBHex],
   });
-  out.add = await p.signSimulateSubmit(boingContractCallToExpressTx(tx), { waitForInclusion: true });
+  out.add = await p.signSimulateSubmit(
+    withBoingExpressDisplay(boingContractCallToExpressTx(tx), p.addDisplay || 'Add liquidity to pool'),
+    { waitForInclusion: true },
+  );
   return out;
 }
 
@@ -105,7 +121,15 @@ export async function executeAddLiquidity(client, p) {
  *   senderHex: string, signSimulateSubmit: Function }} p
  */
 export async function executeRemoveLiquidity(_client, p) {
-  if (isNativePair(p)) return p.signSimulateSubmit(buildNativeRemoveLiquidityRequest(p), { waitForInclusion: true });
+  if (isNativePair(p)) {
+    return p.signSimulateSubmit(
+      withBoingExpressDisplay(
+        buildNativeRemoveLiquidityRequest(p),
+        p.removeDisplay || 'Remove liquidity and unwrap to BOING',
+      ),
+      { waitForInclusion: true },
+    );
+  }
   const tx = buildBoingPoolCallTransaction({
     nonce: 0n,
     senderHex: p.senderHex,
@@ -113,5 +137,8 @@ export async function executeRemoveLiquidity(_client, p) {
     calldata: encodeBoingPoolV8RemoveLiquidityCalldata(p.burn, p.minA, p.minB, 0n),
     extraAccountsHex: [p.tokenAHex, p.tokenBHex],
   });
-  return p.signSimulateSubmit(boingContractCallToExpressTx(tx), { waitForInclusion: true });
+  return p.signSimulateSubmit(
+    withBoingExpressDisplay(boingContractCallToExpressTx(tx), p.removeDisplay || 'Remove liquidity from pool'),
+    { waitForInclusion: true },
+  );
 }

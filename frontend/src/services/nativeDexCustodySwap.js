@@ -19,6 +19,7 @@ import {
   quoteBoingCustodySwap,
 } from '@boing-network/boing-sdk';
 import { WBOING_HEX, isNativeBoingId } from './boingSwapQuote.js';
+import { withBoingExpressDisplay } from './boingExpressTxDisplay.js';
 
 export const CUSTODY_ROUTER_HEX =
   (typeof process !== 'undefined' && process.env?.REACT_APP_BOING_CUSTODY_ROUTER?.trim()) ||
@@ -92,7 +93,14 @@ export async function planCustodySwap(client, p) {
  *
  * @param {import('@boing-network/boing-sdk').BoingClient} client
  * @param {import('@boing-network/boing-sdk').BoingCustodySwapPlan} plan
- * @param {{ senderHex: string, routerHex?: string, signSimulateSubmit: Function, onState?: (s: string) => void }} o
+ * @param {{
+ *   senderHex: string,
+ *   routerHex?: string,
+ *   signSimulateSubmit: Function,
+ *   onState?: (s: string) => void,
+ *   approveDisplay?: string,
+ *   swapDisplay?: string,
+ * }} o
  */
 export async function executeCustodySwap(client, plan, o) {
   const routerHex = o.routerHex || CUSTODY_ROUTER_HEX;
@@ -100,13 +108,19 @@ export async function executeCustodySwap(client, plan, o) {
   const out = { approve: null, swap: null };
   if (plan.approveTx) {
     set(CUSTODY_APPROVAL.APPROVING);
-    out.approve = await o.signSimulateSubmit(boingContractCallToExpressTx(plan.approveTx), { waitForInclusion: true });
+    out.approve = await o.signSimulateSubmit(
+      withBoingExpressDisplay(boingContractCallToExpressTx(plan.approveTx), o.approveDisplay),
+      { waitForInclusion: true },
+    );
     const now = await getBoingTokenAllowance(client, plan.hop.tokenInHex, o.senderHex, routerHex);
     if (now < plan.amountIn) throw new Error(`Approval not visible yet (allowance ${now} < ${plan.amountIn}); retry in a moment.`);
     set(CUSTODY_APPROVAL.APPROVED);
   }
   set(CUSTODY_APPROVAL.SWAPPING);
-  out.swap = await o.signSimulateSubmit(boingContractCallToExpressTx(plan.swapTx), { waitForInclusion: true });
+  out.swap = await o.signSimulateSubmit(
+    withBoingExpressDisplay(boingContractCallToExpressTx(plan.swapTx), o.swapDisplay),
+    { waitForInclusion: true },
+  );
   set(CUSTODY_APPROVAL.DONE);
   return out;
 }
@@ -142,11 +156,14 @@ export async function planNativeBoingSwap(client, p) {
 /**
  * Sign and submit a {@link planNativeBoingSwap} plan (one Boing Express approval showing the BOING value).
  * @param {Awaited<ReturnType<typeof planNativeBoingSwap>>} plan
- * @param {{ signSimulateSubmit: Function, onState?: (s: string) => void }} o
+ * @param {{ signSimulateSubmit: Function, onState?: (s: string) => void, swapDisplay?: string }} o
  */
 export async function executeNativeBoingSwap(plan, o) {
   o.onState?.(CUSTODY_APPROVAL.SWAPPING);
-  const swap = await o.signSimulateSubmit(boingTxToExpressRequest(plan.tx), { waitForInclusion: true });
+  const swap = await o.signSimulateSubmit(
+    withBoingExpressDisplay(boingTxToExpressRequest(plan.tx), o.swapDisplay),
+    { waitForInclusion: true },
+  );
   o.onState?.(CUSTODY_APPROVAL.DONE);
   return { approve: null, swap };
 }
