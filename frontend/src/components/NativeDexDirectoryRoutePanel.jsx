@@ -221,6 +221,7 @@ export default function NativeDexDirectoryRoutePanel({
         type: 'contract_call',
         contract: pool,
         calldata,
+        display: `Swap ${hop.amountIn.toString()} on pool (min out ${minOut.toString()})`,
         ...(accessList ? { access_list: accessList } : {}),
       };
     }
@@ -228,10 +229,18 @@ export default function NativeDexDirectoryRoutePanel({
     const calldata = buildMultihopRouterCalldataHexFromRoute(selectedRoute, slippageBps);
     const poolHexes = hops.map((h) => h.venue.poolHex);
     const accessList = nativeDexRouterAndPoolsAccessListJson(account, routerHex, poolHexes);
+    const firstIn = hops[0]?.amountIn;
+    const lastOut = hops[n - 1]?.amountOut;
+    const minOut =
+      lastOut != null ? (lastOut * (10_000n - BigInt(slippageBps))) / 10_000n : null;
     return {
       type: 'contract_call',
       contract: routerHex,
       calldata,
+      display:
+        firstIn != null && minOut != null
+          ? `Swap ${firstIn.toString()} via smart route (${n} hops, min out ${minOut.toString()})`
+          : `Swap via smart route (${n} hops)`,
       ...(accessList ? { access_list: accessList } : {}),
     };
   }, [account, routerHex, selectedRoute, slippageBps]);

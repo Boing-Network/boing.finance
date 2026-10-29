@@ -17,6 +17,7 @@ import {
   planCustodySwap,
   planNativeBoingSwap,
 } from '../services/nativeDexCustodySwap';
+import { boingSwapIntentDisplay } from '../services/boingExpressTxDisplay';
 import {
   custodyTokenList,
   custodyTokensNeedingMetadata,
@@ -420,15 +421,32 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
           waitForInclusion: o?.waitForInclusion,
           returnSubmitMeta: true,
         });
+      const approveDisplay = boingSwapIntentDisplay({
+        kind: 'approve',
+        amount: fmtIn(amountIn),
+        symbol: tokenIn.symbol,
+        counterparty: 'router',
+      });
+      const swapDisplay = boingSwapIntentDisplay({
+        kind: 'swap',
+        amount: fmtIn(amountIn),
+        symbol: tokenIn.symbol,
+        amountOut: fmtOut(fresh.minOut ?? fresh.amountOut),
+        symbolOut: tokenOut.symbol,
+        counterparty: fresh.native ? fresh.steps?.join(' → ') : 'router',
+      });
       const res = fresh.native
         ? await executeNativeBoingSwap(fresh, {
             signSimulateSubmit,
+            swapDisplay,
             onState: (s) => {
               if (s === CUSTODY_APPROVAL.SWAPPING) setBusyState(`Confirm in Boing Express (${fresh.steps.join(' → ')})…`);
             },
           })
         : await executeCustodySwap(client, fresh, {
             senderHex: account,
+            approveDisplay,
+            swapDisplay,
             onState: (s) => {
               if (s === CUSTODY_APPROVAL.APPROVING) setBusyState(`Approve ${tokenIn.symbol} in Boing Express (1/2)…`);
               else if (s === CUSTODY_APPROVAL.SWAPPING)

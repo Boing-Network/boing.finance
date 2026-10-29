@@ -223,6 +223,7 @@ export default function NativeAmmSwapPanel({
         type: 'contract_call',
         contract: pool,
         calldata,
+        display: `Swap ${amountInBn.toString()} on pool (min out ${minOutBn.toString()})`,
         ...expressTxBase(),
       });
       toast.success(typeof hash === 'string' ? `Submitted: ${hash.slice(0, 18)}…` : 'Submitted');
@@ -262,6 +263,7 @@ export default function NativeAmmSwapPanel({
         type: 'contract_call',
         contract: pool,
         calldata,
+        display: `Add liquidity ${addAmountABn.toString()} + ${addAmountBBn.toString()}`,
         ...expressTxBase(),
       });
       toast.success(typeof hash === 'string' ? `Submitted: ${hash.slice(0, 18)}…` : 'Submitted');
@@ -300,6 +302,7 @@ export default function NativeAmmSwapPanel({
         type: 'contract_call',
         contract: pool,
         calldata,
+        display: `Remove liquidity (burn ${removeLpBn.toString()} LP)`,
         ...expressTxBase(),
       });
       toast.success(typeof hash === 'string' ? `Submitted: ${hash.slice(0, 18)}…` : 'Submitted');
