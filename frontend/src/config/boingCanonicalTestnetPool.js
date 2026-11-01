@@ -1,9 +1,10 @@
 /**
  * Canonical **public Boing testnet** native constant-product pool (32-byte `AccountId`).
  *
- * **Chain:** EIP-155 **6913** (`0x1b01`). Historical hex from the previous public ledger; the hosted
- * Fly RPC currently leaves `end_user.canonical_native_cp_pool` unset. For isolated `localhost:8545`
- * nodes, set `REACT_APP_BOING_NATIVE_AMM_POOL` to your pool id instead.
+ * **Chain:** EIP-155 **6913** (`0x1b01`). Matches hosted Fly
+ * `end_user.canonical_native_cp_pool` when published (verified 2026-11-01). Live source of truth is
+ * still `boing_getNetworkInfo.end_user`. For isolated `localhost:8545` nodes, set
+ * `REACT_APP_BOING_NATIVE_AMM_POOL` to your pool id instead.
  *
  * **Source of truth:** re-exported from `boing-sdk` (`canonicalTestnet.ts`); bump the linked SDK when canon rotates.
  * Cross-repo docs: boing.network `RPC-API-SPEC.md` / `TESTNET.md` / `NATIVE-DEX-OPERATOR-DEPLOYMENT-RECORD.md` Appendix B.
