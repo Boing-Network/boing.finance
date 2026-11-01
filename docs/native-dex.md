@@ -82,7 +82,7 @@ Account URLs: `https://boing.observer/account/{accountHex}` via `frontend/src/co
 
 ## 3. Roadmap
 
-Cross-repo: Boing VM programs must exist before this app can offer full factory/router/locker parity on L1. Protocol checklist: [BOING-L1-DEX-ENGINEERING.md](https://github.com/Boing-Network/boing.network/blob/main/docs/BOING-L1-DEX-ENGINEERING.md).
+Cross-repo: Boing VM programs must exist before this app can offer full factory/router/locker parity on L1. Protocol checklist: [BOING-NATIVE-DEX-CAPABILITY.md](https://github.com/Boing-Network/boing.network/blob/main/docs/BOING-NATIVE-DEX-CAPABILITY.md#engineering-dex-style-products-on-boing-l1) (engineering section).
 
 ### Phase 0 — shipped
 
