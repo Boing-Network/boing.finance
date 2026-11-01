@@ -10,7 +10,7 @@ How **boing.finance** treats **Boing Network L1** (chain id **6913**, Boing VM) 
 **Canonical env catalog:** `frontend/.env.example`.  
 **Live EVM addresses:** `frontend/src/config/contracts.js` (see [contracts.md](./contracts.md)).
 
-*Last reviewed: August 2026.*
+*Last reviewed: November 2026.*
 
 ```mermaid
 flowchart LR
@@ -34,7 +34,7 @@ There is **no compiler switch** that turns the Solidity tree in `contracts/` int
 | Stack | Technology | Used on Boing L1 today? |
 |--------|------------|-------------------------|
 | **DEXFactoryV2, DEXRouter, LiquidityLocker, DEXPair** in `contracts/` | Solidity → EVM bytecode | **No.** Targets Ethereum-style VMs (Hardhat, Sepolia). |
-| **Native constant-product AMM** | Built-in Boing execution + `ContractCall` calldata | **Yes** — swap / add liquidity in-app when a pool id is published (`REACT_APP_BOING_NATIVE_AMM_POOL` or live `end_user.canonical_native_cp_pool`). Hosted Fly testnet currently has none. |
+| **Native constant-product AMM** | Built-in Boing execution + `ContractCall` calldata | **Yes** — swap / add liquidity in-app when a pool id is published (`REACT_APP_BOING_NATIVE_AMM_POOL` or live `end_user.canonical_native_cp_pool`). Hosted Fly testnet publishes a canonical pool (verified 2026-11-01); always prefer the live RPC snapshot. |
 | **Factory / many pairs / router / locker on L1** | Boing VM programs (new bytecode), not `.sol` artifacts | **Partial.** Module ids come from live RPC `end_user` hints or env; do not bake historical SDK hexes. Full Uniswap-class factory UX still depends on protocol + a published factory. |
 
 ### What the app does today

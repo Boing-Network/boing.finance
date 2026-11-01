@@ -39,7 +39,7 @@ Boing L1 runs the **Boing VM**, not EVM application bytecode. There is no compil
 
 Native swap, pool discovery, and operator handoffs: **[docs/native-dex.md](./docs/native-dex.md)** and **[docs/native-dex-discovery.md](./docs/native-dex-discovery.md)**. Upstream: [HANDOFF-DEPENDENT-PROJECTS.md](https://github.com/Boing-Network/boing.network/blob/main/docs/HANDOFF-DEPENDENT-PROJECTS.md).
 
-Hosted Fly testnet currently may have **`end_user.canonical_native_*` = null** — the app must not treat historical SDK hexes as live.
+Hosted Fly testnet currently publishes **`end_user.canonical_native_*`** (verified 2026-11-01). Still prefer the live RPC snapshot over embedded SDK hexes after a rotation.
 
 ## Tech stack
 
