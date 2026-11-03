@@ -35,7 +35,7 @@ import {
 import { comingSoon, navigation } from './config/navigation';
 import NavIcon from './components/NavIcon';
 import BoingAppsLinks from './components/BoingAppsLinks';
-import { poolsRedirectFromSwapSearch } from './utils/swapPoolsRedirect';
+import { poolsRedirectFromLiquiditySearch, poolsRedirectFromSwapSearch } from './utils/swapPoolsRedirect';
 
 // Lazy load all page components for code splitting
 const Swap = lazy(() => import('./pages/Swap'));
@@ -47,7 +47,11 @@ function SwapRoute() {
   const to = poolsRedirectFromSwapSearch(location.search);
   return to ? <Navigate to={to} replace /> : <Swap />;
 }
-const Liquidity = lazy(() => import('./pages/Liquidity'));
+/** /liquidity merged into Pools → Your liquidity: keep query params (`pool=` becomes `addPool=`). */
+function LiquidityRedirect() {
+  const location = useLocation();
+  return <Navigate to={poolsRedirectFromLiquiditySearch(location.search)} replace />;
+}
 const Pools = lazy(() => import('./pages/Pools'));
 const Portfolio = lazy(() => import('./pages/Portfolio'));
 const Bridge = lazy(() => import('./pages/Bridge'));
@@ -236,7 +240,8 @@ function PageTransitionRoutes() {
         <Route path="/" element={<Home />} />
         <Route path="/swap" element={<SwapRoute />} />
         <Route path="/pools" element={<Pools />} />
-        <Route path="/liquidity" element={<Liquidity />} />
+        <Route path="/liquidity" element={<LiquidityRedirect />} />
+        <Route path="/liquidity/*" element={<LiquidityRedirect />} />
         <Route path="/create-pool" element={<CreatePool />} />
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/bridge" element={<Bridge />} />

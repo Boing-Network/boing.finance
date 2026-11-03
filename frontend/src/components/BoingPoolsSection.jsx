@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import BoingPoolsTab from './BoingPoolsTab';
 import BoingYourLiquidityTab from './BoingYourLiquidityTab';
+import BoingLiquidityAdvanced from './BoingLiquidityAdvanced';
 import { useBoingPools } from '../hooks/useBoingPools';
 import { useWallet } from '../contexts/WalletContext';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
@@ -135,7 +136,10 @@ export default function BoingPoolsSection({ account = null, initialQuery = '' })
             onAddLiquidity={addLiquidity}
           />
         ) : (
-          <BoingYourLiquidityTab pools={pools} addFor={addFor} onAddForConsumed={clearAddFor} />
+          <>
+            <BoingYourLiquidityTab pools={pools} addFor={addFor} onAddForConsumed={clearAddFor} />
+            <BoingLiquidityAdvanced />
+          </>
         )}
       </div>
     </section>

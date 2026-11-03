@@ -239,7 +239,14 @@ test.describe('Simple Pools and Your liquidity', () => {
     await page.goto('/pools?noIntro=1&tab=liquidity');
     await expect(page.getByTestId('boing-your-liquidity-tab')).toBeVisible({ timeout: 90_000 });
     await expect(page.getByTestId('liquidity-connect')).toBeVisible();
+    await expect(page.getByTestId('liquidity-advanced-summary')).toContainText('Advanced');
+    await expect(page.getByTestId('liquidity-advanced')).not.toHaveAttribute('open', '');
     await shot(page, 'liquidity-disconnected');
+    // The old Liquidity page redirects here, keeping params (pool= becomes addPool=).
+    await page.goto('/liquidity?noIntro=1&pool=0x' + 'ab'.repeat(32));
+    await expect(page).toHaveURL(/\/pools\?tab=liquidity&addPool=0x(ab){32}&noIntro=1$/, { timeout: 60_000 });
+    await expect(page.getByTestId('pools-tab-liquidity')).toHaveAttribute('aria-selected', 'true');
+    await page.goto('/pools?noIntro=1&tab=liquidity');
     // All pools is public: cards load without a wallet.
     await page.getByTestId('pools-tab-all').click();
     await expect(page.getByTestId('pool-card')).toHaveCount(2, { timeout: 60_000 });

@@ -29,6 +29,27 @@ export function poolsRedirectFromSwapSearch(search) {
   return s ? `/pools?${s}` : '/pools';
 }
 
+/**
+ * The Liquidity page (/liquidity) merged into Pools → Your liquidity (Nov 2026). Every query param is kept;
+ * an old `pool=0x…` deep link becomes `addPool=0x…` (opens the add form; the Advanced paste-any-pool tool
+ * reads it too).
+ *
+ * @param {string} search `location.search` of a /liquidity URL
+ * @returns {string} target URL on /pools
+ */
+export function poolsRedirectFromLiquiditySearch(search) {
+  const q = new URLSearchParams(search || '');
+  const out = new URLSearchParams();
+  out.set('tab', 'liquidity');
+  const pool = (q.get('pool') || '').trim();
+  if (/^0x[0-9a-fA-F]{64}$/.test(pool) && !q.get('addPool')) out.set('addPool', `0x${pool.slice(2).toLowerCase()}`);
+  for (const [k, v] of q) {
+    if (k === 'tab' || k === 'pool') continue;
+    out.set(k, v);
+  }
+  return `/pools?${out.toString()}`;
+}
+
 /** Pools page tab from `?tab=`: 'liquidity' (Your liquidity) or 'all' (All pools, the default). */
 export function parsePoolsTab(raw) {
   const t = String(raw || '').trim().toLowerCase();

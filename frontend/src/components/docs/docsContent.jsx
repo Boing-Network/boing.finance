@@ -85,7 +85,7 @@ function Overview() {
         </li>
         <li>
           <B>Earn fees:</B> browse <To to="/pools">Pools</To>, add or remove liquidity on{' '}
-          <To to="/liquidity">Liquidity</To>, or start a new pair with <To to="/create-pool">Create pool</To>.
+          <To to="/pools?tab=liquidity">Your liquidity</To>, or start a new pair with <To to="/create-pool">Create pool</To>.
         </li>
         <li>
           <B>Track:</B> <To to="/portfolio">Portfolio</To> shows your BOING, token balances and liquidity positions valued
@@ -279,7 +279,7 @@ function Liquidity() {
         <B>impermanent loss</B> in DeFi 101 (settings menu) before you add liquidity.
       </P>
       <P>
-        Earn a share of swap fees by adding tokens to a pool, on <To to="/liquidity">Liquidity</To> or{' '}
+        Earn a share of swap fees by adding tokens to a pool, on{' '}
         <B>Pools → Your liquidity</B> (<To to="/pools?tab=liquidity">open it</To>):
       </P>
       <UL>

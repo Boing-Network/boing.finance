@@ -345,8 +345,8 @@ export default function NativeBoingCreatePoolPanel() {
           Swap
         </Link>
         {' · '}
-        <Link className="td-btn td-btn--link text-xs" to="/liquidity">
-          Liquidity
+        <Link className="td-btn td-btn--link text-xs" to="/pools?tab=liquidity">
+          Your liquidity
         </Link>
         {' · '}
         <Link className="td-btn td-btn--link text-xs" to="/pools">

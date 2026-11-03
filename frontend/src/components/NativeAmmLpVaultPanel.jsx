@@ -445,8 +445,8 @@ export default function NativeAmmLpVaultPanel({ compact = false, embedded = fals
       {!compact && !embedded && (
         <p className="text-xs mt-4" style={{ color: 'var(--text-tertiary)' }}>
           More tools:{' '}
-          <Link to="/liquidity" className="text-cyan-400 underline">
-            Liquidity
+          <Link to="/pools?tab=liquidity" className="text-cyan-400 underline">
+            Your liquidity
           </Link>{' '}
           (direct pool add) ·{' '}
           <Link to="/swap" className="text-cyan-400 underline">

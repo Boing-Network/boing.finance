@@ -57,7 +57,7 @@ export default function NativeBoingManagePoolPanel() {
   const { chainId, walletType, isConnected, getWalletProvider, account } = useWallet();
   const { effectivePoolHex, venues, explorerBaseUrl } = useBoingNativeDexIntegration();
   const [searchParams] = useSearchParams();
-  const [poolHex, setPoolHex] = useState(() => searchParams.get('pool') || effectivePoolHex || '');
+  const [poolHex, setPoolHex] = useState(() => searchParams.get('addPool') || searchParams.get('pool') || effectivePoolHex || '');
   const [addAmountA, setAddAmountA] = useState('');
   const [addAmountB, setAddAmountB] = useState('');
   const [removeLp, setRemoveLp] = useState('');
