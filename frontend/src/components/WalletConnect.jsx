@@ -1,17 +1,16 @@
 import React, { useState, useRef } from 'react';
 import { useCloseOnPointerOutside } from '../hooks/useCloseOnPointerOutside';
 import { useWallet } from '../contexts/WalletContext';
-import { useSolanaWallet, useChainType, CHAIN_TYPE_SOLANA } from '../contexts/SolanaWalletContext';
 import { ChevronDownIcon, WalletIcon, XMarkIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import WalletSelectionModal from './WalletSelectionModal';
 
 const WalletConnect = () => {
-  const chainType = useChainType?.()?.chainType ?? 'evm';
-  const isSolana = chainType === CHAIN_TYPE_SOLANA;
+  // Header wallet is Boing Express only; the LI.FI bridge page connects EVM/Solana wallets itself.
+  const isSolana = false;
 
   const evmWallet = useWallet();
-  const solanaWallet = useSolanaWallet?.() ?? null;
+  const solanaWallet = null;
 
   const [showDropdown, setShowDropdown] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);

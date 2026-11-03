@@ -23,54 +23,43 @@ const OnboardingTour = ({ onComplete }) => {
     {
       id: 'welcome',
       title: 'Welcome to boing.finance!',
-      content: 'Your all-in-one DeFi platform for token deployment, trading, and portfolio management.',
+      content: 'The DEX for Boing Network: swap, provide liquidity and track your portfolio.',
       position: 'center',
       action: () => {
         setCurrentStep(1);
       }
     },
     {
-      id: 'deploy',
-      title: 'Deploy Tokens',
-      content: 'Create your own ERC-20 tokens with advanced security features. No coding required!',
-      target: '[data-tour="deploy-token"]',
+      id: 'swap',
+      title: 'Swap on Boing',
+      content: 'Trade any token that has a native Boing pool, signed with Boing Express.',
+      target: '[data-tour="swap"]',
       position: 'bottom',
       action: () => {
-        navigate('/deploy-token');
+        navigate('/swap');
         setTimeout(() => setCurrentStep(2), 500);
+      }
+    },
+    {
+      id: 'pools',
+      title: 'Provide liquidity',
+      content: 'Browse pools, add liquidity and earn a share of swap fees.',
+      target: '[data-tour="pools"]',
+      position: 'bottom',
+      action: () => {
+        navigate('/pools');
+        setTimeout(() => setCurrentStep(3), 500);
       }
     },
     {
       id: 'portfolio',
       title: 'Track Your Portfolio',
-      content: 'Monitor your token holdings on EVM and Solana in one place.',
+      content: 'See your BOING, tokens and liquidity positions valued in BOING.',
       target: '[data-tour="portfolio"]',
       position: 'bottom',
       action: () => {
         navigate('/portfolio');
-        setTimeout(() => setCurrentStep(3), 500);
-      }
-    },
-    {
-      id: 'analytics',
-      title: 'Market Analytics',
-      content: 'Get real-time market data, trending tokens, and price charts.',
-      target: '[data-tour="analytics"]',
-      position: 'bottom',
-      action: () => {
-        navigate('/analytics');
         setTimeout(() => setCurrentStep(4), 500);
-      }
-    },
-    {
-      id: 'tokens',
-      title: 'Explore Tokens',
-      content: 'Discover and manage tokens on EVM and Solana.',
-      target: '[data-tour="tokens"]',
-      position: 'bottom',
-      action: () => {
-        navigate('/tokens');
-        setTimeout(() => setCurrentStep(5), 500);
       }
     }
   ];

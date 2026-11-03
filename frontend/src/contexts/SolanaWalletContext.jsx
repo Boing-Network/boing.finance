@@ -1,7 +1,7 @@
 /**
  * Solana Wallet Context
  * Provides Solana wallet state and methods (Phantom, Solflare, etc.)
- * Separate from EVM WalletContext - use ChainTypeSelector to switch between EVM and Solana
+ * Separate from the EVM/Boing WalletContext. Mounted only by the /bridge page (lazy chunk).
  */
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { getSolanaRpcEndpoints, solanaConnectionConfig } from '../config/solanaConfig';
@@ -33,40 +33,12 @@ export const useSolanaWallet = () => {
   return context;
 };
 
-// Chain type constants
-export const CHAIN_TYPE_EVM = 'evm';
-export const CHAIN_TYPE_SOLANA = 'solana';
-export const CHAIN_TYPE_BOING = 'boing';
-
-export const ChainTypeContext = createContext();
-
-export const useChainType = () => {
-  const context = useContext(ChainTypeContext);
-  if (!context) {
-    return { chainType: CHAIN_TYPE_EVM, setChainType: () => {}, isSolana: false, isEVM: true, isBoing: false };
-  }
-  return context;
-};
-
 export const SolanaWalletProvider = ({ children }) => {
   const [publicKey, setPublicKey] = useState(null);
   const [connected, setConnected] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [balance, setBalance] = useState(null);
   const [connection, setConnection] = useState(null);
-  const [chainType, setChainTypeState] = useState(() => {
-    try {
-      const stored = localStorage.getItem('boing_chain_type');
-      if (stored === CHAIN_TYPE_SOLANA || stored === CHAIN_TYPE_BOING || stored === CHAIN_TYPE_EVM) {
-        return stored;
-      }
-      // First visit: start on the Boing testnet. Visitors can switch to EVM or Solana from the header.
-      return CHAIN_TYPE_BOING;
-    } catch {
-      return CHAIN_TYPE_BOING;
-    }
-  });
-
   const [solanaNetwork, setSolanaNetworkState] = useState(() => {
     try {
       return localStorage.getItem('boing_solana_network') || (process.env.REACT_APP_SOLANA_NETWORK === 'mainnet' ? 'mainnet' : 'devnet');
@@ -86,10 +58,6 @@ export const SolanaWalletProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if (chainType !== CHAIN_TYPE_SOLANA) {
-      setConnection(null);
-      return undefined;
-    }
     let cancelled = false;
     (async () => {
       const { Connection } = await import('@solana/web3.js');
@@ -111,16 +79,7 @@ export const SolanaWalletProvider = ({ children }) => {
     return () => {
       cancelled = true;
     };
-  }, [chainType, network]);
-
-  const setChainType = useCallback((type) => {
-    setChainTypeState(type);
-    try {
-      localStorage.setItem('boing_chain_type', type);
-    } catch (e) {
-      // ignore
-    }
-  }, []);
+  }, [network]);
 
   // Fetch SOL balance
   const refreshBalance = useCallback(async () => {
@@ -208,19 +167,9 @@ export const SolanaWalletProvider = ({ children }) => {
     signTransaction,
   };
 
-  const chainTypeValue = {
-    chainType,
-    setChainType,
-    isSolana: chainType === CHAIN_TYPE_SOLANA,
-    isEVM: chainType === CHAIN_TYPE_EVM,
-    isBoing: chainType === CHAIN_TYPE_BOING,
-  };
-
   return (
-    <ChainTypeContext.Provider value={chainTypeValue}>
-      <SolanaWalletContext.Provider value={value}>
-        {children}
-      </SolanaWalletContext.Provider>
-    </ChainTypeContext.Provider>
+    <SolanaWalletContext.Provider value={value}>
+      {children}
+    </SolanaWalletContext.Provider>
   );
 };

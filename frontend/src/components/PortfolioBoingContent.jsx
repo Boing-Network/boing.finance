@@ -1,6 +1,6 @@
 /**
- * Portfolio Boing L1 - native BOING balance + account snapshot via Boing RPC / Express.
- * Shown when the connected wallet is on chain 6913 (Boing VM, not EVM/ethers).
+ * Portfolio (Boing L1): native BOING balance + stake via the Boing RPC, and LP positions valued in BOING
+ * from native Boing pool reserves (no Alchemy, The Graph or EVM indexers).
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
@@ -11,6 +11,10 @@ import { fetchBoingNativeAccount } from '../services/boingNativeVm';
 import { getBoingObserverAccountUrl, BOING_OBSERVER_BASE_URL } from '../config/boingExplorerUrls';
 import { isBoingNativeAccountIdHex } from '../utils/boingWalletDiscovery';
 import { formatNativeLedger } from '../utils/boingNativeAmount';
+import { useBoingPools } from '../hooks/useBoingPools';
+import { useConnectBoingExpress } from './BoingOnlyGate';
+import { lpPositionsInBoing, formatRatio } from '../services/boingPoolsSimple';
+import { formatTokenAmount } from '../services/boingSwapQuote';
 
 function shortHex(hex) {
   if (!hex || typeof hex !== 'string') return '—';
@@ -20,7 +24,8 @@ function shortHex(hex) {
 }
 
 export default function PortfolioBoingContent() {
-  const { account, isConnected, connectWallet, chainId, walletType } = useWallet();
+  const { account, isConnected, chainId, walletType } = useWallet();
+  const { connect: connectWallet } = useConnectBoingExpress();
   const [snapshot, setSnapshot] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -28,6 +33,8 @@ export default function PortfolioBoingContent() {
   const net = getNetworkByChainId(BOING_NATIVE_L1_CHAIN_ID);
   const onBoing = Number(chainId) === BOING_NATIVE_L1_CHAIN_ID;
   const accountOk = Boolean(account && isBoingNativeAccountIdHex(account));
+  const pools = useBoingPools(accountOk ? account : null);
+  const positions = React.useMemo(() => lpPositionsInBoing(pools.cards), [pools.cards]);
 
   const fetchBalances = useCallback(async () => {
     if (!isConnected || !accountOk || !onBoing) return;
@@ -62,7 +69,7 @@ export default function PortfolioBoingContent() {
     return (
       <>
         <Helmet>
-          <title>Portfolio - Boing L1 | Boing Finance</title>
+          <title>Portfolio | Boing Finance</title>
         </Helmet>
         <div className="relative z-10 container mx-auto px-4 py-12">
           <div className="max-w-xl mx-auto text-center">
@@ -71,15 +78,14 @@ export default function PortfolioBoingContent() {
             </h1>
             <p className="mb-6" style={{ color: 'var(--text-secondary)' }}>
               Connect <strong style={{ color: 'var(--text-primary)' }}>Boing Express</strong> on Boing
-              testnet (chain {BOING_NATIVE_L1_CHAIN_ID}) to view native BOING balance and stake. EVM
-              wallets and ethers-style portfolio APIs do not apply on Boing L1.
+              testnet (chain {BOING_NATIVE_L1_CHAIN_ID}) to view your BOING balance, stake and liquidity positions.
             </p>
             <button
               type="button"
               onClick={connectWallet}
               className="px-6 py-3 rounded-lg font-medium bg-cyan-600 text-white hover:bg-cyan-500"
             >
-              Connect wallet
+              Connect Boing Express
             </button>
           </div>
         </div>
@@ -91,7 +97,7 @@ export default function PortfolioBoingContent() {
     return (
       <>
         <Helmet>
-          <title>Portfolio - Boing L1 | Boing Finance</title>
+          <title>Portfolio | Boing Finance</title>
         </Helmet>
         <div className="relative z-10 container mx-auto px-4 py-12">
           <div className="max-w-xl mx-auto text-center rounded-xl border p-6" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-card)' }}>
@@ -113,10 +119,10 @@ export default function PortfolioBoingContent() {
   return (
     <>
       <Helmet>
-        <title>Portfolio - Boing L1 | Boing Finance</title>
+        <title>Portfolio | Boing Finance</title>
         <meta
           name="description"
-          content="View native BOING balance and stake on Boing L1 with Boing Express."
+          content="Your BOING balance, stake and liquidity positions on Boing Network, valued from native Boing pools."
         />
       </Helmet>
       <div className="relative z-10 container mx-auto px-4 py-8">
@@ -221,13 +227,59 @@ export default function PortfolioBoingContent() {
             </div>
           )}
 
+          <div className="rounded-xl border p-4" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }} data-testid="portfolio-lp-positions">
+            <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
+              <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+                Liquidity positions
+              </h2>
+              {positions.rows.length > 0 && (
+                <p className="text-sm tabular-nums" style={{ color: 'var(--text-secondary)' }}>
+                  ≈ {formatRatio(positions.totalBoing) ?? '0'} BOING
+                  {positions.unpriced > 0 ? ` (+${positions.unpriced} unpriced)` : ''}
+                </p>
+              )}
+            </div>
+            {pools.loading || pools.lpLoading ? (
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Loading pools…</p>
+            ) : positions.rows.length === 0 ? (
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                No liquidity positions yet.{' '}
+                <Link to="/pools" className="text-cyan-400 underline hover:text-cyan-300">Browse pools</Link>
+              </p>
+            ) : (
+              <ul className="divide-y" style={{ borderColor: 'var(--border-color)' }}>
+                {positions.rows.map(({ card, valueBoing }) => (
+                  <li key={card.poolHex} className="py-2 flex flex-wrap items-center justify-between gap-2 text-sm">
+                    <span style={{ color: 'var(--text-primary)' }}>
+                      {card.pairLabel} <span style={{ color: 'var(--text-tertiary)' }}>· {card.sharePct}</span>
+                    </span>
+                    <span className="tabular-nums" style={{ color: 'var(--text-secondary)' }}>
+                      {formatTokenAmount(card.youA, card.decimalsA, 4)} {card.tokenA.symbol} + {formatTokenAmount(card.youB, card.decimalsB, 4)} {card.tokenB.symbol}
+                      {valueBoing != null ? ` ≈ ${formatRatio(valueBoing) ?? '0'} BOING` : ''}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <p className="text-xs mt-3" style={{ color: 'var(--text-tertiary)' }}>
+              Values use current reserves of native Boing pools paired with BOING.
+            </p>
+          </div>
+
           <div className="flex flex-wrap gap-2 pt-2">
             <Link
-              to="/swap#boing-native-trade"
+              to="/swap"
               className="px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-medium border inline-flex items-center"
               style={{ borderColor: 'rgba(59,130,246,0.45)', color: 'var(--text-primary)', backgroundColor: 'var(--bg-secondary)' }}
             >
-              Native trade hub
+              Swap
+            </Link>
+            <Link
+              to="/pools?tab=liquidity"
+              className="px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-medium border inline-flex items-center"
+              style={{ borderColor: 'rgba(59,130,246,0.45)', color: 'var(--text-primary)', backgroundColor: 'var(--bg-secondary)' }}
+            >
+              Manage liquidity
             </Link>
             <Link
               to="/create-pool"
@@ -235,20 +287,6 @@ export default function PortfolioBoingContent() {
               style={{ borderColor: 'rgba(59,130,246,0.45)', color: 'var(--text-primary)', backgroundColor: 'var(--bg-secondary)' }}
             >
               Create pool
-            </Link>
-            <Link
-              to="/deploy-token"
-              className="px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-medium border inline-flex items-center"
-              style={{ borderColor: 'rgba(59,130,246,0.45)', color: 'var(--text-primary)', backgroundColor: 'var(--bg-secondary)' }}
-            >
-              Deploy token
-            </Link>
-            <Link
-              to="/boing/native-vm"
-              className="px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-medium border inline-flex items-center"
-              style={{ borderColor: 'rgba(59,130,246,0.45)', color: 'var(--text-primary)', backgroundColor: 'var(--bg-secondary)' }}
-            >
-              Native VM tools
             </Link>
           </div>
         </div>

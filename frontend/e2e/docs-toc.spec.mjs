@@ -93,7 +93,7 @@ test.describe('Docs (desktop)', () => {
     await expectOnly(page, 'bridge');
     await expectContentAtTop(page);
 
-    for (const [legacy, id] of [['trading', 'swap'], ['contracts', 'deploy-token'], ['analytics', 'markets'], ['api', 'developers']]) {
+    for (const [legacy, id] of [['trading', 'swap'], ['contracts', 'overview'], ['analytics', 'portfolio'], ['api', 'boing-l1']]) {
       await page.goto('about:blank');
       await page.goto(`/docs?noIntro=1&section=${legacy}`);
       await expectOnly(page, id);

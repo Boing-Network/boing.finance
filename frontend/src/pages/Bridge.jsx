@@ -5,7 +5,7 @@ import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import { useNetwork } from '../hooks/useNetwork';
-import { useSolanaWallet } from '../contexts/SolanaWalletContext';
+import { SolanaWalletProvider, useSolanaWallet } from '../contexts/SolanaWalletContext';
 import { getApiUrl } from '../config';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { PLATFORM_BRIDGE_FEE, PLATFORM_BRIDGE_FEE_LABEL, buildLifiDeepLink } from '../config/bridge';
@@ -90,7 +90,16 @@ const PHASE_LABEL = {
   confirmed: 'Confirmed on the sending network. Bridging…',
 };
 
+/** The Solana wallet stack loads only with this page (LI.FI routes from Solana). */
 export default function Bridge() {
+  return (
+    <SolanaWalletProvider>
+      <BridgeInner />
+    </SolanaWalletProvider>
+  );
+}
+
+function BridgeInner() {
   const wallet = useWalletConnection();
   const { account, chainId: walletChainId, walletType, getActiveEip1193, connectWithRetry } = wallet;
   const sol = useSolanaWallet();

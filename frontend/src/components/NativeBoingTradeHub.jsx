@@ -13,7 +13,7 @@ import { CUSTODY_ROUTER_HEX } from '../services/nativeDexCustodySwap';
 import toast from 'react-hot-toast';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { useWallet } from '../contexts/WalletContext';
-import { useChainType } from '../contexts/SolanaWalletContext';
+import { useChainType } from '../contexts/chainType';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 
 const VALID_TAB_IDS = new Set(['swap', 'advanced']);
