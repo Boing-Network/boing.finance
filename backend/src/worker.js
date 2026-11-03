@@ -9,10 +9,6 @@ import { createIPFSRoutes } from './routes/ipfsRoutes.js';
 import { createAPIRoutes } from './routes/apiRoutes.js';
 import { createWalletActivityRoutes } from './routes/walletActivityRoutes.js';
 import { createPortfolioRoutes } from './routes/portfolioRoutes.js';
-import { createAIRoutes } from './routes/aiRoutes.js';
-import { createGovernanceRoutes } from './routes/governanceRoutes.js';
-import { createBoingRoutes } from './routes/boingRoutes.js';
-import { createSolanaRoutes } from './routes/solanaRoutes.js';
 import { handleSolanaRpcPost } from './routes/solanaRpcRoute.js';
 import { createAggregatorRoutes } from './routes/aggregatorRoutes.js';
 import { createRealtimeRoutes } from './routes/realtimeRoutes.js';
@@ -193,7 +189,7 @@ app.use('*', injectDb);
 
 // Middleware is registered with app.use() BEFORE the matching app.route() so it really
 // wraps the handlers. Prefixes are scoped to DB-backed groups; routes that share the
-// /api prefix but need no DB (AI, aggregator, webhooks, R2, Solana RPC proxy) are untouched.
+// /api prefix but need no DB (aggregator, webhooks, R2, Solana RPC proxy) are untouched.
 // /api/tokens* and /api/liquidity* are the cacheable DEX/API groups mounted at /api.
 app.use('/api/tokens', cacheMiddleware);
 app.use('/api/tokens/*', cacheMiddleware);
@@ -204,12 +200,6 @@ app.use('/analytics', dbMiddleware, cacheMiddleware);
 app.use('/analytics/*', dbMiddleware, cacheMiddleware);
 app.use('/api/portfolio', dbMiddleware);
 app.use('/api/portfolio/*', dbMiddleware);
-app.use('/api/governance', dbMiddleware, cacheMiddleware);
-app.use('/api/governance/*', dbMiddleware, cacheMiddleware);
-app.use('/api/boing', dbMiddleware, cacheMiddleware);
-app.use('/api/boing/*', dbMiddleware, cacheMiddleware);
-app.use('/api/solana/deployments', dbMiddleware);
-app.use('/api/solana/deployments/*', dbMiddleware);
 
 // Mount Portfolio routes (D1 snapshots for PnL) BEFORE the DEX routes: the DEX group
 // declares GET /portfolio/:address, which would otherwise shadow GET /api/portfolio/snapshots
@@ -231,19 +221,8 @@ app.route('/api', createAPIRoutes());
 // Mount Wallet Activity routes at /api/analytics
 app.route('/api/analytics', createWalletActivityRoutes());
 
-// Mount AI Assistant routes at /api/ai (no DB required)
-app.route('/api/ai', createAIRoutes());
-
-// Mount Governance routes at /api/governance
-app.route('/api/governance', createGovernanceRoutes());
-
-// Mount BOING routes (points, activity) at /api/boing
-app.route('/api/boing', createBoingRoutes());
-
+// Solana RPC proxy: used by the LI.FI bridge page's Solana wallet (balances, sending).
 app.post('/api/solana/rpc', handleSolanaRpcPost);
-
-// Mount Solana routes (deployments) at /api/solana
-app.route('/api/solana', createSolanaRoutes());
 
 // Aggregator quotes (LI.FI / Jupiter) — no DB; do not cache
 const aggregatorRoutes = createAggregatorRoutes();
