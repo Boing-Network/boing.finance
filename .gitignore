@@ -38,3 +38,8 @@ solana-programs/**/test-ledger/
 
 # Windows accidental reserved-name file
 nul
+
+# Solana program keypairs (deploy authority) - never commit
+solana-programs/boing-token-hook/keys/boing_token_hook-keypair.json
+**/keys/*-keypair.json
+**/target/deploy/*-keypair.json
