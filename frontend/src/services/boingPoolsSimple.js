@@ -5,7 +5,7 @@
  * Math mirrors the pool bytecode: LP minted = min(a*T/ra, b*T/rb) (first deposit min(a, b));
  * remove pays floor(burn*ra/T), floor(burn*rb/T).
  */
-import { formatTokenAmount, isNativeBoingPool, poolSideDecimals } from './boingSwapQuote.js';
+import { formatTokenAmount, isNativeBoingId, isNativeBoingPool, poolSideDecimals } from './boingSwapQuote.js';
 
 const norm = (h) => (typeof h === 'string' ? h.trim().toLowerCase() : '');
 const big = (v) => {
@@ -145,4 +145,55 @@ export function withSlippageFloor(x, slippagePercent = 0.5) {
 /** True when a visible string carries raw hex (>= 16 hex chars after 0x). */
 export function containsRawHex(s) {
   return /0x[0-9a-f]{16,}/i.test(String(s ?? ''));
+}
+
+/**
+ * Price of one whole token in BOING, read from the deepest pool pairing it with native BOING (wBOING).
+ * Native BOING is 1. Returns null when no BOING pool with liquidity lists the token.
+ */
+export function tokenPriceInBoing(tokenId, cards) {
+  const id = norm(tokenId);
+  if (isNativeBoingId(id)) return 1;
+  let best = null;
+  let bestDepth = -1n;
+  for (const c of cards || []) {
+    if (c.empty) continue;
+    let price = null;
+    let depth = 0n;
+    if (norm(c.tokenA.id) === id && isNativeBoingId(c.tokenB.id)) {
+      price = (Number(c.reserveB) / Number(c.reserveA)) * 10 ** (c.decimalsA - c.decimalsB);
+      depth = c.reserveB;
+    } else if (norm(c.tokenB.id) === id && isNativeBoingId(c.tokenA.id)) {
+      price = (Number(c.reserveA) / Number(c.reserveB)) * 10 ** (c.decimalsB - c.decimalsA);
+      depth = c.reserveA;
+    }
+    if (price != null && Number.isFinite(price) && depth > bestDepth) {
+      best = price;
+      bestDepth = depth;
+    }
+  }
+  return best;
+}
+
+/**
+ * LP positions of the connected wallet, valued in BOING from native Boing pool reserves.
+ * Each row: { card, amountA, amountB, valueBoing (number|null) }. `totalBoing` sums the rows with a price;
+ * `unpriced` counts rows where a side has no BOING pool.
+ */
+export function lpPositionsInBoing(cards) {
+  const rows = [];
+  let totalBoing = 0;
+  let unpriced = 0;
+  for (const c of cards || []) {
+    if (!(c.lpBalance > 0n)) continue;
+    const amountA = Number(c.youA) / 10 ** c.decimalsA;
+    const amountB = Number(c.youB) / 10 ** c.decimalsB;
+    const pA = tokenPriceInBoing(c.tokenA.id, cards);
+    const pB = tokenPriceInBoing(c.tokenB.id, cards);
+    const valueBoing = pA != null && pB != null ? amountA * pA + amountB * pB : null;
+    if (valueBoing == null) unpriced += 1;
+    else totalBoing += valueBoing;
+    rows.push({ card: c, amountA, amountB, valueBoing });
+  }
+  return { rows, totalBoing, unpriced };
 }

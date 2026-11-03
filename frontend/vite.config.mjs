@@ -160,10 +160,6 @@ export default defineConfig(({ mode }) => {
   resolve: {
     alias: {
       ...nobleAliases,
-      '@solana/codecs': path.resolve(
-        __dirname,
-        'node_modules/@solana/codecs/dist/index.browser.mjs'
-      ),
     },
   },
   optimizeDeps: {

@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useWallet } from '../contexts/WalletContext';
-import { useChainType, useSolanaWallet, CHAIN_TYPE_SOLANA } from '../contexts/SolanaWalletContext';
 import { XMarkIcon, CheckIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { discoverBoingEip6963Providers, getBoingWebWalletFallbackProvider } from '../utils/boingWalletDiscovery';
 
-const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
+/** Trading on boing.finance uses Boing Express only; pass allowEvm to also list EVM wallets. */
+const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected, allowEvm = false }) => {
   const { detectWalletProviders, connectWalletWithProvider } = useWallet();
-  const chainType = useChainType?.()?.chainType ?? 'evm';
-  const isSolana = chainType === CHAIN_TYPE_SOLANA;
-  const solanaWallet = useSolanaWallet?.() ?? null;
+  const isSolana = false;
+  const solanaWallet = null;
   const [availableWallets, setAvailableWallets] = useState([]);
   const [selectedWallet, setSelectedWallet] = useState(null);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -72,7 +71,7 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
         });
       }
 
-      if (providers.metamask) {
+      if (allowEvm && providers.metamask) {
         add({
           id: 'metamask',
           walletType: 'metamask',
@@ -83,7 +82,7 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
         });
       }
 
-      if (providers.coinbase) {
+      if (allowEvm && providers.coinbase) {
         add({
           id: 'coinbase',
           walletType: 'coinbase',
@@ -94,7 +93,7 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
         });
       }
 
-      if (typeof window !== 'undefined' && window.ethereum) {
+      if (allowEvm && typeof window !== 'undefined' && window.ethereum) {
         if (!providers.metamask && !providers.coinbase && !providers.boingExpress) {
           add({
             id: 'other',
@@ -115,7 +114,7 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
           icon: '❌',
           provider: null,
           available: false,
-          message: 'Install Boing Express, MetaMask, or Coinbase Wallet'
+          message: 'Install Boing Express'
         });
       }
 
@@ -129,7 +128,7 @@ const WalletSelectionModal = ({ isOpen, onClose, onWalletSelected }) => {
     };
     // detectWalletProviders is recreated each render; only re-run when modal opens
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional
-  }, [isOpen, isSolana]);
+  }, [allowEvm, isOpen, isSolana]);
 
   const handleWalletSelect = (wallet) => {
     if (!wallet.available) {

@@ -254,9 +254,9 @@ export default function TransactionHistoryModal({ isOpen, onClose }) {
             <EmptyState
               variant="transactions"
               title="No transactions yet"
-              description="Transaction history will appear here once you start using the platform features. Most trading features are in development — token deployment is available now."
-              actionLabel="Deploy token"
-              actionHref="/deploy-token"
+              description="Your swaps and liquidity changes will appear here."
+              actionLabel="Swap"
+              actionHref="/swap"
             />
           )}
         </div>

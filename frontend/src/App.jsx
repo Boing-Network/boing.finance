@@ -8,15 +8,11 @@ import './i18n'; // Initialize i18n
 import { WalletProvider } from './contexts/WalletContext';
 import { BoingNativeDexIntegrationProvider } from './contexts/BoingNativeDexIntegrationContext';
 import { ChainRealtimeProvider } from './contexts/ChainRealtimeContext';
-import { SolanaWalletProvider } from './contexts/SolanaWalletContext';
-import ChainTypeSelector from './components/ChainTypeSelector';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AchievementProvider, useAchievements } from './contexts/AchievementContext';
 import logger from './utils/logger';
 import BaseMiniAppWrapper from './components/BaseMiniAppWrapper';
-import BaseNetworkOptimizer from './components/BaseNetworkOptimizer';
 import WalletConnect from './components/WalletConnect';
-import NetworkSelector from './components/NetworkSelector';
 import ThemeToggle from './components/ThemeToggle';
 import LanguageSelector from './components/LanguageSelector';
 import Logo from './components/Logo';
@@ -32,7 +28,6 @@ import { getPageVariant } from './utils/pageVariant';
 import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion';
 import { useBreakpoint } from './hooks/useMediaQuery';
 import { useCloseOnPointerOutside } from './hooks/useCloseOnPointerOutside';
-import priceAlertService from './services/priceAlertService';
 import {
   brandShareImageAbsolute,
   getBrandAssetVersionSuffix,
@@ -54,44 +49,40 @@ function SwapRoute() {
 }
 const Liquidity = lazy(() => import('./pages/Liquidity'));
 const Pools = lazy(() => import('./pages/Pools'));
-const Analytics = lazy(() => import('./pages/Analytics'));
 const Portfolio = lazy(() => import('./pages/Portfolio'));
-const Activity = lazy(() => import('./pages/Activity'));
 const Bridge = lazy(() => import('./pages/Bridge'));
-const DeployToken = lazy(() => import('./pages/DeployToken'));
-const CreateNFT = lazy(() => import('./pages/CreateNFT'));
-const ProjectPack = lazy(() => import('./pages/ProjectPack'));
-const LinkedProject = lazy(() => import('./pages/LinkedProject'));
 const CreatePool = lazy(() => import('./pages/CreatePool'));
-const Tokens = lazy(() => import('./pages/Tokens'));
-const Watchlist = lazy(() => import('./pages/Watchlist'));
 const Status = lazy(() => import('./pages/Status'));
 const Docs = lazy(() => import('./pages/Docs'));
-const DeveloperTools = lazy(() => import('./pages/DeveloperTools'));
 const HelpCenter = lazy(() => import('./pages/HelpCenter'));
 const HelpArticle = lazy(() => import('./pages/HelpArticle'));
 const ContactUs = lazy(() => import('./pages/ContactUs'));
 const BugReport = lazy(() => import('./pages/BugReport'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Terms = lazy(() => import('./pages/Terms'));
-const Whitepaper = lazy(() => import('./pages/Whitepaper'));
-const ExecutiveSummary = lazy(() => import('./pages/ExecutiveSummary'));
-const Blog = lazy(() => import('./pages/Blog'));
-const GovernanceProposals = lazy(() => import('./pages/governance/GovernanceProposals'));
-const GovernanceVote = lazy(() => import('./pages/governance/GovernanceVote'));
-const GovernanceTreasury = lazy(() => import('./pages/governance/GovernanceTreasury'));
-const GovernanceRoadmap = lazy(() => import('./pages/governance/GovernanceRoadmap'));
-const GovernanceCommunity = lazy(() => import('./pages/governance/GovernanceCommunity'));
-const GovernanceLearn = lazy(() => import('./pages/governance/GovernanceLearn'));
-const BoingStaking = lazy(() => import('./pages/boing/BoingStaking'));
-const BoingPoints = lazy(() => import('./pages/boing/BoingPoints'));
-const BoingRoadmap = lazy(() => import('./pages/boing/BoingRoadmap'));
-const BoingActivities = lazy(() => import('./pages/boing/BoingActivities'));
-const BoingNativeVm = lazy(() => import('./pages/boing/BoingNativeVm'));
-const BoingPublishInterface = lazy(() => import('./pages/boing/BoingPublishInterface'));
 const Home = lazy(() => import('./pages/Home'));
+
+/**
+ * Pages removed when boing.finance became a Boing-only DEX (Nov 2026). Old links land on the closest kept page.
+ * Paths ending in '/*' match the whole section.
+ */
+const REMOVED_ROUTE_REDIRECTS = [
+  ['/analytics', '/pools'],
+  ['/tokens', '/pools'],
+  ['/watchlist', '/pools'],
+  ['/activity', '/portfolio'],
+  ['/deploy-token', '/'],
+  ['/create-nft', '/'],
+  ['/project-pack', '/'],
+  ['/linked-project', '/'],
+  ['/developer-tools', '/docs'],
+  ['/whitepaper', '/docs'],
+  ['/executive-summary', '/docs'],
+  ['/blog', '/'],
+  ['/governance/*', '/'],
+  ['/boing/*', '/'],
+];
 const TransactionHistoryModal = lazy(() => import('./components/TransactionHistoryModal'));
-const AIChatModal = lazy(() => import('./components/AIChatModal'));
 const DeFi101Modal = lazy(() => import('./components/DeFi101Modal'));
 const OnboardingTour = lazy(() => import('./components/OnboardingTour'));
 // framer-motion (~110 KB) is only needed once an achievement celebrates; load it then.
@@ -175,22 +166,22 @@ function DefaultSeoTags() {
       })} />
 
       {/* Open Graph Meta Tags for better sharing */}
-      <meta property="og:title" content="Boing Finance — Move liquidity across chains" />
-      <meta property="og:description" content="Cross-chain DeFi with transparent routing and native Boing liquidity. Swap, bridge and deploy across Boing, EVM networks and Solana." />
+      <meta property="og:title" content="Boing Finance — The DEX for Boing Network" />
+      <meta property="og:description" content="Swap and provide liquidity on native Boing pools with Boing Express, and bridge to other chains." />
       <meta property="og:image" content={brandShareImageAbsolute()} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
-      <meta property="og:image:alt" content="Boing Finance — Move liquidity across chains; brand mark on a dark navy background" />
+      <meta property="og:image:alt" content="Boing Finance brand mark on a dark navy background" />
       <meta property="og:url" content={canonical} />
       <meta property="og:type" content="website" />
       <meta property="og:site_name" content="Boing Finance" />
 
       {/* Twitter Card Meta Tags */}
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content="Boing Finance — Move liquidity across chains" />
-      <meta name="twitter:description" content="Cross-chain DeFi with transparent routing and native Boing liquidity." />
+      <meta name="twitter:title" content="Boing Finance — The DEX for Boing Network" />
+      <meta name="twitter:description" content="Swap and provide liquidity on native Boing pools with Boing Express." />
       <meta name="twitter:image" content={brandShareImageAbsolute()} />
-      <meta name="twitter:image:alt" content="Boing Finance — Move liquidity across chains; brand preview with the Boing Finance mark on dark navy" />
+      <meta name="twitter:image:alt" content="Boing Finance brand mark on a dark navy background" />
     </Helmet>
   );
 }
@@ -246,21 +237,10 @@ function PageTransitionRoutes() {
         <Route path="/swap" element={<SwapRoute />} />
         <Route path="/pools" element={<Pools />} />
         <Route path="/liquidity" element={<Liquidity />} />
-        <Route path="/analytics" element={<Analytics />} />
-        <Route path="/portfolio" element={<Portfolio />} />
-        <Route path="/activity" element={<Activity />} />
-        <Route path="/bridge" element={<Bridge />} />
-        <Route path="/tokens" element={<Tokens />} />
-        <Route path="/watchlist" element={<Watchlist />} />
-        <Route path="/docs" element={<Docs />} />
-        <Route path="/developer-tools" element={<DeveloperTools />} />
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/deploy-token" element={<DeployToken />} />
-        <Route path="/create-nft" element={<CreateNFT />} />
-        <Route path="/project-pack" element={<ProjectPack />} />
-        <Route path="/linked-project" element={<LinkedProject />} />
         <Route path="/create-pool" element={<CreatePool />} />
-        <Route path="/whitepaper" element={<Whitepaper />} />
+        <Route path="/portfolio" element={<Portfolio />} />
+        <Route path="/bridge" element={<Bridge />} />
+        <Route path="/docs" element={<Docs />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/help-center" element={<HelpCenter />} />
@@ -268,21 +248,9 @@ function PageTransitionRoutes() {
         <Route path="/contact-us" element={<ContactUs />} />
         <Route path="/status" element={<Status />} />
         <Route path="/bug-report" element={<BugReport />} />
-        <Route path="/executive-summary" element={<ExecutiveSummary />} />
-        {/* Governance */}
-        <Route path="/governance/proposals" element={<GovernanceProposals />} />
-        <Route path="/governance/vote" element={<GovernanceVote />} />
-        <Route path="/governance/treasury" element={<GovernanceTreasury />} />
-        <Route path="/governance/roadmap" element={<GovernanceRoadmap />} />
-        <Route path="/governance/community" element={<GovernanceCommunity />} />
-        <Route path="/governance/learn" element={<GovernanceLearn />} />
-        {/* BOING */}
-        <Route path="/boing/staking" element={<BoingStaking />} />
-        <Route path="/boing/points" element={<BoingPoints />} />
-        <Route path="/boing/roadmap" element={<BoingRoadmap />} />
-        <Route path="/boing/activities" element={<BoingActivities />} />
-        <Route path="/boing/native-vm" element={<BoingNativeVm />} />
-        <Route path="/boing/publish-interface" element={<BoingPublishInterface />} />
+        {REMOVED_ROUTE_REDIRECTS.map(([from, to]) => (
+          <Route key={from} path={from} element={<Navigate to={to} replace />} />
+        ))}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
@@ -293,12 +261,7 @@ function AppContent() {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
-  const [aiChatOpen, setAiChatOpen] = useState(false);
   const [defi101Open, setDefi101Open] = useState(false);
-  const [tradeAndDeployDropdownOpen, setTradeAndDeployDropdownOpen] = useState(false);
-  const [analyticsDropdownOpen, setAnalyticsDropdownOpen] = useState(false);
-  const [governanceDropdownOpen, setGovernanceDropdownOpen] = useState(false);
-  const [boingDropdownOpen, setBoingDropdownOpen] = useState(false);
   const [toolsDropdownOpen, setToolsDropdownOpen] = useState(false);
   const [isMediumNavOpen, setIsMediumNavOpen] = useState(false);
   const mediumNavRef = useRef(null);
@@ -327,10 +290,6 @@ function AppContent() {
   }, [isMenuOpen]);
 
   const closeAllDropdowns = () => {
-    setTradeAndDeployDropdownOpen(false);
-    setAnalyticsDropdownOpen(false);
-    setGovernanceDropdownOpen(false);
-    setBoingDropdownOpen(false);
     setToolsDropdownOpen(false);
     setIsMediumNavOpen(false);
   };
@@ -342,10 +301,6 @@ function AppContent() {
   useEffect(() => {
     if (!isMobileNav) return;
     setIsMenuOpen(false);
-    setTradeAndDeployDropdownOpen(false);
-    setAnalyticsDropdownOpen(false);
-    setGovernanceDropdownOpen(false);
-    setBoingDropdownOpen(false);
     setToolsDropdownOpen(false);
     setIsMediumNavOpen(false);
   }, [isMobileNav]);
@@ -360,20 +315,6 @@ function AppContent() {
   // Using navigation directly ensures consistency
   const memoizedNavigation = navigation;
   
-  // Start price alert service
-  React.useEffect(() => {
-    // Request notification permission
-    if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
-    
-    // Start price alert monitoring
-    priceAlertService.start();
-    
-    return () => {
-      priceAlertService.stop();
-    };
-  }, []);
 
   // Navigation state check (console.log removed for production)
 
@@ -388,7 +329,6 @@ function AppContent() {
         setIsMenuOpen(false);
         setIsMediumNavOpen(false);
         setHistoryModalOpen(false);
-        setAiChatOpen(false);
         setDefi101Open(false);
         closeAllDropdowns();
       }
@@ -407,7 +347,6 @@ function AppContent() {
   return (
     <div className={`relative flex flex-col min-h-screen min-w-0 overflow-x-clip ${pageBackgroundClass}`}>
       <AppShellVisualLayer reducedMotion={prefersReducedMotion} />
-      <BaseNetworkOptimizer />
       
       {/* Header: nav + ticker (sticky so ticker sits in flow directly under nav) */}
       <header className="site-header sticky top-0 z-30 flex flex-col flex-shrink-0 w-full min-w-0">
@@ -458,36 +397,21 @@ function AppContent() {
             {/* Desktop: single-row nav (starts after logo) + right rail — flex-1 so nav never wraps to a second row */}
             <div className="hidden nav:flex nav:flex-1 nav:min-w-0 nav:items-center nav:justify-between nav:gap-1 nav:max-xl:gap-1 xl:gap-3 2xl:gap-4 overflow-visible">
               <div role="navigation" aria-label="Site sections" className="flex flex-nowrap items-center justify-start gap-x-0.5 nav:max-xl:gap-x-0.5 xl:gap-x-2 2xl:gap-x-3 min-w-0 flex-1 overflow-visible pr-1 nav:max-xl:pr-1 xl:pr-2">
-                <DropdownMenu label="Trade & Deploy" items={memoizedNavigation.tradeAndDeploy} isOpen={tradeAndDeployDropdownOpen}
-                  onToggle={() => { const next = !tradeAndDeployDropdownOpen; setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setTradeAndDeployDropdownOpen(next); }}
-                  onClose={() => setTradeAndDeployDropdownOpen(false)}
-                />
-                <DropdownMenu label="Analytics" items={memoizedNavigation.analytics} isOpen={analyticsDropdownOpen}
-                  onToggle={() => { const next = !analyticsDropdownOpen; setTradeAndDeployDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setAnalyticsDropdownOpen(next); }}
-                  onClose={() => setAnalyticsDropdownOpen(false)}
-                />
-                <DropdownMenu label="Governance" items={memoizedNavigation.governance} isOpen={governanceDropdownOpen}
-                  onToggle={() => { const next = !governanceDropdownOpen; setTradeAndDeployDropdownOpen(false); setAnalyticsDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(false); setGovernanceDropdownOpen(next); }}
-                  onClose={() => setGovernanceDropdownOpen(false)}
-                />
-                <DropdownMenu label="BOING" items={memoizedNavigation.boing} isOpen={boingDropdownOpen}
-                  onToggle={() => { const next = !boingDropdownOpen; setTradeAndDeployDropdownOpen(false); setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setToolsDropdownOpen(false); setBoingDropdownOpen(next); }}
-                  onClose={() => setBoingDropdownOpen(false)}
-                />
+                {memoizedNavigation.trading.map((item) => (
+                  <TopNavLink key={item.name} item={item} active={location.pathname === item.href} />
+                ))}
               </div>
               <div className="flex nav:flex-nowrap nav:items-center shrink-0 min-w-0 gap-1 nav:max-xl:gap-1.5 xl:gap-2 2xl:gap-3 overflow-visible">
                 <div className="flex-shrink-0 relative">
                   <ToolsDropdown
                     isOpen={toolsDropdownOpen}
-                    onToggle={() => { const next = !toolsDropdownOpen; setTradeAndDeployDropdownOpen(false); setAnalyticsDropdownOpen(false); setGovernanceDropdownOpen(false); setBoingDropdownOpen(false); setToolsDropdownOpen(next); }}
+                    onToggle={() => { setToolsDropdownOpen(!toolsDropdownOpen); }}
                     onClose={() => setToolsDropdownOpen(false)}
                     onOpenHistory={() => { setHistoryModalOpen(true); setToolsDropdownOpen(false); }}
                     onOpenDefi101={() => { setDefi101Open(true); setToolsDropdownOpen(false); }}
                   />
                 </div>
                 <div className="flex items-center gap-1 nav:max-xl:gap-1.5 xl:gap-2 2xl:gap-3 border-l pl-1.5 nav:max-xl:pl-2 xl:pl-3 shrink-0 min-w-0" style={{ borderColor: 'var(--border-color)' }}>
-                  <div className="flex-shrink-0"><ChainTypeSelector /></div>
-                  <div className="flex-shrink-0"><NetworkSelector /></div>
                   <div className="flex-shrink-0"><WalletConnect /></div>
                 </div>
               </div>
@@ -499,7 +423,6 @@ function AppContent() {
                   onOpenHistory={() => { setHistoryModalOpen(true); setToolsDropdownOpen(false); }}
                   onOpenDefi101={() => { setDefi101Open(true); setToolsDropdownOpen(false); }}
                 /></div>
-                <div className="flex-shrink-0"><NetworkSelector /></div>
                 <div className="flex-shrink-0"><WalletConnect /></div>
             </div>
 
@@ -532,11 +455,11 @@ function AppContent() {
             className="dropdown-menu-glass-gradient-h md:hidden border-t border-border shadow-lg max-h-[min(75vh,calc(100dvh-4.5rem))] overflow-y-auto overscroll-contain"
           >
             <div className="px-4 py-3 space-y-3">
-              {/* Trade & Deploy Section (merged Trading + Deployment) */}
+              {/* Trade section */}
               <div className="dropdown-menu-glass-gradient-strip rounded-lg p-3 border border-border">
-                <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>Trade & Deploy</h3>
+                <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>Trade</h3>
                 <div className="space-y-1">
-                  {memoizedNavigation.tradeAndDeploy.map((item) => (
+                  {memoizedNavigation.trading.map((item) => (
                     <button
                       key={item.name}
                       onClick={() => {
@@ -576,100 +499,6 @@ function AppContent() {
                         {item.description && (
                           <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{item.description}</div>
                         )}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Analytics Section */}
-              <div className="dropdown-menu-glass-gradient-strip rounded-lg p-3 border border-border">
-                <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>Analytics</h3>
-                <div className="space-y-1">
-                  {memoizedNavigation.analytics.map((item) => (
-                    <button
-                      key={item.name}
-                      onClick={() => {
-                        if (item.isAvailable && !item.comingSoon) {
-                          window.location.href = item.href;
-                          closeMenu();
-                        }
-                      }}
-                      className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${(item.comingSoon || !item.isAvailable) ? 'cursor-not-allowed opacity-60' : ''}`}
-                      style={{
-                        color: (item.comingSoon || !item.isAvailable) ? 'var(--text-tertiary)' : 'var(--text-secondary)'
-                      }}
-                      onMouseEnter={(e) => {
-                        if (item.isAvailable && !item.comingSoon) {
-                          e.target.style.color = 'var(--text-primary)';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (item.isAvailable && !item.comingSoon) {
-                          e.target.style.color = 'var(--text-secondary)';
-                        }
-                      }}
-                      disabled={item.comingSoon || !item.isAvailable}
-                      title={item.comingSoon ? comingSoon.tooltip : (item.testnetOnly ? 'Available on Sepolia testnet only' : '')}
-                    >
-                      <NavIcon icon={item.icon} size={18} className="opacity-90" />
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <span>{item.name}</span>
-                          {(item.comingSoon || !item.isAvailable) && (
-                            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>
-                          )}
-                          {item.testnetOnly && item.isAvailable && !item.comingSoon && (
-                            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-400/35">Testnet Only</span>
-                          )}
-                        </div>
-                        {item.description && (
-                          <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{item.description}</div>
-                        )}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Governance Section */}
-              <div className="dropdown-menu-glass-gradient-strip rounded-lg p-3 border border-border">
-                <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>Governance</h3>
-                <div className="space-y-1">
-                  {memoizedNavigation.governance.map((item) => (
-                    <button key={item.name} onClick={() => { if (item.isAvailable && !item.comingSoon) { window.location.href = item.href; closeMenu(); } }}
-                      className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${(item.comingSoon || !item.isAvailable) ? 'cursor-not-allowed opacity-60' : ''}`}
-                      style={{ color: (item.comingSoon || !item.isAvailable) ? 'var(--text-tertiary)' : 'var(--text-secondary)' }}
-                      disabled={item.comingSoon || !item.isAvailable} title={item.comingSoon ? comingSoon.tooltip : ''}>
-                      <NavIcon icon={item.icon} size={18} className="opacity-90" />
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <span>{item.name}</span>
-                          {(item.comingSoon || !item.isAvailable) && <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>}
-                        </div>
-                        {item.description && <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{item.description}</div>}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* BOING Section */}
-              <div className="dropdown-menu-glass-gradient-strip rounded-lg p-3 border border-border">
-                <h3 className="text-sm font-medium mb-2 px-1" style={{ color: 'var(--text-secondary)' }}>BOING</h3>
-                <div className="space-y-1">
-                  {memoizedNavigation.boing.map((item) => (
-                    <button key={item.name} onClick={() => { if (item.isAvailable && !item.comingSoon) { window.location.href = item.href; closeMenu(); } }}
-                      className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-3 ${(item.comingSoon || !item.isAvailable) ? 'cursor-not-allowed opacity-60' : ''}`}
-                      style={{ color: (item.comingSoon || !item.isAvailable) ? 'var(--text-tertiary)' : 'var(--text-secondary)' }}
-                      disabled={item.comingSoon || !item.isAvailable} title={item.comingSoon ? comingSoon.tooltip : ''}>
-                      <NavIcon icon={item.icon} size={18} className="opacity-90" />
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <span>{item.name}</span>
-                          {(item.comingSoon || !item.isAvailable) && <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>}
-                        </div>
-                        {item.description && <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{item.description}</div>}
                       </div>
                     </button>
                   ))}
@@ -678,21 +507,6 @@ function AppContent() {
 
               {/* Mobile Wallet Controls */}
               <div className="space-y-3 pt-3 border-t border-border">
-                <button
-                  onClick={() => {
-                    setAiChatOpen(true);
-                    closeMenu();
-                  }}
-                  className="dropdown-menu-glass-gradient-strip w-full text-left px-3 py-3 rounded-lg text-base font-medium transition-colors flex items-center space-x-3 border border-border"
-                  style={{ color: 'var(--text-secondary)', borderColor: 'var(--border-color)' }}
-                  onMouseEnter={(e) => { e.target.style.color = 'var(--text-primary)'; }}
-                  onMouseLeave={(e) => { e.target.style.color = 'var(--text-secondary)'; }}
-                >
-                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                  </svg>
-                  <span>AI DeFi Assistant</span>
-                </button>
                 <button
                   onClick={() => {
                     setHistoryModalOpen(true);
@@ -727,8 +541,6 @@ function AppContent() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <ChainTypeSelector />
-                  <NetworkSelector />
                   <WalletConnect />
                 </div>
                 <BoingAppsLinks />
@@ -763,31 +575,10 @@ function AppContent() {
             onClose={() => setHistoryModalOpen(false)}
           />
         )}
-        {aiChatOpen && (
-          <AIChatModal isOpen={aiChatOpen} onClose={() => setAiChatOpen(false)} />
-        )}
         {defi101Open && (
           <DeFi101Modal isOpen={defi101Open} onClose={() => setDefi101Open(false)} />
         )}
       </Suspense>
-      {/* Floating AI Assistant button - bottom right, visible on all pages */}
-      <button
-        type="button"
-        onClick={() => setAiChatOpen(true)}
-        className="fixed bottom-[max(1.5rem,env(safe-area-inset-bottom,0px))] right-[max(1.5rem,env(safe-area-inset-right,0px))] z-[40] w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent"
-        style={{
-          background: 'linear-gradient(135deg, var(--accent-teal), var(--accent-cyan))',
-          border: '1px solid var(--border-hover)',
-          boxShadow: '0 4px 20px var(--glow-cyan)'
-        }}
-        aria-label="Open AI DeFi Assistant"
-        title="AI Assistant"
-      >
-        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-        </svg>
-      </button>
-
       <footer className="site-footer w-full flex-shrink-0 mt-auto relative z-20">
         <ShootingStars dense />
         <div className="max-w-7xl mx-auto py-8 sm:py-10 px-4 sm:px-6 lg:px-8 nav:pl-[max(1rem,env(safe-area-inset-left,0px))] nav:pr-[max(1rem,env(safe-area-inset-right,0px))]">
@@ -798,10 +589,10 @@ function AppContent() {
                 <Logo size={48} className="mr-3 sm:mr-4" showText={true} showComic={false} />
               </div>
               <p className="text-sm sm:text-base font-medium mb-1 bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(to right, var(--accent-teal), var(--accent-cyan))', WebkitBackgroundClip: 'text' }}>
-                Boing Finance — Move liquidity across chains
+                Boing Finance — The DEX for Boing Network
               </p>
               <p className="text-xs sm:text-sm mb-4 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                A cross-chain liquidity interface spanning Boing and external networks.
+                Swap and provide liquidity on native Boing pools with Boing Express.
               </p>
               <div className="flex space-x-3 sm:space-x-4">
                 <a href="https://twitter.com/boing_finance" target="_blank" rel="noopener noreferrer" className="transition-colors p-1 sm:p-2 inline-flex min-h-[44px] min-w-[44px] items-center justify-center" style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>
@@ -836,7 +627,6 @@ function AppContent() {
               <h2 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>Resources</h2>
               <ul className="space-y-2 text-xs sm:text-sm">
                 <li><a href="/docs" className="transition-colors block py-1" style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>Documentation</a></li>
-                <li><a href="/whitepaper" className="transition-colors block py-1" style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>Whitepaper</a></li>
                 <li><a href="/terms" className="transition-colors block py-1" style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>Terms of Service</a></li>
                 <li><a href="/privacy" className="transition-colors block py-1" style={{ color: 'var(--text-secondary)' }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>Privacy Policy</a></li>
               </ul>
@@ -913,7 +703,6 @@ function App() {
           <ThemeProvider>
             <WalletProvider>
               <BoingNativeDexIntegrationProvider>
-              <SolanaWalletProvider>
               <ChainRealtimeProvider>
               <AchievementProvider>
                 <AchievementOverlayGate />
@@ -938,7 +727,6 @@ function App() {
               </BaseMiniAppWrapper>
               </AchievementProvider>
               </ChainRealtimeProvider>
-              </SolanaWalletProvider>
               </BoingNativeDexIntegrationProvider>
             </WalletProvider>
           </ThemeProvider>
@@ -948,7 +736,7 @@ function App() {
   );
 }
 
-// Tools dropdown: Language, Theme, Transaction History, DeFi 101 (AI Assistant is in floating FAB)
+// Tools dropdown: Language, Theme, Transaction History, DeFi 101
 // Renders panel via portal so it is not clipped by overflow-x-hidden on the app wrapper.
 function ToolsDropdown({ isOpen, onToggle, onClose, onOpenHistory, onOpenDefi101 }) {
   const buttonRef = useRef(null);
@@ -1098,105 +886,23 @@ function MediumNavPanel({ navigation, onNavigate, comingSoon }) {
   );
   return (
     <div className="py-2">
-      <NavSection title="Trade & Deploy" items={navigation.tradeAndDeploy} />
-      <NavSection title="Analytics" items={navigation.analytics} />
-      <NavSection title="Governance" items={navigation.governance} />
-      <NavSection title="BOING" items={navigation.boing} />
+      <NavSection title="Trade" items={navigation.trading} />
     </div>
   );
 }
 
-// Modified DropdownMenu to support coming soon
-function DropdownMenu({ label, items, isOpen, onToggle, onClose }) {
-  const rootRef = useRef(null);
-  useCloseOnPointerOutside(
-    isOpen,
-    (node) => Boolean(rootRef.current?.contains(node)),
-    onClose
-  );
-
+/** Desktop header link for one trading page. */
+function TopNavLink({ item, active }) {
   return (
-    <div ref={rootRef} className="relative flex-shrink-0">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="px-1.5 py-1.5 nav:max-xl:px-1.5 xl:px-2.5 2xl:px-3 rounded-lg text-sm nav:max-xl:text-xs xl:text-sm font-medium transition-all duration-200 flex items-center space-x-0.5 xl:space-x-1 group hover:bg-[var(--secondary-bg)] shrink-0"
-        style={{ color: 'var(--text-secondary)' }}
-        onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
-        onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-        aria-expanded={isOpen}
-        aria-haspopup="true"
-      >
-        <span>{label}</span>
-        <svg 
-          className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-      {isOpen && (
-          <div className="dropdown-menu-glass-solid-nav absolute top-full left-0 mt-2 w-52 rounded-xl z-[120]">
-          <div className="py-1.5">
-            {items.map((item) => {
-              // Explicit boolean checks with logging
-              const isComingSoon = Boolean(item.comingSoon);
-              const isAvailable = Boolean(item.isAvailable);
-              const shouldDisable = isComingSoon || !isAvailable;
-              
-              return (
-                <button
-                  key={item.name}
-                  onClick={() => {
-                    if (!shouldDisable) {
-                      // Navigating to item
-                      window.location.href = item.href;
-                      onClose();
-                    } else {
-                      // Item is disabled
-                    }
-                  }}
-                  className={`w-full text-left px-4 py-2.5 text-sm flex items-center space-x-3 group transition-all duration-200 rounded-lg mx-1 ${shouldDisable ? 'cursor-not-allowed opacity-60' : 'hover:bg-[var(--secondary-bg)]'}`}
-                  style={{
-                    color: shouldDisable ? 'var(--text-tertiary)' : 'var(--text-secondary)'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (isAvailable && !isComingSoon) {
-                      e.target.style.color = 'var(--text-primary)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (isAvailable && !isComingSoon) {
-                      e.target.style.color = 'var(--text-secondary)';
-                    }
-                  }}
-                  disabled={shouldDisable}
-                  title={shouldDisable ? comingSoon.tooltip : (item.testnetOnly ? 'Available on Sepolia testnet only' : '')}
-                >
-                  <NavIcon icon={item.icon} size={18} className="opacity-90" />
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <span>{item.name}</span>
-                      {shouldDisable && (
-                        <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 animate-pulse">{comingSoon.label}</span>
-                      )}
-                      {item.testnetOnly && isAvailable && !isComingSoon && (
-                        <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-400/30">Testnet Only</span>
-                      )}
-                    </div>
-                    {item.description && (
-                      <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{item.description}</div>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
+    <a
+      href={item.href}
+      className="px-1.5 py-1.5 nav:max-xl:px-1.5 xl:px-2.5 2xl:px-3 rounded-lg text-sm nav:max-xl:text-xs xl:text-sm font-medium transition-colors duration-200 hover:bg-[var(--secondary-bg)] shrink-0 whitespace-nowrap"
+      style={{ color: active ? 'var(--text-primary)' : 'var(--text-secondary)' }}
+      aria-current={active ? 'page' : undefined}
+      title={item.description || undefined}
+    >
+      {item.name}
+    </a>
   );
 }
 

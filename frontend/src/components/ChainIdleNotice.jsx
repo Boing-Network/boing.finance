@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useChainType } from '../contexts/SolanaWalletContext';
+import { useChainType } from '../contexts/chainType';
 import { useWallet } from '../contexts/WalletContext';
 import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
 import { boingJsonRpc } from '../services/boingTestnetRpc';
@@ -14,7 +14,7 @@ const POLL_MS = 60 * 1000;
 const RPC_TIMEOUT_MS = 8000;
 
 /** Pages that read from or write to the Boing testnet. Bridge and the marketing pages stay quiet. */
-const BOING_PAGES = ['/swap', '/pools', '/liquidity', '/create-pool', '/deploy-token', '/tokens', '/portfolio', '/activity', '/boing'];
+const BOING_PAGES = ['/swap', '/pools', '/liquidity', '/create-pool', '/portfolio'];
 
 export function formatAge(ms) {
   const mins = Math.max(0, Math.floor(ms / 60000));

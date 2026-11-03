@@ -1,8 +1,5 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import OnboardingChecklist from '../components/OnboardingChecklist';
-import ForYouSection from '../components/ForYouSection';
-import ProactiveTipsBanner from '../components/ProactiveTipsBanner';
 import {
   brandLogoPngAbsolute,
   brandShareImageAbsolute,
@@ -11,189 +8,93 @@ import {
 import { navigation } from '../config/navigation';
 import NavIcon from '../components/NavIcon';
 
+const TITLE = 'Boing Finance — The DEX for Boing Network';
+const DESCRIPTION =
+  'Swap and provide liquidity on native Boing pools with Boing Express, track your Boing portfolio, and bridge to other chains. Boing runs on public testnet; mainnet is not live.';
+
 function Home() {
-  // Use useMemo to ensure stable reference
-  const memoizedNav = React.useMemo(() => {
-    return navigation;
-  }, []); // Empty deps - navigation should never change
-  
+  const suffix = getBrandAssetVersionSuffix();
   return (
     <>
       <Helmet>
-        <title>Boing Finance — Move liquidity across chains | Swap, bridge & deploy</title>
-        <meta name="description" content="Cross-chain DeFi with transparent routing and native Boing liquidity. Swap, add liquidity, bridge and deploy tokens across Boing, EVM networks and Solana. Boing features run on public testnet; Boing mainnet is not live." />
-        <meta name="keywords" content="Boing Finance, cross-chain DeFi, liquidity, swap, bridge, deploy token, Boing, EVM, Solana, transparent routing" />
-        <meta property="og:title" content="Boing Finance — Move liquidity across chains" />
-        <meta property="og:description" content="Cross-chain DeFi with transparent routing and native Boing liquidity. A cross-chain liquidity interface spanning Boing and external networks." />
+        <title>{TITLE}</title>
+        <meta name="description" content={DESCRIPTION} />
+        <meta name="keywords" content="Boing Finance, Boing Network, DEX, swap, liquidity pools, Boing Express, bridge" />
+        <meta property="og:title" content={TITLE} />
+        <meta property="og:description" content={DESCRIPTION} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://boing.finance" />
         <meta property="og:site_name" content="boing.finance" />
         <meta property="og:locale" content="en_US" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Boing Finance — Move liquidity across chains" />
-        <meta name="twitter:description" content="Cross-chain DeFi with transparent routing and native Boing liquidity." />
+        <meta name="twitter:title" content={TITLE} />
+        <meta name="twitter:description" content={DESCRIPTION} />
         <meta name="twitter:site" content="@boingfinance" />
         <meta property="og:image" content={brandShareImageAbsolute()} />
-        <meta property="og:image:alt" content="Boing Finance — Move liquidity across chains; brand mark on a dark navy background" />
+        <meta property="og:image:alt" content="Boing Finance brand mark on a dark navy background" />
         <meta name="twitter:image" content={brandShareImageAbsolute()} />
-        <meta name="twitter:image:alt" content="Boing Finance — Move liquidity across chains; brand preview with the Boing Finance mark on dark navy" />
+        <meta name="twitter:image:alt" content="Boing Finance brand mark on a dark navy background" />
         <link rel="canonical" href="https://boing.finance" />
-        <link rel="icon" type="image/png" href={`/favicon-32x32.png${getBrandAssetVersionSuffix()}`} sizes="32x32" />
-        <link rel="icon" type="image/png" href={`/favicon-16x16.png${getBrandAssetVersionSuffix()}`} sizes="16x16" />
-        <link rel="icon" type="image/png" href={`/favicon-96x96.png${getBrandAssetVersionSuffix()}`} sizes="96x96" />
-        <link rel="icon" type="image/png" href={`/favicon.png${getBrandAssetVersionSuffix()}`} sizes="512x512" />
-        
-        {/* Structured Data for Homepage */}
+        <link rel="icon" type="image/png" href={`/favicon-32x32.png${suffix}`} sizes="32x32" />
+        <link rel="icon" type="image/png" href={`/favicon-16x16.png${suffix}`} sizes="16x16" />
+        <link rel="icon" type="image/png" href={`/favicon-96x96.png${suffix}`} sizes="96x96" />
+        <link rel="icon" type="image/png" href={`/favicon.png${suffix}`} sizes="512x512" />
         <script type="application/ld+json">
         {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "WebSite",
-          "name": "Boing Finance",
-          "url": "https://boing.finance",
-          "description": "Cross-chain DeFi with transparent routing and native Boing liquidity. A cross-chain liquidity interface spanning Boing and external networks.",
-          "potentialAction": {
-            "@type": "SearchAction",
-            "target": "https://boing.finance/tokens?q={search_term_string}",
-            "query-input": "required name=search_term_string"
-          }
-        })}
-        </script>
-        
-        {/* Enhanced Structured Data for Organization */}
-        <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Organization",
-          "name": "boing.finance",
-          "url": "https://boing.finance",
-          "logo": {
-            "@type": "ImageObject",
-            "url": brandLogoPngAbsolute()
-          },
-          "description": "Cross-chain DeFi with transparent routing and native Boing liquidity. A cross-chain liquidity interface spanning Boing and external networks.",
-          "sameAs": [
-            "https://twitter.com/boingfinance",
-            "https://discord.gg/K3w9nbUw4N"
-          ],
-          "contactPoint": {
-            "@type": "ContactPoint",
-            "contactType": "Customer Service",
-            "url": "https://boing.finance/contact-us"
-          }
-        })}
-        </script>
-        
-        {/* Structured Data for FinancialProduct */}
-        <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "FinancialProduct",
-          "name": "boing.finance DeFi Platform",
-          "description": "Cross-chain DeFi with transparent routing and native Boing liquidity. Swap, add liquidity, bridge and deploy tokens across Boing, EVM networks and Solana.",
-          "provider": {
-            "@type": "Organization",
-            "name": "boing.finance",
-            "url": "https://boing.finance"
-          },
-          "category": "Cryptocurrency Exchange",
-          "areaServed": "Worldwide"
-        })}
-        </script>
-        
-        {/* Structured Data for FAQ */}
-        <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": "How do I deploy a token on Boing Finance?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "To deploy a token on Boing Finance, connect your wallet, navigate to the Deploy Token page, fill in your token details (name, symbol, supply), configure security features, and click deploy. No coding required!"
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "What blockchains does Boing Finance support?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Boing Finance is a cross-chain liquidity interface spanning Boing and external networks: Boing (public testnet, signed with Boing Express), EVM chains and Solana."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Is Boing Finance safe to use?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "No DeFi product is risk-free. Boing Finance shows quote details before you confirm and offers token-deploy options such as mint authority removal and anti-bot protection, but DeFi carries smart-contract, market and bridge risk. The Boing Finance contracts have not had a professional third-party audit, Boing features run on testnet, and nothing on the site is financial advice or a guarantee of safety or returns."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "How much does it cost to deploy a token?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Token deployment costs vary by network (e.g. ETH on Ethereum, BOING on Boing testnet). The app uses a $5 reference value per BOING for fee estimates on Boing. Check the Deploy Token page for current pricing on your connected chain."
-              }
-            }
-          ]
+          '@context': 'https://schema.org',
+          '@type': 'Organization',
+          name: 'boing.finance',
+          url: 'https://boing.finance',
+          logo: { '@type': 'ImageObject', url: brandLogoPngAbsolute() },
+          description: DESCRIPTION,
+          sameAs: ['https://twitter.com/boingfinance', 'https://discord.gg/K3w9nbUw4N'],
         })}
         </script>
       </Helmet>
       <div className="relative z-10 container mx-auto px-4 pt-[6rem] pb-10 md:pt-[7rem] md:pb-14">
         <div className="max-w-7xl mx-auto">
-          {/* 1. Hero: positioning copy left, factual network panel right. The mascot is kept for onboarding and empty states, not the hero. */}
           <section className="relative z-10 mb-20 md:mb-24">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-0">
-              {/* Left: copy and CTAs */}
               <div className="text-center lg:text-left order-1">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4" style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.3)', color: '#FBBF24' }}>
                   <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#FBBF24' }} />
                   Boing: public testnet · mainnet not live
                 </div>
                 <h1 className="hero-title text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-3 pb-2" style={{ fontFamily: 'var(--font-display)', background: 'linear-gradient(135deg, #8DB8FF 0%, #3B8CFF 55%, #F0F4F8 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                  Move liquidity across chains
+                  The DEX for Boing Network
                 </h1>
                 <p className="text-base md:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0 mb-4" style={{ color: 'var(--text-secondary)' }}>
-                  Cross-chain DeFi with transparent routing and native Boing liquidity.
+                  Swap and provide liquidity on native Boing pools, signed with Boing Express.
                 </p>
                 <p className="text-sm leading-relaxed max-w-xl mx-auto lg:mx-0 mb-8" style={{ color: 'var(--text-tertiary)' }}>
-                  Swap, bridge and deploy tokens across Boing, EVM networks and Solana. Quote details such as minimum received are shown before you confirm. DeFi carries risk, including smart-contract risk, and the Boing Finance contracts have not had a professional third-party audit.
+                  Quote details such as minimum received are shown before you confirm. DeFi carries risk, including smart-contract risk, and the Boing Finance contracts have not had a professional third-party audit.
                 </p>
-                {/* CTAs: one primary + one secondary */}
                 <div className="flex flex-wrap justify-center lg:justify-start items-center gap-4">
                   <a href="/swap" className="btn btn-green inline-flex items-center gap-2">
                     Start trading
                   </a>
-                  <a
-                    href="/deploy-token"
-                    className="text-sm font-medium underline underline-offset-4 hover:opacity-80"
-                    style={{ color: 'var(--finance-primary)' }}
-                  >
-                    Deploy a token
+                  <a href="/pools" className="text-sm font-medium underline underline-offset-4 hover:opacity-80" style={{ color: 'var(--finance-primary)' }}>
+                    Browse pools
                   </a>
                 </div>
               </div>
-              {/* Right: where Boing Finance works today */}
               <div className="flex justify-center lg:justify-end order-2">
                 <div className="w-full max-w-md rounded-2xl p-5 text-left" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
                   <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: 'var(--text-tertiary)' }}>
-                    A cross-chain liquidity interface spanning Boing and external networks
+                    What works today
                   </p>
                   <ul className="space-y-4">
                     <li>
-                      <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Boing · native liquidity</p>
+                      <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Swap and liquidity · native Boing pools</p>
                       <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Native-VM pools and swaps on the Boing public testnet, signed with Boing Express.</p>
                     </li>
                     <li>
-                      <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>EVM networks · swap and bridge</p>
-                      <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Cross-chain swaps and bridging via LI.FI, plus token deployment on supported networks.</p>
+                      <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Portfolio · Boing balances</p>
+                      <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Balances, LP positions and values priced from Boing pools.</p>
                     </li>
                     <li>
-                      <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Solana · swap and deploy</p>
-                      <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Jupiter swaps and SPL token deployment.</p>
+                      <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Bridge · other chains</p>
+                      <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Move tokens between EVM chains and Solana via LI.FI today. A native Boing ↔ Base bridge is planned.</p>
                     </li>
                   </ul>
                 </div>
@@ -201,296 +102,41 @@ function Home() {
             </div>
           </section>
 
-
-          {/* 2. Getting started: Onboarding + For You (positioned before feature grid so new users see next steps first) */}
-          <section className="flex flex-col lg:flex-row gap-8 mb-20 md:mb-24 fade-in delay-300">
-            <div className="lg:max-w-sm shrink-0">
-              <OnboardingChecklist />
-            </div>
-            <div className="flex-1 min-w-0">
-              <ForYouSection />
-            </div>
-          </section>
-
-          <section className="mb-16 md:mb-20 fade-in delay-320">
-            <div className="flex flex-wrap justify-center gap-3">
-              <Highlight icon={<SwapIcon />} text="Swaps" />
-              <Highlight icon={<LiquidityIcon />} text="Liquidity" />
-              <Highlight icon={<BridgeIcon />} text="Bridge" />
-              <Highlight icon={<DeployTokenIcon />} text="Deploy" />
-              <Highlight icon={<TokensIcon />} text="Tokens" />
-            </div>
-          </section>
-
-          {/* Proactive Tips (when connected) - right after onboarding */}
-          <section className="mb-20 md:mb-24 max-w-2xl mx-auto fade-in delay-350">
-            <ProactiveTipsBanner />
-          </section>
-
-          {/* 3. Main product: Feature cards (Trade, Analytics, Deploy) */}
           <section className="space-y-10 mb-20 md:mb-24 fade-in delay-400">
             <div className="text-center max-w-xl mx-auto">
               <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>What you can do</h2>
-              <p className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>
-                Trade, bridge, or launch — start with Swap or Project pack.
-              </p>
             </div>
-            {/* First row - 6 cards in 3 columns - dynamically generated from navigation */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[...memoizedNav.trading, ...memoizedNav.deployment].map((item) => {
-                const isComingSoon = Boolean(item.comingSoon);
-                const isAvailable = Boolean(item.isAvailable);
-                const shouldShowComingSoon = isComingSoon || !isAvailable;
-                const CardContent = (
+              {navigation.trading.map((item) => (
+                <a key={item.name} href={item.href} className="block h-full">
                   <TradeDeployEntryCard
                     title={item.name}
                     icon={<NavIcon icon={item.icon} size={22} />}
                     description={item.description || ''}
-                    comingSoon={shouldShowComingSoon}
+                    comingSoon={!item.isAvailable || item.comingSoon}
                   />
-                );
-                return shouldShowComingSoon ? (
-                  <div key={item.name}>{CardContent}</div>
-                ) : (
-                  <a key={item.name} href={item.href} className="block h-full">{CardContent}</a>
-                );
-              })}
-              {memoizedNav.analytics.map((item) => {
-                const isComingSoon = Boolean(item.comingSoon);
-                const isAvailable = Boolean(item.isAvailable);
-                const shouldShowComingSoon = isComingSoon || !isAvailable;
-                const getIcon = () => {
-                  if (item.name === 'Analytics' || item.name === 'Intelligence') return <AnalyticsIcon />;
-                  if (item.name === 'Portfolio') return <PortfolioIcon />;
-                  if (item.name === 'Activity' || item.name === 'Wallet Flow') return <ActivityIcon />;
-                  return <NavIcon icon={item.icon} size={22} />;
-                };
-                const CardContent = (
-                  <FeatureCard title={item.name} icon={getIcon()} description={item.description || ''} comingSoon={shouldShowComingSoon} />
-                );
-                return shouldShowComingSoon ? (
-                  <div key={item.name}>{CardContent}</div>
-                ) : (
-                  <a key={item.name} href={item.href} className="block">{CardContent}</a>
-                );
-              })}
+                </a>
+              ))}
             </div>
-
-            {/* 4. Governance & BOING */}
-            <section className="mt-20 md:mt-28">
-              <h2 className="text-2xl font-bold text-center mb-8" style={{ color: 'var(--text-primary)' }}>Governance & Ecosystem</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2">
-                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Governance</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {memoizedNav.governance.slice(0, 4).map((item) => (
-                    <a key={item.name} href={item.href} className="block">
-                      <FeatureCard title={item.name} icon={<NavIcon icon={item.icon} size={22} />} description={item.description || ''} />
-                    </a>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>BOING Ecosystem</h3>
-                <div className="space-y-4">
-                  {memoizedNav.boing.map((item) => (
-                    <a key={item.name} href={item.href} className="block">
-                      <FeatureCard title={item.name} icon={<NavIcon icon={item.icon} size={22} />} description={item.description || ''} />
-                    </a>
-                  ))}
-                </div>
-              </div>
-            </div>
-            </section>
-
-            {/* 5. Tools & Resources */}
-            <section className="mt-20 md:mt-28">
-              <h2 className="text-2xl font-bold text-center mb-6" style={{ color: 'var(--text-primary)' }}>Tools & Resources</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
-                <a href="/docs" className="block h-full">
-                  <FeatureCard title="Documentation" description="Guides for swap, pools, bridge, and deploy" />
-                </a>
-                <a href="/developer-tools" className="block h-full">
-                  <FeatureCard title="Developer Tools" description="Builder utilities — not required for Swap" />
-                </a>
-                <a href="/watchlist" className="block h-full">
-                  <FeatureCard title="Watchlist" description="Track tokens you care about" />
-                </a>
-                <a href="/help-center" className="block h-full">
-                  <FeatureCard title="Help Center" description="FAQs and Ask AI" />
-                </a>
-              </div>
-            </section>
           </section>
 
-          </div>
-
-          {/* 6. Creator CTA — single primary path */}
-          <div className="mt-24 md:mt-32 mb-10 flex justify-center fade-in delay-800">
-            <div
-              className="rounded-xl px-6 py-5 border max-w-2xl w-full"
-              style={{
-                background: 'linear-gradient(135deg, rgba(59, 140, 255,0.08), rgba(52, 211, 153,0.06))',
-                borderColor: 'rgba(59, 140, 255,0.28)',
-              }}
-            >
-              <div className="text-center">
-                <div className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-                  Launch a project
-                </div>
-                <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-                  Create an NFT collection and a token together, connect them, then add a pool when you&apos;re ready.
-                </p>
-                <a href="/project-pack" className="btn btn-primary inline-flex items-center gap-2">
-                  Open Project pack
-                </a>
-                <p className="text-xs mt-3" style={{ color: 'var(--text-tertiary)' }}>
-                  Or{' '}
-                  <a href="/deploy-token" className="underline" style={{ color: 'var(--finance-primary)' }}>
-                    deploy a token only
-                  </a>
-                </p>
-              </div>
+          <section className="mt-20 md:mt-28">
+            <h2 className="text-2xl font-bold text-center mb-6" style={{ color: 'var(--text-primary)' }}>Resources</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-stretch">
+              <a href="/docs" className="block h-full">
+                <FeatureCard title="Documentation" description="Guides for swap, pools, liquidity and bridge" />
+              </a>
+              <a href="/help-center" className="block h-full">
+                <FeatureCard title="Help Center" description="Answers to common questions" />
+              </a>
+              <a href="/status" className="block h-full">
+                <FeatureCard title="Status" description="Boing testnet and API health" />
+              </a>
             </div>
-          </div>
+          </section>
+        </div>
       </div>
     </>
-  );
-}
-
-
-function Highlight({ icon, text }) {
-  return (
-    <div className="group relative flex items-center space-x-2 px-4 py-2 rounded-lg border border-border hover:border-border-hover transition-all duration-300 hover:scale-105 hover:shadow-lg" style={{ background: 'linear-gradient(to right, var(--secondary-bg), var(--accent-cyan-bg))', boxShadow: '0 0 16px var(--glow-cyan)' }}>
-      <span className="text-xl transition-colors duration-300 animate-pulse group-hover:text-secondary" style={{ color: 'var(--accent-teal)' }}>{icon}</span>
-      <span className="text-sm font-medium transition-colors duration-300" style={{ 
-        color: 'var(--text-secondary)'
-      }} onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}>{text}</span>
-      <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'linear-gradient(to right, var(--secondary-bg), var(--accent-cyan-bg))' }}></div>
-    </div>
-  );
-}
-
-
-
-// Animated SVG Feature Icons
-function SwapIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
-      <defs>
-        <linearGradient id="swapGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="var(--accent-teal)" />
-          <stop offset="50%" stopColor="var(--accent-teal)" />
-          <stop offset="100%" stopColor="var(--accent-cyan)" />
-        </linearGradient>
-      </defs>
-      <path fill="url(#swapGradient)" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" stroke="url(#swapGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function LiquidityIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
-      <defs>
-        <linearGradient id="liquidityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="var(--accent-teal)" />
-          <stop offset="50%" stopColor="var(--accent-teal)" />
-          <stop offset="100%" stopColor="var(--accent-cyan)" />
-        </linearGradient>
-      </defs>
-      <path fill="url(#liquidityGradient)" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" stroke="url(#liquidityGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function AnalyticsIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
-      <defs>
-        <linearGradient id="analyticsGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="var(--accent-teal)" />
-          <stop offset="50%" stopColor="var(--accent-teal)" />
-          <stop offset="100%" stopColor="var(--accent-cyan)" />
-        </linearGradient>
-      </defs>
-      <path fill="url(#analyticsGradient)" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke="url(#analyticsGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function PortfolioIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
-      <defs>
-        <linearGradient id="portfolioGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="var(--accent-teal)" />
-          <stop offset="50%" stopColor="var(--accent-teal)" />
-          <stop offset="100%" stopColor="var(--accent-cyan)" />
-        </linearGradient>
-      </defs>
-      <path fill="url(#portfolioGradient)" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke="url(#portfolioGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function ActivityIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
-      <defs>
-        <linearGradient id="activityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="var(--accent-teal)" />
-          <stop offset="50%" stopColor="var(--accent-teal)" />
-          <stop offset="100%" stopColor="var(--accent-cyan)" />
-        </linearGradient>
-      </defs>
-      <path fill="url(#activityGradient)" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" stroke="url(#activityGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function BridgeIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
-      <defs>
-        <linearGradient id="bridgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="var(--accent-teal)" />
-          <stop offset="50%" stopColor="var(--accent-teal)" />
-          <stop offset="100%" stopColor="var(--accent-cyan)" />
-        </linearGradient>
-      </defs>
-      <path fill="url(#bridgeGradient)" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke="url(#bridgeGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function TokensIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
-      <defs>
-        <linearGradient id="tokensGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="var(--accent-teal)" />
-          <stop offset="50%" stopColor="var(--accent-teal)" />
-          <stop offset="100%" stopColor="var(--accent-cyan)" />
-        </linearGradient>
-      </defs>
-      <path fill="url(#tokensGradient)" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" stroke="url(#tokensGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function DeployTokenIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-lg">
-      <defs>
-        <linearGradient id="deployGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="var(--accent-teal)" />
-          <stop offset="50%" stopColor="var(--accent-teal)" />
-          <stop offset="100%" stopColor="var(--accent-cyan)" />
-        </linearGradient>
-      </defs>
-      <path fill="url(#deployGradient)" d="M12 6v6m0 0v6m0-6h6m-6 0H6" stroke="url(#deployGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
   );
 }
 

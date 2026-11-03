@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import AIChatModal from '../components/AIChatModal';
 import EmptyState from '../components/EmptyState';
 
 const HelpCenter = () => {
   const [activeCategory, setActiveCategory] = useState('getting-started');
   const [searchQuery, setSearchQuery] = useState('');
-  const [aiChatOpen, setAiChatOpen] = useState(false);
 
   const helpCategories = [
     {
@@ -82,34 +80,6 @@ const HelpCenter = () => {
           title: 'Bridge safety',
           content: 'You send from your wallet through a third-party route. Boing does not hold bridge funds.',
           tags: ['security', 'safety', 'best-practices']
-        }
-      ]
-    },
-    {
-      id: 'launch',
-      title: 'Launch',
-      icon: null,
-      articles: [
-        {
-          id: 'project-pack',
-          title: 'Project pack',
-          content:
-            'Create an NFT collection and a token, then connect them as one project. Start at Project pack. Manage existing pairs under Manage links.',
-          tags: ['nft', 'token', 'companions', 'project pack', 'linked', 'boing']
-        },
-        {
-          id: 'linked-project',
-          title: 'Manage links',
-          content:
-            'Connect or disconnect a collection and token you already created. Prefer Project pack to create both together.',
-          tags: ['nft', 'token', 'linked', 'companions', 'claim', 'boing']
-        },
-        {
-          id: 'builder-attestation',
-          title: "Show you're the builder",
-          content:
-            'Optional: after linking, mark yourself as the builder from Project pack success or Manage links.',
-          tags: ['builder', 'attestation', 'companions', 'project', 'on-chain', 'boing']
         }
       ]
     },
@@ -241,13 +211,6 @@ const HelpCenter = () => {
             </div>
 
             <div className="flex flex-wrap justify-center items-center gap-4 mb-8">
-              <button
-                type="button"
-                onClick={() => setAiChatOpen(true)}
-                className="px-4 py-2 rounded-lg font-medium bg-cyan-600 hover:bg-cyan-500 text-white"
-              >
-                Ask AI assistant
-              </button>
               <a href="mailto:support@boing.finance" className="text-sm underline" style={{ color: 'var(--finance-primary)' }}>
                 Email support
               </a>
@@ -259,17 +222,6 @@ const HelpCenter = () => {
               </a>
             </div>
 
-            <AIChatModal
-              isOpen={aiChatOpen}
-              onClose={() => setAiChatOpen(false)}
-              context={{
-                page: 'help-center',
-                helpCategories: helpCategories.map(c => ({
-                  title: c.title,
-                  articles: c.articles.map(a => ({ title: a.title, content: a.content, tags: a.tags }))
-                }))
-              }}
-            />
 
             {/* Search Results or Category Content */}
             {searchQuery ? (
