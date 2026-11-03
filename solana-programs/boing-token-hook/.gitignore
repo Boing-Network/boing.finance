@@ -1,7 +1,0 @@
-.anchor
-target/**
-!target/deploy/
-target/deploy/*
-test-ledger
-node_modules
-.DS_Store
