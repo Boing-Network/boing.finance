@@ -22,6 +22,6 @@ An earlier version of this page described a "boing.finance" token on Ethereum ma
 
 Boing Finance is a cross-chain interface that can show and route BOING on Boing L1 through [Boing Express](https://boing.express). It does not create, sell or govern the L1 token. See [native-dex.md](./native-dex.md) for what the app does on Boing L1.
 
-## EVM tokens named "BOING"
+## Tokens on other chains named "BOING"
 
-[contract-registry.md](./contract-registry.md) lists tokens deployed through this app's EVM `TokenFactory`. Anyone can deploy a token with any name or symbol, so an ERC-20 called "BOING" is not the Boing Network L1 token. The app's own governance and staking contracts are **not deployed** (see [contracts.md](./contracts.md)).
+Anyone can deploy a token with any name or symbol on another chain, so an ERC-20 or SPL token called "BOING" is not the Boing Network L1 token. Boing Finance has no governance or staking contracts.
