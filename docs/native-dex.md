@@ -1,22 +1,18 @@
 # Native DEX on Boing L1
 
 > 👋 **Everyday users:** on Boing L1, swap with [Boing Express](https://boing.express). The Swap tab uses the network default constant-product pool when the RPC publishes one.  
-> 🛠️ **Developers:** Solidity in `contracts/` is **EVM only**. Boing L1 uses Boing VM bytecode + `@boing-network/boing-sdk`.  
+> 🛠️ **Developers:** Boing L1 uses Boing VM bytecode + `@boing-network/boing-sdk`. This repo no longer has any Solidity.  
 > 🛰️ **Operators:** publish `end_user.canonical_native_*` on the node. Do not bake historical SDK hexes as live.
 
 How **boing.finance** treats **Boing Network L1** (chain id **6913**, Boing VM) versus **EVM** chains, what is shipped, and what still belongs to the network team.
 
 **Discovery RPCs, operator handoff, and client wiring:** [native-dex-discovery.md](./native-dex-discovery.md).  
 **Canonical env catalog:** `frontend/.env.example`.  
-**Live EVM addresses:** `frontend/src/config/contracts.js` (see [contracts.md](./contracts.md)).
 
 *Last reviewed: November 2026.*
 
 ```mermaid
 flowchart LR
-  subgraph evm [EVM]
-    Sol[contracts/ Solidity] --> Eth[ethers + MetaMask]
-  end
   subgraph boing [Boing L1]
     VM[Boing VM programs] --> SDK["@boing-network/boing-sdk"]
     SDK --> Express[Boing Express]
@@ -29,11 +25,11 @@ flowchart LR
 
 ## 1. What runs where
 
-There is **no compiler switch** that turns the Solidity tree in `contracts/` into Boing VM bytecode. Boing L1 does **not** run EVM opcodes for application contracts.
+There is **no compiler switch** that turns Solidity into Boing VM bytecode. (The old EVM `contracts/` tree was removed from this repo in November 2026.) Boing L1 does **not** run EVM opcodes for application contracts.
 
 | Stack | Technology | Used on Boing L1 today? |
 |--------|------------|-------------------------|
-| **DEXFactoryV2, DEXRouter, LiquidityLocker, DEXPair** in `contracts/` | Solidity → EVM bytecode | **No.** Targets Ethereum-style VMs (Hardhat, Sepolia). |
+| **DEXFactoryV2, DEXRouter, LiquidityLocker, DEXPair** (removed EVM tree) | Solidity → EVM bytecode | **No.** Removed; the app trades only on Boing. |
 | **Native constant-product AMM** | Built-in Boing execution + `ContractCall` calldata | **Yes** — swap / add liquidity in-app when a pool id is published (`REACT_APP_BOING_NATIVE_AMM_POOL` or live `end_user.canonical_native_cp_pool`). Hosted Fly testnet publishes a canonical pool (verified 2026-11-01); always prefer the live RPC snapshot. |
 | **Factory / many pairs / router / locker on L1** | Boing VM programs (new bytecode), not `.sol` artifacts | **Partial.** Module ids come from live RPC `end_user` hints or env; do not bake historical SDK hexes. Full Uniswap-class factory UX still depends on protocol + a published factory. |
 
@@ -76,7 +72,7 @@ Account URLs: `https://boing.observer/account/{accountHex}` via `frontend/src/co
 | Deploy unit | `solc` bytecode | **Boing VM bytecode** (templates in **@boing-network/boing-sdk** / env overrides) |
 | Address | 20-byte `0x…` | **32-byte `AccountId`** (`0x` + 64 hex) |
 | How dApps deploy | `ethers.ContractFactory` / MetaMask | **Boing Express** + `contract_deploy_meta` (+ QA) |
-| Solidity in `contracts/` | Deployed here | **Reference / EVM only** |
+| Solidity | Deployed here | **Not used** (removed from this repo) |
 
 ---
 

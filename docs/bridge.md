@@ -1,10 +1,16 @@
-# Bridge (LI.FI aggregator MVP)
+# Bridge
+
+**Today:** the [Bridge](https://boing.finance/bridge) page routes transfers between other chains through **LI.FI** (below). Boing L1 (6913) is not a LI.FI network, so you cannot bridge to or from Boing yet.
+
+**Planned:** a native **Boing ↔ Base** bridge, signed by Boing validators with a 2/3 threshold. See [Native Boing ↔ Base bridge (planned)](#native-boing--base-bridge-planned).
+
+## LI.FI (other chains, live)
 
 > 👋 **Everyday users:** [Bridge](https://boing.finance/bridge) moves tokens between every **LI.FI** network (EVM, Solana, Bitcoin, Sui, Tron). Boing does **not** hold bridge inventory.  
 > 🛠️ **Developers:** chains/tokens/status come straight from `https://li.quest/v1`; quotes go through `GET /api/aggregator/lifi/quote`.  
 > 🛰️ **Operators:** register integrator `boing.finance` on [LI.FI Partner Portal](https://portal.li.fi/) and set the fee wallet.
 
-*Last reviewed: October 2026.*
+*Last reviewed: November 2026.*
 
 ## What shipped
 
@@ -39,7 +45,7 @@ So quotes go through the Worker (key server-side, never in the browser) and fall
 
 LI.FI takes the integrator cut from the **sending** token and pays the wallet configured for this integrator in the Partner Portal (FeeForwarder on supported chains). Passing `fee` without portal registration may still quote, but **payouts will not land in Nico’s wallet**.
 
-Same-chain Swap quotes are unchanged (no extra 0.5% there).
+The Swap page trades only on Boing native pools and does not use LI.FI.
 
 ## What Nico must set
 
@@ -64,10 +70,17 @@ printf '%s' "$LIFI_FEE_RECIPIENT_BTC" | wrangler secret put LIFI_FEE_RECIPIENT_B
 ## API
 
 - `GET /api/aggregator/lifi/quote?fromChain=&toChain=&fromToken=&toToken=&fromAmount=&fromAddress=[&toAddress=&slippage=&order=]` — any LI.FI chain id or key; returns `{ success: true, data: <LI.FI step> }` or `{ success: false, lifi: true, status, error: <LI.FI error body> }`
-- `GET /api/aggregator/quote?chain=<fromChain>&toChain=<toChain>&fromToken=&toToken=&fromAmount=&fromAddress=` — EVM-only summary (Swap page)
 - `GET /api/aggregator/bridge-config` — fee bps, recipient if configured
 - `GET /api/bridge/status` — aggregator mode, not a proprietary uptime probe
 
-## Native contract (not this MVP)
+## Native Boing ↔ Base bridge (planned)
 
-`contracts/contracts/CrossChainBridge.sol` remains Sepolia-only and unused by `/bridge`. Priority stays **Low** in [contracts.md](./contracts.md).
+Not built yet. The outline:
+
+- **Base first.** Other EVM chains come later, if at all.
+- **Validator attestation.** Every Boing validator signs bridge events; a transfer is final once validators holding at least **2/3** of the stake have signed. No separate relayer set or multisig.
+- **Boing side:** a native Rust module in the protocol, switched on at a set testnet block height. It locks or burns on Boing and releases or mints when a valid attestation arrives from Base.
+- **Base side:** a `BoingBridgeVault` contract, first on **Base Sepolia**, that checks the validator signatures before releasing funds.
+- The app will show the native route next to LI.FI on `/bridge`. LI.FI stays for other chains.
+
+The old Sepolia `CrossChainBridge.sol` and the `contracts/` folder have been removed from this repo.

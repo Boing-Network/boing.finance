@@ -29,16 +29,10 @@ Copy `frontend/.env.example` to `frontend/.env.local`. **Do not commit `.env.loc
 
 Native DEX / Boing RPC flags are documented in [native-dex.md](./native-dex.md) and [native-dex-discovery.md](./native-dex-discovery.md); they are listed in `.env.example`.
 
-Linked NFT↔token registry (Boing L1): `REACT_APP_BOING_LINKED_NFT_TOKEN_REGISTRY` — public testnet AccountId is baked in `frontend/env/github-build.production.env` / `github-build.staging.env`. Guided create: `/project-pack` (SDK `buildLinkedNftTokenProjectPack` when available). See [linked-nft-token.md](./linked-nft-token.md).
+## RPC
 
-Builder attestation registry (Boing L1): `REACT_APP_BOING_BUILDER_ATTESTATION_REGISTRY` — public testnet AccountId `0x734077a9f926077d39e84ec278b77b7b600c840f7101809646d8797a6a9e1816` (CREATE2 salt `BOING_BUILDER_ATTEST_REG_V1`, selectors `0xE0`–`0xE6`) is baked in the same `github-build.*.env` files. Optional **Attest as builder** after companions are linked; on-chain registry is authority (not soft wallet-proof JSON). See [linked-nft-token.md](./linked-nft-token.md#builder-attestation-on-chain).
-
-## NFT media / IPFS / RPC
-
-- **Boing L1 Create NFT (default):** Prefer L1 media blobs via Express PutBlob (`boing://blob/…`). Bulk one-approval needs **Express 0.1.22+** (`putBlobSession`). See [nft-onchain-vs-offchain.md](./nft-onchain-vs-offchain.md).
-- **R2/HTTP:** collection catalog JSON always; media fallback when Prefer L1 is off, PutBlob fails, or file exceeds wallet-safe size. Large-set budget: `REACT_APP_NFT_MEDIA_BUDGET_GB` (Worker multipart → R2).
-- IPFS keys (Pinata, Storacha, etc.) — optional alternate media path.
-- RPC URLs — optional; defaults live in `frontend/src/config/networks.js`.
+- Boing testnet RPC defaults live in the app; overrides are listed in `.env.example`.
+- The Bridge page's Solana wallet reads balances through the Worker's `/api/solana/rpc` proxy (`HELIUS_API_KEY` or `SOLANA_MAINNET_RPC` on the Worker).
 
 ## Security
 

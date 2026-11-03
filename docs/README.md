@@ -1,40 +1,27 @@
 # 📚 boing.finance — documentation index
 
-> 👋 **Everyday users:** the app is [boing.finance](https://boing.finance). Connect [Boing Express](https://boing.express) for Boing L1; other wallets for EVM/Solana.  
-> 🛠️ **Developers:** this folder is the engineering map. Canonical env: `frontend/.env.example`. Live EVM addresses: `frontend/src/config/contracts.js`.  
+> 👋 **Everyday users:** the app is [boing.finance](https://boing.finance), a DEX on Boing Network. Trade with [Boing Express](https://boing.express). The Bridge page also connects EVM and Solana wallets for LI.FI transfers between other chains.  
+> 🛠️ **Developers:** this folder is the engineering map. Canonical env: `frontend/.env.example`.  
 > 🛰️ **Operators:** `cd frontend && npm run smoke:boing-rpc` against public testnet.
 
 ```mermaid
 flowchart LR
   Index[docs/README] --> Native[native-dex.md]
   Index --> Discover[native-dex-discovery.md]
-  Index --> EVM[contracts.md]
   Index --> Bridge[bridge.md]
   Index --> Deploy[deployment.md]
   Native --> Protocol[boing.network DEX docs]
 ```
 
-Canonical **env vars:** `frontend/.env.example`. Canonical **EVM addresses:** `frontend/src/config/contracts.js`.
-
 | Doc | Description |
 |-----|-------------|
-| [native-dex.md](./native-dex.md) | Boing L1 vs EVM, VM deploy/Observer, roadmap, Uniswap-parity matrix, indexer |
-| [linked-nft-token.md](./linked-nft-token.md) | On-chain companions registry; Project pack (`/project-pack`) + Manage links (`/linked-project`); on-chain builder attestation (`REACT_APP_BOING_BUILDER_ATTESTATION_REGISTRY`) |
-| [nft-onchain-vs-offchain.md](./nft-onchain-vs-offchain.md) | Create NFT Deploy & mint: on-chain hashes vs off-chain catalog; Prefer L1 PutBlob default; Express 0.1.22+ session; R2 fallback |
+| [native-dex.md](./native-dex.md) | How the app uses the Boing VM AMM, roadmap, Uniswap-parity matrix, indexer |
 | [native-dex-discovery.md](./native-dex-discovery.md) | `boing_listDexTokens` / `boing_listDexPools` spec, client wiring, operator definition of done |
-| [contracts.md](./contracts.md) | TokenFactory / DEXFactory status and EVM DEX operator runbook |
-| [contract-registry.md](./contract-registry.md) | Historical addresses and verification links (mirror of `contracts.js`) |
-| [bridge.md](./bridge.md) | LI.FI aggregator Bridge MVP, 0.5% fee, operator portal steps |
-| [deployment.md](./deployment.md) | Cloudflare Workers/Pages, production checklist, cost plan |
+| [bridge.md](./bridge.md) | LI.FI bridge for other chains (live), 0.5% fee, and the planned native Boing ↔ Base bridge |
+| [deployment.md](./deployment.md) | Cloudflare Workers/Pages, D1 migrations |
 | [configuration.md](./configuration.md) | Production env + optional API keys |
-| [adding-a-network.md](./adding-a-network.md) | Add a chain in `networks.js` + `contracts.js` |
-| [integration.md](./integration.md) | Network prioritization, capability matrix, swap market data |
-| [solana.md](./solana.md) | Solana wallet, SPL deploy, Jupiter |
-| [product-roadmap.md](./product-roadmap.md) | Product ideas backlog (not an engineering spec) |
 | [boing-tokenomics.md](./boing-tokenomics.md) | Pointer to where BOING (Boing Network L1 token) economics are documented |
 | [../frontend/docs/DESIGN.md](../frontend/docs/DESIGN.md) | App visual system |
-| [../contracts/GOVERNANCE_CONTRACTS.md](../contracts/GOVERNANCE_CONTRACTS.md) | Governance deploy (undeployed) |
-| [../contracts/CONTRACTS_AUDIT.md](../contracts/CONTRACTS_AUDIT.md) | Internal contract review notes (not a third-party audit) |
 | [../scripts/README.md](../scripts/README.md) | Optional Python asset scripts |
 
 **Upstream (Boing Network):** [HANDOFF-DEPENDENT-PROJECTS.md](https://github.com/Boing-Network/boing.network/blob/main/docs/HANDOFF-DEPENDENT-PROJECTS.md) — Express, Observer, partner dApp backlog.
