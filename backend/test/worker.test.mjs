@@ -50,6 +50,7 @@ function createD1(sqlite) {
 function migratedEnv(extra = {}) {
   const sqlite = new DatabaseSync(':memory:');
   sqlite.exec(readFileSync(join(root, 'migrations', '0001_core_tables.sql'), 'utf8'));
+  sqlite.exec(readFileSync(join(root, 'migrations', '0002_drop_solana_deployments.sql'), 'utf8'));
   sqlite.exec(readFileSync(join(root, 'd1-portfolio-snapshots.sql'), 'utf8'));
   return { DB: createD1(sqlite), NODE_ENV: 'test', FRONTEND_URL: 'https://boing.finance', ...extra };
 }
@@ -85,22 +86,12 @@ test('POST then GET portfolio snapshot round-trips through D1', async () => {
   assert.equal(body.data[0].value, 123.45);
 });
 
-test('governance routes get the db', async () => {
+test('removed feature routes are gone', async () => {
   const env = migratedEnv();
-  for (const path of ['/api/governance/proposals', '/api/governance/treasury']) {
-    const { res, body } = await get(path, env);
-    assert.equal(res.status, 200, `${path}: ${JSON.stringify(body)}`);
-    assert.equal(body.success, true);
+  for (const path of ['/api/governance/proposals', `/api/boing/points/${ADDR}`, '/api/solana/deployments']) {
+    const { res } = await get(path, env);
+    assert.equal(res.status, 404, path);
   }
-});
-
-test('boing points routes get the db', async () => {
-  const env = migratedEnv();
-  const points = await get(`/api/boing/points/${ADDR}`, env);
-  assert.equal(points.res.status, 200, JSON.stringify(points.body));
-  assert.equal(points.body.data.points, 0);
-  const activity = await get('/api/boing/activity', env);
-  assert.equal(activity.res.status, 200, JSON.stringify(activity.body));
 });
 
 test('dex, public API and analytics route groups get the db', async () => {
@@ -126,15 +117,14 @@ test('DB-only route groups fail clearly when the DB binding is missing', async (
 
 test('global error handler logs route + real message but keeps the production body generic', async () => {
   const env = migratedEnv({ NODE_ENV: 'production' });
-  env.DB = {
-    prepare() { throw new Error('boom: secret-ish internal detail'); },
-  };
   const logged = [];
   const orig = console.error;
   console.error = (...args) => logged.push(args);
   try {
-    // /api/governance/proposals has no try/catch, so the error reaches app.onError
-    const { res, body } = await get('/api/governance/proposals', env);
+    // Reading the DB binding throws inside the global injectDb middleware (no try/catch),
+    // so the error reaches app.onError.
+    Object.defineProperty(env, 'DB', { get() { throw new Error('boom: secret-ish internal detail'); } });
+    const { res, body } = await get(`/api/portfolio/snapshots?address=${ADDR}`, env);
     assert.equal(res.status, 500);
     assert.equal(body.message, 'Internal server error');
     assert.ok(!JSON.stringify(body).includes('boom'), 'response must not leak the real error');
@@ -144,6 +134,6 @@ test('global error handler logs route + real message but keeps the production bo
   }
   const line = logged.map((a) => String(a[0])).find((m) => m.includes('[worker-error]'));
   assert.ok(line, 'error was logged server-side');
-  assert.match(line, /GET \/api\/governance\/proposals/);
+  assert.match(line, /GET \/api\/portfolio\/snapshots/);
   assert.match(line, /boom: secret-ish internal detail/);
 });
