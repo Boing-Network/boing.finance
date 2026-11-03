@@ -7,6 +7,7 @@ import { KNOWN_BOING_TOKENS } from '../services/boingSwapQuote';
 import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import NativeVmTokenPickerField from './NativeVmTokenPickerField';
+import { useTokenLabels } from '../hooks/useTokenLabels';
 import CompanionLinkGate from './CompanionLinkGate';
 import {
   computeEffectiveNativeDeployBytecode,
@@ -47,6 +48,9 @@ export default function NativeBoingCreatePoolPanel() {
 
   const [tokenA, setTokenA] = useState('');
   const [tokenB, setTokenB] = useState('');
+  const labelOf = useTokenLabels([tokenA, tokenB]);
+  const symA = tokenA && labelOf(tokenA.toLowerCase()).resolved ? labelOf(tokenA.toLowerCase()).symbol : 'Token A';
+  const symB = tokenB && labelOf(tokenB.toLowerCase()).resolved ? labelOf(tokenB.toLowerCase()).symbol : 'Token B';
   const [amountA, setAmountA] = useState('');
   const [amountB, setAmountB] = useState('');
   const [poolLabel, setPoolLabel] = useState('');
@@ -196,8 +200,8 @@ export default function NativeBoingCreatePoolPanel() {
         deploymentKind: 'Native liquidity pool',
         details: [
           { label: 'Pool', value: result.poolId },
-          { label: 'Token A', value: shortHex(tokenA) },
-          { label: 'Token B', value: shortHex(tokenB) },
+          { label: 'Token A', value: `${labelOf(tokenA.toLowerCase()).symbol} (${shortHex(tokenA)})` },
+          { label: 'Token B', value: `${labelOf(tokenB.toLowerCase()).symbol} (${shortHex(tokenB)})` },
           ...(result.registerSkipped ? [{ label: 'Factory', value: 'Not registered (see note)' }] : []),
         ],
         boingTxIdHex: result.boingTxIdHex,
@@ -266,7 +270,7 @@ export default function NativeBoingCreatePoolPanel() {
 
       <div className="grid gap-4 sm:grid-cols-2 mb-4" id="initial-liquidity">
         <label className="td-field">
-          <span className="td-field__label">Amount of Token A</span>
+          <span className="td-field__label">Amount of {symA}</span>
           <input
             type="text"
             inputMode="numeric"
@@ -281,7 +285,7 @@ export default function NativeBoingCreatePoolPanel() {
           </span>
         </label>
         <label className="td-field">
-          <span className="td-field__label">Amount of Token B</span>
+          <span className="td-field__label">Amount of {symB}</span>
           <input
             type="text"
             inputMode="numeric"

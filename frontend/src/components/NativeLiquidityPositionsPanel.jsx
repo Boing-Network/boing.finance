@@ -6,6 +6,8 @@ import { buildBoingExplorerAccountUrl } from '../config/boingExplorerUrls';
 import { NATIVE_AMM_TOTAL_LP_SUPPLY_KEY, parseNativeAmmReserveU128 } from '../services/nativeAmmCalldata';
 import { fetchNativeLpShareBalanceU128 } from '../services/boingNativeLpShareBalance';
 import { boingGetContractStorage, normalizeBoingFaucetAccountHex } from '../services/boingTestnetRpc';
+import { useTokenLabels } from '../hooks/useTokenLabels';
+import TokenLabel from './TokenLabel';
 
 function shortHex(h) {
   if (!h || typeof h !== 'string') return '—';
@@ -132,6 +134,9 @@ export default function NativeLiquidityPositionsPanel() {
     };
   }, [onBoing, poolRows]);
 
+  const venueByPool = useMemo(() => new Map((venues || []).map((v) => [String(v.poolHex || '').toLowerCase(), v])), [venues]);
+  const labelOf = useTokenLabels((venues || []).flatMap((v) => [v.tokenAHex, v.tokenBHex]));
+
   const shareMultiplicity = useMemo(() => {
     /** @type {Map<string, number>} */
     const m = new Map();
@@ -246,6 +251,13 @@ export default function NativeLiquidityPositionsPanel() {
                         >
                           {shortHex(row.poolHex)}
                         </a>
+                        {venueByPool.get(pid) ? (
+                          <span className="flex flex-wrap items-center gap-1 font-sans text-[11px]" data-testid="lp-position-pair">
+                            <TokenLabel label={labelOf(String(venueByPool.get(pid).tokenAHex).toLowerCase())} copy={false} />
+                            <span>/</span>
+                            <TokenLabel label={labelOf(String(venueByPool.get(pid).tokenBHex).toLowerCase())} copy={false} />
+                          </span>
+                        ) : null}
                         {row.label ? (
                           <span className="block text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
                             {row.label}

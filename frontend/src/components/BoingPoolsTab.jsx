@@ -73,7 +73,7 @@ function PoolCard({ card, onAdd, onSwap }) {
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-3">
           <BoingTokenPairIcons a={card.tokenA.symbol} b={card.tokenB.symbol} />
-          <span className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }} data-testid="pool-pair">
+          <span className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }} data-testid="pool-pair" title={`${card.tokenA.name || card.tokenA.symbol}: ${card.tokenA.id}\n${card.tokenB.name || card.tokenB.symbol}: ${card.tokenB.id}`}>
             {card.pairLabel}
           </span>
         </div>

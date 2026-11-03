@@ -4,6 +4,7 @@ import { getSharedBoingClient } from '../services/boingNativeDexClient';
 import { loadCustodyPools, loadCustodyTokenMetadata } from '../services/nativeDexCustodySwap';
 import { custodyTokenList, custodyTokensNeedingMetadata } from '../services/boingSwapQuote';
 import { poolCard } from '../services/boingPoolsSimple';
+import { shortTokenId } from '../services/boingTokenLabels';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 
 /**
@@ -57,7 +58,10 @@ export function useBoingPools(account) {
   }, [client, missingKey]);
 
   const tokens = useMemo(
-    () => custodyTokenList(pools || [], [...(indexerPickerTokens || []), ...extraMeta]),
+    () =>
+      custodyTokenList(pools || [], [...(indexerPickerTokens || []), ...extraMeta]).map((t) =>
+        t.symbol === 'Token' && t.name === 'Unlisted token' ? { ...t, symbol: shortTokenId(t.id), unlisted: true } : t
+      ),
     [pools, indexerPickerTokens, extraMeta]
   );
 

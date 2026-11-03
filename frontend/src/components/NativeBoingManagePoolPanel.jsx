@@ -18,6 +18,8 @@ import { boingExpressContractCallSignSimulateSubmit } from '../services/boingExp
 import { getWindowBoingProvider } from '../utils/boingWalletDiscovery';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
 import { normalizeNativeVmTokenId32 } from '../services/nativeVmTokenRegistry';
+import { useTokenLabels } from '../hooks/useTokenLabels';
+import TokenLabel from './TokenLabel';
 import { boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
 
 function pickExpressProvider(getWalletProvider) {
@@ -73,6 +75,9 @@ export default function NativeBoingManagePoolPanel() {
     if (!pool) return null;
     return venues.find((v) => (v.poolHex || '').toLowerCase() === pool) || null;
   }, [venues, pool]);
+
+  const labelOf = useTokenLabels(venues.flatMap((v) => [v.tokenAHex, v.tokenBHex]));
+  const symOf = (h) => labelOf((h || '').toLowerCase()).symbol;
 
   const loadReserves = useCallback(async () => {
     if (!pool) return;
@@ -195,7 +200,7 @@ export default function NativeBoingManagePoolPanel() {
             <option value="">Select a pool…</option>
             {venues.map((v) => (
               <option key={v.poolHex} value={v.poolHex}>
-                {shortHex(v.poolHex)} · {shortHex(v.tokenAHex)}/{shortHex(v.tokenBHex)}
+                {symOf(v.tokenAHex)} / {symOf(v.tokenBHex)} · pool {shortHex(v.poolHex)}
               </option>
             ))}
           </select>
@@ -214,6 +219,13 @@ export default function NativeBoingManagePoolPanel() {
         />
       </label>
 
+      {venue ? (
+        <p className="text-sm mb-2 flex flex-wrap items-center gap-2" style={{ color: 'var(--text-primary)' }} data-testid="manage-pool-pair">
+          <TokenLabel label={labelOf(String(venue.tokenAHex).toLowerCase())} showName />
+          <span>/</span>
+          <TokenLabel label={labelOf(String(venue.tokenBHex).toLowerCase())} showName />
+        </p>
+      ) : null}
       {loadError && (
         <p className="text-xs mb-2" style={{ color: '#f87171' }}>
           {loadError}
@@ -221,7 +233,7 @@ export default function NativeBoingManagePoolPanel() {
       )}
       {reserveA != null && reserveB != null && (
         <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
-          Reserves: {reserveA.toString()} / {reserveB.toString()}
+          Reserves: {reserveA.toString()} {venue ? symOf(venue.tokenAHex) : 'A'} / {reserveB.toString()} {venue ? symOf(venue.tokenBHex) : 'B'}
           {explorerBaseUrl && pool ? (
             <>
               {' '}
@@ -236,7 +248,7 @@ export default function NativeBoingManagePoolPanel() {
 
       <div className="grid gap-3 sm:grid-cols-2 mb-3">
         <label className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-          Add reserve A (integer)
+          Add {venue ? symOf(venue.tokenAHex) : 'reserve A'} (integer)
           <input
             className={`${fieldClass} mt-1`}
             style={fieldStyle}
@@ -245,7 +257,7 @@ export default function NativeBoingManagePoolPanel() {
           />
         </label>
         <label className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-          Add reserve B (integer)
+          Add {venue ? symOf(venue.tokenBHex) : 'reserve B'} (integer)
           <input
             className={`${fieldClass} mt-1`}
             style={fieldStyle}

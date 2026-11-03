@@ -10,6 +10,8 @@ import {
   saveCustomNativeVmToken,
   venueTokensToPickerEntries,
 } from '../services/nativeVmTokenRegistry';
+import { useTokenLabels } from '../hooks/useTokenLabels';
+import TokenLabel from './TokenLabel';
 
 function shortHex(h) {
   if (!h || typeof h !== 'string') return '';
@@ -52,6 +54,11 @@ export default function NativeVmTokenPickerField({
   const fromIndexer = useMemo(() => (Array.isArray(indexerTokens) ? indexerTokens : []), [indexerTokens]);
 
   const listRefreshNonce = customVersion + recentVersion;
+  const labelIds = useMemo(() => {
+    void listRefreshNonce;
+    return [value, ...loadRecentNativeVmTokens(), ...fromIndexer.map((e) => e?.id)];
+  }, [value, fromIndexer, listRefreshNonce]);
+  const labelOf = useTokenLabels(labelIds);
   const allPickable = useMemo(() => {
     void listRefreshNonce;
     const custom = loadCustomNativeVmTokens();
@@ -92,8 +99,14 @@ export default function NativeVmTokenPickerField({
         byId.set(id, { id, symbol: shortHex(id), name: 'Recently used' });
       }
     }
-    return [...byId.values()].sort((a, b) => a.symbol.localeCompare(b.symbol));
-  }, [curated, fromVenues, fromIndexer, excludeNorm, listRefreshNonce]);
+    // Replace hex placeholders with on-chain / cached names where we have them.
+    const rows = [...byId.values()].map((e) => {
+      if (e.symbol && !e.symbol.startsWith('0x')) return e;
+      const l = labelOf(e.id);
+      return l.resolved ? { ...e, symbol: l.symbol, name: l.name || e.name } : e;
+    });
+    return rows.sort((a, b) => a.symbol.localeCompare(b.symbol));
+  }, [curated, fromVenues, fromIndexer, excludeNorm, listRefreshNonce, labelOf]);
 
   const normalizedValue = useMemo(() => normalizeNativeVmTokenId32(value), [value]);
   const valueInList = useMemo(
@@ -178,6 +191,11 @@ export default function NativeVmTokenPickerField({
           spellCheck={false}
         />
       </div>
+      {normalizedValue ? (
+        <div className="mt-1.5 text-xs" style={{ color: 'var(--text-primary)' }} data-testid={inputTestId ? `${inputTestId}-label` : undefined}>
+          <TokenLabel label={labelOf(normalizedValue)} showName />
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-center gap-2 mt-1.5">
         <button
           type="button"
