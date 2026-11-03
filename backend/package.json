@@ -8,10 +8,10 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "deploy:prod": "wrangler deploy --env production",
-    "db:generate": "drizzle-kit generate:sqlite",
+    "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
-    "db:push": "drizzle-kit push:sqlite --driver=better-sqlite --schema=./src/database/schema.js --url=./data/dex.db",
+    "db:push": "drizzle-kit push",
     "d1:generate": "node apply-d1-migration.js",
     "test": "node --test test/worker.test.mjs",
     "test:db": "node check-db.js"
@@ -20,11 +20,11 @@
     "@cloudflare/workers-types": "^5.20261007.1",
     "better-sqlite3": "^9.2.2",
     "dotenv": "^17.0.0",
-    "drizzle-orm": "^0.29.3",
+    "drizzle-orm": "^0.45.4",
     "hono": "^4.13.13"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.20.9",
+    "drizzle-kit": "^0.31.11",
     "wrangler": "^4.154.0"
   },
   "engines": {
@@ -44,5 +44,10 @@
     "hono"
   ],
   "author": "Boing Network",
-  "license": "MIT"
+  "license": "MIT",
+  "overrides": {
+    "@esbuild-kit/core-utils": {
+      "esbuild": "^0.25.12"
+    }
+  }
 }

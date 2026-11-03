@@ -3,7 +3,7 @@ const { defineConfig } = require('drizzle-kit');
 module.exports = defineConfig({
   schema: './src/database/schema.js',
   out: './drizzle',
-  dialect: 'better-sqlite',
+  dialect: 'sqlite',
   dbCredentials: {
     url: './data/dex.db'
   },
