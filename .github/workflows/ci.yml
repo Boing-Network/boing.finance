@@ -120,7 +120,7 @@ jobs:
 
   e2e-frontend:
     name: Playwright (native AMM smoke)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # Playwright chromium does not support ubuntu 26.04 yet
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
