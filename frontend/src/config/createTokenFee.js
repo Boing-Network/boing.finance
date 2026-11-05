@@ -126,5 +126,5 @@ export function createTokenFeeNoticeText(plan) {
   if (p.feeAmount <= 0n) {
     return `Platform fee: ${rateNote}. Supply is too small for a whole-unit fee cut.`;
   }
-  return `Platform fee: ${rateNote} → ${p.feeAmount.toString()} tokens to the platform treasury after create (separate Express approval).`;
+  return `Platform fee: ${rateNote} → ${p.feeAmount.toString()} tokens credited to the platform treasury in the same deploy approval (no second Express prompt).`;
 }

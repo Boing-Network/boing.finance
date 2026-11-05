@@ -577,7 +577,11 @@ export default function NativeBoingCreatePoolPanel() {
           style={{ borderColor: 'var(--border-color)' }}
           data-testid="create-pool-success"
         >
-          <p style={{ color: 'var(--text-primary)' }}>Pool created. It now shows in the swap token list and on Pools.</p>
+          <p style={{ color: 'var(--text-primary)' }}>
+            {lastResult.registerSkipped
+              ? 'Pool created on-chain. Pair listing was skipped — it may not appear in Swap / Pools until an operator registers it.'
+              : 'Pool created. It now shows in the swap token list and on Pools.'}
+          </p>
           <div className="mt-2 flex flex-wrap gap-2">
             <Link
               className="td-btn td-btn--primary"
