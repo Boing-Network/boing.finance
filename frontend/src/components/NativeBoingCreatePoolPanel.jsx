@@ -697,7 +697,7 @@ export default function NativeBoingCreatePoolPanel() {
                   <li>4. Register pair — skipped (pool still exists)</li>
                 ) : null}
               </>
-            )}
+            ) : null}
           </ul>
         </div>
       )}
