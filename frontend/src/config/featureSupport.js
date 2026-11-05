@@ -168,9 +168,9 @@ export function getBoingL1FullDexReadiness(chainId, options) {
     {
       id: 'token_deploy',
       label: 'Deploy fungible tokens',
-      status: fs.deployToken ? 'partial' : 'planned',
+      status: fs.deployToken ? 'live' : 'planned',
       detail: fs.deployToken
-        ? 'Boing VM deploy + Boing Express; bytecode must match the node you use (QA).'
+        ? 'Create Token (/create-token): Boing token v2 via Express (Standard + Large set CSV).'
         : 'Not enabled for this chain in app config.',
     },
     {

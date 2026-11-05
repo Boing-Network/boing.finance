@@ -57,6 +57,7 @@ const Portfolio = lazy(() => import('./pages/Portfolio'));
 const Staking = lazy(() => import('./pages/Staking'));
 const Bridge = lazy(() => import('./pages/Bridge'));
 const CreatePool = lazy(() => import('./pages/CreatePool'));
+const CreateToken = lazy(() => import('./pages/CreateToken'));
 const Status = lazy(() => import('./pages/Status'));
 const Docs = lazy(() => import('./pages/Docs'));
 const HelpCenter = lazy(() => import('./pages/HelpCenter'));
@@ -76,7 +77,7 @@ const REMOVED_ROUTE_REDIRECTS = [
   ['/tokens', '/pools'],
   ['/watchlist', '/pools'],
   ['/activity', '/portfolio'],
-  ['/deploy-token', '/'],
+  ['/deploy-token', '/create-token'],
   ['/create-nft', '/'],
   ['/project-pack', '/'],
   ['/linked-project', '/'],
@@ -244,6 +245,7 @@ function PageTransitionRoutes() {
         <Route path="/liquidity" element={<LiquidityRedirect />} />
         <Route path="/liquidity/*" element={<LiquidityRedirect />} />
         <Route path="/create-pool" element={<CreatePool />} />
+        <Route path="/create-token" element={<CreateToken />} />
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/staking" element={<Staking />} />
         <Route path="/bridge" element={<Bridge />} />

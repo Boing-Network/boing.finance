@@ -88,6 +88,10 @@ function Overview() {
           <To to="/pools?tab=liquidity">Your liquidity</To>, or start a new pair with <To to="/create-pool">Create pool</To>.
         </li>
         <li>
+          <B>Launch:</B> <To to="/create-token">Create Token</To> publishes a Boing fungible (Standard one-token or Large
+          set CSV), then create a pool to make it swappable.
+        </li>
+        <li>
           <B>Track:</B> <To to="/portfolio">Portfolio</To> shows your BOING, token balances and liquidity positions valued
           in BOING from the pools. <To to="/staking">Staking</To> shows network stake TVL and your bonded BOING.
         </li>
@@ -112,7 +116,7 @@ function GettingStarted() {
           Press <B>Connect Wallet</B> and choose <B>Boing Express</B>.
         </li>
         <li>Get test tokens from the faucet on <Ext href={NETWORK}>boing.network</Ext> if you need some.</li>
-        <li>Open Swap, Pools, Liquidity, Create pool, Portfolio or Bridge from the header.</li>
+        <li>Open Swap, Pools, Create pool, Create Token, Portfolio, Staking or Bridge from the header.</li>
       </OL>
       <H3>Boing Express</H3>
       <P>
@@ -306,6 +310,11 @@ function Liquidity() {
           <To to="/create-pool">Create pool</To> starts a new pool: pick two tokens and make the first deposit, which sets
           the starting price. The pool is registered on the DEX factory, so it shows on Pools and its tokens show in the
           swap list right away.
+        </li>
+        <li>
+          <To to="/create-token">Create Token</To> deploys a Boing token v2 (whole units, fixed supply at create). Use{' '}
+          <B>Standard</B> for one token or <B>Large set</B> for a CSV of up to 50. After create, open Create pool with the
+          new token to seed liquidity.
         </li>
       </UL>
     </>
@@ -525,7 +534,8 @@ export const LEGACY_SECTION_IDS = Object.freeze({
   technical: 'boing-l1',
   api: 'boing-l1',
   developers: 'boing-l1',
-  'deploy-token': 'overview',
+  'deploy-token': 'liquidity',
+  'create-token': 'liquidity',
   'create-nft': 'overview',
   'publish-interface': 'overview',
   governance: 'overview',

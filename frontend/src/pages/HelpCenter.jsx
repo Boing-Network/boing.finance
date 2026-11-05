@@ -165,7 +165,7 @@ const HelpCenter = () => {
     <>
       <Helmet>
         <title>Help Center | boing.finance — Guides, FAQs & Support</title>
-        <meta name="description" content="Get help with boing.finance. Guides for swap, liquidity, bridge, linked NFT↔token pairs, deploy token, and wallet. FAQs and support." />
+        <meta name="description" content="Get help with boing.finance. Guides for swap, liquidity, create token, bridge, and wallet. FAQs and support." />
         <meta name="keywords" content="help center, support, FAQ, guides, boing.finance, DEX, linked project, NFT, troubleshooting" />
         <meta property="og:title" content="Help Center | boing.finance" />
         <meta property="og:description" content="Get help with boing.finance - Comprehensive guides and support resources." />
