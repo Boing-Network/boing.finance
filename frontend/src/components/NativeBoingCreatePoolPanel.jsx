@@ -30,6 +30,7 @@ import { showDeployCelebration } from '../utils/deployCelebration';
 import { buildBoingExplorerAccountUrl, buildBoingExplorerTxUrl } from '../config/boingExplorerUrls';
 import { isBoingNativeAccountIdHex } from '../utils/boingWalletDiscovery';
 import { normalizeNativeVmTokenId32 } from '../services/nativeVmTokenRegistry';
+import { isCreateAndSeedFactoryConfigured } from '../config/createAndSeedFactory';
 
 const DEFAULT_POOL_PURPOSE = 'dapp';
 
@@ -317,7 +318,9 @@ export default function NativeBoingCreatePoolPanel() {
       <h3 className="td-section-title mb-1">Create a pool</h3>
       <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
         Pick two tokens and deposit the first liquidity. That first deposit sets the starting price. Boing Express will
-        ask twice: deploy the pool, then one batch that binds tokens, seeds liquidity, and registers the pair.
+        {isCreateAndSeedFactoryConfigured()
+          ? ' ask once: create the pool, seed liquidity, and register the pair in a single batch.'
+          : ' ask twice: deploy the pool, then one batch that binds tokens, seeds liquidity, and registers the pair.'}
       </p>
 
       {projectGateActive ? (
@@ -603,7 +606,21 @@ export default function NativeBoingCreatePoolPanel() {
             </a>
           </p>
           <ul className="list-none space-y-0.5 pl-0 mb-0">
-            {lastResult.boingTxIdHex || lastResult.deployTxHash ? (
+            {lastResult.createAndSeedOneShot && lastResult.addLiquidityTxHash ? (
+              <li>
+                1. Create + seed
+                {lastResult.registerTxHash ? ' + register' : ''} —{' '}
+                <a
+                  className="text-cyan-400 underline"
+                  href={buildBoingExplorerTxUrl(explorerBaseUrl, lastResult.addLiquidityTxHash)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {shortHex(lastResult.addLiquidityTxHash)}
+                </a>
+                {lastResult.registerSkipped ? ' (pair listing skipped)' : ''}
+              </li>
+            ) : lastResult.boingTxIdHex || lastResult.deployTxHash ? (
               <li>
                 1. Deploy —{' '}
                 <a
@@ -616,7 +633,7 @@ export default function NativeBoingCreatePoolPanel() {
                 </a>
               </li>
             ) : null}
-            {lastResult.postDeployBatched && lastResult.addLiquidityTxHash ? (
+            {!lastResult.createAndSeedOneShot && lastResult.postDeployBatched && lastResult.addLiquidityTxHash ? (
               <li>
                 2. Bind + seed
                 {lastResult.registerTxHash ? ' + register' : ''} —{' '}
@@ -630,7 +647,7 @@ export default function NativeBoingCreatePoolPanel() {
                 </a>
                 {lastResult.registerSkipped ? ' (pair listing skipped)' : ''}
               </li>
-            ) : (
+            ) : !lastResult.createAndSeedOneShot ? (
               <>
                 {lastResult.setTokensTxHash ? (
                   <li>

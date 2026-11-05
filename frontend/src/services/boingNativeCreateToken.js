@@ -5,9 +5,9 @@
  * marks mint_first used, and (when configured) claims the token in the linked NFT↔token registry.
  *
  * Platform fee (percent of initial mint) is planned in {@link planCreateTokenPlatformFee}.
- * When a fee recipient is configured and feeAmount > 0, a follow-up reference-token transfer
- * collects the fee share (separate Express approval). Live builds use the committed treasury
- * AccountId (overridable via `REACT_APP_CREATE_TOKEN_FEE_RECIPIENT`).
+ * When a fee recipient is configured and feeAmount > 0, the fee is credited to the treasury
+ * inside the mint-at-deploy init (same Express approval as create). Live builds use the committed
+ * treasury AccountId (overridable via `REACT_APP_CREATE_TOKEN_FEE_RECIPIENT`).
  */
 import {
   bytesToHex,
@@ -203,6 +203,10 @@ export async function createBoingNativeToken({
       descriptionHashHex: input.descriptionHashHex,
       runtimeHexOverride: input.bytecodeHexOverride,
       claimRegistryHex,
+      // One-shot fee: mint treasury share in deploy init when collection is ready.
+      feeRecipientHex:
+        collectPlatformFee && platformFee.collectionReady ? platformFee.recipient : null,
+      feeAmount: collectPlatformFee && platformFee.collectionReady ? platformFee.feeAmount : 0n,
     });
   } catch (e) {
     return { ok: false, code: 'prepare_failed', message: e?.message || 'Could not prepare the deploy.', platformFee };
@@ -278,7 +282,17 @@ export async function createBoingNativeToken({
   });
 
   let feeCollection;
-  if (collectPlatformFee && platformFee.collectionReady) {
+  if (launch.feeMintedAtDeploy) {
+    feeCollection = {
+      ok: true,
+      skipped: false,
+      mintedAtDeploy: true,
+      feePlan: platformFee,
+      txHash,
+      boingTxIdHex,
+    };
+  } else if (collectPlatformFee && platformFee.collectionReady) {
+    // Legacy fallback if mint-at-deploy fee was not applied (e.g. custom runtime override).
     feeCollection = await collectCreateTokenPlatformFee({
       getWalletProvider,
       account: sender,
