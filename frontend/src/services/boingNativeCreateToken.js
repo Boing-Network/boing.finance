@@ -6,8 +6,8 @@
  *
  * Platform fee (percent of initial mint) is planned in {@link planCreateTokenPlatformFee}.
  * When a fee recipient is configured and feeAmount > 0, a follow-up reference-token transfer
- * collects the fee share (separate Express approval). Collection is skipped while the treasury
- * AccountId is unset — UI still shows the 0.5% fee; collection stays off.
+ * collects the fee share (separate Express approval). Live builds use the committed treasury
+ * AccountId (overridable via `REACT_APP_CREATE_TOKEN_FEE_RECIPIENT`).
  */
 import {
   bytesToHex,

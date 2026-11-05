@@ -5,7 +5,8 @@
  * not a fixed BOING charge. Live default: **0.5% (50 bps)** — Nico soft-confirmed;
  * matches the bridge fee target. Override with `REACT_APP_CREATE_TOKEN_FEE_BPS` if needed.
  *
- * Collection needs {@link getCreateTokenFeeRecipient} (Boing AccountId) — unset = display-only.
+ * Fee collection needs a Boing treasury AccountId
+ * ({@link PLATFORM_CREATE_TOKEN_FEE_RECIPIENT} / `REACT_APP_CREATE_TOKEN_FEE_RECIPIENT`).
  */
 
 /** Safe read for Vite env (undefined under plain Node tests). */
@@ -20,10 +21,30 @@ function readEnv(name) {
 }
 
 /**
+ * Normalize a Boing AccountId hex (with or without `0x`) to lowercase `0x` + 64 hex.
+ * @param {string} raw
+ * @returns {string} normalized hex or ''
+ */
+export function normalizeCreateTokenFeeRecipient(raw) {
+  const trimmed = String(raw ?? '').trim();
+  if (!trimmed) return '';
+  const hex = trimmed.startsWith('0x') || trimmed.startsWith('0X') ? trimmed.slice(2) : trimmed;
+  if (!/^[0-9a-fA-F]{64}$/.test(hex) || /^0+$/.test(hex)) return '';
+  return `0x${hex.toLowerCase()}`;
+}
+
+/**
  * Live Create Token platform fee in basis points (50 = 0.5% of initial mint).
  * Same rate target as `PLATFORM_BRIDGE_FEE_BPS` in `bridge.js`.
  */
 export const PLATFORM_CREATE_TOKEN_FEE_BPS = 50;
+
+/**
+ * Live Create Token fee treasury (Boing L1 AccountId). Public address — safe to commit.
+ * Override with `REACT_APP_CREATE_TOKEN_FEE_RECIPIENT` (hex with or without `0x`).
+ */
+export const PLATFORM_CREATE_TOKEN_FEE_RECIPIENT =
+  '0xd692627aaedf987f8854e84ab3c4d581d73f6adc13a3d86b512dc9f0d3635237';
 
 /** @returns {number} */
 export function getCreateTokenFeeBps() {
@@ -45,16 +66,14 @@ export function getCreateTokenFeeLabel(bps = getCreateTokenFeeBps()) {
 }
 
 /**
- * Boing L1 AccountId (0x + 64 hex) that receives the fee share of minted supply.
- * Same pattern as LI.FI fee recipient — live value via env, not committed.
+ * Boing L1 AccountId (`0x` + 64 hex) that receives the fee share of minted supply.
+ * Env override wins when valid; otherwise the committed live default.
  * @returns {string} normalized hex or ''
  */
 export function getCreateTokenFeeRecipient() {
-  const raw = readEnv('REACT_APP_CREATE_TOKEN_FEE_RECIPIENT');
-  if (/^0x[0-9a-fA-F]{64}$/.test(raw) && !/^0x0+$/i.test(raw)) {
-    return raw.toLowerCase();
-  }
-  return '';
+  const fromEnv = normalizeCreateTokenFeeRecipient(readEnv('REACT_APP_CREATE_TOKEN_FEE_RECIPIENT'));
+  if (fromEnv) return fromEnv;
+  return normalizeCreateTokenFeeRecipient(PLATFORM_CREATE_TOKEN_FEE_RECIPIENT);
 }
 
 /**
