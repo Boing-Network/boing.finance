@@ -14,7 +14,7 @@ const POLL_MS = 60 * 1000;
 const RPC_TIMEOUT_MS = 8000;
 
 /** Pages that read from or write to the Boing testnet. Bridge and the marketing pages stay quiet. */
-const BOING_PAGES = ['/swap', '/pools', '/create-pool', '/portfolio'];
+const BOING_PAGES = ['/swap', '/pools', '/create-pool', '/portfolio', '/staking'];
 
 export function formatAge(ms) {
   const mins = Math.max(0, Math.floor(ms / 60000));

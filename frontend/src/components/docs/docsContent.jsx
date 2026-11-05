@@ -89,7 +89,7 @@ function Overview() {
         </li>
         <li>
           <B>Track:</B> <To to="/portfolio">Portfolio</To> shows your BOING, token balances and liquidity positions valued
-          in BOING from the pools.
+          in BOING from the pools. <To to="/staking">Staking</To> shows network stake TVL and your bonded BOING.
         </li>
         <li>
           <B>Move funds:</B> <To to="/bridge">Bridge</To> moves tokens between other chains through LI.FI today. A native
@@ -436,6 +436,10 @@ function PortfolioActivity() {
           <To to="/portfolio">Portfolio</To>: connect Boing Express to see your BOING balance, your token balances and your
           liquidity positions. Each position is valued in BOING from the pools&apos; current reserves; a token with no
           BOING pool is listed without a value. A link opens your account on Boing Observer.
+        </li>
+        <li>
+          <To to="/staking">Staking</To>: network stake TVL from <code>chain_native.total_stake</code>, plus your bonded
+          stake and pending unbond when connected. Bond / Unbond / Claim are signed in Boing Express for now.
         </li>
         <li>
           <B>Transaction History</B> (settings menu): recent transactions tracked by the app.

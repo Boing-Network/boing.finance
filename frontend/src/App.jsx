@@ -54,6 +54,7 @@ function LiquidityRedirect() {
 }
 const Pools = lazy(() => import('./pages/Pools'));
 const Portfolio = lazy(() => import('./pages/Portfolio'));
+const Staking = lazy(() => import('./pages/Staking'));
 const Bridge = lazy(() => import('./pages/Bridge'));
 const CreatePool = lazy(() => import('./pages/CreatePool'));
 const Status = lazy(() => import('./pages/Status'));
@@ -244,6 +245,7 @@ function PageTransitionRoutes() {
         <Route path="/liquidity/*" element={<LiquidityRedirect />} />
         <Route path="/create-pool" element={<CreatePool />} />
         <Route path="/portfolio" element={<Portfolio />} />
+        <Route path="/staking" element={<Staking />} />
         <Route path="/bridge" element={<Bridge />} />
         <Route path="/docs" element={<Docs />} />
         <Route path="/terms" element={<Terms />} />

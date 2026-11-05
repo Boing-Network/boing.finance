@@ -223,6 +223,9 @@ export default function PortfolioBoingContent() {
                     ? ` · pending unbond ${formatNativeLedger(snapshot.pendingUnbond, snapshot?.decimals ?? 0)}`
                     : ''}
                 </p>
+                <Link to="/staking" className="text-sm text-cyan-400 underline hover:text-cyan-300 mt-2 inline-block">
+                  View staking &amp; network TVL
+                </Link>
               </div>
             </div>
           )}
@@ -273,6 +276,13 @@ export default function PortfolioBoingContent() {
               style={{ borderColor: 'rgba(59,130,246,0.45)', color: 'var(--text-primary)', backgroundColor: 'var(--bg-secondary)' }}
             >
               Swap
+            </Link>
+            <Link
+              to="/staking"
+              className="px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-medium border inline-flex items-center"
+              style={{ borderColor: 'rgba(59,130,246,0.45)', color: 'var(--text-primary)', backgroundColor: 'var(--bg-secondary)' }}
+            >
+              Staking
             </Link>
             <Link
               to="/pools?tab=liquidity"

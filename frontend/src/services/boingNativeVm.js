@@ -48,6 +48,41 @@ export async function fetchBoingNativeAccount(account, options = {}) {
 }
 
 /**
+ * Network-wide stake / TVL snapshot from `boing_getNetworkInfo.chain_native`.
+ * `total_stake` is a u128 decimal string in ledger units (same style as `boing_getAccount.stake`) —
+ * format with {@link formatNativeLedger} using the returned `decimals`. Not circulating supply; APY
+ * is listed under `rpc.not_available` and is not invented here.
+ *
+ * @param {{ signal?: AbortSignal }} [options]
+ * @returns {Promise<{
+ *   totalStake: string,
+ *   totalBalance: string | null,
+ *   accountCount: number | null,
+ *   asOfHeight: number | null,
+ *   headHeight: number | null,
+ *   decimals: number,
+ *   stakingApyAvailable: boolean,
+ * }>}
+ */
+export async function fetchBoingNetworkStakeStats(options = {}) {
+  const info = await boingJsonRpc('boing_getNetworkInfo', [], options);
+  const cn = info?.chain_native || {};
+  const head = Number(info?.head_height ?? cn?.as_of_height ?? 0);
+  const asOf = cn?.as_of_height != null ? Number(cn.as_of_height) : null;
+  const decimals = ledgerDecimalsAt(info?.native_currency, asOf ?? head);
+  const notAvailable = Array.isArray(info?.rpc?.not_available) ? info.rpc.not_available : [];
+  return {
+    totalStake: cn?.total_stake != null ? String(cn.total_stake) : '0',
+    totalBalance: cn?.total_balance != null ? String(cn.total_balance) : null,
+    accountCount: cn?.account_count != null ? Number(cn.account_count) : null,
+    asOfHeight: Number.isFinite(asOf) ? asOf : null,
+    headHeight: Number.isFinite(head) ? head : null,
+    decimals: Number.isFinite(decimals) ? decimals : 0,
+    stakingApyAvailable: !notAvailable.includes('staking_apy'),
+  };
+}
+
+/**
  * Pre-flight bytecode check (when node exposes boing_qaCheck).
  * @param {string} bytecodeHex
  * @param {string} [purposeCategory]

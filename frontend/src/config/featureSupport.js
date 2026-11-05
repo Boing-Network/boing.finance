@@ -232,6 +232,13 @@ export function getBoingL1FullDexReadiness(chainId, options) {
         'Portfolio on chain 6913 uses boing_getAccount via Boing Express (not EVM indexers). LP / token positions: Pools → Your liquidity.',
     },
     {
+      id: 'staking',
+      label: 'Staking (TVL + wallet stake)',
+      status: 'partial',
+      detail:
+        '/staking shows chain_native.total_stake (TVL) and your bonded stake. Bond / Unbond / Claim stay in Boing Express until Finance wires those dApp txs.',
+    },
+    {
       id: 'bridge',
       label: 'In-app cross-chain bridge',
       status: 'planned',
