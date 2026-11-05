@@ -8,12 +8,13 @@ import { boingExpressContractCallSignSimulateSubmit } from '../services/boingExp
 import { formatTokenAmount, isNativeBoingId, NATIVE_FEE_RESERVE, parseTokenAmount, sanitizeAmountInput, toAmountInput } from '../services/boingSwapQuote';
 import { addLiquidityPreview, pairedAmount, removeLiquidityPreview, withSlippageFloor } from '../services/boingPoolsSimple';
 import { executeAddLiquidity, executeRemoveLiquidity } from '../services/boingLiquidityTx';
-import { getWindowBoingProvider, boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
+import { getWindowBoingProvider } from '../utils/boingWalletDiscovery';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
 import { useWalletNativeValue } from '../hooks/useWalletNativeValue';
 import { NATIVE_VALUE_MIN_EXPRESS_VERSION } from '../services/boingWalletNativeValue';
 import BoingTokenPairIcons from './BoingTokenPairIcons';
 import { PoolDetails, PRIMARY_BTN } from './BoingPoolsTab';
+import { useConnectBoingExpress } from './BoingOnlyGate';
 
 const panel = { borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-secondary)' };
 const muted = { color: 'var(--text-tertiary)' };
@@ -346,7 +347,8 @@ function RemoveLiquidityPanel({ pools, card, onDone, onCancel }) {
 
 /** Your liquidity: positions (share, what you'd get back) with Add / Remove, and the add form. */
 export default function BoingYourLiquidityTab({ pools, addFor, onAddForConsumed }) {
-  const { isConnected, account, chainId, connectWalletWithProvider } = useWallet();
+  const { isConnected, account, chainId } = useWallet();
+  const { connect } = useConnectBoingExpress();
   const connected = Boolean(isConnected && account);
   const [mode, setMode] = useState(/** @type {null | { kind: 'add' | 'remove', card?: any }} */ (null));
 
@@ -361,15 +363,6 @@ export default function BoingYourLiquidityTab({ pools, addFor, onAddForConsumed 
   const done = () => {
     setMode(null);
     pools.reload();
-  };
-  const connect = async () => {
-    const provider = getWindowBoingProvider();
-    if (!provider) return toast.error(boingWalletMissingMessage());
-    try {
-      await connectWalletWithProvider(provider, 'boingExpress', BOING_NATIVE_L1_CHAIN_ID);
-    } catch (e) {
-      toast.error(formatBoingExpressRpcError(e));
-    }
   };
 
   return (

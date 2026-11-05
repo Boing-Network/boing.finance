@@ -38,6 +38,7 @@ import {
   WBOING_HEX,
 } from '../services/boingSwapQuote';
 import { getWindowBoingProvider, boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
+import { useConnectBoingExpress } from './BoingOnlyGate';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
 import { useWalletNativeValue } from '../hooks/useWalletNativeValue';
 import { NATIVE_VALUE_MIN_EXPRESS_VERSION } from '../services/boingWalletNativeValue';
@@ -175,7 +176,8 @@ function TokenSelect({ side, token, tokens, balances, onPick, disabled, otherTok
  * @param {{ slippagePercent?: number, prefill?: { key: number, tokenIn: string, tokenOut: string } }} props
  */
 export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
-  const { chainId, walletType, isConnected, getWalletProvider, account, connectWalletWithProvider } = useWallet();
+  const { chainId, walletType, isConnected, getWalletProvider, account } = useWallet();
+  const { connect: connectBoingExpress } = useConnectBoingExpress();
   const { indexerPickerTokens } = useBoingNativeDexIntegration();
   const client = useMemo(() => getSharedBoingClient(), []);
 
@@ -388,16 +390,8 @@ export default function BoingSwapCard({ slippagePercent = 0.5, prefill }) {
 
   const onPrimary = async () => {
     if (button.kind === 'connect') {
-      const provider = getWindowBoingProvider();
-      if (!provider) {
-        toast.error(boingWalletMissingMessage());
-        return;
-      }
-      try {
-        await connectWalletWithProvider(provider, 'boingExpress', BOING_NATIVE_L1_CHAIN_ID);
-      } catch (e) {
-        toast.error(formatBoingExpressRpcError(e));
-      }
+      // Same path as header / BoingOnlyGate: extension first, then boing.express web wallet.
+      await connectBoingExpress();
       return;
     }
     if (button.disabled) return;
