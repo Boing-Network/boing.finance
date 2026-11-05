@@ -7,11 +7,20 @@ import { encodeNativeDexRegisterPairCalldataHex } from './nativeDexFactoryCallda
 import { nativeAccountsAccessListJson } from './nativeAmmAccessList';
 import { normalizeNativeVmTokenId32 } from './nativeVmTokenRegistry';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
-import { boingPoolBytecodeHex, predictNonceDerivedContractAddress } from '@boing-network/boing-sdk';
-import { buildCreatePoolPostDeployBatchRequest, executeAddLiquidity } from './boingLiquidityTx';
+import {
+  boingPoolBytecodeHex,
+  predictNonceDerivedContractAddress,
+  randomCreateAndSeedPoolSaltHex,
+} from '@boing-network/boing-sdk';
+import {
+  buildCreateAndSeedOneShotBatchRequest,
+  buildCreatePoolPostDeployBatchRequest,
+  executeAddLiquidity,
+} from './boingLiquidityTx';
 import { withBoingExpressDisplay } from './boingExpressTxDisplay';
 import { getSharedBoingClient } from './boingNativeDexClient';
 import { boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
+import { getCreateAndSeedFactoryHex } from '../config/createAndSeedFactory';
 
 const U64_MAX = (1n << 64n) - 1n;
 
@@ -236,6 +245,64 @@ export async function createBoingNativeConstantProductPool({
     return { ok: false, code: 'no_provider', message: boingWalletMissingMessage() };
   }
 
+  // No override -> custody pool v8: token-v2 pairs pulled with approvals, quoted and swapped by the swap card.
+  const custody = !String(customBytecode || '').trim();
+  const createAndSeedFactory = custody ? getCreateAndSeedFactoryHex() : '';
+  const factory = normalizeNativeVmTokenId32(factoryHex || '');
+
+  // True one-approval path: CREATE2 factory + Batch (approve → create_and_seed → add_liquidity).
+  if (createAndSeedFactory) {
+    try {
+      const saltHex32 = randomCreateAndSeedPoolSaltHex();
+      const { poolHex, request } = buildCreateAndSeedOneShotBatchRequest({
+        factoryHex: createAndSeedFactory,
+        saltHex32,
+        tokenAHex: tokenA,
+        tokenBHex: tokenB,
+        amountA: amountABn,
+        amountB: amountBBn,
+        minLp: 1n,
+        senderHex: account,
+        directoryHex: factory || null,
+        poolBytecodeHex: boingPoolBytecodeHex(8),
+      });
+      const batchTx = withBoingExpressDisplay(
+        request,
+        factory
+          ? 'Create pool, seed liquidity, and register the pair'
+          : 'Create pool and seed liquidity'
+      );
+      const oneShotHash = await boingExpressContractCallSignSimulateSubmit(provider, batchTx, {
+        senderHex: account,
+        waitForInclusion: true,
+      });
+      if (!factory) {
+        warnings.push(
+          'No native DEX directory id is published on this network, so the pair was not registered for discovery.'
+        );
+      }
+      return {
+        ok: true,
+        poolId: poolHex,
+        deployTxHash: oneShotHash,
+        boingTxIdHex: oneShotHash,
+        setTokensTxHash: oneShotHash,
+        addLiquidityTxHash: oneShotHash,
+        registerTxHash: factory ? oneShotHash : null,
+        setTokensSkipped: false,
+        registerSkipped: !factory,
+        postDeployBatched: true,
+        createAndSeedOneShot: true,
+        custody: true,
+        warnings,
+      };
+    } catch (e) {
+      warnings.push(
+        `Create-and-seed one-shot failed (${formatBoingExpressRpcError(e)}); falling back to deploy + bind/seed.`
+      );
+    }
+  }
+
   // Pool templates emit no deploy log, so the receipt alone does not name the new account: predict the
   // nonce-derived address up front and confirm it has code once the deploy is included.
   let predictedPoolId = null;
@@ -245,8 +312,6 @@ export async function createBoingNativeConstantProductPool({
     predictedPoolId = null;
   }
 
-  // No override -> custody pool v8: token-v2 pairs pulled with approvals, quoted and swapped by the swap card.
-  const custody = !String(customBytecode || '').trim();
   const deploy = await executeBoingLaunchWizardDeploy({
     kind: 'liquidity_pool',
     getWalletProvider,
@@ -278,8 +343,6 @@ export async function createBoingNativeConstantProductPool({
       poolId: null,
     };
   }
-
-  const factory = normalizeNativeVmTokenId32(factoryHex || '');
 
   // Custody: one Express approval for bind + seed (+ register). Custom bytecode keeps the sequential path.
   if (custody) {

@@ -136,16 +136,32 @@ export function buildBoingTokenV2LaunchTx(input) {
   if (nonce < 0n) throw new Error('nonce must be >= 0');
   const supply = parseBoingTokenV2Supply(input.supply);
   const tokenHex = predictNonceDerivedContractAddress(senderHex, nonce).toLowerCase();
+  const feeRecipientHex = String(input.feeRecipientHex ?? '').trim() || null;
+  const feeAmount =
+    typeof input.feeAmount === 'bigint'
+      ? input.feeAmount
+      : input.feeAmount != null
+        ? BigInt(input.feeAmount)
+        : 0n;
   const bytecode = buildBoingTokenV2MintAtDeployBytecodeHex({
     supply,
     runtimeHex: String(input.runtimeHexOverride ?? '').trim() || undefined,
     claimRegistryHex: input.claimRegistryHex || null,
+    feeRecipientHex,
+    feeAmount,
   });
   const deployTx = {
     ...buildBoingTokenV2DeployMetaTx({ ...input, bytecodeHexOverride: bytecode }),
     nonce: nonce.toString(),
   };
-  return { tokenHex, supply, deployTx };
+  return {
+    tokenHex,
+    supply,
+    deployTx,
+    feeMintedAtDeploy: Boolean(feeRecipientHex && feeAmount > 0n),
+    feeAmount,
+    feeRecipientHex: feeRecipientHex ? validateHex32(feeRecipientHex).toLowerCase() : null,
+  };
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -168,14 +184,33 @@ export const BOING_TOKEN_MINT_ONCE_SLOT_HEX = `0x${'00'.repeat(31)}f1`;
 export { BOING_DEPLOY_INIT_MARKER };
 
 /**
- * `0xFD || init` deploy bytecode: v2 runtime with the whole `supply` minted to the deployer at deploy.
- * With `claimRegistryHex` the init also calls the linked NFT↔token registry v2 `claim_self(deployer)`
- * (the registry faults, and so the whole deploy fails, if the token were somehow already claimed).
- * @param {{ supply: unknown, runtimeHex?: string, balanceXorMask?: Uint8Array, claimRegistryHex?: string | null }} input
+ * `0xFD || init` deploy bytecode: v2 runtime with supply minted at deploy.
+ * When `feeRecipientHex` + `feeAmount` are set, credits `supply - fee` to the deployer and `fee` to
+ * the treasury in the same init (one Express approval; no post-create transfer).
+ * With `claimRegistryHex` the init also calls the linked NFT↔token registry v2 `claim_self(deployer)`.
+ * @param {{ supply: unknown, runtimeHex?: string, balanceXorMask?: Uint8Array, claimRegistryHex?: string | null,
+ *   feeRecipientHex?: string | null, feeAmount?: bigint }} input
  * @returns {`0x${string}`}
  */
-export function buildBoingTokenV2MintAtDeployBytecodeHex({ supply, runtimeHex, balanceXorMask, claimRegistryHex = null } = {}) {
+export function buildBoingTokenV2MintAtDeployBytecodeHex({
+  supply,
+  runtimeHex,
+  balanceXorMask,
+  claimRegistryHex = null,
+  feeRecipientHex = null,
+  feeAmount = 0n,
+} = {}) {
   const amount = parseBoingTokenV2Supply(supply);
+  let fee = typeof feeAmount === 'bigint' ? feeAmount : BigInt(feeAmount || 0);
+  if (fee < 0n) throw new Error('feeAmount must be >= 0');
+  if (fee > amount) throw new Error('feeAmount cannot exceed supply');
+  let feeTo = null;
+  if (fee > 0n) {
+    feeTo = validateHex32(feeRecipientHex || '').toLowerCase();
+  } else {
+    fee = 0n;
+  }
+  const creatorAmount = amount - fee;
   const runtime = runtimeBytesForInit(runtimeHex || boingTokenV2BytecodeHex());
   const mask = balanceXorMask || REFERENCE_FUNGIBLE_BALANCE_XOR;
   if (!(mask instanceof Uint8Array) || mask.length !== 32) throw new Error('balance XOR mask must be 32 bytes');
@@ -184,11 +219,20 @@ export function buildBoingTokenV2MintAtDeployBytecodeHex({ supply, runtimeHex, b
   w.op(OP.CALLER);
   w.push32(hexToU8(BOING_TOKEN_ADMIN_SLOT_HEX));
   w.op(OP.SSTORE);
-  // balance[CALLER ^ mask] = supply
-  w.push32(word(amount));
-  w.op(OP.CALLER);
-  w.push32(mask);
-  w.op(OP.XOR, OP.SSTORE);
+  // balance[CALLER ^ mask] = creatorAmount (full supply when no fee)
+  if (creatorAmount > 0n) {
+    w.push32(word(creatorAmount));
+    w.op(OP.CALLER);
+    w.push32(mask);
+    w.op(OP.XOR, OP.SSTORE);
+  }
+  // balance[treasury ^ mask] = fee
+  if (fee > 0n && feeTo) {
+    w.push32(word(fee));
+    w.push32(hexToU8(feeTo));
+    w.push32(mask);
+    w.op(OP.XOR, OP.SSTORE);
+  }
   // mint-once = 1
   w.push32(word(1n));
   w.push32(hexToU8(BOING_TOKEN_MINT_ONCE_SLOT_HEX));

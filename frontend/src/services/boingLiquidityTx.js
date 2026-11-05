@@ -11,6 +11,10 @@
  *   set_tokens -> (wrap/approves/)add_liquidity -> optional factory register_pair
  * so Express asks twice (deploy + seed), not four times. Deploy cannot join a batch: Express/protocol
  * batch steps are transfer | contract_call only.
+ *
+ * When a create-and-seed factory is published (`REACT_APP_BOING_NATIVE_CREATE_AND_SEED_FACTORY`),
+ * Create Pool uses ONE batch instead: wrap? → approve → create_and_seed (CREATE2+bind+register) →
+ * add_liquidity — no top-level pool deploy.
  */
 
 const lc = (h) => String(h || '').toLowerCase();
@@ -101,6 +105,48 @@ export function buildCreatePoolPostDeployBatchRequest(p) {
   return boingTxToExpressRequest(tx);
 }
 
+/**
+ * True one-approval Create Pool when the create-and-seed factory is published.
+ * @param {{
+ *   factoryHex: string, saltHex32: string, tokenAHex: string, tokenBHex: string,
+ *   amountA: bigint, amountB: bigint, senderHex: string, minLp?: bigint,
+ *   directoryHex?: string | null, poolBytecodeHex?: string, wboingHex?: string,
+ * }} p
+ */
+export function buildCreateAndSeedOneShotBatchRequest(p) {
+  const tokenA = lc(p.tokenAHex);
+  const tokenB = lc(p.tokenBHex);
+  const w = lc(p.wboingHex || WBOING_HEX);
+  const poolBytecode = hexToBytes(p.poolBytecodeHex || boingPoolBytecodeHex(8));
+  let wrap = null;
+  let amountA = p.amountA;
+  let amountB = p.amountB;
+  let legA = tokenA;
+  let legB = tokenB;
+  if (isNativeBoingId(tokenA) || tokenA === w) {
+    wrap = { contractHex: w, calldata: encodeWboingDepositCalldata(), value: amountA };
+    legA = w;
+  } else if (isNativeBoingId(tokenB) || tokenB === w) {
+    wrap = { contractHex: w, calldata: encodeWboingDepositCalldata(), value: amountB };
+    legB = w;
+  }
+  const { poolHex, tx } = buildCreateAndSeedBatchTransaction({
+    senderHex: p.senderHex,
+    factoryHex: p.factoryHex,
+    saltHex32: p.saltHex32,
+    tokenAHex: legA,
+    tokenBHex: legB,
+    amountA,
+    amountB,
+    minLp: p.minLp ?? 1n,
+    directoryHex: p.directoryHex || null,
+    poolBytecode,
+    wrap,
+    nonce: 0n,
+  });
+  return { poolHex, request: boingTxToExpressRequest(tx) };
+}
+
 /** Batch request for a native-BOING remove (exported for tests). */
 export function buildNativeRemoveLiquidityRequest(p) {
   const w = lc(p.wboingHex || WBOING_HEX);
@@ -123,10 +169,12 @@ export function buildNativeRemoveLiquidityRequest(p) {
 const isNativePair = (p) => isNativeBoingId(p.tokenAHex) || isNativeBoingId(p.tokenBHex);
 import {
   boingContractCallToExpressTx,
+  boingPoolBytecodeHex,
   boingTxToExpressRequest,
   buildBatchTransaction,
   buildBoingPoolCallTransaction,
   buildBoingTokenApproveTransaction,
+  buildCreateAndSeedBatchTransaction,
   encodeBoingPoolV8AddLiquidityCalldata,
   encodeBoingPoolV8RemoveLiquidityCalldata,
   encodeNativeAmmSetTokensCalldata,
@@ -135,6 +183,7 @@ import {
   encodeWboingDepositCalldata,
   encodeWboingWithdrawAllCalldata,
   getBoingTokenAllowance,
+  hexToBytes,
 } from '@boing-network/boing-sdk';
 import { WBOING_HEX, isNativeBoingId } from './boingSwapQuote.js';
 import { withBoingExpressDisplay } from './boingExpressTxDisplay.js';

@@ -272,8 +272,8 @@ export default function CreateTokenBoingContent() {
           <StatusBanner variant="info">
             <p className="text-sm mb-0">
               Boing token <strong style={{ color: 'var(--text-primary)' }}>v2</strong> — one Express signature creates
-              the token and puts the whole supply in your account. Nobody can mint more afterwards. Add a pool next to
-              make it swappable.
+              the token. Your wallet receives the mint minus the platform fee (fee goes to treasury at deploy). Nobody
+              can mint more afterwards. Add a pool next to make it swappable.
             </p>
           </StatusBanner>
 
@@ -296,8 +296,8 @@ export default function CreateTokenBoingContent() {
           <section className="td-card text-left p-5 sm:p-6" data-testid="create-token-panel">
             <h2 className="td-section-title mb-1">Standard</h2>
             <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-              Create one fungible token. Express will ask you to approve the deploy
-              {feePreview.collectionReady ? ', then a separate fee transfer' : ''}.
+              Create one fungible token. Express will ask once to approve the deploy
+              {feePreview.collectionReady ? ' (platform fee is credited to treasury in that same approval)' : ''}.
             </p>
             <div className="grid gap-4 sm:grid-cols-2 mb-4">
               <label className="td-field">
@@ -447,6 +447,8 @@ export default function CreateTokenBoingContent() {
                     Platform fee {lastResult.platformFee.feeLabel}: {lastResult.platformFee.feeAmount.toString()} tokens
                     {lastResult.feeCollection?.skipped
                       ? ' — collection deferred (treasury not configured).'
+                      : lastResult.feeCollection?.mintedAtDeploy
+                        ? ' — credited to treasury at deploy.'
                       : lastResult.feeCollection?.ok
                         ? ' — transferred to treasury.'
                         : lastResult.feeCollection?.ok === false

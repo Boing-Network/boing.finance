@@ -19,10 +19,12 @@ import {
 } from '../src/services/boingSwapQuote.js';
 import { poolCard, pairedAmount } from '../src/services/boingPoolsSimple.js';
 import {
+  buildCreateAndSeedOneShotBatchRequest,
   buildCreatePoolPostDeployBatchRequest,
   buildNativeAddLiquidityRequest,
   buildNativeRemoveLiquidityRequest,
 } from '../src/services/boingLiquidityTx.js';
+import { boingPoolBytecodeHex } from '@boing-network/boing-sdk';
 import { planNativeBoingSwap } from '../src/services/nativeDexCustodySwap.js';
 
 const USDC = '0x6676f971ade3982406efa3e2cdb0477923f8f2a15624c4b6ad3a432817a75e93';
@@ -104,6 +106,33 @@ test('native add / remove liquidity are single batches (wrap with value, unwrap 
   assert.deepEqual(rm.calls.map((c) => c.contract), [POOL, WBOING_HEX]);
   assert.equal(rm.calls.every((c) => c.value == null), true);
   assert.ok(rm.access_list.write.includes(WBOING_HEX));
+});
+
+test('create-and-seed one-shot batch: wrap? + approves + create_and_seed + add_liquidity', () => {
+  const CAS = `0x${'c5'.repeat(32)}`;
+  const DIR = `0x${'cd'.repeat(32)}`;
+  const salt = `0x${'07'.repeat(32)}`;
+  const { poolHex, request } = buildCreateAndSeedOneShotBatchRequest({
+    factoryHex: CAS,
+    saltHex32: salt,
+    tokenAHex: WBOING_HEX,
+    tokenBHex: USDC,
+    amountA: E18,
+    amountB: 200n,
+    senderHex: ME,
+    directoryHex: DIR,
+    poolBytecodeHex: boingPoolBytecodeHex(8),
+  });
+  assert.equal(request.type, 'batch');
+  assert.match(poolHex, /^0x[0-9a-f]{64}$/);
+  // deposit + approve wBOING + approve USDC + create_and_seed + add_liquidity
+  assert.equal(request.calls.length, 5);
+  assert.equal(request.calls[0].contract, WBOING_HEX);
+  assert.equal(request.calls[0].value, String(E18));
+  assert.equal(request.calls[3].contract, CAS);
+  assert.equal(request.calls[4].contract, poolHex);
+  assert.ok(request.access_list.write.includes(CAS));
+  assert.ok(request.access_list.write.includes(DIR));
 });
 
 test('create-pool post-deploy seed is one batch: set_tokens + wrap/approves/add + optional register', () => {
