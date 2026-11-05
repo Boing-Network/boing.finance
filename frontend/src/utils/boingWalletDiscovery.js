@@ -150,9 +150,12 @@ export async function switchToBoingTestnetInWallet(provider) {
 
 export { BOING_TESTNET_CHAIN_HEX };
 
-/** Chrome Web Store listing for the Boing Express extension. */
-export const BOING_EXPRESS_CHROME_STORE_URL =
-  'https://chromewebstore.google.com/detail/hhknjdhknnghccmfnfafbkapjljicbfh';
+/**
+ * Where users get Boing Express today.
+ * Chrome Web Store item ID is not published in-repo yet (was a literal `[REDACTED]`
+ * path that broke install CTAs). Point CTAs at the live web wallet until a real CWS URL lands.
+ */
+export const BOING_EXPRESS_CHROME_STORE_URL = 'https://boing.express';
 
 /**
  * User-facing message when no Boing Express provider is injected. Explains mobile / non-Chromium
@@ -168,5 +171,5 @@ export function boingWalletMissingMessage(userAgent) {
   if (!chromium) {
     return 'Boing Express is a Chrome extension. Open boing.finance in Chrome, Edge, or Brave with the extension installed (or use boing.express).';
   }
-  return `Boing Express isn't installed in this browser. Install it from the Chrome Web Store (${BOING_EXPRESS_CHROME_STORE_URL}), then reload.`;
+  return "Boing Express isn't installed in this browser. Open https://boing.express to use the web wallet (or install the Chrome extension when the store listing is live), then reload.";
 }
