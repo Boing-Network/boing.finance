@@ -88,8 +88,8 @@ function Overview() {
           <To to="/pools?tab=liquidity">Your liquidity</To>, or start a new pair with <To to="/create-pool">Create pool</To>.
         </li>
         <li>
-          <B>Launch:</B> <To to="/create-token">Create Token</To> publishes a Boing fungible (Standard one-token or Large
-          set CSV), then create a pool to make it swappable.
+          <B>Launch:</B> <To to="/create-token">Create Token</To> publishes a Boing fungible (Standard one-token), then
+          create a pool to make it swappable. A <B>0.5%</B> platform fee of initial mint applies.
         </li>
         <li>
           <B>Track:</B> <To to="/portfolio">Portfolio</To> shows your BOING, token balances and liquidity positions valued
@@ -312,9 +312,9 @@ function Liquidity() {
           swap list right away.
         </li>
         <li>
-          <To to="/create-token">Create Token</To> deploys a Boing token v2 (whole units, fixed supply at create). Use{' '}
-          <B>Standard</B> for one token or <B>Large set</B> for a CSV of up to 50. After create, open Create pool with the
-          new token to seed liquidity.
+          <To to="/create-token">Create Token</To> deploys a Boing token v2 (whole units, fixed supply at create) —
+          Standard one-token only. Platform fee is <B>0.5% of initial mint</B> (same target as the bridge fee). After
+          create, open Create pool with the new token to seed liquidity.
         </li>
       </UL>
     </>

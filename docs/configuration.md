@@ -26,6 +26,7 @@ Copy `frontend/.env.example` to `frontend/.env.local`. **Do not commit `.env.loc
 - **The Graph, Alchemy, LiFi (browser)** — see `.env.example`
 - **LI.FI / Jupiter (Worker)** — `wrangler secret put LIFI_API_KEY` / `JUPITER_API_KEY` on `boing-api-prod` (`--env production`). Quotes work without keys.
 - **Bridge fee recipients (public addresses, live deploy only)** — Worker secrets `LIFI_FEE_RECIPIENT` (EVM), `LIFI_FEE_RECIPIENT_SOL`, `LIFI_FEE_RECIPIENT_BTC`. Optional frontend overlay `REACT_APP_LIFI_FEE_RECIPIENT*` (baked at Pages build). Must match [portal.li.fi](https://portal.li.fi/) for integrator `boing.finance`. See [bridge.md](./bridge.md).
+- **Create Token platform fee** — **0.5% of initial mint** (`PLATFORM_CREATE_TOKEN_FEE_BPS = 50`; optional override `REACT_APP_CREATE_TOKEN_FEE_BPS`). Matches the bridge fee target (Nico soft-confirmed). Optional treasury AccountId `REACT_APP_CREATE_TOKEN_FEE_RECIPIENT` (0x + 64 hex); when unset the UI shows the fee but does not collect on-chain.
 
 Native DEX / Boing RPC flags are documented in [native-dex.md](./native-dex.md) and [native-dex-discovery.md](./native-dex-discovery.md); they are listed in `.env.example`.
 

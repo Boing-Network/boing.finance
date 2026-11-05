@@ -170,7 +170,7 @@ export function getBoingL1FullDexReadiness(chainId, options) {
       label: 'Deploy fungible tokens',
       status: fs.deployToken ? 'live' : 'planned',
       detail: fs.deployToken
-        ? 'Create Token (/create-token): Boing token v2 via Express (Standard + Large set CSV).'
+        ? 'Create Token (/create-token): Boing token v2 via Express (Standard only; platform fee = % of mint).'
         : 'Not enabled for this chain in app config.',
     },
     {

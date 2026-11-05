@@ -1,6 +1,6 @@
 /**
- * Create Token (Boing L1): Standard (one token) and Large set (CSV batch).
- * Fresh Finance UX — same shell language as Create Pool / Staking.
+ * Create Token (Boing L1): Standard one-token deploy.
+ * Platform fee = 0.5% of initial mint (live; matches bridge fee target).
  */
 import React, { useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
@@ -10,56 +10,36 @@ import { isBoingTestnetChainId } from '@boing-network/boing-sdk';
 import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import {
-  SegmentedControl,
   StatusBanner,
   TradeDeployButton,
 } from './PageLayout';
 import EmptyState from './EmptyState';
 import { useConnectBoingExpress } from './BoingOnlyGate';
 import {
+  createTokenFeeNoticeText,
+  getCreateTokenFeeLabel,
+  planCreateTokenPlatformFee,
+} from '../config/createTokenFee';
+import {
   computeEffectiveNativeDeployBytecode,
   createBoingNativeToken,
-  createBoingNativeTokenBatch,
   getBundledNativeFungibleBytecodeHex,
 } from '../services/boingNativeCreateToken';
 import { preflightBoingLaunchWizardByKind } from '../services/boingNativeLaunchWizardDeploy';
 import { parseBoingTokenV2Supply, BOING_TOKEN_V2_DECIMALS } from '../services/boingTokenV2Launch';
 import { tryParseEvenLengthDeployBytecodeHex } from '../utils/boingDeployBytecodeHex';
 import { showDeployCelebration } from '../utils/deployCelebration';
-import {
-  parseTokenCreateCsv,
-  TOKEN_CREATE_CSV_MAX_ROWS,
-  TOKEN_CREATE_CSV_TEMPLATE,
-} from '../utils/tokenCreateCsv';
 import { buildBoingExplorerAccountUrl, buildBoingExplorerTxUrl } from '../config/boingExplorerUrls';
 import { isValidBoingQaPurpose, BOING_QA_PURPOSE_TOKEN } from '../config/boingQa';
-
-function shortHex(h) {
-  if (!h || typeof h !== 'string') return '—';
-  const t = h.trim();
-  if (t.length < 18) return t || '—';
-  return `${t.slice(0, 10)}…${t.slice(-6)}`;
-}
-
-const MODE_OPTIONS = [
-  { value: 'standard', label: 'Standard' },
-  { value: 'large', label: 'Large set' },
-];
 
 export default function CreateTokenBoingContent() {
   const { chainId, walletType, isConnected, getWalletProvider, account } = useWallet();
   const { explorerBaseUrl } = useBoingNativeDexIntegration();
   const { connect } = useConnectBoingExpress();
 
-  const [mode, setMode] = useState('standard');
-
   const [name, setName] = useState('');
   const [symbol, setSymbol] = useState('');
   const [supply, setSupply] = useState('1000000');
-
-  const [csvText, setCsvText] = useState('');
-  const [csvFileName, setCsvFileName] = useState('');
-  const parsedCsv = useMemo(() => (csvText ? parseTokenCreateCsv(csvText) : null), [csvText]);
 
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [customBytecode, setCustomBytecode] = useState('');
@@ -70,9 +50,7 @@ export default function CreateTokenBoingContent() {
 
   const [busy, setBusy] = useState(false);
   const [stage, setStage] = useState(null);
-  const [batchProgress, setBatchProgress] = useState(null);
   const [lastResult, setLastResult] = useState(null);
-  const [batchResults, setBatchResults] = useState(null);
 
   const bundledBytecode = useMemo(() => getBundledNativeFungibleBytecodeHex(), []);
   const effectiveBytecode = useMemo(
@@ -82,6 +60,15 @@ export default function CreateTokenBoingContent() {
   const deployBlocked =
     !effectiveBytecode || (qaResult?.result === 'unsure' && !qaPoolAcknowledged);
 
+  const feePreview = useMemo(() => {
+    try {
+      const supplyBn = parseBoingTokenV2Supply(supply);
+      return planCreateTokenPlatformFee(supplyBn);
+    } catch {
+      return planCreateTokenPlatformFee(0n);
+    }
+  }, [supply]);
+
   if (!isConnected) {
     return (
       <>
@@ -89,7 +76,7 @@ export default function CreateTokenBoingContent() {
           <title>Create Token | boing.finance — Boing Network</title>
           <meta
             name="description"
-            content="Create a fungible token on Boing Network. Standard one-token deploy or Large set CSV batch."
+            content="Create a fungible token on Boing Network. One-token Standard deploy with a platform fee as a percent of initial mint."
           />
         </Helmet>
         <div className="relative z-10 container mx-auto px-4 py-8" data-testid="create-token-page">
@@ -176,14 +163,22 @@ export default function CreateTokenBoingContent() {
   };
 
   const celebrateOne = (result, tokenName, tokenSymbol) => {
+    const fee = result.platformFee;
+    const details = [
+      { label: 'Name', value: tokenName },
+      { label: 'Symbol', value: tokenSymbol },
+      { label: 'Supply', value: `${result.supply} (whole units)` },
+      { label: 'Token', value: result.tokenHex },
+    ];
+    if (fee?.feeAmount > 0n) {
+      details.push({
+        label: 'Platform fee',
+        value: `${fee.feeLabel} → ${fee.feeAmount.toString()} tokens`,
+      });
+    }
     showDeployCelebration({
       deploymentKind: 'Boing token',
-      details: [
-        { label: 'Name', value: tokenName },
-        { label: 'Symbol', value: tokenSymbol },
-        { label: 'Supply', value: `${result.supply} (whole units)` },
-        { label: 'Token', value: result.tokenHex },
-      ],
+      details,
       boingTxIdHex: result.boingTxIdHex,
       contractAddress: result.tokenHex,
       explorerBaseUrl,
@@ -213,7 +208,6 @@ export default function CreateTokenBoingContent() {
     }
     setBusy(true);
     setLastResult(null);
-    setBatchResults(null);
     setStage(null);
     try {
       const result = await createBoingNativeToken({
@@ -233,72 +227,14 @@ export default function CreateTokenBoingContent() {
         return;
       }
       celebrateOne(result, n, s);
-      if (!result.confirmed) {
+      if (result.feeCollection && !result.feeCollection.skipped && !result.feeCollection.ok) {
+        toast.error(result.feeCollection.message || 'Token created, but platform fee transfer failed.');
+      } else if (!result.confirmed) {
         toast('Submitted — waiting for inclusion. Check boing.observer shortly.', { icon: 'ℹ️' });
       }
     } finally {
       setBusy(false);
       setStage(null);
-    }
-  };
-
-  const onCsvFile = async (file) => {
-    if (!file) return;
-    setCsvFileName(file.name);
-    const text = await file.text();
-    setCsvText(text);
-    setBatchResults(null);
-  };
-
-  const onCreateLargeSet = async () => {
-    if (!parsedCsv || parsedCsv.rows.length === 0) {
-      toast.error('Upload a valid CSV with name, symbol, and supply columns.');
-      return;
-    }
-    if (parsedCsv.errors.length) {
-      toast.error(parsedCsv.errors[0]);
-      return;
-    }
-    if (deployBlocked) {
-      toast.error(
-        !effectiveBytecode
-          ? 'Token bytecode is not available in this build.'
-          : 'QA returned unsure — acknowledge the community pool checkbox first.'
-      );
-      return;
-    }
-    setBusy(true);
-    setLastResult(null);
-    setBatchResults(null);
-    setBatchProgress({ done: 0, total: parsedCsv.rows.length });
-    try {
-      const results = await createBoingNativeTokenBatch({
-        rows: parsedCsv.rows,
-        getWalletProvider,
-        account,
-        customBytecode,
-        descriptionHash,
-        qaPoolAcknowledged,
-        continueOnError: false,
-        onProgress: ({ index, total, phase }) => {
-          if (phase === 'start') setBatchProgress({ done: index, total, labeling: `Signing ${index + 1} of ${total}…` });
-          if (phase === 'done') setBatchProgress({ done: index + 1, total });
-        },
-      });
-      setBatchResults(results);
-      const okCount = results.filter((r) => r.result?.ok).length;
-      const lastOk = [...results].reverse().find((r) => r.result?.ok);
-      if (okCount === 0) {
-        toast.error(results[0]?.result?.message || 'No tokens were created.');
-        return;
-      }
-      toast.success(`Created ${okCount} of ${results.length} token${results.length === 1 ? '' : 's'}.`);
-      if (lastOk?.result) {
-        celebrateOne(lastOk.result, lastOk.row.name, lastOk.row.symbol);
-      }
-    } finally {
-      setBusy(false);
-      setBatchProgress(null);
     }
   };
 
@@ -308,6 +244,9 @@ export default function CreateTokenBoingContent() {
       sign: 'Approve in Boing Express…',
       submit: 'Submitting…',
       confirm: 'Waiting for inclusion…',
+      fee_sign: 'Approve platform fee transfer…',
+      fee_submit: 'Submitting platform fee…',
+      fee_confirm: 'Confirming platform fee…',
     }[stage] || null;
 
   return (
@@ -316,7 +255,7 @@ export default function CreateTokenBoingContent() {
         <title>Create Token | boing.finance — Boing Network</title>
         <meta
           name="description"
-          content="Create a fungible token on Boing Network. Standard one-token deploy or Large set CSV batch."
+          content="Create a fungible token on Boing Network. Standard one-token deploy with a platform fee as a percent of initial mint."
         />
       </Helmet>
       <div className="relative z-10 container mx-auto px-4 py-8" data-testid="create-token-page">
@@ -330,17 +269,6 @@ export default function CreateTokenBoingContent() {
             </p>
           </header>
 
-          <SegmentedControl
-            aria-label="Create token mode"
-            value={mode}
-            onChange={(v) => {
-              setMode(v);
-              setLastResult(null);
-              setBatchResults(null);
-            }}
-            options={MODE_OPTIONS}
-          />
-
           <StatusBanner variant="info">
             <p className="text-sm mb-0">
               Boing token <strong style={{ color: 'var(--text-primary)' }}>v2</strong> — one Express signature creates
@@ -349,162 +277,79 @@ export default function CreateTokenBoingContent() {
             </p>
           </StatusBanner>
 
+          <StatusBanner variant="warn" data-testid="create-token-fee-notice">
+            <p className="text-sm mb-1" style={{ color: 'var(--text-primary)' }}>
+              Platform fee: <strong>{getCreateTokenFeeLabel()} of initial mint</strong>
+            </p>
+            <p className="text-xs mb-0" style={{ color: 'var(--text-secondary)' }}>
+              {createTokenFeeNoticeText(feePreview)}
+              {feePreview.feeAmount > 0n ? (
+                <>
+                  {' '}
+                  Preview for this supply: <strong>{feePreview.feeAmount.toString()}</strong> fee tokens ·{' '}
+                  <strong>{feePreview.creatorAmount.toString()}</strong> remain with you after collection.
+                </>
+              ) : null}
+            </p>
+          </StatusBanner>
+
           <section className="td-card text-left p-5 sm:p-6" data-testid="create-token-panel">
-            {mode === 'standard' ? (
-              <>
-                <h2 className="td-section-title mb-1">Standard</h2>
-                <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-                  Create one fungible token. Express will ask you to approve the deploy.
-                </p>
-                <div className="grid gap-4 sm:grid-cols-2 mb-4">
-                  <label className="td-field">
-                    <span className="td-field__label">Name *</span>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="td-field__input"
-                      placeholder="My Token"
-                      data-testid="create-token-name"
-                      autoComplete="off"
-                    />
-                  </label>
-                  <label className="td-field">
-                    <span className="td-field__label">Symbol *</span>
-                    <input
-                      type="text"
-                      value={symbol}
-                      onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-                      className="td-field__input"
-                      placeholder="MTK"
-                      maxLength={32}
-                      data-testid="create-token-symbol"
-                      autoComplete="off"
-                    />
-                  </label>
-                </div>
-                <label className="td-field mb-4 block">
-                  <span className="td-field__label">Initial supply *</span>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={supply}
-                    onChange={(e) => setSupply(e.target.value.replace(/[^\d_,\s]/g, ''))}
-                    className="td-field__input"
-                    placeholder="1000000"
-                    data-testid="create-token-supply"
-                  />
-                  <span className="text-xs mt-1 block" style={{ color: 'var(--text-tertiary)' }}>
-                    Whole numbers only · {BOING_TOKEN_V2_DECIMALS} decimals (all units go to your account)
-                  </span>
-                </label>
-              </>
-            ) : (
-              <>
-                <h2 className="td-section-title mb-1">Large set</h2>
-                <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-                  Upload a CSV to create up to {TOKEN_CREATE_CSV_MAX_ROWS} tokens. Each row needs its own Express
-                  approval — keep the set small enough to finish in one sitting.
-                </p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <a
-                    className="td-btn td-btn--ghost text-sm"
-                    href="/templates/token-create-batch.csv"
-                    download="token-create-batch.csv"
-                    data-testid="create-token-csv-template"
-                  >
-                    Download CSV template
-                  </a>
-                  <label className="td-btn td-btn--ghost text-sm cursor-pointer">
-                    Upload CSV
-                    <input
-                      type="file"
-                      accept=".csv,text/csv"
-                      className="sr-only"
-                      data-testid="create-token-csv-input"
-                      onChange={(e) => onCsvFile(e.target.files?.[0])}
-                    />
-                  </label>
-                  <button
-                    type="button"
-                    className="td-btn td-btn--link text-sm"
-                    onClick={() => {
-                      setCsvText(TOKEN_CREATE_CSV_TEMPLATE);
-                      setCsvFileName('example.csv');
-                    }}
-                  >
-                    Load example
-                  </button>
-                </div>
-                {csvFileName ? (
-                  <p className="text-xs mb-2" style={{ color: 'var(--text-tertiary)' }}>
-                    File: {csvFileName}
-                  </p>
-                ) : null}
-                {parsedCsv?.errors?.length ? (
-                  <StatusBanner variant="warn" className="mb-3">
-                    <ul className="text-sm list-disc pl-4 mb-0">
-                      {parsedCsv.errors.slice(0, 5).map((err) => (
-                        <li key={err}>{err}</li>
-                      ))}
-                    </ul>
-                  </StatusBanner>
-                ) : null}
-                {parsedCsv?.warnings?.length ? (
-                  <p className="text-xs mb-3 text-amber-300">{parsedCsv.warnings.join(' ')}</p>
-                ) : null}
-                {parsedCsv?.rows?.length ? (
-                  <div className="mb-4 overflow-x-auto rounded-lg border" style={{ borderColor: 'var(--border-color)' }}>
-                    <table className="w-full text-sm" data-testid="create-token-csv-preview">
-                      <thead>
-                        <tr style={{ color: 'var(--text-tertiary)' }}>
-                          <th className="text-left px-3 py-2 font-medium">#</th>
-                          <th className="text-left px-3 py-2 font-medium">Name</th>
-                          <th className="text-left px-3 py-2 font-medium">Symbol</th>
-                          <th className="text-left px-3 py-2 font-medium">Supply</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {parsedCsv.rows.map((row, i) => (
-                          <tr key={`${row.symbol}-${i}`} style={{ color: 'var(--text-primary)' }}>
-                            <td className="px-3 py-2 tabular-nums">{i + 1}</td>
-                            <td className="px-3 py-2">{row.name}</td>
-                            <td className="px-3 py-2 font-mono">{row.symbol}</td>
-                            <td className="px-3 py-2 tabular-nums">{row.supply}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <p className="text-sm mb-4" style={{ color: 'var(--text-tertiary)' }}>
-                    Columns: <code className="text-xs">name</code>, <code className="text-xs">symbol</code>,{' '}
-                    <code className="text-xs">supply</code>
-                  </p>
-                )}
-              </>
-            )}
+            <h2 className="td-section-title mb-1">Standard</h2>
+            <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+              Create one fungible token. Express will ask you to approve the deploy
+              {feePreview.collectionReady ? ', then a separate fee transfer' : ''}.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2 mb-4">
+              <label className="td-field">
+                <span className="td-field__label">Name *</span>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="td-field__input"
+                  placeholder="My Token"
+                  data-testid="create-token-name"
+                  autoComplete="off"
+                />
+              </label>
+              <label className="td-field">
+                <span className="td-field__label">Symbol *</span>
+                <input
+                  type="text"
+                  value={symbol}
+                  onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+                  className="td-field__input"
+                  placeholder="MTK"
+                  maxLength={32}
+                  data-testid="create-token-symbol"
+                  autoComplete="off"
+                />
+              </label>
+            </div>
+            <label className="td-field mb-4 block">
+              <span className="td-field__label">Initial supply *</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={supply}
+                onChange={(e) => setSupply(e.target.value.replace(/[^\d_,\s]/g, ''))}
+                className="td-field__input"
+                placeholder="1000000"
+                data-testid="create-token-supply"
+              />
+              <span className="text-xs mt-1 block" style={{ color: 'var(--text-tertiary)' }}>
+                Whole numbers only · {BOING_TOKEN_V2_DECIMALS} decimals (all units go to your account at mint)
+              </span>
+            </label>
 
             <div className="flex flex-wrap gap-2 mb-3">
               <TradeDeployButton
                 type="button"
-                onClick={mode === 'standard' ? onCreateStandard : onCreateLargeSet}
-                disabled={
-                  busy ||
-                  deployBlocked ||
-                  (mode === 'standard'
-                    ? !name.trim() || !symbol.trim() || !supply.trim()
-                    : !parsedCsv?.rows?.length || Boolean(parsedCsv?.errors?.length))
-                }
+                onClick={onCreateStandard}
+                disabled={busy || deployBlocked || !name.trim() || !symbol.trim() || !supply.trim()}
                 data-testid="create-token-submit"
               >
-                {busy
-                  ? mode === 'large' && batchProgress
-                    ? `Creating ${batchProgress.done}/${batchProgress.total}…`
-                    : stageLabel || 'Creating…'
-                  : mode === 'standard'
-                    ? 'Create token'
-                    : `Create ${parsedCsv?.rows?.length || 0} token${(parsedCsv?.rows?.length || 0) === 1 ? '' : 's'}`}
+                {busy ? stageLabel || 'Creating…' : 'Create token'}
               </TradeDeployButton>
               <TradeDeployButton
                 type="button"
@@ -542,9 +387,9 @@ export default function CreateTokenBoingContent() {
               </label>
             )}
 
-            {(stageLabel || batchProgress?.labeling) && (
+            {stageLabel && (
               <p role="status" className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
-                {batchProgress?.labeling || stageLabel}
+                {stageLabel}
               </p>
             )}
 
@@ -554,20 +399,14 @@ export default function CreateTokenBoingContent() {
                   Optional review check and bytecode override for operators. Leave bytecode empty to use Boing token
                   v2 from boing-sdk.
                 </p>
-                {mode === 'standard' ? (
-                  <button
-                    type="button"
-                    onClick={runQa}
-                    disabled={qaBusy || busy || !name.trim() || !symbol.trim()}
-                    className="td-btn td-btn--ghost text-sm"
-                  >
-                    {qaBusy ? 'Checking…' : 'Run review check'}
-                  </button>
-                ) : (
-                  <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-                    Large set runs the review check automatically before each deploy.
-                  </p>
-                )}
+                <button
+                  type="button"
+                  onClick={runQa}
+                  disabled={qaBusy || busy || !name.trim() || !symbol.trim()}
+                  className="td-btn td-btn--ghost text-sm"
+                >
+                  {qaBusy ? 'Checking…' : 'Run review check'}
+                </button>
                 <label className="td-field">
                   <span className="td-field__label">Bytecode override (hex)</span>
                   <textarea
@@ -603,6 +442,18 @@ export default function CreateTokenBoingContent() {
                 <p style={{ color: 'var(--text-primary)' }}>
                   Token created. Create a pool with USDC to make it swappable.
                 </p>
+                {lastResult.platformFee?.feeAmount > 0n ? (
+                  <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)' }} data-testid="create-token-fee-result">
+                    Platform fee {lastResult.platformFee.feeLabel}: {lastResult.platformFee.feeAmount.toString()} tokens
+                    {lastResult.feeCollection?.skipped
+                      ? ' — collection deferred (treasury not configured).'
+                      : lastResult.feeCollection?.ok
+                        ? ' — transferred to treasury.'
+                        : lastResult.feeCollection?.ok === false
+                          ? ` — transfer failed: ${lastResult.feeCollection.message || 'unknown error'}`
+                          : '.'}
+                  </p>
+                ) : null}
                 <p className="text-xs mt-2 font-mono break-all" style={{ color: 'var(--text-secondary)' }}>
                   {lastResult.tokenHex}
                 </p>
@@ -636,46 +487,6 @@ export default function CreateTokenBoingContent() {
                     </a>
                   ) : null}
                 </div>
-              </div>
-            ) : null}
-
-            {batchResults?.length ? (
-              <div
-                className="rounded-lg border p-3 text-sm space-y-2"
-                style={{ borderColor: 'var(--border-color)' }}
-                data-testid="create-token-batch-results"
-              >
-                <p style={{ color: 'var(--text-primary)' }}>
-                  Batch results · {batchResults.filter((r) => r.result?.ok).length} ok / {batchResults.length} tried
-                </p>
-                <ul className="space-y-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
-                  {batchResults.map(({ row, result }, i) => (
-                    <li key={`${row.symbol}-${i}`} className="font-mono break-all">
-                      {row.symbol}:{' '}
-                      {result.ok ? (
-                        <>
-                          <a
-                            className="text-cyan-400 underline"
-                            href={buildBoingExplorerAccountUrl(explorerBaseUrl, result.tokenHex)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {shortHex(result.tokenHex)}
-                          </a>
-                          {' · '}
-                          <Link
-                            className="text-cyan-400 underline"
-                            to={`/create-pool?token=${result.tokenHex}&pair=usdc`}
-                          >
-                            pool
-                          </Link>
-                        </>
-                      ) : (
-                        <span className="text-amber-300">{result.message || 'failed'}</span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
               </div>
             ) : null}
           </section>
