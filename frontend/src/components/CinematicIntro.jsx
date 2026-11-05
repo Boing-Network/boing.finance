@@ -494,7 +494,7 @@ function CinematicIntro({ onComplete }) {
         className={`cinematic-intro__scene-text${showSceneText ? ' show' : ''}`}
         aria-hidden
       >
-        <div className="cinematic-intro__scene-label">Move liquidity across chains</div>
+        <div className="cinematic-intro__scene-label">The DEX for Boing Network</div>
         <div className="cinematic-intro__scene-title">boing.finance</div>
         <div className="cinematic-intro__scene-sub">Swap. Bridge. Deploy. {PLATFORM_BRIDGE_FEE_LABEL} bridge fee.</div>
       </div>

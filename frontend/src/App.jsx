@@ -176,7 +176,7 @@ function DefaultSeoTags() {
       <meta property="og:image" content={brandShareImageAbsolute()} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
-      <meta property="og:image:alt" content="Boing Finance brand mark on a dark navy background" />
+      <meta property="og:image:alt" content="Boing Finance — The DEX for Boing Network" />
       <meta property="og:url" content={canonical} />
       <meta property="og:type" content="website" />
       <meta property="og:site_name" content="Boing Finance" />
@@ -184,9 +184,9 @@ function DefaultSeoTags() {
       {/* Twitter Card Meta Tags */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="Boing Finance — The DEX for Boing Network" />
-      <meta name="twitter:description" content="Swap and provide liquidity on native Boing pools with Boing Express." />
+      <meta name="twitter:description" content="Swap and provide liquidity on native Boing pools with Boing Express. Public testnet; mainnet is not live." />
       <meta name="twitter:image" content={brandShareImageAbsolute()} />
-      <meta name="twitter:image:alt" content="Boing Finance brand mark on a dark navy background" />
+      <meta name="twitter:image:alt" content="Boing Finance — The DEX for Boing Network" />
     </Helmet>
   );
 }

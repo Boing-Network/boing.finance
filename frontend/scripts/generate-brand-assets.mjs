@@ -1,10 +1,9 @@
 /**
  * Rasterize public/assets/boing-logo-mark.svg into favicons, PWA icons, OG image, and legacy paths.
+ * OG card uses public/assets/boing-finance-wordmark.svg (mark + Comfortaa "Boing Finance") on navy #050A1A —
+ * same family layout as boing.network / boing.express / boing.observer.
  * Requires: sharp (devDependency). Run from frontend/: `npm run generate-brand-assets`
  * Then: `npm run generate-favicon` (uses boing-logo-mark.png as ICO source).
- *
- * The mark is a rounded square (outlined paths only, no <text>) so Sharp/librsvg
- * matches in-app Logo.jsx: shell + route arc + destination node.
  */
 
 import fs from 'fs';
@@ -16,9 +15,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(__dirname, '..', 'public');
 const assetsDir = path.join(publicDir, 'assets');
 const svgPath = path.join(assetsDir, 'boing-logo-mark.svg');
+const wordmarkPath = path.join(assetsDir, 'boing-finance-wordmark.svg');
 
 /** Solid tile behind small favicons — transparent + ICO quantization often reads as broken / “green” in tabs. */
 const FAVICON_TILE_BG = { r: 5, g: 10, b: 26, alpha: 1 };
+const BRAND_RGB = { r: 5, g: 10, b: 26 };
+const PNG = { compressionLevel: 9 };
 
 /**
  * @param {number} size
@@ -29,7 +31,7 @@ async function renderSquare(size, outAbsPath, background = { r: 0, g: 0, b: 0, a
   const buf = fs.readFileSync(svgPath);
   await sharp(buf)
     .resize(size, size, { fit: 'contain', background })
-    .png({ compressionLevel: 9 })
+    .png(PNG)
     .toFile(outAbsPath);
   console.log(`[brand-assets] ${path.relative(publicDir, outAbsPath)} (${size}×${size})`);
 }
@@ -58,103 +60,131 @@ async function buildSplash() {
     },
   })
     .composite([{ input: logo, gravity: 'center' }])
-    .png({ compressionLevel: 9 })
+    .png(PNG)
     .toFile(out);
   console.log('[brand-assets] splash.png (512×512, boing-logo-mark on #050A1A)');
 }
 
+function ogTaglineSvg() {
+  return Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="760" height="120" viewBox="0 0 760 120">
+  <text x="0" y="40" fill="#94a3b8" font-family="Comfortaa,Segoe UI,system-ui,sans-serif" font-size="30">The DEX for Boing Network</text>
+  <text x="0" y="92" fill="#64748b" font-family="Comfortaa,Segoe UI,system-ui,sans-serif" font-size="24">boing.finance · Public testnet, mainnet not live</text>
+</svg>`,
+    'utf8',
+  );
+}
+
+/**
+ * 1200×630: outlined wordmark (mark + Comfortaa Bold paths) with tagline under the text.
+ * Matches network / express / observer family share cards.
+ */
 async function buildOgImage() {
-  const logoBuf = await sharp(fs.readFileSync(svgPath))
-    .resize(280, 280, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
-    .png()
+  if (!fs.existsSync(wordmarkPath)) {
+    throw new Error(`Missing wordmark: ${wordmarkPath}`);
+  }
+  const wordmarkSvg = fs.readFileSync(wordmarkPath);
+  const W = 1200;
+  const H = 630;
+  const wmWidth = 900;
+  const wm = await sharp(wordmarkSvg, { density: 900 }).resize({ width: wmWidth }).png().toBuffer();
+  const { height: wmHeight } = await sharp(wm).metadata();
+  const tag = await sharp(ogTaglineSvg()).png().toBuffer();
+  const left = Math.round((W - wmWidth) / 2);
+  const top = Math.round(H / 2 - wmHeight / 2 - 50);
+  // text starts at x=76 of the wordmark viewBox (width ~250)
+  const textLeft = left + Math.round(wmWidth * (76 / 250));
+  const buffer = await sharp({ create: { width: W, height: H, channels: 3, background: BRAND_RGB } })
+    .composite([
+      { input: wm, left, top },
+      { input: tag, left: textLeft, top: top + wmHeight + 8 },
+    ])
+    .png(PNG)
     .toBuffer();
-  const b64 = logoBuf.toString('base64');
-  const ogSvg = `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#18244A"/>
-      <stop offset="55%" stop-color="#0A1128"/>
-      <stop offset="100%" stop-color="#050A1A"/>
-    </linearGradient>
-    <radialGradient id="glow" cx="50%" cy="32%" r="70%">
-      <stop offset="0%" stop-color="#3B8CFF" stop-opacity="0.12"/>
-      <stop offset="100%" stop-color="#3B8CFF" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect width="1200" height="630" fill="url(#bg)"/>
-  <rect width="1200" height="630" fill="url(#glow)"/>
-  <image href="data:image/png;base64,${b64}" width="280" height="280" x="460" y="88"/>
-  <text x="600" y="440" text-anchor="middle" fill="#F0F4F8" font-size="48" font-family="Segoe UI, system-ui, sans-serif" font-weight="700">boing.finance</text>
-  <text x="600" y="495" text-anchor="middle" fill="#8DB8FF" font-size="26" font-family="Segoe UI, system-ui, sans-serif">Move liquidity across chains</text>
-  <text x="600" y="535" text-anchor="middle" fill="#8b9cb0" font-size="18" font-family="Segoe UI, system-ui, sans-serif">Transparent routing · Native Boing liquidity</text>
-</svg>`;
-  const out = path.join(publicDir, 'preview-image.png');
-  await sharp(Buffer.from(ogSvg)).png().toFile(out);
-  console.log('[brand-assets] preview-image.png (1200×630)');
+
+  const previewOut = path.join(publicDir, 'preview-image.png');
+  const ogOut = path.join(publicDir, 'og.png');
+  const ogImageOut = path.join(publicDir, 'og-image.png');
+  await fs.promises.writeFile(previewOut, buffer);
+  await fs.promises.writeFile(ogOut, buffer);
+  await fs.promises.writeFile(ogImageOut, buffer);
+  console.log('[brand-assets] preview-image.png / og.png / og-image.png (1200×630, family wordmark card)');
 }
 
 async function buildHeroImage() {
-  const logoBuf = await sharp(fs.readFileSync(svgPath))
-    .resize(240, 240, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+  if (!fs.existsSync(wordmarkPath)) {
+    throw new Error(`Missing wordmark: ${wordmarkPath}`);
+  }
+  const wordmarkSvg = fs.readFileSync(wordmarkPath);
+  const W = 1024;
+  const H = 682;
+  const wmWidth = 720;
+  const wm = await sharp(wordmarkSvg, { density: 900 }).resize({ width: wmWidth }).png().toBuffer();
+  const { height: wmHeight } = await sharp(wm).metadata();
+  const tag = await sharp(
+    Buffer.from(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="700" height="100" viewBox="0 0 700 100">
+  <text x="0" y="36" fill="#94a3b8" font-family="Comfortaa,Segoe UI,system-ui,sans-serif" font-size="28">The DEX for Boing Network</text>
+  <text x="0" y="78" fill="#64748b" font-family="Comfortaa,Segoe UI,system-ui,sans-serif" font-size="20">boing.finance · Public testnet, mainnet not live</text>
+</svg>`,
+      'utf8',
+    ),
+  )
     .png()
     .toBuffer();
-  const b64 = logoBuf.toString('base64');
-  const heroSvg = `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="682" viewBox="0 0 1024 682">
-  <defs>
-    <linearGradient id="hbg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#18244A"/>
-      <stop offset="55%" stop-color="#0A1128"/>
-      <stop offset="100%" stop-color="#050A1A"/>
-    </linearGradient>
-    <radialGradient id="hglow" cx="38%" cy="42%" r="65%">
-      <stop offset="0%" stop-color="#3B8CFF" stop-opacity="0.14"/>
-      <stop offset="100%" stop-color="#3B8CFF" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect width="1024" height="682" fill="url(#hbg)"/>
-  <rect width="1024" height="682" fill="url(#hglow)"/>
-  <image href="data:image/png;base64,${b64}" width="240" height="240" x="120" y="221"/>
-  <text x="400" y="320" fill="#F0F4F8" font-size="52" font-family="Segoe UI, system-ui, sans-serif" font-weight="700">boing.finance</text>
-  <text x="400" y="372" fill="#8DB8FF" font-size="28" font-family="Segoe UI, system-ui, sans-serif">Move liquidity across chains</text>
-  <text x="400" y="416" fill="#8b9cb0" font-size="18" font-family="Segoe UI, system-ui, sans-serif">Transparent routing · Native Boing liquidity</text>
-</svg>`;
-  const out = path.join(publicDir, 'hero-image.png');
-  await sharp(Buffer.from(heroSvg)).png().toFile(out);
+  const left = Math.round((W - wmWidth) / 2);
+  const top = Math.round(H / 2 - wmHeight / 2 - 40);
+  const textLeft = left + Math.round(wmWidth * (76 / 250));
+  await sharp({ create: { width: W, height: H, channels: 3, background: BRAND_RGB } })
+    .composite([
+      { input: wm, left, top },
+      { input: tag, left: textLeft, top: top + wmHeight + 8 },
+    ])
+    .png(PNG)
+    .toFile(path.join(publicDir, 'hero-image.png'));
   console.log('[brand-assets] hero-image.png (1024×682)');
 }
 
 async function buildFacebookBanner() {
-  const logoBuf = await sharp(fs.readFileSync(svgPath))
-    .resize(200, 200, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
-    .png()
-    .toBuffer();
-  const b64 = logoBuf.toString('base64');
+  if (!fs.existsSync(wordmarkPath)) {
+    throw new Error(`Missing wordmark: ${wordmarkPath}`);
+  }
+  const wordmarkSvg = fs.readFileSync(wordmarkPath);
   const w = 820;
   const h = 312;
-  const svg = `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
-  <defs>
-    <linearGradient id="bbg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#18244A"/>
-      <stop offset="100%" stop-color="#050A1A"/>
-    </linearGradient>
-  </defs>
-  <rect width="${w}" height="${h}" fill="url(#bbg)"/>
-  <image href="data:image/png;base64,${b64}" width="200" height="200" x="48" y="56"/>
-  <text x="280" y="130" fill="#F0F4F8" font-size="36" font-family="Segoe UI, system-ui, sans-serif" font-weight="700">boing.finance</text>
-  <text x="280" y="175" fill="#8b9cb0" font-size="18" font-family="Segoe UI, system-ui, sans-serif">Move liquidity across chains</text>
-  <text x="280" y="210" fill="#3B8CFF" font-size="15" font-family="Segoe UI, system-ui, sans-serif" opacity="0.9">Transparent routing · Native Boing liquidity</text>
-</svg>`;
-  const out = path.join(assetsDir, 'boing-banner-facebook.png');
-  await sharp(Buffer.from(svg)).png().toFile(out);
+  const wmWidth = 560;
+  const wm = await sharp(wordmarkSvg, { density: 900 }).resize({ width: wmWidth }).png().toBuffer();
+  const { height: wmHeight } = await sharp(wm).metadata();
+  const tag = await sharp(
+    Buffer.from(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="520" height="48" viewBox="0 0 520 48">
+  <text x="0" y="32" fill="#94a3b8" font-family="Comfortaa,Segoe UI,system-ui,sans-serif" font-size="20">The DEX for Boing Network · Public testnet</text>
+</svg>`,
+      'utf8',
+    ),
+  )
+    .png()
+    .toBuffer();
+  const left = Math.round((w - wmWidth) / 2);
+  const top = Math.round(h / 2 - wmHeight / 2 - 18);
+  const textLeft = left + Math.round(wmWidth * (76 / 250));
+  await sharp({ create: { width: w, height: h, channels: 3, background: BRAND_RGB } })
+    .composite([
+      { input: wm, left, top },
+      { input: tag, left: textLeft, top: top + wmHeight + 4 },
+    ])
+    .png(PNG)
+    .toFile(path.join(assetsDir, 'boing-banner-facebook.png'));
   console.log('[brand-assets] assets/boing-banner-facebook.png (820×312)');
 }
 
 async function main() {
   if (!fs.existsSync(svgPath)) {
     console.error('[brand-assets] Missing', svgPath);
+    process.exit(1);
+  }
+  if (!fs.existsSync(wordmarkPath)) {
+    console.error('[brand-assets] Missing', wordmarkPath);
     process.exit(1);
   }
 
@@ -171,6 +201,8 @@ async function main() {
   await renderSquare(96, path.join(publicDir, 'favicon-96x96.png'), FAVICON_TILE_BG);
   await renderSquare(180, path.join(publicDir, 'apple-touch-icon.png'), FAVICON_TILE_BG);
   await renderSquare(150, path.join(publicDir, 'mstile-150x150.png'), FAVICON_TILE_BG);
+  await renderSquare(192, path.join(publicDir, 'web-app-manifest-192x192.png'), FAVICON_TILE_BG);
+  await renderSquare(512, path.join(publicDir, 'web-app-manifest-512x512.png'), FAVICON_TILE_BG);
 
   copySvgFavicon();
   await buildSplash();

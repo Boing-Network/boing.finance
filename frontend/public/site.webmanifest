@@ -1,7 +1,7 @@
 {
-  "name": "Boing Finance — Move liquidity across chains",
+  "name": "Boing Finance — The DEX for Boing Network",
   "short_name": "boing.finance",
-  "description": "Cross-chain DeFi with transparent routing and native Boing liquidity.",
+  "description": "Swap and provide liquidity on native Boing pools with Boing Express. Public testnet; mainnet is not live.",
   "icons": [
     { "src": "/assets/boing-logo-mark.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
     { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },

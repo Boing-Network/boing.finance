@@ -1,6 +1,6 @@
 /**
  * Canonical brand asset paths (public/). Keep in sync with scripts/generate-brand-assets.mjs.
- * Family hex mark uses the network purple→cyan gradient; share tiles sit on #050A1A.
+ * Arc-slab mark + navy/cyan share card (preview-image.png / og.png) match the Boing family OG layout.
  */
 
 const DEFAULT_SITE_ORIGIN = 'https://boing.finance';

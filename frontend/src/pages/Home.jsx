@@ -31,9 +31,9 @@ function Home() {
         <meta name="twitter:description" content={DESCRIPTION} />
         <meta name="twitter:site" content="@boingfinance" />
         <meta property="og:image" content={brandShareImageAbsolute()} />
-        <meta property="og:image:alt" content="Boing Finance brand mark on a dark navy background" />
+        <meta property="og:image:alt" content="Boing Finance — The DEX for Boing Network" />
         <meta name="twitter:image" content={brandShareImageAbsolute()} />
-        <meta name="twitter:image:alt" content="Boing Finance brand mark on a dark navy background" />
+        <meta name="twitter:image:alt" content="Boing Finance — The DEX for Boing Network" />
         <link rel="canonical" href="https://boing.finance" />
         <link rel="icon" type="image/png" href={`/favicon-32x32.png${suffix}`} sizes="32x32" />
         <link rel="icon" type="image/png" href={`/favicon-16x16.png${suffix}`} sizes="16x16" />

@@ -17,7 +17,7 @@ export const minikitConfig = {
     splashImageUrl: "https://boing.finance/splash.png",
     splashBackgroundColor: "#050A1A",
     heroImageUrl: "https://boing.finance/preview-image.png",
-    tagline: "Move liquidity across chains",
+    tagline: "The DEX for Boing Network",
     primaryCategory: "finance",
     tags: [
       "defi",
