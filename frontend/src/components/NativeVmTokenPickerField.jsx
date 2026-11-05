@@ -32,6 +32,8 @@ function shortHex(h) {
  *   indexerTokens?: Array<{ id: string, symbol: string, name: string, decimals?: number }>,
  *   inputTestId?: string,
  *   helpHint?: boolean,
+ *   hideAddressField?: boolean,
+ *   balanceLabel?: string | null,
  * }} props
  */
 export default function NativeVmTokenPickerField({
@@ -43,9 +45,12 @@ export default function NativeVmTokenPickerField({
   indexerTokens = [],
   inputTestId,
   helpHint = true,
+  hideAddressField = false,
+  balanceLabel = null,
 }) {
   const [customVersion, setCustomVersion] = useState(0);
   const [recentVersion, setRecentVersion] = useState(0);
+  const [showPaste, setShowPaste] = useState(false);
 
   const excludeNorm = useMemo(() => normalizeNativeVmTokenId32(excludeHex || ''), [excludeHex]);
 
@@ -114,11 +119,25 @@ export default function NativeVmTokenPickerField({
     [allPickable, normalizedValue]
   );
 
+  const selectedMeta = useMemo(() => {
+    if (!normalizedValue) return null;
+    const fromList = allPickable.find((t) => t.id === normalizedValue);
+    if (fromList) return fromList;
+    const l = labelOf(normalizedValue);
+    return {
+      id: normalizedValue,
+      symbol: l.resolved ? l.symbol : shortHex(normalizedValue),
+      name: l.resolved ? l.name || 'Selected token' : 'Selected token',
+    };
+  }, [normalizedValue, allPickable, labelOf]);
+
   const onSelectPreset = useCallback(
     (e) => {
       const v = e.target.value;
-      e.target.value = '';
-      if (!v) return;
+      if (!v) {
+        onChange('');
+        return;
+      }
       const id = normalizeNativeVmTokenId32(v);
       if (!id) return;
       onChange(id);
@@ -158,63 +177,114 @@ export default function NativeVmTokenPickerField({
     }
   }, [value, allPickable]);
 
+  const optionLabel = (t) =>
+    `${t.symbol}${'coingeckoId' in t && t.coingeckoId ? ` [${t.coingeckoId}]` : ''} — ${t.name.slice(0, 42)}${
+      t.name.length > 42 ? '…' : ''
+    }`;
+
+  const showPasteChrome = !hideAddressField || showPaste;
+
+  const addressInput = (
+    <input
+      id={inputTestId || undefined}
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value.trim())}
+      onBlur={onBlurRecordRecent}
+      placeholder="Paste token id (0x…)"
+      data-testid={inputTestId}
+      className={`td-field__input w-full text-xs font-mono ${hideAddressField ? '' : 'flex-1'}`}
+      spellCheck={false}
+      // Keep mounted when collapsed so URL prefills / e2e can still read the value.
+      hidden={hideAddressField && !showPaste ? true : undefined}
+      tabIndex={hideAddressField && !showPaste ? -1 : undefined}
+      aria-hidden={hideAddressField && !showPaste ? true : undefined}
+    />
+  );
+
+  const saveRow = showPasteChrome ? (
+    <div className="flex flex-wrap items-center gap-2 mt-1.5">
+      <button
+        type="button"
+        onClick={onSaveCustom}
+        className="td-btn td-btn--ghost text-[10px] px-2 py-0.5"
+        data-testid={inputTestId ? `${inputTestId}-save` : undefined}
+      >
+        Save current id to my tokens
+      </button>
+      {normalizedValue && !valueInList ? (
+        <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
+          Not in the list yet — save it so it stays here.
+        </span>
+      ) : null}
+    </div>
+  ) : null;
+
   return (
-    <div className="td-field">
-      <label className="td-field__label" htmlFor={inputTestId || undefined}>
-        {label}
-      </label>
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+    <div className="td-field relative">
+      <div className="flex items-baseline justify-between gap-2 mb-1">
+        <label className="td-field__label mb-0" htmlFor={inputTestId || undefined}>
+          {label}
+        </label>
+        {balanceLabel != null ? (
+          <span
+            className="text-xs tabular-nums shrink-0"
+            style={{ color: 'var(--text-tertiary)' }}
+            data-testid={inputTestId ? `${inputTestId}-balance` : undefined}
+          >
+            {balanceLabel}
+          </span>
+        ) : null}
+      </div>
+      <div className={`flex flex-col gap-2 ${hideAddressField ? '' : 'sm:flex-row sm:items-stretch'}`}>
         <select
           aria-label={`${label} — choose from list`}
-          defaultValue=""
+          value={normalizedValue || ''}
           onChange={onSelectPreset}
-          className="td-field__input w-full sm:max-w-[200px] text-xs shrink-0"
+          className={`td-field__input w-full text-xs ${hideAddressField ? '' : 'sm:max-w-[200px] shrink-0'}`}
+          data-testid={inputTestId ? `${inputTestId}-select` : undefined}
         >
-          <option value="">Pick from list…</option>
+          <option value="">{normalizedValue ? 'Clear selection…' : 'Pick from list…'}</option>
+          {normalizedValue && !valueInList && selectedMeta ? (
+            <option value={normalizedValue}>{optionLabel(selectedMeta)}</option>
+          ) : null}
           {allPickable.map((t) => (
             <option key={t.id} value={t.id}>
-              {t.symbol}
-              {'coingeckoId' in t && t.coingeckoId ? ` [${t.coingeckoId}]` : ''} — {t.name.slice(0, 42)}
-              {t.name.length > 42 ? '…' : ''}
+              {optionLabel(t)}
             </option>
           ))}
         </select>
-        <input
-          id={inputTestId || undefined}
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value.trim())}
-          onBlur={onBlurRecordRecent}
-          placeholder="Paste token id (0x…)"
-          data-testid={inputTestId}
-          className="td-field__input w-full flex-1 text-xs font-mono"
-          spellCheck={false}
-        />
+        {!hideAddressField ? addressInput : null}
       </div>
+      {hideAddressField ? (
+        <div className="mt-1.5">
+          <button
+            type="button"
+            className="td-btn td-btn--link text-[10px] px-0"
+            onClick={() => setShowPaste((v) => !v)}
+            data-testid={inputTestId ? `${inputTestId}-paste-toggle` : undefined}
+          >
+            {showPaste ? 'Hide custom token id' : 'Paste custom token id…'}
+          </button>
+          {showPaste ? <div className="mt-1.5 space-y-1">{addressInput}{saveRow}</div> : addressInput}
+        </div>
+      ) : (
+        saveRow
+      )}
       {normalizedValue ? (
         <div className="mt-1.5 text-xs" style={{ color: 'var(--text-primary)' }} data-testid={inputTestId ? `${inputTestId}-label` : undefined}>
           <TokenLabel label={labelOf(normalizedValue)} showName />
         </div>
       ) : null}
-      <div className="flex flex-wrap items-center gap-2 mt-1.5">
-        <button
-          type="button"
-          onClick={onSaveCustom}
-          className="td-btn td-btn--ghost text-[10px] px-2 py-0.5"
-          data-testid={inputTestId ? `${inputTestId}-save` : undefined}
-        >
-          Save current id to my tokens
-        </button>
-        {normalizedValue && !valueInList ? (
-          <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
-            Not in the list yet — save it so it stays here.
-          </span>
-        ) : null}
-      </div>
-      {helpHint ? (
+      {!hideAddressField && helpHint ? (
         <p className="text-[10px] mt-1 leading-snug" style={{ color: 'var(--text-tertiary)' }}>
           New tokens appear after deploy (saved here), from recent deploys on this browser, or once they show up in the
           network token directory. Paste the AccountId if the name is missing.
+        </p>
+      ) : null}
+      {hideAddressField && helpHint ? (
+        <p className="text-[10px] mt-1 leading-snug" style={{ color: 'var(--text-tertiary)' }}>
+          Don&apos;t see your token? Use Paste custom token id, then save it to my tokens.
         </p>
       ) : null}
     </div>

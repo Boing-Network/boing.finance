@@ -2,8 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
-import { boingPoolBytecodeHex, isBoingTestnetChainId } from '@boing-network/boing-sdk';
-import { KNOWN_BOING_TOKENS } from '../services/boingSwapQuote';
+import { boingPoolBytecodeHex, getBoingTokenBalance, isBoingTestnetChainId } from '@boing-network/boing-sdk';
+import { formatTokenAmount, isNativeBoingId, KNOWN_BOING_TOKENS } from '../services/boingSwapQuote';
+import { getSharedBoingClient } from '../services/boingNativeDexClient';
 import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
 import NativeVmTokenPickerField from './NativeVmTokenPickerField';
@@ -19,6 +20,7 @@ import { BOING_QA_PURPOSE_OPTIONS, isValidBoingQaPurpose } from '../config/boing
 import { showDeployCelebration } from '../utils/deployCelebration';
 import { buildBoingExplorerAccountUrl, buildBoingExplorerTxUrl } from '../config/boingExplorerUrls';
 import { isBoingNativeAccountIdHex } from '../utils/boingWalletDiscovery';
+import { normalizeNativeVmTokenId32 } from '../services/nativeVmTokenRegistry';
 
 const DEFAULT_POOL_PURPOSE = 'dapp';
 
@@ -27,6 +29,20 @@ function shortHex(h) {
   const t = h.trim();
   if (t.length < 18) return t || '—';
   return `${t.slice(0, 10)}…${t.slice(-6)}`;
+}
+
+function normTokenId(id) {
+  return normalizeNativeVmTokenId32(id) || String(id || '').trim().toLowerCase();
+}
+
+function decimalsForToken(id) {
+  const n = normTokenId(id);
+  return KNOWN_BOING_TOKENS[n]?.decimals ?? 0;
+}
+
+function balanceDisplay(balance, tokenId) {
+  if (balance == null) return 'Balance: …';
+  return `Balance: ${formatTokenAmount(balance, decimalsForToken(tokenId), 4)}`;
 }
 
 /**
@@ -53,6 +69,7 @@ export default function NativeBoingCreatePoolPanel() {
   const symB = tokenB && labelOf(tokenB.toLowerCase()).resolved ? labelOf(tokenB.toLowerCase()).symbol : 'Token B';
   const [amountA, setAmountA] = useState('');
   const [amountB, setAmountB] = useState('');
+  const [balances, setBalances] = useState(/** @type {Record<string, bigint | null>} */ ({}));
   const [poolLabel, setPoolLabel] = useState('');
   const [poolSymbol, setPoolSymbol] = useState('');
   const [purposeCategory, setPurposeCategory] = useState(DEFAULT_POOL_PURPOSE);
@@ -65,6 +82,7 @@ export default function NativeBoingCreatePoolPanel() {
   const [busy, setBusy] = useState(false);
   const [lastResult, setLastResult] = useState(null);
   const [companionsLinked, setCompanionsLinked] = useState(!projectGateActive);
+  const client = useMemo(() => getSharedBoingClient(), []);
 
   useEffect(() => {
     if (isBoingNativeAccountIdHex(projectToken) && !tokenA) {
@@ -89,6 +107,43 @@ export default function NativeBoingCreatePoolPanel() {
   useEffect(() => {
     if (!projectGateActive) setCompanionsLinked(true);
   }, [projectGateActive]);
+
+  // Wallet balances for the selected Token A / Token B (same sources as Swap / Liquidity).
+  useEffect(() => {
+    if (!isConnected || !account || walletType !== 'boingExpress') {
+      setBalances({});
+      return undefined;
+    }
+    let off = false;
+    const ids = [tokenA, tokenB].map(normTokenId).filter(Boolean);
+    if (!ids.length) {
+      setBalances({});
+      return undefined;
+    }
+    const readOne = async (id) => {
+      if (isNativeBoingId(id)) {
+        return BigInt((await client.getAccount(account))?.balance ?? 0);
+      }
+      return getBoingTokenBalance(client, id, account);
+    };
+    Promise.all(
+      ids.map(async (id) => {
+        try {
+          return [id, await readOne(id)];
+        } catch {
+          return [id, null];
+        }
+      })
+    ).then((rows) => {
+      if (!off) setBalances(Object.fromEntries(rows));
+    });
+    return () => {
+      off = true;
+    };
+  }, [client, isConnected, account, walletType, tokenA, tokenB]);
+
+  const balA = tokenA ? balances[normTokenId(tokenA)] : null;
+  const balB = tokenB ? balances[normTokenId(tokenB)] : null;
 
   // Custody pool v8 (token-v2 pairs, approvals, swaps through the swap card) unless an operator overrides it.
   const bundledBytecode = useMemo(() => {
@@ -238,10 +293,9 @@ export default function NativeBoingCreatePoolPanel() {
 
       <div className="td-status td-status--info text-xs mb-4">
         <p className="mb-0">
-          Don&apos;t see your token? Paste its AccountId below, then{' '}
-          <strong style={{ color: 'var(--text-primary)' }}>Save current id to my tokens</strong>. Tokens you deploy on
-          this browser are saved automatically. Tokens that never joined a pool may not appear in the network directory
-          yet.
+          Pick tokens from the list. Missing one? Open{' '}
+          <strong style={{ color: 'var(--text-primary)' }}>Paste custom token id</strong> under Token A or B, then save
+          it to my tokens. Deploys on this browser are saved automatically.
         </p>
       </div>
 
@@ -255,6 +309,8 @@ export default function NativeBoingCreatePoolPanel() {
           indexerTokens={indexerPickerTokens}
           inputTestId="native-create-pool-token-a"
           helpHint={false}
+          hideAddressField
+          balanceLabel={tokenA && isConnected ? balanceDisplay(balA, tokenA) : null}
         />
         <NativeVmTokenPickerField
           label="Token B"
@@ -265,12 +321,28 @@ export default function NativeBoingCreatePoolPanel() {
           indexerTokens={indexerPickerTokens}
           inputTestId="native-create-pool-token-b"
           helpHint={false}
+          hideAddressField
+          balanceLabel={tokenB && isConnected ? balanceDisplay(balB, tokenB) : null}
         />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 mb-4" id="initial-liquidity">
         <label className="td-field">
-          <span className="td-field__label">Amount of {symA}</span>
+          <span className="td-field__label flex items-baseline justify-between gap-2">
+            <span>Amount of {symA}</span>
+            {tokenA && isConnected ? (
+              <button
+                type="button"
+                className="text-xs font-normal hover:underline tabular-nums"
+                style={{ color: 'var(--text-tertiary)' }}
+                data-testid="create-pool-balance-a"
+                onClick={() => balA != null && balA > 0n && setAmountA(balA.toString())}
+                title="Use full wallet balance (base units)"
+              >
+                {balanceDisplay(balA, tokenA)}
+              </button>
+            ) : null}
+          </span>
           <input
             type="text"
             inputMode="numeric"
@@ -285,7 +357,21 @@ export default function NativeBoingCreatePoolPanel() {
           </span>
         </label>
         <label className="td-field">
-          <span className="td-field__label">Amount of {symB}</span>
+          <span className="td-field__label flex items-baseline justify-between gap-2">
+            <span>Amount of {symB}</span>
+            {tokenB && isConnected ? (
+              <button
+                type="button"
+                className="text-xs font-normal hover:underline tabular-nums"
+                style={{ color: 'var(--text-tertiary)' }}
+                data-testid="create-pool-balance-b"
+                onClick={() => balB != null && balB > 0n && setAmountB(balB.toString())}
+                title="Use full wallet balance (base units)"
+              >
+                {balanceDisplay(balB, tokenB)}
+              </button>
+            ) : null}
+          </span>
           <input
             type="text"
             inputMode="numeric"
