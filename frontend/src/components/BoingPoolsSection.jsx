@@ -5,11 +5,8 @@ import BoingPoolsTab from './BoingPoolsTab';
 import BoingYourLiquidityTab from './BoingYourLiquidityTab';
 import BoingLiquidityAdvanced from './BoingLiquidityAdvanced';
 import { useBoingPools } from '../hooks/useBoingPools';
-import { useWallet } from '../contexts/WalletContext';
-import { BOING_NATIVE_L1_CHAIN_ID } from '../config/networks';
-import { getWindowBoingProvider, boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
-import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
 import { boingSwapPairHref, parsePoolsTab } from '../utils/swapPoolsRedirect';
+import { useConnectBoingExpress } from './BoingOnlyGate';
 
 const TABS = [
   { id: 'all', label: 'All pools' },
@@ -28,7 +25,7 @@ const TABS = [
 export default function BoingPoolsSection({ account = null, initialQuery = '' }) {
   const pools = useBoingPools(account || null);
   const navigate = useNavigate();
-  const { connectWalletWithProvider } = useWallet();
+  const { connect: connectBoingExpress } = useConnectBoingExpress();
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = parsePoolsTab(searchParams.get('tab'));
   const [addFor, setAddFor] = useState(/** @type {any} */ (null));
@@ -78,18 +75,9 @@ export default function BoingPoolsSection({ account = null, initialQuery = '' })
       setTab('liquidity');
       return;
     }
-    const provider = getWindowBoingProvider();
-    if (!provider) {
-      toast.error(boingWalletMissingMessage());
-      return;
-    }
-    try {
-      await connectWalletWithProvider(provider, 'boingExpress', BOING_NATIVE_L1_CHAIN_ID);
-      // The page re-renders for the connected wallet; the URL carries the pool across.
-      setTab('liquidity', { addPool: c.poolHex });
-    } catch (e) {
-      toast.error(formatBoingExpressRpcError(e));
-    }
+    await connectBoingExpress();
+    // The page re-renders for the connected wallet; the URL carries the pool across.
+    setTab('liquidity', { addPool: c.poolHex });
   };
 
   return (
