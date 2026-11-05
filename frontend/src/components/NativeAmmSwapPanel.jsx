@@ -444,7 +444,7 @@ export default function NativeAmmSwapPanel({
         </div>
         <div>
           <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
-            Amount in — sell {direction === 'a_to_b' ? legA : legB} (integer units)
+            Amount in — sell {direction === 'a_to_b' ? legA : legB} (integer base units; Advanced tool)
           </label>
           <input
             type="text"

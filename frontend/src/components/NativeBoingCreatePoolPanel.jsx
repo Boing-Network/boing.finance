@@ -317,7 +317,7 @@ export default function NativeBoingCreatePoolPanel() {
       <h3 className="td-section-title mb-1">Create a pool</h3>
       <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
         Pick two tokens and deposit the first liquidity. That first deposit sets the starting price. Boing Express will
-        ask you to confirm up to four steps: deploy the pool, bind the tokens, seed liquidity, then register the pair.
+        ask twice: deploy the pool, then one batch that binds tokens, seeds liquidity, and registers the pair.
       </p>
 
       {projectGateActive ? (
@@ -616,24 +616,10 @@ export default function NativeBoingCreatePoolPanel() {
                 </a>
               </li>
             ) : null}
-            {lastResult.setTokensTxHash ? (
+            {lastResult.postDeployBatched && lastResult.addLiquidityTxHash ? (
               <li>
-                2. Bind tokens —{' '}
-                <a
-                  className="text-cyan-400 underline"
-                  href={buildBoingExplorerTxUrl(explorerBaseUrl, lastResult.setTokensTxHash)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {shortHex(lastResult.setTokensTxHash)}
-                </a>
-              </li>
-            ) : lastResult.setTokensSkipped ? (
-              <li>2. Bind tokens — skipped</li>
-            ) : null}
-            {lastResult.addLiquidityTxHash ? (
-              <li>
-                3. Seed liquidity —{' '}
+                2. Bind + seed
+                {lastResult.registerTxHash ? ' + register' : ''} —{' '}
                 <a
                   className="text-cyan-400 underline"
                   href={buildBoingExplorerTxUrl(explorerBaseUrl, lastResult.addLiquidityTxHash)}
@@ -642,23 +628,55 @@ export default function NativeBoingCreatePoolPanel() {
                 >
                   {shortHex(lastResult.addLiquidityTxHash)}
                 </a>
+                {lastResult.registerSkipped ? ' (pair listing skipped)' : ''}
               </li>
-            ) : null}
-            {lastResult.registerTxHash ? (
-              <li>
-                4. Register pair —{' '}
-                <a
-                  className="text-cyan-400 underline"
-                  href={buildBoingExplorerTxUrl(explorerBaseUrl, lastResult.registerTxHash)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {shortHex(lastResult.registerTxHash)}
-                </a>
-              </li>
-            ) : lastResult.registerSkipped ? (
-              <li>4. Register pair — skipped (pool still exists)</li>
-            ) : null}
+            ) : (
+              <>
+                {lastResult.setTokensTxHash ? (
+                  <li>
+                    2. Bind tokens —{' '}
+                    <a
+                      className="text-cyan-400 underline"
+                      href={buildBoingExplorerTxUrl(explorerBaseUrl, lastResult.setTokensTxHash)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {shortHex(lastResult.setTokensTxHash)}
+                    </a>
+                  </li>
+                ) : lastResult.setTokensSkipped ? (
+                  <li>2. Bind tokens — skipped</li>
+                ) : null}
+                {lastResult.addLiquidityTxHash ? (
+                  <li>
+                    3. Seed liquidity —{' '}
+                    <a
+                      className="text-cyan-400 underline"
+                      href={buildBoingExplorerTxUrl(explorerBaseUrl, lastResult.addLiquidityTxHash)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {shortHex(lastResult.addLiquidityTxHash)}
+                    </a>
+                  </li>
+                ) : null}
+                {lastResult.registerTxHash ? (
+                  <li>
+                    4. Register pair —{' '}
+                    <a
+                      className="text-cyan-400 underline"
+                      href={buildBoingExplorerTxUrl(explorerBaseUrl, lastResult.registerTxHash)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {shortHex(lastResult.registerTxHash)}
+                    </a>
+                  </li>
+                ) : lastResult.registerSkipped ? (
+                  <li>4. Register pair — skipped (pool still exists)</li>
+                ) : null}
+              </>
+            )}
           </ul>
         </div>
       )}

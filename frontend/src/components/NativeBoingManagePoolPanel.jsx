@@ -21,6 +21,14 @@ import { normalizeNativeVmTokenId32 } from '../services/nativeVmTokenRegistry';
 import { useTokenLabels } from '../hooks/useTokenLabels';
 import TokenLabel from './TokenLabel';
 import { boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
+import {
+  BOING_DECIMALS,
+  KNOWN_BOING_TOKENS,
+  formatTokenAmount,
+  isNativeBoingId,
+  parseTokenAmount,
+  sanitizeAmountInput,
+} from '../services/boingSwapQuote';
 
 function pickExpressProvider(getWalletProvider) {
   try {
@@ -32,17 +40,6 @@ function pickExpressProvider(getWalletProvider) {
   return getWindowBoingProvider();
 }
 
-function parsePositiveBigInt(raw) {
-  try {
-    const t = (raw || '').trim();
-    if (!t) return null;
-    const n = BigInt(t);
-    return n > 0n ? n : null;
-  } catch {
-    return null;
-  }
-}
-
 function shortHex(h) {
   if (!h || typeof h !== 'string') return '—';
   const t = h.trim();
@@ -50,8 +47,17 @@ function shortHex(h) {
   return `${t.slice(0, 10)}…${t.slice(-6)}`;
 }
 
+function decimalsForToken(id) {
+  const n = normalizeNativeVmTokenId32(id) || String(id || '').trim().toLowerCase();
+  if (!n) return 0;
+  if (isNativeBoingId(n)) return BOING_DECIMALS;
+  const known = KNOWN_BOING_TOKENS[n]?.decimals;
+  return typeof known === 'number' ? known : 0;
+}
+
 /**
  * Add / remove on an existing native CP pool (canonical, directory venue, or pasted AccountId).
+ * Amounts are human units (same as Swap / Your liquidity).
  */
 export default function NativeBoingManagePoolPanel() {
   const { chainId, walletType, isConnected, getWalletProvider, account } = useWallet();
@@ -79,6 +85,16 @@ export default function NativeBoingManagePoolPanel() {
   const labelOf = useTokenLabels(venues.flatMap((v) => [v.tokenAHex, v.tokenBHex]));
   const symOf = (h) => labelOf((h || '').toLowerCase()).symbol;
 
+  const decA =
+    typeof venue?.tokenADecimals === 'number' ? venue.tokenADecimals : decimalsForToken(venue?.tokenAHex);
+  const decB =
+    typeof venue?.tokenBDecimals === 'number' ? venue.tokenBDecimals : decimalsForToken(venue?.tokenBHex);
+
+  const addA = useMemo(() => parseTokenAmount(addAmountA, decA), [addAmountA, decA]);
+  const addB = useMemo(() => parseTokenAmount(addAmountB, decB), [addAmountB, decB]);
+  /** LP share amounts are whole integer units on native CP pools (no decimals metadata). */
+  const removeBn = useMemo(() => parseTokenAmount(removeLp, 0), [removeLp]);
+
   const loadReserves = useCallback(async () => {
     if (!pool) return;
     setLoadError(null);
@@ -99,10 +115,6 @@ export default function NativeBoingManagePoolPanel() {
   useEffect(() => {
     loadReserves();
   }, [loadReserves]);
-
-  const addA = useMemo(() => parsePositiveBigInt(addAmountA), [addAmountA]);
-  const addB = useMemo(() => parsePositiveBigInt(addAmountB), [addAmountB]);
-  const removeBn = useMemo(() => parsePositiveBigInt(removeLp), [removeLp]);
 
   const callPool = async (calldata) => {
     if (!isBoingTestnetChainId(chainId) || walletType !== 'boingExpress' || !isConnected) {
@@ -126,8 +138,12 @@ export default function NativeBoingManagePoolPanel() {
   };
 
   const onAdd = async () => {
-    if (addA == null || addB == null) {
-      toast.error('Enter positive integer amounts for both reserves.');
+    if (!addA || !addB) {
+      toast.error(
+        !addAmountA.trim() || !addAmountB.trim()
+          ? 'Enter amounts for both reserves.'
+          : 'Amounts must match each token’s decimals (BOING allows fractions; most test tokens are whole units).'
+      );
       return;
     }
     setBusy(true);
@@ -145,7 +161,7 @@ export default function NativeBoingManagePoolPanel() {
   };
 
   const onRemove = async () => {
-    if (removeBn == null) {
+    if (!removeBn) {
       toast.error('Enter a positive LP amount to burn.');
       return;
     }
@@ -184,8 +200,8 @@ export default function NativeBoingManagePoolPanel() {
         <Link to="/create-pool" className="text-cyan-400 underline">
           Create Pool
         </Link>{' '}
-        if the pair does not exist yet. First-seed / MVP add_liquidity may not mint a transferable LP token — use{' '}
-        <strong>Remove LP</strong> only when this pool actually minted shares to you.
+        if the pair does not exist yet. Enter human amounts (same as Swap). First-seed / MVP add_liquidity may not mint
+        a transferable LP token — use <strong>Remove LP</strong> only when this pool actually minted shares to you.
       </p>
 
       {venues.length > 0 && (
@@ -233,7 +249,8 @@ export default function NativeBoingManagePoolPanel() {
       )}
       {reserveA != null && reserveB != null && (
         <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
-          Reserves: {reserveA.toString()} {venue ? symOf(venue.tokenAHex) : 'A'} / {reserveB.toString()} {venue ? symOf(venue.tokenBHex) : 'B'}
+          Reserves: {formatTokenAmount(reserveA, decA, 4)} {venue ? symOf(venue.tokenAHex) : 'A'} /{' '}
+          {formatTokenAmount(reserveB, decB, 4)} {venue ? symOf(venue.tokenBHex) : 'B'}
           {explorerBaseUrl && pool ? (
             <>
               {' '}
@@ -248,22 +265,34 @@ export default function NativeBoingManagePoolPanel() {
 
       <div className="grid gap-3 sm:grid-cols-2 mb-3">
         <label className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-          Add {venue ? symOf(venue.tokenAHex) : 'reserve A'} (integer)
+          Add {venue ? symOf(venue.tokenAHex) : 'reserve A'}
           <input
             className={`${fieldClass} mt-1`}
             style={fieldStyle}
+            inputMode={decA ? 'decimal' : 'numeric'}
             value={addAmountA}
-            onChange={(e) => setAddAmountA(e.target.value.replace(/\D/g, ''))}
+            onChange={(e) => setAddAmountA(sanitizeAmountInput(e.target.value, decA))}
+            placeholder={decA ? '200' : '1000000'}
+            data-testid="manage-pool-amount-a"
           />
+          <span className="mt-1 block" style={{ color: 'var(--text-tertiary)' }}>
+            {decA ? `Human amount (${decA} decimals)` : 'Whole units (0 decimals)'}
+          </span>
         </label>
         <label className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-          Add {venue ? symOf(venue.tokenBHex) : 'reserve B'} (integer)
+          Add {venue ? symOf(venue.tokenBHex) : 'reserve B'}
           <input
             className={`${fieldClass} mt-1`}
             style={fieldStyle}
+            inputMode={decB ? 'decimal' : 'numeric'}
             value={addAmountB}
-            onChange={(e) => setAddAmountB(e.target.value.replace(/\D/g, ''))}
+            onChange={(e) => setAddAmountB(sanitizeAmountInput(e.target.value, decB))}
+            placeholder={decB ? '200' : '1000000'}
+            data-testid="manage-pool-amount-b"
           />
+          <span className="mt-1 block" style={{ color: 'var(--text-tertiary)' }}>
+            {decB ? `Human amount (${decB} decimals)` : 'Whole units (0 decimals)'}
+          </span>
         </label>
       </div>
       <div className="flex flex-wrap gap-2 mb-4">
@@ -279,12 +308,13 @@ export default function NativeBoingManagePoolPanel() {
       </div>
 
       <label className="text-xs block mb-2" style={{ color: 'var(--text-tertiary)' }}>
-        LP amount to burn
+        LP amount to burn (whole LP units)
         <input
           className={`${fieldClass} mt-1 max-w-xs`}
           style={fieldStyle}
+          inputMode="numeric"
           value={removeLp}
-          onChange={(e) => setRemoveLp(e.target.value.replace(/\D/g, ''))}
+          onChange={(e) => setRemoveLp(sanitizeAmountInput(e.target.value, 0))}
         />
       </label>
       <button

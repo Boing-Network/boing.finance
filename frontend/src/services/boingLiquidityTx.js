@@ -6,25 +6,97 @@
  * v10 pools pairing native BOING (wBOING) use ONE batch instead (one Boing Express confirmation):
  *   add:    wBOING.deposit (BOING sent as call value) -> approve wBOING -> approve other token -> add_liquidity
  *   remove: remove_liquidity -> wBOING.withdraw_all (the BOING side arrives as native BOING)
+ *
+ * Create Pool post-deploy seed: ONE batch after the deploy tx —
+ *   set_tokens -> (wrap/approves/)add_liquidity -> optional factory register_pair
+ * so Express asks twice (deploy + seed), not four times. Deploy cannot join a batch: Express/protocol
+ * batch steps are transfer | contract_call only.
  */
 
 const lc = (h) => String(h || '').toLowerCase();
 
+function uniqHex(...ids) {
+  return ids.map(lc).filter((v, i, a) => v && /^0x[0-9a-f]{64}$/.test(v) && a.indexOf(v) === i);
+}
+
+/** Liquidity call steps only (no set_tokens / register). Shared by add-liquidity and create-pool seed. */
+function buildAddLiquidityBatchCalls(p) {
+  const pool = lc(p.poolHex);
+  const minLp = p.minLp ?? 1n;
+  const addCd = encodeBoingPoolV8AddLiquidityCalldata(p.amountA, p.amountB, minLp, 0n);
+  if (isNativePair(p)) {
+    const w = lc(p.wboingHex || WBOING_HEX);
+    const [boingAmount, otherHex, otherAmount] =
+      isNativeBoingId(p.tokenAHex) || lc(p.tokenAHex) === w
+        ? [p.amountA, p.tokenBHex, p.amountB]
+        : [p.amountB, p.tokenAHex, p.amountA];
+    return [
+      { kind: 'contractCallWithValue', contractHex: w, calldata: encodeWboingDepositCalldata(), value: boingAmount },
+      { kind: 'contractCall', contractHex: w, calldata: encodeReferenceApproveCalldata(pool, boingAmount) },
+      { kind: 'contractCall', contractHex: lc(otherHex), calldata: encodeReferenceApproveCalldata(pool, otherAmount) },
+      { kind: 'contractCall', contractHex: pool, calldata: addCd },
+    ];
+  }
+  return [
+    {
+      kind: 'contractCall',
+      contractHex: lc(p.tokenAHex),
+      calldata: encodeReferenceApproveCalldata(pool, p.amountA),
+    },
+    {
+      kind: 'contractCall',
+      contractHex: lc(p.tokenBHex),
+      calldata: encodeReferenceApproveCalldata(pool, p.amountB),
+    },
+    { kind: 'contractCall', contractHex: pool, calldata: addCd },
+  ];
+}
+
 /** Batch request for a native-BOING add (exported for tests). Nonce is refreshed by the signer. */
 export function buildNativeAddLiquidityRequest(p) {
   const w = lc(p.wboingHex || WBOING_HEX);
-  const [boingAmount, otherHex, otherAmount] = isNativeBoingId(p.tokenAHex) || lc(p.tokenAHex) === w
-    ? [p.amountA, p.tokenBHex, p.amountB]
-    : [p.amountB, p.tokenAHex, p.amountA];
   const tx = buildBatchTransaction({
     nonce: 0n,
     senderHex: p.senderHex,
-    calls: [
-      { kind: 'contractCallWithValue', contractHex: w, calldata: encodeWboingDepositCalldata(), value: boingAmount },
-      { kind: 'contractCall', contractHex: w, calldata: encodeReferenceApproveCalldata(p.poolHex, boingAmount) },
-      { kind: 'contractCall', contractHex: otherHex, calldata: encodeReferenceApproveCalldata(p.poolHex, otherAmount) },
-      { kind: 'contractCall', contractHex: p.poolHex, calldata: encodeBoingPoolV8AddLiquidityCalldata(p.amountA, p.amountB, p.minLp ?? 1n, 0n) },
-    ],
+    calls: buildAddLiquidityBatchCalls(p),
+    accessList: (() => {
+      const ids = uniqHex(p.senderHex, p.poolHex, p.tokenAHex, p.tokenBHex, w);
+      return { read: ids, write: ids };
+    })(),
+  });
+  return boingTxToExpressRequest(tx);
+}
+
+/**
+ * Post-deploy Create Pool seed: set_tokens + liquidity (+ optional register_pair) in ONE Express approval.
+ * @param {{
+ *   poolHex: string, tokenAHex: string, tokenBHex: string, amountA: bigint, amountB: bigint,
+ *   senderHex: string, minLp?: bigint, factoryHex?: string | null, wboingHex?: string,
+ * }} p
+ */
+export function buildCreatePoolPostDeployBatchRequest(p) {
+  const pool = lc(p.poolHex);
+  const tokenA = lc(p.tokenAHex);
+  const tokenB = lc(p.tokenBHex);
+  const factory = p.factoryHex ? lc(p.factoryHex) : '';
+  const w = lc(p.wboingHex || WBOING_HEX);
+  const calls = [
+    { kind: 'contractCall', contractHex: pool, calldata: encodeNativeAmmSetTokensCalldata(tokenA, tokenB) },
+    ...buildAddLiquidityBatchCalls(p),
+  ];
+  if (factory) {
+    calls.push({
+      kind: 'contractCall',
+      contractHex: factory,
+      calldata: encodeNativeDexRegisterPairCalldata(tokenA, tokenB, pool),
+    });
+  }
+  const ids = uniqHex(p.senderHex, pool, tokenA, tokenB, w, factory || null);
+  const tx = buildBatchTransaction({
+    nonce: 0n,
+    senderHex: p.senderHex,
+    calls,
+    accessList: { read: ids, write: ids },
   });
   return boingTxToExpressRequest(tx);
 }
@@ -57,6 +129,8 @@ import {
   buildBoingTokenApproveTransaction,
   encodeBoingPoolV8AddLiquidityCalldata,
   encodeBoingPoolV8RemoveLiquidityCalldata,
+  encodeNativeAmmSetTokensCalldata,
+  encodeNativeDexRegisterPairCalldata,
   encodeReferenceApproveCalldata,
   encodeWboingDepositCalldata,
   encodeWboingWithdrawAllCalldata,

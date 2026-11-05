@@ -41,7 +41,7 @@ There is **no compiler switch** that turns Solidity into Boing VM bytecode. (The
   - `nativeVm.dexFactory`, `swapRouter`, `ledgerRouterV2` / `V3`, `liquidityLocker`, plus LP vault / share token ids (env or live RPC; zeros when unpublished).
   - Runtime defaults come from **`fetchNativeDexIntegrationDefaults`** (`@boing-network/boing-sdk`): live `boing_getNetworkInfo.end_user` plus env overrides. Historical SDK-embedded 6913 hexes are **not** treated as live.
 
-The **Swap** tab on 6913 targets the **network default** constant-product pool. **Create Pool** on 6913 deploys a new CP pool, binds token ids, and seeds `add_liquidity`; `register_pair` runs when a factory id is published. **Pools → Your liquidity** add/remove (Advanced section for a pasted id) works on the canonical pool, a directory venue, or a pasted pool AccountId. Additional factory pairs (including multihop) are surfaced under **Pools** and **Smart route**.
+The **Swap** tab on 6913 targets the **network default** constant-product pool. **Create Pool** on 6913 deploys a new CP pool, then one Express batch binds token ids, seeds `add_liquidity`, and runs `register_pair` when a factory id is published (two user approvals — deploy cannot join a protocol batch). Amounts are human units (same as Swap). **Pools → Your liquidity** add/remove (Advanced section for a pasted id) works on the canonical pool, a directory venue, or a pasted pool AccountId. Additional factory pairs (including multihop) are surfaced under **Pools** and **Smart route**.
 
 ### “Deploy the Solidity DEX on Boing” actually means
 

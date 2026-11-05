@@ -309,9 +309,9 @@ function Liquidity() {
         <li>
           <To to="/create-pool">Create pool</To> starts a new pool: pick two tokens and make the first deposit, which sets
           the starting price. Enter amounts the same way as Swap (human units — e.g. <B>200</B> BOING means 200 BOING,
-          not 200 base units). Express confirms up to four steps (deploy, bind tokens, seed liquidity, register pair).
-          The pool is registered on the DEX factory, so it shows on Pools and its tokens show in the swap list right
-          away.
+          not 200 base units). Express confirms twice: deploy, then one batch that binds tokens, seeds liquidity, and
+          registers the pair. The pool is registered on the DEX factory, so it shows on Pools and its tokens show in
+          the swap list right away.
         </li>
         <li>
           <To to="/create-token">Create Token</To> deploys a Boing token v2 (whole units, fixed supply at create) —

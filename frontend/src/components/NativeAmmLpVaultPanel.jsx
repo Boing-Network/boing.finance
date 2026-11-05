@@ -346,7 +346,7 @@ export default function NativeAmmLpVaultPanel({ compact = false, embedded = fals
               type="text"
               value={depAmountA}
               onChange={(e) => setDepAmountA(e.target.value)}
-              placeholder="Amount A (u128)"
+              placeholder="Amount A (integer base units)"
               className="text-sm p-2 rounded-lg border font-mono"
               style={{
                 backgroundColor: 'var(--bg-tertiary)',
@@ -358,7 +358,7 @@ export default function NativeAmmLpVaultPanel({ compact = false, embedded = fals
               type="text"
               value={depAmountB}
               onChange={(e) => setDepAmountB(e.target.value)}
-              placeholder="Amount B (u128)"
+              placeholder="Amount B (integer base units)"
               className="text-sm p-2 rounded-lg border font-mono"
               style={{
                 backgroundColor: 'var(--bg-tertiary)',

@@ -8,7 +8,8 @@ import { nativeAccountsAccessListJson } from './nativeAmmAccessList';
 import { normalizeNativeVmTokenId32 } from './nativeVmTokenRegistry';
 import { formatBoingExpressRpcError } from '../utils/boingExpressRpcError';
 import { boingPoolBytecodeHex, predictNonceDerivedContractAddress } from '@boing-network/boing-sdk';
-import { executeAddLiquidity } from './boingLiquidityTx';
+import { buildCreatePoolPostDeployBatchRequest, executeAddLiquidity } from './boingLiquidityTx';
+import { withBoingExpressDisplay } from './boingExpressTxDisplay';
 import { getSharedBoingClient } from './boingNativeDexClient';
 import { boingWalletMissingMessage } from '../utils/boingWalletDiscovery';
 
@@ -75,7 +76,109 @@ export async function resolveDeployedPoolId(txIdHex, predictedPoolId, { maxAttem
 }
 
 /**
+ * Sequential fallback when the post-deploy batch is unavailable or fails (custom bytecode / older nodes).
+ */
+async function seedPoolSequential({
+  provider,
+  account,
+  poolId,
+  tokenA,
+  tokenB,
+  amountABn,
+  amountBBn,
+  factory,
+  custody,
+  getWalletProvider,
+  warnings,
+}) {
+  let setTokensTxHash = null;
+  let setTokensSkipped = false;
+  try {
+    setTokensTxHash = await contractCall(
+      provider,
+      poolId,
+      encodeNativeAmmSetTokensCalldataHex(tokenA, tokenB),
+      [account, poolId, tokenA, tokenB],
+      custody ? { senderHex: account, waitForInclusion: true } : undefined
+    );
+  } catch (e) {
+    setTokensSkipped = true;
+    warnings.push(
+      `set_tokens did not land (${formatBoingExpressRpcError(e)}). v1 ledger-only pools skip this; add liquidity may still work.`
+    );
+  }
+
+  let addLiquidityTxHash = null;
+  try {
+    if (custody) {
+      const res = await executeAddLiquidity(getSharedBoingClient(), {
+        poolHex: poolId,
+        tokenAHex: tokenA,
+        tokenBHex: tokenB,
+        amountA: amountABn,
+        amountB: amountBBn,
+        minLp: 1n,
+        senderHex: account,
+        signSimulateSubmit: (tx, o) =>
+          boingExpressContractCallSignSimulateSubmit(provider, tx, { senderHex: account, waitForInclusion: o?.waitForInclusion }),
+      });
+      addLiquidityTxHash = res.add;
+    } else {
+      addLiquidityTxHash = await contractCall(
+        provider,
+        poolId,
+        encodeNativeAmmAddLiquidityCalldataHex(amountABn, amountBBn, 0n),
+        [account, poolId, tokenA, tokenB]
+      );
+    }
+  } catch (e) {
+    return {
+      ok: false,
+      code: 'add_liquidity_failed',
+      message: `Pool deployed at ${poolId}, but the first add_liquidity failed: ${formatBoingExpressRpcError(e)}`,
+      poolId,
+      setTokensTxHash,
+      setTokensSkipped,
+      warnings,
+    };
+  }
+
+  let registerTxHash = null;
+  let registerSkipped = !factory;
+  if (factory) {
+    try {
+      registerTxHash = await contractCall(
+        provider,
+        factory,
+        encodeNativeDexRegisterPairCalldataHex(tokenA, tokenB, poolId),
+        [account, factory, poolId, tokenA, tokenB]
+      );
+    } catch (e) {
+      registerSkipped = true;
+      warnings.push(
+        `Factory register_pair failed (${formatBoingExpressRpcError(e)}). The pool exists; an operator who controls the factory can register it later.`
+      );
+    }
+  } else {
+    warnings.push('No native DEX factory id is published on this network, so the pair was not registered for discovery.');
+  }
+
+  return {
+    ok: true,
+    poolId,
+    setTokensTxHash,
+    addLiquidityTxHash,
+    registerTxHash,
+    setTokensSkipped,
+    registerSkipped,
+    postDeployBatched: false,
+    warnings,
+  };
+}
+
+/**
  * Deploy a native CP pool, bind token ids, seed the first add_liquidity, and optionally register on the factory.
+ * Custody path: deploy (1 Express approval) + post-deploy batch bind/seed/register (1 Express approval).
  * Does not claim success if deploy inclusion or seeding fails.
  *
  * @returns {Promise<{
@@ -90,6 +193,7 @@ export async function resolveDeployedPoolId(txIdHex, predictedPoolId, { maxAttem
  *   registerTxHash?: string | null,
  *   setTokensSkipped?: boolean,
  *   registerSkipped?: boolean,
+ *   postDeployBatched?: boolean,
  *   warnings?: string[],
  * }>}
  */
@@ -175,92 +279,90 @@ export async function createBoingNativeConstantProductPool({
     };
   }
 
-  let setTokensTxHash = null;
-  let setTokensSkipped = false;
-  try {
-    setTokensTxHash = await contractCall(
-      provider,
-      poolId,
-      encodeNativeAmmSetTokensCalldataHex(tokenA, tokenB),
-      [account, poolId, tokenA, tokenB],
-      custody ? { senderHex: account, waitForInclusion: true } : undefined
-    );
-  } catch (e) {
-    setTokensSkipped = true;
-    warnings.push(
-      `set_tokens did not land (${formatBoingExpressRpcError(e)}). v1 ledger-only pools skip this; add liquidity may still work.`
-    );
-  }
-
-  let addLiquidityTxHash = null;
-  try {
-    if (custody) {
-      const res = await executeAddLiquidity(getSharedBoingClient(), {
-        poolHex: poolId,
-        tokenAHex: tokenA,
-        tokenBHex: tokenB,
-        amountA: amountABn,
-        amountB: amountBBn,
-        minLp: 1n,
-        senderHex: account,
-        signSimulateSubmit: (tx, o) =>
-          boingExpressContractCallSignSimulateSubmit(provider, tx, { senderHex: account, waitForInclusion: o?.waitForInclusion }),
-      });
-      addLiquidityTxHash = res.add;
-    } else {
-      addLiquidityTxHash = await contractCall(
-        provider,
-        poolId,
-        encodeNativeAmmAddLiquidityCalldataHex(amountABn, amountBBn, 0n),
-        [account, poolId, tokenA, tokenB]
-      );
-    }
-  } catch (e) {
-    return {
-      ok: false,
-      code: 'add_liquidity_failed',
-      message: `Pool deployed at ${poolId}, but the first add_liquidity failed: ${formatBoingExpressRpcError(e)}`,
-      poolId,
-      deployTxHash: deploy.txHash,
-      boingTxIdHex: deploy.boingTxIdHex,
-      setTokensTxHash,
-      setTokensSkipped,
-      warnings,
-    };
-  }
-
   const factory = normalizeNativeVmTokenId32(factoryHex || '');
-  let registerTxHash = null;
-  let registerSkipped = !factory;
-  if (factory) {
+
+  // Custody: one Express approval for bind + seed (+ register). Custom bytecode keeps the sequential path.
+  if (custody) {
     try {
-      registerTxHash = await contractCall(
-        provider,
-        factory,
-        encodeNativeDexRegisterPairCalldataHex(tokenA, tokenB, poolId),
-        [account, factory, poolId, tokenA, tokenB]
+      const batchTx = withBoingExpressDisplay(
+        buildCreatePoolPostDeployBatchRequest({
+          poolHex: poolId,
+          tokenAHex: tokenA,
+          tokenBHex: tokenB,
+          amountA: amountABn,
+          amountB: amountBBn,
+          minLp: 1n,
+          senderHex: account,
+          factoryHex: factory || null,
+        }),
+        factory
+          ? 'Bind tokens, seed liquidity, and register the pair'
+          : 'Bind tokens and seed liquidity'
       );
+      const seedHash = await boingExpressContractCallSignSimulateSubmit(provider, batchTx, {
+        senderHex: account,
+        waitForInclusion: true,
+      });
+      if (!factory) {
+        warnings.push('No native DEX factory id is published on this network, so the pair was not registered for discovery.');
+      }
+      return {
+        ok: true,
+        poolId,
+        deployTxHash: deploy.txHash,
+        boingTxIdHex: deploy.boingTxIdHex,
+        setTokensTxHash: seedHash,
+        addLiquidityTxHash: seedHash,
+        registerTxHash: factory ? seedHash : null,
+        setTokensSkipped: false,
+        registerSkipped: !factory,
+        postDeployBatched: true,
+        custody: true,
+        warnings,
+      };
     } catch (e) {
-      registerSkipped = true;
       warnings.push(
-        `Factory register_pair failed (${formatBoingExpressRpcError(e)}). The pool exists; an operator who controls the factory can register it later.`
+        `One-shot bind/seed batch failed (${formatBoingExpressRpcError(e)}); retrying as separate Express steps.`
       );
+      const seq = await seedPoolSequential({
+        provider,
+        account,
+        poolId,
+        tokenA,
+        tokenB,
+        amountABn,
+        amountBBn,
+        factory,
+        custody: true,
+        getWalletProvider,
+        warnings,
+      });
+      return {
+        ...seq,
+        deployTxHash: deploy.txHash,
+        boingTxIdHex: deploy.boingTxIdHex,
+        custody: true,
+      };
     }
-  } else {
-    warnings.push('No native DEX factory id is published on this network, so the pair was not registered for discovery.');
   }
 
-  return {
-    ok: true,
+  const seq = await seedPoolSequential({
+    provider,
+    account,
     poolId,
+    tokenA,
+    tokenB,
+    amountABn,
+    amountBBn,
+    factory,
+    custody: false,
+    getWalletProvider,
+    warnings,
+  });
+  return {
+    ...seq,
     deployTxHash: deploy.txHash,
     boingTxIdHex: deploy.boingTxIdHex,
-    setTokensTxHash,
-    addLiquidityTxHash,
-    registerTxHash,
-    setTokensSkipped,
-    registerSkipped,
-    custody,
-    warnings,
+    custody: false,
   };
 }

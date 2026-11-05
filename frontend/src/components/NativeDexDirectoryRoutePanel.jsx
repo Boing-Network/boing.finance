@@ -429,7 +429,7 @@ export default function NativeDexDirectoryRoutePanel({
       <div className="grid gap-3 sm:grid-cols-2 mb-3">
         <div>
           <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>
-            Amount in (integer units)
+            Amount in (integer base units)
           </label>
           <input
             type="text"

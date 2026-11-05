@@ -18,7 +18,11 @@ import {
   toAmountInput,
 } from '../src/services/boingSwapQuote.js';
 import { poolCard, pairedAmount } from '../src/services/boingPoolsSimple.js';
-import { buildNativeAddLiquidityRequest, buildNativeRemoveLiquidityRequest } from '../src/services/boingLiquidityTx.js';
+import {
+  buildCreatePoolPostDeployBatchRequest,
+  buildNativeAddLiquidityRequest,
+  buildNativeRemoveLiquidityRequest,
+} from '../src/services/boingLiquidityTx.js';
 import { planNativeBoingSwap } from '../src/services/nativeDexCustodySwap.js';
 
 const USDC = '0x6676f971ade3982406efa3e2cdb0477923f8f2a15624c4b6ad3a432817a75e93';
@@ -100,6 +104,44 @@ test('native add / remove liquidity are single batches (wrap with value, unwrap 
   assert.deepEqual(rm.calls.map((c) => c.contract), [POOL, WBOING_HEX]);
   assert.equal(rm.calls.every((c) => c.value == null), true);
   assert.ok(rm.access_list.write.includes(WBOING_HEX));
+});
+
+test('create-pool post-deploy seed is one batch: set_tokens + wrap/approves/add + optional register', () => {
+  const FACTORY = `0x${'cd'.repeat(32)}`;
+  const withReg = buildCreatePoolPostDeployBatchRequest({
+    poolHex: POOL,
+    tokenAHex: WBOING_HEX,
+    tokenBHex: USDC,
+    amountA: E18,
+    amountB: 200n,
+    minLp: 1n,
+    senderHex: ME,
+    factoryHex: FACTORY,
+  });
+  assert.equal(withReg.type, 'batch');
+  // set_tokens + deposit + approve wBOING + approve USDC + add_liquidity + register_pair
+  assert.equal(withReg.calls.length, 6);
+  assert.equal(withReg.calls[0].contract, POOL);
+  assert.deepEqual(withReg.calls.map((c) => c.value ?? null), [null, String(E18), null, null, null, null]);
+  assert.equal(withReg.calls.at(-1).contract, FACTORY);
+  assert.ok(withReg.access_list.write.includes(FACTORY));
+
+  const tokenToken = buildCreatePoolPostDeployBatchRequest({
+    poolHex: POOL,
+    tokenAHex: USDC,
+    tokenBHex: TBOING,
+    amountA: 1000n,
+    amountB: 2000n,
+    senderHex: ME,
+    factoryHex: null,
+  });
+  // set_tokens + approve A + approve B + add_liquidity
+  assert.equal(tokenToken.calls.length, 4);
+  assert.equal(tokenToken.calls.every((c) => c.value == null), true);
+  assert.deepEqual(
+    tokenToken.calls.map((c) => c.contract),
+    [POOL, USDC, TBOING, POOL],
+  );
 });
 
 test('native swap plan: one batch, BOING value on the deposit step, unwrap on the way out', async () => {

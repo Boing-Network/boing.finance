@@ -236,7 +236,7 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
             >
               <NativePoolsDirectoryPanel onTradeThisPair={onTradeThisPair} />
             </AdvSection>
-            <AdvSection id="routing" title="Smart routing" description="Multi-hop quotes across several pools when no direct pair exists.">
+            <AdvSection id="routing" title="Smart routing" description="Multi-hop quotes across several pools when no direct pair exists. Amounts here are integer base units (operator tool — use the Swap tab for human amounts).">
               <NativeDexDirectoryRoutePanel
                 slippagePercent={slippagePercent}
                 embedded
@@ -248,7 +248,7 @@ export default function NativeBoingTradeHub({ slippagePercent = 0.5 }) {
             <AdvSection
               id="legacy"
               title="Legacy pool"
-              description="The original ledger pool (v1) and its LP vaults. Kept for existing positions."
+              description="The original ledger pool (v1) and its LP vaults. Kept for existing positions. Amount fields take integer base units (operator tool)."
               copies={[['Legacy pool', effectivePoolHex]]}
             >
               {loading ? (
