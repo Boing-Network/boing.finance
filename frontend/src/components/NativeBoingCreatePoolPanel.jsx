@@ -3,7 +3,16 @@ import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import { boingPoolBytecodeHex, getBoingTokenBalance, isBoingTestnetChainId } from '@boing-network/boing-sdk';
-import { formatTokenAmount, isNativeBoingId, KNOWN_BOING_TOKENS } from '../services/boingSwapQuote';
+import {
+  BOING_DECIMALS,
+  formatTokenAmount,
+  isNativeBoingId,
+  KNOWN_BOING_TOKENS,
+  NATIVE_FEE_RESERVE,
+  parseTokenAmount,
+  sanitizeAmountInput,
+  toAmountInput,
+} from '../services/boingSwapQuote';
 import { getSharedBoingClient } from '../services/boingNativeDexClient';
 import { useWallet } from '../contexts/WalletContext';
 import { useBoingNativeDexIntegration } from '../contexts/BoingNativeDexIntegrationContext';
@@ -35,14 +44,33 @@ function normTokenId(id) {
   return normalizeNativeVmTokenId32(id) || String(id || '').trim().toLowerCase();
 }
 
-function decimalsForToken(id) {
+/** Decimals for amount fields: known tokens (BOING=18), then directory / indexer, else whole units (0). */
+function decimalsForToken(id, indexerTokens = [], venues = []) {
   const n = normTokenId(id);
-  return KNOWN_BOING_TOKENS[n]?.decimals ?? 0;
+  if (!n) return 0;
+  if (isNativeBoingId(n)) return BOING_DECIMALS;
+  const known = KNOWN_BOING_TOKENS[n]?.decimals;
+  if (typeof known === 'number') return known;
+  for (const t of indexerTokens || []) {
+    if (normTokenId(t?.id) === n && typeof t.decimals === 'number') return t.decimals;
+  }
+  for (const v of venues || []) {
+    if (normTokenId(v?.tokenAHex) === n && typeof v.tokenADecimals === 'number') return v.tokenADecimals;
+    if (normTokenId(v?.tokenBHex) === n && typeof v.tokenBDecimals === 'number') return v.tokenBDecimals;
+  }
+  return 0;
 }
 
-function balanceDisplay(balance, tokenId) {
+function balanceDisplay(balance, decimals) {
   if (balance == null) return 'Balance: …';
-  return `Balance: ${formatTokenAmount(balance, decimalsForToken(tokenId), 4)}`;
+  return `Balance: ${formatTokenAmount(balance, decimals, 4)}`;
+}
+
+/** Max fill for the amount field (human units). Keeps 1 BOING for fees when the side is native BOING. */
+function maxAmountInput(balance, tokenId, decimals) {
+  if (balance == null || balance <= 0n) return '';
+  const spend = isNativeBoingId(tokenId) && balance > NATIVE_FEE_RESERVE ? balance - NATIVE_FEE_RESERVE : balance;
+  return spend > 0n ? toAmountInput(spend, decimals) : '';
 }
 
 /**
@@ -144,6 +172,10 @@ export default function NativeBoingCreatePoolPanel() {
 
   const balA = tokenA ? balances[normTokenId(tokenA)] : null;
   const balB = tokenB ? balances[normTokenId(tokenB)] : null;
+  const decA = decimalsForToken(tokenA, indexerPickerTokens, venues);
+  const decB = decimalsForToken(tokenB, indexerPickerTokens, venues);
+  const amountABase = parseTokenAmount(amountA, decA);
+  const amountBBase = parseTokenAmount(amountB, decB);
 
   // Custody pool v8 (token-v2 pairs, approvals, swaps through the swap card) unless an operator overrides it.
   const bundledBytecode = useMemo(() => {
@@ -225,6 +257,18 @@ export default function NativeBoingCreatePoolPanel() {
       );
       return;
     }
+    if (!amountABase || !amountBBase) {
+      toast.error(
+        !amountA?.trim() || !amountB?.trim()
+          ? 'Enter positive amounts for both tokens.'
+          : 'Amounts must match each token decimals (BOING allows up to 18 fraction digits; most test tokens are whole units).'
+      );
+      return;
+    }
+    if ((balA != null && amountABase > balA) || (balB != null && amountBBase > balB)) {
+      toast.error('Amount exceeds wallet balance.');
+      return;
+    }
     setBusy(true);
     setLastResult(null);
     try {
@@ -233,8 +277,8 @@ export default function NativeBoingCreatePoolPanel() {
         account,
         tokenAHex: tokenA,
         tokenBHex: tokenB,
-        amountA,
-        amountB,
+        amountA: amountABase.toString(),
+        amountB: amountBBase.toString(),
         factoryHex: effectiveFactoryHex,
         poolLabel,
         poolSymbol,
@@ -272,8 +316,8 @@ export default function NativeBoingCreatePoolPanel() {
     <section className="td-card text-left mb-6 p-5 sm:p-6" data-testid="native-create-pool-panel">
       <h3 className="td-section-title mb-1">Create a pool</h3>
       <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-        Pick two tokens and deposit the first liquidity. That first deposit sets the starting price. Express will ask
-        you to approve each step.
+        Pick two tokens and deposit the first liquidity. That first deposit sets the starting price. Boing Express will
+        ask you to confirm up to four steps: deploy the pool, bind the tokens, seed liquidity, then register the pair.
       </p>
 
       {projectGateActive ? (
@@ -310,7 +354,7 @@ export default function NativeBoingCreatePoolPanel() {
           inputTestId="native-create-pool-token-a"
           helpHint={false}
           hideAddressField
-          balanceLabel={tokenA && isConnected ? balanceDisplay(balA, tokenA) : null}
+          balanceLabel={tokenA && isConnected ? balanceDisplay(balA, decA) : null}
         />
         <NativeVmTokenPickerField
           label="Token B"
@@ -322,7 +366,7 @@ export default function NativeBoingCreatePoolPanel() {
           inputTestId="native-create-pool-token-b"
           helpHint={false}
           hideAddressField
-          balanceLabel={tokenB && isConnected ? balanceDisplay(balB, tokenB) : null}
+          balanceLabel={tokenB && isConnected ? balanceDisplay(balB, decB) : null}
         />
       </div>
 
@@ -336,24 +380,26 @@ export default function NativeBoingCreatePoolPanel() {
                 className="text-xs font-normal hover:underline tabular-nums"
                 style={{ color: 'var(--text-tertiary)' }}
                 data-testid="create-pool-balance-a"
-                onClick={() => balA != null && balA > 0n && setAmountA(balA.toString())}
-                title="Use full wallet balance (base units)"
+                onClick={() => setAmountA(maxAmountInput(balA, tokenA, decA))}
+                title="Use wallet balance"
               >
-                {balanceDisplay(balA, tokenA)}
+                {balanceDisplay(balA, decA)}
               </button>
             ) : null}
           </span>
           <input
             type="text"
-            inputMode="numeric"
+            inputMode={decA ? 'decimal' : 'numeric'}
             value={amountA}
             data-testid="create-pool-amount-a"
-            onChange={(e) => setAmountA(e.target.value.replace(/[^\d]/g, ''))}
+            onChange={(e) => setAmountA(sanitizeAmountInput(e.target.value, decA))}
             className="td-field__input"
-            placeholder="1000000"
+            placeholder={decA ? '200' : '1000000'}
           />
           <span className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
-            Whole numbers only (no decimals in this flow).
+            {decA
+              ? `Human amount (${decA} decimals). Example: 200 = 200 ${symA}.`
+              : 'Whole units (this token has 0 decimals).'}
           </span>
         </label>
         <label className="td-field">
@@ -365,24 +411,26 @@ export default function NativeBoingCreatePoolPanel() {
                 className="text-xs font-normal hover:underline tabular-nums"
                 style={{ color: 'var(--text-tertiary)' }}
                 data-testid="create-pool-balance-b"
-                onClick={() => balB != null && balB > 0n && setAmountB(balB.toString())}
-                title="Use full wallet balance (base units)"
+                onClick={() => setAmountB(maxAmountInput(balB, tokenB, decB))}
+                title="Use wallet balance"
               >
-                {balanceDisplay(balB, tokenB)}
+                {balanceDisplay(balB, decB)}
               </button>
             ) : null}
           </span>
           <input
             type="text"
-            inputMode="numeric"
+            inputMode={decB ? 'decimal' : 'numeric'}
             value={amountB}
             data-testid="create-pool-amount-b"
-            onChange={(e) => setAmountB(e.target.value.replace(/[^\d]/g, ''))}
+            onChange={(e) => setAmountB(sanitizeAmountInput(e.target.value, decB))}
             className="td-field__input"
-            placeholder="1000000"
+            placeholder={decB ? '200' : '1000000'}
           />
           <span className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
-            Whole numbers only (no decimals in this flow).
+            {decB
+              ? `Human amount (${decB} decimals). Example: 200 = 200 ${symB}.`
+              : 'Whole units (this token has 0 decimals).'}
           </span>
         </label>
       </div>
@@ -403,8 +451,8 @@ export default function NativeBoingCreatePoolPanel() {
             deployBlocked ||
             !tokenA ||
             !tokenB ||
-            !amountA ||
-            !amountB ||
+            !amountABase ||
+            !amountBBase ||
             (projectGateActive && !companionsLinked)
           }
           className="td-btn td-btn--primary disabled:opacity-50"
@@ -542,31 +590,77 @@ export default function NativeBoingCreatePoolPanel() {
         </div>
       )}
       {lastResult?.ok && lastResult.poolId && (
-        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-          Pool{' '}
-          <a
-            className="text-cyan-400 underline"
-            href={buildBoingExplorerAccountUrl(explorerBaseUrl, lastResult.poolId)}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {shortHex(lastResult.poolId)}
-          </a>
-          {lastResult.deployTxHash ? (
-            <>
-              {' '}
-              ·{' '}
-              <a
-                className="text-cyan-400 underline"
-                href={buildBoingExplorerTxUrl(explorerBaseUrl, lastResult.boingTxIdHex || lastResult.deployTxHash)}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                deploy tx
-              </a>
-            </>
-          ) : null}
-        </p>
+        <div className="text-xs space-y-1" style={{ color: 'var(--text-secondary)' }}>
+          <p className="mb-0">
+            Pool{' '}
+            <a
+              className="text-cyan-400 underline"
+              href={buildBoingExplorerAccountUrl(explorerBaseUrl, lastResult.poolId)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {shortHex(lastResult.poolId)}
+            </a>
+          </p>
+          <ul className="list-none space-y-0.5 pl-0 mb-0">
+            {lastResult.boingTxIdHex || lastResult.deployTxHash ? (
+              <li>
+                1. Deploy —{' '}
+                <a
+                  className="text-cyan-400 underline"
+                  href={buildBoingExplorerTxUrl(explorerBaseUrl, lastResult.boingTxIdHex || lastResult.deployTxHash)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {shortHex(lastResult.boingTxIdHex || lastResult.deployTxHash)}
+                </a>
+              </li>
+            ) : null}
+            {lastResult.setTokensTxHash ? (
+              <li>
+                2. Bind tokens —{' '}
+                <a
+                  className="text-cyan-400 underline"
+                  href={buildBoingExplorerTxUrl(explorerBaseUrl, lastResult.setTokensTxHash)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {shortHex(lastResult.setTokensTxHash)}
+                </a>
+              </li>
+            ) : lastResult.setTokensSkipped ? (
+              <li>2. Bind tokens — skipped</li>
+            ) : null}
+            {lastResult.addLiquidityTxHash ? (
+              <li>
+                3. Seed liquidity —{' '}
+                <a
+                  className="text-cyan-400 underline"
+                  href={buildBoingExplorerTxUrl(explorerBaseUrl, lastResult.addLiquidityTxHash)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {shortHex(lastResult.addLiquidityTxHash)}
+                </a>
+              </li>
+            ) : null}
+            {lastResult.registerTxHash ? (
+              <li>
+                4. Register pair —{' '}
+                <a
+                  className="text-cyan-400 underline"
+                  href={buildBoingExplorerTxUrl(explorerBaseUrl, lastResult.registerTxHash)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {shortHex(lastResult.registerTxHash)}
+                </a>
+              </li>
+            ) : lastResult.registerSkipped ? (
+              <li>4. Register pair — skipped (pool still exists)</li>
+            ) : null}
+          </ul>
+        </div>
       )}
     </section>
   );
