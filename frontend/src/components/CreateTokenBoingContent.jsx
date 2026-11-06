@@ -29,8 +29,11 @@ import { preflightBoingLaunchWizardByKind } from '../services/boingNativeLaunchW
 import { parseBoingTokenV2Supply, BOING_TOKEN_V2_DECIMALS } from '../services/boingTokenV2Launch';
 import { tryParseEvenLengthDeployBytecodeHex } from '../utils/boingDeployBytecodeHex';
 import { showDeployCelebration } from '../utils/deployCelebration';
+import { ensureTokenLaunchMetadataForCreate } from '../utils/tokenLaunchMetadata';
+import { isPublicAssetUri } from '../utils/r2AssetUpload';
 import { buildBoingExplorerAccountUrl, buildBoingExplorerTxUrl } from '../config/boingExplorerUrls';
 import { isValidBoingQaPurpose, BOING_QA_PURPOSE_TOKEN } from '../config/boingQa';
+import TokenLogoUpload from './TokenLogoUpload';
 
 export default function CreateTokenBoingContent() {
   const { chainId, walletType, isConnected, getWalletProvider, account } = useWallet();
@@ -40,6 +43,7 @@ export default function CreateTokenBoingContent() {
   const [name, setName] = useState('');
   const [symbol, setSymbol] = useState('');
   const [supply, setSupply] = useState('1000000');
+  const [logoUrl, setLogoUrl] = useState('');
 
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [customBytecode, setCustomBytecode] = useState('');
@@ -162,7 +166,7 @@ export default function CreateTokenBoingContent() {
     }
   };
 
-  const celebrateOne = (result, tokenName, tokenSymbol) => {
+  const celebrateOne = (result, tokenName, tokenSymbol, logo) => {
     const fee = result.platformFee;
     const details = [
       { label: 'Name', value: tokenName },
@@ -170,6 +174,8 @@ export default function CreateTokenBoingContent() {
       { label: 'Supply', value: `${result.supply} (whole units)` },
       { label: 'Token', value: result.tokenHex },
     ];
+    if (logo) details.push({ label: 'Logo', value: logo });
+    if (result.metadataUri) details.push({ label: 'Metadata', value: result.metadataUri });
     if (fee?.feeAmount > 0n) {
       details.push({
         label: 'Platform fee',
@@ -198,6 +204,10 @@ export default function CreateTokenBoingContent() {
       toast.error(e?.message || 'Invalid supply.');
       return;
     }
+    if (logoUrl.trim() && !isPublicAssetUri(logoUrl)) {
+      toast.error('Logo URL must be https:// or ipfs://');
+      return;
+    }
     if (deployBlocked) {
       toast.error(
         !effectiveBytecode
@@ -210,6 +220,28 @@ export default function CreateTokenBoingContent() {
     setLastResult(null);
     setStage(null);
     try {
+      let hashForDeploy = descriptionHash.trim();
+      let metadataUri = '';
+      let publishedLogo = logoUrl.trim();
+      if (isPublicAssetUri(publishedLogo)) {
+        setStage('metadata');
+        try {
+          const published = await ensureTokenLaunchMetadataForCreate({
+            name: n,
+            symbol: s,
+            supply,
+            image: publishedLogo,
+          });
+          if (published?.descriptionHash) {
+            hashForDeploy = published.descriptionHash;
+            metadataUri = published.metadataUri || '';
+          }
+        } catch (e) {
+          toast.error(e?.message || 'Could not publish token logo metadata.');
+          return;
+        }
+      }
+
       const result = await createBoingNativeToken({
         getWalletProvider,
         account,
@@ -217,16 +249,19 @@ export default function CreateTokenBoingContent() {
         symbol: s,
         supply,
         customBytecode,
-        descriptionHash,
+        descriptionHash: hashForDeploy,
         qaPoolAcknowledged,
         onStage: setStage,
       });
-      setLastResult(result);
+      const withMeta = result?.ok
+        ? { ...result, metadataUri: metadataUri || undefined, logoUrl: publishedLogo || undefined }
+        : result;
+      setLastResult(withMeta);
       if (!result.ok) {
         toast.error(result.message || 'Could not create the token.');
         return;
       }
-      celebrateOne(result, n, s);
+      celebrateOne(withMeta, n, s, publishedLogo);
       if (result.feeCollection && !result.feeCollection.skipped && !result.feeCollection.ok) {
         toast.error(result.feeCollection.message || 'Token created, but platform fee transfer failed.');
       } else if (!result.confirmed) {
@@ -240,6 +275,7 @@ export default function CreateTokenBoingContent() {
 
   const stageLabel =
     {
+      metadata: 'Publishing logo metadata…',
       qa: 'Running review check…',
       sign: 'Approve in Boing Express…',
       submit: 'Submitting…',
@@ -342,6 +378,10 @@ export default function CreateTokenBoingContent() {
               </span>
             </label>
 
+            <div className="mb-4">
+              <TokenLogoUpload value={logoUrl} onChange={setLogoUrl} disabled={busy} />
+            </div>
+
             <div className="flex flex-wrap gap-2 mb-3">
               <TradeDeployButton
                 type="button"
@@ -442,6 +482,19 @@ export default function CreateTokenBoingContent() {
                 <p style={{ color: 'var(--text-primary)' }}>
                   Token created. Create a pool with USDC to make it swappable.
                 </p>
+                {lastResult.logoUrl ? (
+                  <div className="mt-2 flex items-center gap-2" data-testid="create-token-logo-result">
+                    <img
+                      src={lastResult.logoUrl}
+                      alt=""
+                      className="h-8 w-8 rounded object-cover"
+                      style={{ border: '1px solid var(--border-color)' }}
+                    />
+                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                      Logo committed for explorers (boing.observer).
+                    </span>
+                  </div>
+                ) : null}
                 {lastResult.platformFee?.feeAmount > 0n ? (
                   <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)' }} data-testid="create-token-fee-result">
                     Platform fee {lastResult.platformFee.feeLabel}: {lastResult.platformFee.feeAmount.toString()} tokens

@@ -314,7 +314,7 @@ function Liquidity() {
           Pools and their tokens show in the swap list right away.
         </li>
         <li>
-          <To to="/create-token">Create Token</To> deploys a Boing token v2 (whole units, fixed supply at create) —
+          <To to="/create-token">Create Token</To> deploys a Boing token v2 (whole units, fixed supply at create; optional logo for explorers) —
           Standard one-token only. Platform fee is <B>0.5% of initial mint</B>, credited to the treasury in the same
           deploy approval. After create, open Create pool with the new token to seed liquidity.
         </li>
