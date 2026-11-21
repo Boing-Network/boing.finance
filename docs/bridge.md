@@ -1,8 +1,8 @@
 # Bridge
 
-**Today:** the [Bridge](https://boing.finance/bridge) page routes transfers between other chains through **LI.FI** (below). Boing L1 (6913) is not a LI.FI network, so you cannot bridge to or from Boing yet.
+**Today:** the [Bridge](https://boing.finance/bridge) page has two modes — **Other chains (LI.FI)** (live) and **Boing ↔ Base** (native path, testnet code shipped, not activated until operators deploy). Boing L1 (6913) is not a LI.FI network.
 
-**Planned:** a native **Boing ↔ Base** bridge, signed by Boing validators with a 2/3 threshold. See [Native Boing ↔ Base bridge (planned)](#native-boing--base-bridge-planned).
+**Native path:** inventory-free Boing ↔ Base with validator ⌈2W/3⌉ stake attestation and a **0.5%** fee. See [Native Boing ↔ Base bridge](#native-boing--base-bridge-testnet-code-shipped).
 
 ## LI.FI (other chains, live)
 
@@ -73,14 +73,32 @@ printf '%s' "$LIFI_FEE_RECIPIENT_BTC" | wrangler secret put LIFI_FEE_RECIPIENT_B
 - `GET /api/aggregator/bridge-config` — fee bps, recipient if configured
 - `GET /api/bridge/status` — aggregator mode, not a proprietary uptime probe
 
-## Native Boing ↔ Base bridge (planned)
+## Native Boing ↔ Base bridge (testnet code shipped)
 
-Not built yet. The outline:
+**Not live on public testnet until operators deploy + activate.** Inventory-free lock/mint · **0.5%** fee · Base-first · validator **⌈2W/3⌉** stake.
 
-- **Base first.** Other EVM chains come later, if at all.
-- **Validator attestation.** Every Boing validator signs bridge events; a transfer is final once validators holding at least **2/3** of the stake have signed. No separate relayer set or multisig.
-- **Boing side:** a native Rust module in the protocol, switched on at a set testnet block height. It locks or burns on Boing and releases or mints when a valid attestation arrives from Base.
-- **Base side:** a `BoingBridgeVault` contract, first on **Base Sepolia**, that checks the validator signatures before releasing funds.
-- The app will show the native route next to LI.FI on `/bridge`. LI.FI stays for other chains.
+| Piece | Location | Status |
+|-------|----------|--------|
+| Base Sepolia vault + bBOING | `contracts/bridge/` (Foundry) | Code + tests; **deploy keys = Nico** |
+| Deploy script | `scripts/bridge/deploy-base-sepolia.sh` | Manual |
+| Attestor dry-run | `scripts/bridge/attest-relayer.mjs` | Prints checklist; live submit needs keys |
+| Boing protocol txs | `boing.network` `BridgeLockToBase` (41) / `BridgeClaimFromBase` (42) | Activation-gated (`BOING_BRIDGE_ACTIVATION_HEIGHT` unset = off) |
+| Finance UI | `/bridge` → **Boing ↔ Base** tab | Distinct from LI.FI; execution gated on env addresses |
 
-The old Sepolia `CrossChainBridge.sol` and the `contracts/` folder have been removed from this repo.
+### Flows
+
+1. **Boing → Base:** user locks native BOING on Boing → attestors ECDSA-sign → `BoingBridgeVault.mintWithAttestation` mints **bBOING** (fee on both sides = 50 bps).
+2. **Base → Boing:** user `burnToBoing` → attestors Ed25519-sign → `BridgeClaimFromBase` unlocks escrow.
+
+No Boing-held market inventory. Escrow only holds user-locked BOING that backs bBOING.
+
+### What Nico must run
+
+1. `cd contracts/bridge && forge test` (CI-friendly).
+2. Fund a Base Sepolia key → `scripts/bridge/deploy-base-sepolia.sh` with `PRIVATE_KEY`, `FEE_RECIPIENT`, `BASE_SEPOLIA_RPC`.
+3. `replaceValidatorSet` on the vault with secp256k1 attestor addresses + stake weights.
+4. Set Pages env `REACT_APP_BOING_BASE_BRIDGE_VAULT` / `REACT_APP_BRIDGED_BOING_TOKEN`.
+5. Coordinate `BOING_BRIDGE_ACTIVATION_HEIGHT` on **all** Boing testnet nodes + restart.
+6. Run attestor with `ATTESTOR_ECDSA_KEYS` + `ATTESTOR_ED25519_SECRETS`.
+
+See also: network `docs/BOING-BASE-BRIDGE.md` and the project pack `docs/boing-base-bridge-implementation.md`.

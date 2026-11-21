@@ -94,7 +94,7 @@ function Home() {
                     </li>
                     <li>
                       <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Bridge · other chains</p>
-                      <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Move tokens between EVM chains and Solana via LI.FI today. A native Boing ↔ Base bridge is planned.</p>
+                      <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Move tokens between EVM chains and Solana via LI.FI today. Native Boing ↔ Base (testnet) is on the Bridge page — activate after Base Sepolia deploy.</p>
                     </li>
                   </ul>
                 </div>

@@ -43,3 +43,8 @@ nul
 solana-programs/boing-token-hook/keys/boing_token_hook-keypair.json
 **/keys/*-keypair.json
 **/target/deploy/*-keypair.json
+
+# Foundry (native Boing↔Base bridge)
+contracts/bridge/out/
+contracts/bridge/cache/
+contracts/bridge/broadcast/
