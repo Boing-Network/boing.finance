@@ -12,6 +12,7 @@ import { PLATFORM_BRIDGE_FEE, PLATFORM_BRIDGE_FEE_LABEL, buildLifiDeepLink } fro
 import TokenManagementModal from '../components/TokenManagementModal';
 import ChainPicker from '../components/bridge/ChainPicker';
 import TokenLogo from '../components/bridge/TokenLogo';
+import BoingBaseBridgePanel from '../components/bridge/BoingBaseBridgePanel';
 import EmptyState from '../components/EmptyState';
 import { useLifiChains, useLifiTokens } from '../hooks/useLifi';
 import { useBridgeBalances } from '../hooks/useBridgeBalances';
@@ -123,6 +124,8 @@ function BridgeInner() {
   const [recent, setRecent] = useState(loadRecent);
   const [serverHistory, setServerHistory] = useState([]);
   const [howItWorksExpanded, setHowItWorksExpanded] = useState(false);
+  /** LI.FI = other chains; native = Boing ↔ Base (testnet). */
+  const [bridgeMode, setBridgeMode] = useState(/** @type {'lifi' | 'boing-base'} */ ('lifi'));
   const didDefaultChain = useRef(false);
 
   const evmAccount = walletType === 'boingExpress' ? null : account || null;
@@ -423,10 +426,39 @@ function BridgeInner() {
         <div className="td-shell td-shell--narrow">
           <h1 className="sr-only">Bridge tokens between {chains.length ? `${chains.length} networks` : 'networks'}</h1>
 
-          {network && Number(network.chainId) === BOING_NATIVE_L1_CHAIN_ID && (
+          <div className="mb-4 flex flex-wrap gap-2" role="tablist" aria-label="Bridge mode" data-testid="bridge-mode-tabs">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={bridgeMode === 'lifi'}
+              className={`td-btn ${bridgeMode === 'lifi' ? '' : 'td-btn--ghost'}`}
+              onClick={() => setBridgeMode('lifi')}
+              data-testid="bridge-mode-lifi"
+            >
+              Other chains (LI.FI)
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={bridgeMode === 'boing-base'}
+              className={`td-btn ${bridgeMode === 'boing-base' ? '' : 'td-btn--ghost'}`}
+              onClick={() => setBridgeMode('boing-base')}
+              data-testid="bridge-mode-boing-base"
+            >
+              Boing ↔ Base
+            </button>
+          </div>
+
+          {bridgeMode === 'boing-base' && (
+            <div className="mb-6">
+              <BoingBaseBridgePanel />
+            </div>
+          )}
+
+          {bridgeMode === 'lifi' && network && Number(network.chainId) === BOING_NATIVE_L1_CHAIN_ID && (
             <div className="mb-6 rounded-xl border px-4 py-3 text-sm" role="status" style={{ borderColor: 'rgba(45, 212, 191, 0.45)', backgroundColor: 'var(--bg-card)', color: 'var(--text-secondary)' }}>
-              <strong style={{ color: 'var(--text-primary)' }}>On Boing L1:</strong> the bridge moves tokens between LI.FI networks (Boing
-              testnet isn&apos;t one of them). Move BOING with Boing Express for now.{' '}
+              <strong style={{ color: 'var(--text-primary)' }}>On Boing L1:</strong> LI.FI moves tokens between other networks (Boing
+              testnet isn&apos;t one of them). Use the <strong>Boing ↔ Base</strong> tab for the native path (testnet).{' '}
               <Link to="/docs" className="td-btn--link">
                 Learn more
               </Link>
@@ -434,6 +466,7 @@ function BridgeInner() {
             </div>
           )}
 
+          {bridgeMode === 'lifi' && (
           <div
             id="bridge-form"
             className="mb-6 rounded-2xl p-4 shadow-xl sm:p-6"
@@ -696,7 +729,9 @@ function BridgeInner() {
               </span>
             </p>
           </div>
+          )}
 
+          {bridgeMode === 'lifi' && (
           <div className="mb-6 overflow-hidden rounded-2xl shadow-lg" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
             <div className="p-4 sm:p-5">
               <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -755,7 +790,9 @@ function BridgeInner() {
               )}
             </div>
           </div>
+          )}
 
+          {bridgeMode === 'lifi' && (
           <div className="overflow-hidden rounded-2xl shadow-lg" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
             <button onClick={() => setHowItWorksExpanded(!howItWorksExpanded)} className="flex w-full items-center justify-between p-4 text-left transition-opacity hover:opacity-90 sm:p-5" type="button">
               <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -791,6 +828,7 @@ function BridgeInner() {
               </div>
             )}
           </div>
+          )}
         </div>
 
         <TokenManagementModal
